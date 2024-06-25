@@ -1,0 +1,158 @@
+package com.worldwidewaves.shared.events
+
+/*
+ * Copyright 2024 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.worldwidewaves.shared.InitFavoriteEvent
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
+import com.worldwidewaves.shared.generated.resources.Res
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+// ---------------------------
+
+interface EventsConfigurationProvider {
+    suspend fun geoEventsConfiguration(): String
+}
+
+class DefaultEventsConfigurationProvider : EventsConfigurationProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun geoEventsConfiguration(): String {
+        return withContext(Dispatchers.IO) {
+            Napier.i("Loading events configuration from $FS_EVENTS_CONF")
+            Res.readBytes(FS_EVENTS_CONF).decodeToString()
+        }
+    }
+}
+
+// ---------------------------
+
+class WWWEvents(
+    private val initFavoriteEvent: InitFavoriteEvent,
+    private val eventsConfigurationProvider: EventsConfigurationProvider = DefaultEventsConfigurationProvider()
+) {
+
+    private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
+    val eventsFlow = _eventsFlow.asStateFlow()
+
+    init {
+        loadEvents()
+    }
+
+    fun resetEventsFlow() {
+        _eventsFlow.value = emptyList()
+    }
+
+    // ---------------------------
+
+    // Job to manage the coroutine for loading events
+    private var loadJob: Job? = null
+
+    // JSON decoder configured to ignore unknown keys in the JSON data
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
+
+    /**
+     * Initiates the loading of events if not already started.
+     * Uses the apply scope function to return the current instance.
+     */
+    private fun loadEvents() = apply {
+        loadJob = loadJob ?: loadEventsJob()
+    }
+
+    /**
+     * Launches a coroutine to load events from the configuration provider.
+     * The coroutine runs on the IO dispatcher.
+     */
+    private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
+        val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
+        val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
+
+        val validationResults = isValidEventsData(events)
+
+        validationResults.filterValues { !it.first }
+            .mapNotNull { it.value.second }
+            .forEach { errorMessage ->
+                Napier.e("Validation Error: $errorMessage")
+            }
+
+        _eventsFlow.value = validationResults.filterValues { it.first }
+            .keys.onEach { initFavoriteEvent.call(it) }
+            .toList()
+    }
+
+    // ---------------------------
+
+    fun events(): StateFlow<List<WWWEvent>> {
+        return eventsFlow
+    }
+
+    fun getEventById(id: String): WWWEvent? {
+        return eventsFlow.value.find { it.id == id }
+    }
+
+    fun onEventLoaded(function: () -> Job) {
+        this.loadJob?.invokeOnCompletion { function() }
+    }
+
+    // ---------------------------
+
+    /**
+     * Validates a list of `WWWEvent` objects.
+     *
+     * This function checks each event in the provided list for various validation criteria.
+     * It returns a map where each event is associated with a pair containing a boolean indicating
+     * whether the event is valid and a string message describing the validation error, if any.
+     *
+     * @param events The list of `WWWEvent` objects to validate.
+     * @return A map where each `WWWEvent` is associated with a pair of a boolean and a string.
+     *         The boolean indicates whether the event is valid, and the string contains the validation error message, if any.
+     */
+    private fun isValidEventsData(events: List<WWWEvent>): Map<WWWEvent, Pair<Boolean, String?>> {
+        return events.associateWith { event ->
+            when {
+                event.id.isEmpty() -> Pair(false, "ID is empty")
+                event.type.isEmpty() -> Pair(false, "Type is empty")
+                event.location.isEmpty() -> Pair(false, "Location is empty")
+                !event.date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> Pair(false, "Date format is invalid")
+                !event.startHour.matches(Regex("\\d{2}:\\d{2}")) -> Pair(false, "Start hour format is invalid")
+                event.description.isEmpty() -> Pair(false, "Description is empty")
+                event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
+                event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
+                event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
+                event.mapMaxzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Maxzoom must be a double")
+                event.mapLanguage.isEmpty() -> Pair(false, "Map language is empty")
+                event.mapOsmarea.isEmpty() -> Pair(false, "Map Osmarea is empty")
+                event.timeZone.isEmpty() -> Pair(false, "Time zone is empty")
+                else -> Pair(true, null)
+            }
+        }
+    }
+
+}
