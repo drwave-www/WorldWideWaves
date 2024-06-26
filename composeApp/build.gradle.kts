@@ -66,9 +66,21 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     dependencies {
         debugImplementation(compose.uiTooling)
     }
+}
+dependencies {
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.ui.text.google.fonts)
 }
 
