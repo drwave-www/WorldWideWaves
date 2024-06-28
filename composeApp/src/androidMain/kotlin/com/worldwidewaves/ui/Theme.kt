@@ -1,4 +1,4 @@
-package com.worldwidewaves.ui.theme
+package com.worldwidewaves.ui
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -54,8 +54,6 @@ private val lightScheme = lightColorScheme(
     surfaceContainerHigh = surfaceContainerHighLight,
     surfaceContainerHighest = surfaceContainerHighestLight,
 )
-
-
 
 val extendedLight = ExtendedColorScheme(
   quaternary = ColorFamily(

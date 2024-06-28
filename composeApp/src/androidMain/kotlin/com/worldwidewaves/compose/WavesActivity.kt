@@ -1,4 +1,4 @@
-package com.worldwidewaves
+package com.worldwidewaves.compose
 
 import Greeting
 import android.os.Bundle
@@ -13,7 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.ui.theme.AppTheme
+import com.worldwidewaves.ui.AppTheme
 
 class WavesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

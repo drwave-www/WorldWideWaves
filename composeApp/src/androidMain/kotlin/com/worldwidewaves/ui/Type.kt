@@ -1,4 +1,4 @@
-package com.worldwidewaves.ui.theme
+package com.worldwidewaves.ui
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
