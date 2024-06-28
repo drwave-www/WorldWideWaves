@@ -1,0 +1,35 @@
+[
+  {
+    "id": "paris_france",
+    "type": "city",
+    "location": "Paris",
+    "country":"France",
+    "community": "Europe",
+    "date": "2024-03-15",
+    "startHour": "18:00"
+  },
+  {
+    "id": "riodejaneiro_brazil",
+    "type": "city",
+    "location": "Rio de Janeiro",
+    "country":"Brazil",
+    "community": "Europe",
+    "date": "2024-03-15",
+    "startHour": "18:00"
+  },
+  {
+    "id": "france",
+    "type": "country",
+    "location": "France",
+    "community": "Europe",
+    "date": "2024-04-22",
+    "startHour": "20:30"
+  },
+  {
+    "id": "world",
+    "type": "world",
+    "location": "World",
+    "date": "2024-05-01",
+    "startHour": "12:00"
+  }
+]

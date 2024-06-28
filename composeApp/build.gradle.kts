@@ -29,6 +29,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
+            implementation(compose.components.resources)
         }
     }
 }
@@ -75,6 +76,11 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
     }
+}
+
+compose.resources {
+    publicResClass = true
+    generateResClass = always
 }
 
 dependencies {
