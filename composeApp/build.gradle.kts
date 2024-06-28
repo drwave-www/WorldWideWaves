@@ -15,7 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-
+    
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -40,8 +40,6 @@ android {
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
-    // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
-
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -78,9 +76,6 @@ android {
         debugImplementation(compose.uiTooling)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
-        implementation(libs.maplibre.android)
-        implementation(libs.maplibre.android.annotation)
-        implementation(libs.androidx.datastore.preferences)
     }
 }
 
@@ -95,5 +90,4 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.play.services.location)
 }

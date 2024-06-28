@@ -1,6 +1,0 @@
-services:
-  build:
-    image: node:10
-    volumes:
-      - .:/font-glyphs
-      - ./font-glyphs:/font-glyphs

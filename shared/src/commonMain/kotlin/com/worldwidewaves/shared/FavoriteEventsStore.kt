@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import com.worldwidewaves.shared.events.WWWEvent
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -39,21 +38,28 @@ class FavoriteEventsStore(
     private val dataStore: DataStore<Preferences>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-
     private fun favoriteKey(eventId: String): Preferences.Key<Boolean> =
         booleanPreferencesKey("favorite_$eventId")
 
     suspend fun setFavoriteStatus(eventId: String, isFavorite: Boolean) = withContext(dispatcher) {
-        dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
+        val key = favoriteKey(eventId)
+        dataStore.edit { preferences ->
+            preferences[key] = isFavorite
+        }
     }
 
     suspend fun isFavorite(eventId: String): Boolean = withContext(dispatcher) {
+        val key = favoriteKey(eventId)
         dataStore.data
-            .catch { Napier.e("Error reading favorites", it); emit(emptyPreferences()) }
-            .map { it[favoriteKey(eventId)] ?: false }
-            .firstOrNull() ?: false
+            .catch {
+                // TODO log the error
+                emit(emptyPreferences())
+            }
+            .map { preferences ->
+                preferences[key] ?: false
+            }.firstOrNull()
+            ?: false
     }
-
 }
 
 // ----------------------------
@@ -65,7 +71,8 @@ class InitFavoriteEvent(private val favoriteEventsStore: FavoriteEventsStore) {
 }
 
 class SetEventFavorite(private val favoriteEventsStore: FavoriteEventsStore) {
-    suspend fun call(event: WWWEvent, isFavorite: Boolean) =
-        favoriteEventsStore.setFavoriteStatus(event.id, isFavorite)
-            .also { event.favorite = isFavorite }
+    suspend fun call(event: WWWEvent, isFavorite: Boolean) {
+        event.favorite = isFavorite
+        favoriteEventsStore.setFavoriteStatus(event.id, event.favorite)
+    }
 }

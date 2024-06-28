@@ -32,12 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.utils.TabManager
-import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsListScreen
+import com.worldwidewaves.compose.EventsScreen
 import com.worldwidewaves.compose.SettingsScreen
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.settings_icon
@@ -59,19 +56,17 @@ private val tabInfo = listOf(
 
 // ----------------------------
 
-open class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
-    private val eventsListScreen: EventsListScreen by inject()
+    private val eventsScreen: EventsScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
 
-    protected val tabManager = TabManager(
-        listOf(
-            eventsListScreen,
-            aboutScreen,
-            settingsScreen
-        )
-    ) { isSelected, tabIndex, contentDescription ->
+    private val tabManager = TabManager(listOf(
+        eventsScreen,
+        aboutScreen,
+        settingsScreen
+    )) { isSelected, tabIndex, contentDescription ->
         TabBarItem(isSelected, tabIndex, contentDescription)
     }
 
@@ -80,11 +75,11 @@ open class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setStatusBarColor(window)
-
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                Surface(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                ) {
                     tabManager.TabView()
                 }
             }
@@ -102,7 +97,7 @@ open class MainActivity : AppCompatActivity() {
         Image(
             painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
             contentDescription = contentDescription,
-            modifier = Modifier.height(DIM_EXT_TABBAR_HEIGHT.dp),
+            modifier = Modifier.height(45.dp),
             contentScale = ContentScale.Fit
         )
     }

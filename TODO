@@ -1,72 +1,26 @@
 
 Next:
-
-- wave progression
-    - manage with several wave areas and their start hour/days, with their direction
-    - move warming zone dans la wave
-    - adapt end time and progression to take into account the warming zone
-    - add a time delay for warming, in linear wave
-    - add a layer on the map
-    - add a progress bar on the map
-    - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')
-
-- Large map screen
-    => add map actions
-    => test on my phone in paris
-
-- cleanup events.json, splitting properties in the right object, ex: mapMaxZoom, etc...
-
-- wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
-      - add a progress bar on the wave screen
-
-- scripting to add a new event : param city/country
-    - openAI: images + descriptions
-    - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
-    - flags, ..
-
-- replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
-
-- deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
-
-- round2 wave : routing on streets
-
-- add maps generation for countries, then for the world : no road names, limited zooms
-- adapt wave behavior on countries and the world
-    --> add end date additionally to end hour for countries and the world
-    --> add 'wave hours', so countries and the world can have several waves over days during the process
-
-- add the ability to define a geojson for warming zones
-
-- systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
-
-Cleanings :
+- use typography
+- Build failure on Github Actions
 - code coverage of current devs
-- check cached files are renewed when app version evolves
-- apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+- replace all static sizes by configurables ones
 
 Other:
 - Fill-in FAQ Contents
-- Penser au processus de démarrage de la wave : qui, comment, où ?
-     --> ie. ZONE ROUGE
-     --> où se situe cette zone rouge dans la réalité du terrain ?
 
 Waves screen :
 - select good images for flags, same ratio
 
 Common:
+- Implement events geolimits + speed, to calculate endTime
+- Implement isDone, isSoon, isRunning
 - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
-- manage with translations
-- manage with translation of events contents (description, location, etc, ...)
+
+Scripts:
+- Script for events resources
+    - images
+    - flags
+    - geolimits
 
 Debug:
 - Implement a way to simulate events & geolocation
-     ==> button "simulate now avec un bandeau en haut en cours de simulation + 'stop'"
-     ==> uniquemment si l'option setting 'activate simulation's est activé
-          ==> ajouter une option 'simulate position' dans les settings sinon prendre la position réelle
-
-Ideas:
-- Section d'information / apprentissage - youtube videos
-    - video promo des ONG participantes
-    - videos explicatives WWW
-    - par pays / events
-- Une association par event, avec un lien cagnotte et une video youtube de présentation

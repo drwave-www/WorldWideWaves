@@ -16,7 +16,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-
+    
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,7 +27,7 @@ kotlin {
             isStatic = true
         }
     }
-
+    
     sourceSets {
         named("commonMain") {
             resources.srcDirs("composeResources")
@@ -38,11 +38,11 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(compose.runtime)
             implementation(compose.components.resources)
+            implementation(libs.kotlinx.datetime.v032)
             implementation(libs.androidx.annotation)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
-            implementation(libs.napier)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -67,9 +67,6 @@ android {
     }
     dependencies {
         implementation(libs.koin.android)
-        implementation(libs.kotlinx.datetime)
-        implementation(libs.maplibre.android)
-        implementation(libs.androidx.datastore.preferences)
     }
 }
 

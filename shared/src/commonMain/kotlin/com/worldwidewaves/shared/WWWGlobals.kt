@@ -20,120 +20,18 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 class WWWGlobals {
 
     companion object {
-
-        // -- URL Constants --
-        const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
-
-        // -- FS Constants --
-
-        const val FS_DATASTORE_FOLDER = "datastore"
-
-        private const val FS_FILES_FOLDER = "files"
-        const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
-
-        const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
-
-        const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
-        const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
-        const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
-
-        // -- Wave Constants --
-        const val WAVE_DEFAULT_REFRESH_INTERVAL = 10000L // ms
-        const val WAVE_OBSERVE_DELAY = 2 // hours
-
-        // -- UI Constants --
-
-        const val CONST_SPLASH_MIN_DURATION =  2000 // ms
-        const val CONST_TIMER_GPS_UPDATE = 3000 // ms
-
-        // ----------------------------
-
-        const val DIM_DEFAULT_EXT_PADDING = 20
-        const val DIM_DEFAULT_INT_PADDING = 10
-
-        const val DIM_DEFAULT_SPACER_SMALL = 10
-        const val DIM_DEFAULT_SPACER_MEDIUM = 20
-        const val DIM_DEFAULT_SPACER_BIG = 30
-
-        const val DIM_DIVIDER_WIDTH = 200
-        const val DIM_DIVIDER_THICKNESS = 2
-
-        // ----------------------------
-        const val CONST_SPLASH_LOGO_WIDTH = 200
-
-        const val DIM_INT_TABBAR_HEIGHT = 60
-        const val DIM_INT_TABBAR_ITEM_WIDTH = 150
-        const val DIM_INT_TABBAR_ITEM_FONTSIZE = 20
-        const val DIM_EXT_TABBAR_HEIGHT = 45
-
-        val DIM_BACK_PADDING = listOf(10, 10, 10, 15)
-        const val DIM_BACK_FONTSIZE = 18
-        const val DIM_BACK_EVENT_LOCATION_FONTSIZE = 24
-
-        const val DIM_EVENT_DESC_FONTSIZE = 16
-        const val DIM_EVENT_DATE_FONTSIZE = 90
-        const val DIM_EVENT_DATE_MITER = 20f
-        const val DIM_EVENT_DATE_STROKE = 5f
-
-        const val DIM_EVENT_MAP_RATIO = (16f / 9f)
-
-        const val DIM_EVENT_WAVEBUTTON_WIDTH = 300
-        const val DIM_EVENT_WAVEBUTTON_HEIGHT = 40
-        const val DIM_EVENT_WAVEBUTTON_FONTSIZE = 24
-
-        const val DIM_EVENT_GEOLOCME_HEIGHT = 45
-        const val DIM_EVENT_GEOLOCME_BORDER = 2
-        const val DIM_EVENT_GEOLOCME_FONTSIZE = 14
-
-        const val DIM_EVENT_NUMBERS_BORDERWIDTH = 2
-        const val DIM_EVENT_NUMBERS_BORDERROUND = 50
-        const val DIM_EVENT_NUMBERS_TITLE_FONTSIZE = 32
-        const val DIM_EVENT_NUMBERS_SPACER = 16
-        const val DIM_EVENT_NUMBERS_LABEL_FONTSIZE = 15
-        const val DIM_EVENT_NUMBERS_VALUE_FONTSIZE = 24
-        const val DIM_EVENT_NUMBERS_TZ_FONTSIZE = 12
-
-        const val DIM_INFO_TEXT_FONTSIZE = 16
-        const val DIM_INFO_DRWAVE_FONTSIZE = 26
-        const val DIM_INFO_DRWAVE_INSTA_FONTSIZE = 26
-
-        const val DIM_FAQ_TITLE_FONTSIZE = 64
-        const val DIM_FAQ_SECTION_TITLE_FONTSIZE = 16
-        const val DIM_FAQ_LINK_FONTSIZE = 16
-        const val DIM_FAQ_INTRO_FONTSIZE = 18
-        const val DIM_FAQ_RULE_NBRING_WIDTH = 20
-        const val DIM_FAQ_RULE_TITLE_FONTSIZE = 16
-        const val DIM_FAQ_RULE_CONTENTS_FONTSIZE = 12
-        const val DIM_FAQ_RULE_QUESTION_FONTSIZE = 14
-        const val DIM_FAQ_RULE_ANSWER_FONTSIZE = 16
-
-        const val DIM_COMMON_SOONRUNNING_PADDING = 15
-        const val DIM_COMMON_SOONRUNNING_WIDTH = 115
-        const val DIM_COMMON_SOONRUNNING_HEIGHT = 26
-        const val DIM_COMMON_SOONRUNNING_FONTSIZE = 16
-
-        const val DIM_COMMON_DONE_IMAGE_WIDTH = 130
-
-        const val DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH = 90
-        const val DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE = 16
-        const val DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE = 16
-
-        const val DIM_EVENTS_SELECTOR_HEIGHT = 50
-        const val DIM_EVENTS_SELECTOR_ROUND = 25
-        const val DIM_EVENTS_SELECTOR_FONTSIZE = 16
-        const val DIM_EVENTS_NOEVENTS_FONTSIZE = 24
-        const val DIM_EVENTS_OVERLAY_HEIGHT = 160
-        const val DIM_EVENTS_FLAG_WIDTH = 65
-        const val DIM_EVENTS_FLAG_BORDER = 1
-        const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
-        const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
-        const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
-        const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = 16
-
-
+        fun today(): LocalDate {
+            val now = Clock.System.now()
+            return now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+        }
     }
 
 }
