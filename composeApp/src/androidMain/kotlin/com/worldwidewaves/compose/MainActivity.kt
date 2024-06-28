@@ -1,22 +1,28 @@
 package com.worldwidewaves.compose
 
-import Greeting
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.R
 import com.worldwidewaves.ui.AppTheme
+import java.util.Timer
+import kotlin.concurrent.timerTask
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,20 +31,35 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                Surface {
-                    val greeting = remember { Greeting().greet() }
-
-                    Column(
-                        modifier = Modifier.padding(all = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        greeting.forEach { greeting ->
-                            Text(greeting)
-                            HorizontalDivider()
-                        }
+                Surface(modifier = Modifier.fillMaxHeight()) {
+                    Box {
+                        Image(
+                            painter = painterResource(id = R.drawable.background),
+                            contentDescription = stringResource(id = R.string.logo_description),
+                            contentScale = ContentScale.FillWidth,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterStart)
+                                .offset(y = -55.dp) // TODO: how to to solve image to top without fixed offset ?
+                        )
+                        Image(
+                            painter = painterResource(id = R.drawable.www_logo_transparent),
+                            contentDescription = stringResource(id = R.string.logo_description),
+                            modifier = Modifier
+                                .width(200.dp)
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 10.dp)
+                        )
                     }
                 }
             }
         }
+
+        val activity = this
+        Timer().schedule(timerTask {
+            val intent = Intent(activity, WavesActivity::class.java)
+            startActivity(intent)
+        }, 1500)
+
     }
 }
