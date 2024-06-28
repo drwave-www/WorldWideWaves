@@ -2,13 +2,14 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    let phrases = Greeting().greet()
+    let events : Array<WWWEvent> = WWWEvents(eventsConf: "").events()
     
     var body: some View {
-        List(phrases, id: \.self) {
-            Text($0)
+        List(events, id: \.self) { event in
+            Text(event.location)
         }
     }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {
