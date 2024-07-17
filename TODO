@@ -1,0 +1,14 @@
+
+Waves screen :
+- select good images for flags, same ratio
+- IDEAL: load images of events from assets
+- favorites mechanisms
+- check fonts
+
+Common:
+- Implement events geolimits + speed, to calculate endTime
+- Implement isDone, isSoon, isRunning
+
+
+Debug:
+- Implement a way to simulate events

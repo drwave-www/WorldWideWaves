@@ -225,11 +225,11 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
     ) {
         event.community?.let {
             displayEntityImage(entityName = event.community!!, entityType = "community",
-                modifier = Modifier.width(50.dp).padding(start = 10.dp, top = 10.dp).border(1.dp, Color.White))
+                modifier = Modifier.width(65.dp).padding(start = 10.dp, top = 10.dp).border(1.dp, Color.White))
         }
         event.country?.let {
             displayEntityImage(entityName = event.country!!, entityType = "country",
-                modifier = Modifier.width(50.dp).padding(start = 10.dp, bottom = 10.dp).border(1.dp, Color.White))
+                modifier = Modifier.width(65.dp).padding(start = 10.dp, bottom = 10.dp).border(1.dp, Color.White))
         }
     }
 }
