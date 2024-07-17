@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .align(Alignment.CenterStart)
-                                .offset(y = -55.dp) // TODO: how to solve image to top without fixed offset ?
+                                .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
                         )
                         Image(
                             painter = painterResource(Res.drawable.www_logo_transparent),

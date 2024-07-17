@@ -29,6 +29,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
         }
     }
 }
@@ -47,5 +48,8 @@ android {
         res.srcDirs("src/androidMain/res", "src/commonMain/resources/res")
         assets.srcDirs("src/commonMain/resources/assets")
     }
+}
+dependencies {
+    implementation(libs.places)
 }
 

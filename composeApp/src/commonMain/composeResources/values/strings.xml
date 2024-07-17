@@ -6,4 +6,7 @@
     <string name="events_select_all">All</string>
     <string name="events_select_starred">Starred</string>
 
+    <string name="event_done">Done</string>
+    <string name="event_soon">soon !</string>
+    <string name="event_running">running</string>
 </resources>
