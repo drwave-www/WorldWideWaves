@@ -1,7 +1,9 @@
 package com.worldwidewaves.compose
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,11 +28,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,53 +38,53 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.shared.WWWEvent
-import com.worldwidewaves.shared.WWWEvents
-import com.worldwidewaves.shared.isDone
-import com.worldwidewaves.shared.isRunning
-import com.worldwidewaves.shared.isSoon
+import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.events.isRunning
+import com.worldwidewaves.shared.events.isSoon
+import com.worldwidewaves.shared.R as CR
 import com.worldwidewaves.ui.AppTheme
 import com.worldwidewaves.ui.extendedLight
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.stringResource
-import worldwidewaves.composeapp.generated.resources.Res
-import worldwidewaves.composeapp.generated.resources.*
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import org.jetbrains.compose.resources.painterResource as composePainterResource
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 // ----------------------------
 
 class WavesActivity : AppCompatActivity() {
 
-    @OptIn(ExperimentalResourceApi::class)
+    private val viewModel: WWWEventsViewModel by viewModels<WWWEventsViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             AppTheme {
-                Surface {
+                EventsScreen(viewModel)
+            }
+        }
+    }
 
-                    // Load WorldWideWaves events
-                    var events : List<WWWEvent> by remember { mutableStateOf(emptyList()) }
-                    LaunchedEffect(Unit) {
-                        val eventsConf = Res.readBytes("files/events.json")
-                        events = WWWEvents(eventsConf.decodeToString()).events()
-                    }
+    // ----------------------------
 
-                    Box(modifier = Modifier
-                        .padding(start = 20.dp, end = 20.dp, top = 20.dp)
-                        .fillMaxSize()) {
-                        Column {
-                            FavoritesSelector()
-                            Spacer(modifier = Modifier.size(20.dp))
-                            Events(events)
-                        }
-                    }
+    @Composable
+    private fun EventsScreen(viewModel: WWWEventsViewModel) {
+        val events by viewModel.events.collectAsState()
+
+        Surface {
+            Box(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+                    .fillMaxSize()
+            ) {
+                Column {
+                    FavoritesSelector()
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Events(events)
                 }
             }
         }
@@ -96,7 +94,7 @@ class WavesActivity : AppCompatActivity() {
 // ----------------------------
 
 @Composable
-fun FavoritesSelector(starredSelected: Boolean = false, modifier: Modifier = Modifier) {
+fun FavoritesSelector(modifier: Modifier = Modifier, starredSelected: Boolean = false) {
     val allColor = if (starredSelected) extendedLight.quaternary else extendedLight.quinary
     val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
 
@@ -114,7 +112,7 @@ fun FavoritesSelector(starredSelected: Boolean = false, modifier: Modifier = Mod
                 .background(allColor.color),
                 contentAlignment = Alignment.Center) {
                 Text(color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                    text = stringResource(Res.string.events_select_all))
+                    text = stringResource(CR.string.events_select_all))
             }
             Box(modifier = Modifier
                 .clip(RoundedCornerShape(25.dp))
@@ -123,7 +121,7 @@ fun FavoritesSelector(starredSelected: Boolean = false, modifier: Modifier = Mod
                 .background(starredColor.color),
                 contentAlignment = Alignment.Center) {
                 Text(color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                    text = stringResource(Res.string.events_select_starred))
+                    text = stringResource(CR.string.events_select_starred))
             }
         }
     }
@@ -144,7 +142,7 @@ fun Events(events: List<WWWEvent>, modifier: Modifier = Modifier) {
 
 @Composable
 fun Event(event: WWWEvent, modifier: Modifier = Modifier) {
-    Column(modifier = Modifier) {
+    Column(modifier = modifier) {
         EventOverlay(event)
         EventLocationAndDate(event)
     }
@@ -181,8 +179,8 @@ private fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxSize()
             ) { }
             Image(
-                painter = composePainterResource(Res.drawable.event_done),
-                contentDescription = stringResource(Res.string.event_done),
+                painter = painterResource(CR.drawable.event_done),
+                contentDescription = stringResource(CR.string.event_done),
                 modifier = Modifier.width(130.dp),
             )
         }
@@ -194,7 +192,7 @@ private fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modi
     if (event.isSoon() || event.isRunning()) {
         val backgroundColor =
             if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-        val textId = if (event.isSoon()) Res.string.event_soon else Res.string.event_running
+        val textId = if (event.isSoon()) CR.string.event_soon else CR.string.event_running
 
         Box(modifier = modifier.fillMaxWidth().offset(y = (-5).dp), contentAlignment = Alignment.TopEnd) {
             Box(
@@ -224,11 +222,11 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         event.community?.let {
-            displayEntityImage(entityName = event.community!!, entityType = "community",
+            DisplayEntityImage(entityName = event.community!!, entityType = "community",
                 modifier = Modifier.width(65.dp).padding(start = 10.dp, top = 10.dp).border(1.dp, Color.White))
         }
         event.country?.let {
-            displayEntityImage(entityName = event.country!!, entityType = "country",
+            DisplayEntityImage(entityName = event.country!!, entityType = "country",
                 modifier = Modifier.width(65.dp).padding(start = 10.dp, bottom = 10.dp).border(1.dp, Color.White))
         }
     }
@@ -238,6 +236,11 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
 
 @Composable
 private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
+    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val date = formatter.parse(event.date) // Assuming event.date is in "yyyy-MM-dd" format
+    val outputFormatter = SimpleDateFormat("dd/MM", Locale.getDefault())
+    val eventDate = date?.let { outputFormatter.format(it) }
+
     Box(
         modifier = modifier
     ) {
@@ -248,7 +251,7 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                     Text(
                         text = event.location.uppercase(),
@@ -256,19 +259,20 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
                             color = extendedLight.quinary.color,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                             fontSize = 28.sp
-                        ),
-                        modifier = Modifier.offset(y = (-2).dp)
-                    )
-                    Text(
-                        text = LocalDate.parse(event.date).format(DateTimeFormatter.ofPattern("dd/MM")),
-                        modifier = Modifier.padding(end = 2.dp),
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 34.sp
                         )
                     )
+                    eventDate?.let {
+                        Text(
+                            text = it,
+                            modifier = Modifier.padding(end = 2.dp),
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 34.sp
+                            )
+                        )
+                    }
             }
 
             // Country if present
@@ -279,7 +283,7 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
                     fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                     fontSize = 14.sp
                 ),
-                modifier = Modifier.offset(y = (-8).dp)
+                modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
             )
 
         }
@@ -289,7 +293,7 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
 // ----------------------------
 
 @Composable
-fun displayEntityImage(entityName: String, modifier: Modifier = Modifier, entityType: String) {
+fun DisplayEntityImage(entityName: String, modifier: Modifier = Modifier, entityType: String) {
     getPainterFromDrawableName(entityName, entityType)?.let { painter ->
         Image(
             modifier = modifier,
@@ -299,6 +303,7 @@ fun displayEntityImage(entityName: String, modifier: Modifier = Modifier, entity
     }
 }
 
+@SuppressLint("DiscouragedApi")
 @Composable
 fun getPainterFromDrawableName(drawableName: String, entityType: String): Painter? {
     val context = LocalContext.current

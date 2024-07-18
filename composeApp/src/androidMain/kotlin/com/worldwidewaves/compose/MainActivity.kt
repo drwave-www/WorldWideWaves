@@ -17,13 +17,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.ui.AppTheme
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import worldwidewaves.composeapp.generated.resources.*
 import java.util.Timer
 import kotlin.concurrent.timerTask
+import com.worldwidewaves.shared.R as CR
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     Box {
                         Image(
-                            painter = painterResource(Res.drawable.background),
-                            contentDescription = stringResource(Res.string.background_description),
+                            painter = painterResource(CR.drawable.background),
+                            contentDescription = stringResource(CR.string.background_description),
                             contentScale = ContentScale.FillWidth,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -47,8 +47,8 @@ class MainActivity : AppCompatActivity() {
                                 .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
                         )
                         Image(
-                            painter = painterResource(Res.drawable.www_logo_transparent),
-                            contentDescription = stringResource(Res.string.logo_description),
+                            painter = painterResource(CR.drawable.www_logo_transparent),
+                            contentDescription = stringResource(CR.string.logo_description),
                             modifier = Modifier
                                 .width(200.dp)
                                 .align(Alignment.BottomCenter)

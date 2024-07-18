@@ -9,6 +9,14 @@ Common:
 - Implement events geolimits + speed, to calculate endTime
 - Implement isDone, isSoon, isRunning
 
+Scripts:
+- Script for events resources
+    - images
+    - flags
+    - geolimits
+
+Tests:
+-
 
 Debug:
-- Implement a way to simulate events
+- Implement a way to simulate events & geolocation

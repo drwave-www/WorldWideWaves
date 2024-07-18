@@ -27,6 +27,9 @@ kotlin {
     }
     
     sourceSets {
+        named("commonMain") {
+            resources.srcDirs("resources")
+        }
         commonMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
@@ -45,8 +48,8 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
     sourceSets["main"].apply {
-        res.srcDirs("src/androidMain/res", "src/commonMain/resources/res")
-        assets.srcDirs("src/commonMain/resources/assets")
+        res.srcDirs("src/commonMain/res")
+        //assets.srcDirs("src/commonMain/assets")
     }
 }
 dependencies {
