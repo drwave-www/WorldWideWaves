@@ -57,7 +57,7 @@ import java.util.Locale
 
 class WavesActivity : AppCompatActivity() {
 
-    private val viewModel: WWWEventsViewModel by viewModels<WWWEventsViewModel>()
+    private val viewModel: EventsViewModel by viewModels<EventsViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +72,7 @@ class WavesActivity : AppCompatActivity() {
     // ----------------------------
 
     @Composable
-    private fun EventsScreen(viewModel: WWWEventsViewModel) {
+    private fun EventsScreen(viewModel: EventsViewModel) {
         val events by viewModel.events.collectAsState()
 
         Surface {

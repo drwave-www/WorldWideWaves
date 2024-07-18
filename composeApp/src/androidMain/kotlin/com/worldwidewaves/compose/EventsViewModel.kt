@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class WWWEventsViewModel : ViewModel() {
+class EventsViewModel : ViewModel() {
 
     private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
     val events: StateFlow<List<WWWEvent>> = _events
