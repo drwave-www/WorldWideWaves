@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getCommunityImage
 import com.worldwidewaves.shared.events.getCountryImage
+import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
@@ -187,7 +188,6 @@ fun Event(event: WWWEvent, modifier: Modifier = Modifier) {
 private fun EventOverlay(event: WWWEvent, modifier: Modifier = Modifier) {
     val heightModifier = Modifier.height(159.dp)
 
-    // Main event space with image and layers
     Box(modifier = heightModifier) {
         // Main Image
         Box(modifier = heightModifier) {
@@ -273,7 +273,7 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
             )
         }
         event.country?.let {
-              Image(
+            Image(
                 modifier = Modifier
                     .width(65.dp)
                     .padding(start = 10.dp, bottom = 10.dp)
@@ -281,7 +281,7 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
                 contentScale = ContentScale.FillWidth,
                 painter = painterResource(event.getCountryImage() as DrawableResource),
                 contentDescription = event.community!!
-              )
+            )
         }
     }
 }
@@ -290,10 +290,7 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
 
 @Composable
 private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
-    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val date = formatter.parse(event.date) // Assuming event.date is in "yyyy-MM-dd" format
-    val outputFormatter = SimpleDateFormat("dd/MM", Locale.getDefault())
-    val eventDate = date?.let { outputFormatter.format(it) }
+    val eventDate = event.getFormattedSimpleDate()
 
     Box(
         modifier = modifier
@@ -315,18 +312,16 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
                         fontSize = 28.sp
                     )
                 )
-                eventDate?.let {
-                    Text(
-                        text = it,
-                        modifier = Modifier.padding(end = 2.dp),
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 34.sp
-                        )
+                Text(
+                    text = eventDate,
+                    modifier = Modifier.padding(end = 2.dp),
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 34.sp
                     )
-                }
+                )
             }
 
             // Country if present

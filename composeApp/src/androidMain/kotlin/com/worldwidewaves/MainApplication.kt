@@ -29,10 +29,10 @@ class MainApplication : Application(), Configuration.Provider {
             .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
             .build()
 
-        override fun onCreate() {
-            super.onCreate()
+    override fun onCreate() {
+        super.onCreate()
 
-            // Initialize the WWW Compose platform
-            AndroidPlatform.initialize(this)
-        }
+        // Initialize the WWW Compose platform
+        AndroidPlatform.initialize(this)
+    }
 }

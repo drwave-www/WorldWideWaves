@@ -20,6 +20,9 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.getImage
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 
 // ---------------------------
@@ -56,3 +59,8 @@ fun WWWEvent.getLocationImage(): Any? = getImage("location", this.id)
 fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getImage("community", it) }
 fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", it) }
 
+fun WWWEvent.getFormattedSimpleDate(): String {
+    val instant = Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
+    val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    return "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+}
