@@ -20,12 +20,15 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.worldwidewaves.activities.TabScreen
+import androidx.compose.ui.unit.dp
+import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 
 class SettingsScreen : TabScreen {
 
@@ -33,8 +36,8 @@ class SettingsScreen : TabScreen {
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier) {
-            Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,)
+        Box(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
+            Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily)
         }
     }
 

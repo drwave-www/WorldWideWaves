@@ -23,6 +23,7 @@ package com.worldwidewaves.compose
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,7 +44,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_INSTA_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
 import com.worldwidewaves.shared.generated.resources.drwave
 import com.worldwidewaves.shared.generated.resources.drwave_instagram
 import com.worldwidewaves.shared.generated.resources.drwave_instagram_url
@@ -64,39 +70,31 @@ class AboutInfoScreen : TabScreen {
     override fun Screen(modifier: Modifier) {
         val state = rememberLazyListState()
 
-        Surface(modifier = modifier) {
-            LazyColumn(state = state,
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
-                    .fillMaxSize(),
+        Box(modifier = modifier) {
+            LazyColumn(
+                state = state,
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                item { // WWW Logo
-                    AboutWWWLogo()
-                }
-
-                item { // Main Info text
-                    Text(
-                        text = stringResource(ShRes.string.infos_core),
-                        style = TextStyle(textAlign = TextAlign.Justify),
-                        fontSize = 18.sp,
-                        fontFamily = displayFontFamily
-                    )
-                }
-
-                item { // DrWave signature + contact
-                    DrWaveSignatureAndContact()
-                }
-
-                item { // Divider line
-                    AboutDividerLine()
-                }
-
-                item { // WWW social networks
-                    AboutWWWSocialNetworks()
-                }
+                item { AboutWWWLogo() }
+                item { MainInfo() }
+                item { DrWaveSignatureAndContact() }
+                item { AboutDividerLine() }
+                item { AboutWWWSocialNetworks() }
             }
         }
+    }
+
+    // ----------------------------
+
+    @Composable
+    private fun MainInfo() {
+        Text(
+            text = stringResource(ShRes.string.infos_core),
+            style = TextStyle(textAlign = TextAlign.Justify),
+            fontSize = DIM_INFO_TEXT_FONTSIZE.sp,
+            fontFamily = displayFontFamily
+        )
     }
 
     // ----------------------------
@@ -105,11 +103,11 @@ class AboutInfoScreen : TabScreen {
     private fun DrWaveSignatureAndContact() {
         val uriHandler = LocalUriHandler.current
 
-        Spacer(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(ShRes.string.drwave),
-                fontSize = 26.sp,
+                fontSize = DIM_INFO_DRWAVE_FONTSIZE.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = extraFontFamily
             )
@@ -121,7 +119,7 @@ class AboutInfoScreen : TabScreen {
                 )
                 Text(
                     modifier = Modifier
-                        .padding(start = 10.dp)
+                        .padding(start = DIM_DEFAULT_INT_PADDING.dp)
                         .clickable(onClick = {
                             try {
                                 uriHandler.openUri(ShRes.string.drwave_instagram_url.toString())
@@ -130,13 +128,13 @@ class AboutInfoScreen : TabScreen {
                             }
                         }),
                     text = stringResource(ShRes.string.drwave_instagram),
-                    fontSize = 16.sp,
+                    fontSize = DIM_INFO_DRWAVE_INSTA_FONTSIZE.sp,
                     fontFamily = displayFontFamily,
                     textDecoration = TextDecoration.Underline
                 )
             }
         }
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }
 
 }

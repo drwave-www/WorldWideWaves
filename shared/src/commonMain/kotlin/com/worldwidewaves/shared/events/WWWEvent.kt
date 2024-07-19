@@ -20,11 +20,13 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.getImage
-import kotlinx.datetime.Instant
+import com.worldwidewaves.shared.getEventImage
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 // ---------------------------
 
@@ -38,8 +40,21 @@ data class WWWEvent(
     val date: String,
     val startHour: String,
     val speed: Int,
-    var favorite: Boolean = false
-)
+    val description: String,
+    val instagramAccount: String,
+    val instagramHashtag: String,
+    var favorite: Boolean = false,
+    val mapOsmadminid: Int,
+    val mapMaxzoom: Double,
+    val mapLanguage: String,
+    val mapOsmarea: String,
+    val mapWarmingZoneLongitude: Double,
+    val timeZone: String
+) {
+    @Transient var map = WWWEventMap(this)
+    @Transient var area = WWWEventArea(this)
+    @Transient var wave = WWWEventWaveLinear(this)
+}
 
 // ---------------------------
 
@@ -57,19 +72,40 @@ fun WWWEvent.isRunning(): Boolean {
 
 // ---------------------------
 
-fun WWWEvent.getLocationImage(): Any? = getImage("location", this.id)
-fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getImage("community", it) }
-fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", it) }
+private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
 
-fun WWWEvent.getFormattedSimpleDate(): String {
-    return try {
-        val instant =
-            Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
-        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-        "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${
-            dateTime.monthNumber.toString().padStart(2, '0')
-        }"
-    } catch (e: Exception) {
-        "00/00"
-    }
-}
+fun WWWEvent.getLocationImage(): Any? = getEventImageByType("location", this.id)
+fun WWWEvent.getCommunityImage(): Any? = getEventImageByType("community", this.community)
+fun WWWEvent.getCountryImage(): Any? = getEventImageByType("country", this.country)
+
+// ---------------------------
+
+fun WWWEvent.getTimeZone(): TimeZone = TimeZone.of(this.timeZone)
+
+/**
+ * Converts the start date and time of the event to a simple local date format.
+ *
+ * This function parses the event's start date and time, converts it to the local time zone,
+ * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
+ *
+ * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
+ */
+fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
+    LocalDateTime.parse("${this.date}T${this.startHour}:00")
+        .toInstant(getTimeZone())
+        .toLocalDateTime(getTimeZone())
+        .let { "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}" }
+}.getOrDefault("00/00")
+
+/**
+ * Converts the start date and time of the event to a local `LocalDateTime`.
+ *
+ * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
+ * and then converts it to a `LocalDateTime` in the same time zone.
+ *
+ * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
+ */
+fun WWWEvent.getStartDateTime(): LocalDateTime =
+    LocalDateTime.parse("${date}T${startHour}")
+        .toInstant(getTimeZone())
+        .toLocalDateTime(getTimeZone())

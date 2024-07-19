@@ -19,10 +19,26 @@
  */
 package com.worldwidewaves.shared
 
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.datetime.LocalDateTime
+import platform.Foundation.NSCachesDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSSearchPathForDirectoriesInDomains
+import platform.Foundation.NSString
+import platform.Foundation.NSURL
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.create
+import platform.Foundation.writeToFile
 import platform.UIKit.UIDevice
 
-class IOSPlatform: WWWPlatform {
-    override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+// TODO : Check https://skie.touchlab.co/
+
+class IOSPlatform : WWWPlatform {
+    override val name: String =
+        UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+
     override fun getContext(): Any {
         TODO("Not yet implemented")
     }
@@ -30,10 +46,46 @@ class IOSPlatform: WWWPlatform {
 
 actual fun getPlatform(): WWWPlatform = IOSPlatform()
 
-actual fun getImage(type: String, id: String): Any? {
+actual fun getEventImage(type: String, id: String): Any? {
     TODO("Not yet implemented")
 }
 
-//actual fun readEventsConfig(): String {
-//    return "" // TODO
-//}
+actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
+    TODO("Not yet implemented")
+}
+
+actual fun cachedFileExists(fileName: String): Boolean {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+}
+
+actual fun cachedFilePath(fileName: String): String? {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    return NSURL.fileURLWithPath(filePath).absoluteString
+}
+
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+actual fun cacheStringToFile(fileName: String, content: String) {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    val nsString = NSString.create(string = content)
+    nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
+}
+
+actual fun getCacheDir(): String {
+    return NSSearchPathForDirectoriesInDomains(
+        NSCachesDirectory,
+        NSUserDomainMask,
+        true
+    ).first() as String
+}
+
+actual fun getLocalDatetime(): LocalDateTime {
+    TODO("Not yet implemented")
+}
+
+actual suspend fun cacheDeepFile(fileName: String) {
+    TODO("Not yet implemented")
+}

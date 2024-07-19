@@ -21,10 +21,19 @@ package com.worldwidewaves.shared
  */
 
 import android.content.Context
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
 
+/**
+ * Retrieves the file path for the key-value store.
+ *
+ * This function constructs the file path for the key-value store by accessing the application's
+ * files directory and appending the specified folder and file name for the data store.
+ *
+ * @return The absolute path of the key-value store file as a String.
+ */
 actual fun keyValueStorePath(): String {
     return (getPlatform().getContext() as Context)
         .filesDir
-        .resolve("datastore/$dataStoreFileName")
+        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
         .absolutePath
 }

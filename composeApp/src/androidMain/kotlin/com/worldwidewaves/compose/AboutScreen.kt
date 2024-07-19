@@ -20,12 +20,8 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,38 +37,40 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.activities.TabManager
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.activities.utils.TabManager
+import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_WIDTH
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.logo_description
+import com.worldwidewaves.shared.generated.resources.tab_faq_name
+import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
-import com.worldwidewaves.shared.generated.resources.www_instagram_url
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import com.worldwidewaves.theme.displayFontFamily
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 private val tabInfo = listOf(
-    "Infos",
-    "FAQ"
+    ShRes.string.tab_infos_name,
+    ShRes.string.tab_faq_name
 )
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
 
-    private val tabManager = TabManager(listOf(
-        aboutInfoScreen,
-        aboutFaqScreen
-    )) { isSelected, tabIndex, _ ->
-        TabBarItem(isSelected, tabIndex)
-    }
+    private val tabManager = TabManager(
+        listOf(
+            aboutInfoScreen,
+            aboutFaqScreen
+        )
+    ) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
 
     // ----------------------------
 
@@ -82,7 +80,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier) {
+        Surface(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
             tabManager.TabView()
         }
     }
@@ -93,25 +91,25 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
         Box(
             modifier = Modifier
-                .height(60.dp)
-                .width(150.dp),
+                .height(DIM_INT_TABBAR_HEIGHT.dp)
+                .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 10.dp, end = 10.dp)
-                        .offset(y = (-20).dp),
+                        .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
+                        .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
                     color = Color.White, thickness = 2.dp
                 )
             }
             Text(
-                text = tabInfo[tabIndex].uppercase(),
+                text = stringResource(tabInfo[tabIndex]).uppercase(),
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                 fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                fontSize = 20.sp
+                fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
             )
         }
     }
@@ -132,40 +130,10 @@ fun AboutDividerLine() {
 
 @Composable
 fun AboutWWWSocialNetworks() {
-    val uriHandler = LocalUriHandler.current
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(
-            painter = painterResource(Res.drawable.instagram_icon),
-            contentDescription = "Instagram logo",
-            modifier = Modifier.width(90.dp)
-        )
-        Column(
-            modifier = Modifier.padding(start = 10.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                modifier = Modifier.clickable(onClick = {
-                    try {
-                        uriHandler.openUri(ShRes.string.www_instagram_url.toString())
-                    } catch (e: Exception) {
-                        Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
-                    }
-                }),
-                text = stringResource(Res.string.www_instagram),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = displayFontFamily,
-                textDecoration = TextDecoration.Underline
-            )
-            Text(
-                text = stringResource(Res.string.www_hashtag),
-                fontSize = 16.sp,
-                fontFamily = displayFontFamily
-            )
-        }
-    }
-    Spacer(modifier = Modifier.size(50.dp))
+    WWWSocialNetworks(
+        instagramAccount = stringResource(ShRes.string.www_instagram),
+        instagramHashtag = stringResource(ShRes.string.www_hashtag)
+    )
 }
 
 @Composable

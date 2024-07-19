@@ -2,6 +2,9 @@
     <string name="logo_description">logo</string>
     <string name="background_description">background</string>
 
+    <string name="back">Back</string>
+    <string name="wave_now">Wave Now!</string>">
+
     <string name="events_select_all">All</string>
     <string name="events_select_starred">Starred</string>
 
@@ -10,6 +13,24 @@
     <string name="event_running">running</string>
     <string name="event_favorite_on">favorite_on</string>
     <string name="event_favorite_off">favorite_off</string>
+    <string name="event_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
+
+    <string name="tab_infos_name">About</string>
+    <string name="tab_faq_name">FAQ</string>
+
+    <string name="geoloc_undone">Updating location..</string>
+    <string name="geoloc_error">Unable to locate you</string>
+    <string name="geoloc_yourein">YOUR ARE IN the area!</string>
+    <string name="geoloc_yourenotin">YOU ARE NOT in the area!</string>
+    <string name="geoloc_warm_in">YOUR ARE IN the area and will warm!</string>
+    <string name="geoloc_desc">FAQ</string>
+
+    <string name="be_waved">be waved!</string>
+    <string name="wave_speed">Wave speed</string>
+    <string name="wave_start_time">Start time</string>
+    <string name="wave_end_time">End time</string>
+    <string name="wave_total_time">Total time</string>
+    <string name="wave_progression">Progression</string>
 
     <string name="infos_core">
 WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries, culminating in a final, awe-inspiring wave that spans the globe. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.
@@ -68,7 +89,5 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
 
     <string name="faq_question_5">Question 5</string>
     <string name="faq_answer_5">Answer 5</string>
-
-
 
 </resources>

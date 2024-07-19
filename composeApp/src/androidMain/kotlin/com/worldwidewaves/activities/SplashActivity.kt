@@ -21,27 +21,33 @@ package com.worldwidewaves.activities
  */
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.WindowInsets
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_LOGO_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.generated.resources.*
+import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.background_description
+import com.worldwidewaves.shared.generated.resources.logo_description
+import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,53 +63,59 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            AppTheme {
-                SplashScreen()
+        window.decorView.post { // Merge with ActivityTools...
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(WindowInsets.Type.statusBars())
+                window.insetsController?.hide(WindowInsets.Type.navigationBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
         }
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
 
-        // Load main activity
-        val intent = Intent(this, MainActivity::class.java)
-        val startTime = System.currentTimeMillis()
-        events.invokeWhenLoaded {
-            lifecycleScope.launch { // Delay min 1500ms
-                val elapsedTime = System.currentTimeMillis() - startTime
-                val delayTime = maxOf(1500 - elapsedTime, 0)
-                delay(delayTime)
-                startActivity(intent)
-            }
-        }
+        setContent { AppTheme { SplashScreen() } }
+        loadMainActivity()
     }
 
     // ---------------------------
 
-    @Composable
-    private fun SplashScreen() {
-        Surface(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Box {
-                Image(
-                    painter = painterResource(ShRes.drawable.background),
-                    contentDescription = stringResource(ShRes.string.background_description),
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterStart)
-                        .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
-                )
-                Image(
-                    painter = painterResource(ShRes.drawable.www_logo_transparent),
-                    contentDescription = stringResource(ShRes.string.logo_description),
-                    modifier = Modifier
-                        .width(200.dp)
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp)
-                )
+    private fun loadMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        val startTime = System.currentTimeMillis()
+        events.onEventLoaded {
+            lifecycleScope.launch {
+                val elapsedTime = System.currentTimeMillis() - startTime
+                delay(maxOf(CONST_SPLASH_MIN_DURATION - elapsedTime, 0))
+                startActivity(intent)
             }
+        }
+    }
+}
+
+// ---------------------------
+
+@Composable
+@Preview
+private fun SplashScreen() {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box {
+            Image(
+                painter = painterResource(ShRes.drawable.background),
+                contentDescription = stringResource(ShRes.string.background_description),
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.CenterStart)
+            )
+            Image(
+                painter = painterResource(ShRes.drawable.www_logo_transparent),
+                contentDescription = stringResource(ShRes.string.logo_description),
+                modifier = Modifier
+                    .width(CONST_SPLASH_LOGO_WIDTH.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = DIM_DEFAULT_INT_PADDING.dp)
+            )
         }
     }
 }

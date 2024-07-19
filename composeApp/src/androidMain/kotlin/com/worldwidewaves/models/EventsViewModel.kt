@@ -24,14 +24,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing event data.
+ *
+ * This ViewModel fetches events from a data source (`WWWEvents`), exposes them as a
+ * `StateFlow`, and provides filtering functionality for displaying all events or only
+ * favorite events.
+ *
+ * @param wwwEvents The data source for retrieving events.
+ */
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
-    private var originalEvents : List<WWWEvent> = emptyList()
+    private var originalEvents: List<WWWEvent> = emptyList()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
@@ -46,7 +56,7 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     // ---------------------------
 
     private fun loadEvents() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             wwwEvents.eventsFlow.collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList

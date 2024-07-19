@@ -3,7 +3,7 @@ package com.worldwidewaves.di
 import com.worldwidewaves.compose.AboutFaqScreen
 import com.worldwidewaves.compose.AboutInfoScreen
 import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsScreen
+import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
 import com.worldwidewaves.models.EventsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -30,11 +30,12 @@ import org.koin.dsl.module
  */
 
 val androidModule = module {
-    single { EventsScreen(viewModel = get(), setEventFavorite = get()) }
+    single { EventsListScreen(viewModel = get(), setEventFavorite = get()) }
     viewModel { EventsViewModel(wwwEvents = get()) }
 
     single { SettingsScreen() }
     single { AboutScreen(get(), get()) }
     single { AboutInfoScreen() }
     single { AboutFaqScreen() }
+
 }

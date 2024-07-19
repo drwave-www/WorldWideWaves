@@ -23,6 +23,7 @@ package com.worldwidewaves.shared
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import io.github.aakira.napier.Napier
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import okio.Path.Companion.toPath
@@ -34,8 +35,10 @@ private val lock = SynchronizedObject()
 
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {
     if (::dataStore.isInitialized) {
+        Napier.v("DataStore already initialized with path: ${producePath()}")
         dataStore
     } else {
+        Napier.i("Creating DataStore with path: ${producePath()}")
         PreferenceDataStoreFactory
             .createWithPath(produceFile = { producePath().toPath() })
             .also { createdDataStore -> dataStore = createdDataStore }
