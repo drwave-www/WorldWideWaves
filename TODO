@@ -16,7 +16,7 @@ Scripts:
     - geolimits
 
 Tests:
--
+- introduce tests
 
 Debug:
 - Implement a way to simulate events & geolocation

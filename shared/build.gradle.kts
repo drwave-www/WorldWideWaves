@@ -33,12 +33,17 @@ kotlin {
             resources.srcDirs("composeResources")
         }
         commonMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.coroutines.core)
             implementation(compose.runtime)
             implementation(compose.components.resources)
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+            implementation(libs.kotlinx.datetime.v032)
+            implementation(libs.androidx.annotation)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
@@ -67,5 +72,6 @@ compose.resources {
 dependencies {
     implementation(libs.places)
     implementation(libs.androidx.ui.graphics.android)
+    implementation(libs.androidx.annotation.jvm)
 }
 

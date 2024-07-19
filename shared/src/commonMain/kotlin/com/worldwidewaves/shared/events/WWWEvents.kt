@@ -19,6 +19,7 @@
  */
 package com.worldwidewaves.shared.events
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.generated.resources.Res.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,8 +42,13 @@ class WWWEvents {
         }
     }
 
+    fun resetEventsFlow() {
+        _eventsFlow.value = emptyList()
+    }
+
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun loadEvents() {
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    suspend fun loadEvents() {
         val eventsConf = readBytes("files/events.json").decodeToString()
         val loadedEvents = Json {
             ignoreUnknownKeys = true
