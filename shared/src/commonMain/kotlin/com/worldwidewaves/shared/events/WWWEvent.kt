@@ -60,7 +60,11 @@ fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getImage("communi
 fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", it) }
 
 fun WWWEvent.getFormattedSimpleDate(): String {
-    val instant = Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
-    val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+    return try {
+        val instant = Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
+        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+        "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+    } catch (e: Exception) {
+        "00/00"
+    }
 }
