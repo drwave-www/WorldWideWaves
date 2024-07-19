@@ -1,6 +1,5 @@
 package com.worldwidewaves.compose
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -34,13 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.shared.R as ShR
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getCommunityImage
 import com.worldwidewaves.shared.events.getCountryImage
@@ -178,7 +175,6 @@ private fun EventOverlay(event: WWWEvent, modifier: Modifier = Modifier) {
             Image(
                 modifier = modifier,
                 contentScale = ContentScale.FillWidth,
-                //painter = getPainterFromDrawableName(event.id, "location")!!,
                 painter = painterResource(event.getLocationImage() as DrawableResource),
                 contentDescription = event.location
             )
@@ -247,13 +243,6 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         event.community?.let {
-//            DisplayEntityImage(
-//                entityName = event.community!!, entityType = "community",
-//                modifier = Modifier
-//                    .width(65.dp)
-//                    .padding(start = 10.dp, top = 10.dp)
-//                    .border(1.dp, Color.White)
-//            )
             Image(
                 modifier = Modifier
                     .width(65.dp)
@@ -265,13 +254,6 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
             )
         }
         event.country?.let {
-//            DisplayEntityImage(
-//                entityName = event.country!!, entityType = "country",
-//                modifier = Modifier
-//                    .width(65.dp)
-//                    .padding(start = 10.dp, bottom = 10.dp)
-//                    .border(1.dp, Color.White)
-//            )
               Image(
                 modifier = Modifier
                     .width(65.dp)
@@ -344,34 +326,3 @@ private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier)
         }
     }
 }
-
-// ----------------------------
-
-//@Composable
-//fun DisplayEntityImage(entityName: String, modifier: Modifier = Modifier, entityType: String) {
-//    //getPainterFromDrawableName(entityName, entityType)?.let { painter ->
-//        Image(
-//            modifier = modifier,
-//            painter = painter,
-//            contentDescription = entityName
-//        )
-//    //}
-//}
-
-//@SuppressLint("DiscouragedApi")
-//@Composable
-//fun getPainterFromDrawableName(drawableName: String, entityType: String): Painter? {
-////    val context = LocalContext.current
-//
-////    val resourceId = context.resources.getIdentifier(
-////        "e_${entityType}_${drawableName}", "drawable", context.packageName
-////    )
-//    val resourceName = "e_${entityType}_${drawableName}"
-//    val field = ShRes.drawable::class.jaget .getField(resourceName)
-//    val resource = field.get(DrawableResource::class.java) as DrawableResource
-//
-//
-//    ShR.drawable
-//
-//    return painterResource(resource)
-//}

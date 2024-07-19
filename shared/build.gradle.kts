@@ -54,7 +54,6 @@ android {
     }
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
-        assets.srcDirs("src/commonMain/assets")
     }
 }
 

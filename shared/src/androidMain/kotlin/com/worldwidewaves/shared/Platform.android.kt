@@ -11,7 +11,7 @@ import com.worldwidewaves.shared.generated.resources.e_location_paris_france
 import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_brazil
 import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import com.worldwidewaves.shared.generated.resources.not_found
 import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
@@ -47,18 +47,18 @@ actual fun getImage(type: String, id: String): Any? {
             "unitedstates" -> Res.drawable.e_location_unitedstates
             "riodejaneiro_brazil" -> Res.drawable.e_location_riodejaneiro_brazil
             "world" -> Res.drawable.e_location_world
-            else -> return null
+            else -> Res.drawable.not_found
         }
         "community" -> when (id) {
             "europe" -> Res.drawable.e_community_europe
             "usa" -> Res.drawable.e_community_usa
-            else -> return null
+            else -> Res.drawable.not_found
         }
         "country" -> when (id) {
             "brazil" -> Res.drawable.e_country_brazil
             "france" -> Res.drawable.e_country_france
-            else -> return null
+            else -> Res.drawable.not_found
         }
-        else -> null
+        else -> Res.drawable.not_found
     }
 }
