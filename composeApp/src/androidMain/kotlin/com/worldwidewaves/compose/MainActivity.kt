@@ -17,14 +17,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.generated.resources.*
 import com.worldwidewaves.ui.AppTheme
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import java.util.Timer
 import kotlin.concurrent.timerTask
-import com.worldwidewaves.shared.R as CR
-
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,12 +34,14 @@ class MainActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 Surface(
-                    modifier = Modifier.fillMaxHeight().background(MaterialTheme.colorScheme.background)
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     Box {
                         Image(
-                            painter = painterResource(CR.drawable.background),
-                            contentDescription = stringResource(CR.string.background_description),
+                            painter = painterResource(ShRes.drawable.background),
+                            contentDescription = stringResource(ShRes.string.background_description),
                             contentScale = ContentScale.FillWidth,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -47,8 +49,8 @@ class MainActivity : AppCompatActivity() {
                                 .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
                         )
                         Image(
-                            painter = painterResource(CR.drawable.www_logo_transparent),
-                            contentDescription = stringResource(CR.string.logo_description),
+                            painter = painterResource(ShRes.drawable.www_logo_transparent),
+                            contentDescription = stringResource(ShRes.string.logo_description),
                             modifier = Modifier
                                 .width(200.dp)
                                 .align(Alignment.BottomCenter)
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         val activity = this
         Timer().schedule(timerTask {
-            val intent = Intent(activity, WavesActivity::class.java)
+            val intent = Intent(activity, EventsActivity::class.java)
             startActivity(intent)
         }, 2000)
 

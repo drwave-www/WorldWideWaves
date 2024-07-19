@@ -2,6 +2,7 @@ package com.worldwidewaves
 
 import android.app.Application
 import androidx.work.Configuration
+import com.worldwidewaves.shared.AndroidPlatform
 
 class MainApplication : Application(), Configuration.Provider {
     override val workManagerConfiguration: Configuration

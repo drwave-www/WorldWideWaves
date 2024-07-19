@@ -1,6 +1,7 @@
 package com.worldwidewaves.shared.events
 
-import kotlinx.serialization.*
+import com.worldwidewaves.shared.getImage
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class WWWEvent(
@@ -25,3 +26,8 @@ fun WWWEvent.isSoon(): Boolean {
 fun WWWEvent.isRunning(): Boolean {
     return this.id == "riodejaneiro_brazil" // test
 }
+
+fun WWWEvent.getLocationImage(): Any? = getImage("location", this.id)
+fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getImage("community", it) }
+fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", it) }
+

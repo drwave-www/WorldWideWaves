@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
         <activity
-            android:name=".compose.WavesActivity"
+            android:name=".compose.EventsActivity"
             android:exported="false"
             android:label="@string/title_activity_waves" />
         <activity

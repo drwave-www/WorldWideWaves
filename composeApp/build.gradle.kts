@@ -29,7 +29,6 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
-            implementation(compose.components.resources)
         }
     }
 }
@@ -39,11 +38,7 @@ android {
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
-
-    //sourceSets["main"].assets.srcDirs("../shared/src/commonMain/assets")
-    //sourceSets["main"].resources.srcDirs("../shared/src/commonMain/res")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -80,11 +75,6 @@ android {
         debugImplementation(compose.uiTooling)
     }
 }
-
-//compose.resources {
-//    publicResClass = true
-//    generateResClass = always
-//}
 
 dependencies {
     implementation(libs.androidx.appcompat)

@@ -6,3 +6,7 @@ interface WWWPlatform {
     fun getContext(): Any
 }
 
+expect fun getPlatform(): WWWPlatform
+//expect fun readEventsConfig(): String
+
+expect fun getImage(type: String, id: String): Any? // expect

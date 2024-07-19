@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization")
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
@@ -28,11 +30,14 @@ kotlin {
     
     sourceSets {
         named("commonMain") {
-            resources.srcDirs("resources")
+            resources.srcDirs("composeResources")
         }
         commonMain.dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+            implementation(compose.runtime)
+            implementation(compose.components.resources)
         }
     }
 }
@@ -49,10 +54,18 @@ android {
     }
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
-        //assets.srcDirs("src/commonMain/assets")
+        assets.srcDirs("src/commonMain/assets")
     }
 }
+
+compose.resources {
+    publicResClass = true
+    generateResClass = always
+    packageOfResClass = "com.worldwidewaves.shared.generated.resources"
+}
+
 dependencies {
     implementation(libs.places)
+    implementation(libs.androidx.ui.graphics.android)
 }
 

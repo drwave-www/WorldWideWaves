@@ -1,6 +1,5 @@
-package com.worldwidewaves
+package com.worldwidewaves.shared
 
-import com.worldwidewaves.shared.WWWPlatform
 import platform.UIKit.UIDevice
 
 class IOSPlatform: WWWPlatform {
@@ -10,3 +9,12 @@ class IOSPlatform: WWWPlatform {
     }
 }
 
+actual fun getPlatform(): WWWPlatform = IOSPlatform()
+
+actual fun getImage(type: String, id: String): Any? {
+    TODO("Not yet implemented")
+}
+
+//actual fun readEventsConfig(): String {
+//    return "" // TODO
+//}
