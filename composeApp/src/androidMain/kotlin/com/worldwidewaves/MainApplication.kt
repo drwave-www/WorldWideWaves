@@ -26,9 +26,10 @@ import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.di.sharedModule
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
-import org.koin.core.context.GlobalContext as koin
+import org.koin.core.context.startKoin
 
 class MainApplication : Application(), Configuration.Provider {
 
@@ -40,14 +41,14 @@ class MainApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        koin.startKoin {
+        startKoin {
             androidContext(this@MainApplication)
             androidLogger()
             modules(sharedModule() + androidModule)
         }
 
         // Initialize the WWW platform
-        val platform = koin.get().get<WWWPlatform>() as AndroidPlatform
+        val platform = getKoin().get<WWWPlatform>() as AndroidPlatform
         platform.initialize(this)
     }
 }

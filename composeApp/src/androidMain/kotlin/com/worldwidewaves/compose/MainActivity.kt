@@ -65,9 +65,12 @@ class MainActivity : AppCompatActivity() {
 
         // Load main activity
         val intent = Intent(this, EventsActivity::class.java)
+        val startTime = System.currentTimeMillis()
         events.invokeWhenLoaded {
-            lifecycleScope.launch {
-                delay(2000)
+            lifecycleScope.launch { // Delay min 1500ms
+                val elapsedTime = System.currentTimeMillis() - startTime
+                val delayTime = maxOf(1500 - elapsedTime, 0)
+                delay(delayTime)
                 startActivity(intent)
             }
         }
