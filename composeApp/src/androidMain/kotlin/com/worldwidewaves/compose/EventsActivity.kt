@@ -43,14 +43,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,15 +72,21 @@ import com.worldwidewaves.shared.events.isFavorite
 import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.events.isSoon
 import com.worldwidewaves.shared.events.setFavorite
-import com.worldwidewaves.shared.generated.resources.*
+import com.worldwidewaves.shared.generated.resources.event_done
+import com.worldwidewaves.shared.generated.resources.event_favorite_off
+import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.event_running
+import com.worldwidewaves.shared.generated.resources.event_soon
+import com.worldwidewaves.shared.generated.resources.events_select_all
+import com.worldwidewaves.shared.generated.resources.events_select_starred
+import com.worldwidewaves.shared.generated.resources.favorite_off
+import com.worldwidewaves.shared.generated.resources.favorite_on
 import com.worldwidewaves.ui.AppTheme
 import com.worldwidewaves.ui.extendedLight
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.text.SimpleDateFormat
-import java.util.Locale
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
@@ -116,7 +118,7 @@ class EventsActivity : AppCompatActivity() {
                     .fillMaxSize()
             ) {
                 Column {
-                    FavoritesSelector()
+                    FavoritesSelector(viewModel)
                     Spacer(modifier = Modifier.size(20.dp))
                     Events(events)
                 }
@@ -128,7 +130,9 @@ class EventsActivity : AppCompatActivity() {
 // ----------------------------
 
 @Composable
-fun FavoritesSelector(modifier: Modifier = Modifier, starredSelected: Boolean = false) {
+fun FavoritesSelector(viewModel: EventsViewModel, modifier: Modifier = Modifier) {
+    var starredSelected by remember { mutableStateOf(viewModel.hasFavorites.value) }
+
     val allColor = if (starredSelected) extendedLight.quaternary else extendedLight.quinary
     val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
 
@@ -151,7 +155,13 @@ fun FavoritesSelector(modifier: Modifier = Modifier, starredSelected: Boolean = 
             ) {
                 Text(
                     color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                    text = stringResource(ShRes.string.events_select_all)
+                    text = stringResource(ShRes.string.events_select_all),
+                    modifier = Modifier.clickable {
+                        if (starredSelected) {
+                            viewModel.filterAllEvents()
+                            starredSelected = !starredSelected
+                        }
+                    }
                 )
             }
             Box(
@@ -164,7 +174,13 @@ fun FavoritesSelector(modifier: Modifier = Modifier, starredSelected: Boolean = 
             ) {
                 Text(
                     color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                    text = stringResource(ShRes.string.events_select_starred)
+                    text = stringResource(ShRes.string.events_select_starred),
+                    modifier = Modifier.clickable {
+                        if (!starredSelected) {
+                            viewModel.filterFavoriteEvents()
+                            starredSelected = !starredSelected
+                        }
+                    }
                 )
             }
         }

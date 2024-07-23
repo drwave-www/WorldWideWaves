@@ -30,8 +30,13 @@ import kotlinx.coroutines.launch
 
 class EventsViewModel : ViewModel() {
 
+    private var originalEvents : List<WWWEvent> = emptyList()
+
+    private val _hasFavorites = MutableStateFlow<Boolean>(false)
     private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
+
     val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
+    val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
 
     init {
         loadEvents()
@@ -40,8 +45,21 @@ class EventsViewModel : ViewModel() {
     private fun loadEvents() {
         viewModelScope.launch {
             WWWEvents().eventsFlow.collect { eventsList ->
+                if (originalEvents.isEmpty()) {
+                    originalEvents = eventsList
+                    _hasFavorites.value = originalEvents.any { it.favorite }
+                }
                 _events.value = eventsList
             }
         }
     }
+
+    fun filterFavoriteEvents() {
+        _events.value = originalEvents.filter { it.favorite }
+    }
+
+    fun filterAllEvents() {
+        _events.value = originalEvents
+    }
+
 }
