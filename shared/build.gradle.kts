@@ -40,6 +40,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.kotlinx.datetime.v032)
             implementation(libs.androidx.annotation)
+            implementation(libs.datastore.preferences)
+            implementation(libs.kotlinx.atomic)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

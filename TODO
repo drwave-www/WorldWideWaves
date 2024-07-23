@@ -4,6 +4,7 @@ Waves screen :
 - IDEAL: load images of events from assets
 - favorites mechanisms
 - check fonts
+- tab bar
 
 Common:
 - Implement events geolimits + speed, to calculate endTime

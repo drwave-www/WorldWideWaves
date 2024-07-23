@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,12 +43,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,15 +72,14 @@ import com.worldwidewaves.shared.events.getCountryImage
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.events.isFavorite
 import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.events.isSoon
-import com.worldwidewaves.shared.generated.resources.event_done
-import com.worldwidewaves.shared.generated.resources.event_running
-import com.worldwidewaves.shared.generated.resources.event_soon
-import com.worldwidewaves.shared.generated.resources.events_select_all
-import com.worldwidewaves.shared.generated.resources.events_select_starred
+import com.worldwidewaves.shared.events.setFavorite
+import com.worldwidewaves.shared.generated.resources.*
 import com.worldwidewaves.ui.AppTheme
 import com.worldwidewaves.ui.extendedLight
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -202,6 +210,7 @@ private fun EventOverlay(event: WWWEvent, modifier: Modifier = Modifier) {
         EventOverlayCountryAndCommunityFlags(event, heightModifier)
         EventOverlaySoonOrRunning(event)
         EventOverlayDone(event)
+        EventOverlayFavorite(event)
     }
 }
 
@@ -283,6 +292,29 @@ private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modi
                 contentDescription = event.community!!
             )
         }
+    }
+}
+
+@Composable
+private fun EventOverlayFavorite(event: WWWEvent, modifier: Modifier = Modifier) {
+    var isFavorite by remember { mutableStateOf(event.isFavorite()) }
+    val scope = rememberCoroutineScope()
+
+    Box(modifier = modifier
+        .fillMaxSize()
+        .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
+        Image(
+            modifier = Modifier
+                .width(45.dp)
+                .clickable {
+                    isFavorite = !isFavorite
+                    scope.launch {
+                        event.setFavorite(isFavorite)
+                    }
+                },
+            painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
+            contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
+        )
     }
 }
 

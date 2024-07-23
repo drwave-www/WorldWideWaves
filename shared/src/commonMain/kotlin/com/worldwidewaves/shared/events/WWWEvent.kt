@@ -19,6 +19,7 @@
  */
 package com.worldwidewaves.shared.events
 
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.getImage
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -36,21 +37,36 @@ data class WWWEvent(
     val community: String? = null,
     val date: String,
     val startHour: String,
-    val speed: Int
+    val speed: Int,
+    var favorite: Boolean = false
 )
+
+suspend fun WWWEvent.initFavoriteStatus() {
+    this.favorite = WWWPlatform.favoriteEventsStore.isFavorite(eventId = this.id)
+}
+
+suspend fun WWWEvent.setFavorite(favorite: Boolean): WWWEvent {
+    this.favorite = favorite
+    WWWPlatform.favoriteEventsStore.setFavoriteStatus(this.id, favorite)
+    return this
+}
 
 // ---------------------------
 
 fun WWWEvent.isDone(): Boolean {
-    return this.id == "paris_france" // test
+    return this.id == "paris_france" // TODO: test
 }
 
 fun WWWEvent.isSoon(): Boolean {
-    return this.id == "unitedstates" // test
+    return this.id == "unitedstates" // TODO: test…
 }
 
 fun WWWEvent.isRunning(): Boolean {
-    return this.id == "riodejaneiro_brazil" // test
+    return this.id == "riodejaneiro_brazil" // TODO: test…
+}
+
+fun WWWEvent.isFavorite(): Boolean {
+    return this.favorite || this.id == "paris_france" // TODO: test…
 }
 
 // ---------------------------

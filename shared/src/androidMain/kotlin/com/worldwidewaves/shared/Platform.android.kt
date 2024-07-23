@@ -53,6 +53,7 @@ object AndroidPlatform : WWWPlatform {
             throw IllegalStateException("AndroidPlatform can only be initialized once.")
         }
     }
+
 }
 
 // --- Platform-specific API ---

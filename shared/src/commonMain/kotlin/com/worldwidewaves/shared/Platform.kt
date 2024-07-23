@@ -23,6 +23,14 @@ interface WWWPlatform {
     val name: String
 
     fun getContext(): Any
+
+    // ---------------------------
+
+    companion object {
+        val favoriteEventsStore: FavoriteEventsStore by lazy {
+            FavoriteEventsStore(createDataStore())
+        }
+    }
 }
 
 expect fun getPlatform(): WWWPlatform

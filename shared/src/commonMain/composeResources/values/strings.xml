@@ -9,4 +9,6 @@
     <string name="event_done">Done</string>
     <string name="event_soon">soon !</string>
     <string name="event_running">running</string>
+    <string name="event_favorite_on">favorite_on</string>
+    <string name="event_favorite_off">favorite_off</string>
 </resources>

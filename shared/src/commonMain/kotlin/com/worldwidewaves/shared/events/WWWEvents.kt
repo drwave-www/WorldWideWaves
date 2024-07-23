@@ -53,6 +53,9 @@ class WWWEvents {
         val loadedEvents = Json {
             ignoreUnknownKeys = true
         }.decodeFromString<List<WWWEvent>>(eventsConf)
+        loadedEvents.forEach { // Read favorite status from DataStore
+            it.initFavoriteStatus()
+        }
         _eventsFlow.value = loadedEvents
     }
 
