@@ -126,10 +126,11 @@ class EventsActivity : AppCompatActivity() {
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp)
                     .fillMaxSize()
             ) {
-                Column {
+                Column(modifier = Modifier.fillMaxHeight() ){
                     FavoritesSelector(viewModel)
                     Spacer(modifier = Modifier.size(20.dp))
-                    Events(viewModel, events)
+                    Events(viewModel, events, modifier = Modifier.weight(1f))
+                    TabBar(selectedTab = Tab.Events)
                 }
             }
         }
