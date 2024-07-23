@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">WorldWideWaves</string>
-    <string name="title_activity_waves">Waves</string>
+
+    <string name="title_activity_events">Events</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_about">About</string>
 
 </resources>

@@ -20,6 +20,7 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
@@ -56,13 +58,13 @@ enum class Tab {
 
 @Composable
 fun TabBar(modifier: Modifier = Modifier, selectedTab: Tab = Tab.None) {
+    val context = LocalContext.current
     var currentTab by remember { mutableStateOf(selectedTab) }
 
-    val tabs = listOf(Tab.Events, Tab.About, Tab.Settings)
-    val icons = mapOf(
-        Tab.Events to Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
-        Tab.About to Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
-        Tab.Settings to Pair(ShRes.drawable.settings_icon, ShRes.drawable.settings_icon_selected)
+    val tabInfo = mapOf(
+        Tab.Events to Triple(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected, EventsActivity::class.java),
+        Tab.About to Triple(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected, AboutActivity::class.java),
+        Tab.Settings to Triple(ShRes.drawable.settings_icon, ShRes.drawable.settings_icon_selected, SettingsActivity::class.java)
     )
 
     Row(
@@ -73,14 +75,17 @@ fun TabBar(modifier: Modifier = Modifier, selectedTab: Tab = Tab.None) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        tabs.forEach { tab ->
-            val icon = if (currentTab == tab) icons[tab]?.second else icons[tab]?.first
-            icon?.let {
-                TabBarItem(
-                    icon = it,
-                    onClick = { currentTab = tab }
-                )
-            }
+        tabInfo.forEach { (tab, info) ->
+            val (icon, selectedIcon, activityClass) = info
+            val iconResource = if (currentTab == tab) selectedIcon else icon
+            TabBarItem(
+                icon = iconResource,
+                onClick = {
+                    currentTab = tab
+                    val intent = Intent(context, activityClass)
+                    context.startActivity(intent)
+                }
+            )
         }
     }
 }
@@ -98,7 +103,7 @@ private fun TabBarItem(
         Image(
             painter = painterResource(icon),
             contentDescription = null, // Accessibility description should be added based on the context
-            modifier = Modifier.height(50.dp),
+            modifier = Modifier.height(45.dp),
             contentScale = ContentScale.Fit
         )
     }

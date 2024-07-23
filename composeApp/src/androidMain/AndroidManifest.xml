@@ -12,7 +12,15 @@
         <activity
             android:name=".compose.EventsActivity"
             android:exported="false"
-            android:label="@string/title_activity_waves" />
+            android:label="@string/title_activity_events" />
+        <activity
+            android:name=".compose.AboutActivity"
+            android:exported="false"
+            android:label="@string/title_activity_about" />
+        <activity
+            android:name=".compose.SettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".compose.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
