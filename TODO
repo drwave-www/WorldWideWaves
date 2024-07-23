@@ -1,7 +1,5 @@
 
 Waves screen :
-- bug favorite icon sur selected
-    - icon qui s'affiche correctement dans starred
 - setup injection de dépendances
 - tab bar
 

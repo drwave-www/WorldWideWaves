@@ -47,6 +47,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -225,6 +226,8 @@ class EventsActivity : AppCompatActivity() {
         }
     }
 
+    // ----------------------------
+
     @Composable
     private fun EventOverlay(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
         val heightModifier = Modifier.height(159.dp)
@@ -332,6 +335,10 @@ class EventsActivity : AppCompatActivity() {
     private fun EventOverlayFavorite(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
         val scope = rememberCoroutineScope()
+
+        LaunchedEffect(event.favorite) {
+            isFavorite = event.favorite
+        }
 
         Box(modifier = modifier
             .fillMaxSize()

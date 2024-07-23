@@ -35,7 +35,6 @@ class WWWEvents {
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
-    private var loadJob : Job? = null
 
     init {
         loadEvents()
@@ -45,6 +44,11 @@ class WWWEvents {
         _eventsFlow.value = emptyList()
     }
 
+    // ---------------------------
+
+    private var loadJob : Job? = null
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
+
     fun getLoadingJob(): Job? = loadJob
 
     @OptIn(ExperimentalResourceApi::class)
@@ -52,9 +56,7 @@ class WWWEvents {
         if (loadJob == null)
             loadJob = CoroutineScope(Dispatchers.IO).launch {
                 val eventsConf = readBytes("files/events.json").decodeToString()
-                val loadedEvents = Json {
-                    ignoreUnknownKeys = true
-                }.decodeFromString<List<WWWEvent>>(eventsConf)
+                val loadedEvents = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsConf)
                 loadedEvents.forEach { // Read favorite status from DataStore
                     it.initFavoriteStatus()
                 }
