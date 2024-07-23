@@ -65,10 +65,6 @@ fun WWWEvent.isRunning(): Boolean {
     return this.id == "riodejaneiro_brazil" // TODO: test…
 }
 
-fun WWWEvent.isFavorite(): Boolean {
-    return this.favorite || this.id == "paris_france" // TODO: test…
-}
-
 // ---------------------------
 
 fun WWWEvent.getLocationImage(): Any? = getImage("location", this.id)

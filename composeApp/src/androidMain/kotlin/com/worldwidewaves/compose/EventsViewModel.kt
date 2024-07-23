@@ -32,11 +32,11 @@ class EventsViewModel : ViewModel() {
 
     private var originalEvents : List<WWWEvent> = emptyList()
 
-    private val _hasFavorites = MutableStateFlow<Boolean>(false)
-    private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
-
-    val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
+    private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
+
+    private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
+    val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
 
     init {
         loadEvents()
@@ -45,11 +45,9 @@ class EventsViewModel : ViewModel() {
     private fun loadEvents() {
         viewModelScope.launch {
             WWWEvents().eventsFlow.collect { eventsList ->
-                if (originalEvents.isEmpty()) {
-                    originalEvents = eventsList
-                    _hasFavorites.value = originalEvents.any { it.favorite }
-                }
+                originalEvents = eventsList
                 _events.value = eventsList
+                _hasFavorites.value = eventsList.any { it.favorite }
             }
         }
     }
@@ -60,6 +58,14 @@ class EventsViewModel : ViewModel() {
 
     fun filterAllEvents() {
         _events.value = originalEvents
+    }
+
+    fun filterEvents(starredSelected: Boolean) {
+        if (starredSelected) {
+            filterFavoriteEvents()
+        } else {
+            filterAllEvents()
+        }
     }
 
 }

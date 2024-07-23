@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.events.WWWEvent
@@ -68,7 +69,6 @@ import com.worldwidewaves.shared.events.getCountryImage
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
-import com.worldwidewaves.shared.events.isFavorite
 import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.events.isSoon
 import com.worldwidewaves.shared.events.setFavorite
@@ -94,6 +94,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventsActivity : AppCompatActivity() {
 
     private val viewModel: EventsViewModel by viewModels<EventsViewModel>()
+    private var starredSelected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +111,10 @@ class EventsActivity : AppCompatActivity() {
     @Composable
     private fun EventsScreen(viewModel: EventsViewModel) {
         val events by viewModel.events.collectAsState()
+        val hasFavorites by viewModel.hasFavorites.collectAsState()
+        starredSelected = hasFavorites
+
+        viewModel.filterEvents(starredSelected)
 
         Surface {
             Box(
@@ -120,271 +125,288 @@ class EventsActivity : AppCompatActivity() {
                 Column {
                     FavoritesSelector(viewModel)
                     Spacer(modifier = Modifier.size(20.dp))
-                    Events(events)
+                    Events(viewModel, events)
                 }
             }
         }
     }
-}
 
-// ----------------------------
+    // ----------------------------
 
-@Composable
-fun FavoritesSelector(viewModel: EventsViewModel, modifier: Modifier = Modifier) {
-    var starredSelected by remember { mutableStateOf(viewModel.hasFavorites.value) }
+    @Composable
+    fun FavoritesSelector(viewModel: EventsViewModel, modifier: Modifier = Modifier) {
+        val allColor = if (this.starredSelected) extendedLight.quaternary else extendedLight.quinary
+        val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
 
-    val allColor = if (starredSelected) extendedLight.quaternary else extendedLight.quinary
-    val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
-
-    val allWeight = if (starredSelected) FontWeight.Normal else FontWeight.Bold
-    val starredWeight = if (starredSelected) FontWeight.Bold else FontWeight.Normal
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(25.dp))
-            .background(extendedLight.quaternary.color)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(25.dp))
-                    .height(50.dp)
-                    .fillMaxWidth(.5f)
-                    .background(allColor.color),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                    text = stringResource(ShRes.string.events_select_all),
-                    modifier = Modifier.clickable {
-                        if (starredSelected) {
-                            viewModel.filterAllEvents()
-                            starredSelected = !starredSelected
-                        }
-                    }
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(25.dp))
-                    .height(50.dp)
-                    .fillMaxWidth()
-                    .background(starredColor.color),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                    text = stringResource(ShRes.string.events_select_starred),
-                    modifier = Modifier.clickable {
-                        if (!starredSelected) {
-                            viewModel.filterFavoriteEvents()
-                            starredSelected = !starredSelected
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-// ----------------------------
-
-@Composable
-fun Events(events: List<WWWEvent>, modifier: Modifier = Modifier) {
-    LazyColumn(
-        modifier = modifier
-    ) {
-        items(events) { event ->
-            Event(event)
-        }
-    }
-}
-
-@Composable
-fun Event(event: WWWEvent, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        EventOverlay(event)
-        EventLocationAndDate(event)
-    }
-}
-
-@Composable
-private fun EventOverlay(event: WWWEvent, modifier: Modifier = Modifier) {
-    val heightModifier = Modifier.height(159.dp)
-
-    Box(modifier = heightModifier) {
-        // Main Image
-        Box(modifier = heightModifier) {
-            Image(
-                modifier = modifier,
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(event.getLocationImage() as DrawableResource),
-                contentDescription = event.location
-            )
-        }
-
-        EventOverlayCountryAndCommunityFlags(event, heightModifier)
-        EventOverlaySoonOrRunning(event)
-        EventOverlayDone(event)
-        EventOverlayFavorite(event)
-    }
-}
-
-@Composable
-private fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isDone()) {
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Surface(
-                color = Color.run { White.copy(alpha = 0.5f) },
-                modifier = Modifier.fillMaxSize()
-            ) { }
-            Image(
-                painter = painterResource(ShRes.drawable.event_done),
-                contentDescription = stringResource(ShRes.string.event_done),
-                modifier = Modifier.width(130.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isSoon() || event.isRunning()) {
-        val backgroundColor =
-            if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-        val textId = if (event.isSoon()) ShRes.string.event_soon else ShRes.string.event_running
+        val allWeight = if (starredSelected) FontWeight.Normal else FontWeight.Bold
+        val starredWeight = if (starredSelected) FontWeight.Bold else FontWeight.Normal
 
         Box(
             modifier = modifier
-                .fillMaxWidth()
-                .offset(y = (-5).dp),
-            contentAlignment = Alignment.TopEnd
+                .clip(RoundedCornerShape(25.dp))
+                .background(extendedLight.quaternary.color)
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 15.dp, end = 15.dp)
-                    .size(width = 115.dp, height = 26.dp)
-                    .background(backgroundColor)
-                    .padding(end = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(textId),
-                    style = TextStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 16.sp
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(25.dp))
+                        .height(50.dp)
+                        .fillMaxWidth(.5f)
+                        .background(allColor.color),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
+                        text = stringResource(ShRes.string.events_select_all),
+                        modifier = Modifier.clickable {
+                            if (starredSelected) {
+                                starredSelected = false
+                                viewModel.filterAllEvents()
+                            }
+                        }
                     )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(25.dp))
+                        .height(50.dp)
+                        .fillMaxWidth()
+                        .background(starredColor.color),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
+                        text = stringResource(ShRes.string.events_select_starred),
+                        modifier = Modifier.clickable {
+                            if (!starredSelected) {
+                                starredSelected = true
+                                viewModel.filterFavoriteEvents()
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    // ----------------------------
+
+    @Composable
+    fun Events(viewModel: EventsViewModel, events: List<WWWEvent>, modifier: Modifier = Modifier) {
+        LazyColumn(
+            modifier = modifier
+        ) {
+            if (events.isNotEmpty()) {
+                items(events) { event ->
+                    Event(viewModel, event)
+                }
+            } else {
+                item {
+                    Text( // TODO: better explanation of favorites
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        text = "No events found",
+                        style = TextStyle(
+                            color = extendedLight.quinary.color,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontSize = 24.sp
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun Event(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+        Column(modifier = modifier) {
+            EventOverlay(viewModel, event)
+            EventLocationAndDate(event)
+        }
+    }
+
+    @Composable
+    private fun EventOverlay(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+        val heightModifier = Modifier.height(159.dp)
+
+        Box(modifier = heightModifier) {
+            // Main Image
+            Box(modifier = heightModifier) {
+                Image(
+                    modifier = modifier,
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(event.getLocationImage() as DrawableResource),
+                    contentDescription = event.location
+                )
+            }
+
+            EventOverlayCountryAndCommunityFlags(event, heightModifier)
+            EventOverlaySoonOrRunning(event)
+            EventOverlayDone(event)
+            EventOverlayFavorite(viewModel, event)
+        }
+    }
+
+    @Composable
+    private fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
+        if (event.isDone()) {
+            Box(modifier = modifier, contentAlignment = Alignment.Center) {
+                Surface(
+                    color = Color.run { White.copy(alpha = 0.5f) },
+                    modifier = Modifier.fillMaxSize()
+                ) { }
+                Image(
+                    painter = painterResource(ShRes.drawable.event_done),
+                    contentDescription = stringResource(ShRes.string.event_done),
+                    modifier = Modifier.width(130.dp),
                 )
             }
         }
     }
-}
 
-@Composable
-private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        event.community?.let {
-            Image(
-                modifier = Modifier
-                    .width(65.dp)
-                    .padding(start = 10.dp, top = 10.dp)
-                    .border(1.dp, Color.White),
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(event.getCommunityImage() as DrawableResource),
-                contentDescription = event.community!!
-            )
-        }
-        event.country?.let {
-            Image(
-                modifier = Modifier
-                    .width(65.dp)
-                    .padding(start = 10.dp, bottom = 10.dp)
-                    .border(1.dp, Color.White),
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(event.getCountryImage() as DrawableResource),
-                contentDescription = event.community!!
-            )
-        }
-    }
-}
+    @Composable
+    private fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
+        if (event.isSoon() || event.isRunning()) {
+            val backgroundColor =
+                if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
+            val textId = if (event.isSoon()) ShRes.string.event_soon else ShRes.string.event_running
 
-@Composable
-private fun EventOverlayFavorite(event: WWWEvent, modifier: Modifier = Modifier) {
-    var isFavorite by remember { mutableStateOf(event.isFavorite()) }
-    val scope = rememberCoroutineScope()
-
-    Box(modifier = modifier
-        .fillMaxSize()
-        .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
-        Image(
-            modifier = Modifier
-                .width(45.dp)
-                .clickable {
-                    isFavorite = !isFavorite
-                    scope.launch {
-                        event.setFavorite(isFavorite)
-                    }
-                },
-            painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-            contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
-        )
-    }
-}
-
-// ----------------------------
-
-@Composable
-private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
-    val eventDate = event.getFormattedSimpleDate()
-
-    Box(
-        modifier = modifier
-    ) {
-        Column {
-
-            // Location and date
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .offset(y = (-5).dp),
+                contentAlignment = Alignment.TopEnd
             ) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 15.dp, end = 15.dp)
+                        .size(width = 115.dp, height = 26.dp)
+                        .background(backgroundColor)
+                        .padding(end = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(textId),
+                        style = TextStyle(
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontSize = 16.sp
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modifier = Modifier) {
+        Column(
+            modifier = modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            event.community?.let {
+                Image(
+                    modifier = Modifier
+                        .width(65.dp)
+                        .padding(start = 10.dp, top = 10.dp)
+                        .border(1.dp, Color.White),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(event.getCommunityImage() as DrawableResource),
+                    contentDescription = event.community!!
+                )
+            }
+            event.country?.let {
+                Image(
+                    modifier = Modifier
+                        .width(65.dp)
+                        .padding(start = 10.dp, bottom = 10.dp)
+                        .border(1.dp, Color.White),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(event.getCountryImage() as DrawableResource),
+                    contentDescription = event.community!!
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun EventOverlayFavorite(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+        var isFavorite by remember { mutableStateOf(event.favorite) }
+        val scope = rememberCoroutineScope()
+
+        Box(modifier = modifier
+            .fillMaxSize()
+            .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
+            Image(
+                modifier = Modifier
+                    .width(45.dp)
+                    .clickable {
+                        scope.launch {
+                            isFavorite = !isFavorite
+                            event.setFavorite(isFavorite)
+                            if (starredSelected) { // Refresh the list
+                                viewModel.filterFavoriteEvents()
+                            }
+                        }
+                    },
+                painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
+                contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
+            )
+        }
+    }
+
+    // ----------------------------
+
+    @Composable
+    private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
+        val eventDate = event.getFormattedSimpleDate()
+
+        Box(
+            modifier = modifier
+        ) {
+            Column {
+
+                // Location and date
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = event.location.uppercase(),
+                        style = TextStyle(
+                            color = extendedLight.quinary.color,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontSize = 28.sp
+                        )
+                    )
+                    Text(
+                        text = eventDate,
+                        modifier = Modifier.padding(end = 2.dp),
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 34.sp
+                        )
+                    )
+                }
+
+                // Country if present
                 Text(
-                    text = event.location.uppercase(),
+                    text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
                     style = TextStyle(
                         color = extendedLight.quinary.color,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 28.sp
-                    )
+                        fontSize = 14.sp
+                    ),
+                    modifier = Modifier
+                        .offset(y = (-8).dp)
+                        .padding(start = 2.dp)
                 )
-                Text(
-                    text = eventDate,
-                    modifier = Modifier.padding(end = 2.dp),
-                    style = TextStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 34.sp
-                    )
-                )
+
             }
-
-            // Country if present
-            Text(
-                text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
-                style = TextStyle(
-                    color = extendedLight.quinary.color,
-                    fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                    fontSize = 14.sp
-                ),
-                modifier = Modifier
-                    .offset(y = (-8).dp)
-                    .padding(start = 2.dp)
-            )
-
         }
     }
+
 }
