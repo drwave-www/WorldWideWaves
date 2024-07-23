@@ -1,3 +1,5 @@
+package com.worldwidewaves.shared.events
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,8 +19,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.worldwidewaves.shared.events
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

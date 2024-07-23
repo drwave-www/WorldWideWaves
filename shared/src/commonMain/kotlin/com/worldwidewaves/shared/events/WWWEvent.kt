@@ -1,3 +1,5 @@
+package com.worldwidewaves.shared.events
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,9 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.getImage
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -40,16 +40,6 @@ data class WWWEvent(
     val speed: Int,
     var favorite: Boolean = false
 )
-
-suspend fun WWWEvent.initFavoriteStatus() {
-    this.favorite = WWWPlatform.favoriteEventsStore.isFavorite(eventId = this.id)
-}
-
-suspend fun WWWEvent.setFavorite(favorite: Boolean): WWWEvent {
-    this.favorite = favorite
-    WWWPlatform.favoriteEventsStore.setFavoriteStatus(this.id, favorite)
-    return this
-}
 
 // ---------------------------
 
@@ -73,9 +63,12 @@ fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", i
 
 fun WWWEvent.getFormattedSimpleDate(): String {
     return try {
-        val instant = Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
+        val instant =
+            Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
         val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-        "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+        "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${
+            dateTime.monthNumber.toString().padStart(2, '0')
+        }"
     } catch (e: Exception) {
         "00/00"
     }

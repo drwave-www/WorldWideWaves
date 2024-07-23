@@ -23,18 +23,8 @@ package com.worldwidewaves.shared
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 
 // ----------------------------
@@ -42,12 +32,12 @@ import okio.Path.Companion.toPath
 private lateinit var dataStore: DataStore<Preferences>
 private val lock = SynchronizedObject()
 
-fun createDataStore(): DataStore<Preferences> = synchronized(lock) {
+fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {
     if (::dataStore.isInitialized) {
         dataStore
     } else {
         PreferenceDataStoreFactory
-            .createWithPath(produceFile = { keyValueStorePath().toPath() })
+            .createWithPath(produceFile = { producePath().toPath() })
             .also { createdDataStore -> dataStore = createdDataStore }
     }
 }
@@ -55,32 +45,3 @@ fun createDataStore(): DataStore<Preferences> = synchronized(lock) {
 expect fun keyValueStorePath(): String
 
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
-
-// ----------------------------
-
-class FavoriteEventsStore(
-    private val dataStore: DataStore<Preferences>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) {
-    private fun favoriteKey(eventId: String): Preferences.Key<Boolean> = booleanPreferencesKey("favorite_$eventId")
-
-    suspend fun setFavoriteStatus(eventId: String, isFavorite: Boolean) = withContext(dispatcher) {
-        val key = favoriteKey(eventId)
-        dataStore.edit { preferences ->
-            preferences[key] = isFavorite
-        }
-    }
-
-    suspend fun isFavorite(eventId: String): Boolean = withContext(dispatcher) {
-        val key = favoriteKey(eventId)
-        dataStore.data
-            .catch {
-                // TODO log the error
-                emit(emptyPreferences())
-            }
-            .map { preferences ->
-            preferences[key] ?: false
-        }.firstOrNull()
-            ?: false
-    }
-}

@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared
 
-import android.content.Context
-
 /*
  * Copyright 2024 DrWave
  *
@@ -22,6 +20,7 @@ import android.content.Context
  * limitations under the License.
  */
 
+import android.content.Context
 
 actual fun keyValueStorePath(): String {
     return (getPlatform().getContext() as Context)

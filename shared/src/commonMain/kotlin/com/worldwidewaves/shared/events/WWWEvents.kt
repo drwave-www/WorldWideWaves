@@ -1,3 +1,5 @@
+package com.worldwidewaves.shared.events
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,21 +19,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.generated.resources.Res.readBytes
+import com.worldwidewaves.shared.InitFavoriteEvent
+import com.worldwidewaves.shared.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import kotlinx.coroutines.*
 
-class WWWEvents {
+class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
@@ -46,19 +48,17 @@ class WWWEvents {
 
     // ---------------------------
 
-    private var loadJob : Job? = null
+    private var loadJob: Job? = null
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
-
-    fun getLoadingJob(): Job? = loadJob
 
     @OptIn(ExperimentalResourceApi::class)
     fun loadEvents(): WWWEvents {
         if (loadJob == null)
             loadJob = CoroutineScope(Dispatchers.IO).launch {
-                val eventsConf = readBytes("files/events.json").decodeToString()
+                val eventsConf = Res.readBytes("files/events.json").decodeToString()
                 val loadedEvents = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsConf)
                 loadedEvents.forEach { // Read favorite status from DataStore
-                    it.initFavoriteStatus()
+                    initFavoriteEvent.call(it)
                 }
                 _eventsFlow.value = loadedEvents
             }
@@ -74,6 +74,10 @@ class WWWEvents {
 
     fun getEventById(id: String): WWWEvent? {
         return eventsFlow.value.find { it.id == id }
+    }
+
+    fun invokeWhenLoaded(function: () -> Job) {
+        this.loadJob?.invokeOnCompletion { function() }
     }
 
 }

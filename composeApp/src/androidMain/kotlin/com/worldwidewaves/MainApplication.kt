@@ -1,3 +1,5 @@
+package com.worldwidewaves
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,11 +19,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves
 
 import android.app.Application
 import androidx.work.Configuration
+import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.di.sharedModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.GlobalContext as koin
 
 class MainApplication : Application(), Configuration.Provider {
 
@@ -33,7 +40,14 @@ class MainApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
 
-        // Initialize the WWW Compose platform
-        AndroidPlatform.initialize(this)
+        koin.startKoin {
+            androidContext(this@MainApplication)
+            androidLogger()
+            modules(sharedModule() + androidModule)
+        }
+
+        // Initialize the WWW platform
+        val platform = koin.get().get<WWWPlatform>() as AndroidPlatform
+        platform.initialize(this)
     }
 }

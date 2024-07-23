@@ -1,3 +1,5 @@
+package com.worldwidewaves.shared
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,11 +19,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.shared
 
 import android.content.Context
 import android.os.Build
-import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -39,25 +39,26 @@ import java.lang.ref.WeakReference
 object AndroidPlatform : WWWPlatform {
     private var _contextRef: WeakReference<Context>? = null
 
-    private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
+    // private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
 
     private val context: Context
-        get() = _contextRef?.get() ?: throw UninitializedPropertyAccessException("AndroidPlatform must be initialized with a context before use.")
+        get() = _contextRef?.get() ?: throw UninitializedPropertyAccessException("com.worldwidewaves.shared.AndroidPlatform must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
 
     override fun getContext(): Any = context
 
-    fun initialize(context: Context) {
+    fun initialize(context: Context): AndroidPlatform {
         if (_contextRef == null) {
             _contextRef = WeakReference(context.applicationContext)
         } else {
-            throw IllegalStateException("AndroidPlatform can only be initialized once.")
+            throw IllegalStateException("com.worldwidewaves.shared.AndroidPlatform can only be initialized once.")
         }
+        return this
     }
 
-    fun getEvents() : WWWEvents = events.value
+    // fun getEvents() : WWWEvents = events.value
 }
 
 // --- Platform-specific API ---

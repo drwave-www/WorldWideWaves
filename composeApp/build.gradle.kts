@@ -29,6 +29,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
+            implementation(libs.koin.core)
         }
     }
 }
@@ -73,6 +74,7 @@ android {
     }
     dependencies {
         debugImplementation(compose.uiTooling)
+        implementation(libs.koin.android)
     }
 }
 

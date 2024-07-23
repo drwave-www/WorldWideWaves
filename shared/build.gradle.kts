@@ -42,10 +42,12 @@ kotlin {
             implementation(libs.androidx.annotation)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
+            implementation(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
         }
     }
 }
@@ -62,6 +64,9 @@ android {
     }
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
+    }
+    dependencies {
+        implementation(libs.koin.android)
     }
 }
 

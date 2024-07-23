@@ -1,3 +1,5 @@
+package com.worldwidewaves.shared
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,20 +19,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.shared
 
 interface WWWPlatform {
     val name: String
 
     fun getContext(): Any
 
-    // ---------------------------
-
-    companion object {
-        val favoriteEventsStore: FavoriteEventsStore by lazy {
-            FavoriteEventsStore(createDataStore())
-        }
-    }
 }
 
 expect fun getPlatform(): WWWPlatform

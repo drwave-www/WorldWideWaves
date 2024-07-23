@@ -1,3 +1,5 @@
+package com.worldwidewaves.compose
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,11 +19,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.compose
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.shared.SetEventFavorite
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getCommunityImage
 import com.worldwidewaves.shared.events.getCountryImage
@@ -72,7 +73,6 @@ import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.events.isSoon
-import com.worldwidewaves.shared.events.setFavorite
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
@@ -88,14 +88,17 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
 class EventsActivity : AppCompatActivity() {
 
-    private val viewModel: EventsViewModel by viewModels<EventsViewModel>()
+    private val viewModel: EventsViewModel by inject()
     private var starredSelected = false
+
+    private val setEventFavorite: SetEventFavorite by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -349,7 +352,7 @@ class EventsActivity : AppCompatActivity() {
                     .clickable {
                         scope.launch {
                             isFavorite = !isFavorite
-                            event.setFavorite(isFavorite)
+                            setEventFavorite.call(event, isFavorite)
                             if (starredSelected) { // Refresh the list
                                 viewModel.filterFavoriteEvents()
                             }

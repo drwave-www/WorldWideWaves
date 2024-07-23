@@ -1,3 +1,5 @@
+package com.worldwidewaves.compose
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,18 +19,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.compose
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class EventsViewModel : ViewModel() {
+class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private var originalEvents : List<WWWEvent> = emptyList()
 
@@ -46,7 +47,7 @@ class EventsViewModel : ViewModel() {
 
     private fun loadEvents() {
         viewModelScope.launch {
-            AndroidPlatform.getEvents().eventsFlow.collect { eventsList ->
+            wwwEvents.eventsFlow.collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList
                 _hasFavorites.value = eventsList.any { it.favorite }

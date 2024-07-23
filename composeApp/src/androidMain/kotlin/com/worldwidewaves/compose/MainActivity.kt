@@ -1,3 +1,5 @@
+package com.worldwidewaves.compose
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,7 +19,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.compose
 
 import android.content.Intent
 import android.os.Bundle
@@ -39,16 +40,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.worldwidewaves.shared.AndroidPlatform
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.*
 import com.worldwidewaves.ui.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class MainActivity : AppCompatActivity() {
+
+    private val events: WWWEvents by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,18 +65,12 @@ class MainActivity : AppCompatActivity() {
 
         // Load main activity
         val intent = Intent(this, EventsActivity::class.java)
-        val events = AndroidPlatform.getEvents()
-        events.getLoadingJob()?.invokeOnCompletion {
+        events.invokeWhenLoaded {
             lifecycleScope.launch {
                 delay(2000)
                 startActivity(intent)
             }
         }
-
-//        lifecycleScope.launch {
-//            //delay(2000)
-//            startActivity(intent)
-//        }
     }
 
     // ---------------------------
