@@ -1,10 +1,9 @@
 
 Waves screen :
 - select good images for flags, same ratio
-- IDEAL: load images of events from assets
-- favorites mechanisms
 - check fonts
 - tab bar
+- change favorites icon
 
 Common:
 - Implement events geolimits + speed, to calculate endTime
@@ -17,7 +16,7 @@ Scripts:
     - geolimits
 
 Tests:
-- introduce tests
+- code coverage of current devs
 
 Debug:
 - Implement a way to simulate events & geolocation
