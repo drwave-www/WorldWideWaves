@@ -33,16 +33,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.generated.resources.*
 import com.worldwidewaves.ui.AppTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.util.Timer
-import kotlin.concurrent.timerTask
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class MainActivity : AppCompatActivity() {
@@ -52,39 +55,54 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    Box {
-                        Image(
-                            painter = painterResource(ShRes.drawable.background),
-                            contentDescription = stringResource(ShRes.string.background_description),
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.CenterStart)
-                                .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
-                        )
-                        Image(
-                            painter = painterResource(ShRes.drawable.www_logo_transparent),
-                            contentDescription = stringResource(ShRes.string.logo_description),
-                            modifier = Modifier
-                                .width(200.dp)
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 10.dp)
-                        )
-                    }
-                }
+                SplashScreen()
             }
         }
 
-        val activity = this
-        Timer().schedule(timerTask {
-            val intent = Intent(activity, EventsActivity::class.java)
-            startActivity(intent)
-        }, 2000)
+        // Load main activity
+        val intent = Intent(this, EventsActivity::class.java)
+        val events = AndroidPlatform.getEvents()
+        events.getLoadingJob()?.invokeOnCompletion {
+            lifecycleScope.launch {
+                delay(2000)
+                startActivity(intent)
+            }
+        }
 
+//        lifecycleScope.launch {
+//            //delay(2000)
+//            startActivity(intent)
+//        }
+    }
+
+    // ---------------------------
+
+    @Composable
+    private fun SplashScreen() {
+        Surface(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            Box {
+                Image(
+                    painter = painterResource(ShRes.drawable.background),
+                    contentDescription = stringResource(ShRes.string.background_description),
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart)
+                        .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
+                )
+                Image(
+                    painter = painterResource(ShRes.drawable.www_logo_transparent),
+                    contentDescription = stringResource(ShRes.string.logo_description),
+                    modifier = Modifier
+                        .width(200.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 10.dp)
+                )
+            }
+        }
     }
 }

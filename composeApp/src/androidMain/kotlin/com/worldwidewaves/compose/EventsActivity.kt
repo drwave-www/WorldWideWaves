@@ -152,18 +152,18 @@ class EventsActivity : AppCompatActivity() {
                         .clip(RoundedCornerShape(25.dp))
                         .height(50.dp)
                         .fillMaxWidth(.5f)
-                        .background(allColor.color),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_all),
-                        modifier = Modifier.clickable {
+                        .background(allColor.color)
+                        .clickable {
                             if (starredSelected) {
                                 starredSelected = false
                                 viewModel.filterAllEvents()
                             }
-                        }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
+                        text = stringResource(ShRes.string.events_select_all)
                     )
                 }
                 Box(
@@ -171,18 +171,18 @@ class EventsActivity : AppCompatActivity() {
                         .clip(RoundedCornerShape(25.dp))
                         .height(50.dp)
                         .fillMaxWidth()
-                        .background(starredColor.color),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_starred),
-                        modifier = Modifier.clickable {
+                        .background(starredColor.color)
+                        .clickable {
                             if (!starredSelected) {
                                 starredSelected = true
                                 viewModel.filterFavoriteEvents()
                             }
-                        }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
+                        text = stringResource(ShRes.string.events_select_starred)
                     )
                 }
             }

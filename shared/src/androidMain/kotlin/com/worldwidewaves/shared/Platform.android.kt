@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
 
 import android.content.Context
 import android.os.Build
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -38,6 +39,8 @@ import java.lang.ref.WeakReference
 object AndroidPlatform : WWWPlatform {
     private var _contextRef: WeakReference<Context>? = null
 
+    private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
+
     private val context: Context
         get() = _contextRef?.get() ?: throw UninitializedPropertyAccessException("AndroidPlatform must be initialized with a context before use.")
 
@@ -54,6 +57,7 @@ object AndroidPlatform : WWWPlatform {
         }
     }
 
+    fun getEvents() : WWWEvents = events.value
 }
 
 // --- Platform-specific API ---

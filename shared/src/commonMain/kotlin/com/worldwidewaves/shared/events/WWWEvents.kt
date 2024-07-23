@@ -19,7 +19,6 @@
  */
 package com.worldwidewaves.shared.events
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.generated.resources.Res.readBytes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,33 +29,39 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import kotlinx.coroutines.*
 
 class WWWEvents {
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
+    private var loadJob : Job? = null
 
     init {
-        CoroutineScope(Dispatchers.IO).launch {
-            loadEvents()
-        }
+        loadEvents()
     }
 
     fun resetEventsFlow() {
         _eventsFlow.value = emptyList()
     }
 
+    fun getLoadingJob(): Job? = loadJob
+
     @OptIn(ExperimentalResourceApi::class)
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    suspend fun loadEvents() {
-        val eventsConf = readBytes("files/events.json").decodeToString()
-        val loadedEvents = Json {
-            ignoreUnknownKeys = true
-        }.decodeFromString<List<WWWEvent>>(eventsConf)
-        loadedEvents.forEach { // Read favorite status from DataStore
-            it.initFavoriteStatus()
-        }
-        _eventsFlow.value = loadedEvents
+    fun loadEvents(): WWWEvents {
+        if (loadJob == null)
+            loadJob = CoroutineScope(Dispatchers.IO).launch {
+                val eventsConf = readBytes("files/events.json").decodeToString()
+                val loadedEvents = Json {
+                    ignoreUnknownKeys = true
+                }.decodeFromString<List<WWWEvent>>(eventsConf)
+                loadedEvents.forEach { // Read favorite status from DataStore
+                    it.initFavoriteStatus()
+                }
+                _eventsFlow.value = loadedEvents
+            }
+
+        return this
     }
 
     // ---------------------------

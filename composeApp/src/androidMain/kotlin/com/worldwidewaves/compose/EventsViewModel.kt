@@ -21,8 +21,8 @@ package com.worldwidewaves.compose
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,15 +42,19 @@ class EventsViewModel : ViewModel() {
         loadEvents()
     }
 
+    // ---------------------------
+
     private fun loadEvents() {
         viewModelScope.launch {
-            WWWEvents().eventsFlow.collect { eventsList ->
+            AndroidPlatform.getEvents().eventsFlow.collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList
                 _hasFavorites.value = eventsList.any { it.favorite }
             }
         }
     }
+
+    // ---------------------------
 
     fun filterFavoriteEvents() {
         _events.value = originalEvents.filter { it.favorite }
