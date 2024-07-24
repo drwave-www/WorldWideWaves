@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.activities
 
 /*
  * Copyright 2024 DrWave
@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.*
-import com.worldwidewaves.ui.AppTheme
+import com.worldwidewaves.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -50,7 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-class MainActivity : AppCompatActivity() {
+class SplashActivity : AppCompatActivity() {
 
     private val events: WWWEvents by inject()
 
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Load main activity
-        val intent = Intent(this, EventsActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         val startTime = System.currentTimeMillis()
         events.invokeWhenLoaded {
             lifecycleScope.launch { // Delay min 1500ms

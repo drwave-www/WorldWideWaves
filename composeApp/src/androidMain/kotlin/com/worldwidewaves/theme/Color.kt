@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.ui
+package com.worldwidewaves.theme
 
 import androidx.compose.ui.graphics.Color
 

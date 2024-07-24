@@ -20,9 +20,6 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.activities.TabScreen
 import com.worldwidewaves.shared.SetEventFavorite
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getCommunityImage
@@ -82,45 +80,38 @@ import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.ui.AppTheme
-import com.worldwidewaves.ui.extendedLight
+import com.worldwidewaves.theme.extendedLight
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
-class EventsActivity : AppCompatActivity() {
+class EventsScreen(
+    private val viewModel: EventsViewModel,
+    private val setEventFavorite: SetEventFavorite
+) : TabScreen {
 
-    private val viewModel: EventsViewModel by inject()
     private var starredSelected = false
-
-    private val setEventFavorite: SetEventFavorite by inject()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            AppTheme {
-                EventsScreen(viewModel)
-            }
-        }
-    }
+    private var firstLaunch = true;
 
     // ----------------------------
 
     @Composable
-    private fun EventsScreen(viewModel: EventsViewModel) {
+    override fun Screen(modifier: Modifier) {
         val events by viewModel.events.collectAsState()
         val hasFavorites by viewModel.hasFavorites.collectAsState()
-        starredSelected = hasFavorites
+
+        if (firstLaunch) {
+            firstLaunch = false
+            starredSelected = hasFavorites
+        }
 
         viewModel.filterEvents(starredSelected)
 
-        Surface {
+        Surface(modifier = modifier) {
             Box(
                 modifier = Modifier
                     .padding(start = 20.dp, end = 20.dp, top = 20.dp)
@@ -130,7 +121,6 @@ class EventsActivity : AppCompatActivity() {
                     FavoritesSelector(viewModel)
                     Spacer(modifier = Modifier.size(20.dp))
                     Events(viewModel, events, modifier = Modifier.weight(1f))
-                    TabBar(selectedTab = Tab.Events)
                 }
             }
         }

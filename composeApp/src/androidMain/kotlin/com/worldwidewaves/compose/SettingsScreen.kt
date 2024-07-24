@@ -20,30 +20,18 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
-import android.os.Bundle
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.worldwidewaves.ui.AppTheme
+import com.worldwidewaves.activities.TabScreen
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsScreen : TabScreen {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    Column(modifier = Modifier.fillMaxHeight()) {
-                        Box(modifier = Modifier.weight(1f))
-                        TabBar(selectedTab = Tab.Settings)
-                    }
-                }
-            }
+    @Composable
+    override fun Screen(modifier: Modifier) {
+        Surface(modifier = modifier) {
+            Text("Settings Screen")
         }
     }
 
