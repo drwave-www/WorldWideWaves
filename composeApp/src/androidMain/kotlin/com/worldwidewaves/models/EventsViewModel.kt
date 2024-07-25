@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.models
 
 /*
  * Copyright 2024 DrWave

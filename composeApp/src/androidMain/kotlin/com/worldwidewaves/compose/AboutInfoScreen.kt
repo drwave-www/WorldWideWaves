@@ -26,14 +26,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.activities.TabScreen
 
-class FaqScreen : TabScreen {
+class AboutInfoScreen : TabScreen {
 
-    override fun getName(): String = "FAQ"
+    override fun getName(): String = "Infos"
 
     @Composable
     override fun Screen(modifier: Modifier) {
         Surface(modifier = modifier) {
-            Text("FAQ Screen")
+            Text("Infos Screen")
         }
     }
 

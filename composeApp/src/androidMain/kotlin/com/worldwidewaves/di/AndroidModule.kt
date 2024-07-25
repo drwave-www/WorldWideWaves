@@ -2,9 +2,9 @@ package com.worldwidewaves.di
 
 import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsScreen
-import com.worldwidewaves.compose.EventsViewModel
-import com.worldwidewaves.compose.FaqScreen
-import com.worldwidewaves.compose.InfoScreen
+import com.worldwidewaves.models.EventsViewModel
+import com.worldwidewaves.compose.AboutFaqScreen
+import com.worldwidewaves.compose.AboutInfoScreen
 import com.worldwidewaves.compose.SettingsScreen
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -35,6 +35,6 @@ val androidModule = module {
 
     single { SettingsScreen() }
     single { AboutScreen(get(), get()) }
-    single { InfoScreen() }
-    single { FaqScreen() }
+    single { AboutInfoScreen() }
+    single { AboutFaqScreen() }
 }

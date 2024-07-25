@@ -44,11 +44,11 @@ private val tabInfo = listOf(
     "Infos", "FAQ"
 )
 
-class AboutScreen(infoScreen: InfoScreen, faqScreen: FaqScreen) : TabScreen {
+class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
 
     private val tabManager = TabManager(listOf(
-        infoScreen,
-        faqScreen
+        aboutInfoScreen,
+        aboutFaqScreen
     )) { isSelected, tabIndex, _, onClick ->
         TabBarItem(isSelected, tabIndex, onClick)
     }
