@@ -28,6 +28,8 @@ import com.worldwidewaves.activities.TabScreen
 
 class SettingsScreen : TabScreen {
 
+    override fun getName(): String = "Settings"
+
     @Composable
     override fun Screen(modifier: Modifier) {
         Surface(modifier = modifier) {

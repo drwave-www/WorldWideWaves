@@ -1,6 +1,6 @@
 package com.worldwidewaves.di
 
-import com.worldwidewaves.compose.AboutScreen
+import com.worldwidewaves.compose.InfoScreen
 import com.worldwidewaves.compose.EventsScreen
 import com.worldwidewaves.compose.EventsViewModel
 import com.worldwidewaves.compose.SettingsScreen
@@ -32,5 +32,5 @@ val androidModule = module {
     viewModel { EventsViewModel(wwwEvents = get()) }
 
     single { SettingsScreen() }
-    single { AboutScreen() }
+    single { InfoScreen() }
 }

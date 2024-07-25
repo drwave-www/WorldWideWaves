@@ -95,7 +95,9 @@ class EventsScreen(
 ) : TabScreen {
 
     private var starredSelected = false
-    private var firstLaunch = true;
+    private var firstLaunch = true
+
+    override fun getName(): String = "Events"
 
     // ----------------------------
 
