@@ -1,13 +1,4 @@
-package com.worldwidewaves.di
-
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsScreen
-import com.worldwidewaves.compose.EventsViewModel
-import com.worldwidewaves.compose.FaqScreen
-import com.worldwidewaves.compose.InfoScreen
-import com.worldwidewaves.compose.SettingsScreen
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.dsl.module
+package com.worldwidewaves.compose
 
 /*
  * Copyright 2024 DrWave
@@ -15,7 +6,7 @@ import org.koin.dsl.module
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
  * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
  * community, and shared human experience by leveraging real-time coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +20,21 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val androidModule = module {
-    single { EventsScreen(viewModel = get(), setEventFavorite = get()) }
-    viewModel { EventsViewModel(wwwEvents = get()) }
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.worldwidewaves.activities.TabScreen
 
-    single { SettingsScreen() }
-    single { AboutScreen(get(), get()) }
-    single { InfoScreen() }
-    single { FaqScreen() }
+class FaqScreen : TabScreen {
+
+    override fun getName(): String = "FAQ"
+
+    @Composable
+    override fun Screen(modifier: Modifier) {
+        Surface(modifier = modifier) {
+            Text("FAQ Screen")
+        }
+    }
+
 }

@@ -22,6 +22,7 @@ package com.worldwidewaves.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,8 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsScreen
-import com.worldwidewaves.compose.InfoScreen
 import com.worldwidewaves.compose.SettingsScreen
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
@@ -57,19 +58,19 @@ private val tabInfo = listOf(
 
 // ----------------------------
 
-class MainActivity : TabActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val eventsScreen: EventsScreen by inject()
-    private val infoScreen: InfoScreen by inject()
+    private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
 
-    override fun getTabScreens(): List<TabScreen> = listOf(
+    private val tabManager = TabManager(listOf(
         eventsScreen,
-        infoScreen,
+        aboutScreen,
         settingsScreen
-    )
-
-    override fun getDefaultSelectedTab(): Int = 0
+    )) { isSelected, tabIndex, contentDescription, onClick ->
+        TabBarItem(isSelected, tabIndex, contentDescription, onClick)
+    }
 
     // ----------------------------
 
@@ -81,7 +82,7 @@ class MainActivity : TabActivity() {
                 Surface(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 ) {
-                 TabView(selectedTab = 0)
+                    tabManager.TabView()
                 }
             }
         }
@@ -90,7 +91,7 @@ class MainActivity : TabActivity() {
     // ----------------------------
 
     @Composable
-     override fun TabBarItem(
+    private fun TabBarItem(
         isSelected: Boolean,
         tabIndex: Int,
         contentDescription: String?,

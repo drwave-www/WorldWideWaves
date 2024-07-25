@@ -68,6 +68,7 @@ kotlinx-atomic = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.r
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 
 
 [plugins]

@@ -28,12 +28,12 @@ import com.worldwidewaves.activities.TabScreen
 
 class InfoScreen : TabScreen {
 
-    override fun getName(): String = "Info"
+    override fun getName(): String = "Infos"
 
     @Composable
     override fun Screen(modifier: Modifier) {
         Surface(modifier = modifier) {
-            Text("About Screen")
+            Text("Infos Screen")
         }
     }
 
