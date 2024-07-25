@@ -25,8 +25,6 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -68,8 +66,8 @@ class MainActivity : AppCompatActivity() {
         eventsScreen,
         aboutScreen,
         settingsScreen
-    )) { isSelected, tabIndex, contentDescription, onClick ->
-        TabBarItem(isSelected, tabIndex, contentDescription, onClick)
+    )) { isSelected, tabIndex, contentDescription ->
+        TabBarItem(isSelected, tabIndex, contentDescription)
     }
 
     // ----------------------------
@@ -94,20 +92,14 @@ class MainActivity : AppCompatActivity() {
     private fun TabBarItem(
         isSelected: Boolean,
         tabIndex: Int,
-        contentDescription: String?,
-        onClick: () -> Unit
+        contentDescription: String?
     ) {
-        Box(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-        ) {
-            Image(
-                painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
-                contentDescription = contentDescription,
-                modifier = Modifier.height(45.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
+        Image(
+            painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
+            contentDescription = contentDescription,
+            modifier = Modifier.height(45.dp),
+            contentScale = ContentScale.Fit
+        )
     }
 }
 

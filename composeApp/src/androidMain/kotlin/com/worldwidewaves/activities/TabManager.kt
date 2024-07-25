@@ -20,7 +20,9 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -51,8 +53,7 @@ class TabManager(
     val tabBarItem: @Composable (
         isSelected: Boolean,
         tabIndex: Int,
-        contentDescription: String?,
-        onClick: () -> Unit
+        contentDescription: String?
     ) -> Unit
 ) {
 
@@ -76,12 +77,14 @@ class TabManager(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 screens.forEachIndexed { index, tab ->
-                    tabBarItem(
-                        currentTab == index,
-                         index,
-                         tab.getName()
-                    ) {
+                    Box(modifier = Modifier.clickable(onClick = {
                         currentTab = index
+                    })) {
+                        tabBarItem(
+                            currentTab == index,
+                             index,
+                             tab.getName()
+                        )
                     }
                 }
             }

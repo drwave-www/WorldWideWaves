@@ -20,7 +20,6 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,8 +48,8 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     private val tabManager = TabManager(listOf(
         aboutInfoScreen,
         aboutFaqScreen
-    )) { isSelected, tabIndex, _, onClick ->
-        TabBarItem(isSelected, tabIndex, onClick)
+    )) { isSelected, tabIndex, _ ->
+        TabBarItem(isSelected, tabIndex)
     }
 
     // ----------------------------
@@ -71,12 +70,10 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     @Composable
     private fun TabBarItem(
         isSelected: Boolean,
-        tabIndex: Int,
-        onClick: () -> Unit
+        tabIndex: Int
     ) {
         Box(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .height(60.dp)
                 .width(150.dp),
             contentAlignment = Alignment.Center
