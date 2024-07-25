@@ -1,12 +1,15 @@
 
-Waves screen :
-- tab bar : check loading effect...
+Next:
+- terminate infoScreen
+- use typography
+- compile tests
 
+Waves screen :
 - select good images for flags, same ratio
-- check fonts
 - change favorites icon
 
 Common:
+- replace all static sizes by configurables ones
 - Build failure on Github Actions
 - Implement events geolimits + speed, to calculate endTime
 - Implement isDone, isSoon, isRunning

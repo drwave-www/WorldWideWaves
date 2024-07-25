@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -81,6 +82,7 @@ import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extendedLight
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -161,7 +163,8 @@ class EventsScreen(
                 ) {
                     Text(
                         color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_all)
+                        text = stringResource(ShRes.string.events_select_all),
+                        fontFamily = displayFontFamily
                     )
                 }
                 Box(
@@ -180,7 +183,8 @@ class EventsScreen(
                 ) {
                     Text(
                         color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_starred)
+                        text = stringResource(ShRes.string.events_select_starred),
+                        fontFamily = displayFontFamily
                     )
                 }
             }
@@ -191,7 +195,10 @@ class EventsScreen(
 
     @Composable
     fun Events(viewModel: EventsViewModel, events: List<WWWEvent>, modifier: Modifier = Modifier) {
+        val state = rememberLazyListState()
+
         LazyColumn(
+            state = state,
             modifier = modifier
         ) {
             if (events.isNotEmpty()) {
@@ -204,6 +211,7 @@ class EventsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         text = "No events found",
+                        fontFamily = displayFontFamily,
                         style = TextStyle(
                             color = extendedLight.quinary.color,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,

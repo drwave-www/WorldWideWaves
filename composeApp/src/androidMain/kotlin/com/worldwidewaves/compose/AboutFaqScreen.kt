@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.theme.displayFontFamily
 
 class AboutFaqScreen : TabScreen {
 
@@ -33,7 +34,7 @@ class AboutFaqScreen : TabScreen {
     @Composable
     override fun Screen(modifier: Modifier) {
         Surface(modifier = modifier) {
-            Text("FAQ Screen")
+            Text("FAQ Screen", fontFamily = displayFontFamily)
         }
     }
 

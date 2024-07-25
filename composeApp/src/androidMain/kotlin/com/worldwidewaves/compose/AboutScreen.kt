@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.TabManager
 import com.worldwidewaves.activities.TabScreen
 
@@ -90,7 +91,9 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
             Text(
                 text = tabInfo[tabIndex].uppercase(),
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
+                fontSize = 20.sp
             )
         }
     }

@@ -1,11 +1,11 @@
 package com.worldwidewaves.di
 
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsScreen
-import com.worldwidewaves.models.EventsViewModel
 import com.worldwidewaves.compose.AboutFaqScreen
 import com.worldwidewaves.compose.AboutInfoScreen
+import com.worldwidewaves.compose.AboutScreen
+import com.worldwidewaves.compose.EventsScreen
 import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.models.EventsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
