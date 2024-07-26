@@ -1,6 +1,5 @@
 
 Next:
-- change application icon
 - change favorites icon
 - use typography
 - Build failure on Github Actions
@@ -16,6 +15,7 @@ Waves screen :
 Common:
 - Implement events geolimits + speed, to calculate endTime
 - Implement isDone, isSoon, isRunning
+- convert images to SVG, or generate declinations
 
 Scripts:
 - Script for events resources
