@@ -62,7 +62,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
  * limitations under the License.
  */
 
-abstract class EventBackAbstractActivity : MainActivity() {
+abstract class AbstractEventBackActivity : MainActivity() {
 
     private val wwwEvents: WWWEvents by inject()
     private val setEventFavorite: SetEventFavorite by inject()

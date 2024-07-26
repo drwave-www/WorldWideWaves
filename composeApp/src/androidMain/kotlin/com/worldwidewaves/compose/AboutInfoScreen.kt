@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.generated.resources.drwave
 import com.worldwidewaves.shared.generated.resources.drwave_instagram
 import com.worldwidewaves.shared.generated.resources.drwave_instagram_url

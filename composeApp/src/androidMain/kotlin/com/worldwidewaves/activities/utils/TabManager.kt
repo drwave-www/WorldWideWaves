@@ -1,4 +1,4 @@
-package com.worldwidewaves.activities
+package com.worldwidewaves.activities.utils
 
 /*
  * Copyright 2024 DrWave

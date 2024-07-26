@@ -65,7 +65,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.EventActivity
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.models.EventsViewModel
 import com.worldwidewaves.shared.SetEventFavorite
 import com.worldwidewaves.shared.events.WWWEvent

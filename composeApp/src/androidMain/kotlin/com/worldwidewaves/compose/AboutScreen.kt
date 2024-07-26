@@ -46,8 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.activities.TabManager
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.activities.utils.TabManager
+import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.logo_description
