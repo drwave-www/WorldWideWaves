@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,34 +97,30 @@ abstract class EventBackAbstractActivity : MainActivity() {
 
     @Composable
     private fun BackwardScreen(event: WWWEvent?) {
-        var localEvent by remember { mutableStateOf(event) }
-        val currentEvent by rememberUpdatedState(event)
-        var isFavorite by remember { mutableStateOf(false) }
+        var isFavorite by remember { mutableStateOf(event?.favorite ?: false) }
         val scope = rememberCoroutineScope()
 
-        LaunchedEffect(currentEvent) {
-            localEvent = currentEvent
+        LaunchedEffect(event) {
+            isFavorite = event?.favorite ?: false
         }
 
-        if (localEvent != null) {
-            LaunchedEffect(localEvent!!.favorite) {
-                isFavorite = localEvent!!.favorite
+        if (event != null) {
+            LaunchedEffect(event.favorite) {
+                isFavorite = event.favorite
             }
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (parentActivityIntent != null) {
-                        Text(
-                            modifier = Modifier.clickable(onClick = { finish() }),
-                            text = "< "+ stringResource(ShRes.string.back),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = 16.sp,
-                        )
-                    }
+                    Text(
+                        modifier = Modifier.clickable(onClick = { finish() }),
+                        text = "< "+ stringResource(ShRes.string.back),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontSize = 16.sp,
+                    )
                     Text(
                         modifier = Modifier.weight(1f),
-                        text = localEvent!!.location.uppercase(),
+                        text = event.location.uppercase(),
                         color = quinaryLight,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                         fontWeight = FontWeight.Bold,
@@ -138,14 +133,14 @@ abstract class EventBackAbstractActivity : MainActivity() {
                             .clickable {
                                 scope.launch {
                                     isFavorite = !isFavorite
-                                    setEventFavorite.call(localEvent!!, isFavorite)
+                                    setEventFavorite.call(event, isFavorite)
                                 }
                             },
                         painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
                         contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
                     )
                 }
-                Screen(modifier = Modifier, localEvent!!)
+                Screen(modifier = Modifier, event)
             }
         } else {
             Text(
