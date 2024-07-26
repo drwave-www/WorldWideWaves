@@ -1,12 +1,13 @@
 
 Next:
-- terminate infoScreen
 - use typography
 - compile tests
+- change favorites icon
+- change application icon
+- screen FAQ
 
 Waves screen :
 - select good images for flags, same ratio
-- change favorites icon
 
 Common:
 - replace all static sizes by configurables ones
