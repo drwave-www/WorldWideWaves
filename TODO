@@ -1,7 +1,8 @@
 
 Next:
+- refresh favorites list on change from EventActivity
 - use typography
-- Build failure on Github Actions
+- continue EventActivity
 - code coverage of current devs
 - replace all static sizes by configurables ones
 

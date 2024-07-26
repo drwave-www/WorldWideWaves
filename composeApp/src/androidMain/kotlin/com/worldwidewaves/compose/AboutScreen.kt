@@ -82,7 +82,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier) {
+        Surface(modifier = modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
             tabManager.TabView()
         }
     }

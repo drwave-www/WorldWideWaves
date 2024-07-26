@@ -74,9 +74,7 @@ class TabManager(
             // Display the selected tab screen
             Surface(modifier = Modifier.fillMaxSize().weight(1f)) {
                 Box(
-                    modifier = Modifier
-                        .padding(start = 20.dp, end = 20.dp, top = 20.dp)
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     if (originalScreen != null) {
                         originalScreen!!(Modifier)

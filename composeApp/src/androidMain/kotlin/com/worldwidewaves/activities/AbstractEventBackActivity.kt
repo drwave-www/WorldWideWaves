@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -110,7 +111,12 @@ abstract class AbstractEventBackActivity : MainActivity() {
             }
 
             Column(modifier = Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                // Back layer
+                Row(
+                    modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 15.dp, end = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         modifier = Modifier.clickable(onClick = { finish() }),
                         text = "< "+ stringResource(ShRes.string.back),
@@ -140,6 +146,8 @@ abstract class AbstractEventBackActivity : MainActivity() {
                         contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
                     )
                 }
+
+                // Content screen
                 Screen(modifier = Modifier, event)
             }
         } else {

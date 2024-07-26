@@ -148,7 +148,6 @@ class AboutFaqScreen : TabScreen {
         Box(modifier = modifier) {
             Column(
                 modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
                     .fillMaxSize()
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally

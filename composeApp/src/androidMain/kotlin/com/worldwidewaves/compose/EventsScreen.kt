@@ -119,7 +119,10 @@ class EventsScreen(
 
         viewModel.filterEvents(starredSelected)
 
-        Column(modifier = modifier.fillMaxHeight() ){
+        Column(modifier = modifier
+            .fillMaxHeight()
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+        ){
             FavoritesSelector(viewModel)
             Spacer(modifier = Modifier.size(20.dp))
             Events(viewModel, events, modifier = Modifier.weight(1f))
@@ -257,56 +260,6 @@ class EventsScreen(
     }
 
     @Composable
-    private fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
-        if (event.isDone()) {
-            Box(modifier = modifier, contentAlignment = Alignment.Center) {
-                Surface(
-                    color = Color.run { White.copy(alpha = 0.5f) },
-                    modifier = Modifier.fillMaxSize()
-                ) { }
-                Image(
-                    painter = painterResource(ShRes.drawable.event_done),
-                    contentDescription = stringResource(ShRes.string.event_done),
-                    modifier = Modifier.width(130.dp),
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
-        if (event.isSoon() || event.isRunning()) {
-            val backgroundColor =
-                if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-            val textId = if (event.isSoon()) ShRes.string.event_soon else ShRes.string.event_running
-
-            Box(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .offset(y = (-5).dp),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 15.dp, end = 15.dp)
-                        .size(width = 115.dp, height = 26.dp)
-                        .background(backgroundColor)
-                        .padding(end = 10.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(textId),
-                        style = TextStyle(
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = 16.sp
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
     private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modifier = Modifier) {
         Column(
             modifier = modifier.fillMaxHeight(),
@@ -373,9 +326,7 @@ class EventsScreen(
     private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
         val eventDate = event.getFormattedSimpleDate()
 
-        Box(
-            modifier = modifier
-        ) {
+        Box(modifier = modifier) {
             Column {
 
                 // Location and date
@@ -421,5 +372,58 @@ class EventsScreen(
             }
         }
     }
+}
 
+// ----------------------------
+
+@Composable
+fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
+    if (event.isSoon() || event.isRunning()) {
+        val backgroundColor =
+            if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
+        val textId = if (event.isSoon()) ShRes.string.event_soon else ShRes.string.event_running
+
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .offset(y = (-5).dp),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 15.dp, end = 15.dp)
+                    .size(width = 115.dp, height = 26.dp)
+                    .background(backgroundColor)
+                    .padding(end = 10.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(textId),
+                    style = TextStyle(
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontSize = 16.sp
+                    )
+                )
+            }
+        }
+    }
+}
+
+// ----------------------------
+
+@Composable
+fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
+    if (event.isDone()) {
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+            Surface(
+                color = Color.run { White.copy(alpha = 0.5f) },
+                modifier = Modifier.fillMaxSize()
+            ) { }
+            Image(
+                painter = painterResource(ShRes.drawable.event_done),
+                contentDescription = stringResource(ShRes.string.event_done),
+                modifier = Modifier.width(130.dp),
+            )
+        }
+    }
 }

@@ -67,7 +67,6 @@ class AboutInfoScreen : TabScreen {
         Box(modifier = modifier) {
             LazyColumn(state = state,
                 modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

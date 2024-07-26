@@ -20,18 +20,37 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import com.worldwidewaves.compose.EventOverlayDone
+import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.getLocationImage
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
-        Box(modifier = modifier) {
-            Text(text = event.location)
+        Column() {
+            Box(modifier = modifier) {
+                Image(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painterResource(event.getLocationImage() as DrawableResource),
+                    contentDescription = event.location
+                )
+                EventOverlaySoonOrRunning(event)
+                EventOverlayDone(event, modifier = Modifier.matchParentSize())
+            }
+            Text(text = "test")
         }
     }
 }
