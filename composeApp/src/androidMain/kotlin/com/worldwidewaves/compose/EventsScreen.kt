@@ -350,7 +350,7 @@ class EventsScreen(
             .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
             Image(
                 modifier = Modifier
-                    .width(45.dp)
+                    .size(48.dp)
                     .clickable {
                         scope.launch {
                             isFavorite = !isFavorite
