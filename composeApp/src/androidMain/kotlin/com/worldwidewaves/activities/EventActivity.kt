@@ -20,37 +20,18 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
-import android.os.Bundle
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
-import org.koin.android.ext.android.inject
 
-class EventActivity : BackAbstractActivity() {
-
-    private val wwwEvents: WWWEvents by inject()
-    private var event: WWWEvent? = null
-
-    // ----------------------------
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val eventId = intent.getStringExtra("id")
-        if (eventId != null)
-            event = wwwEvents.getEventById(eventId)
-    }
-
-    // ----------------------------
+class EventActivity : EventBackAbstractActivity() {
 
     @Composable
-    override fun Screen(modifier: Modifier) {
+    override fun Screen(modifier: Modifier, event: WWWEvent) {
         Box(modifier = modifier) {
-            Text(text = "Event")
+            Text(text = event.location)
         }
     }
 }

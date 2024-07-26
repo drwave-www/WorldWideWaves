@@ -2,6 +2,8 @@
     <string name="logo_description">logo</string>
     <string name="background_description">background</string>
 
+    <string name="back">Back</string>
+
     <string name="events_select_all">All</string>
     <string name="events_select_starred">Starred</string>
 

@@ -224,7 +224,7 @@ class EventsScreen(
 
         Column(modifier = modifier.clickable(onClick = {
             context.startActivity(Intent(context, EventActivity::class.java).apply {
-                putExtra("id", event.id)
+                putExtra("eventId", event.id)
             })
         })) {
             EventOverlay(viewModel, event)
