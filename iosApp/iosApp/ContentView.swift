@@ -21,7 +21,7 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    let events : Array<WWWEvent> = WWWEvents(eventsConf: "").events()
+    let events : Array<WWWEvent> = WWWEvents().events()
     
     var body: some View {
         List(events, id: \.self) { event in
