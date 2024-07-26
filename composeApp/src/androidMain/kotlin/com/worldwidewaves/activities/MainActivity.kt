@@ -56,13 +56,13 @@ private val tabInfo = listOf(
 
 // ----------------------------
 
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     private val eventsScreen: EventsScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
 
-    private val tabManager = TabManager(listOf(
+    protected val tabManager = TabManager(listOf(
         eventsScreen,
         aboutScreen,
         settingsScreen

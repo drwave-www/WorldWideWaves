@@ -21,6 +21,7 @@ package com.worldwidewaves.compose
  */
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -145,7 +146,7 @@ class AboutFaqScreen : TabScreen {
 
         var expandedFaqItem by remember { mutableStateOf(-1) }
 
-        Surface(modifier = modifier) {
+        Box(modifier = modifier) {
             Column(
                 modifier = Modifier
                     .padding(start = 20.dp, end = 20.dp)

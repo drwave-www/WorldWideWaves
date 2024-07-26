@@ -29,9 +29,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,15 +61,30 @@ class TabManager(
 ) {
 
     @Composable
-    fun TabView(modifier: Modifier = Modifier, selectedTab: Int = 0) {
+    fun TabView(
+        modifier: Modifier = Modifier,
+        startScreen: @Composable ((Modifier) -> Unit)? = null,
+        selectedTab: Int = 0
+    ) {
         var currentTab by remember { mutableIntStateOf(selectedTab) }
+        var originalScreen by remember { mutableStateOf(startScreen) }
 
         Column(modifier = Modifier.fillMaxHeight()) {
 
             // Display the selected tab screen
-            screens[currentTab].Screen(modifier = Modifier
-                .fillMaxSize()
-                .weight(1f))
+            Surface(modifier = Modifier.fillMaxSize().weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+                        .fillMaxSize()
+                ) {
+                    if (originalScreen != null) {
+                        originalScreen!!(Modifier)
+                    } else {
+                        screens[currentTab].Screen(Modifier)
+                    }
+                }
+            }
 
             // Tab bar
             Row(
@@ -78,10 +96,11 @@ class TabManager(
             ) {
                 screens.forEachIndexed { index, tab ->
                     Box(modifier = Modifier.clickable(onClick = {
+                        originalScreen = null
                         currentTab = index
                     })) {
                         tabBarItem(
-                            currentTab == index,
+                            originalScreen == null && currentTab == index,
                              index,
                              tab.getName()
                         )

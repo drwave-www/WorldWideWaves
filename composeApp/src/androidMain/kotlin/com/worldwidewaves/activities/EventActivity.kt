@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.activities
 
 /*
  * Copyright 2024 DrWave
@@ -6,7 +6,7 @@ package com.worldwidewaves.compose
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
  * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
  * community, and shared human experience by leveraging real-time coordination and location-based services.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,23 +20,37 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
+import android.os.Bundle
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.worldwidewaves.activities.TabScreen
+import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.WWWEvents
+import org.koin.android.ext.android.inject
 
-class SettingsScreen : TabScreen {
+class EventActivity : BackAbstractActivity() {
 
-    override fun getName(): String = "Settings"
+    private val wwwEvents: WWWEvents by inject()
+    private var event: WWWEvent? = null
+
+    // ----------------------------
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val eventId = intent.getStringExtra("id")
+        if (eventId != null)
+            event = wwwEvents.getEventById(eventId)
+    }
+
+    // ----------------------------
 
     @Composable
     override fun Screen(modifier: Modifier) {
         Box(modifier = modifier) {
-            Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,)
+            Text(text = "Event")
         }
     }
-
 }

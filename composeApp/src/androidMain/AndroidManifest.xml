@@ -14,6 +14,9 @@
             android:name=".activities.MainActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.EventActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SplashActivity"
             android:exported="true" >
             <intent-filter>

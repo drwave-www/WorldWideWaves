@@ -20,6 +20,7 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,11 +58,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.TabScreen
 import com.worldwidewaves.models.EventsViewModel
 import com.worldwidewaves.shared.SetEventFavorite
@@ -116,18 +119,10 @@ class EventsScreen(
 
         viewModel.filterEvents(starredSelected)
 
-        Surface(modifier = modifier) {
-            Box(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp, top = 20.dp)
-                    .fillMaxSize()
-            ) {
-                Column(modifier = Modifier.fillMaxHeight() ){
-                    FavoritesSelector(viewModel)
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Events(viewModel, events, modifier = Modifier.weight(1f))
-                }
-            }
+        Column(modifier = modifier.fillMaxHeight() ){
+            FavoritesSelector(viewModel)
+            Spacer(modifier = Modifier.size(20.dp))
+            Events(viewModel, events, modifier = Modifier.weight(1f))
         }
     }
 
@@ -225,7 +220,13 @@ class EventsScreen(
 
     @Composable
     fun Event(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
-        Column(modifier = modifier) {
+        val context = LocalContext.current
+
+        Column(modifier = modifier.clickable(onClick = {
+            context.startActivity(Intent(context, EventActivity::class.java).apply {
+                putExtra("id", event.id)
+            })
+        })) {
             EventOverlay(viewModel, event)
             EventLocationAndDate(event)
         }
