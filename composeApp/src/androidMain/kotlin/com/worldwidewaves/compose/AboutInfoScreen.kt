@@ -20,7 +20,9 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,28 +32,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.TabScreen
-import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.drwave
 import com.worldwidewaves.shared.generated.resources.drwave_instagram
+import com.worldwidewaves.shared.generated.resources.drwave_instagram_url
 import com.worldwidewaves.shared.generated.resources.infos_core
 import com.worldwidewaves.shared.generated.resources.instagram_icon
-import com.worldwidewaves.shared.generated.resources.logo_description
-import com.worldwidewaves.shared.generated.resources.www_hashtag
-import com.worldwidewaves.shared.generated.resources.www_instagram
-import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import org.jetbrains.compose.resources.painterResource
@@ -74,15 +72,9 @@ class AboutInfoScreen : TabScreen {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item { // WWW Logo
-                    Image(
-                        painter = painterResource(Res.drawable.www_logo_transparent),
-                        contentDescription = stringResource(Res.string.logo_description),
-                        modifier = Modifier
-                            .width(250.dp)
-                            .padding(top = 10.dp)
-                    )
-                    Spacer(modifier = Modifier.size(20.dp))
+                    AboutWWWLogo()
                 }
+
                 item { // Main Info text
                     Text(
                         text = stringResource(ShRes.string.infos_core),
@@ -91,67 +83,60 @@ class AboutInfoScreen : TabScreen {
                         fontFamily = displayFontFamily
                     )
                 }
+
                 item { // DrWave signature + contact
-                    Spacer(modifier = Modifier.size(30.dp))
-                    Column(horizontalAlignment = Alignment.Start) {
-                        Text(
-                            text = stringResource(ShRes.string.drwave),
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Black,
-                            fontFamily = extraFontFamily
-                        )
-                        Row {
-                            Image(
-                                painter = painterResource(ShRes.drawable.instagram_icon),
-                                contentDescription = "Instagram logo",
-                                modifier = Modifier.width(25.dp)
-                            )
-                            Text(
-                                modifier = Modifier.padding(start = 10.dp),
-                                text = stringResource(ShRes.string.drwave_instagram),
-                                fontSize = 16.sp,
-                                fontFamily = displayFontFamily
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.size(10.dp))
+                    DrWaveSignatureAndContact()
                 }
+
                 item { // Divider line
-                    Spacer(modifier = Modifier.size(30.dp))
-                    HorizontalDivider(
-                        modifier = Modifier.width(200.dp),
-                        color = Color.White, thickness = 2.dp
-                    )
-                    Spacer(modifier = Modifier.size(30.dp))
+                    AboutDividerLine()
                 }
+
                 item { // WWW social networks
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(ShRes.drawable.instagram_icon),
-                            contentDescription = "Instagram logo",
-                            modifier = Modifier.width(90.dp)
-                        )
-                        Column(
-                            modifier = Modifier.padding(start = 10.dp),
-                            horizontalAlignment = Alignment.Start
-                        ) {
-                            Text(
-                                text = stringResource(ShRes.string.www_instagram),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Black,
-                                fontFamily = displayFontFamily
-                            )
-                            Text(
-                                text = stringResource(ShRes.string.www_hashtag),
-                                fontSize = 16.sp,
-                                fontFamily = displayFontFamily
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.size(50.dp))
+                    AboutWWWSocialNetworks()
                 }
             }
         }
+    }
+
+    // ----------------------------
+
+    @Composable
+    private fun DrWaveSignatureAndContact() {
+        val uriHandler = LocalUriHandler.current
+
+        Spacer(modifier = Modifier.size(30.dp))
+        Column(horizontalAlignment = Alignment.Start) {
+            Text(
+                text = stringResource(ShRes.string.drwave),
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Black,
+                fontFamily = extraFontFamily
+            )
+            Row {
+                Image(
+                    painter = painterResource(ShRes.drawable.instagram_icon),
+                    contentDescription = "Instagram logo",
+                    modifier = Modifier.width(25.dp)
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .clickable(onClick = {
+                            try {
+                                uriHandler.openUri(ShRes.string.drwave_instagram_url.toString())
+                            } catch (e: Exception) {
+                                Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
+                            }
+                        }),
+                    text = stringResource(ShRes.string.drwave_instagram),
+                    fontSize = 16.sp,
+                    fontFamily = displayFontFamily,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
+        }
+        Spacer(modifier = Modifier.size(10.dp))
     }
 
 }

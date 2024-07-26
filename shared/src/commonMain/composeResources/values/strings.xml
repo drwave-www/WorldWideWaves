@@ -23,6 +23,52 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
 
     <string name="drwave">Dr Wave</string>
     <string name="drwave_instagram">@dr.wave</string>
+    <string name="drwave_instagram_url">https://www.instagram.com/dr.wave/</string>
     <string name="www_instagram">@worldwide.waves</string>
+    <string name="www_instagram_url">https://www.instagram.com/worldwide.waves/</string>
     <string name="www_hashtag">#wwwaves</string>
+
+    <string name="warn_rules_security_title">Rules &amp; Security</string>
+    <string name="warn_rules_security_text">Welcome to WorldWideWaves! We are excited to have you join our global wave events. To ensure everyone has a safe and enjoyable experience, please follow these guidelines:</string>
+    <string name="warn_general_title">General Rules :</string>
+    <string name="warn_general_item_1">Respect for All: Treat all participants with respect, regardless of their background. Please uphold respect for all attendees; discriminatory behavior or harassment is not acceptable at our events.</string>
+    <string name="warn_general_item_2">Follow Directions: Adhere to instructions from event organizers and local authorities at all times if any.</string>
+    <string name="warn_general_item_3">Stay Within Designated Areas: For your safety, remain within the areas designated for the event if any.</string>
+    <string name="warn_general_item_4">No Alcohol or Illegal Substances: We kindly request that attendees refrain from bringing alcohol or illegal substances to the event.</string>
+    <string name="warn_general_item_5">Minimize Environmental Impact: Dispose of all waste in designated receptacles and avoid littering to keep our venues clean.</string>
+    <string name="warn_general_item_6">Report Concerns: If you see something suspicious or someone in distress, immediately report it to event staff or local authorities.</string>
+    <string name="warn_safety_title">Safety Tips:</string>
+    <string name="warn_safety_item_1">Dress Appropriately: Wear comfortable clothing and footwear suitable for the event's activities and weather conditions.</string>
+    <string name="warn_safety_item_2">Stay Hydrated: Bring water and stay hydrated, especially during events in warm climates.</string>
+    <string name="warn_safety_item_3">Be Mindful of Your Belongings: Keep personal belongings secure and avoid bringing valuables that you do not need.</string>
+    <string name="warn_safety_item_4">Use the Buddy System: Stay with friends or make new ones, and look out for each other's safety.</string>
+    <string name="warn_safety_item_5">First Aid: Familiarize yourself with the locations of first aid stations, which are clearly marked on the event map in the app.</string>
+    <string name="warn_emergency_title">Emergency Procedures:</string>
+    <string name="warn_emergency_item_1">Evacuation Routes: Know the evacuation routes, marked clearly in our app and at the event site.</string>
+    <string name="warn_emergency_item_2">Emergency Contacts: Save the emergency contact numbers provided in the app, including local emergency services and event-specific contacts.</string>
+    <string name="warn_emergency_item_3">In Case of Emergency: Follow the instructions of event staff and emergency responders. If an evacuation is ordered, leave promptly and calmly.</string>
+    <string name="warn_legal_title">Legal:</string>
+    <string name="warn_legal_item_1">Liability Waiver: Participation in WorldWideWaves events is at your own risk. By participating, you agree to waive any claims against the organizers related to injuries that could happen during the event.</string>
+    <string name="warn_legal_item_2">Media Release: Events may be photographed or filmed for promotional purposes. Participation grants us permission to use your image in promotional materials.</string>
+
+    <string name="faq">FAQ</string>
+    <string name="faq_access">Access FAQ</string>
+
+    <string name="faq_question_1">Question 1</string>
+    <string name="faq_answer_1">Answer 1</string>
+
+    <string name="faq_question_2">Question 2</string>
+    <string name="faq_answer_2">Answer 2</string>
+
+    <string name="faq_question_3">Question 3</string>
+    <string name="faq_answer_3">Answer 3</string>
+
+    <string name="faq_question_4">Question 4</string>
+    <string name="faq_answer_4">Answer 4</string>
+
+    <string name="faq_question_5">Question 5</string>
+    <string name="faq_answer_5">Answer 5</string>
+
+
+
 </resources>
