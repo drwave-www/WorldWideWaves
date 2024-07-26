@@ -201,6 +201,7 @@ class AboutFaqScreen : TabScreen {
                 }
 
                 // WWW Social Networks
+                Spacer(modifier = Modifier.size(20.dp))
                 AboutDividerLine()
                 AboutWWWSocialNetworks()
             }
@@ -234,7 +235,7 @@ class AboutFaqScreen : TabScreen {
                 textDecoration = TextDecoration.Underline
             )
         }
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(20.dp))
         Text(
             text = stringResource(ShRes.string.warn_rules_security_text),
             fontSize = 18.sp,
@@ -300,7 +301,7 @@ class AboutFaqScreen : TabScreen {
         ) {
             Text(
                 text = stringResource(question),
-                fontSize = 18.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = displayFontFamily,
                 color = MaterialTheme.colorScheme.primary

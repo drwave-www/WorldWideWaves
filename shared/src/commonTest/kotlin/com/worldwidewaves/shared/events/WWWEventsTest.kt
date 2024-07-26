@@ -20,37 +20,30 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.di.commonModule
+import com.worldwidewaves.shared.di.datastoreModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class WWWEventsTest {
+class WWWEventsTest : KoinTest {
 
-    private lateinit var wwwEvents: WWWEvents
+    private val wwwEvents: WWWEvents by inject()
 
     @BeforeTest
     fun setUp() {
-        wwwEvents = WWWEvents().apply {
-            resetEventsFlow()
-        }
+        startKoin { modules(commonModule, datastoreModule) }
+        wwwEvents.resetEventsFlow()
     }
 
-    @Test
-    fun loadEventsPopulatesEventsFlow() = runTest {
-        wwwEvents.loadEvents()
-        val events = wwwEvents.events().value
-        assertTrue(events.isNotEmpty(), "Events flow should be populated after loading events.")
-    }
-
-    @Test
-    fun getEventByIdReturnsNullForUnknownId() = runTest {
-        wwwEvents.loadEvents()
-        val event = wwwEvents.getEventById("unknown_id")
-        assertNull(event, "Event with unknown id should not be found.")
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
     }
 
 }

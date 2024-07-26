@@ -61,7 +61,8 @@ import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 private val tabInfo = listOf(
-    "Infos", "FAQ"
+    "Infos",
+    "FAQ"
 )
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
@@ -89,10 +90,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     // ----------------------------
 
     @Composable
-    private fun TabBarItem(
-        isSelected: Boolean,
-        tabIndex: Int
-    ) {
+    private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
         Box(
             modifier = Modifier
                 .height(60.dp)

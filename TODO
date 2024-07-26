@@ -1,9 +1,11 @@
 
 Next:
-- use typography
-- compile tests
-- change favorites icon
 - change application icon
+- change favorites icon
+- use typography
+- Build failure on Github Actions
+- code coverage of current devs
+- replace all static sizes by configurables ones
 
 Other:
 - Fill-in FAQ Contents
@@ -12,8 +14,6 @@ Waves screen :
 - select good images for flags, same ratio
 
 Common:
-- replace all static sizes by configurables ones
-- Build failure on Github Actions
 - Implement events geolimits + speed, to calculate endTime
 - Implement isDone, isSoon, isRunning
 
@@ -22,9 +22,6 @@ Scripts:
     - images
     - flags
     - geolimits
-
-Tests:
-- code coverage of current devs
 
 Debug:
 - Implement a way to simulate events & geolocation
