@@ -66,8 +66,7 @@ class AboutInfoScreen : TabScreen {
 
         Box(modifier = modifier) {
             LazyColumn(state = state,
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item { // WWW Logo

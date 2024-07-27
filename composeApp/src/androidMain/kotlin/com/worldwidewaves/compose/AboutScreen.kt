@@ -20,12 +20,8 @@ package com.worldwidewaves.compose
  * limitations under the License.
  */
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,21 +37,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.logo_description
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
 import com.worldwidewaves.shared.generated.resources.www_instagram_url
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import com.worldwidewaves.theme.displayFontFamily
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -132,40 +124,11 @@ fun AboutDividerLine() {
 
 @Composable
 fun AboutWWWSocialNetworks() {
-    val uriHandler = LocalUriHandler.current
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Image(
-            painter = painterResource(Res.drawable.instagram_icon),
-            contentDescription = "Instagram logo",
-            modifier = Modifier.width(90.dp)
-        )
-        Column(
-            modifier = Modifier.padding(start = 10.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                modifier = Modifier.clickable(onClick = {
-                    try {
-                        uriHandler.openUri(ShRes.string.www_instagram_url.toString())
-                    } catch (e: Exception) {
-                        Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
-                    }
-                }),
-                text = stringResource(Res.string.www_instagram),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = displayFontFamily,
-                textDecoration = TextDecoration.Underline
-            )
-            Text(
-                text = stringResource(Res.string.www_hashtag),
-                fontSize = 16.sp,
-                fontFamily = displayFontFamily
-            )
-        }
-    }
-    Spacer(modifier = Modifier.size(50.dp))
+    WWWSocialNetworks(
+        instagramAccount = stringResource(ShRes.string.www_instagram),
+        instagramUrl = stringResource(ShRes.string.www_instagram_url),
+        instagramHashtag = stringResource(ShRes.string.www_hashtag)
+    )
 }
 
 @Composable

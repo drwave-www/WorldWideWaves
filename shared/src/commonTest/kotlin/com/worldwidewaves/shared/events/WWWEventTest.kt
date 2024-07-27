@@ -28,38 +28,115 @@ class WWWEventTest {
 
     @Test
     fun isDoneReturnsTrueForEventWithIdParisFrance() {
-        val event = WWWEvent(id = "paris_france", type = "", location = "", country = "", community = "", date = "2024-03-15", startHour = "18:00", speed = 5)
+        val event = WWWEvent(
+            id = "paris_france",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-15",
+            startHour = "18:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertTrue(event.isDone())
     }
 
     @Test
     fun isDoneReturnsFalseForEventWithIdNotParisFrance() {
-        val event = WWWEvent(id = "newyork_usa", type = "", location = "", country = "", community = "", date = "2024-03-16", startHour = "19:00", speed = 5)
+        val event = WWWEvent(
+            id = "newyork_usa",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-16",
+            startHour = "19:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertFalse(event.isDone())
     }
 
     @Test
     fun isSoonReturnsTrueForEventWithIdUnitedStates() {
-        val event = WWWEvent(id = "unitedstates", type = "", location = "", country = "", community = "", date = "2024-03-17", startHour = "20:00", speed = 5)
+        val event = WWWEvent(
+            id = "unitedstates",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-17",
+            startHour = "20:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertTrue(event.isSoon())
     }
 
     @Test
     fun isSoonReturnsFalseForEventWithIdNotUnitedStates() {
-        val event = WWWEvent(id = "canada", type = "", location = "", country = "", community = "", date = "2024-03-18", startHour = "21:00", speed = 5)
+        val event = WWWEvent(
+            id = "canada",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-18",
+            startHour = "21:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertFalse(event.isSoon())
     }
 
     @Test
     fun isRunningReturnsTrueForEventWithIdRioDeJaneiroBrazil() {
-        val event = WWWEvent(id = "riodejaneiro_brazil", type = "", location = "", country = "", community = "", date = "2024-03-19", startHour = "22:00", speed = 5)
+        val event = WWWEvent(
+            id = "riodejaneiro_brazil",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-19",
+            startHour = "22:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertTrue(event.isRunning())
     }
 
     @Test
     fun isRunningReturnsFalseForEventWithIdNotRioDeJaneiroBrazil() {
-        val event = WWWEvent(id = "tokyo_japan", type = "", location = "", country = "", community = "", date = "2024-03-20", startHour = "23:00", speed = 5)
+        val event = WWWEvent(
+            id = "tokyo_japan",
+            type = "",
+            location = "",
+            country = "",
+            community = "",
+            date = "2024-03-20",
+            startHour = "23:00",
+            speed = 5,
+            description = "",
+            instagramAccount = "placeholder",
+            instagramUrl = "https://www.instagram.com/placeholder/",
+            instagramHashtag = "#placeholder"
+        )
         assertFalse(event.isRunning())
     }
-
 }

@@ -1,6 +1,5 @@
 
 Next:
-- refresh favorites list on change from EventActivity
 - use typography
 - continue EventActivity
 - code coverage of current devs
@@ -16,6 +15,8 @@ Common:
 - Implement events geolimits + speed, to calculate endTime
 - Implement isDone, isSoon, isRunning
 - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
+- manage with translations
+- manage with translation of events contents (description, location, etc, ...)
 
 Scripts:
 - Script for events resources

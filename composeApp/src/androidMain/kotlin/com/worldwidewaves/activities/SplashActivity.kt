@@ -57,20 +57,19 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            AppTheme {
-                SplashScreen()
-            }
-        }
+        setContent { AppTheme { SplashScreen() } }
+        loadMainActivity()
+    }
 
-        // Load main activity
+    // ---------------------------
+
+    private fun loadMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         val startTime = System.currentTimeMillis()
         events.invokeWhenLoaded {
-            lifecycleScope.launch { // Delay min 1500ms
+            lifecycleScope.launch {
                 val elapsedTime = System.currentTimeMillis() - startTime
-                val delayTime = maxOf(1500 - elapsedTime, 0)
-                delay(delayTime)
+                delay(maxOf(1500 - elapsedTime, 0))
                 startActivity(intent)
             }
         }

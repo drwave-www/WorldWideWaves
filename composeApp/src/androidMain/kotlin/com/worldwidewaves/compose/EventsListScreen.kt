@@ -43,7 +43,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -73,14 +72,8 @@ import com.worldwidewaves.shared.events.getCommunityImage
 import com.worldwidewaves.shared.events.getCountryImage
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLocationImage
-import com.worldwidewaves.shared.events.isDone
-import com.worldwidewaves.shared.events.isRunning
-import com.worldwidewaves.shared.events.isSoon
-import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.event_running
-import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
@@ -95,7 +88,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
-class EventsScreen(
+class EventsListScreen(
     private val viewModel: EventsViewModel,
     private val setEventFavorite: SetEventFavorite
 ) : TabScreen {
@@ -370,60 +363,6 @@ class EventsScreen(
                 )
 
             }
-        }
-    }
-}
-
-// ----------------------------
-
-@Composable
-fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isSoon() || event.isRunning()) {
-        val backgroundColor =
-            if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-        val textId = if (event.isSoon()) ShRes.string.event_soon else ShRes.string.event_running
-
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .offset(y = (-5).dp),
-            contentAlignment = Alignment.TopEnd
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 15.dp, end = 15.dp)
-                    .size(width = 115.dp, height = 26.dp)
-                    .background(backgroundColor)
-                    .padding(end = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(textId),
-                    style = TextStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 16.sp
-                    )
-                )
-            }
-        }
-    }
-}
-
-// ----------------------------
-
-@Composable
-fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isDone()) {
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Surface(
-                color = Color.run { White.copy(alpha = 0.5f) },
-                modifier = Modifier.fillMaxSize()
-            ) { }
-            Image(
-                painter = painterResource(ShRes.drawable.event_done),
-                contentDescription = stringResource(ShRes.string.event_done),
-                modifier = Modifier.width(130.dp),
-            )
         }
     }
 }

@@ -34,7 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsScreen
+import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
@@ -59,12 +59,12 @@ private val tabInfo = listOf(
 
 open class MainActivity : AppCompatActivity() {
 
-    private val eventsScreen: EventsScreen by inject()
+    private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
 
     protected val tabManager = TabManager(listOf(
-        eventsScreen,
+        eventsListScreen,
         aboutScreen,
         settingsScreen
     )) { isSelected, tabIndex, contentDescription ->
@@ -78,9 +78,7 @@ open class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                ) {
+                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     tabManager.TabView()
                 }
             }

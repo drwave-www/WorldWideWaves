@@ -3,21 +3,29 @@
     "id": "paris_france",
     "type": "city",
     "location": "Paris",
-    "country":"france",
+    "country": "france",
     "community": "europe",
     "date": "2024-03-15",
     "startHour": "18:00",
-    "speed": "5"
+    "speed": "5",
+    "description": "Experience the wave in Paris, where the charm of the Eiffel Tower meets the elegance of the Champs-Élysées",
+    "instagramAccount": "worldwidewaves.paris",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.paris/",
+    "instagramHashtag": "#waveparis"
   },
   {
     "id": "riodejaneiro_brazil",
     "type": "city",
     "location": "Rio de Janeiro",
-    "country":"brazil",
+    "country": "brazil",
     "community": "europe",
     "date": "2024-03-15",
     "startHour": "18:00",
-    "speed": "5"
+    "speed": "5",
+    "description": "Join the wave in Rio de Janeiro, where the rhythm of Copacabana meets the majesty of Christ the Redeemer",
+    "instagramAccount": "worldwidewaves.rio",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.rio/",
+    "instagramHashtag": "#waverio"
   },
   {
     "id": "unitedstates",
@@ -26,7 +34,11 @@
     "community": "usa",
     "date": "2024-04-22",
     "startHour": "20:30",
-    "speed": "5"
+    "speed": "5",
+    "description": "Feel the wave across the United States, from the bustling streets of New York to the sunny beaches of California",
+    "instagramAccount": "worldwidewaves.usa",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.usa/",
+    "instagramHashtag": "#waveusa"
   },
   {
     "id": "world",
@@ -34,6 +46,10 @@
     "location": "The World !!!",
     "date": "2024-05-01",
     "startHour": "12:00",
-    "speed": "5"
+    "speed": "5",
+    "description": "Be part of the global wave, uniting people from every corner of the world in a celebration of unity and diversity",
+    "instagramAccount": "worldwidewaves.world",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.world/",
+    "instagramHashtag": "#waveworld"
   }
 ]

@@ -2,23 +2,22 @@ package com.worldwidewaves.activities
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,18 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import com.worldwidewaves.shared.SetEventFavorite
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
-import com.worldwidewaves.shared.generated.resources.event_favorite_off
-import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.favorite_off
-import com.worldwidewaves.shared.generated.resources.favorite_on
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -66,7 +59,6 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 abstract class AbstractEventBackActivity : MainActivity() {
 
     private val wwwEvents: WWWEvents by inject()
-    private val setEventFavorite: SetEventFavorite by inject()
 
     // ----------------------------
 
@@ -74,22 +66,25 @@ abstract class AbstractEventBackActivity : MainActivity() {
         super.onCreate(savedInstanceState)
 
         var selectedEvent by mutableStateOf<WWWEvent?>(null)
-
         val eventId = intent.getStringExtra("eventId")
-        if (eventId != null)
-            wwwEvents.invokeWhenLoaded { // Update when loaded
-                lifecycleScope.launch {
-                    selectedEvent = wwwEvents.getEventById(eventId)
-                }
-            }
+
+        if (eventId != null) {
+            loadEvent(eventId) { event -> selectedEvent = event }
+        }
 
         setContent {
             AppTheme {
-                Surface(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                ) {
+                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     tabManager.TabView(startScreen = { BackwardScreen(selectedEvent) })
                 }
+            }
+        }
+    }
+
+    private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
+        wwwEvents.invokeWhenLoaded {
+            lifecycleScope.launch {
+                onEventLoaded(wwwEvents.getEventById(eventId))
             }
         }
     }
@@ -98,18 +93,9 @@ abstract class AbstractEventBackActivity : MainActivity() {
 
     @Composable
     private fun BackwardScreen(event: WWWEvent?) {
-        var isFavorite by remember { mutableStateOf(event?.favorite ?: false) }
-        val scope = rememberCoroutineScope()
-
-        LaunchedEffect(event) {
-            isFavorite = event?.favorite ?: false
-        }
+        val scrollState = rememberScrollState()
 
         if (event != null) {
-            LaunchedEffect(event.favorite) {
-                isFavorite = event.favorite
-            }
-
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 // Back layer
@@ -133,22 +119,13 @@ abstract class AbstractEventBackActivity : MainActivity() {
                         textAlign = TextAlign.Center,
                         fontSize = 24.sp,
                     )
-                    Image(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable {
-                                scope.launch {
-                                    isFavorite = !isFavorite
-                                    setEventFavorite.call(event, isFavorite)
-                                }
-                            },
-                        painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-                        contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
-                    )
                 }
 
                 // Content screen
-                Screen(modifier = Modifier, event)
+                Box(modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                ) { Screen(modifier = Modifier, event) }
             }
         } else {
             Text(
