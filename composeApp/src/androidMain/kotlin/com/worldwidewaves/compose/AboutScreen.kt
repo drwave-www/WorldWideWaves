@@ -44,6 +44,8 @@ import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.logo_description
+import com.worldwidewaves.shared.generated.resources.tab_faq_name
+import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
 import com.worldwidewaves.shared.generated.resources.www_instagram_url
@@ -53,8 +55,8 @@ import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 private val tabInfo = listOf(
-    "Infos",
-    "FAQ"
+    ShRes.string.tab_infos_name,
+    ShRes.string.tab_faq_name
 )
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
@@ -99,7 +101,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
                 )
             }
             Text(
-                text = tabInfo[tabIndex].uppercase(),
+                text = stringResource(tabInfo[tabIndex]).uppercase(),
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                 fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
