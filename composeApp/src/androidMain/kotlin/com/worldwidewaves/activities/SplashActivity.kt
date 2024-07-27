@@ -25,19 +25,16 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.shared.events.WWWEvents
@@ -74,35 +71,31 @@ class SplashActivity : AppCompatActivity() {
             }
         }
     }
+}
 
-    // ---------------------------
+// ---------------------------
 
-    @Composable
-    private fun SplashScreen() {
-        Surface(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Box {
-                Image(
-                    painter = painterResource(ShRes.drawable.background),
-                    contentDescription = stringResource(ShRes.string.background_description),
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterStart)
-                        .offset(y = (-55).dp) // TODO: how to solve image to top without fixed offset ?
-                )
-                Image(
-                    painter = painterResource(ShRes.drawable.www_logo_transparent),
-                    contentDescription = stringResource(ShRes.string.logo_description),
-                    modifier = Modifier
-                        .width(200.dp)
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 10.dp)
-                )
-            }
+@Composable
+@Preview
+private fun SplashScreen() {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box {
+            Image(
+                painter = painterResource(ShRes.drawable.background),
+                contentDescription = stringResource(ShRes.string.background_description),
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.CenterStart)
+            )
+            Image(
+                painter = painterResource(ShRes.drawable.www_logo_transparent),
+                contentDescription = stringResource(ShRes.string.logo_description),
+                modifier = Modifier
+                    .width(200.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 10.dp)
+            )
         }
     }
 }

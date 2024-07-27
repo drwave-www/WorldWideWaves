@@ -1,12 +1,16 @@
 
 Next:
 - use typography
+     ---> Créer une bibliothèque de composants standards WWW : WWWStandardText, ...
 - continue EventActivity
 - code coverage of current devs
 - replace all static sizes by configurables ones
 
 Other:
 - Fill-in FAQ Contents
+- Penser au processus de démarrage de la wave : qui, comment, où ?
+     --> ie. ZONE ROUGE
+     --> où se situe cette zone rouge dans la réalité du terrain ?
 
 Waves screen :
 - select good images for flags, same ratio
@@ -26,3 +30,7 @@ Scripts:
 
 Debug:
 - Implement a way to simulate events & geolocation
+     ==> button "simulate now avec un bandeau en haut en cours de simulation + 'stop'"
+     ==> uniquemment si l'option setting 'activate simulation's est activé
+          ==> ajouter une option 'simulate position' dans les settings sinon prendre la position réelle
+
