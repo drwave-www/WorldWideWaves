@@ -38,7 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.generated.resources.*
+import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.background_description
+import com.worldwidewaves.shared.generated.resources.logo_description
+import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

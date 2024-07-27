@@ -51,8 +51,8 @@ interface TabScreen {
 // ----------------------------
 
 class TabManager(
-    private val screens: List<TabScreen>,
-    val tabBarItem: @Composable (
+    private val screens: List<TabScreen>, // List of tab screens
+    val tabBarItem: @Composable ( // How to draw a tab item
         isSelected: Boolean,
         tabIndex: Int,
         contentDescription: String?
@@ -72,9 +72,7 @@ class TabManager(
 
             // Display the selected tab screen
             Surface(modifier = Modifier.fillMaxSize().weight(1f)) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     if (originalScreen != null) {
                         originalScreen!!(Modifier)
                     } else {
@@ -85,9 +83,7 @@ class TabManager(
 
             // Tab bar
             Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(60.dp),
+                modifier = modifier.fillMaxWidth().height(60.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {

@@ -63,14 +63,14 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
     if (event.isSoon() || event.isRunning()) {
-        val backgroundColor =
-            if (event.isSoon()) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
-        val textId = if (event.isSoon()) Res.string.event_soon else Res.string.event_running
+        val (backgroundColor, textId) = if (event.isSoon()) {
+            MaterialTheme.colorScheme.secondary to Res.string.event_soon
+        } else {
+            MaterialTheme.colorScheme.tertiary to Res.string.event_running
+        }
 
         Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .offset(y = (-5).dp),
+            modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
             contentAlignment = Alignment.TopEnd
         ) {
             Box(
@@ -133,7 +133,7 @@ fun WWWSocialNetworks(
             modifier = Modifier.padding(start = 10.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
+            Text( // TODO - replace by WWWALink
                 modifier = Modifier.clickable(onClick = {
                     try {
                         uriHandler.openUri(instagramUrl)

@@ -134,7 +134,6 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
             fontSize = 90.sp,
             fontWeight = FontWeight.Black
         )
-
         Text(
             text = eventDate,
             style = textStyle.copy(color = quinaryLight)

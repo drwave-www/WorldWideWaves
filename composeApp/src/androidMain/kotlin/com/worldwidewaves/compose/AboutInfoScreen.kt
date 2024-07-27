@@ -69,32 +69,25 @@ class AboutInfoScreen : TabScreen {
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                item { // WWW Logo
-                    AboutWWWLogo()
-                }
-
-                item { // Main Info text
-                    Text(
-                        text = stringResource(ShRes.string.infos_core),
-                        style = TextStyle(textAlign = TextAlign.Justify),
-                        fontSize = 18.sp,
-                        fontFamily = displayFontFamily
-                    )
-                }
-
-                item { // DrWave signature + contact
-                    DrWaveSignatureAndContact()
-                }
-
-                item { // Divider line
-                    AboutDividerLine()
-                }
-
-                item { // WWW social networks
-                    AboutWWWSocialNetworks()
-                }
+                item { AboutWWWLogo() }
+                item { MainInfo() }
+                item { DrWaveSignatureAndContact() }
+                item { AboutDividerLine() }
+                item { AboutWWWSocialNetworks() }
             }
         }
+    }
+
+    // ----------------------------
+
+    @Composable
+    private fun MainInfo() {
+        Text(
+            text = stringResource(ShRes.string.infos_core),
+            style = TextStyle(textAlign = TextAlign.Justify),
+            fontSize = 18.sp,
+            fontFamily = displayFontFamily
+        )
     }
 
     // ----------------------------
@@ -117,7 +110,7 @@ class AboutInfoScreen : TabScreen {
                     contentDescription = "Instagram logo",
                     modifier = Modifier.width(25.dp)
                 )
-                Text(
+                Text( // TODO Convert it to WWWALink
                     modifier = Modifier
                         .padding(start = 10.dp)
                         .clickable(onClick = {

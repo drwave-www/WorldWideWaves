@@ -105,18 +105,40 @@ class EventsListScreen(
         val events by viewModel.events.collectAsState()
         val hasFavorites by viewModel.hasFavorites.collectAsState()
 
-        if (firstLaunch) {
+        if (firstLaunch) { // Select favorites at launch if any
             firstLaunch = false
             starredSelected = hasFavorites
         }
 
         viewModel.filterEvents(starredSelected)
 
-        Column(modifier = modifier
-            .fillMaxHeight()
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
-        ){
-            FavoritesSelector(viewModel)
+        EventsList(
+            modifier, events,
+            onAllEventsCLicked = { if (starredSelected) toggleStarredSelection() },
+            onFavoriteEventsClicked = { if (!starredSelected) toggleStarredSelection() }
+        )
+    }
+
+    private fun toggleStarredSelection() {
+        starredSelected = !starredSelected
+        viewModel.filterEvents(starredSelected)
+    }
+
+    // ----------------------------
+
+    @Composable
+    private fun EventsList(
+        modifier: Modifier,
+        events: List<WWWEvent>,
+        onAllEventsCLicked: () -> Unit,
+        onFavoriteEventsClicked: () -> Unit
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxHeight()
+                .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+        ) {
+            FavoritesSelector(onAllEventsCLicked, onFavoriteEventsClicked)
             Spacer(modifier = Modifier.size(20.dp))
             Events(viewModel, events, modifier = Modifier.weight(1f))
         }
@@ -125,7 +147,11 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    fun FavoritesSelector(viewModel: EventsViewModel, modifier: Modifier = Modifier) {
+    private fun FavoritesSelector(
+        onAllEventsCLicked: () -> Unit,
+        onFavoriteEventsClicked: () -> Unit,
+        modifier: Modifier = Modifier
+    ) {
         val allColor = if (this.starredSelected) extendedLight.quaternary else extendedLight.quinary
         val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
 
@@ -138,47 +164,50 @@ class EventsListScreen(
                 .background(extendedLight.quaternary.color)
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp))
-                        .height(50.dp)
-                        .fillMaxWidth(.5f)
-                        .background(allColor.color)
-                        .clickable {
-                            if (starredSelected) {
-                                starredSelected = false
-                                viewModel.filterAllEvents()
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        color = allColor.onColor, fontWeight = allWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_all),
-                        fontFamily = displayFontFamily
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(25.dp))
-                        .height(50.dp)
-                        .fillMaxWidth()
-                        .background(starredColor.color)
-                        .clickable {
-                            if (!starredSelected) {
-                                starredSelected = true
-                                viewModel.filterFavoriteEvents()
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        color = starredColor.onColor, fontWeight = starredWeight, fontSize = 16.sp,
-                        text = stringResource(ShRes.string.events_select_starred),
-                        fontFamily = displayFontFamily
-                    )
-                }
+                SelectorBox(
+                    modifier = Modifier.fillMaxWidth(.5f),
+                    backgroundColor = allColor.color,
+                    onClick = onAllEventsCLicked,
+                    textColor = allColor.onColor,
+                    fontWeight = allWeight,
+                    text = stringResource(ShRes.string.events_select_all)
+                )
+                SelectorBox(
+                    modifier = Modifier.fillMaxWidth(),
+                    backgroundColor = starredColor.color,
+                    onClick = onFavoriteEventsClicked,
+                    textColor = starredColor.onColor,
+                    fontWeight = starredWeight,
+                    text = stringResource(ShRes.string.events_select_starred)
+                )
             }
+        }
+    }
+
+    @Composable
+    private fun SelectorBox(
+        modifier: Modifier,
+        backgroundColor: Color,
+        onClick: () -> Unit,
+        textColor: Color,
+        fontWeight: FontWeight,
+        text: String
+    ) {
+        Box(
+            modifier = modifier
+                .clip(RoundedCornerShape(25.dp))
+                .height(50.dp)
+                .background(backgroundColor)
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                color = textColor,
+                fontWeight = fontWeight,
+                fontSize = 16.sp,
+                text = text,
+                fontFamily = displayFontFamily
+            )
         }
     }
 
@@ -193,9 +222,7 @@ class EventsListScreen(
             modifier = modifier
         ) {
             if (events.isNotEmpty()) {
-                items(events) { event ->
-                    Event(viewModel, event)
-                }
+                items(events) { event -> Event(viewModel, event) }
             } else {
                 item {
                     Text( // TODO: better explanation of favorites
@@ -259,28 +286,33 @@ class EventsListScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             event.community?.let {
-                Image(
-                    modifier = Modifier
-                        .width(65.dp)
-                        .padding(start = 10.dp, top = 10.dp)
-                        .border(1.dp, Color.White),
-                    contentScale = ContentScale.FillWidth,
-                    painter = painterResource(event.getCommunityImage() as DrawableResource),
+                EventFlag(
+                    modifier = Modifier.padding(start = 10.dp, top = 10.dp),
+                    imageResource = event.getCommunityImage() as DrawableResource,
                     contentDescription = event.community!!
                 )
             }
+
             event.country?.let {
-                Image(
-                    modifier = Modifier
-                        .width(65.dp)
-                        .padding(start = 10.dp, bottom = 10.dp)
-                        .border(1.dp, Color.White),
-                    contentScale = ContentScale.FillWidth,
-                    painter = painterResource(event.getCountryImage() as DrawableResource),
+                EventFlag(
+                    modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                    imageResource = event.getCountryImage() as DrawableResource,
                     contentDescription = event.community!!
                 )
             }
         }
+    }
+
+    @Composable
+    private fun EventFlag(modifier: Modifier, imageResource: DrawableResource, contentDescription: String) {
+        Image(
+            modifier = modifier
+                .width(65.dp)
+                .border(1.dp, Color.White),
+            contentScale = ContentScale.FillWidth,
+            painter = painterResource(imageResource),
+            contentDescription = contentDescription
+        )
     }
 
     @Composable
@@ -324,8 +356,7 @@ class EventsListScreen(
 
                 // Location and date
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
@@ -361,7 +392,6 @@ class EventsListScreen(
                         .offset(y = (-8).dp)
                         .padding(start = 2.dp)
                 )
-
             }
         }
     }

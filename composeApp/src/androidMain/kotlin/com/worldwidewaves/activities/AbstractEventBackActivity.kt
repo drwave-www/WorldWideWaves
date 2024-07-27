@@ -121,11 +121,12 @@ abstract class AbstractEventBackActivity : MainActivity() {
                     )
                 }
 
-                // Content screen
+                // Content Event screen
                 Box(modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                 ) { Screen(modifier = Modifier, event) }
+
             }
         } else {
             Text(
@@ -136,6 +137,8 @@ abstract class AbstractEventBackActivity : MainActivity() {
             )
         }
     }
+
+    // ----------------------------
 
     @Composable
     abstract fun Screen(modifier: Modifier, event: WWWEvent)

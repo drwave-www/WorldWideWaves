@@ -37,7 +37,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -141,9 +142,8 @@ class AboutFaqScreen : TabScreen {
     override fun Screen(modifier: Modifier) {
         val coroutineScope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
-        var scrollToFAQPosition  by remember { mutableStateOf(0F) }
-
-        var expandedFaqItem by remember { mutableStateOf(-1) }
+        var scrollToFAQPosition by remember { mutableFloatStateOf(0F) }
+        var expandedFaqItem by remember { mutableIntStateOf(-1) }
 
         Box(modifier = modifier) {
             Column(
@@ -152,7 +152,6 @@ class AboutFaqScreen : TabScreen {
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // WWW Logo
                 AboutWWWLogo()
 
                 // Main FAQ text - Rules & Security
@@ -162,14 +161,10 @@ class AboutFaqScreen : TabScreen {
                         scrollState.animateScrollTo(scrollToFAQPosition.roundToInt())
                     }
                 }
-
-                // Divider line
                 AboutDividerLine()
 
                 // For each rules_hierarchy entry, display the title and the list of items
                 ShowRulesHierarchy()
-
-                // Divider line
                 AboutDividerLine()
 
                 // FAQ title
@@ -187,16 +182,12 @@ class AboutFaqScreen : TabScreen {
                 Spacer(modifier = Modifier.size(30.dp))
 
                 // FAQ Items
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 2.dp
-                )
+                FAQDividerLine()
                 faq_contents.forEachIndexed { index, (question, answer) ->
                     FAQItem(index, question, answer,
                             expandedFaqItem,
                             onExpand = { expandedFaqItem = it })
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 2.dp
-                    )
+                    FAQDividerLine()
                 }
 
                 // WWW Social Networks
@@ -210,9 +201,7 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
-    private fun FAQTitle(
-        scrollToFAQPosition: () -> Unit
-    ) {
+    private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
@@ -240,6 +229,13 @@ class AboutFaqScreen : TabScreen {
             fontSize = 18.sp,
             style = TextStyle(textAlign = TextAlign.Justify),
             fontFamily = displayFontFamily
+        )
+    }
+
+    @Composable
+    private fun FAQDividerLine() {
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 2.dp
         )
     }
 
