@@ -77,3 +77,25 @@ fun WWWEvent.getFormattedSimpleDate(): String {
         "00/00"
     }
 }
+
+// ---------------------------
+
+fun WWWEvent.getLiteralSpeed(): String {
+    return "12 m/s"
+}
+
+fun WWWEvent.getLiteralStartTime(): String {
+    return "14:00 BRT"
+}
+
+fun WWWEvent.getLiteralEndTime(): String {
+    return "15:23 BRT"
+}
+
+fun WWWEvent.getLiteralTotalTime(): String {
+    return "83 min"
+}
+
+fun WWWEvent.getLiteralProgression(): String {
+    return "49.23%"
+}

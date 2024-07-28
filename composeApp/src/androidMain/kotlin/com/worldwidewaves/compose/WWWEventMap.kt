@@ -1,13 +1,12 @@
-package com.worldwidewaves.di
+package com.worldwidewaves.compose
 
-import com.worldwidewaves.compose.AboutFaqScreen
-import com.worldwidewaves.compose.AboutInfoScreen
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsListScreen
-import com.worldwidewaves.compose.SettingsScreen
-import com.worldwidewaves.models.EventsViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.dsl.module
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.events.WWWEvent
 
 /*
  * Copyright 2024 DrWave
@@ -29,13 +28,16 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val androidModule = module {
-    single { EventsListScreen(viewModel = get(), setEventFavorite = get()) }
-    viewModel { EventsViewModel(wwwEvents = get()) }
+class WWWEventMap(val event : WWWEvent) {
 
-    single { SettingsScreen() }
-    single { AboutScreen(get(), get()) }
-    single { AboutInfoScreen() }
-    single { AboutFaqScreen() }
+    @Composable
+    fun Screen(modifier: Modifier) {
+        Surface(
+            color = Color.White,
+            modifier = modifier.height(270.dp)
+        ) {
+            // TODO
+        }
+    }
 
 }

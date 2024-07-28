@@ -41,8 +41,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -327,21 +329,25 @@ class EventsListScreen(
         Box(modifier = modifier
             .fillMaxSize()
             .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
-            Image(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable {
-                        scope.launch {
-                            isFavorite = !isFavorite
-                            setEventFavorite.call(event, isFavorite)
-                            if (starredSelected) { // Refresh the list
-                                viewModel.filterFavoriteEvents()
+            Surface(modifier = Modifier.clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clickable {
+                            scope.launch {
+                                isFavorite = !isFavorite
+                                setEventFavorite.call(event, isFavorite)
+                                if (starredSelected) { // Refresh the list
+                                    viewModel.filterFavoriteEvents()
+                                }
                             }
-                        }
-                    },
-                painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-                contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
-            )
+                        },
+                    painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
+                    contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
+                )
+            }
         }
     }
 

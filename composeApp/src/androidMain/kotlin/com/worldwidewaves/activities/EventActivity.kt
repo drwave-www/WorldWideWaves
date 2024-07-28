@@ -21,10 +21,14 @@ package com.worldwidewaves.activities
  */
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +36,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,6 +45,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -50,12 +57,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
+import com.worldwidewaves.compose.WWWEventMap
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
+import com.worldwidewaves.shared.events.getLiteralEndTime
+import com.worldwidewaves.shared.events.getLiteralProgression
+import com.worldwidewaves.shared.events.getLiteralSpeed
+import com.worldwidewaves.shared.events.getLiteralStartTime
+import com.worldwidewaves.shared.events.getLiteralTotalTime
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.generated.resources.be_waved
+import com.worldwidewaves.shared.generated.resources.geoloc_desc
+import com.worldwidewaves.shared.generated.resources.geoloc_refresh_icon
+import com.worldwidewaves.shared.generated.resources.geoloc_undone
+import com.worldwidewaves.shared.generated.resources.wave_end_time
 import com.worldwidewaves.shared.generated.resources.wave_now
+import com.worldwidewaves.shared.generated.resources.wave_progression
+import com.worldwidewaves.shared.generated.resources.wave_speed
+import com.worldwidewaves.shared.generated.resources.wave_start_time
+import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
@@ -64,18 +86,25 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-
 class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
         val eventDate = event.getFormattedSimpleDate()
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(30.dp)
+        ) {
             EventOverlay(event, eventDate)
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
+            WWWEventMap(event).Screen(
+                modifier = Modifier.fillMaxWidth()
+            )
+            GeolocalizeMe()
+            EventNumbers(event)
             WWWEventSocialNetworks(event)
         }
     }
@@ -87,7 +116,6 @@ class EventActivity : AbstractEventBackActivity() {
 @Composable
 private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.padding(20.dp),
         text = event.description,
         fontFamily = extraFontFamily,
         color = quinaryLight,
@@ -160,7 +188,6 @@ fun DividerLine() {
         modifier = Modifier.width(200.dp),
         color = Color.White, thickness = 2.dp
     )
-    Spacer(modifier = Modifier.size(20.dp))
 }
 
 // ----------------------------
@@ -170,7 +197,8 @@ private fun ButtonWave(event: WWWEvent) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .width(300.dp).height(40.dp)
+            .width(300.dp)
+            .height(40.dp)
             .clickable(onClick = {
                 /* TODO */
             })
@@ -194,9 +222,109 @@ private fun ButtonWave(event: WWWEvent) {
 @Composable
 private fun WWWEventSocialNetworks(event: WWWEvent) {
     WWWSocialNetworks(
-        modifier = Modifier.padding(top = 20.dp, bottom = 20.dp),
         instagramAccount = event.instagramAccount,
         instagramUrl = event.instagramUrl,
         instagramHashtag = event.instagramHashtag
     )
+}
+
+// ----------------------------
+
+@Composable
+private fun GeolocalizeMe() {
+    Row(modifier = Modifier.height(45.dp).padding(start = 20.dp, end = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(modifier = Modifier
+            .border(2.dp, MaterialTheme.colorScheme.primary)
+            .fillMaxHeight()
+            .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(ShRes.string.geoloc_undone),
+                color = quinaryLight,
+                fontSize = 14.sp,
+                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
+            )
+        }
+        Spacer(modifier = Modifier.size(20.dp))
+        Surface(modifier = Modifier.clip(CircleShape),
+            color = MaterialTheme.colorScheme.primary
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(45.dp)
+                    .clickable {
+                        // TODO
+                    },
+                painter = painterResource(ShRes.drawable.geoloc_refresh_icon),
+                contentDescription = stringResource(ShRes.string.geoloc_desc),
+            )
+        }
+    }
+}
+
+// ----------------------------
+
+@Composable
+private fun EventNumbers(event: WWWEvent) {
+
+    val eventNumbers = mapOf( // TODO : update progression every x seconds
+        ShRes.string.wave_speed to event.getLiteralSpeed(),
+        ShRes.string.wave_start_time to event.getLiteralStartTime(),
+        ShRes.string.wave_end_time to event.getLiteralEndTime(),
+        ShRes.string.wave_total_time to event.getLiteralTotalTime(),
+        ShRes.string.wave_progression to event.getLiteralProgression()
+    )
+
+    Box(
+        modifier = Modifier
+            .border(
+                width = 2.dp,
+                color = quinaryLight,
+                shape = RoundedCornerShape(topStart = 50.dp, bottomEnd = 50.dp)
+            )
+            .padding(20.dp)
+    ) {
+        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+            Text(
+                text = stringResource(ShRes.string.be_waved),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Right,
+                color = quinaryLight,
+                fontFamily = extraFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            eventNumbers.forEach { (key, value) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = stringResource(key),
+                        color = quinaryLight,
+                        fontFamily = extraFontFamily,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        text = value,
+                        color = when (key) {
+                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                            ShRes.string.wave_start_time -> Color.Yellow
+                            else -> MaterialTheme.colorScheme.primary
+                        },
+                        fontFamily = extraFontFamily,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
 }
