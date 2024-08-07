@@ -1,2 +1,10 @@
-paris_france:
-  boundingbox: 2.242911,48.812848,2.418073,48.905836
+events:
+  - event:
+      id: paris_france
+      name: World Wide Wave in Paris, France
+      bbox: 2.242911,48.812848,2.418073,48.905836
+      center: 48.8619, 2.3417, 14
+      minzoom: 10
+      maxzoom: 14
+      language: fr
+      osmarea: europe/france/ile-de-france
