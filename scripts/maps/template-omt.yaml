@@ -1,16 +1,9 @@
 tileset:
   layers:
-        - layers/water_name/water_name.yaml
-        - layers/building/building.yaml
         - layers/landuse/landuse.yaml
-        - layers/mountain_peak/mountain_peak.yaml
-        - layers/housenumber/housenumber.yaml
-        - layers/transportation_name/transportation_name.yaml
         - layers/boundary/boundary.yaml
         - layers/landcover/landcover.yaml
         - layers/water/water.yaml
-        - layers/poi/poi.yaml
-        - layers/place/place.yaml
         - layers/transportation/transportation.yaml
         - layers/park/park.yaml
         - layers/waterway/waterway.yaml

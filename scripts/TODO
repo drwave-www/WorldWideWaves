@@ -1,5 +1,3 @@
-- remove tools + make openmaptiles a copy
-- make each country configurable 
 - ensure that right layers are used
     --> generate all all check with maptiler / gqis
 - try size with wikipedia
@@ -9,5 +7,6 @@
 - import into Android with right styles / icons, etc...
 
 - geojson of the border
+  --> https://peteris.rocks/blog/openstreetmap-administrative-boundaries-in-geojson/
 
 - generate images / descriptions / other etc...
