@@ -53,8 +53,16 @@ else
   cp ./data/${area}.yaml openmaptiles/
 fi
 
-# PWD to OpenMapTiles environment ---------------------------------------------
-cd openmaptiles
+
+# ========== PWD to OpenMapTiles environment ==================================
+# =============================================================================
+# =============================================================================
+#
+                             cd openmaptiles
+#
+# =============================================================================
+# =============================================================================
+
 
 ##  Min versions ... ----------------------------------------------------------
 MIN_COMPOSE_VER=1.7.1
@@ -200,15 +208,6 @@ echo "====> : Stop PostgreSQL service ( but we keep PostgreSQL data volume for d
 echo
 make stop-db
 
-echo "-------------------------------------------------------------------------------------"
-echo "====> : Inputs - Outputs md5sum for debugging "
-echo
-rm -f ./data/quickstart_checklist.chk
-{
-  find build data -type f -exec md5sum {} + | sort -k2
-} >> ./data/quickstart_checklist.chk
-cat ./data/quickstart_checklist.chk
-
 ENDTIME=$(date +%s)
 
 echo
@@ -236,4 +235,4 @@ cp "./data/$MBTILES_FILE" ../data
 echo
 echo "MBTILES output file is now available in ./data/$MBTILES_FILE"
 
-
+rm -rf data/
