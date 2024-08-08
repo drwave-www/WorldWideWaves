@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- TODO: temporary for maps testing purposes -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
@@ -10,6 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_foreground"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+
         <activity
             android:name=".activities.MainActivity"
             android:exported="false" />
@@ -29,6 +35,7 @@
             android:authorities="${applicationId}.androidx-startup"
             tools:node="remove">
         </provider>
+
     </application>
 
 </manifest>

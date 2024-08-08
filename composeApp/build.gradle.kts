@@ -40,6 +40,8 @@ android {
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
+    sourceSets["main"].assets.srcDirs("src/androidMain/assets")
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -76,6 +78,7 @@ android {
         debugImplementation(compose.uiTooling)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
+        implementation(libs.maplibre.android)
     }
 }
 

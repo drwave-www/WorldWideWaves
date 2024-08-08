@@ -154,5 +154,5 @@ fun WWWSocialNetworks(
             )
         }
     }
-    Spacer(modifier = Modifier.size(50.dp))
+    Spacer(modifier = Modifier.size(20.dp))
 }

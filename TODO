@@ -1,10 +1,30 @@
 
 Next:
-- use typography
-     ---> Créer une bibliothèque de composants standards WWW : WWWStandardText, ...
-- continue EventActivity
-- code coverage of current devs
 - replace all static sizes by configurables ones
+- scripting for events resources
+    - map tiles
+        - https://github.com/systemed/tilemaker
+          (pbf from http://download.geofabrik.de/)
+          ->? USEFUL for viewing too
+        - usage :
+            - check for info about no server  https://gist.github.com/typebrook/7d25be326f0e9afd58e0bbc333d2a175
+            - or use file:// or asset://
+            - probably better, use tangram : https://github.com/tangrams/tangram-es?tab=readme-ov-file
+                --> ok should work with a mbtiles file source in tangram
+            - OK: utiliser maplibre native
+                --> https://maplibre.org/maplibre-native/docs/book/android/location-component-guide.html
+                --> ex: https://github.com/typebrook/mapstew-android/blob/3c6190b401/app/src/main/java/io/typebrook/mapstew/map/MaplibreFragment.kt#L125
+        - extract area : https://extract.bbbike.org/
+        - bounding box  :https://boundingbox.klokantech.com/
+        - implem: https://medium.com/@ty2/how-to-display-offline-maps-using-maplibre-mapbox-39ad0f3c7543
+    - geojson of the shape
+    - openAI: images + descriptions
+    - generate/update JSON
+- !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
+    --> think strategy before (inject, cache, preload, post-install init, etc...)
+    --> write tests before
+- code coverage of current devs
+
 
 Other:
 - Fill-in FAQ Contents

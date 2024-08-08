@@ -10,3 +10,5 @@
   --> https://peteris.rocks/blog/openstreetmap-administrative-boundaries-in-geojson/
 
 - generate images / descriptions / other etc...
+
+- apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr

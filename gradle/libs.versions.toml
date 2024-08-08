@@ -33,6 +33,7 @@ annotationJvm = "1.8.0"
 dataStorePreferences = "1.1.1"
 kotlinxAtomic = "0.24.0"
 koin = "3.2.0"
+maplibreAndroid = "11.1.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -69,7 +70,7 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
-
+maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibreAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
