@@ -31,7 +31,7 @@ mkdir -p ./data
 [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
 
 # ---------- Vars and support functions ---------------------------------------
-. lib.inc.sh
+. ./libs/lib.inc.sh
 
 # ----------
 
@@ -51,9 +51,9 @@ for event in $EVENTS; do # Download OSM area as PBF file
   [ ! -f $DPBF ] && osmconvert $SPBF -b=$BBOX -o=$DPBF
 
   echo "-- Generates OpenMapTiles environment for event $event"
-  tpl $event .env-template data/.env-${event}
+  tpl $event templates/.env-template data/.env-${event}
 
   echo "-- Generates OpenMapTiles tileset definition for event $event"
-  tpl $event template-omt.yaml data/${event}.yaml
+  tpl $event templates/template-omt.yaml data/${event}.yaml
 
 done

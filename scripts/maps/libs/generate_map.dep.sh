@@ -20,7 +20,7 @@
 #
 # CALL: ./generate_map.sh [--empty] event_id
 #
-cd "$(dirname "$0")"
+cd "$(dirname "$0")"/..
 
 set -o errexit
 set -o pipefail

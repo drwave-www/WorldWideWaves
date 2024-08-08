@@ -29,7 +29,7 @@ cd "$(dirname "$0")" # always work from executable folder
 [ ! -d openmaptiles ] && git clone git@github.com:openmaptiles/openmaptiles.git && rm -rf openmaptiles/.git
 
 # ---------- Vars and support functions ---------------------------------------
-. lib.inc.sh
+. ./libs/lib.inc.sh
 
 # ----------
 
@@ -38,6 +38,6 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
 
   echo "==> EVENT $event"
   echo
-  ./generate_map.dep.sh $event
+  ./libs/generate_map.dep.sh $event
 
 done
