@@ -49,7 +49,7 @@ if [ ! -f ./data/.env-$area ]; then
   echo "Environment has not been created for area $area, launch './download.sh' in parent directory, ensure an event has been configured too in ../../events.yaml"
   exit 1
 else
-  cat .env-global ./data/.env-$area > ./openmaptiles/.env
+  cat .omt-env-global ./data/.env-$area > ./openmaptiles/.env
   cp ./data/${area}.yaml openmaptiles/
 fi
 
