@@ -90,7 +90,7 @@ class WWWEventTest {
     @Test
     fun testGetStartDateTimeAsLocal() {
         val expectedDateTime = LocalDateTime.parse("2024-03-15T18:00")
-        assertEquals(expectedDateTime, testEvent.getStartDateTime())
+        assertEquals(expectedDateTime, testEvent.getStartDateTimeAsLocal())
     }
 }
 

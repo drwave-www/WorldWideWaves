@@ -81,7 +81,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWI
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.WWWEvent
@@ -301,7 +300,6 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 @Composable
 private fun EventNumbers(event: WWWEvent) {
     val eventNumbers = remember { mutableStateMapOf<StringResource, String>() }
-    val eventTimeZone = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
     // Retrieve wave numbers and frequently update progession
@@ -317,7 +315,6 @@ private fun EventNumbers(event: WWWEvent) {
                     ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
                     ShRes.string.wave_progression to waveNumbers.waveProgression
             ))
-            eventTimeZone.value = waveNumbers.waveTimezone
             while (event.isRunning()) {
                 delay(WAVE_REFRESH_INTERVAL)
                 val newProgressionValue = event.wave.getLiteralProgression()
@@ -358,7 +355,6 @@ private fun EventNumbers(event: WWWEvent) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Label
                         Text(
                             text = stringResource(key),
                             color = quinaryLight,
@@ -366,33 +362,17 @@ private fun EventNumbers(event: WWWEvent) {
                             fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp,
                             fontWeight = FontWeight.Black
                         )
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            // Value
-                            Text(
-                                text = value,
-                                color = when (key) {
-                                    ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                                    ShRes.string.wave_start_time -> Color.Yellow
-                                    else -> MaterialTheme.colorScheme.primary
-                                },
-                                fontFamily = extraFontFamily,
-                                fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            // optional Timezone
-                            if (key in listOf(ShRes.string.wave_start_time, ShRes.string.wave_end_time)) {
-                                Text(
-                                    text = " ${eventTimeZone.value}",
-                                    color = when (key) {
-                                        ShRes.string.wave_start_time -> Color.Yellow
-                                        else -> MaterialTheme.colorScheme.primary
-                                    },
-                                    fontFamily = extraFontFamily,
-                                    fontSize = DIM_EVENT_NUMBERS_TZ_FONTSIZE.sp,
-                                    fontWeight = FontWeight.Light
-                                )
-                            }
-                        }
+                        Text(
+                            text = value,
+                            color = when (key) {
+                                ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                ShRes.string.wave_start_time -> Color.Yellow
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            fontFamily = extraFontFamily,
+                            fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
+                            fontWeight = FontWeight.Black
+                        )
                     }
                     Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                 }

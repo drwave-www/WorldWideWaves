@@ -1,9 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
-
 /*
  * Copyright 2024 DrWave
  *
@@ -26,7 +22,6 @@ import kotlinx.datetime.offsetAt
 
 
 data class WaveNumbers(
-    val waveTimezone: String,
     val waveSpeed: String,
     val waveStartTime: String,
     val waveEndTime: String,
@@ -36,61 +31,15 @@ data class WaveNumbers(
 
 // ---------------------------
 
-abstract class WWWEventWave {
+interface WWWEventWave {
 
-    abstract val event: WWWEvent
-    private var cachedLiteralStartTime: String? = null
+    suspend fun getAllNumbers(): WaveNumbers
 
-    abstract suspend fun getAllNumbers(): WaveNumbers
+    fun getLiteralStartTime(): String
+    fun getLiteralSpeed(): String
 
-    abstract suspend fun getLiteralEndTime(): String
-    abstract suspend fun getLiteralTotalTime(): String
-    abstract suspend fun getLiteralProgression(): String
-
-    // ---------------------------
-
-    /**
-     * Retrieves the literal speed of the event in meters per second.
-     *
-     * This function returns the speed of the event as a string formatted with "m/s".
-     *
-     * @return A string representing the speed of the event in meters per second.
-     */
-    fun getLiteralSpeed(): String = "${event.speed} m/s"
-
-    /**
-     * Retrieves the literal start time of the event in "HH:mm" format.
-     *
-     * This function first checks if the start time has been cached. If it has, it returns the cached value.
-     * If not, it calculates the start time by converting the event's start date and time to a local `LocalDateTime`,
-     * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
-     *
-     * @return A string representing the start time of the event in "HH:mm" format.
-     */
-    fun getLiteralStartTime(): String {
-        return cachedLiteralStartTime ?: event.getStartDateTime().let { localDateTime ->
-            val hour = localDateTime.hour.toString().padStart(2, '0')
-            val minute = localDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute"
-        }.also { cachedLiteralStartTime = it }
-    }
-
-    /**
-     * Retrieves the event's time zone offset in the form "UTC+x".
-     *
-     * This function calculates the current offset of the event's time zone from UTC
-     * and returns it as a string in the format "UTC+x".
-     *
-     * @return A string representing the event's time zone offset in the form "UTC+x".
-     */
-    fun getLiteralTimezone(): String {
-        val offset = TimeZone.of(event.timeZone).offsetAt(Clock.System.now())
-        val hoursOffset = offset.totalSeconds / 3600
-        return when {
-            hoursOffset == 0 -> "UTC"
-            hoursOffset > 0 -> "UTC+$hoursOffset"
-            else -> "UTC$hoursOffset"
-        }
-    }
+    suspend fun getLiteralEndTime(): String
+    suspend fun getLiteralTotalTime(): String
+    suspend fun getLiteralProgression(): String
 
 }

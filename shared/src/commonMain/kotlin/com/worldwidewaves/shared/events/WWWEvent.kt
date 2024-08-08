@@ -105,7 +105,7 @@ fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
  *
  * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
  */
-fun WWWEvent.getStartDateTime(): LocalDateTime =
+fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime =
     LocalDateTime.parse("${date}T${startHour}")
         .toInstant(getTimeZone())
         .toLocalDateTime(getTimeZone())
