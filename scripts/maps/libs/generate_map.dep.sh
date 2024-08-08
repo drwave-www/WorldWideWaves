@@ -220,11 +220,6 @@ echo "      : Hint: you can remove with:  docker rmi IMAGE "
 echo
 docker images | grep openmaptiles
 
-echo "====> : (disk space) We have created the new vectortiles ( ./data/$MBTILES_FILE ) "
-echo "      : Data directory content:"
-echo
-ls -la ./data
-
 echo "-------------------------------------------------------------------------------------"
 echo "The generation for  $area  is finished! "
 echo "It took $((ENDTIME - STARTTIME)) seconds to complete"
