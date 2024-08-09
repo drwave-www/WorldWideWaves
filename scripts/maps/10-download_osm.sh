@@ -39,8 +39,8 @@ for event in $EVENTS; do # Download OSM area as PBF file
                          # and generates a dedicated PBF file for corresponding BBOX
                          # EVENTS is defined in lib.inc.sh
   echo "==> EVENT $event"
-  BBOX=$(conf $event bbox)
-  AREA=$(conf $event osmarea)
+  BBOX=$(conf $event mapBbox)
+  AREA=$(conf $event mapOsmarea)
   SPBF=data/osm-$(echo $AREA | sed -e 's/\//_/g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 

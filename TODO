@@ -1,7 +1,5 @@
 
 Next:
-- merge events.json and events.json (to YAML)
-- use shared to store map data (moves in composeResources/files/maps and maps/tiles
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => center to default center
