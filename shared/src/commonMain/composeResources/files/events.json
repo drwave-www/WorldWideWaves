@@ -16,6 +16,7 @@
     "mapCenter": "48.8619,2.3417,14",
     "mapMinzoom": 10,
     "mapMaxzoom": 14,
+    "mapDefaultzoom": 13,
     "mapLanguage": "fr",
     "mapOsmarea": "europe/france/ile-de-france"
   },

@@ -52,9 +52,22 @@ data class WWWEvent(
     val mapCenter: String,
     val mapMinzoom: Int,
     val mapMaxzoom: Int,
+    val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
     val mapOsmarea: String
 )
+
+// ---------------------------
+
+fun WWWEvent.getMapCenter(): Pair<Double, Double> {
+    val (lat, lng) = this.mapCenter.split(",").map { it.toDouble() }
+    return Pair(lat, lng)
+}
+
+fun WWWEvent.getMapBbox(): List<Double> {
+    // swLng, swLat, neLng, neLat
+    return this.mapBbox.split(",").map { it.toDouble() }
+}
 
 // ---------------------------
 

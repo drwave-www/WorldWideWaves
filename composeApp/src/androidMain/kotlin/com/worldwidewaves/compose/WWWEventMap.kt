@@ -17,12 +17,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.getMapBbox
+import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -50,19 +53,22 @@ import java.io.File
 
 class WWWEventMap(private val event : WWWEvent) {
 
+    enum class CameraPosition {
+        BOUNDS,
+        DEFAULT_CENTER
+    }
+
     @Composable
-    fun Screen(modifier: Modifier) {
+    fun Screen(
+        modifier: Modifier,
+        initialCameraPosition: CameraPosition? = CameraPosition.BOUNDS,
+    ) {
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
 
         LaunchedEffect(event) {
             styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
-
-        val bounds = LatLngBounds.Builder()
-            .include(LatLng(48.812848, 2.242911)) // Southwest corner
-            .include(LatLng(48.905836, 2.418073)) // Northeast corner
-            .build()
 
         AndroidView(
             modifier = modifier.fillMaxWidth().height(300.dp),
@@ -75,29 +81,50 @@ class WWWEventMap(private val event : WWWEvent) {
                     styleUri.value?.let { uri ->
                         map.setStyle(Style.Builder().fromUri(uri.toString())) {
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
-                            // Set the map view center
-                            map.cameraPosition = CameraPosition.Builder()
-                                .target(LatLng(48.8619, 2.3417))
-                                .zoom(14.0)
-                                .bearing(2.0)
-                                .build()
                         }
                     }
 
-                    map.addOnMapClickListener {
-                        // Handle map click events
-                        val t = map
-                        true
-                    }
+//                    map.addOnMapClickListener {
+//                        // Handle map click events
+//                        val t = map
+//                        true
+//                    }
 
-                    map.animateCamera(
-                        CameraUpdateFactory.newLatLngBounds(
-                            bounds, 50
-                        )
-                    )
+                    this.setCameraPosition(initialCameraPosition, map)
+
                 }
             }
         )
+    }
+
+    // -- Private functions ---------------------------------------------------
+
+    private fun setCameraPosition(
+        initialCameraPosition: CameraPosition?,
+        map: MapLibreMap
+    ) {
+        when (initialCameraPosition) {
+            CameraPosition.DEFAULT_CENTER -> {
+                val (cLat, cLng) = event.getMapCenter()
+                map.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(cLat, cLng),
+                        event.mapDefaultzoom ?: event.mapMinzoom.toDouble()
+                    )
+                )
+            }
+
+            CameraPosition.BOUNDS -> {
+                val (swLng, swLat, neLng, neLat) = event.getMapBbox()
+                val bounds = LatLngBounds.Builder()
+                    .include(LatLng(swLat, swLng)) // Southwest corner
+                    .include(LatLng(neLat, neLng)) // Northeast corner
+                    .build()
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, -20))
+            }
+
+            null -> {}
+        }
     }
 
 }
