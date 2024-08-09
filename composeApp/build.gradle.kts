@@ -94,4 +94,5 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.location)
 }

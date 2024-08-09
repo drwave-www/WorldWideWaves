@@ -24,6 +24,8 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
+import com.worldwidewaves.utils.RequestLocationPermission
+import com.worldwidewaves.utils.getUserLocation
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -71,22 +73,41 @@ class WWWEventMap(private val event: WWWEvent) {
         modifier: Modifier,
         initialCameraPosition: CameraPosition? = CameraPosition.BOUNDS,
     ) {
+        val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
+        val userLocation = remember { mutableStateOf(LatLng(0.0, 0.0)) }
+
+        RequestLocationPermission()
 
         // Prepare location marker
-        var symbolManager: SymbolManager
-        var symbol: Symbol
+        val symbolManager = remember { mutableStateOf<SymbolManager?>(null) }
+        val symbol = remember { mutableStateOf<Symbol?>(null) }
         val drawable = ResourcesCompat.getDrawable(
             (AndroidPlatform.getContext() as Context).resources,
             R.drawable.position_marker, null
         )
         val markerBitmap = remember { BitmapUtils.getBitmapFromDrawable(drawable)!! }
 
-        LaunchedEffect(event) {
+        LaunchedEffect(Unit) {
             styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
 
+        // Frequently update the user location for GPS tracking
+        LaunchedEffect(Unit) {
+            getUserLocation(context) { userLocation.value = it }
+        }
+
+        // Update the position marker on user location change
+        LaunchedEffect(userLocation.value) {
+            symbolManager.value?.update(
+                symbol.value?.apply {
+                    latLng = userLocation.value
+                }
+            )
+        }
+
+        // The map view
         AndroidView(
             modifier = modifier
                 .fillMaxWidth()
@@ -102,23 +123,23 @@ class WWWEventMap(private val event: WWWEvent) {
                         ) { style ->
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
+                            // Add location marker
                             val (cLat, cLng) = event.getMapCenter() // TODO: change this for location
-                            symbolManager = SymbolManager(mapView, map, style)
-                            symbolManager.iconAllowOverlap = true
-                            symbolManager.iconIgnorePlacement = true
-                            symbol = symbolManager.create(
+                            symbolManager.value = SymbolManager(mapView, map, style)
+                            symbolManager.value!!.iconAllowOverlap = true
+                            symbolManager.value!!.iconIgnorePlacement = true
+                            symbol.value = symbolManager.value!!.create(
                                 SymbolOptions()
                                     .withLatLng(LatLng(cLat, cLng))
                                     .withIconImage("position-marker")
                                     .withIconSize(0.2f)
                                     .withIconAnchor("bottom")
                             )
-                            symbolManager.update(symbol)
+                            symbolManager.value!!.update(symbol.value!!)
                         }
                     }
 
-                    this.setCameraPosition(initialCameraPosition, map)
-
+                    setCameraPosition(initialCameraPosition, map)
                 }
             }
         )
@@ -180,13 +201,16 @@ fun rememberMapViewWithLifecycle(): MapView {
         maxZoomPreference(14.0)
         minZoomPreference(10.0)
         localIdeographFontFamily("Droid Sans")
-        zoomGesturesEnabled(true)
+
         compassEnabled(true)
         compassFadesWhenFacingNorth(true)
-        scrollGesturesEnabled(true)
-        rotateGesturesEnabled(true)
-        tiltGesturesEnabled(true)
-        debugActive(true)
+
+        zoomGesturesEnabled(false)
+        scrollGesturesEnabled(false)
+        horizontalScrollGesturesEnabled(false)
+        rotateGesturesEnabled(false)
+        tiltGesturesEnabled(false)
+        doubleTapGesturesEnabled(false)
     }
     MapLibre.getInstance(context)
 

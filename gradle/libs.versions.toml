@@ -29,6 +29,7 @@ kotlinxAtomic = "0.24.0"
 koin = "3.2.0"
 maplibreAndroid = "11.1.0"
 maplibreAndroidAnnotation = "3.0.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -59,6 +60,7 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibreAndroid" }
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]
