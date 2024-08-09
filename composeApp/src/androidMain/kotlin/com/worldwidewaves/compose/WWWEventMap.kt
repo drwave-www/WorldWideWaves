@@ -2,6 +2,7 @@ package com.worldwidewaves.compose
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
@@ -119,12 +120,14 @@ class WWWEventMap(private val event: WWWEvent) {
                             val locationComponentOptions =
                                 LocationComponentOptions.builder(context)
                                     .pulseEnabled(true)
+                                    .pulseColor(Color.RED)
+                                    .foregroundTintColor(Color.BLACK)
                                     .build()
                             val locationComponentActivationOptions =
                                 buildLocationComponentActivationOptions(context, style, locationComponentOptions)
                             locationComponent.value!!.activateLocationComponent(locationComponentActivationOptions)
                             locationComponent.value!!.isLocationComponentEnabled = true
-                            locationComponent.value!!.cameraMode = CameraMode.TRACKING
+                            locationComponent.value!!.cameraMode = CameraMode.NONE
                         }
                     }
 
