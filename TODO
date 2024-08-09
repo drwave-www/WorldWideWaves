@@ -3,19 +3,25 @@ Next:
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => center to default center
-- find the right style + setup for the map
 - manage with location
 - scripting for events resources
     - geojson of the shape
     - openAI: images + descriptions
+
+- find the right style + setup for the map
+
 - !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
     --> think strategy before (inject, cache, preload, post-install init, etc...)
     --> write tests before
-- show wave progression layer on map
-- round2 : routing on streets
- - replace all static sizes by configurables ones
-- code coverage of current devs
 
+- show wave progression layer on map
+
+- round2 : routing on streets
+
+Cleanings :
+- replace all static sizes by configurables ones
+- code coverage of current devs
+- check cached files are renewed when app version evolves
 
 Other:
 - Fill-in FAQ Contents
@@ -45,3 +51,8 @@ Debug:
      ==> uniquemment si l'option setting 'activate simulation's est activé
           ==> ajouter une option 'simulate position' dans les settings sinon prendre la position réelle
 
+Ideas:
+- Section d'information / apprentissage - youtube videos
+    - video promo des ONG participantes
+    - videos explicatives WWW
+    - par pays / events

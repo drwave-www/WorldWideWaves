@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -33,6 +34,7 @@ import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.MissingResourceException
 import java.io.File
 import java.lang.ref.WeakReference
 
@@ -93,24 +95,30 @@ actual fun getEventImage(type: String, id: String): Any? {
 // --- Platform-specific API ---
 
 @OptIn(ExperimentalResourceApi::class)
-actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String {
+actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String? {
     val context = AndroidPlatform.getContext() as Context
-    val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.mbtiles")
-    val assetSize = fileBytes.size
     val cacheDir = context.cacheDir
     val cachedFile = File(cacheDir, "$eventId.mbtiles")
 
-    if (cachedFile.exists()) {
-        val cachedFileSize = cachedFile.length().toInt()
-        if (cachedFileSize == assetSize) {
-            return cachedFile.absolutePath
-        }
-    }
+    return try {
+        val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.mbtiles")
+        val assetSize = fileBytes.size
 
-    cachedFile.outputStream().use { outputStream ->
-        outputStream.write(fileBytes)
+        if (cachedFile.exists()) {
+            val cachedFileSize = cachedFile.length().toInt()
+            if (cachedFileSize == assetSize) {
+                return cachedFile.absolutePath
+            }
+        }
+
+        cachedFile.outputStream().use { outputStream ->
+            outputStream.write(fileBytes)
+        }
+        cachedFile.absolutePath
+    } catch (e: MissingResourceException) {
+        Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
+        null
     }
-    return cachedFile.absolutePath
 }
 
 actual fun cachedFileExists(fileName: String): Boolean {
@@ -120,10 +128,10 @@ actual fun cachedFileExists(fileName: String): Boolean {
     return file.exists()
 }
 
-actual fun cachedFilePath(fileName: String): String {
+actual fun cachedFilePath(fileName: String): String? {
     val context = AndroidPlatform.getContext() as Context
     val file = File(context.cacheDir, fileName)
-    return file.toURI().path
+    return if (file.exists()) file.toURI().path else null
 }
 
 actual fun cacheStringToFile(fileName: String, content: String) {

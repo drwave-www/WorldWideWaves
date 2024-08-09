@@ -31,8 +31,8 @@ expect fun getPlatform(): WWWPlatform
 
 expect fun getEventImage(type: String, id: String): Any?
 
-expect suspend fun getMBTilesAbsoluteFilePath(eventId: String): String
+expect suspend fun getMBTilesAbsoluteFilePath(eventId: String): String?
 
 expect fun cachedFileExists(fileName: String): Boolean
-expect fun cachedFilePath(fileName: String): String
+expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String)

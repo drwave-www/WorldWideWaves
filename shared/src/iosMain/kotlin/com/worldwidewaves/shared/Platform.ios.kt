@@ -37,7 +37,7 @@ actual fun getEventImage(type: String, id: String): Any? {
     TODO("Not yet implemented")
 }
 
-actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String {
+actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String? {
     TODO("Not yet implemented")
 }
 
@@ -47,10 +47,10 @@ actual fun cachedFileExists(fileName: String): Boolean {
     return NSFileManager.defaultManager.fileExistsAtPath(filePath)
 }
 
-actual fun cachedFilePath(fileName: String): String {
+actual fun cachedFilePath(fileName: String): String? {
     val cacheDir = getCacheDir()
     val filePath = "$cacheDir/$fileName"
-    return NSURL.fileURLWithPath(filePath).absoluteString ?: ""
+    return NSURL.fileURLWithPath(filePath).absoluteString
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)

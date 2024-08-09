@@ -92,8 +92,8 @@ fun WWWEvent.getFormattedSimpleDate(): String {
 // ---------------------------
 
 @OptIn(ExperimentalResourceApi::class)
-suspend fun WWWEvent.getMapStyleUri(): String {
-    val mbtilesFilePath = getMBTilesAbsoluteFilePath(this.id)
+suspend fun WWWEvent.getMapStyleUri(): String? {
+    val mbtilesFilePath = getMBTilesAbsoluteFilePath(this.id) ?: return null
     val styleFilename = "style-${this.id}.json"
 
     //if (cachedFileExists(styleFilename)) { // TODO: better manage cache

@@ -56,7 +56,7 @@ class WWWEventMap(private val event : WWWEvent) {
         val styleUri = remember { mutableStateOf<Uri?>(null) }
 
         LaunchedEffect(event) {
-            styleUri.value = Uri.fromFile(File(event.getMapStyleUri()))
+            styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
 
         val bounds = LatLngBounds.Builder()
