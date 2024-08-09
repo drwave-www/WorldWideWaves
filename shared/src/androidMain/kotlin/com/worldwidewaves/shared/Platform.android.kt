@@ -46,7 +46,8 @@ object AndroidPlatform : WWWPlatform {
     // private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
 
     private val context: Context
-        get() = _contextRef?.get() ?: throw UninitializedPropertyAccessException("com.worldwidewaves.shared.AndroidPlatform must be initialized with a context before use.")
+        get() = _contextRef?.get()
+            ?: throw UninitializedPropertyAccessException("com.worldwidewaves.shared.AndroidPlatform must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
@@ -78,16 +79,19 @@ actual fun getEventImage(type: String, id: String): Any? {
             "world" -> Res.drawable.e_location_world
             else -> Res.drawable.not_found
         }
+
         "community" -> when (id) {
             "europe" -> Res.drawable.e_community_europe
             "usa" -> Res.drawable.e_community_usa
             else -> Res.drawable.not_found
         }
+
         "country" -> when (id) {
             "brazil" -> Res.drawable.e_country_brazil
             "france" -> Res.drawable.e_country_france
             else -> Res.drawable.not_found
         }
+
         else -> Res.drawable.not_found
     }
 }

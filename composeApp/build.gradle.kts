@@ -15,7 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -79,6 +79,7 @@ android {
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
         implementation(libs.maplibre.android)
+        implementation(libs.maplibre.android.annotation)
     }
 }
 

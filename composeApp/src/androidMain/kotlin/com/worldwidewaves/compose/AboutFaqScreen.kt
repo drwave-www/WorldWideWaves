@@ -185,8 +185,8 @@ class AboutFaqScreen : TabScreen {
                 FAQDividerLine()
                 faq_contents.forEachIndexed { index, (question, answer) ->
                     FAQItem(index, question, answer,
-                            expandedFaqItem,
-                            onExpand = { expandedFaqItem = it })
+                        expandedFaqItem,
+                        onExpand = { expandedFaqItem = it })
                     FAQDividerLine()
                 }
 

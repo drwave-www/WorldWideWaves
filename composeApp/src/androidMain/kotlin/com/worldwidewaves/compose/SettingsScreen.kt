@@ -36,7 +36,7 @@ class SettingsScreen : TabScreen {
     @Composable
     override fun Screen(modifier: Modifier) {
         Box(modifier = modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
-            Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,)
+            Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily)
         }
     }
 

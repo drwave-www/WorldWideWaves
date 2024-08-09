@@ -260,7 +260,11 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    private fun EventOverlay(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+    private fun EventOverlay(
+        viewModel: EventsViewModel,
+        event: WWWEvent,
+        modifier: Modifier = Modifier
+    ) {
         val heightModifier = Modifier.height(159.dp)
 
         Box(modifier = heightModifier) {
@@ -282,7 +286,10 @@ class EventsListScreen(
     }
 
     @Composable
-    private fun EventOverlayCountryAndCommunityFlags(event: WWWEvent, modifier: Modifier = Modifier) {
+    private fun EventOverlayCountryAndCommunityFlags(
+        event: WWWEvent,
+        modifier: Modifier = Modifier
+    ) {
         Column(
             modifier = modifier.fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
@@ -306,7 +313,11 @@ class EventsListScreen(
     }
 
     @Composable
-    private fun EventFlag(modifier: Modifier, imageResource: DrawableResource, contentDescription: String) {
+    private fun EventFlag(
+        modifier: Modifier,
+        imageResource: DrawableResource,
+        contentDescription: String
+    ) {
         Image(
             modifier = modifier
                 .width(65.dp)
@@ -318,7 +329,11 @@ class EventsListScreen(
     }
 
     @Composable
-    private fun EventOverlayFavorite(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+    private fun EventOverlayFavorite(
+        viewModel: EventsViewModel,
+        event: WWWEvent,
+        modifier: Modifier = Modifier
+    ) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
         val scope = rememberCoroutineScope()
 
@@ -326,10 +341,13 @@ class EventsListScreen(
             isFavorite = event.favorite
         }
 
-        Box(modifier = modifier
-            .fillMaxSize()
-            .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd) {
-            Surface(modifier = Modifier.clip(CircleShape),
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd
+        ) {
+            Surface(
+                modifier = Modifier.clip(CircleShape),
                 color = MaterialTheme.colorScheme.primary
             ) {
                 Image(

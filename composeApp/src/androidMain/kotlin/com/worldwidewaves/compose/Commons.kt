@@ -70,7 +70,9 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
         }
 
         Box(
-            modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .offset(y = (-5).dp),
             contentAlignment = Alignment.TopEnd
         ) {
             Box(

@@ -61,10 +61,12 @@ private val tabInfo = listOf(
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
 
-    private val tabManager = TabManager(listOf(
-        aboutInfoScreen,
-        aboutFaqScreen
-    )) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
+    private val tabManager = TabManager(
+        listOf(
+            aboutInfoScreen,
+            aboutFaqScreen
+        )
+    ) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
 
     // ----------------------------
 
@@ -84,7 +86,9 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     @Composable
     private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
         Box(
-            modifier = Modifier.height(60.dp).width(150.dp),
+            modifier = Modifier
+                .height(60.dp)
+                .width(150.dp),
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
@@ -134,7 +138,9 @@ fun AboutWWWLogo() {
     Image(
         painter = painterResource(Res.drawable.www_logo_transparent),
         contentDescription = stringResource(Res.string.logo_description),
-        modifier = Modifier.width(250.dp).padding(top = 10.dp)
+        modifier = Modifier
+            .width(250.dp)
+            .padding(top = 10.dp)
     )
     Spacer(modifier = Modifier.size(20.dp))
 }

@@ -232,14 +232,18 @@ private fun WWWEventSocialNetworks(event: WWWEvent) {
 
 @Composable
 private fun GeolocalizeMe() {
-    Row(modifier = Modifier.height(45.dp).padding(start = 20.dp, end = 20.dp),
+    Row(
+        modifier = Modifier
+            .height(45.dp)
+            .padding(start = 20.dp, end = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(modifier = Modifier
-            .border(2.dp, MaterialTheme.colorScheme.primary)
-            .fillMaxHeight()
-            .weight(1f),
+        Box(
+            modifier = Modifier
+                .border(2.dp, MaterialTheme.colorScheme.primary)
+                .fillMaxHeight()
+                .weight(1f),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -250,7 +254,8 @@ private fun GeolocalizeMe() {
             )
         }
         Spacer(modifier = Modifier.size(20.dp))
-        Surface(modifier = Modifier.clip(CircleShape),
+        Surface(
+            modifier = Modifier.clip(CircleShape),
             color = MaterialTheme.colorScheme.primary
         ) {
             Image(

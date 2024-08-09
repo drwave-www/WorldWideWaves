@@ -1,6 +1,6 @@
 
 Next:
-- screen for event main screen : default zoom + loc + geojson
+- screen for event main screen : loc + geojson
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => center to default center

@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
-    private var originalEvents : List<WWWEvent> = emptyList()
+    private var originalEvents: List<WWWEvent> = emptyList()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()

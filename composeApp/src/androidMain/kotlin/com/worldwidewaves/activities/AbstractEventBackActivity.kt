@@ -100,12 +100,17 @@ abstract class AbstractEventBackActivity : MainActivity() {
 
                 // Back layer
                 Row(
-                    modifier = Modifier.padding(start = 10.dp, top = 10.dp, bottom = 15.dp, end = 10.dp),
+                    modifier = Modifier.padding(
+                        start = 10.dp,
+                        top = 10.dp,
+                        bottom = 15.dp,
+                        end = 10.dp
+                    ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         modifier = Modifier.clickable(onClick = { finish() }),
-                        text = "< "+ stringResource(ShRes.string.back),
+                        text = "< " + stringResource(ShRes.string.back),
                         color = MaterialTheme.colorScheme.primary,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                         fontSize = 16.sp,
@@ -122,7 +127,8 @@ abstract class AbstractEventBackActivity : MainActivity() {
                 }
 
                 // Content Event screen
-                Box(modifier = Modifier
+                Box(
+                    modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                 ) { Screen(modifier = Modifier, event) }

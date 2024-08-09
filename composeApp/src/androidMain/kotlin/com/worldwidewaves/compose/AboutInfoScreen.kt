@@ -65,7 +65,8 @@ class AboutInfoScreen : TabScreen {
         val state = rememberLazyListState()
 
         Box(modifier = modifier) {
-            LazyColumn(state = state,
+            LazyColumn(
+                state = state,
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

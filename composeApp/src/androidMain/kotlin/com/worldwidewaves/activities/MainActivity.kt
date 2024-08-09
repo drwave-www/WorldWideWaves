@@ -63,11 +63,13 @@ open class MainActivity : AppCompatActivity() {
     private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
 
-    protected val tabManager = TabManager(listOf(
-        eventsListScreen,
-        aboutScreen,
-        settingsScreen
-    )) { isSelected, tabIndex, contentDescription ->
+    protected val tabManager = TabManager(
+        listOf(
+            eventsListScreen,
+            aboutScreen,
+            settingsScreen
+        )
+    ) { isSelected, tabIndex, contentDescription ->
         TabBarItem(isSelected, tabIndex, contentDescription)
     }
 

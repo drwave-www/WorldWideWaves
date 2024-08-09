@@ -32,8 +32,10 @@ import platform.Foundation.create
 import platform.Foundation.writeToFile
 import platform.UIKit.UIDevice
 
-class IOSPlatform: WWWPlatform {
-    override val name: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+class IOSPlatform : WWWPlatform {
+    override val name: String =
+        UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+
     override fun getContext(): Any {
         TODO("Not yet implemented")
     }
@@ -70,5 +72,9 @@ actual fun cacheStringToFile(fileName: String, content: String) {
 }
 
 private fun getCacheDir(): String {
-    return NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true).first() as String
+    return NSSearchPathForDirectoriesInDomains(
+        NSCachesDirectory,
+        NSUserDomainMask,
+        true
+    ).first() as String
 }

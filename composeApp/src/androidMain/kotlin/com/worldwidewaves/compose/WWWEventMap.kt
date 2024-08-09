@@ -1,5 +1,6 @@
 package com.worldwidewaves.compose
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +15,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.worldwidewaves.R
+import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
@@ -29,6 +33,10 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.plugins.annotation.Symbol
+import org.maplibre.android.plugins.annotation.SymbolManager
+import org.maplibre.android.plugins.annotation.SymbolOptions
+import org.maplibre.android.utils.BitmapUtils
 import java.io.File
 
 /*
@@ -51,7 +59,7 @@ import java.io.File
  * limitations under the License.
  */
 
-class WWWEventMap(private val event : WWWEvent) {
+class WWWEventMap(private val event: WWWEvent) {
 
     enum class CameraPosition {
         BOUNDS,
@@ -66,29 +74,48 @@ class WWWEventMap(private val event : WWWEvent) {
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
 
+        // Prepare location marker
+        var symbolManager: SymbolManager
+        var symbol: Symbol
+        val drawable = ResourcesCompat.getDrawable(
+            (AndroidPlatform.getContext() as Context).resources,
+            R.drawable.position_marker, null
+        )
+        val markerBitmap = remember { BitmapUtils.getBitmapFromDrawable(drawable)!! }
+
         LaunchedEffect(event) {
             styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
 
         AndroidView(
-            modifier = modifier.fillMaxWidth().height(300.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(300.dp),
             factory = { mapView },
             update = { mv ->
                 mv.getMapAsync { map ->
-                    val styleFileContents = // DEBUG
-                        styleUri.value?.let { it.path?.let { it1 -> File(it1).readText() } } // TODO debug
-
                     styleUri.value?.let { uri ->
-                        map.setStyle(Style.Builder().fromUri(uri.toString())) {
+                        map.setStyle(
+                            Style.Builder()
+                                .fromUri(uri.toString())
+                                .withImage("position-marker", markerBitmap)
+                        ) { style ->
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
+
+                            val (cLat, cLng) = event.getMapCenter() // TODO: change this for location
+                            symbolManager = SymbolManager(mapView, map, style)
+                            symbolManager.iconAllowOverlap = true
+                            symbolManager.iconIgnorePlacement = true
+                            symbol = symbolManager.create(
+                                SymbolOptions()
+                                    .withLatLng(LatLng(cLat, cLng))
+                                    .withIconImage("position-marker")
+                                    .withIconSize(0.2f)
+                                    .withIconAnchor("bottom")
+                            )
+                            symbolManager.update(symbol)
                         }
                     }
-
-//                    map.addOnMapClickListener {
-//                        // Handle map click events
-//                        val t = map
-//                        true
-//                    }
 
                     this.setCameraPosition(initialCameraPosition, map)
 
