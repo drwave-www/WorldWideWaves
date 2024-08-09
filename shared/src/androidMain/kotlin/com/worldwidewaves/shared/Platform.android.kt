@@ -32,6 +32,8 @@ import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_bra
 import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import java.io.File
 import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
@@ -65,7 +67,7 @@ object AndroidPlatform : WWWPlatform {
 
 actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
-actual fun getImage(type: String, id: String): Any? {
+actual fun getEventImage(type: String, id: String): Any? {
     return when (type) {
         "location" -> when (id) {
             "paris_france" -> Res.drawable.e_location_paris_france
@@ -86,4 +88,47 @@ actual fun getImage(type: String, id: String): Any? {
         }
         else -> Res.drawable.not_found
     }
+}
+
+// --- Platform-specific API ---
+
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String {
+    val context = AndroidPlatform.getContext() as Context
+    val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.mbtiles")
+    val assetSize = fileBytes.size
+    val cacheDir = context.cacheDir
+    val cachedFile = File(cacheDir, "$eventId.mbtiles")
+
+    if (cachedFile.exists()) {
+        val cachedFileSize = cachedFile.length().toInt()
+        if (cachedFileSize == assetSize) {
+            return cachedFile.absolutePath
+        }
+    }
+
+    cachedFile.outputStream().use { outputStream ->
+        outputStream.write(fileBytes)
+    }
+    return cachedFile.absolutePath
+}
+
+actual fun cachedFileExists(fileName: String): Boolean {
+    val context = AndroidPlatform.getContext() as Context
+    val cacheDir = context.cacheDir
+    val file = File(cacheDir, fileName)
+    return file.exists()
+}
+
+actual fun cachedFilePath(fileName: String): String {
+    val context = AndroidPlatform.getContext() as Context
+    val file = File(context.cacheDir, fileName)
+    return file.toURI().path
+}
+
+actual fun cacheStringToFile(fileName: String, content: String) {
+    val context = AndroidPlatform.getContext() as Context
+    val cacheDir = context.cacheDir
+    val file = File(cacheDir, fileName)
+    file.writeText(content)
 }

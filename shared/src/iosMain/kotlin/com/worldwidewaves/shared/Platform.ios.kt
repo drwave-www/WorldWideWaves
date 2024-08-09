@@ -19,6 +19,9 @@
  */
 package com.worldwidewaves.shared
 
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.*
 import platform.UIKit.UIDevice
 
 class IOSPlatform: WWWPlatform {
@@ -30,10 +33,34 @@ class IOSPlatform: WWWPlatform {
 
 actual fun getPlatform(): WWWPlatform = IOSPlatform()
 
-actual fun getImage(type: String, id: String): Any? {
+actual fun getEventImage(type: String, id: String): Any? {
     TODO("Not yet implemented")
 }
 
-//actual fun readEventsConfig(): String {
-//    return "" // TODO
-//}
+actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String {
+    TODO("Not yet implemented")
+}
+
+actual fun cachedFileExists(fileName: String): Boolean {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    return NSFileManager.defaultManager.fileExistsAtPath(filePath)
+}
+
+actual fun cachedFilePath(fileName: String): String {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    return NSURL.fileURLWithPath(filePath).absoluteString ?: ""
+}
+
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+actual fun cacheStringToFile(fileName: String, content: String) {
+    val cacheDir = getCacheDir()
+    val filePath = "$cacheDir/$fileName"
+    val nsString = NSString.create(string = content)
+    nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
+}
+
+private fun getCacheDir(): String {
+    return NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true).first() as String
+}

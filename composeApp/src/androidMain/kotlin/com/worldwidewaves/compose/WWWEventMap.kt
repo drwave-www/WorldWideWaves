@@ -1,12 +1,13 @@
 package com.worldwidewaves.compose
 
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,6 +17,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.getMapStyleUri
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -24,11 +26,7 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import java.io.BufferedWriter
 import java.io.File
-import java.io.FileOutputStream
-import java.io.FileWriter
-import java.io.InputStream
 
 /*
  * Copyright 2024 DrWave
@@ -55,9 +53,11 @@ class WWWEventMap(private val event : WWWEvent) {
     @Composable
     fun Screen(modifier: Modifier) {
         val mapView = rememberMapViewWithLifecycle()
-        val context = LocalContext.current
+        val styleUri = remember { mutableStateOf<Uri?>(null) }
 
-        val styleUri= getStyleUri(context, event.id)
+        LaunchedEffect(event) {
+            styleUri.value = Uri.fromFile(File(event.getMapStyleUri()))
+        }
 
         val bounds = LatLngBounds.Builder()
             .include(LatLng(48.812848, 2.242911)) // Southwest corner
@@ -65,34 +65,23 @@ class WWWEventMap(private val event : WWWEvent) {
             .build()
 
         AndroidView(
-            modifier = modifier.width(300.dp).height(300.dp),
+            modifier = modifier.fillMaxWidth().height(300.dp),
             factory = { mapView },
-            update = { mapView ->
-                mapView.getMapAsync { map ->
-//                        map.setStyle(
-//                            "https://api.maptiler.com/maps/58e6cfd1-716a-4195-b99e-8a6896e51812/style.json?key=Pe7kSmGevTDugaLmtlc9"
-//                        ) // TODO
-//                        {
-//                            map.uiSettings.setAttributionMargins(15, 0, 0, 15)
-//                            // Set the map view center
-//                            map.cameraPosition = CameraPosition.Builder()
-//                                .target(LatLng( 48.8619, 2.3417))
-//                                .zoom(14.0)
-//                                .bearing(2.0)
-//                                .build()
-//                        }
+            update = { mv ->
+                mv.getMapAsync { map ->
+                    val styleFileContents = // DEBUG
+                        styleUri.value?.let { it.path?.let { it1 -> File(it1).readText() } } // TODO debug
 
-                    val styleFileContents = File(styleUri.path).readText() // TODO debug
-
-                    map.setStyle(Style.Builder().fromUri(styleUri.toString()))
-                    {
-                        map.uiSettings.setAttributionMargins(15, 0, 0, 15)
-                        // Set the map view center
-                        map.cameraPosition = CameraPosition.Builder()
-                            .target(LatLng( 48.8619, 2.3417))
-                            .zoom(14.0)
-                            .bearing(2.0)
-                            .build()
+                    styleUri.value?.let { uri ->
+                        map.setStyle(Style.Builder().fromUri(uri.toString())) {
+                            map.uiSettings.setAttributionMargins(15, 0, 0, 15)
+                            // Set the map view center
+                            map.cameraPosition = CameraPosition.Builder()
+                                .target(LatLng(48.8619, 2.3417))
+                                .zoom(14.0)
+                                .bearing(2.0)
+                                .build()
+                        }
                     }
 
                     map.addOnMapClickListener {
@@ -174,54 +163,3 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
-
-// ----------------------------------------------------------
-
-fun getMBTilesAbsoluteFilePath(context: Context, fileName: String): String {
-    val inputStream: InputStream = context.assets.open(fileName)
-    val assetSize = inputStream.available()
-    val cacheDir = context.cacheDir
-    val cachedFile = File(cacheDir, fileName)
-
-    if (cachedFile.exists()) {
-        val cachedFileSize = cachedFile.length().toInt()
-        if (cachedFileSize == assetSize) {
-            inputStream.close()
-            return cachedFile.absolutePath
-        }
-    }
-
-    FileOutputStream(cachedFile).use { outputStream ->
-        inputStream.copyTo(outputStream)
-    }
-    inputStream.close()
-    return cachedFile.absolutePath
-}
-
-fun getStyleUri(context: Context, eventId: String): Uri {
-    val mbtilesFilePath = getMBTilesAbsoluteFilePath(context, "$eventId.mbtiles")
-    val cacheDir = context.cacheDir
-    val styleFile = File(cacheDir, "style-$eventId.json")
-
-    // Check if the cached JSON file already exists // TODO. uncomment
-    //if (styleFile.exists()) {
-    //    return Uri.fromFile(styleFile)
-    //}
-
-    val styleJsonInputStream: InputStream = context.assets.open("mapstyle.json")
-
-    // Copy the original JSON content to the new file
-    styleJsonInputStream.use { input ->
-        FileOutputStream(styleFile).use { output ->
-            input.copyTo(output)
-        }
-    }
-
-    // Replace the placeholder with the URI of the mbtiles file
-    val newFileStr = styleFile.readText().replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
-    BufferedWriter(FileWriter(styleFile)).use { out ->
-        out.write(newFileStr)
-    }
-
-    return Uri.fromFile(styleFile)
-}

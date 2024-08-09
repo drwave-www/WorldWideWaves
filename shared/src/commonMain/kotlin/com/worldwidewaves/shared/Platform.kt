@@ -29,4 +29,10 @@ interface WWWPlatform {
 
 expect fun getPlatform(): WWWPlatform
 
-expect fun getImage(type: String, id: String): Any? // expect
+expect fun getEventImage(type: String, id: String): Any?
+
+expect suspend fun getMBTilesAbsoluteFilePath(eventId: String): String
+
+expect fun cachedFileExists(fileName: String): Boolean
+expect fun cachedFilePath(fileName: String): String
+expect fun cacheStringToFile(fileName: String, content: String)

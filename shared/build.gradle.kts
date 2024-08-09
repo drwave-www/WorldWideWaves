@@ -38,7 +38,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(compose.runtime)
             implementation(compose.components.resources)
-            implementation(libs.kotlinx.datetime.v032)
+            //implementation(libs.kotlinx.datetime.v032)
             implementation(libs.androidx.annotation)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)

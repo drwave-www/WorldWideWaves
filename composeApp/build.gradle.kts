@@ -40,7 +40,7 @@ android {
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
-    sourceSets["main"].assets.srcDirs("src/androidMain/assets")
+    // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
 
 
     compileOptions {

@@ -20,11 +20,16 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.getImage
+import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getEventImage
+import com.worldwidewaves.shared.getMBTilesAbsoluteFilePath
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
@@ -61,9 +66,9 @@ fun WWWEvent.isRunning(): Boolean {
 
 // ---------------------------
 
-fun WWWEvent.getLocationImage(): Any? = getImage("location", this.id)
-fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getImage("community", it) }
-fun WWWEvent.getCountryImage(): Any? = this.country?.let { getImage("country", it) }
+fun WWWEvent.getLocationImage(): Any? = getEventImage("location", this.id)
+fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getEventImage("community", it) }
+fun WWWEvent.getCountryImage(): Any? = this.country?.let { getEventImage("country", it) }
 
 fun WWWEvent.getFormattedSimpleDate(): String {
     return try {
@@ -76,6 +81,28 @@ fun WWWEvent.getFormattedSimpleDate(): String {
     } catch (e: Exception) {
         "00/00"
     }
+}
+
+// ---------------------------
+
+@OptIn(ExperimentalResourceApi::class)
+suspend fun WWWEvent.getMapStyleUri(): String {
+    val mbtilesFilePath = getMBTilesAbsoluteFilePath(this.id)
+    val styleFilename = "style-${this.id}.json"
+
+    //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
+    //    return cachedFileUri(styleFilename)
+    //}
+
+    val styleJsonBytes: ByteArray = Res.readBytes("files/maps/mapstyle.json")
+    var newFileStr = styleJsonBytes.decodeToString()
+    newFileStr = newFileStr.replace(
+        "___FILE_URI___",
+        "mbtiles:///$mbtilesFilePath"
+    )
+    cacheStringToFile(styleFilename, newFileStr)
+
+    return cachedFilePath(styleFilename)
 }
 
 // ---------------------------
