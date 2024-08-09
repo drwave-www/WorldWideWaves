@@ -1,6 +1,5 @@
 - ensure that right layers are used
     --> generate all all check with maptiler / gqis
-- try size with wikipedia
 - run in mac if possible ?
 
 - find the right styles : https://github.com/openmaptiles/osm-bright-gl-style
@@ -10,5 +9,3 @@
   --> https://peteris.rocks/blog/openstreetmap-administrative-boundaries-in-geojson/
 
 - generate images / descriptions / other etc...
-
-- apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr

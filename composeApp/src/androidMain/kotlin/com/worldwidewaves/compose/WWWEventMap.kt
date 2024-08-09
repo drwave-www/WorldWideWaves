@@ -1,6 +1,8 @@
 package com.worldwidewaves.compose
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,30 +17,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.worldwidewaves.R
-import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
 import com.worldwidewaves.utils.RequestLocationPermission
-import com.worldwidewaves.utils.getUserLocation
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.location.LocationComponent
+import org.maplibre.android.location.LocationComponentActivationOptions
+import org.maplibre.android.location.LocationComponentOptions
+import org.maplibre.android.location.engine.LocationEngineRequest
+import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.plugins.annotation.Symbol
-import org.maplibre.android.plugins.annotation.SymbolManager
-import org.maplibre.android.plugins.annotation.SymbolOptions
-import org.maplibre.android.utils.BitmapUtils
 import java.io.File
 
 /*
@@ -68,6 +67,7 @@ class WWWEventMap(private val event: WWWEvent) {
         DEFAULT_CENTER
     }
 
+    @SuppressLint("MissingPermission")
     @Composable
     fun Screen(
         modifier: Modifier,
@@ -76,35 +76,27 @@ class WWWEventMap(private val event: WWWEvent) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
-        val userLocation = remember { mutableStateOf(LatLng(0.0, 0.0)) }
+
+        val locationComponent = remember { mutableStateOf<LocationComponent?>(null) }
+        val userLocation = remember { mutableStateOf<Location?>(null) }
 
         RequestLocationPermission()
 
-        // Prepare location marker
-        val symbolManager = remember { mutableStateOf<SymbolManager?>(null) }
-        val symbol = remember { mutableStateOf<Symbol?>(null) }
-        val drawable = ResourcesCompat.getDrawable(
-            (AndroidPlatform.getContext() as Context).resources,
-            R.drawable.position_marker, null
-        )
-        val markerBitmap = remember { BitmapUtils.getBitmapFromDrawable(drawable)!! }
-
+        // Setup Map properties
         LaunchedEffect(Unit) {
             styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
 
         // Frequently update the user location for GPS tracking
-        LaunchedEffect(Unit) {
-            getUserLocation(context) { userLocation.value = it }
-        }
+//        LaunchedEffect(Unit) {
+//            getUserLocation(context) { userLocation.value = it }
+//        }
 
         // Update the position marker on user location change
         LaunchedEffect(userLocation.value) {
-            symbolManager.value?.update(
-                symbol.value?.apply {
-                    latLng = userLocation.value
-                }
-            )
+            userLocation.value?.let {
+                locationComponent.value?.forceLocationUpdate(it)
+            }
         }
 
         // The map view
@@ -119,23 +111,20 @@ class WWWEventMap(private val event: WWWEvent) {
                         map.setStyle(
                             Style.Builder()
                                 .fromUri(uri.toString())
-                                .withImage("position-marker", markerBitmap)
                         ) { style ->
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
-                            // Add location marker
-                            val (cLat, cLng) = event.getMapCenter() // TODO: change this for location
-                            symbolManager.value = SymbolManager(mapView, map, style)
-                            symbolManager.value!!.iconAllowOverlap = true
-                            symbolManager.value!!.iconIgnorePlacement = true
-                            symbol.value = symbolManager.value!!.create(
-                                SymbolOptions()
-                                    .withLatLng(LatLng(cLat, cLng))
-                                    .withIconImage("position-marker")
-                                    .withIconSize(0.2f)
-                                    .withIconAnchor("bottom")
-                            )
-                            symbolManager.value!!.update(symbol.value!!)
+                            // Add a marker for the user's position
+                            locationComponent.value = map.locationComponent
+                            val locationComponentOptions =
+                                LocationComponentOptions.builder(context)
+                                    .pulseEnabled(true)
+                                    .build()
+                            val locationComponentActivationOptions =
+                                buildLocationComponentActivationOptions(context, style, locationComponentOptions)
+                            locationComponent.value!!.activateLocationComponent(locationComponentActivationOptions)
+                            locationComponent.value!!.isLocationComponentEnabled = true
+                            locationComponent.value!!.cameraMode = CameraMode.TRACKING
                         }
                     }
 
@@ -146,6 +135,24 @@ class WWWEventMap(private val event: WWWEvent) {
     }
 
     // -- Private functions ---------------------------------------------------
+
+    private fun buildLocationComponentActivationOptions(
+        context: Context,
+        style: Style,
+        locationComponentOptions: LocationComponentOptions
+    ): LocationComponentActivationOptions {
+        return LocationComponentActivationOptions
+            .builder(context, style)
+            .locationComponentOptions(locationComponentOptions)
+            .useDefaultLocationEngine(true)
+            .locationEngineRequest(
+                LocationEngineRequest.Builder(750)
+                    .setFastestInterval(750)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .build()
+            )
+            .build()
+    }
 
     private fun setCameraPosition(
         initialCameraPosition: CameraPosition?,

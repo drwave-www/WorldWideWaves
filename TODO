@@ -1,9 +1,12 @@
 
 Next:
-- screen for event main screen : loc + geojson
+- review code for location management : https://maplibre.org/maplibre-native/docs/book/android/location-component-guide.html
+- screen for event main screen : geojson
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => center to default center
+    => + general cleaning
+    => manage all cases for user location
 - manage with location
 - scripting for events resources
     - geojson of the shape
@@ -20,9 +23,11 @@ Next:
 - round2 : routing on streets
 
 Cleanings :
-- replace all static sizes by configurables ones
+- Compose: replace all static sizes by configurables ones
 - code coverage of current devs
 - check cached files are renewed when app version evolves
+- apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+- nettoyer tous les TODOs
 
 Other:
 - Fill-in FAQ Contents
