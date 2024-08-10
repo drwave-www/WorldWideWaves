@@ -21,7 +21,7 @@
 
 cd "$(dirname "$0")" # always work from executable folder
 
-set -x
+#set -x
 
 mkdir -p ./data
 
