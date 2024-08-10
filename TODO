@@ -11,6 +11,7 @@ Next:
     - openAI: images + descriptions
 
 - find the right style + setup for the map
+   --> one found, turn it into code in shared folder only using github copilot
 
 - !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
     --> think strategy before (inject, cache, preload, post-install init, etc...)

@@ -4,9 +4,10 @@ boundaries,
 fostering unity, community, and shared human experience by leveraging real-time coordination and
 location-based services.
 
-To get BBOX on specific city : http://polygons.openstreetmap.fr/
+To get BBOX on specific city : http://polygons.openstreetmap.fr/ or http://bboxfinder.com
 To get GEOjson data from OSM admin bounday : http://polygons.openstreetmap.fr/?id=71525
 Where admin ID is get from OSM
+To see the area of a specified bbox : https://www.openstreetmap.org/?minlon=2.2241&minlat=48.8156&maxlon=2.4699&maxlat=48.9022#map=13/48.8589/2.3470
 
 ## Project Structure
 
