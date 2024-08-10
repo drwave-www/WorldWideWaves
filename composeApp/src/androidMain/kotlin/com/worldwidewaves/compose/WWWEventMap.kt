@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -24,7 +25,6 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
-import com.worldwidewaves.shared.getMapFileAbsolutePath
 import com.worldwidewaves.utils.RequestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -40,15 +40,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.LineLayer
-import org.maplibre.android.style.layers.Property
-import org.maplibre.android.style.layers.PropertyFactory.lineCap
-import org.maplibre.android.style.layers.PropertyFactory.lineColor
-import org.maplibre.android.style.layers.PropertyFactory.lineJoin
-import org.maplibre.android.style.layers.PropertyFactory.lineWidth
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
 import java.io.File
 
 /*
@@ -84,6 +75,7 @@ class WWWEventMap(private val event: WWWEvent) {
         modifier: Modifier,
         initialCameraPosition: CameraPosition? = CameraPosition.BOUNDS,
     ) {
+        val configuration = LocalConfiguration.current
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
@@ -106,11 +98,15 @@ class WWWEventMap(private val event: WWWEvent) {
             }
         }
 
+        // Calculate height based on aspect ratio and available width
+        val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f)
+
+
         // The map view
         AndroidView(
             modifier = modifier
                 .fillMaxWidth()
-                .height(300.dp),
+                .height(calculatedHeight),
             factory = { mapView },
             update = { mv ->
                 mv.getMapAsync { map ->

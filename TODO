@@ -1,5 +1,6 @@
 
 Next:
+- add generated geojson from original one in % of the area for the start of the wave (from the right)
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => center to default center
@@ -9,6 +10,7 @@ Next:
 - scripting for events resources
     - geojson of the shape
     - openAI: images + descriptions
+    - openAI for geo coordinates too (bbox 16/9, ...)
 
 - find the right style + setup for the map
    --> one found, turn it into code in shared folder only using github copilot
