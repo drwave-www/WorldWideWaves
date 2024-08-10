@@ -226,8 +226,10 @@ echo "It took $((ENDTIME - STARTTIME)) seconds to complete"
 echo "We saved the log file to $log_file  (for debugging) You can compare with the travis log !"
 
 # Copy the MBTILES output to our working directory ----------------------------
-cp "./data/$MBTILES_FILE" ../data
+DEST_MBTILES=../../../shared/src/commonMain/composeResources/files/maps/tiles/$MBTILES_FILE
+cp "./data/$MBTILES_FILE ../data"
+cp "./data/$MBTILES_FILE" $DEST_MBTILES
 echo
-echo "MBTILES output file is now available in ./data/$MBTILES_FILE"
+echo "MBTILES output file is now available in $DEST_MBTILES"
 
 rm -rf data/

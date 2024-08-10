@@ -21,42 +21,26 @@
 
 cd "$(dirname "$0")" # always work from executable folder
 
-#set -x
-
-mkdir -p ./bin
-mkdir -p ./data
-
-# ---------- Download dependencies --------------------------------------------
-
-# git clone openmpatiles-tools to download OSM areas
-[ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
-
-[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert
+set -x
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 
 # ----------
 
-for event in $EVENTS; do # Download OSM area as PBF file 
-                         # and generates a dedicated PBF file for corresponding BBOX
+for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
+
   echo "==> EVENT $event"
-  BBOX=$(conf $event mapBbox)
-  AREA=$(conf $event mapOsmarea)
-  SPBF=data/osm-$(echo $AREA | sed -e 's/\//_/g').osm.pbf
-  DPBF=data/www-${event}.osm.pbf
+  echo
 
-  echo "-- Download area $AREA from OSM.."
-  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREA -o $SPBF
+  OSMADMINID=$(conf $event mapOsmadminid)
+  echo $OSMADMINID
 
-  echo "-- Extract bbox $BBOX from area $AREA.."
-  [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF
 
-  echo "-- Generates OpenMapTiles environment for event $event"
-  tpl $event templates/.env-template data/.env-${event}
+  DEST_GEOJSON=../../shared/src/commonMain/composeResources/files/maps/tiles/$event.geojson
+  wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson
+  cp data/$event.geojson $DEST_GEOJSON
 
-  echo "-- Generates OpenMapTiles tileset definition for event $event"
-  tpl $event templates/template-omt.yaml data/${event}.yaml
 
 done
