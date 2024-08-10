@@ -1,6 +1,5 @@
 
 Next:
-- review code for location management : https://maplibre.org/maplibre-native/docs/book/android/location-component-guide.html
 - screen for event main screen : geojson
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds

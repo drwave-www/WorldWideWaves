@@ -50,6 +50,7 @@ data class WWWEvent(
     var favorite: Boolean = false,
     val mapBbox: String,
     val mapCenter: String,
+    val mapOsmbadminid: Int,
     val mapMinzoom: Int,
     val mapMaxzoom: Int,
     val mapDefaultzoom: Double? = null,
