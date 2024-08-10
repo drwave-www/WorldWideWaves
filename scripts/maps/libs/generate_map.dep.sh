@@ -227,8 +227,8 @@ echo "We saved the log file to $log_file  (for debugging) You can compare with t
 
 # Copy the MBTILES output to our working directory ----------------------------
 DEST_MBTILES=../../../shared/src/commonMain/composeResources/files/maps/tiles/$MBTILES_FILE
-cp "./data/$MBTILES_FILE ../data"
-cp "./data/$MBTILES_FILE" $DEST_MBTILES
+cp ./data/$MBTILES_FILE ../data
+cp ./data/$MBTILES_FILE $DEST_MBTILES
 echo
 echo "MBTILES output file is now available in $DEST_MBTILES"
 
