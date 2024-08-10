@@ -24,6 +24,7 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
+import com.worldwidewaves.shared.getMapFileAbsolutePath
 import com.worldwidewaves.utils.RequestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -39,6 +40,15 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory.lineCap
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineJoin
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
 import java.io.File
 
 /*
@@ -77,6 +87,7 @@ class WWWEventMap(private val event: WWWEvent) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
+        val mapStyle = remember { mutableStateOf<Style?>(null) }
 
         val locationComponent = remember { mutableStateOf<LocationComponent?>(null) }
         val userLocation = remember { mutableStateOf<Location?>(null) }
@@ -87,11 +98,6 @@ class WWWEventMap(private val event: WWWEvent) {
         LaunchedEffect(Unit) {
             styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
         }
-
-        // Frequently update the user location for GPS tracking
-//        LaunchedEffect(Unit) {
-//            getUserLocation(context) { userLocation.value = it }
-//        }
 
         // Update the position marker on user location change
         LaunchedEffect(userLocation.value) {
@@ -113,6 +119,7 @@ class WWWEventMap(private val event: WWWEvent) {
                             Style.Builder()
                                 .fromUri(uri.toString())
                         ) { style ->
+                            mapStyle.value = style
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
                             // Add a marker for the user's position

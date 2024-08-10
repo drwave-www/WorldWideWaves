@@ -24,7 +24,7 @@ import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.getMBTilesAbsoluteFilePath
+import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -50,7 +50,7 @@ data class WWWEvent(
     var favorite: Boolean = false,
     val mapBbox: String,
     val mapCenter: String,
-    val mapOsmbadminid: Int,
+    val mapOsmadminid: Int,
     val mapMinzoom: Int,
     val mapMaxzoom: Int,
     val mapDefaultzoom: Double? = null,
@@ -107,7 +107,8 @@ fun WWWEvent.getFormattedSimpleDate(): String {
 
 @OptIn(ExperimentalResourceApi::class)
 suspend fun WWWEvent.getMapStyleUri(): String? {
-    val mbtilesFilePath = getMBTilesAbsoluteFilePath(this.id) ?: return null
+    val mbtilesFilePath = getMapFileAbsolutePath(this.id, "mbtiles") ?: return null
+    val geojsonFilePath = getMapFileAbsolutePath(this.id, "geojson") ?: return null
     val styleFilename = "style-${this.id}.json"
 
     //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
@@ -119,6 +120,10 @@ suspend fun WWWEvent.getMapStyleUri(): String? {
     newFileStr = newFileStr.replace(
         "___FILE_URI___",
         "mbtiles:///$mbtilesFilePath"
+    )
+    newFileStr = newFileStr.replace(
+        "___GEOJSON_URI___",
+        "file:///$geojsonFilePath"
     )
     cacheStringToFile(styleFilename, newFileStr)
 

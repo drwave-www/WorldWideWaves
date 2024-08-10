@@ -99,13 +99,13 @@ actual fun getEventImage(type: String, id: String): Any? {
 // --- Platform-specific API ---
 
 @OptIn(ExperimentalResourceApi::class)
-actual suspend fun getMBTilesAbsoluteFilePath(eventId: String): String? {
+actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     val context = AndroidPlatform.getContext() as Context
     val cacheDir = context.cacheDir
-    val cachedFile = File(cacheDir, "$eventId.mbtiles")
+    val cachedFile = File(cacheDir, "$eventId.$extension")
 
     return try {
-        val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.mbtiles")
+        val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.$extension")
         val assetSize = fileBytes.size
 
         if (cachedFile.exists()) {

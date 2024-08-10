@@ -6,6 +6,10 @@
     "fca30fb8-41f2-4a30-b7ec-47fabfd07102": {
       "url": "___FILE_URI___",
       "type": "vector"
+    },
+    "geojson": {
+      "data": "___GEOJSON_URI___",
+      "type": "geojson"
     }
   },
   "layers": [
@@ -14,6 +18,24 @@
       "type": "background",
       "paint": {
         "background-color": "#ffffff"
+      }
+    },
+    {
+      "id": "adminboundaryartea",
+      "source": "geojson",
+      "type": "fill",
+      "paint": {
+        "fill-color": "#5DB075",
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "adminboundaryline",
+      "source": "geojson",
+      "type": "line",
+      "paint": {
+        "line-color": "#5DB075",
+        "line-width": 10
       }
     },
     {
