@@ -181,7 +181,7 @@ class WWWEventMap(private val event: WWWEvent) {
                     .include(LatLng(swLat, swLng)) // Southwest corner
                     .include(LatLng(neLat, neLng)) // Northeast corner
                     .build()
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, -20))
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
             }
 
             null -> {}
