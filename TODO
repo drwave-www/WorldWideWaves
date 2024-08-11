@@ -10,7 +10,7 @@ Next:
 - scripting for events resources
     - geojson of the shape
     - openAI: images + descriptions
-    - openAI for geo coordinates too (bbox 16/9, ...)
+    - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
 
 - find the right style + setup for the map
    --> one found, turn it into code in shared folder only using github copilot

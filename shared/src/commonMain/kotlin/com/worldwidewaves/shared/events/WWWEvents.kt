@@ -53,17 +53,18 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
 
     @OptIn(ExperimentalResourceApi::class)
     fun loadEvents(): WWWEvents {
-        if (loadJob == null)
-            loadJob = CoroutineScope(Dispatchers.IO).launch {
-                val eventsConf = Res.readBytes("files/events.json").decodeToString()
-                val loadedEvents = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsConf)
-                loadedEvents.forEach { // Read favorite status from DataStore
-                    initFavoriteEvent.call(it)
-                }
-                _eventsFlow.value = loadedEvents
-            }
-
+        loadJob = loadJob ?: loadEventsJob()
         return this
+    }
+
+    @OptIn(ExperimentalResourceApi::class)
+    private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
+        val eventsConf = Res.readBytes("files/events.json").decodeToString()
+        val loadedEvents = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsConf)
+        loadedEvents.forEach { // Read favorite status from DataStore
+            initFavoriteEvent.call(it)
+        }
+        _eventsFlow.value = loadedEvents
     }
 
     // ---------------------------

@@ -91,16 +91,13 @@ fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getEventImage("co
 fun WWWEvent.getCountryImage(): Any? = this.country?.let { getEventImage("country", it) }
 
 fun WWWEvent.getFormattedSimpleDate(): String {
-    return try {
-        val instant =
-            Instant.parse(this.date + "T00:00:00Z") // Assuming date is in "yyyy-MM-dd" format
-        val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-        "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${
-            dateTime.monthNumber.toString().padStart(2, '0')
-        }"
-    } catch (e: Exception) {
-        "00/00"
-    }
+    return runCatching {
+        Instant.parse("${this.date}T00:00:00Z")
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .let { dateTime ->
+                "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+            }
+    }.getOrDefault("00/00")
 }
 
 // ---------------------------
@@ -115,16 +112,11 @@ suspend fun WWWEvent.getMapStyleUri(): String? {
     //    return cachedFileUri(styleFilename)
     //}
 
-    val styleJsonBytes: ByteArray = Res.readBytes("files/maps/mapstyle.json")
-    var newFileStr = styleJsonBytes.decodeToString()
-    newFileStr = newFileStr.replace(
-        "___FILE_URI___",
-        "mbtiles:///$mbtilesFilePath"
-    )
-    newFileStr = newFileStr.replace(
-        "___GEOJSON_URI___",
-        "file:///$geojsonFilePath"
-    )
+    val newFileStr = Res.readBytes("files/maps/mapstyle.json")
+        .decodeToString()
+        .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
+        .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
+
     cacheStringToFile(styleFilename, newFileStr)
 
     return cachedFilePath(styleFilename)

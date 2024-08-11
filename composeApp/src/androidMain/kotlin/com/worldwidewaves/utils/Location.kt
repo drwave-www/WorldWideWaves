@@ -21,10 +21,7 @@ package com.worldwidewaves.utils
  */
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -33,13 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationAvailability
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 
 @Composable
 fun RequestLocationPermission() {
@@ -83,28 +73,3 @@ fun RequestLocationPermission() {
         // TODO: Permission denied, handle accordingly
     }
 }
-
-// --- Location fetching ---
-
-//@SuppressLint("MissingPermission")
-//fun getUserLocation(context: Context, onLocationReceived: (Location) -> Unit) {
-//    val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
-//
-//    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
-//        .setMinUpdateIntervalMillis(5000) // TODO: set it configurable, as in builder
-//        .build()
-//
-//    val locationCallback = object : LocationCallback() {
-//        override fun onLocationResult(locationResult: LocationResult) {
-//            for (location in locationResult.locations) {
-//                onLocationReceived(location)
-//            }
-//        }
-//
-//        override fun onLocationAvailability(locationAvailability: LocationAvailability) {
-//            // TODO: Handle location availability changes if needed
-//        }
-//    }
-//
-//    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-//}
