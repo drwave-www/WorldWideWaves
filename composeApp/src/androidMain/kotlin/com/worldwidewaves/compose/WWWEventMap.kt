@@ -160,7 +160,6 @@ class WWWEventMap(private val event: WWWEvent) {
                     )
                 )
             }
-
             CameraPosition.BOUNDS -> {
                 val (swLng, swLat, neLng, neLat) = event.getMapBbox()
                 val bounds = LatLngBounds.Builder()
@@ -169,11 +168,9 @@ class WWWEventMap(private val event: WWWEvent) {
                     .build()
                 map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
             }
-
             null -> {}
         }
     }
-
 }
 
 // -- Use the MapLibre MapView as a composable --------------------------------
@@ -188,18 +185,16 @@ fun rememberMapViewWithLifecycle(): MapView {
 
     val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
     maplibreMapOptions.apply {
-        //apiBaseUri("https://demotiles.maplibre.org/tiles/tiles.json")
         camera(
             CameraPosition.Builder()
-                .bearing(0.0)
-                .target(LatLng(48.8619, 2.3417))
-                .zoom(10.0)
-                .tilt(0.0)
+                .bearing(0.0).tilt(0.0)
+                .target(LatLng(48.8619, 2.3417)) // TODO: fill with event prefs
+                .zoom(10.0) // TODO: fill with event prefs
                 .build()
         )
-        maxZoomPreference(14.0)
+        maxZoomPreference(14.0) // TODO: fill with event prefs
         minZoomPreference(10.0)
-        localIdeographFontFamily("Droid Sans")
+        localIdeographFontFamily("Droid Sans") // TODO: replace
 
         compassEnabled(true)
         compassFadesWhenFacingNorth(true)

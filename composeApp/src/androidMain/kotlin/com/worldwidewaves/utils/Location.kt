@@ -37,33 +37,33 @@ fun requestLocationPermission() : Boolean{
     val permissionState = remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        permissionState.value = isGranted
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        permissionState.value =
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+                    && permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
     }
 
     LaunchedEffect(Unit) {
-        when {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                permissionState.value = true
-            }
-            else -> {
-                launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-        when {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-            }
-            else -> {
-                permissionState.value = false
-                launcher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-            }
+        val fineLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (fineLocationGranted && coarseLocationGranted) {
+            permissionState.value = true
+        } else {
+            launcher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         }
     }
 
