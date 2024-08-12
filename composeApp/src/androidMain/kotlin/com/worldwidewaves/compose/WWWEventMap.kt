@@ -25,7 +25,7 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getMapBbox
 import com.worldwidewaves.shared.events.getMapCenter
 import com.worldwidewaves.shared.events.getMapStyleUri
-import com.worldwidewaves.utils.RequestLocationPermission
+import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -82,9 +82,11 @@ class WWWEventMap(private val event: WWWEvent) {
         val mapStyle = remember { mutableStateOf<Style?>(null) }
 
         val locationComponent = remember { mutableStateOf<LocationComponent?>(null) }
-        val userLocation = remember { mutableStateOf<Location?>(null) }
+        val (cLat, cLong) = event.getMapCenter()
 
-        RequestLocationPermission()
+        //val userLocation = remember { mutableStateOf<Location?>(null) }
+
+        val hasLocationPermission = requestLocationPermission()
 
         // Setup Map properties
         LaunchedEffect(Unit) {
@@ -92,15 +94,14 @@ class WWWEventMap(private val event: WWWEvent) {
         }
 
         // Update the position marker on user location change
-        LaunchedEffect(userLocation.value) {
-            userLocation.value?.let {
-                locationComponent.value?.forceLocationUpdate(it)
-            }
-        }
+//        LaunchedEffect(userLocation.value) {
+//            userLocation.value?.let {
+//                locationComponent.value?.forceLocationUpdate(it)
+//            }
+//        }
 
         // Calculate height based on aspect ratio and available width
         val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f)
-
 
         // The map view
         AndroidView(
@@ -119,18 +120,31 @@ class WWWEventMap(private val event: WWWEvent) {
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
                             // Add a marker for the user's position
-                            locationComponent.value = map.locationComponent
-                            val locationComponentOptions =
-                                LocationComponentOptions.builder(context)
-                                    .pulseEnabled(true)
-                                    .pulseColor(Color.RED)
-                                    .foregroundTintColor(Color.BLACK)
-                                    .build()
-                            val locationComponentActivationOptions =
-                                buildLocationComponentActivationOptions(context, style, locationComponentOptions)
-                            locationComponent.value!!.activateLocationComponent(locationComponentActivationOptions)
-                            locationComponent.value!!.isLocationComponentEnabled = true
-                            locationComponent.value!!.cameraMode = CameraMode.NONE
+                            if (hasLocationPermission) {
+                                locationComponent.value = map.locationComponent
+                                val locationComponentOptions =
+                                    LocationComponentOptions.builder(context)
+                                        .pulseEnabled(true)
+                                        .pulseColor(Color.RED)
+                                        .foregroundTintColor(Color.BLACK)
+                                        .build()
+                                val locationComponentActivationOptions =
+                                    buildLocationComponentActivationOptions(
+                                        context,
+                                        style,
+                                        locationComponentOptions
+                                    )
+                                locationComponent.value!!.activateLocationComponent(
+                                    locationComponentActivationOptions
+                                )
+                                locationComponent.value!!.isLocationComponentEnabled = true
+                                val location = Location("").apply {
+                                    this.latitude = cLat
+                                    this.longitude = cLong
+                                }
+                                locationComponent.value?.forceLocationUpdate(location)
+                                locationComponent.value!!.cameraMode = CameraMode.NONE
+                            }
                         }
                     }
 
@@ -152,7 +166,7 @@ class WWWEventMap(private val event: WWWEvent) {
             .locationComponentOptions(locationComponentOptions)
             .useDefaultLocationEngine(true)
             .locationEngineRequest(
-                LocationEngineRequest.Builder(750)
+                LocationEngineRequest.Builder(1500)
                     .setFastestInterval(750)
                     .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                     .build()

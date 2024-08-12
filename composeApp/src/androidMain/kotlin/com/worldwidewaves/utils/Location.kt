@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 @Composable
-fun RequestLocationPermission() {
+fun requestLocationPermission() : Boolean{
     val context = LocalContext.current
     val permissionState = remember { mutableStateOf(false) }
 
@@ -67,9 +67,5 @@ fun RequestLocationPermission() {
         }
     }
 
-    if (permissionState.value) {
-        // Permission granted, proceed with location fetching
-    } else {
-        // TODO: Permission denied, handle accordingly
-    }
+    return permissionState.value
 }

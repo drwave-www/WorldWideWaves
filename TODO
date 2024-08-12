@@ -1,5 +1,10 @@
 
 Next:
+- maplibre :
+The library you are trying to load was most likely built with -Wl,--hash-style=gnu.
+This was not supported on Android until recently (afaik this isn't even in L).
+You need to build your libraries with -Wl,--hash-style=sysv.
+- implement permission maager from maplibre
 - add generated geojson from original one in % of the area for the start of the wave (from the right)
 - add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
