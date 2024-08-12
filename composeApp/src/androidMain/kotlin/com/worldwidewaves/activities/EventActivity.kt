@@ -116,6 +116,7 @@ class EventActivity : AbstractEventBackActivity() {
 @Composable
 private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
+        modifier = modifier.padding(horizontal = 20.dp),
         text = event.description,
         fontFamily = extraFontFamily,
         color = quinaryLight,
