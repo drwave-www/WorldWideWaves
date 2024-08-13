@@ -250,10 +250,9 @@ class EventsListScreen(
         Column(modifier = modifier.clickable(onClick = {
             context.startActivity(Intent(context, EventActivity::class.java).apply {
                 putExtra("eventId", event.id)
-            })
-        })) {
-            EventOverlay(viewModel, event)
-            EventLocationAndDate(event)
+            })})) {
+                EventOverlay(viewModel, event)
+                EventLocationAndDate(event)
         }
     }
 
@@ -268,11 +267,12 @@ class EventsListScreen(
         val heightModifier = Modifier.height(159.dp)
 
         Box(modifier = heightModifier) {
+
             // Main Image
             Box(modifier = heightModifier) {
                 Image(
-                    modifier = modifier,
-                    contentScale = ContentScale.FillWidth,
+                    modifier = modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Crop,
                     painter = painterResource(event.getLocationImage() as DrawableResource),
                     contentDescription = event.location
                 )
@@ -377,8 +377,6 @@ class EventsListScreen(
 
         Box(modifier = modifier) {
             Column {
-
-                // Location and date
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

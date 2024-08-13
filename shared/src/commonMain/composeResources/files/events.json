@@ -34,13 +34,14 @@
     "instagramAccount": "worldwidewaves.rio",
     "instagramUrl": "https://www.instagram.com/worldwidewaves.rio/",
     "instagramHashtag": "#waverio",
-    "mapBbox": "unknown",
-    "mapCenter": "unknown",
-    "mapOsmadminid": 0,
-    "mapMinzoom": 0,
-    "mapMaxzoom": 0,
-    "mapLanguage": "unknown",
-    "mapOsmarea": "unknown"
+    "mapBbox": "-43.7955,-23.0823,-43.1052,-22.7469",
+    "mapCenter": "-22.9068,-43.1729",
+    "mapOsmadminid": 3448439,
+    "mapMinzoom": 10,
+    "mapMaxzoom": 14,
+    "mapDefaultzoom": 13,
+    "mapLanguage": "pt",
+    "mapOsmarea": "south-america/brazil/rio-de-janeiro"
   },
   {
     "id": "unitedstates",
@@ -54,13 +55,14 @@
     "instagramAccount": "worldwidewaves.usa",
     "instagramUrl": "https://www.instagram.com/worldwidewaves.usa/",
     "instagramHashtag": "#waveusa",
-    "mapBbox": "unknown",
-    "mapCenter": "unknown",
-    "mapOsmadminid": 0,
-    "mapMinzoom": 0,
-    "mapMaxzoom": 0,
-    "mapLanguage": "unknown",
-    "mapOsmarea": "unknown"
+    "mapBbox": "-125.0017,24.3963,-66.9346,49.3844",
+    "mapCenter": "37.0902,-95.7129",
+    "mapOsmadminid": 148838,
+    "mapMinzoom": 3,
+    "mapMaxzoom": 7,
+    "mapDefaultzoom": 5,
+    "mapLanguage": "en",
+    "mapOsmarea": "north-america/united-states"
   },
   {
     "id": "world",
@@ -73,12 +75,13 @@
     "instagramAccount": "worldwidewaves.world",
     "instagramUrl": "https://www.instagram.com/worldwidewaves.world/",
     "instagramHashtag": "#waveworld",
-    "mapBbox": "unknown",
-    "mapCenter": "unknown",
+    "mapBbox": "-180,-90,180,90",
+    "mapCenter": "0,0",
     "mapOsmadminid": 0,
-    "mapMinzoom": 0,
-    "mapMaxzoom": 0,
-    "mapLanguage": "unknown",
-    "mapOsmarea": "unknown"
+    "mapMinzoom": 1,
+    "mapMaxzoom": 5,
+    "mapDefaultzoom": 2,
+    "mapLanguage": "en",
+    "mapOsmarea": "world"
   }
 ]
