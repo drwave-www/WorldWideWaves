@@ -41,7 +41,7 @@
     "mapMaxzoom": 14,
     "mapDefaultzoom": 13,
     "mapLanguage": "pt",
-    "mapOsmarea": "south-america/brazil/rio-de-janeiro"
+    "mapOsmarea": "south-america/brazil/sudeste"
   },
   {
     "id": "unitedstates",
@@ -62,7 +62,7 @@
     "mapMaxzoom": 7,
     "mapDefaultzoom": 5,
     "mapLanguage": "en",
-    "mapOsmarea": "north-america/united-states"
+    "mapOsmarea": "north-america/us"
   },
   {
     "id": "world",
@@ -82,6 +82,6 @@
     "mapMaxzoom": 5,
     "mapDefaultzoom": 2,
     "mapLanguage": "en",
-    "mapOsmarea": "world"
+    "mapOsmarea": "planet"
   }
 ]

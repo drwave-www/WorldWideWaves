@@ -1,5 +1,6 @@
 # Events configuration file
 EVENTS_FILE=../../shared/src/commonMain/composeResources/files/events.json
+echo "--> Using events file $EVENTS_FILE"
 
 # Download jq for JSON decoding with bash
 mkdir -p ./bin
