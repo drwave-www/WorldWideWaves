@@ -20,7 +20,7 @@
     <string name="geoloc_undone">Updating location..</string>
     <string name="geoloc_error">Unable to locate you</string>
     <string name="geoloc_yourein">You are in the area!</string>
-    <string name="geoloc_yourenotin">You are in the area!</string>
+    <string name="geoloc_yourenotin">You are not in the area!</string>
     <string name="geoloc_desc">FAQ</string>
 
     <string name="be_waved">be waved!</string>

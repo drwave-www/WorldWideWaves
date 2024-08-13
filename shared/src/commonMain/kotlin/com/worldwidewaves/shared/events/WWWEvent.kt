@@ -102,10 +102,20 @@ fun WWWEvent.getFormattedSimpleDate(): String {
 
 // ---------------------------
 
+suspend fun WWWEvent.getMbtilesFilePath(): String? {
+    return getMapFileAbsolutePath(this.id, "mbtiles")
+}
+
+suspend fun WWWEvent.getGeoJsonFilePath(): String? {
+    return getMapFileAbsolutePath(this.id, "geojson")
+}
+
+// ---------------------------
+
 @OptIn(ExperimentalResourceApi::class)
 suspend fun WWWEvent.getMapStyleUri(): String? {
-    val mbtilesFilePath = getMapFileAbsolutePath(this.id, "mbtiles") ?: return null
-    val geojsonFilePath = getMapFileAbsolutePath(this.id, "geojson") ?: return null
+    val mbtilesFilePath = getMbtilesFilePath() ?: return null
+    val geojsonFilePath = getGeoJsonFilePath() ?: return null
     val styleFilename = "style-${this.id}.json"
 
     //if (cachedFileExists(styleFilename)) { // TODO: better manage cache

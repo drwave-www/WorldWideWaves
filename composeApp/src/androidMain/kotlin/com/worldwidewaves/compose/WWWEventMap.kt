@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -32,7 +33,9 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
+import org.maplibre.android.location.engine.LocationEngineCallback
 import org.maplibre.android.location.engine.LocationEngineRequest
+import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
@@ -60,7 +63,10 @@ import java.io.File
  * limitations under the License.
  */
 
-class WWWEventMap(private val event: WWWEvent) {
+class WWWEventMap(
+    private val event: WWWEvent,
+    private val onLocationUpdate: (LatLng) -> Unit
+) {
 
     enum class CameraPosition {
         BOUNDS,
@@ -113,6 +119,21 @@ class WWWEventMap(private val event: WWWEvent) {
                                 )
                                 map.locationComponent.isLocationComponentEnabled = true
                                 map.locationComponent.cameraMode = CameraMode.NONE
+
+                                map.locationComponent.locationEngine?.requestLocationUpdates(
+                                    buildLocationEngineRequest(),
+                                    object : LocationEngineCallback<LocationEngineResult> {
+                                        override fun onSuccess(result: LocationEngineResult?) {
+                                            result?.lastLocation?.let { location ->
+                                                onLocationUpdate(LatLng(location.latitude, location.longitude))
+                                            }
+                                        }
+                                        override fun onFailure(exception: Exception) {
+                                            // Handle failure if needed
+                                        }
+                                    },
+                                    Looper.getMainLooper()
+                                )
                             }
                         }
                     }
@@ -138,13 +159,16 @@ class WWWEventMap(private val event: WWWEvent) {
             )
             .useDefaultLocationEngine(true)
             .locationEngineRequest(
-                LocationEngineRequest.Builder(1500)
-                    .setFastestInterval(750)
-                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                    .build()
+                buildLocationEngineRequest()
             )
             .build()
     }
+
+    private fun buildLocationEngineRequest(): LocationEngineRequest =
+        LocationEngineRequest.Builder(1500)
+            .setFastestInterval(750)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
 
     private fun setCameraPosition(
         initialCameraPosition: CameraPosition?,

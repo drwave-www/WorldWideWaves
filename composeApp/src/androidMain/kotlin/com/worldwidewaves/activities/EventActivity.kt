@@ -33,19 +33,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -59,6 +61,7 @@ import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWEventMap
 import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLiteralEndTime
@@ -68,10 +71,11 @@ import com.worldwidewaves.shared.events.getLiteralStartTime
 import com.worldwidewaves.shared.events.getLiteralTotalTime
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.events.isPositionWithinArea
 import com.worldwidewaves.shared.generated.resources.be_waved
-import com.worldwidewaves.shared.generated.resources.geoloc_desc
-import com.worldwidewaves.shared.generated.resources.geoloc_refresh_icon
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
+import com.worldwidewaves.shared.generated.resources.geoloc_yourein
+import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.generated.resources.wave_end_time
 import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.shared.generated.resources.wave_progression
@@ -81,9 +85,12 @@ import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventActivity : AbstractEventBackActivity() {
@@ -91,6 +98,9 @@ class EventActivity : AbstractEventBackActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
         val eventDate = event.getFormattedSimpleDate()
+        val coroutineScope = rememberCoroutineScope()
+        var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
+        var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,10 +110,28 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            WWWEventMap(event).Screen(
+            WWWEventMap(event, onLocationUpdate = { newLocation ->
+                if (lastKnownLocation == null || lastKnownLocation != newLocation) {
+                    lastKnownLocation = newLocation
+                    coroutineScope.launch {
+                        geolocText = if (
+                            event.isPositionWithinArea(
+                                Position(
+                                    newLocation.latitude,
+                                    newLocation.longitude
+                                )
+                            )
+                        ) {
+                            ShRes.string.geoloc_yourein
+                        } else {
+                            ShRes.string.geoloc_yourenotin
+                        }
+                    }
+                }
+            }).Screen(
                 modifier = Modifier.fillMaxWidth()
             )
-            GeolocalizeMe()
+            GeolocalizeMe(geolocText)
             EventNumbers(event)
             WWWEventSocialNetworks(event)
         }
@@ -232,14 +260,14 @@ private fun WWWEventSocialNetworks(event: WWWEvent) {
 // ----------------------------
 
 @Composable
-private fun GeolocalizeMe() {
+private fun GeolocalizeMe(geolocText: StringResource) {
     Row(
         modifier = Modifier
             .height(45.dp)
             .padding(start = 20.dp, end = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-    ) {
+    ) { // TODO: change colors depending on in/out area
         Box(
             modifier = Modifier
                 .border(2.dp, MaterialTheme.colorScheme.primary)
@@ -248,25 +276,10 @@ private fun GeolocalizeMe() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(ShRes.string.geoloc_undone),
+                text = stringResource(geolocText),
                 color = quinaryLight,
                 fontSize = 14.sp,
                 fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
-            )
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-        Surface(
-            modifier = Modifier.clip(CircleShape),
-            color = MaterialTheme.colorScheme.primary
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(45.dp)
-                    .clickable {
-                        // TODO
-                    },
-                painter = painterResource(ShRes.drawable.geoloc_refresh_icon),
-                contentDescription = stringResource(ShRes.string.geoloc_desc),
             )
         }
     }

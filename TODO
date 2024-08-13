@@ -1,29 +1,23 @@
 
 Next:
-- maplibre :
-The library you are trying to load was most likely built with -Wl,--hash-style=gnu.
-This was not supported on Android until recently (afaik this isn't even in L).
-You need to build your libraries with -Wl,--hash-style=sysv.
-- add generated geojson from original one using one end longitude for the start of the wave (from the right)
-- add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
-    => move and zoom methods to keep bounds
-    => center to default center
-    => + general cleaning
-    => manage all cases for user location
-- manage with location
+
+- !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
+    --> in-the-wave calculation
+    --> think strategy before (inject, cache, preload, post-install init, etc...)
+    --> write tests before
+
 - scripting for events resources
     - geojson of the shape
     - openAI: images + descriptions
     - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
 
-- find the right style + setup for the map
-   --> one found, turn it into code in shared folder only using github copilot
-
-- !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
-    --> think strategy before (inject, cache, preload, post-install init, etc...)
-    --> write tests before
-
 - show wave progression layer on map
+
+- add generated geojson from original one using one end longitude for the start of the wave (from the right)
+
+- add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
+    => move and zoom methods to keep bounds
+    => manage all cases for user location
 
 - round2 : routing on streets
 

@@ -38,7 +38,7 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
   echo $OSMADMINID
 
 
-  DEST_GEOJSON=../../shared/src/commonMain/composeResources/files/maps/tiles/$event.geojson
+  DEST_GEOJSON=../../shared/src/commonMain/composeResources/files/maps/$event.geojson
   wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson
   cp data/$event.geojson $DEST_GEOJSON
 

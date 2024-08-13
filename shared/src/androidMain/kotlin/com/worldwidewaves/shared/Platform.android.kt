@@ -105,7 +105,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val cachedFile = File(cacheDir, "$eventId.$extension")
 
     return try {
-        val fileBytes: ByteArray = Res.readBytes("files/maps/tiles/$eventId.$extension")
+        val fileBytes: ByteArray = Res.readBytes("files/maps/$eventId.$extension") // TODO: static folder name
         val assetSize = fileBytes.size
 
         if (cachedFile.exists()) {

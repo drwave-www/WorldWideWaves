@@ -226,7 +226,7 @@ echo "It took $((ENDTIME - STARTTIME)) seconds to complete"
 echo "We saved the log file to $log_file  (for debugging) You can compare with the travis log !"
 
 # Copy the MBTILES output to our working directory ----------------------------
-DEST_MBTILES=../../../shared/src/commonMain/composeResources/files/maps/tiles/$MBTILES_FILE
+DEST_MBTILES=../../../shared/src/commonMain/composeResources/files/maps/$MBTILES_FILE
 cp ./data/$MBTILES_FILE ../data
 cp ./data/$MBTILES_FILE $DEST_MBTILES
 echo
