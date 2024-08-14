@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,6 +68,7 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
@@ -81,6 +83,7 @@ import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -298,19 +301,30 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 
 @Composable
 private fun EventNumbers(event: WWWEvent) {
-
-    val eventNumbers = remember { mutableStateOf<Map<StringResource, String>>(emptyMap()) }
+    val eventNumbers = remember { mutableStateMapOf<StringResource, String>() }
     val coroutineScope = rememberCoroutineScope()
 
+    // Retrieve wave numbers and frequently update progession
     LaunchedEffect(event) {
+        var lastProgressionValue = ""
         coroutineScope.launch {
-            eventNumbers.value = mapOf(
-                ShRes.string.wave_speed to event.wave.getLiteralSpeed(),
-                ShRes.string.wave_start_time to event.wave.getLiteralStartTime(),
-                ShRes.string.wave_end_time to event.wave.getLiteralEndTime(),
-                ShRes.string.wave_total_time to event.wave.getLiteralTotalTime(),
-                ShRes.string.wave_progression to event.wave.getLiteralProgression()
-            )
+            val waveNumbers = event.wave.getAllNumbers()
+            eventNumbers.clear()
+            eventNumbers.putAll(mapOf(
+                    ShRes.string.wave_speed to waveNumbers.waveSpeed,
+                    ShRes.string.wave_start_time to waveNumbers.waveStartTime,
+                    ShRes.string.wave_end_time to waveNumbers.waveEndTime,
+                    ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
+                    ShRes.string.wave_progression to waveNumbers.waveProgression
+            ))
+            while (event.isRunning()) {
+                delay(10000) // 10s : TODO: static number
+                val newProgressionValue = event.wave.getLiteralProgression()
+                if (newProgressionValue != lastProgressionValue) {
+                    eventNumbers[ShRes.string.wave_progression] = newProgressionValue
+                    lastProgressionValue = newProgressionValue
+                }
+            }
         }
     }
 
@@ -334,7 +348,7 @@ private fun EventNumbers(event: WWWEvent) {
                 fontSize = 32.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            eventNumbers.value.forEach { (key, value) ->
+            eventNumbers.forEach { (key, value) ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween

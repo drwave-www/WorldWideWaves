@@ -104,6 +104,7 @@ fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime {
     return localDateTime.toInstant(timezone).toLocalDateTime(timezone)
 }
 
+
 //import kotlinx.serialization.json.Json
 //import kotlinx.serialization.json.jsonObject
 //import kotlinx.serialization.json.jsonPrimitive

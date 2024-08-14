@@ -20,6 +20,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.wave_end_time
+import com.worldwidewaves.shared.generated.resources.wave_progression
+import com.worldwidewaves.shared.generated.resources.wave_speed
+import com.worldwidewaves.shared.generated.resources.wave_start_time
+import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
@@ -35,11 +41,31 @@ import kotlin.time.toDuration
 
 const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 
+data class WaveNumbers(
+    val waveSpeed: String,
+    val waveStartTime: String,
+    val waveEndTime: String,
+    val waveTotalTime: String,
+    val waveProgression: String
+)
+
 class WWWEventWave(private val event: WWWEvent) {
 
     private var cachedLiteralStartTime: String? = null
     private var cachedLiteralEndTime: String? = null
     private var cachedTotalTime: Duration? = null
+
+    // ---------------------------
+
+    suspend fun getAllNumbers(): WaveNumbers {
+        return WaveNumbers(
+            waveSpeed = event.wave.getLiteralSpeed(),
+            waveStartTime = event.wave.getLiteralStartTime(),
+            waveEndTime = event.wave.getLiteralEndTime(),
+            waveTotalTime = event.wave.getLiteralTotalTime(),
+            waveProgression = event.wave.getLiteralProgression()
+        )
+    }
 
     // ---------------------------
 

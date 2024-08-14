@@ -1,8 +1,8 @@
 
 Next:
 
-- Avion: frequent reload on wave : find a way to record listeners and launch in s separate thread ?
 - Avion: add tests on area/map/wave
+- Avion: clean statics
 - Avion: warming zone + affichage progression wave
     - show wave progression layer on map
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
