@@ -29,12 +29,13 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
 @Serializable
-data class WWWEvent(
+data class WWWEvent (
     val id: String,
     val type: String,
     val location: String,
@@ -56,7 +57,10 @@ data class WWWEvent(
     val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
     val mapOsmarea: String
-)
+) {
+    @Transient val area = WWWArea(this)
+    @Transient val wave = WWWWave(this)
+}
 
 // ---------------------------
 

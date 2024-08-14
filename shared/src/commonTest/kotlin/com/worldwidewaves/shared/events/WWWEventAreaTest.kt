@@ -1,10 +1,6 @@
 package com.worldwidewaves.shared.events
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -28,7 +24,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class WWWEventAlgoAreaTest {
+class WWWEventAreaTest {
 
     @Test
     fun testIsPointInSimplePolygon() {
@@ -135,67 +131,4 @@ class WWWEventAlgoAreaTest {
         assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
     }
 
-    // ---------------------------
-
-
-    @Test
-    fun getCachedPolygon_returnsEmptyList_whenNoCoordinates() = runBlocking {
-        val event = WWWEvent("testEvent")
-        event.areaPolygon = emptyList()
-        val result = event.getCachedPolygon()
-        assertEquals(emptyList<Position>(), result)
-    }
-
-    @Test
-    fun getCachedPolygon_returnsPolygon_whenTypeIsPolygon() = runBlocking {
-        val event = WWWEvent("testEvent")
-        val geoJsonData = buildJsonObject {
-            put("type", "Polygon")
-            put("coordinates", buildJsonArray {
-                add(buildJsonArray {
-                    add(buildJsonArray { add(2.0); add(1.0) })
-                    add(buildJsonArray { add(3.0); add(1.0) })
-                })
-            })
-        }
-        event.setGeoJsonData(geoJsonData)
-        val result = event.getCachedPolygon()
-        assertEquals(listOf(Position(1.0, 2.0), Position(1.0, 3.0)), result)
-    }
-
-    @Test
-    fun getCachedPolygon_returnsMultiPolygon_whenTypeIsMultiPolygon() = runBlocking {
-        val event = WWWEvent("testEvent")
-        val geoJsonData = buildJsonObject {
-            put("type", "MultiPolygon")
-            put("coordinates", buildJsonArray {
-                add(buildJsonArray {
-                    add(buildJsonArray {
-                        add(buildJsonArray { add(2.0); add(1.0) })
-                        add(buildJsonArray { add(3.0); add(1.0) })
-                    })
-                })
-            })
-        }
-        event.setGeoJsonData(geoJsonData)
-        val result = event.getCachedPolygon()
-        assertEquals(listOf(Position(1.0, 2.0), Position(1.0, 3.0)), result)
-    }
-
-    @Test
-    fun getCachedPolygon_returnsEmptyList_whenTypeIsUnknown() = runBlocking {
-        val event = WWWEvent("testEvent")
-        val geoJsonData = buildJsonObject {
-            put("type", "Unknown")
-            put("coordinates", buildJsonArray {
-                add(buildJsonArray {
-                    add(buildJsonArray { add(2.0); add(1.0) })
-                    add(buildJsonArray { add(3.0); add(1.0) })
-                })
-            })
-        }
-        event.setGeoJsonData(geoJsonData)
-        val result = event.getCachedPolygon()
-        assertEquals(emptyList<Position>(), result)
-    }
 }

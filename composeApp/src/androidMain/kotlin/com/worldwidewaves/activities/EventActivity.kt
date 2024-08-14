@@ -71,7 +71,6 @@ import com.worldwidewaves.shared.events.getLiteralStartTime
 import com.worldwidewaves.shared.events.getLiteralTotalTime
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
-import com.worldwidewaves.shared.events.isPositionWithinArea
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
@@ -136,7 +135,7 @@ private fun updateGeolocText(
     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
         coroutineScope.launch {
             val newGeolocText = if (
-                event.isPositionWithinArea(
+                event.area.isPositionWithin(
                     Position(
                         newLocation.latitude,
                         newLocation.longitude
