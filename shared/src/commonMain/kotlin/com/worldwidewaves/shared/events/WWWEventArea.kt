@@ -45,7 +45,7 @@ data class BoundingBox(
 
 // ---------------------------
 
-class WWWEventArea(private val event: WWWEvent) {
+open class WWWEventArea(private val event: WWWEvent) {
 
     private val areaPolygon: MutableList<Position> = mutableListOf()
     private var cachedBoundingBox: BoundingBox? = null
@@ -72,14 +72,14 @@ class WWWEventArea(private val event: WWWEvent) {
     }
 
     @OptIn(ExperimentalResourceApi::class)
-    private suspend fun getGeoJsonData(): JsonObject {
+    open suspend fun getGeoJsonData(): JsonObject {
         val geojsonData = withContext(Dispatchers.IO) {
             Res.readBytes("files/maps/${event.id}.geojson").decodeToString() // TODO static folder name
         }
         return Json.parseToJsonElement(geojsonData).jsonObject
     }
 
-    private suspend fun getCachedPolygon(): List<Position> {
+    suspend fun getCachedPolygon(): List<Position> {
         if (this.areaPolygon.isEmpty()) {
             this.areaPolygon.addAll(
                 withContext(Dispatchers.Default) {
@@ -147,7 +147,9 @@ fun isPointInPolygon(tap: Position, polygon: List<Position>): Boolean {
 
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
-private fun polygonBbox(polygon: List<Position>): BoundingBox {
+fun polygonBbox(polygon: List<Position>): BoundingBox {
+    if (polygon.isEmpty())
+        throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
     val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygon.fold(
         Quadruple(
             Double.MAX_VALUE, Double.MAX_VALUE,

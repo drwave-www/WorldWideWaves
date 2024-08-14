@@ -2,11 +2,12 @@
 Next:
 
 - Avion: add tests on area/map/wave
+- Avion: add checkers for Json deserialization of events
 - Avion: clean statics
+- Avion: - nettoyer tous les TODOs
 - Avion: warming zone + affichage progression wave
     - show wave progression layer on map
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
-- nettoyer tous les TODOs
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions

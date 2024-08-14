@@ -1,7 +1,16 @@
 package com.worldwidewaves.shared.events
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.put
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /*
@@ -135,6 +144,171 @@ class WWWEventAreaTest {
             Position(0.0, 0.0)
         )
         assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
+    }
+
+    // -----------------------
+
+    @Test
+    fun testSimplePolygon() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testBadPolygon() {
+        val polygon = emptyList<Position>()
+        assertFailsWith<IllegalArgumentException> {
+            polygonBbox(polygon)
+        }
+    }
+
+    @Test
+    fun testComplexPolygon() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testPointOnEdge() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val pointOnEdge = Position(0.5, 0.0)
+        assertTrue(isPointInPolygon(pointOnEdge, polygon))
+    }
+
+    @Test
+    fun testPolygonWithHole() {
+        val outerPolygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 3.0),
+            Position(3.0, 3.0),
+            Position(3.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val innerPolygon = listOf(
+            Position(1.0, 1.0),
+            Position(1.0, 2.0),
+            Position(2.0, 2.0),
+            Position(2.0, 1.0),
+            Position(1.0, 1.0)
+        )
+        val combinedPolygon = outerPolygon + innerPolygon
+        val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
+        val actualBbox = polygonBbox(combinedPolygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testDegeneratePolygon() {
+        val polygon = listOf(
+            Position(1.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 1.0)
+        )
+        val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    // -----------------------
+
+    private fun createMockWWWEventArea(event: WWWEvent): WWWEventArea {
+        return object : WWWEventArea(event) {
+            override suspend fun getGeoJsonData(): JsonObject {
+                return buildJsonObject {
+                    put("type", "Polygon")
+                    put("coordinates", Json.parseToJsonElement(
+                        "[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]").jsonArray
+                    )
+                }
+            }
+        }
+    }
+
+    private fun createMockWWWEventAreaEmpty(event: WWWEvent): WWWEventArea {
+        return object : WWWEventArea(event) {
+            override suspend fun getGeoJsonData(): JsonObject {
+                return buildJsonObject {
+                    put("type", "Polygon")
+                    put("coordinates", Json.parseToJsonElement("[]").jsonArray)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun testIsPositionWithin() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createMockWWWEventArea(randomEvent)
+        val position = Position(5.0, 5.0) // Position within the polygon
+
+        runBlocking {
+            assertTrue(eventArea.isPositionWithin(position), "Expected position to be within the event area")
+        }
+    }
+
+    @Test
+    fun testGetBoundingBox() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createMockWWWEventArea(randomEvent)
+
+        runBlocking {
+            val boundingBox = eventArea.getBoundingBox()
+            assertNotNull(boundingBox, "Expected bounding box to be not null")
+            assertTrue(boundingBox.minLatitude <= boundingBox.maxLatitude, "Invalid bounding box coordinates")
+            assertTrue(boundingBox.minLongitude <= boundingBox.maxLongitude, "Invalid bounding box coordinates")
+        }
+    }
+
+    @Test
+    fun testGetCachedPolygon() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createMockWWWEventArea(randomEvent)
+
+        runBlocking {
+            val polygon = eventArea.getCachedPolygon()
+            val expectedPolygon = listOf(
+                Position(latitude=0.0, longitude=0.0),
+                Position(latitude=10.0, longitude=0.0),
+                Position(latitude=10.0, longitude=10.0),
+                Position(latitude=0.0, longitude=10.0),
+                Position(latitude=0.0, longitude=0.0)
+            )
+            assertEquals(expectedPolygon, polygon, "Expected polygon to match the predefined polygon")
+        }
+    }
+
+    @Test
+    fun testGetCachedPolygonEmpty() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createMockWWWEventAreaEmpty(randomEvent)
+
+        runBlocking {
+            val polygon = eventArea.getCachedPolygon()
+            assertTrue(polygon.isEmpty(), "Expected polygon to be empty")
+        }
     }
 
 }
