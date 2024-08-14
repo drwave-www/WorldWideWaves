@@ -85,6 +85,7 @@ import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -111,23 +112,10 @@ class EventActivity : AbstractEventBackActivity() {
             DividerLine()
             ButtonWave(event)
             WWWEventMap(event, onLocationUpdate = { newLocation ->
-                if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                    lastKnownLocation = newLocation
-                    coroutineScope.launch {
-                        geolocText = if (
-                            event.isPositionWithinArea(
-                                Position(
-                                    newLocation.latitude,
-                                    newLocation.longitude
-                                )
-                            )
-                        ) {
-                            ShRes.string.geoloc_yourein
-                        } else {
-                            ShRes.string.geoloc_yourenotin
-                        }
-                    }
+                updateGeolocText(event, newLocation, lastKnownLocation, coroutineScope) { newGeolocText ->
+                    geolocText = newGeolocText
                 }
+                lastKnownLocation = newLocation
             }).Screen(
                 modifier = Modifier.fillMaxWidth()
             )
@@ -136,7 +124,32 @@ class EventActivity : AbstractEventBackActivity() {
             WWWEventSocialNetworks(event)
         }
     }
+}
 
+private fun updateGeolocText(
+    event: WWWEvent,
+    newLocation: LatLng,
+    lastKnownLocation: LatLng?,
+    coroutineScope: CoroutineScope,
+    onGeolocTextUpdated: (StringResource) -> Unit
+) {
+    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
+        coroutineScope.launch {
+            val newGeolocText = if (
+                event.isPositionWithinArea(
+                    Position(
+                        newLocation.latitude,
+                        newLocation.longitude
+                    )
+                )
+            ) {
+                ShRes.string.geoloc_yourein
+            } else {
+                ShRes.string.geoloc_yourenotin
+            }
+            onGeolocTextUpdated(newGeolocText)
+        }
+    }
 }
 
 // ----------------------------

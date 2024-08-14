@@ -23,13 +23,14 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.generated.resources.Res
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
@@ -67,54 +68,45 @@ suspend fun WWWEvent.isPositionWithinArea(position: Position): Boolean {
 // ---------------------------
 
 @OptIn(ExperimentalResourceApi::class)
-private suspend fun WWWEvent.getGeoJsonData(callback: (JsonObject) -> Unit): JsonObject {
+private suspend fun WWWEvent.getGeoJsonData(): JsonObject {
     val geojsonData = withContext(Dispatchers.IO) {
         Res.readBytes("files/maps/$id.geojson").decodeToString() // TODO static folder name
     }
-    val geometryCollection = Json.parseToJsonElement(geojsonData).jsonObject
-    callback(geometryCollection)
-    return geometryCollection
+    return Json.parseToJsonElement(geojsonData).jsonObject
 }
 
-private suspend fun WWWEvent.getCachedPolygon(): List<Position> {
+suspend fun WWWEvent.getCachedPolygon(): List<Position> {
     if (this.areaPolygon.isEmpty()) {
-        this.areaPolygon = runBlocking {
-            var polygonResult = listOf<Position>() // Variable to store the polygon result
-            getGeoJsonData { geometryCollection ->
-                val type = geometryCollection["type"]?.toString()?.replace("\"", "")
-                val coordinates = geometryCollection["coordinates"]?.jsonArray
+        this.areaPolygon = withContext(Dispatchers.Default) {
+            val geometryCollection = getGeoJsonData()
+            val type = geometryCollection["type"]?.jsonPrimitive?.content
+            val coordinates = geometryCollection["coordinates"]?.jsonArray
 
-                polygonResult = when (type) { // Assign the result to polygonResult
-                    "Polygon" -> {
-                        coordinates?.let {
-                            it.jsonArray.flatMap { ring ->
-                                ring.jsonArray.map { point ->
-                                    Position(
-                                        point.jsonArray[1].toString().toDouble(),
-                                        point.jsonArray[0].toString().toDouble()
-                                    )
-                                }
-                            }
-                        } ?: emptyList()
-                    }
-                    "MultiPolygon" -> {
-                        coordinates?.let {
-                            it.jsonArray.flatMap { multiPolygon ->
-                                multiPolygon.jsonArray.flatMap { ring ->
-                                    ring.jsonArray.map { point ->
-                                        Position(
-                                            point.jsonArray[1].toString().toDouble(),
-                                            point.jsonArray[0].toString().toDouble()
-                                        )
-                                    }
-                                }
-                            }
-                        } ?: emptyList()
-                    }
-                    else -> emptyList()
+            when (type) {
+                "Polygon" -> {
+                    coordinates?.flatMap { ring ->
+                        ring.jsonArray.map { point ->
+                            Position(
+                                point.jsonArray[1].jsonPrimitive.double,
+                                point.jsonArray[0].jsonPrimitive.double
+                            )
+                        }
+                    } ?: emptyList()
                 }
+                "MultiPolygon" -> {
+                    coordinates?.flatMap { multiPolygon ->
+                        multiPolygon.jsonArray.flatMap { ring ->
+                            ring.jsonArray.map { point ->
+                                Position(
+                                    point.jsonArray[1].jsonPrimitive.double,
+                                    point.jsonArray[0].jsonPrimitive.double
+                                )
+                            }
+                        }
+                    } ?: emptyList()
+                }
+                else -> emptyList()
             }
-            polygonResult // Return the extracted polygon vertices
         }
     }
     return this.areaPolygon

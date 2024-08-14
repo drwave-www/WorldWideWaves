@@ -1,6 +1,7 @@
 
 Next:
 
+- fix tests in AlgoArea + refactor what is needed + add new tests
 - !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
     --> in-the-wave calculation
     --> think strategy before (inject, cache, preload, post-install init, etc...)
