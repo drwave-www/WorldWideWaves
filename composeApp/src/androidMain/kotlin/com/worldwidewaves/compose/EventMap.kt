@@ -22,9 +22,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getMapBbox
-import com.worldwidewaves.shared.events.getMapCenter
-import com.worldwidewaves.shared.events.getMapStyleUri
 import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -63,7 +60,7 @@ import java.io.File
  * limitations under the License.
  */
 
-class WWWEventMap(
+class EventMap(
     private val event: WWWEvent,
     private val onLocationUpdate: (LatLng) -> Unit
 ) {
@@ -89,7 +86,7 @@ class WWWEventMap(
 
         // Setup Map properties
         LaunchedEffect(Unit) {
-            styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
+            styleUri.value = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
         }
 
         // Calculate height based on aspect ratio and available width
@@ -176,7 +173,7 @@ class WWWEventMap(
     ) {
         when (initialCameraPosition) {
             CameraPosition.DEFAULT_CENTER -> {
-                val (cLat, cLng) = event.getMapCenter()
+                val (cLat, cLng) = event.map.getCenter()
                 map.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(cLat, cLng),
@@ -185,7 +182,7 @@ class WWWEventMap(
                 )
             }
             CameraPosition.BOUNDS -> {
-                val (swLng, swLat, neLng, neLat) = event.getMapBbox()
+                val (swLng, swLat, neLng, neLat) = event.map.getBbox()
                 val bounds = LatLngBounds.Builder()
                     .include(LatLng(swLat, swLng)) // Southwest corner
                     .include(LatLng(neLat, neLng)) // Northeast corner

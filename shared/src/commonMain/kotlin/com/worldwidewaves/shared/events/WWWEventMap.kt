@@ -1,0 +1,70 @@
+package com.worldwidewaves.shared.events
+
+import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getMapFileAbsolutePath
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+/*
+ * Copyright 2024 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class WWWEventMap(val event: WWWEvent) {
+
+    fun getCenter(): Pair<Double, Double> {
+        val (lat, lng) = event.mapCenter.split(",").map { it.toDouble() }
+        return Pair(lat, lng)
+    }
+
+    fun getBbox(): List<Double> {
+        // swLng, swLat, neLng, neLat
+        return event.mapBbox.split(",").map { it.toDouble() }
+    }
+
+    // ---------------------------q
+
+    suspend fun getMbtilesFilePath(): String? {
+        return getMapFileAbsolutePath(event.id, "mbtiles")
+    }
+
+    // ---------------------------
+
+    @OptIn(ExperimentalResourceApi::class)
+    suspend fun getStyleUri(): String? {
+        val mbtilesFilePath = getMbtilesFilePath() ?: return null
+        val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
+        val styleFilename = "style-${event.id}.json"
+
+        //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
+        //    return cachedFileUri(styleFilename)
+        //}
+
+        // TODO : generate the start area polygon from the geojson file, see below for code
+
+        val newFileStr = Res.readBytes("files/maps/mapstyle.json")
+            .decodeToString()
+            .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
+            .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
+
+        cacheStringToFile(styleFilename, newFileStr)
+
+        return cachedFilePath(styleFilename)
+    }
+
+}

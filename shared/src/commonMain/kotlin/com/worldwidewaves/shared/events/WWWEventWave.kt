@@ -22,31 +22,28 @@ package com.worldwidewaves.shared.events
 
 // ---------------------------
 
-//@Suppress("UNUSED_PARAMETER")
-//@Transient
-//var WWWEvent.wave: WWWWave
-//    get() = WWWWave.provideWave(id).setEvent(this)
-//    set(value) {
-//        throw Exception("Cannot set wave")
-//    }
+class WWWEventWave(val event: WWWEvent) {
 
-// ---------------------------
+    fun getLiteralStartTime(): String {
+        return "14:00 BRT"
+    }
 
-class WWWWave(val event: WWWEvent) {
+    fun getLiteralSpeed(): String {
+        return "12 m/s"
+    }
 
-//    companion object : KoinComponent {
-//        fun provideWave(eventId: String): WWWWave {
-//            return getKoin().get<WWWWave>(qualifier = named(eventId))
-//        }
-//    }
-//
-//    fun setEvent(wwwEvent: WWWEvent): WWWWave {
-//        event = wwwEvent
-//        return this
-//    }
-//
-//    // ---------------------------
+    fun getLiteralEndTime(): String {
+        return "15:23 BRT"
+    }
 
+    fun getLiteralTotalTime(): String {
+        return "83 min"
+    }
 
+    fun getLiteralProgression(): String {
+        return "49.23%"
+    }
+
+    // ---------------------------
 
 }

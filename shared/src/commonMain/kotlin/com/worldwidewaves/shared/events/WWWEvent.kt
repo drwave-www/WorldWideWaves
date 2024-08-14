@@ -20,17 +20,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.cacheStringToFile
-import com.worldwidewaves.shared.cachedFilePath
-import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
@@ -58,20 +53,9 @@ data class WWWEvent (
     val mapLanguage: String,
     val mapOsmarea: String
 ) {
-    @Transient val area = WWWArea(this)
-    @Transient val wave = WWWWave(this)
-}
-
-// ---------------------------
-
-fun WWWEvent.getMapCenter(): Pair<Double, Double> {
-    val (lat, lng) = this.mapCenter.split(",").map { it.toDouble() }
-    return Pair(lat, lng)
-}
-
-fun WWWEvent.getMapBbox(): List<Double> {
-    // swLng, swLat, neLng, neLat
-    return this.mapBbox.split(",").map { it.toDouble() }
+    @Transient val map = WWWEventMap(this)
+    @Transient val area = WWWEventArea(this)
+    @Transient val wave = WWWEventWave(this)
 }
 
 // ---------------------------
@@ -103,63 +87,6 @@ fun WWWEvent.getFormattedSimpleDate(): String {
             }
     }.getOrDefault("00/00")
 }
-
-// ---------------------------
-
-suspend fun WWWEvent.getMbtilesFilePath(): String? {
-    return getMapFileAbsolutePath(this.id, "mbtiles")
-}
-
-suspend fun WWWEvent.getGeoJsonFilePath(): String? {
-    return getMapFileAbsolutePath(this.id, "geojson")
-}
-
-// ---------------------------
-
-@OptIn(ExperimentalResourceApi::class)
-suspend fun WWWEvent.getMapStyleUri(): String? {
-    val mbtilesFilePath = getMbtilesFilePath() ?: return null
-    val geojsonFilePath = getGeoJsonFilePath() ?: return null
-    val styleFilename = "style-${this.id}.json"
-
-    //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
-    //    return cachedFileUri(styleFilename)
-    //}
-
-    // TODO : generate the start area polygon from the geojson file, see below for code
-
-    val newFileStr = Res.readBytes("files/maps/mapstyle.json")
-        .decodeToString()
-        .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
-        .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
-
-    cacheStringToFile(styleFilename, newFileStr)
-
-    return cachedFilePath(styleFilename)
-}
-
-// ---------------------------
-
-fun WWWEvent.getLiteralSpeed(): String {
-    return "12 m/s"
-}
-
-fun WWWEvent.getLiteralStartTime(): String {
-    return "14:00 BRT"
-}
-
-fun WWWEvent.getLiteralEndTime(): String {
-    return "15:23 BRT"
-}
-
-fun WWWEvent.getLiteralTotalTime(): String {
-    return "83 min"
-}
-
-fun WWWEvent.getLiteralProgression(): String {
-    return "49.23%"
-}
-
 
 //import kotlinx.serialization.json.Json
 //import kotlinx.serialization.json.jsonObject

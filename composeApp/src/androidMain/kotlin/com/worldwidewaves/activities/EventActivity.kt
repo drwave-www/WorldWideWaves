@@ -57,18 +57,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
-import com.worldwidewaves.compose.WWWEventMap
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getFormattedSimpleDate
-import com.worldwidewaves.shared.events.getLiteralEndTime
-import com.worldwidewaves.shared.events.getLiteralProgression
-import com.worldwidewaves.shared.events.getLiteralSpeed
-import com.worldwidewaves.shared.events.getLiteralStartTime
-import com.worldwidewaves.shared.events.getLiteralTotalTime
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.generated.resources.be_waved
@@ -110,7 +105,7 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            WWWEventMap(event, onLocationUpdate = { newLocation ->
+            EventMap(event, onLocationUpdate = { newLocation ->
                 updateGeolocText(event, newLocation, lastKnownLocation, coroutineScope) { newGeolocText ->
                     geolocText = newGeolocText
                 }
@@ -303,11 +298,11 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 private fun EventNumbers(event: WWWEvent) {
 
     val eventNumbers = mapOf( // TODO : update progression every x seconds
-        ShRes.string.wave_speed to event.getLiteralSpeed(),
-        ShRes.string.wave_start_time to event.getLiteralStartTime(),
-        ShRes.string.wave_end_time to event.getLiteralEndTime(),
-        ShRes.string.wave_total_time to event.getLiteralTotalTime(),
-        ShRes.string.wave_progression to event.getLiteralProgression()
+        ShRes.string.wave_speed to event.wave.getLiteralSpeed(),
+        ShRes.string.wave_start_time to event.wave.getLiteralStartTime(),
+        ShRes.string.wave_end_time to event.wave.getLiteralEndTime(),
+        ShRes.string.wave_total_time to event.wave.getLiteralTotalTime(),
+        ShRes.string.wave_progression to event.wave.getLiteralProgression()
     )
 
     Box(

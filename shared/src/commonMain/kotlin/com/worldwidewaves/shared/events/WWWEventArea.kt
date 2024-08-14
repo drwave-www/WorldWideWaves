@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -34,19 +35,9 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
-//@Suppress("UNUSED_PARAMETER")
-//@Transient
-//var WWWEvent.area: WWWArea
-//    get() = WWWArea.provideArea(id).setEvent(this)
-//    set(value) {
-//        throw Exception("Cannot set area")
-//    }
-
-// ---------------------------
-
 data class Position(val latitude: Double, val longitude: Double)
 
-class WWWArea(private val event: WWWEvent) {
+class WWWEventArea(private val event: WWWEvent) {
 
     private val areaPolygon: MutableList<Position> = mutableListOf()
 
@@ -58,6 +49,10 @@ class WWWArea(private val event: WWWEvent) {
     }
 
     // ---------------------------
+
+    suspend fun getGeoJsonFilePath(): String? {
+        return getMapFileAbsolutePath(this.event.id, "geojson")
+    }
 
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun getGeoJsonData(): JsonObject {
