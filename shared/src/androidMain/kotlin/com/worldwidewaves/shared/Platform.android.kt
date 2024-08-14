@@ -33,6 +33,10 @@ import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_bra
 import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.MissingResourceException
 import java.io.File
@@ -66,7 +70,7 @@ object AndroidPlatform : WWWPlatform {
     // fun getEvents() : WWWEvents = events.value
 }
 
-// --- Platform-specific API ---
+// ---------------------------
 
 actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
@@ -96,7 +100,7 @@ actual fun getEventImage(type: String, id: String): Any? {
     }
 }
 
-// --- Platform-specific API ---
+// ---------------------------
 
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
@@ -125,6 +129,8 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     }
 }
 
+// ---------------------------
+
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
     val cacheDir = context.cacheDir
@@ -143,4 +149,10 @@ actual fun cacheStringToFile(fileName: String, content: String) {
     val cacheDir = context.cacheDir
     val file = File(cacheDir, fileName)
     file.writeText(content)
+}
+
+// ---------------------------
+
+actual fun getLocalDatetime(): LocalDateTime {
+    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }

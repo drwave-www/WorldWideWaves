@@ -1,11 +1,10 @@
 
 Next:
 
-- fix tests in AlgoArea + refactor what is needed + add new tests
-- !!! do the wave algo / maps stuff (WaveManager + WaveMapManager)
-    --> in-the-wave calculation
-    --> think strategy before (inject, cache, preload, post-install init, etc...)
-    --> write tests before
+- Avion: Ajout statut dans wave et renvoyer infosd par defaut si non starte ou termine
+- Avion: frequent reload on wave : find a way to record listeners and launch in s separate thread ?
+- Avion: add tests on area/map/wave
+- Avion: warming zone + affichage progression wave
 
 - scripting for events resources
     - geojson of the shape

@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,8 +64,8 @@ import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getFormattedSimpleDate
 import com.worldwidewaves.shared.events.getLocationImage
+import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
@@ -92,7 +93,7 @@ class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
-        val eventDate = event.getFormattedSimpleDate()
+        val eventDate = event.getStartDateSimpleAsLocal()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -298,13 +299,20 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 @Composable
 private fun EventNumbers(event: WWWEvent) {
 
-    val eventNumbers = mapOf( // TODO : update progression every x seconds
-        ShRes.string.wave_speed to event.wave.getLiteralSpeed(),
-        ShRes.string.wave_start_time to event.wave.getLiteralStartTime(),
-        ShRes.string.wave_end_time to event.wave.getLiteralEndTime(),
-        ShRes.string.wave_total_time to event.wave.getLiteralTotalTime(),
-        ShRes.string.wave_progression to event.wave.getLiteralProgression()
-    )
+    val eventNumbers = remember { mutableStateOf<Map<StringResource, String>>(emptyMap()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(event) {
+        coroutineScope.launch {
+            eventNumbers.value = mapOf(
+                ShRes.string.wave_speed to event.wave.getLiteralSpeed(),
+                ShRes.string.wave_start_time to event.wave.getLiteralStartTime(),
+                ShRes.string.wave_end_time to event.wave.getLiteralEndTime(),
+                ShRes.string.wave_total_time to event.wave.getLiteralTotalTime(),
+                ShRes.string.wave_progression to event.wave.getLiteralProgression()
+            )
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -326,7 +334,7 @@ private fun EventNumbers(event: WWWEvent) {
                 fontSize = 32.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
-            eventNumbers.forEach { (key, value) ->
+            eventNumbers.value.forEach { (key, value) ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween

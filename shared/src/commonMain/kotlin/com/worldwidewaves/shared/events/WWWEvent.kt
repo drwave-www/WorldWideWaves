@@ -21,8 +21,9 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.getEventImage
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -51,7 +52,8 @@ data class WWWEvent(
     val mapMaxzoom: Int,
     val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
-    val mapOsmarea: String
+    val mapOsmarea: String,
+    val timeZone: String
 ) {
     @Transient val map = WWWEventMap(this)
     @Transient val area = WWWEventArea(this)
@@ -78,14 +80,28 @@ fun WWWEvent.getLocationImage(): Any? = getEventImage("location", this.id)
 fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getEventImage("community", it) }
 fun WWWEvent.getCountryImage(): Any? = this.country?.let { getEventImage("country", it) }
 
-fun WWWEvent.getFormattedSimpleDate(): String {
+// ---------------------------
+
+fun WWWEvent.getTimeZone(): TimeZone {
+    return TimeZone.of(this.timeZone)
+}
+
+fun WWWEvent.getStartDateSimpleAsLocal(): String {
     return runCatching {
-        Instant.parse("${this.date}T00:00:00Z")
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-            .let { dateTime ->
-                "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
-            }
+        val dateTimeString = "${this.date}T${this.startHour}:00"
+        val localDateTime = LocalDateTime.parse(dateTimeString)
+        val timezone = getTimeZone()
+        localDateTime.toInstant(timezone).toLocalDateTime(timezone).let { dateTime ->
+            "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+        }
     }.getOrDefault("00/00")
+}
+
+fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime {
+    val dateTimeString = "${date}T${startHour}"
+    val localDateTime = LocalDateTime.parse(dateTimeString)
+    val timezone = getTimeZone()
+    return localDateTime.toInstant(timezone).toLocalDateTime(timezone)
 }
 
 //import kotlinx.serialization.json.Json

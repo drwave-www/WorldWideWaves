@@ -19,7 +19,8 @@
     "mapMaxzoom": 14,
     "mapDefaultzoom": 13,
     "mapLanguage": "fr",
-    "mapOsmarea": "europe/france/ile-de-france"
+    "mapOsmarea": "europe/france/ile-de-france",
+    "timeZone": "Europe/Paris"
   },
   {
     "id": "riodejaneiro_brazil",
@@ -41,7 +42,8 @@
     "mapMaxzoom": 14,
     "mapDefaultzoom": 13,
     "mapLanguage": "pt",
-    "mapOsmarea": "south-america/brazil/sudeste"
+    "mapOsmarea": "south-america/brazil/sudeste",
+    "timeZone": "America/Sao_Paulo"
   },
   {
     "id": "unitedstates",
@@ -62,7 +64,8 @@
     "mapMaxzoom": 7,
     "mapDefaultzoom": 5,
     "mapLanguage": "en",
-    "mapOsmarea": "north-america/us"
+    "mapOsmarea": "north-america/us",
+    "timeZone": "America/New_York"
   },
   {
     "id": "world",
@@ -82,6 +85,7 @@
     "mapMaxzoom": 5,
     "mapDefaultzoom": 2,
     "mapLanguage": "en",
-    "mapOsmarea": "planet"
+    "mapOsmarea": "planet",
+    "timeZone": "UTC"
   }
 ]
