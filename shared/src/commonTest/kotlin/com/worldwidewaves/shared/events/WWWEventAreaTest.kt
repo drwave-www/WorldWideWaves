@@ -3,9 +3,7 @@ package com.worldwidewaves.shared.events
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -234,34 +232,31 @@ class WWWEventAreaTest {
 
     // -----------------------
 
-    private fun createMockWWWEventArea(event: WWWEvent): WWWEventArea {
-        return object : WWWEventArea(event) {
-            override suspend fun getGeoJsonData(): JsonObject {
-                return buildJsonObject {
-                    put("type", "Polygon")
-                    put("coordinates", Json.parseToJsonElement(
-                        "[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]").jsonArray
-                    )
-                }
+    private fun createMockGeoJsonDataProvider(geoJson: String): GeoJsonDataProvider {
+        return object: GeoJsonDataProvider {
+            override suspend fun getGeoJsonData(eventId: String): JsonObject {
+                return Json.parseToJsonElement(geoJson).jsonObject
             }
         }
     }
 
-    private fun createMockWWWEventAreaEmpty(event: WWWEvent): WWWEventArea {
-        return object : WWWEventArea(event) {
-            override suspend fun getGeoJsonData(): JsonObject {
-                return buildJsonObject {
-                    put("type", "Polygon")
-                    put("coordinates", Json.parseToJsonElement("[]").jsonArray)
-                }
-            }
-        }
+    private fun createWWWEventArea(event: WWWEvent, geoJson: String): WWWEventArea {
+        val geoJsonDataProvider = createMockGeoJsonDataProvider(geoJson)
+        return WWWEventArea(event, geoJsonDataProvider)
     }
+
+    private val polygonGeoJson = """
+        {"type":"Polygon","coordinates":[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]}
+    """.trimIndent()
+
+    private val emptyPolygonGeoJson = """
+        {"type":"Polygon","coordinates":[]}
+    """.trimIndent()
 
     @Test
     fun testIsPositionWithin() {
         val randomEvent = createRandomWWWEvent("test_event")
-        val eventArea = createMockWWWEventArea(randomEvent)
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
         val position = Position(5.0, 5.0) // Position within the polygon
 
         runBlocking {
@@ -272,7 +267,7 @@ class WWWEventAreaTest {
     @Test
     fun testGetBoundingBox() {
         val randomEvent = createRandomWWWEvent("test_event")
-        val eventArea = createMockWWWEventArea(randomEvent)
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
 
         runBlocking {
             val boundingBox = eventArea.getBoundingBox()
@@ -285,7 +280,7 @@ class WWWEventAreaTest {
     @Test
     fun testGetCachedPolygon() {
         val randomEvent = createRandomWWWEvent("test_event")
-        val eventArea = createMockWWWEventArea(randomEvent)
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
 
         runBlocking {
             val polygon = eventArea.getCachedPolygon()
@@ -303,12 +298,11 @@ class WWWEventAreaTest {
     @Test
     fun testGetCachedPolygonEmpty() {
         val randomEvent = createRandomWWWEvent("test_event")
-        val eventArea = createMockWWWEventAreaEmpty(randomEvent)
+        val eventArea = createWWWEventArea(randomEvent, emptyPolygonGeoJson)
 
         runBlocking {
             val polygon = eventArea.getCachedPolygon()
             assertTrue(polygon.isEmpty(), "Expected polygon to be empty")
         }
     }
-
 }

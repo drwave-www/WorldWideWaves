@@ -32,6 +32,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.koin.core.component.KoinComponent
 
 // ---------------------------
 
@@ -45,10 +46,35 @@ data class BoundingBox(
 
 // ---------------------------
 
-open class WWWEventArea(private val event: WWWEvent) {
+interface GeoJsonDataProvider {
+    suspend fun getGeoJsonData(eventId: String): JsonObject
+}
+
+class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun getGeoJsonData(eventId: String): JsonObject {
+        val geojsonData = withContext(Dispatchers.IO) {
+            Res.readBytes("files/maps/$eventId.geojson").decodeToString()
+        }
+        return Json.parseToJsonElement(geojsonData).jsonObject
+    }
+}
+
+// ---------------------------
+
+class WWWEventArea(
+    private val event: WWWEvent,
+    private val geoJsonDataProvider: GeoJsonDataProvider = DefaultGeoJsonDataProvider()
+) : KoinComponent {
 
     private val areaPolygon: MutableList<Position> = mutableListOf()
     private var cachedBoundingBox: BoundingBox? = null
+
+    // ---------------------------
+
+    internal suspend fun getGeoJsonFilePath(): String? {
+        return getMapFileAbsolutePath(event.id, "mbtiles")
+    }
 
     // ---------------------------
 
@@ -67,23 +93,11 @@ open class WWWEventArea(private val event: WWWEvent) {
 
     // ---------------------------
 
-    suspend fun getGeoJsonFilePath(): String? {
-        return getMapFileAbsolutePath(this.event.id, "geojson")
-    }
-
-    @OptIn(ExperimentalResourceApi::class)
-    open suspend fun getGeoJsonData(): JsonObject {
-        val geojsonData = withContext(Dispatchers.IO) {
-            Res.readBytes("files/maps/${event.id}.geojson").decodeToString() // TODO static folder name
-        }
-        return Json.parseToJsonElement(geojsonData).jsonObject
-    }
-
     suspend fun getCachedPolygon(): List<Position> {
         if (this.areaPolygon.isEmpty()) {
             this.areaPolygon.addAll(
                 withContext(Dispatchers.Default) {
-                    val geometryCollection = getGeoJsonData()
+                    val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
                     val coordinates = geometryCollection["coordinates"]?.jsonArray
 
