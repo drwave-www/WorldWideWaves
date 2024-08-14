@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared
 
-import kotlinx.datetime.LocalDateTime
-
 /*
  * Copyright 2024 DrWave
  *
@@ -40,9 +38,3 @@ expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
 expect fun cachedFileExists(fileName: String): Boolean
 expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String)
-expect suspend fun cacheDeepFile(fileName: String)
-expect fun getCacheDir(): String
-
-// ---------------------------
-
-expect fun getLocalDatetime(): LocalDateTime

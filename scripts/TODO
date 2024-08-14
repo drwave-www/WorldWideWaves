@@ -1,4 +1,11 @@
-
+- ensure that right layers are used
+    --> generate all all check with maptiler / gqis
 - run in mac if possible ?
+
+- find the right styles : https://github.com/openmaptiles/osm-bright-gl-style
+- import into Android with right styles / icons, etc...
+
+- geojson of the border
+  --> https://peteris.rocks/blog/openstreetmap-administrative-boundaries-in-geojson/
 
 - generate images / descriptions / other etc...

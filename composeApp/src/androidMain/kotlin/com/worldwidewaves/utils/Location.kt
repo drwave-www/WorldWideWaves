@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 @Composable
-fun requestLocationPermission(): Boolean {
+fun requestLocationPermission() : Boolean{
     val context = LocalContext.current
     val permissionState = remember { mutableStateOf(false) }
 

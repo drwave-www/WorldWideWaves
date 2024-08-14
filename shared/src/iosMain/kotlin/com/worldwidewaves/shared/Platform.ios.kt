@@ -21,7 +21,6 @@ package com.worldwidewaves.shared
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.datetime.LocalDateTime
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -32,8 +31,6 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
 import platform.Foundation.writeToFile
 import platform.UIKit.UIDevice
-
-// TODO : Check https://skie.touchlab.co/
 
 class IOSPlatform : WWWPlatform {
     override val name: String =
@@ -74,18 +71,10 @@ actual fun cacheStringToFile(fileName: String, content: String) {
     nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
 }
 
-actual fun getCacheDir(): String {
+private fun getCacheDir(): String {
     return NSSearchPathForDirectoriesInDomains(
         NSCachesDirectory,
         NSUserDomainMask,
         true
     ).first() as String
-}
-
-actual fun getLocalDatetime(): LocalDateTime {
-    TODO("Not yet implemented")
-}
-
-actual suspend fun cacheDeepFile(fileName: String) {
-    TODO("Not yet implemented")
 }

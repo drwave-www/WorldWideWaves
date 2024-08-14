@@ -10,13 +10,16 @@
     "speed": "5",
     "description": "Experience the wave in Paris, where the charm of the Eiffel Tower meets the elegance of the Champs-Élysées",
     "instagramAccount": "worldwidewaves.paris",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.paris/",
     "instagramHashtag": "#waveparis",
+    "mapBbox": "2.2241,48.8156,2.4699,48.9022",
+    "mapCenter": "48.8619,2.3417",
     "mapOsmadminid": 71525,
-    "mapMaxzoom": 18,
+    "mapMinzoom": 10,
+    "mapMaxzoom": 14,
+    "mapDefaultzoom": 13,
     "mapLanguage": "fr",
-    "mapOsmarea": "europe/france/ile-de-france",
-    "mapWarmingZoneLongitude": 2.39492,
-    "timeZone": "Europe/Paris"
+    "mapOsmarea": "europe/france/ile-de-france"
   },
   {
     "id": "riodejaneiro_brazil",
@@ -29,13 +32,16 @@
     "speed": "5",
     "description": "Join the wave in Rio de Janeiro, where the rhythm of Copacabana meets the majesty of Christ the Redeemer",
     "instagramAccount": "worldwidewaves.rio",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.rio/",
     "instagramHashtag": "#waverio",
+    "mapBbox": "-43.7955,-23.0823,-43.1052,-22.7469",
+    "mapCenter": "-22.9068,-43.1729",
     "mapOsmadminid": 3448439,
+    "mapMinzoom": 10,
     "mapMaxzoom": 14,
+    "mapDefaultzoom": 13,
     "mapLanguage": "pt",
-    "mapOsmarea": "south-america/brazil/sudeste",
-    "mapWarmingZoneLongitude": 0,
-    "timeZone": "America/Sao_Paulo"
+    "mapOsmarea": "south-america/brazil/sudeste"
   },
   {
     "id": "unitedstates",
@@ -47,13 +53,16 @@
     "speed": "5",
     "description": "Feel the wave across the United States, from the bustling streets of New York to the sunny beaches of California",
     "instagramAccount": "worldwidewaves.usa",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.usa/",
     "instagramHashtag": "#waveusa",
+    "mapBbox": "-125.0017,24.3963,-66.9346,49.3844",
+    "mapCenter": "37.0902,-95.7129",
     "mapOsmadminid": 148838,
+    "mapMinzoom": 3,
     "mapMaxzoom": 7,
+    "mapDefaultzoom": 5,
     "mapLanguage": "en",
-    "mapOsmarea": "north-america/us",
-    "mapWarmingZoneLongitude": 0,
-    "timeZone": "America/New_York"
+    "mapOsmarea": "north-america/us"
   },
   {
     "id": "world",
@@ -64,12 +73,15 @@
     "speed": "5",
     "description": "Be part of the global wave, uniting people from every corner of the world in a celebration of unity and diversity",
     "instagramAccount": "worldwidewaves.world",
+    "instagramUrl": "https://www.instagram.com/worldwidewaves.world/",
     "instagramHashtag": "#waveworld",
+    "mapBbox": "-180,-90,180,90",
+    "mapCenter": "0,0",
     "mapOsmadminid": 0,
+    "mapMinzoom": 1,
     "mapMaxzoom": 5,
+    "mapDefaultzoom": 2,
     "mapLanguage": "en",
-    "mapOsmarea": "planet",
-    "mapWarmingZoneLongitude": 0,
-    "timeZone": "UTC"
+    "mapOsmarea": "planet"
   }
 ]

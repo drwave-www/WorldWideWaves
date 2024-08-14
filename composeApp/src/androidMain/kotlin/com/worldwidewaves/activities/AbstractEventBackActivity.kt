@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,17 +20,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
@@ -60,9 +56,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
  * limitations under the License.
  */
 
-abstract class AbstractEventBackActivity(
-    private val activateInfiniteScroll : Boolean = true
-) : MainActivity() {
+abstract class AbstractEventBackActivity : MainActivity() {
 
     private val wwwEvents: WWWEvents by inject()
 
@@ -70,8 +64,6 @@ abstract class AbstractEventBackActivity(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setStatusBarColor(window)
 
         var selectedEvent by mutableStateOf<WWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")
@@ -90,7 +82,7 @@ abstract class AbstractEventBackActivity(
     }
 
     private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
-        wwwEvents.onEventLoaded {
+        wwwEvents.invokeWhenLoaded {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
             }
@@ -107,47 +99,42 @@ abstract class AbstractEventBackActivity(
             Column(modifier = Modifier.fillMaxWidth()) {
 
                 // Back layer
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = DIM_BACK_PADDING[0].dp,
-                            end = DIM_BACK_PADDING[1].dp,
-                            top = DIM_BACK_PADDING[2].dp,
-                            bottom = DIM_BACK_PADDING[3].dp
-                        )
+                Row(
+                    modifier = Modifier.padding(
+                        start = 10.dp,
+                        top = 10.dp,
+                        bottom = 15.dp,
+                        end = 10.dp
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .clickable(onClick = { finish() }),
-                            text = "< " + stringResource(ShRes.string.back),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = DIM_BACK_FONTSIZE.sp,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth().align(Center),
-                            text = event.location.uppercase(),
-                            color = quinaryLight,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = DIM_BACK_EVENT_LOCATION_FONTSIZE.sp,
-                        )
-                    }
+                    Text(
+                        modifier = Modifier.clickable(onClick = { finish() }),
+                        text = "< " + stringResource(ShRes.string.back),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontSize = 16.sp,
+                    )
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = event.location.uppercase(),
+                        color = quinaryLight,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        fontSize = 24.sp,
+                    )
                 }
 
                 // Content Event screen
-                var screenModifier = Modifier.fillMaxSize()
-                if (activateInfiniteScroll)
-                    screenModifier = screenModifier.verticalScroll(scrollState)
-
-                Box(modifier = screenModifier) { Screen(modifier = Modifier, event) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                ) { Screen(modifier = Modifier, event) }
 
             }
-        } else { // Error, should not occur
+        } else {
             Text(
                 text = "Event not found",
                 color = MaterialTheme.colorScheme.primary,

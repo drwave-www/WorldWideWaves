@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.shared.events
 
 /*
  * Copyright 2024 DrWave
@@ -20,9 +20,33 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.WWWEvents
-import org.koin.dsl.module
+// ---------------------------
 
-val commonModule = module {
-    single { WWWEvents(get()) }
+//@Suppress("UNUSED_PARAMETER")
+//@Transient
+//var WWWEvent.wave: WWWWave
+//    get() = WWWWave.provideWave(id).setEvent(this)
+//    set(value) {
+//        throw Exception("Cannot set wave")
+//    }
+
+// ---------------------------
+
+class WWWWave(val event: WWWEvent) {
+
+//    companion object : KoinComponent {
+//        fun provideWave(eventId: String): WWWWave {
+//            return getKoin().get<WWWWave>(qualifier = named(eventId))
+//        }
+//    }
+//
+//    fun setEvent(wwwEvent: WWWEvent): WWWWave {
+//        event = wwwEvent
+//        return this
+//    }
+//
+//    // ---------------------------
+
+
+
 }

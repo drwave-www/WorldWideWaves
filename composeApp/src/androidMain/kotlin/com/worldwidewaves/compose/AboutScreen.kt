@@ -42,17 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_WIDTH
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.logo_description
 import com.worldwidewaves.shared.generated.resources.tab_faq_name
 import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
+import com.worldwidewaves.shared.generated.resources.www_instagram_url
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -80,7 +76,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
+        Surface(modifier = modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
             tabManager.TabView()
         }
     }
@@ -91,16 +87,16 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
         Box(
             modifier = Modifier
-                .height(DIM_INT_TABBAR_HEIGHT.dp)
-                .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
+                .height(60.dp)
+                .width(150.dp),
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
-                        .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
+                        .padding(start = 10.dp, end = 10.dp)
+                        .offset(y = (-20).dp),
                     color = Color.White, thickness = 2.dp
                 )
             }
@@ -109,7 +105,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                 fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
+                fontSize = 20.sp
             )
         }
     }
@@ -132,6 +128,7 @@ fun AboutDividerLine() {
 fun AboutWWWSocialNetworks() {
     WWWSocialNetworks(
         instagramAccount = stringResource(ShRes.string.www_instagram),
+        instagramUrl = stringResource(ShRes.string.www_instagram_url),
         instagramHashtag = stringResource(ShRes.string.www_hashtag)
     )
 }

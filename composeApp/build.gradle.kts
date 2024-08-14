@@ -80,7 +80,6 @@ android {
         implementation(libs.koin.androidCompose)
         implementation(libs.maplibre.android)
         implementation(libs.maplibre.android.annotation)
-        implementation(libs.androidx.datastore.preferences)
     }
 }
 

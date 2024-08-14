@@ -20,18 +20,22 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getEventImage
-import kotlinx.datetime.LocalDateTime
+import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
 @Serializable
-data class WWWEvent(
+data class WWWEvent (
     val id: String,
     val type: String,
     val location: String,
@@ -42,18 +46,32 @@ data class WWWEvent(
     val speed: Int,
     val description: String,
     val instagramAccount: String,
+    val instagramUrl: String,
     val instagramHashtag: String,
     var favorite: Boolean = false,
+    val mapBbox: String,
+    val mapCenter: String,
     val mapOsmadminid: Int,
-    val mapMaxzoom: Double,
+    val mapMinzoom: Int,
+    val mapMaxzoom: Int,
+    val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
-    val mapOsmarea: String,
-    val mapWarmingZoneLongitude: Double,
-    val timeZone: String
+    val mapOsmarea: String
 ) {
-    @Transient var map = WWWEventMap(this)
-    @Transient var area = WWWEventArea(this)
-    @Transient var wave = WWWEventWaveLinear(this)
+    @Transient val area = WWWArea(this)
+    @Transient val wave = WWWWave(this)
+}
+
+// ---------------------------
+
+fun WWWEvent.getMapCenter(): Pair<Double, Double> {
+    val (lat, lng) = this.mapCenter.split(",").map { it.toDouble() }
+    return Pair(lat, lng)
+}
+
+fun WWWEvent.getMapBbox(): List<Double> {
+    // swLng, swLat, neLng, neLat
+    return this.mapBbox.split(",").map { it.toDouble() }
 }
 
 // ---------------------------
@@ -72,40 +90,130 @@ fun WWWEvent.isRunning(): Boolean {
 
 // ---------------------------
 
-private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
+fun WWWEvent.getLocationImage(): Any? = getEventImage("location", this.id)
+fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getEventImage("community", it) }
+fun WWWEvent.getCountryImage(): Any? = this.country?.let { getEventImage("country", it) }
 
-fun WWWEvent.getLocationImage(): Any? = getEventImageByType("location", this.id)
-fun WWWEvent.getCommunityImage(): Any? = getEventImageByType("community", this.community)
-fun WWWEvent.getCountryImage(): Any? = getEventImageByType("country", this.country)
+fun WWWEvent.getFormattedSimpleDate(): String {
+    return runCatching {
+        Instant.parse("${this.date}T00:00:00Z")
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .let { dateTime ->
+                "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
+            }
+    }.getOrDefault("00/00")
+}
 
 // ---------------------------
 
-fun WWWEvent.getTimeZone(): TimeZone = TimeZone.of(this.timeZone)
+suspend fun WWWEvent.getMbtilesFilePath(): String? {
+    return getMapFileAbsolutePath(this.id, "mbtiles")
+}
 
-/**
- * Converts the start date and time of the event to a simple local date format.
- *
- * This function parses the event's start date and time, converts it to the local time zone,
- * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
- *
- * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
- */
-fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
-    LocalDateTime.parse("${this.date}T${this.startHour}:00")
-        .toInstant(getTimeZone())
-        .toLocalDateTime(getTimeZone())
-        .let { "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}" }
-}.getOrDefault("00/00")
+suspend fun WWWEvent.getGeoJsonFilePath(): String? {
+    return getMapFileAbsolutePath(this.id, "geojson")
+}
 
-/**
- * Converts the start date and time of the event to a local `LocalDateTime`.
- *
- * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
- * and then converts it to a `LocalDateTime` in the same time zone.
- *
- * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
- */
-fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime =
-    LocalDateTime.parse("${date}T${startHour}")
-        .toInstant(getTimeZone())
-        .toLocalDateTime(getTimeZone())
+// ---------------------------
+
+@OptIn(ExperimentalResourceApi::class)
+suspend fun WWWEvent.getMapStyleUri(): String? {
+    val mbtilesFilePath = getMbtilesFilePath() ?: return null
+    val geojsonFilePath = getGeoJsonFilePath() ?: return null
+    val styleFilename = "style-${this.id}.json"
+
+    //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
+    //    return cachedFileUri(styleFilename)
+    //}
+
+    // TODO : generate the start area polygon from the geojson file, see below for code
+
+    val newFileStr = Res.readBytes("files/maps/mapstyle.json")
+        .decodeToString()
+        .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
+        .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
+
+    cacheStringToFile(styleFilename, newFileStr)
+
+    return cachedFilePath(styleFilename)
+}
+
+// ---------------------------
+
+fun WWWEvent.getLiteralSpeed(): String {
+    return "12 m/s"
+}
+
+fun WWWEvent.getLiteralStartTime(): String {
+    return "14:00 BRT"
+}
+
+fun WWWEvent.getLiteralEndTime(): String {
+    return "15:23 BRT"
+}
+
+fun WWWEvent.getLiteralTotalTime(): String {
+    return "83 min"
+}
+
+fun WWWEvent.getLiteralProgression(): String {
+    return "49.23%"
+}
+
+
+//import kotlinx.serialization.json.Json
+//import kotlinx.serialization.json.jsonObject
+//import kotlinx.serialization.json.jsonPrimitive
+//import kotlinx.serialization.json.jsonArray
+//import kotlinx.serialization.json.double
+//import kotlinx.serialization.json.decodeFromJsonElement
+//import kotlinx.serialization.Serializable
+//import java.io.File
+
+//@Serializable
+//data class GeoJsonPolygon(val type: String, val coordinates: List<List<List<Double>>>)
+//
+//fun parseGeoJson(filePath: String): GeoJsonPolygon {
+//    val jsonString = File(filePath).readText()
+//    val jsonElement = Json.parseToJsonElement(jsonString)
+//    return Json.decodeFromJsonElement(jsonElement.jsonObject["geometry"]!!)
+//}
+//
+//fun splitPolygonByLongitude(polygon: GeoJsonPolygon, longitude: Double): List<List<List<Double>>> {
+//    val coordinates = polygon.coordinates[0]
+//    val leftSide = mutableListOf<List<Double>>()
+//    val rightSide = mutableListOf<List<Double>>()
+//    var isLeft = true
+//
+//    for (i in coordinates.indices) {
+//        val point = coordinates[i]
+//        if (point[0] < longitude) {
+//            if (!isLeft) {
+//                isLeft = true
+//                leftSide.add(listOf(longitude, point[1]))
+//                rightSide.add(listOf(longitude, point[1]))
+//            }
+//            leftSide.add(point)
+//        } else {
+//            if (isLeft) {
+//                isLeft = false
+//                leftSide.add(listOf(longitude, point[1]))
+//                rightSide.add(listOf(longitude, point[1]))
+//            }
+//            rightSide.add(point)
+//        }
+//    }
+//
+//    return listOf(leftSide, rightSide)
+//}
+//
+//fun main() {
+//    val geoJsonFilePath = "path/to/your/geojson/file.geojson"
+//    val specifiedLongitude = 2.3522 // Example longitude for Paris
+//
+//    val polygon = parseGeoJson(geoJsonFilePath)
+//    val (leftPolygon, rightPolygon) = splitPolygonByLongitude(polygon, specifiedLongitude)
+//
+//    println("Left Polygon: $leftPolygon")
+//    println("Right Polygon: $rightPolygon")
+//}

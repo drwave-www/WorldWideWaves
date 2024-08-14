@@ -54,19 +54,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_INTRO_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_LINK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_ANSWER_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_CONTENTS_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_NBRING_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
 import com.worldwidewaves.shared.generated.resources.faq
 import com.worldwidewaves.shared.generated.resources.faq_access
 import com.worldwidewaves.shared.generated.resources.faq_answer_1
@@ -160,7 +147,9 @@ class AboutFaqScreen : TabScreen {
 
         Box(modifier = modifier) {
             Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AboutWWWLogo()
@@ -179,18 +168,18 @@ class AboutFaqScreen : TabScreen {
                 AboutDividerLine()
 
                 // FAQ title
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         // Save the position of the FAQ section
                         scrollToFAQPosition = coordinates.positionInRoot().y
                     },
                     text = stringResource(ShRes.string.faq),
-                    fontSize = DIM_FAQ_TITLE_FONTSIZE.sp,
+                    fontSize = 64.sp,
                     fontWeight = FontWeight.Black,
                     fontFamily = extraFontFamily
                 )
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
+                Spacer(modifier = Modifier.size(30.dp))
 
                 // FAQ Items
                 FAQDividerLine()
@@ -202,7 +191,7 @@ class AboutFaqScreen : TabScreen {
                 }
 
                 // WWW Social Networks
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+                Spacer(modifier = Modifier.size(20.dp))
                 AboutDividerLine()
                 AboutWWWSocialNetworks()
             }
@@ -216,7 +205,7 @@ class AboutFaqScreen : TabScreen {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                fontSize = DIM_FAQ_SECTION_TITLE_FONTSIZE.sp, fontFamily = extraFontFamily,
+                fontSize = 16.sp, fontFamily = extraFontFamily,
                 textAlign = TextAlign.Start,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary,
@@ -226,7 +215,7 @@ class AboutFaqScreen : TabScreen {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = scrollToFAQPosition),
-                fontSize = DIM_FAQ_LINK_FONTSIZE.sp, fontFamily = displayFontFamily,
+                fontSize = 16.sp, fontFamily = displayFontFamily,
                 textAlign = TextAlign.End,
                 fontWeight = FontWeight.Black,
                 color = quinaryLight,
@@ -234,10 +223,10 @@ class AboutFaqScreen : TabScreen {
                 textDecoration = TextDecoration.Underline
             )
         }
-        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+        Spacer(modifier = Modifier.size(20.dp))
         Text(
             text = stringResource(ShRes.string.warn_rules_security_text),
-            fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
+            fontSize = 18.sp,
             style = TextStyle(textAlign = TextAlign.Justify),
             fontFamily = displayFontFamily
         )
@@ -258,32 +247,32 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                fontSize = DIM_FAQ_RULE_TITLE_FONTSIZE.sp,
+                fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black,
                 fontFamily = extraFontFamily,
                 textAlign = TextAlign.Start
             )
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+            Spacer(modifier = Modifier.size(10.dp))
             items.forEachIndexed { index, item ->
-                Row(modifier = Modifier.padding(bottom = DIM_DEFAULT_INT_PADDING.dp / 2)) {
+                Row(modifier = Modifier.padding(bottom = 5.dp)) {
                     Text(
-                        modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
+                        modifier = Modifier.width(20.dp),
                         text = (index + 1).toString() + ".",
-                        fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp,
+                        fontSize = 12.sp,
                         fontFamily = displayFontFamily,
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
+                        modifier = Modifier.padding(start = 10.dp),
                         text = stringResource(item),
-                        fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp,
+                        fontSize = 12.sp,
                         style = TextStyle(textAlign = TextAlign.Justify),
                         fontFamily = displayFontFamily
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+            Spacer(modifier = Modifier.size(20.dp))
         }
     }
 
@@ -300,14 +289,14 @@ class AboutFaqScreen : TabScreen {
 
         Column(modifier = Modifier
             .fillMaxWidth()
-            .padding(DIM_DEFAULT_INT_PADDING.dp)
+            .padding(10.dp)
             .clickable {
                 onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
             }
         ) {
             Text(
                 text = stringResource(question),
-                fontSize = DIM_FAQ_RULE_QUESTION_FONTSIZE.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = displayFontFamily,
                 color = MaterialTheme.colorScheme.primary
@@ -316,7 +305,7 @@ class AboutFaqScreen : TabScreen {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answer),
-                    fontSize = DIM_FAQ_RULE_ANSWER_FONTSIZE.sp,
+                    fontSize = 16.sp,
                     fontFamily = displayFontFamily,
                     style = TextStyle(textAlign = TextAlign.Justify)
                 )
