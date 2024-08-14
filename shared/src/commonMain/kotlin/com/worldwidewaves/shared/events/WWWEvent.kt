@@ -30,7 +30,7 @@ import kotlinx.serialization.Transient
 // ---------------------------
 
 @Serializable
-data class WWWEvent (
+data class WWWEvent(
     val id: String,
     val type: String,
     val location: String,

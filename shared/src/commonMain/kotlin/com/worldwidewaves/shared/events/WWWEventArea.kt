@@ -36,16 +36,33 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 // ---------------------------
 
 data class Position(val latitude: Double, val longitude: Double)
+data class BoundingBox(
+    val minLatitude: Double,
+    val minLongitude: Double,
+    val maxLatitude: Double,
+    val maxLongitude: Double
+)
+
+// ---------------------------
 
 class WWWEventArea(private val event: WWWEvent) {
 
     private val areaPolygon: MutableList<Position> = mutableListOf()
+    private var cachedBoundingBox: BoundingBox? = null
 
     // ---------------------------
 
     suspend fun isPositionWithin(position: Position): Boolean {
-        val polygon = getCachedPolygon()
-        return polygon.isNotEmpty() && isPointInPolygon(position, polygon)
+        return getCachedPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
+    }
+
+    suspend fun getBoundingBox(): BoundingBox {
+        cachedBoundingBox?.let { return it }
+
+        val polygon = getCachedPolygon().takeIf { it.isNotEmpty() }
+            ?: throw IllegalStateException("Polygon is empty")
+
+        return polygonBbox(polygon).also { cachedBoundingBox = it }
     }
 
     // ---------------------------
@@ -81,6 +98,7 @@ class WWWEventArea(private val event: WWWEvent) {
                                 }
                             } ?: emptyList()
                         }
+
                         "MultiPolygon" -> {
                             coordinates?.flatMap { multiPolygon ->
                                 multiPolygon.jsonArray.flatMap { ring ->
@@ -93,6 +111,7 @@ class WWWEventArea(private val event: WWWEvent) {
                                 }
                             } ?: emptyList()
                         }
+
                         else -> emptyList()
                     }
                 }
@@ -100,34 +119,48 @@ class WWWEventArea(private val event: WWWEvent) {
         }
         return this.areaPolygon
     }
-
 }
 
 // ---------------------------
 
 // from https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
 fun isPointInPolygon(tap: Position, polygon: List<Position>): Boolean {
-    var ax: Double
-    var ay: Double
-    var bx = polygon[polygon.size - 1].latitude - tap.latitude
-    var by = polygon[polygon.size - 1].longitude - tap.longitude
-    var depth =0
+    var (bx, by) = polygon.last().let { it.latitude - tap.latitude to it.longitude - tap.longitude }
+    var depth = 0
 
     for (i in polygon.indices) {
-        ax = bx
-        ay = by
+        val (ax, ay) = bx to by
         bx = polygon[i].latitude - tap.latitude
         by = polygon[i].longitude - tap.longitude
 
-        if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
-            continue // both "up" or both "down", or both points on left
-        }
+        if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
 
         val lx = ax - ay * (bx - ax) / (by - ay)
-
-        if (lx == 0.0) return true // point on edge
+        if (lx == 0.0) return true
         if (lx > 0) depth++
     }
 
     return (depth and 1) == 1
+}
+
+// ---------------------------
+
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
+private fun polygonBbox(polygon: List<Position>): BoundingBox {
+    val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygon.fold(
+        Quadruple(
+            Double.MAX_VALUE, Double.MAX_VALUE,
+            Double.MIN_VALUE, Double.MIN_VALUE
+        )
+    )
+    { (minLat, minLon, maxLat, maxLon), pos ->
+        Quadruple(
+            minOf(minLat, pos.latitude),
+            minOf(minLon, pos.longitude),
+            maxOf(maxLat, pos.latitude),
+            maxOf(maxLon, pos.longitude)
+        )
+    }
+    return BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude)
 }

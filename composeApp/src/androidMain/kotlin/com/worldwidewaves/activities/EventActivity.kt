@@ -106,9 +106,10 @@ class EventActivity : AbstractEventBackActivity() {
             DividerLine()
             ButtonWave(event)
             EventMap(event, onLocationUpdate = { newLocation ->
-                updateGeolocText(event, newLocation, lastKnownLocation, coroutineScope) { newGeolocText ->
-                    geolocText = newGeolocText
-                }
+                updateGeolocText(event,
+                    newLocation, lastKnownLocation,
+                    coroutineScope
+                ) { geolocText = it }
                 lastKnownLocation = newLocation
             }).Screen(
                 modifier = Modifier.fillMaxWidth()

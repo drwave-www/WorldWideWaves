@@ -51,20 +51,16 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
     private var loadJob: Job? = null
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
 
-    @OptIn(ExperimentalResourceApi::class)
-    fun loadEvents(): WWWEvents {
+    private fun loadEvents() = apply {
         loadJob = loadJob ?: loadEventsJob()
-        return this
     }
 
     @OptIn(ExperimentalResourceApi::class)
     private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
-        val eventsConf = Res.readBytes("files/events.json").decodeToString()
-        val loadedEvents = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsConf)
-        loadedEvents.forEach { // Read favorite status from DataStore
-            initFavoriteEvent.call(it)
-        }
-        _eventsFlow.value = loadedEvents
+        _eventsFlow.value = Res.readBytes("files/events.json")
+            .decodeToString()
+            .let { jsonDecoder.decodeFromString<List<WWWEvent>>(it) }
+            .onEach { initFavoriteEvent.call(it) }
     }
 
     // ---------------------------

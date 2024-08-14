@@ -25,21 +25,23 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class WWWEventMap(val event: WWWEvent) {
+class WWWEventMap(private val event: WWWEvent) {
 
     fun getCenter(): Pair<Double, Double> {
-        val (lat, lng) = event.mapCenter.split(",").map { it.toDouble() }
-        return Pair(lat, lng)
+        val coordinates = event.mapCenter.split(",").mapNotNull { it.toDoubleOrNull() }
+        require(coordinates.size == 2) { "Invalid mapCenter format" }
+        return Pair(coordinates[0], coordinates[1])
     }
 
     fun getBbox(): List<Double> {
-        // swLng, swLat, neLng, neLat
-        return event.mapBbox.split(",").map { it.toDouble() }
+        val coordinates = event.mapBbox.split(",").mapNotNull { it.toDoubleOrNull() }
+        require(coordinates.size == 4) { "Invalid mapBbox format" }
+        return coordinates
     }
 
     // ---------------------------q
 
-    suspend fun getMbtilesFilePath(): String? {
+    private suspend fun getMbtilesFilePath(): String? {
         return getMapFileAbsolutePath(event.id, "mbtiles")
     }
 

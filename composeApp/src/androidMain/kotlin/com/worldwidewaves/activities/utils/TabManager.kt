@@ -71,9 +71,11 @@ class TabManager(
         Column(modifier = Modifier.fillMaxHeight()) {
 
             // Display the selected tab screen
-            Surface(modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (originalScreen != null) {
                         originalScreen!!(Modifier)

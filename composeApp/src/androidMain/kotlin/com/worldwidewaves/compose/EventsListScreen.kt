@@ -250,9 +250,10 @@ class EventsListScreen(
         Column(modifier = modifier.clickable(onClick = {
             context.startActivity(Intent(context, EventActivity::class.java).apply {
                 putExtra("eventId", event.id)
-            })})) {
-                EventOverlay(viewModel, event)
-                EventLocationAndDate(event)
+            })
+        })) {
+            EventOverlay(viewModel, event)
+            EventLocationAndDate(event)
         }
     }
 

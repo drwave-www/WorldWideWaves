@@ -42,12 +42,18 @@ class WWWEventAreaTest {
         println("Testing point inside polygon: $insidePoint")
         println("Polygon vertices: $polygon")
 
-        assertTrue(isPointInPolygon(insidePoint, polygon), "Expected point to be inside the polygon")
+        assertTrue(
+            isPointInPolygon(insidePoint, polygon),
+            "Expected point to be inside the polygon"
+        )
 
         // Debug information
         println("Testing point outside polygon: $outsidePoint")
 
-        assertFalse(isPointInPolygon(outsidePoint, polygon), "Expected point to be outside the polygon")
+        assertFalse(
+            isPointInPolygon(outsidePoint, polygon),
+            "Expected point to be outside the polygon"
+        )
     }
 
     @Test
@@ -56,7 +62,7 @@ class WWWEventAreaTest {
         val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
-            Position(1.0, 1.0),Position(1.0, 0.0),
+            Position(1.0, 1.0), Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
         assertFalse(isPointInPolygon(point, polygon))

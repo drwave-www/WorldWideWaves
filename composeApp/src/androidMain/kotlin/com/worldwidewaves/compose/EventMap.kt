@@ -80,8 +80,8 @@ class EventMap(
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         val styleUri = remember { mutableStateOf<Uri?>(null) }
-        val mapStyle = remember { mutableStateOf<Style?>(null) }
 
+        // Reauest GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
 
         // Setup Map properties
@@ -90,7 +90,7 @@ class EventMap(
         }
 
         // Calculate height based on aspect ratio and available width
-        val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f)
+        val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f) // TODO fixed value
 
         // The map view
         AndroidView(
@@ -106,7 +106,6 @@ class EventMap(
                             Style.Builder()
                                 .fromUri(uri.toString())
                         ) { style ->
-                            mapStyle.value = style
                             map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
                             // Add a marker for the user's position
@@ -122,9 +121,15 @@ class EventMap(
                                     object : LocationEngineCallback<LocationEngineResult> {
                                         override fun onSuccess(result: LocationEngineResult?) {
                                             result?.lastLocation?.let { location ->
-                                                onLocationUpdate(LatLng(location.latitude, location.longitude))
+                                                onLocationUpdate(
+                                                    LatLng(
+                                                        location.latitude,
+                                                        location.longitude
+                                                    )
+                                                )
                                             }
                                         }
+
                                         override fun onFailure(exception: Exception) {
                                             // Handle failure if needed
                                         }
@@ -143,7 +148,8 @@ class EventMap(
 
     private fun buildLocationComponentActivationOptions(
         context: Context,
-        style: Style): LocationComponentActivationOptions {
+        style: Style
+    ): LocationComponentActivationOptions {
 
         return LocationComponentActivationOptions
             .builder(context, style)
@@ -181,6 +187,7 @@ class EventMap(
                     )
                 )
             }
+
             CameraPosition.BOUNDS -> {
                 val (swLng, swLat, neLng, neLat) = event.map.getBbox()
                 val bounds = LatLngBounds.Builder()
@@ -189,6 +196,7 @@ class EventMap(
                     .build()
                 map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
             }
+
             null -> {}
         }
     }
