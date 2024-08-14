@@ -1,8 +1,6 @@
 
 Next:
 
-- Avion: Ajout statut dans wave et renvoyer infosd par defaut si non starte ou termine
-    - Implement isDone, isSoon, isRunning in event
 - Avion: frequent reload on wave : find a way to record listeners and launch in s separate thread ?
 - Avion: add tests on area/map/wave
 - Avion: warming zone + affichage progression wave

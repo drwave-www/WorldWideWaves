@@ -103,17 +103,17 @@ class WWWEventWave(private val event: WWWEvent) {
     // ---------------------------
 
     suspend fun getLiteralProgression(): String {
-        val currentDateTime = getLocalDatetime()
-        val startDateTime = event.getStartDateTimeAsLocal()
-        val totalTime = getTotalTime()
-
-        val elapsedTime = (
-                currentDateTime.toInstant(event.getTimeZone()).epochSeconds
-                        - startDateTime.toInstant(event.getTimeZone()).epochSeconds
-                ).toDuration(DurationUnit.SECONDS)
-
-        val progression = (elapsedTime / totalTime) * 100
-        return "%.2f%%".format(progression)
+        return when {
+            event.isDone() -> "100%"
+            !event.isRunning() -> "0%"
+            else -> {
+                val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
+                        event.getStartDateTimeAsLocal().toInstant(event.getTimeZone()).epochSeconds
+                val totalTime = getTotalTime().inWholeSeconds
+                val progression = (elapsedTime.toDouble() / totalTime) * 100
+                "$progression%"
+            }
+        }
     }
 
 }
