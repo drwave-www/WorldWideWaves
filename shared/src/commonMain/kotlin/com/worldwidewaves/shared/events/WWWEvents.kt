@@ -30,10 +30,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
+// ---------------------------
+
+interface EventsConfigurationProvider {
+    suspend fun geoEventsConfiguration(): String
+}
+
+class DefaultEventsConfigurationProvider : EventsConfigurationProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun geoEventsConfiguration(): String {
+        return withContext(Dispatchers.IO) {
+            Res.readBytes("files/events.json").decodeToString()
+        }
+    }
+}
+
+// ---------------------------
+
+class WWWEvents(
+    private val initFavoriteEvent: InitFavoriteEvent,
+    private val eventsConfigurationProvider: EventsConfigurationProvider = DefaultEventsConfigurationProvider()
+) {
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
@@ -55,12 +76,22 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
         loadJob = loadJob ?: loadEventsJob()
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
-        _eventsFlow.value = Res.readBytes("files/events.json")
-            .decodeToString()
-            .let { jsonDecoder.decodeFromString<List<WWWEvent>>(it) }
+        val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
+        val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
+
+        val validationResults = isValidEventsData(events)
+
+        validationResults.filterValues { !it.first }
+            .mapNotNull { it.value.second }
+            .forEach { errorMessage ->
+                println("Validation Error: $errorMessage")
+            }
+
+        _eventsFlow.value = validationResults.filterValues { it.first }
+            .keys
             .onEach { initFavoriteEvent.call(it) }
+            .toList()
     }
 
     // ---------------------------
@@ -75,6 +106,34 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) {
 
     fun invokeWhenLoaded(function: () -> Job) {
         this.loadJob?.invokeOnCompletion { function() }
+    }
+
+    // ---------------------------
+
+    private fun isValidEventsData(events: List<WWWEvent>): Map<WWWEvent, Pair<Boolean, String?>> {
+        return events.associateWith { event ->
+            when {
+                event.id.isEmpty() -> Pair(false, "ID is empty")
+                event.type.isEmpty() -> Pair(false, "Type is empty")
+                event.location.isEmpty() -> Pair(false, "Location is empty")
+                !event.date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> Pair(false, "Date format is invalid")
+                !event.startHour.matches(Regex("\\d{2}:\\d{2}")) -> Pair(false, "Start hour format is invalid")
+                event.speed <= 0 -> Pair(false, "Speed must be a positive integer")
+                event.description.isEmpty() -> Pair(false, "Description is empty")
+                event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
+                !event.instagramUrl.startsWith("https://") -> Pair(false, "Instagram URL must start with https://")
+                event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
+                event.mapBbox.split(",").size != 4 -> Pair(false, "Map Bbox must have 4 elements")
+                event.mapCenter.split(",").size != 2 -> Pair(false, "Map Center must have 2 elements")
+                event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
+                event.mapMinzoom.toString().toIntOrNull() == null -> Pair(false, "Map Minzoom must be an integer")
+                event.mapMaxzoom.toString().toIntOrNull() == null -> Pair(false, "Map Maxzoom must be an integer")
+                event.mapLanguage.isEmpty() -> Pair(false, "Map language is empty")
+                event.mapOsmarea.isEmpty() -> Pair(false, "Map Osmarea is empty")
+                event.timeZone.isEmpty() -> Pair(false, "Time zone is empty")
+                else -> Pair(true, null)
+            }
+        }
     }
 
 }

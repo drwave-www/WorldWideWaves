@@ -1,8 +1,6 @@
 
 Next:
 
-- Avion: add tests on area/map/wave
-- Avion: add checkers for Json deserialization of events
 - Avion: clean statics
 - Avion: - nettoyer tous les TODOs
 - Avion: warming zone + affichage progression wave
