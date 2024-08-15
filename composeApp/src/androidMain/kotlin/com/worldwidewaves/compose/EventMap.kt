@@ -99,8 +99,8 @@ class EventMap(
                             addLocationMarkerToMap(map, context, style)
                         }
 
-                        map.setMinZoomPreference(event.mapMinzoom)
-                        map.setMaxZoomPreference(event.mapMaxzoom)
+//                        map.setMinZoomPreference(event.mapMinzoom)
+//                        map.setMaxZoomPreference(event.mapMaxzoom)
                     }
                 }
             }
