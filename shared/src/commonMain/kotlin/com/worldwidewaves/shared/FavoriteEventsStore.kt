@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import com.worldwidewaves.shared.events.WWWEvent
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -51,14 +52,13 @@ class FavoriteEventsStore(
     suspend fun isFavorite(eventId: String): Boolean = withContext(dispatcher) {
         val key = favoriteKey(eventId)
         dataStore.data
-            .catch {
-                // TODO log the error
+            .catch { exception ->
+                Napier.e("Error reading favoris", exception)
                 emit(emptyPreferences())
             }
             .map { preferences ->
                 preferences[key] ?: false
-            }.firstOrNull()
-            ?: false
+            }.firstOrNull() ?: false
     }
 }
 

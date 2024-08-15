@@ -135,7 +135,7 @@ fun WWWSocialNetworks(
             modifier = Modifier.padding(start = 10.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            Text( // TODO - replace by WWWALink
+            Text(
                 modifier = Modifier.clickable(onClick = {
                     try {
                         uriHandler.openUri(instagramUrl)

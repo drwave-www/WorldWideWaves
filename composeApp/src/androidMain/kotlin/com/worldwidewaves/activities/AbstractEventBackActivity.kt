@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
@@ -64,6 +65,8 @@ abstract class AbstractEventBackActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setStatusBarColor(window)
 
         var selectedEvent by mutableStateOf<WWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")

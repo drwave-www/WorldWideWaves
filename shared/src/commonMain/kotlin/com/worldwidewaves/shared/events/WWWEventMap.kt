@@ -76,7 +76,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val styleFilename = "style-${event.id}.json"
 
-        //if (cachedFileExists(styleFilename)) { // TODO: better manage cache
+        //if (cachedFileExists(styleFilename)) { // TODO: for testing, better manage cache
         //    return cachedFileUri(styleFilename)
         //}
 

@@ -241,7 +241,7 @@ private fun ButtonWave(event: WWWEvent) {
             .width(300.dp)
             .height(40.dp)
             .clickable(onClick = {
-                /* TODO */
+                /* TODO: click on Wave button */
             })
     ) {
         Text(
@@ -278,8 +278,9 @@ private fun GeolocalizeMe(geolocText: StringResource) {
             .height(45.dp)
             .padding(start = 20.dp, end = 20.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) { // TODO: change colors depending on in/out area
+        verticalAlignment = Alignment.CenterVertically
+    ) { // TODO: change colors depending on in/out area changes
+        // check https://medium.com/nerd-for-tech/jetpack-compose-pulsating-effect-4b9f2928d31a
         Box(
             modifier = Modifier
                 .border(2.dp, MaterialTheme.colorScheme.primary)

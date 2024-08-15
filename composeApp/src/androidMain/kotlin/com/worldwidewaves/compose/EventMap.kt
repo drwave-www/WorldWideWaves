@@ -98,6 +98,9 @@ class EventMap(
                         if (hasLocationPermission) {
                             addLocationMarkerToMap(map, context, style)
                         }
+
+                        map.setMinZoomPreference(event.mapMinzoom)
+                        map.setMaxZoomPreference(event.mapMaxzoom)
                     }
                 }
             }
@@ -143,7 +146,7 @@ class EventMap(
         }
     }
 
-    // -- Private Map setup functions -----------------------------------------
+    // -- Private Map location setup functions --------------------------------
 
     @SuppressLint("MissingPermission")
     private fun addLocationMarkerToMap(
@@ -222,20 +225,14 @@ fun rememberMapViewWithLifecycle(): MapView {
 
     val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
     maplibreMapOptions.apply {
-        camera(
-            CameraPosition.Builder()
-                .bearing(0.0).tilt(0.0)
-                .target(LatLng(48.8619, 2.3417)) // TODO: fill with event prefs
-                .zoom(10.0) // TODO: fill with event prefs
-                .build()
-        )
-        maxZoomPreference(14.0) // TODO: fill with event prefs
-        minZoomPreference(10.0)
-        localIdeographFontFamily("Droid Sans") // TODO: replace
+        camera(CameraPosition.Builder().bearing(0.0).tilt(0.0).build())
+
+        localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
 
         compassEnabled(true)
         compassFadesWhenFacingNorth(true)
 
+        // TODO: depending on map type / screen, to configure
         zoomGesturesEnabled(false)
         scrollGesturesEnabled(false)
         horizontalScrollGesturesEnabled(false)
