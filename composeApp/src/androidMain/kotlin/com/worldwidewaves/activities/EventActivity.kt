@@ -41,7 +41,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,20 +59,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
-import com.worldwidewaves.compose.WWWEventMap
 import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_MITER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_STROKE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DESC_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_BORDER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERROUND
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getFormattedSimpleDate
-import com.worldwidewaves.shared.events.getLiteralEndTime
-import com.worldwidewaves.shared.events.getLiteralProgression
-import com.worldwidewaves.shared.events.getLiteralSpeed
-import com.worldwidewaves.shared.events.getLiteralStartTime
-import com.worldwidewaves.shared.events.getLiteralTotalTime
 import com.worldwidewaves.shared.events.getLocationImage
+import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
+import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
@@ -85,6 +104,7 @@ import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -97,7 +117,7 @@ class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
-        val eventDate = event.getFormattedSimpleDate()
+        val eventDate = event.getStartDateSimpleAsLocal()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -110,14 +130,13 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            WWWEventMap(event, onLocationUpdate = { newLocation ->
-                updateGeolocText(event, newLocation, lastKnownLocation, coroutineScope) { newGeolocText ->
-                    geolocText = newGeolocText
-                }
+            EventMap(event, onLocationUpdate = { newLocation ->
+                updateGeolocText(event,
+                    newLocation, lastKnownLocation,
+                    coroutineScope
+                ) { geolocText = it }
                 lastKnownLocation = newLocation
-            }).Screen(
-                modifier = Modifier.fillMaxWidth()
-            )
+            }).Screen(modifier = Modifier.fillMaxWidth())
             GeolocalizeMe(geolocText)
             EventNumbers(event)
             WWWEventSocialNetworks(event)
@@ -156,11 +175,11 @@ private fun updateGeolocText(
 @Composable
 private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.padding(horizontal = 20.dp),
+        modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
         fontFamily = extraFontFamily,
         color = quinaryLight,
-        fontSize = 16.sp,
+        fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
         textAlign = TextAlign.Justify,
         fontWeight = FontWeight.Bold
     )
@@ -195,12 +214,12 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
     Box(
         modifier = modifier
             .fillMaxSize()
-            .let { if (event.isDone()) it.padding(bottom = 20.dp) else it },
+            .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
     ) {
         val textStyle = TextStyle(
             fontFamily = extraFontFamily,
-            fontSize = 90.sp,
+            fontSize = DIM_EVENT_DATE_FONTSIZE.sp,
             fontWeight = FontWeight.Black
         )
         Text(
@@ -212,8 +231,8 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
             style = textStyle.copy(
                 color = MaterialTheme.colorScheme.primary,
                 drawStyle = Stroke(
-                    miter = 20f,
-                    width = 5f,
+                    miter = DIM_EVENT_DATE_MITER,
+                    width = DIM_EVENT_DATE_STROKE,
                     join = StrokeJoin.Miter
                 )
             )
@@ -226,8 +245,8 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
 @Composable
 fun DividerLine() {
     HorizontalDivider(
-        modifier = Modifier.width(200.dp),
-        color = Color.White, thickness = 2.dp
+        modifier = Modifier.width(DIM_DIVIDER_WIDTH.dp),
+        color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
     )
 }
 
@@ -238,10 +257,10 @@ private fun ButtonWave(event: WWWEvent) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .width(300.dp)
-            .height(40.dp)
+            .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
+            .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
             .clickable(onClick = {
-                /* TODO */
+                /* TODO: click on Wave button */
             })
     ) {
         Text(
@@ -250,7 +269,7 @@ private fun ButtonWave(event: WWWEvent) {
                 .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(ShRes.string.wave_now).uppercase(),
             color = quinaryLight,
-            fontSize = 24.sp,
+            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Black,
             fontFamily = displayFontFamily
@@ -275,14 +294,14 @@ private fun WWWEventSocialNetworks(event: WWWEvent) {
 private fun GeolocalizeMe(geolocText: StringResource) {
     Row(
         modifier = Modifier
-            .height(45.dp)
-            .padding(start = 20.dp, end = 20.dp),
+            .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
+            .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) { // TODO: change colors depending on in/out area
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
             modifier = Modifier
-                .border(2.dp, MaterialTheme.colorScheme.primary)
+                .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
                 .fillMaxHeight()
                 .weight(1f),
             contentAlignment = Alignment.Center
@@ -290,7 +309,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
             Text(
                 text = stringResource(geolocText),
                 color = quinaryLight,
-                fontSize = 14.sp,
+                fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp,
                 fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
             )
         }
@@ -301,60 +320,83 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 
 @Composable
 private fun EventNumbers(event: WWWEvent) {
+    val eventNumbers = remember { mutableStateMapOf<StringResource, String>() }
+    val coroutineScope = rememberCoroutineScope()
 
-    val eventNumbers = mapOf( // TODO : update progression every x seconds
-        ShRes.string.wave_speed to event.getLiteralSpeed(),
-        ShRes.string.wave_start_time to event.getLiteralStartTime(),
-        ShRes.string.wave_end_time to event.getLiteralEndTime(),
-        ShRes.string.wave_total_time to event.getLiteralTotalTime(),
-        ShRes.string.wave_progression to event.getLiteralProgression()
-    )
-
-    Box(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = quinaryLight,
-                shape = RoundedCornerShape(topStart = 50.dp, bottomEnd = 50.dp)
-            )
-            .padding(20.dp)
-    ) {
-        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-            Text(
-                text = stringResource(ShRes.string.be_waved),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-                color = quinaryLight,
-                fontFamily = extraFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            eventNumbers.forEach { (key, value) ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(key),
-                        color = quinaryLight,
-                        fontFamily = extraFontFamily,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = value,
-                        color = when (key) {
-                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                            ShRes.string.wave_start_time -> Color.Yellow
-                            else -> MaterialTheme.colorScheme.primary
-                        },
-                        fontFamily = extraFontFamily,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
-                    )
+    // Retrieve wave numbers and frequently update progession
+    LaunchedEffect(event) {
+        var lastProgressionValue = ""
+        coroutineScope.launch {
+            val waveNumbers = event.wave.getAllNumbers()
+            eventNumbers.clear()
+            eventNumbers.putAll(mapOf(
+                    ShRes.string.wave_speed to waveNumbers.waveSpeed,
+                    ShRes.string.wave_start_time to waveNumbers.waveStartTime,
+                    ShRes.string.wave_end_time to waveNumbers.waveEndTime,
+                    ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
+                    ShRes.string.wave_progression to waveNumbers.waveProgression
+            ))
+            while (event.isRunning()) {
+                delay(WAVE_REFRESH_INTERVAL)
+                val newProgressionValue = event.wave.getLiteralProgression()
+                if (newProgressionValue != lastProgressionValue) {
+                    eventNumbers[ShRes.string.wave_progression] = newProgressionValue
+                    lastProgressionValue = newProgressionValue
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+
+    Box(modifier = Modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
+        Box(
+            modifier = Modifier
+                .border(
+                    width = DIM_EVENT_NUMBERS_BORDERWIDTH.dp,
+                    color = quinaryLight,
+                    shape = RoundedCornerShape(
+                        topStart = DIM_EVENT_NUMBERS_BORDERROUND.dp,
+                        bottomEnd = DIM_EVENT_NUMBERS_BORDERROUND.dp
+                    )
+                )
+                .padding(DIM_DEFAULT_EXT_PADDING.dp)
+        ) {
+            Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
+                Text(
+                    text = stringResource(ShRes.string.be_waved),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Right,
+                    color = quinaryLight,
+                    fontFamily = extraFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp
+                )
+                Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
+                eventNumbers.forEach { (key, value) ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(key),
+                            color = quinaryLight,
+                            fontFamily = extraFontFamily,
+                            fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = value,
+                            color = when (key) {
+                                ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                ShRes.string.wave_start_time -> Color.Yellow
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            fontFamily = extraFontFamily,
+                            fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
+                }
             }
         }
     }

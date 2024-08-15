@@ -1,9 +1,9 @@
 [versions]
-agp = "8.5.0"
+agp = "8.5.2"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
-androidx-activityCompose = "1.9.0"
+androidx-activityCompose = "1.9.1"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.1.4"
 androidx-material = "1.12.0"
@@ -14,25 +14,27 @@ kotlinxCoroutinesCore = "1.8.0"
 kotlinxCoroutinesTest = "1.6.0"
 kotlinxDatetime = "0.6.0"
 kotlinxSerializationJson = "1.7.1"
-lifecycleLivedataKtx = "2.8.2"
-lifecycleViewmodelKtx = "2.8.2"
+lifecycleLivedataKtx = "2.8.4"
+lifecycleViewmodelKtx = "2.8.4"
 navigationFragmentKtx = "2.7.7"
 navigationUiKtx = "2.7.7"
 material3Android = "1.2.1"
 uiTextGoogleFonts = "1.6.8"
-workRuntimeKtx = "2.9.0"
+workRuntimeKtx = "2.9.1"
 places = "3.5.0"
 uiGraphicsAndroid = "1.6.8"
-annotationJvm = "1.8.0"
+annotationJvm = "1.8.2"
 dataStorePreferences = "1.1.1"
 kotlinxAtomic = "0.24.0"
 koin = "3.2.0"
 maplibreAndroid = "11.1.0"
 maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
+napier = "2.7.1"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
@@ -61,7 +63,7 @@ koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose"
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibreAndroid" }
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-
+napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

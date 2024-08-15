@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.datetime.LocalDateTime
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -77,4 +78,8 @@ private fun getCacheDir(): String {
         NSUserDomainMask,
         true
     ).first() as String
+}
+
+actual fun getLocalDatetime(): LocalDateTime {
+    TODO("Not yet implemented")
 }

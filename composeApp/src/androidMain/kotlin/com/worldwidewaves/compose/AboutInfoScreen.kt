@@ -45,6 +45,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_INSTA_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
 import com.worldwidewaves.shared.generated.resources.drwave
 import com.worldwidewaves.shared.generated.resources.drwave_instagram
 import com.worldwidewaves.shared.generated.resources.drwave_instagram_url
@@ -86,7 +92,7 @@ class AboutInfoScreen : TabScreen {
         Text(
             text = stringResource(ShRes.string.infos_core),
             style = TextStyle(textAlign = TextAlign.Justify),
-            fontSize = 18.sp,
+            fontSize = DIM_INFO_TEXT_FONTSIZE.sp,
             fontFamily = displayFontFamily
         )
     }
@@ -97,11 +103,11 @@ class AboutInfoScreen : TabScreen {
     private fun DrWaveSignatureAndContact() {
         val uriHandler = LocalUriHandler.current
 
-        Spacer(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(ShRes.string.drwave),
-                fontSize = 26.sp,
+                fontSize = DIM_INFO_DRWAVE_FONTSIZE.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = extraFontFamily
             )
@@ -111,9 +117,9 @@ class AboutInfoScreen : TabScreen {
                     contentDescription = "Instagram logo",
                     modifier = Modifier.width(25.dp)
                 )
-                Text( // TODO Convert it to WWWALink
+                Text(
                     modifier = Modifier
-                        .padding(start = 10.dp)
+                        .padding(start = DIM_DEFAULT_INT_PADDING.dp)
                         .clickable(onClick = {
                             try {
                                 uriHandler.openUri(ShRes.string.drwave_instagram_url.toString())
@@ -122,13 +128,13 @@ class AboutInfoScreen : TabScreen {
                             }
                         }),
                     text = stringResource(ShRes.string.drwave_instagram),
-                    fontSize = 16.sp,
+                    fontSize = DIM_INFO_DRWAVE_INSTA_FONTSIZE.sp,
                     fontFamily = displayFontFamily,
                     textDecoration = TextDecoration.Underline
                 )
             }
         }
-        Spacer(modifier = Modifier.size(10.dp))
+        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }
 
 }

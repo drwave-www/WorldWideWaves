@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 
 // ----------------------------
 
@@ -71,9 +72,11 @@ class TabManager(
         Column(modifier = Modifier.fillMaxHeight()) {
 
             // Display the selected tab screen
-            Surface(modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (originalScreen != null) {
                         originalScreen!!(Modifier)
@@ -87,7 +90,7 @@ class TabManager(
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .height(60.dp),
+                    .height(DIM_INT_TABBAR_HEIGHT.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {

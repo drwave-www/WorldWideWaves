@@ -1,7 +1,14 @@
 package com.worldwidewaves.shared.events
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /*
@@ -42,12 +49,18 @@ class WWWEventAreaTest {
         println("Testing point inside polygon: $insidePoint")
         println("Polygon vertices: $polygon")
 
-        assertTrue(isPointInPolygon(insidePoint, polygon), "Expected point to be inside the polygon")
+        assertTrue(
+            isPointInPolygon(insidePoint, polygon),
+            "Expected point to be inside the polygon"
+        )
 
         // Debug information
         println("Testing point outside polygon: $outsidePoint")
 
-        assertFalse(isPointInPolygon(outsidePoint, polygon), "Expected point to be outside the polygon")
+        assertFalse(
+            isPointInPolygon(outsidePoint, polygon),
+            "Expected point to be outside the polygon"
+        )
     }
 
     @Test
@@ -56,7 +69,7 @@ class WWWEventAreaTest {
         val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
-            Position(1.0, 1.0),Position(1.0, 0.0),
+            Position(1.0, 1.0), Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
         assertFalse(isPointInPolygon(point, polygon))
@@ -131,4 +144,165 @@ class WWWEventAreaTest {
         assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
     }
 
+    // -----------------------
+
+    @Test
+    fun testSimplePolygon() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testBadPolygon() {
+        val polygon = emptyList<Position>()
+        assertFailsWith<IllegalArgumentException> {
+            polygonBbox(polygon)
+        }
+    }
+
+    @Test
+    fun testComplexPolygon() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testPointOnEdge() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val pointOnEdge = Position(0.5, 0.0)
+        assertTrue(isPointInPolygon(pointOnEdge, polygon))
+    }
+
+    @Test
+    fun testPolygonWithHole() {
+        val outerPolygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 3.0),
+            Position(3.0, 3.0),
+            Position(3.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val innerPolygon = listOf(
+            Position(1.0, 1.0),
+            Position(1.0, 2.0),
+            Position(2.0, 2.0),
+            Position(2.0, 1.0),
+            Position(1.0, 1.0)
+        )
+        val combinedPolygon = outerPolygon + innerPolygon
+        val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
+        val actualBbox = polygonBbox(combinedPolygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testDegeneratePolygon() {
+        val polygon = listOf(
+            Position(1.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 1.0)
+        )
+        val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
+        val actualBbox = polygonBbox(polygon)
+        assertEquals(expectedBbox, actualBbox)
+    }
+
+    // -----------------------
+
+    private fun createMockGeoJsonDataProvider(geoJson: String): GeoJsonDataProvider {
+        return object: GeoJsonDataProvider {
+            override suspend fun getGeoJsonData(eventId: String): JsonObject {
+                return Json.parseToJsonElement(geoJson).jsonObject
+            }
+        }
+    }
+
+    private fun createWWWEventArea(event: WWWEvent, geoJson: String): WWWEventArea {
+        val geoJsonDataProvider = createMockGeoJsonDataProvider(geoJson)
+        return WWWEventArea(event, geoJsonDataProvider)
+    }
+
+    private val polygonGeoJson = """
+        {"type":"Polygon","coordinates":[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]}
+    """.trimIndent()
+
+    private val emptyPolygonGeoJson = """
+        {"type":"Polygon","coordinates":[]}
+    """.trimIndent()
+
+    @Test
+    fun testIsPositionWithin() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
+        val position = Position(5.0, 5.0) // Position within the polygon
+
+        runBlocking {
+            assertTrue(eventArea.isPositionWithin(position), "Expected position to be within the event area")
+        }
+    }
+
+    @Test
+    fun testGetBoundingBox() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
+
+        runBlocking {
+            val boundingBox = eventArea.getBoundingBox()
+            assertNotNull(boundingBox, "Expected bounding box to be not null")
+            assertTrue(boundingBox.minLatitude <= boundingBox.maxLatitude, "Invalid bounding box coordinates")
+            assertTrue(boundingBox.minLongitude <= boundingBox.maxLongitude, "Invalid bounding box coordinates")
+        }
+    }
+
+    @Test
+    fun testGetCachedPolygon() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
+
+        runBlocking {
+            val polygon = eventArea.getPolygon()
+            val expectedPolygon = listOf(
+                Position(latitude=0.0, longitude=0.0),
+                Position(latitude=10.0, longitude=0.0),
+                Position(latitude=10.0, longitude=10.0),
+                Position(latitude=0.0, longitude=10.0),
+                Position(latitude=0.0, longitude=0.0)
+            )
+            assertEquals(expectedPolygon, polygon, "Expected polygon to match the predefined polygon")
+        }
+    }
+
+    @Test
+    fun testGetCachedPolygonEmpty() {
+        val randomEvent = createRandomWWWEvent("test_event")
+        val eventArea = createWWWEventArea(randomEvent, emptyPolygonGeoJson)
+
+        runBlocking {
+            val polygon = eventArea.getPolygon()
+            assertTrue(polygon.isEmpty(), "Expected polygon to be empty")
+        }
+    }
 }

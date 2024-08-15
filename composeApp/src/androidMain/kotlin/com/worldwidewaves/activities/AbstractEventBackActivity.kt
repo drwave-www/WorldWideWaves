@@ -26,6 +26,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_ARROW_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_TEXT_FONTSIZE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
@@ -65,6 +69,8 @@ abstract class AbstractEventBackActivity : MainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setStatusBarColor(window)
+
         var selectedEvent by mutableStateOf<WWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")
 
@@ -101,10 +107,10 @@ abstract class AbstractEventBackActivity : MainActivity() {
                 // Back layer
                 Row(
                     modifier = Modifier.padding(
-                        start = 10.dp,
-                        top = 10.dp,
-                        bottom = 15.dp,
-                        end = 10.dp
+                        start = DIM_BACK_PADDING[0].dp,
+                        end = DIM_BACK_PADDING[1].dp,
+                        top = DIM_BACK_PADDING[2].dp,
+                        bottom = DIM_BACK_PADDING[3].dp
                     ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -113,7 +119,7 @@ abstract class AbstractEventBackActivity : MainActivity() {
                         text = "< " + stringResource(ShRes.string.back),
                         color = MaterialTheme.colorScheme.primary,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 16.sp,
+                        fontSize = DIM_BACK_ARROW_FONTSIZE.sp,
                     )
                     Text(
                         modifier = Modifier.weight(1f),
@@ -122,7 +128,7 @@ abstract class AbstractEventBackActivity : MainActivity() {
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
-                        fontSize = 24.sp,
+                        fontSize = DIM_BACK_TEXT_FONTSIZE.sp,
                     )
                 }
 
@@ -134,7 +140,7 @@ abstract class AbstractEventBackActivity : MainActivity() {
                 ) { Screen(modifier = Modifier, event) }
 
             }
-        } else {
+        } else { // Error, should not occur
             Text(
                 text = "Event not found",
                 color = MaterialTheme.colorScheme.primary,

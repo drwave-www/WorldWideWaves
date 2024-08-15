@@ -23,6 +23,7 @@ package com.worldwidewaves.shared
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -33,6 +34,10 @@ import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_bra
 import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.MissingResourceException
 import java.io.File
@@ -40,14 +45,15 @@ import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
 
-object AndroidPlatform : WWWPlatform {
+object AndroidPlatform : WWWPlatform  {
     private var _contextRef: WeakReference<Context>? = null
 
     // private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
 
     private val context: Context
         get() = _contextRef?.get()
-            ?: throw UninitializedPropertyAccessException("com.worldwidewaves.shared.AndroidPlatform must be initialized with a context before use.")
+            ?: throw UninitializedPropertyAccessException(
+                "AndroidPlatform must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
@@ -55,18 +61,13 @@ object AndroidPlatform : WWWPlatform {
     override fun getContext(): Any = context
 
     fun initialize(context: Context): AndroidPlatform {
-        if (_contextRef == null) {
-            _contextRef = WeakReference(context.applicationContext)
-        } else {
-            throw IllegalStateException("com.worldwidewaves.shared.AndroidPlatform can only be initialized once.")
-        }
+        _contextRef = WeakReference(context.applicationContext)
         return this
     }
 
-    // fun getEvents() : WWWEvents = events.value
 }
 
-// --- Platform-specific API ---
+// ---------------------------
 
 actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
@@ -96,51 +97,49 @@ actual fun getEventImage(type: String, id: String): Any? {
     }
 }
 
-// --- Platform-specific API ---
+// ---------------------------
 
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val cachedFile = File(cacheDir, "$eventId.$extension")
+    val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
     return try {
-        val fileBytes: ByteArray = Res.readBytes("files/maps/$eventId.$extension") // TODO: static folder name
-        val assetSize = fileBytes.size
-
-        if (cachedFile.exists()) {
-            val cachedFileSize = cachedFile.length().toInt()
-            if (cachedFileSize == assetSize) {
-                return cachedFile.absolutePath
-            }
+        Log.i("getMBTilesAbsoluteFilePath", "Trying to get $eventId.$extension")
+        val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
+        if (cachedFile.exists() && cachedFile.length().toInt() == fileBytes.size) {
+            cachedFile.absolutePath
+        } else {
+            Log.i("getMBTilesAbsoluteFilePath", "Caching $eventId.$extension")
+            cachedFile.outputStream().use { it.write(fileBytes) }
+            cachedFile.absolutePath
         }
-
-        cachedFile.outputStream().use { outputStream ->
-            outputStream.write(fileBytes)
-        }
-        cachedFile.absolutePath
     } catch (e: MissingResourceException) {
         Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
         null
     }
 }
 
+// ---------------------------
+
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val file = File(cacheDir, fileName)
-    return file.exists()
+    return File(context.cacheDir, fileName).exists()
 }
 
 actual fun cachedFilePath(fileName: String): String? {
     val context = AndroidPlatform.getContext() as Context
-    val file = File(context.cacheDir, fileName)
-    return if (file.exists()) file.toURI().path else null
+    return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
 }
 
 actual fun cacheStringToFile(fileName: String, content: String) {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val file = File(cacheDir, fileName)
-    file.writeText(content)
+    Log.i("cacheStringToFile", "Caching data to $fileName")
+    File(context.cacheDir, fileName).writeText(content)
+}
+
+// ---------------------------
+
+actual fun getLocalDatetime(): LocalDateTime {
+    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }

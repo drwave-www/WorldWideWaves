@@ -13,14 +13,14 @@ tileset:
   description: "WWW EVENT #location#"
   attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
   center: [ #mapCenter#]
-  bounds: [ #mapBbox#]
-  maxzoom: #mapMaxzoom#
-  minzoom: #mapMinzoom#
-  pixel_scale: 256
-  languages:
-    - en # English, Latin
-    - #mapLanguage#
-  defaults:
-    srs: +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over
-    datasource:
-      srid: 900913
+    bounds: [ #mapBbox#]
+      maxzoom: #mapMaxzoom#
+        minzoom: #mapMinzoom#
+        pixel_scale: 256
+        languages:
+          - en # English, Latin
+          - #mapLanguage#
+        defaults:
+          srs: +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over
+          datasource:
+            srid: 900913

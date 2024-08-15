@@ -20,7 +20,10 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getMapFileAbsolutePath
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -31,47 +34,73 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-
-// ---------------------------
-
-//@Suppress("UNUSED_PARAMETER")
-//@Transient
-//var WWWEvent.area: WWWArea
-//    get() = WWWArea.provideArea(id).setEvent(this)
-//    set(value) {
-//        throw Exception("Cannot set area")
-//    }
+import org.koin.core.component.KoinComponent
 
 // ---------------------------
 
 data class Position(val latitude: Double, val longitude: Double)
+data class BoundingBox(
+    val minLatitude: Double,
+    val minLongitude: Double,
+    val maxLatitude: Double,
+    val maxLongitude: Double
+)
 
-class WWWArea(private val event: WWWEvent) {
+// ---------------------------
+
+interface GeoJsonDataProvider {
+    suspend fun getGeoJsonData(eventId: String): JsonObject
+}
+
+class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun getGeoJsonData(eventId: String): JsonObject {
+        val geojsonData = withContext(Dispatchers.IO) {
+            Napier.i("Loading geojson data for event $eventId")
+            Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+        }
+        return Json.parseToJsonElement(geojsonData).jsonObject
+    }
+}
+
+// ---------------------------
+
+open class WWWEventArea(
+    private val event: WWWEvent,
+    private val geoJsonDataProvider: GeoJsonDataProvider = DefaultGeoJsonDataProvider()
+) : KoinComponent {
 
     private val areaPolygon: MutableList<Position> = mutableListOf()
+    private var cachedBoundingBox: BoundingBox? = null
+
+    // ---------------------------
+
+    internal suspend fun getGeoJsonFilePath(): String? {
+        return getMapFileAbsolutePath(event.id, "geojson")
+    }
 
     // ---------------------------
 
     suspend fun isPositionWithin(position: Position): Boolean {
-        val polygon = getCachedPolygon()
-        return polygon.isNotEmpty() && isPointInPolygon(position, polygon)
+        return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
+    }
+
+    open suspend fun getBoundingBox(): BoundingBox {
+        cachedBoundingBox?.let { return it }
+
+        val polygon = getPolygon().takeIf { it.isNotEmpty() }
+            ?: throw IllegalStateException("Polygon is empty")
+
+        return polygonBbox(polygon).also { cachedBoundingBox = it }
     }
 
     // ---------------------------
 
-    @OptIn(ExperimentalResourceApi::class)
-    private suspend fun getGeoJsonData(): JsonObject {
-        val geojsonData = withContext(Dispatchers.IO) {
-            Res.readBytes("files/maps/${event.id}.geojson").decodeToString() // TODO static folder name
-        }
-        return Json.parseToJsonElement(geojsonData).jsonObject
-    }
-
-    private suspend fun getCachedPolygon(): List<Position> {
+    suspend fun getPolygon(): List<Position> {
         if (this.areaPolygon.isEmpty()) {
             this.areaPolygon.addAll(
                 withContext(Dispatchers.Default) {
-                    val geometryCollection = getGeoJsonData()
+                    val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
                     val coordinates = geometryCollection["coordinates"]?.jsonArray
 
@@ -86,6 +115,7 @@ class WWWArea(private val event: WWWEvent) {
                                 }
                             } ?: emptyList()
                         }
+
                         "MultiPolygon" -> {
                             coordinates?.flatMap { multiPolygon ->
                                 multiPolygon.jsonArray.flatMap { ring ->
@@ -98,41 +128,115 @@ class WWWArea(private val event: WWWEvent) {
                                 }
                             } ?: emptyList()
                         }
+
                         else -> emptyList()
                     }
                 }
             )
         }
+
         return this.areaPolygon
     }
-
 }
 
 // ---------------------------
 
 // from https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
 fun isPointInPolygon(tap: Position, polygon: List<Position>): Boolean {
-    var ax: Double
-    var ay: Double
-    var bx = polygon[polygon.size - 1].latitude - tap.latitude
-    var by = polygon[polygon.size - 1].longitude - tap.longitude
-    var depth =0
+    var (bx, by) = polygon.last().let { it.latitude - tap.latitude to it.longitude - tap.longitude }
+    var depth = 0
 
     for (i in polygon.indices) {
-        ax = bx
-        ay = by
+        val (ax, ay) = bx to by
         bx = polygon[i].latitude - tap.latitude
         by = polygon[i].longitude - tap.longitude
 
-        if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
-            continue // both "up" or both "down", or both points on left
-        }
+        if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
 
         val lx = ax - ay * (bx - ax) / (by - ay)
-
-        if (lx == 0.0) return true // point on edge
+        if (lx == 0.0) return true
         if (lx > 0) depth++
     }
 
     return (depth and 1) == 1
 }
+
+// ---------------------------
+
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
+fun polygonBbox(polygon: List<Position>): BoundingBox {
+    if (polygon.isEmpty())
+        throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
+
+    val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygon.fold(
+        Quadruple(
+            Double.MAX_VALUE, Double.MAX_VALUE,
+            Double.MIN_VALUE, Double.MIN_VALUE
+        )
+    ) { (minLat, minLon, maxLat, maxLon), pos ->
+        Quadruple(
+            minOf(minLat, pos.latitude), minOf(minLon, pos.longitude),
+            maxOf(maxLat, pos.latitude), maxOf(maxLon, pos.longitude)
+        )
+    }
+    return BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude)
+}
+
+
+//import kotlinx.serialization.json.Json
+//import kotlinx.serialization.json.jsonObject
+//import kotlinx.serialization.json.jsonPrimitive
+//import kotlinx.serialization.json.jsonArray
+//import kotlinx.serialization.json.double
+//import kotlinx.serialization.json.decodeFromJsonElement
+//import kotlinx.serialization.Serializable
+//import java.io.File
+
+//@Serializable
+//data class GeoJsonPolygon(val type: String, val coordinates: List<List<List<Double>>>)
+//
+//fun parseGeoJson(filePath: String): GeoJsonPolygon {
+//    val jsonString = File(filePath).readText()
+//    val jsonElement = Json.parseToJsonElement(jsonString)
+//    return Json.decodeFromJsonElement(jsonElement.jsonObject["geometry"]!!)
+//}
+//
+//fun splitPolygonByLongitude(polygon: GeoJsonPolygon, longitude: Double): List<List<List<Double>>> {
+//    val coordinates = polygon.coordinates[0]
+//    val leftSide = mutableListOf<List<Double>>()
+//    val rightSide = mutableListOf<List<Double>>()
+//    var isLeft = true
+//
+//    for (i in coordinates.indices) {
+//        val point = coordinates[i]
+//        if (point[0] < longitude) {
+//            if (!isLeft) {
+//                isLeft = true
+//                leftSide.add(listOf(longitude, point[1]))
+//                rightSide.add(listOf(longitude, point[1]))
+//            }
+//            leftSide.add(point)
+//        } else {
+//            if (isLeft) {
+//                isLeft = false
+//                leftSide.add(listOf(longitude, point[1]))
+//                rightSide.add(listOf(longitude, point[1]))
+//            }
+//            rightSide.add(point)
+//        }
+//    }
+//
+//    return listOf(leftSide, rightSide)
+//}
+//
+//fun main() {
+//    val geoJsonFilePath = "path/to/your/geojson/file.geojson"
+//    val specifiedLongitude = 2.3522 // Example longitude for Paris
+//
+//    val polygon = parseGeoJson(geoJsonFilePath)
+//    val (leftPolygon, rightPolygon) = splitPolygonByLongitude(polygon, specifiedLongitude)
+//
+//    println("Left Polygon: $leftPolygon")
+//    println("Right Polygon: $rightPolygon")
+//}

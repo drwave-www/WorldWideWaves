@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -21,10 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getMapBbox
-import com.worldwidewaves.shared.events.getMapCenter
-import com.worldwidewaves.shared.events.getMapStyleUri
 import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -63,7 +61,7 @@ import java.io.File
  * limitations under the License.
  */
 
-class WWWEventMap(
+class EventMap(
     private val event: WWWEvent,
     private val onLocationUpdate: (LatLng) -> Unit
 ) {
@@ -73,7 +71,8 @@ class WWWEventMap(
         DEFAULT_CENTER
     }
 
-    @SuppressLint("MissingPermission")
+    // -------------------------
+
     @Composable
     fun Screen(
         modifier: Modifier,
@@ -82,71 +81,115 @@ class WWWEventMap(
         val configuration = LocalConfiguration.current
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
-        val styleUri = remember { mutableStateOf<Uri?>(null) }
-        val mapStyle = remember { mutableStateOf<Style?>(null) }
 
+        // Request GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
 
-        // Setup Map properties
+        // Setup Map Style and properties
         LaunchedEffect(Unit) {
-            styleUri.value = event.getMapStyleUri()?.let { Uri.fromFile(File(it)) }
-        }
+            val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
+            mapView.getMapAsync { map ->
 
-        // Calculate height based on aspect ratio and available width
-        val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f)
+                setCameraPosition(initialCameraPosition, map)
 
-        // The map view
-        AndroidView(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(calculatedHeight),
-            factory = { mapView },
-            update = { mv ->
-                mv.getMapAsync { map ->
-                    setCameraPosition(initialCameraPosition, map)
-                    styleUri.value?.let { uri ->
-                        map.setStyle(
-                            Style.Builder()
-                                .fromUri(uri.toString())
-                        ) { style ->
-                            mapStyle.value = style
-                            map.uiSettings.setAttributionMargins(15, 0, 0, 15)
+                styleUri?.let { uri ->
+                    map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
+                        map.uiSettings.setAttributionMargins(15, 0, 0, 15)
 
-                            // Add a marker for the user's position
-                            if (hasLocationPermission) {
-                                map.locationComponent.activateLocationComponent(
-                                    buildLocationComponentActivationOptions(context, style)
-                                )
-                                map.locationComponent.isLocationComponentEnabled = true
-                                map.locationComponent.cameraMode = CameraMode.NONE
-
-                                map.locationComponent.locationEngine?.requestLocationUpdates(
-                                    buildLocationEngineRequest(),
-                                    object : LocationEngineCallback<LocationEngineResult> {
-                                        override fun onSuccess(result: LocationEngineResult?) {
-                                            result?.lastLocation?.let { location ->
-                                                onLocationUpdate(LatLng(location.latitude, location.longitude))
-                                            }
-                                        }
-                                        override fun onFailure(exception: Exception) {
-                                            // Handle failure if needed
-                                        }
-                                    },
-                                    Looper.getMainLooper()
-                                )
-                            }
+                        // Add a marker for the user's position
+                        if (hasLocationPermission) {
+                            addLocationMarkerToMap(map, context, style)
                         }
+
+//                        map.setMinZoomPreference(event.mapMinzoom)
+//                        map.setMaxZoomPreference(event.mapMaxzoom)
                     }
                 }
             }
+        }
+
+        // Calculate height based on aspect ratio and available width
+        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
+
+        // The map view
+        AndroidView(
+            modifier = modifier.fillMaxWidth().height(calculatedHeight),
+            factory = { mapView }
         )
     }
 
-    // -- Private functions ---------------------------------------------------
+    // -------------------------
+
+    private fun setCameraPosition(
+        initialCameraPosition: CameraPosition?,
+        map: MapLibreMap
+    ) {
+        when (initialCameraPosition) {
+            CameraPosition.DEFAULT_CENTER -> {
+                val (cLat, cLng) = event.map.getCenter()
+                map.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(cLat, cLng),
+                        event.mapDefaultzoom ?: event.mapMinzoom
+                    )
+                )
+            }
+
+            CameraPosition.BOUNDS -> {
+                val (swLng, swLat, neLng, neLat) = event.map.getBbox()
+                val bounds = LatLngBounds.Builder()
+                    .include(LatLng(swLat, swLng)) // Southwest corner
+                    .include(LatLng(neLat, neLng)) // Northeast corner
+                    .build()
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            }
+
+            null -> {}
+        }
+    }
+
+    // -- Private Map location setup functions --------------------------------
+
+    @SuppressLint("MissingPermission")
+    private fun addLocationMarkerToMap(
+        map: MapLibreMap,
+        context: Context,
+        style: Style
+    ) {
+        map.locationComponent.activateLocationComponent(
+            buildLocationComponentActivationOptions(context, style)
+        )
+        map.locationComponent.isLocationComponentEnabled = true
+        map.locationComponent.cameraMode = CameraMode.NONE
+
+        map.locationComponent.locationEngine?.requestLocationUpdates(
+            buildLocationEngineRequest(),
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let { location ->
+                        onLocationUpdate(
+                            LatLng(
+                                location.latitude,
+                                location.longitude
+                            )
+                        )
+                    }
+                }
+
+                override fun onFailure(exception: Exception) {
+                    // Handle failure if needed
+                }
+            },
+            Looper.getMainLooper()
+        )
+    }
+
+    // ------------------------
 
     private fun buildLocationComponentActivationOptions(
         context: Context,
-        style: Style): LocationComponentActivationOptions {
+        style: Style
+    ): LocationComponentActivationOptions {
 
         return LocationComponentActivationOptions
             .builder(context, style)
@@ -165,36 +208,11 @@ class WWWEventMap(
     }
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest.Builder(1500)
-            .setFastestInterval(750)
+        LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.toLong())
+            .setFastestInterval(CONST_TIMER_GPS_UPDATE.toLong() / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
-    private fun setCameraPosition(
-        initialCameraPosition: CameraPosition?,
-        map: MapLibreMap
-    ) {
-        when (initialCameraPosition) {
-            CameraPosition.DEFAULT_CENTER -> {
-                val (cLat, cLng) = event.getMapCenter()
-                map.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(cLat, cLng),
-                        event.mapDefaultzoom ?: event.mapMinzoom.toDouble()
-                    )
-                )
-            }
-            CameraPosition.BOUNDS -> {
-                val (swLng, swLat, neLng, neLat) = event.getMapBbox()
-                val bounds = LatLngBounds.Builder()
-                    .include(LatLng(swLat, swLng)) // Southwest corner
-                    .include(LatLng(neLat, neLng)) // Northeast corner
-                    .build()
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
-            }
-            null -> {}
-        }
-    }
 }
 
 // -- Use the MapLibre MapView as a composable --------------------------------
@@ -209,20 +227,14 @@ fun rememberMapViewWithLifecycle(): MapView {
 
     val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
     maplibreMapOptions.apply {
-        camera(
-            CameraPosition.Builder()
-                .bearing(0.0).tilt(0.0)
-                .target(LatLng(48.8619, 2.3417)) // TODO: fill with event prefs
-                .zoom(10.0) // TODO: fill with event prefs
-                .build()
-        )
-        maxZoomPreference(14.0) // TODO: fill with event prefs
-        minZoomPreference(10.0)
-        localIdeographFontFamily("Droid Sans") // TODO: replace
+        camera(CameraPosition.Builder().bearing(0.0).tilt(0.0).build())
+
+        localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
 
         compassEnabled(true)
         compassFadesWhenFacingNorth(true)
 
+        // TODO: depending on map type / screen, to configure
         zoomGesturesEnabled(false)
         scrollGesturesEnabled(false)
         horizontalScrollGesturesEnabled(false)
