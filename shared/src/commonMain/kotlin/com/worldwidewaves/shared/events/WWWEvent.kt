@@ -55,9 +55,9 @@ data class WWWEvent(
     val mapOsmarea: String,
     val timeZone: String
 ) {
-    @Transient val map = WWWEventMap(this)
-    @Transient val area = WWWEventArea(this)
-    @Transient val wave = WWWEventWave(this)
+    @Transient var map = WWWEventMap(this)
+    @Transient var area = WWWEventArea(this)
+    @Transient var wave = WWWEventWave(this)
 }
 
 // ---------------------------
@@ -103,61 +103,3 @@ fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime {
     val timezone = getTimeZone()
     return localDateTime.toInstant(timezone).toLocalDateTime(timezone)
 }
-
-
-//import kotlinx.serialization.json.Json
-//import kotlinx.serialization.json.jsonObject
-//import kotlinx.serialization.json.jsonPrimitive
-//import kotlinx.serialization.json.jsonArray
-//import kotlinx.serialization.json.double
-//import kotlinx.serialization.json.decodeFromJsonElement
-//import kotlinx.serialization.Serializable
-//import java.io.File
-
-//@Serializable
-//data class GeoJsonPolygon(val type: String, val coordinates: List<List<List<Double>>>)
-//
-//fun parseGeoJson(filePath: String): GeoJsonPolygon {
-//    val jsonString = File(filePath).readText()
-//    val jsonElement = Json.parseToJsonElement(jsonString)
-//    return Json.decodeFromJsonElement(jsonElement.jsonObject["geometry"]!!)
-//}
-//
-//fun splitPolygonByLongitude(polygon: GeoJsonPolygon, longitude: Double): List<List<List<Double>>> {
-//    val coordinates = polygon.coordinates[0]
-//    val leftSide = mutableListOf<List<Double>>()
-//    val rightSide = mutableListOf<List<Double>>()
-//    var isLeft = true
-//
-//    for (i in coordinates.indices) {
-//        val point = coordinates[i]
-//        if (point[0] < longitude) {
-//            if (!isLeft) {
-//                isLeft = true
-//                leftSide.add(listOf(longitude, point[1]))
-//                rightSide.add(listOf(longitude, point[1]))
-//            }
-//            leftSide.add(point)
-//        } else {
-//            if (isLeft) {
-//                isLeft = false
-//                leftSide.add(listOf(longitude, point[1]))
-//                rightSide.add(listOf(longitude, point[1]))
-//            }
-//            rightSide.add(point)
-//        }
-//    }
-//
-//    return listOf(leftSide, rightSide)
-//}
-//
-//fun main() {
-//    val geoJsonFilePath = "path/to/your/geojson/file.geojson"
-//    val specifiedLongitude = 2.3522 // Example longitude for Paris
-//
-//    val polygon = parseGeoJson(geoJsonFilePath)
-//    val (leftPolygon, rightPolygon) = splitPolygonByLongitude(polygon, specifiedLongitude)
-//
-//    println("Left Polygon: $leftPolygon")
-//    println("Right Polygon: $rightPolygon")
-//}

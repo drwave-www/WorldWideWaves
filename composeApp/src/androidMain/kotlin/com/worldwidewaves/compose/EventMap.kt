@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -70,7 +69,8 @@ class EventMap(
         DEFAULT_CENTER
     }
 
-    @SuppressLint("MissingPermission")
+    // -------------------------
+
     @Composable
     fun Screen(
         modifier: Modifier,
@@ -79,14 +79,28 @@ class EventMap(
         val configuration = LocalConfiguration.current
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
-        val styleUri = remember { mutableStateOf<Uri?>(null) }
 
-        // Reauest GPS location Android permissions
+        // Request GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
 
-        // Setup Map properties
+        // Setup Map Style and properties
         LaunchedEffect(Unit) {
-            styleUri.value = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
+            val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
+            mapView.getMapAsync { map ->
+
+                setCameraPosition(initialCameraPosition, map)
+
+                styleUri?.let { uri ->
+                    map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
+                        map.uiSettings.setAttributionMargins(15, 0, 0, 15)
+
+                        // Add a marker for the user's position
+                        if (hasLocationPermission) {
+                            addLocationMarkerToMap(map, context, style)
+                        }
+                    }
+                }
+            }
         }
 
         // Calculate height based on aspect ratio and available width
@@ -94,84 +108,12 @@ class EventMap(
 
         // The map view
         AndroidView(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(calculatedHeight),
-            factory = { mapView },
-            update = { mv ->
-                mv.getMapAsync { map ->
-                    setCameraPosition(initialCameraPosition, map)
-                    styleUri.value?.let { uri ->
-                        map.setStyle(
-                            Style.Builder()
-                                .fromUri(uri.toString())
-                        ) { style ->
-                            map.uiSettings.setAttributionMargins(15, 0, 0, 15)
-
-                            // Add a marker for the user's position
-                            if (hasLocationPermission) {
-                                map.locationComponent.activateLocationComponent(
-                                    buildLocationComponentActivationOptions(context, style)
-                                )
-                                map.locationComponent.isLocationComponentEnabled = true
-                                map.locationComponent.cameraMode = CameraMode.NONE
-
-                                map.locationComponent.locationEngine?.requestLocationUpdates(
-                                    buildLocationEngineRequest(),
-                                    object : LocationEngineCallback<LocationEngineResult> {
-                                        override fun onSuccess(result: LocationEngineResult?) {
-                                            result?.lastLocation?.let { location ->
-                                                onLocationUpdate(
-                                                    LatLng(
-                                                        location.latitude,
-                                                        location.longitude
-                                                    )
-                                                )
-                                            }
-                                        }
-
-                                        override fun onFailure(exception: Exception) {
-                                            // Handle failure if needed
-                                        }
-                                    },
-                                    Looper.getMainLooper()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            modifier = modifier.fillMaxWidth().height(calculatedHeight),
+            factory = { mapView }
         )
     }
 
-    // -- Private functions ---------------------------------------------------
-
-    private fun buildLocationComponentActivationOptions(
-        context: Context,
-        style: Style
-    ): LocationComponentActivationOptions {
-
-        return LocationComponentActivationOptions
-            .builder(context, style)
-            .locationComponentOptions(
-                LocationComponentOptions.builder(context)
-                    .pulseEnabled(true)
-                    .pulseColor(Color.RED)
-                    .foregroundTintColor(Color.BLACK)
-                    .build()
-            )
-            .useDefaultLocationEngine(true)
-            .locationEngineRequest(
-                buildLocationEngineRequest()
-            )
-            .build()
-    }
-
-    private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest.Builder(1500)
-            .setFastestInterval(750)
-            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-            .build()
+    // -------------------------
 
     private fun setCameraPosition(
         initialCameraPosition: CameraPosition?,
@@ -200,6 +142,72 @@ class EventMap(
             null -> {}
         }
     }
+
+    // -- Private Map setup functions -----------------------------------------
+
+    @SuppressLint("MissingPermission")
+    private fun addLocationMarkerToMap(
+        map: MapLibreMap,
+        context: Context,
+        style: Style
+    ) {
+        map.locationComponent.activateLocationComponent(
+            buildLocationComponentActivationOptions(context, style)
+        )
+        map.locationComponent.isLocationComponentEnabled = true
+        map.locationComponent.cameraMode = CameraMode.NONE
+
+        map.locationComponent.locationEngine?.requestLocationUpdates(
+            buildLocationEngineRequest(),
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let { location ->
+                        onLocationUpdate(
+                            LatLng(
+                                location.latitude,
+                                location.longitude
+                            )
+                        )
+                    }
+                }
+
+                override fun onFailure(exception: Exception) {
+                    // Handle failure if needed
+                }
+            },
+            Looper.getMainLooper()
+        )
+    }
+
+    // ------------------------
+
+    private fun buildLocationComponentActivationOptions(
+        context: Context,
+        style: Style
+    ): LocationComponentActivationOptions {
+
+        return LocationComponentActivationOptions
+            .builder(context, style)
+            .locationComponentOptions(
+                LocationComponentOptions.builder(context)
+                    .pulseEnabled(true)
+                    .pulseColor(Color.RED)
+                    .foregroundTintColor(Color.BLACK)
+                    .build()
+            )
+            .useDefaultLocationEngine(true)
+            .locationEngineRequest(
+                buildLocationEngineRequest()
+            )
+            .build()
+    }
+
+    private fun buildLocationEngineRequest(): LocationEngineRequest =
+        LocationEngineRequest.Builder(1500)
+            .setFastestInterval(750)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
+
 }
 
 // -- Use the MapLibre MapView as a composable --------------------------------

@@ -1,11 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.cacheStringToFile
-import com.worldwidewaves.shared.cachedFilePath
-import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.getMapFileAbsolutePath
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-
 /*
  * Copyright 2024 DrWave
  *
@@ -25,7 +19,37 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class WWWEventMap(private val event: WWWEvent) {
+
+import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+// ---------------------------
+
+interface MapDataProvider {
+    suspend fun geoMapStyleData(): String
+}
+
+class DefaultMapDataProvider : MapDataProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun geoMapStyleData(): String {
+        return withContext(Dispatchers.IO) {
+            Res.readBytes("files/maps/mapstyle.json").decodeToString()
+        }
+    }
+}
+
+// ---------------------------
+
+class WWWEventMap(
+    private val event: WWWEvent,
+    private val mapDataProvider: MapDataProvider = DefaultMapDataProvider()
+) {
 
     fun getCenter(): Pair<Double, Double> {
         val coordinates = event.mapCenter.split(",").mapNotNull { it.toDoubleOrNull() }
@@ -47,7 +71,6 @@ class WWWEventMap(private val event: WWWEvent) {
 
     // ---------------------------
 
-    @OptIn(ExperimentalResourceApi::class)
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
@@ -59,8 +82,7 @@ class WWWEventMap(private val event: WWWEvent) {
 
         // TODO : generate the start area polygon from the geojson file, see below for code
 
-        val newFileStr = Res.readBytes("files/maps/mapstyle.json")
-            .decodeToString()
+        val newFileStr = mapDataProvider.geoMapStyleData()
             .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
             .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
 

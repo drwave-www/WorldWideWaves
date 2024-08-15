@@ -20,12 +20,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.wave_end_time
-import com.worldwidewaves.shared.generated.resources.wave_progression
-import com.worldwidewaves.shared.generated.resources.wave_speed
-import com.worldwidewaves.shared.generated.resources.wave_start_time
-import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
@@ -49,7 +43,7 @@ data class WaveNumbers(
     val waveProgression: String
 )
 
-class WWWEventWave(private val event: WWWEvent) {
+class WWWEventWave(val event: WWWEvent) {
 
     private var cachedLiteralStartTime: String? = null
     private var cachedLiteralEndTime: String? = null
@@ -108,7 +102,7 @@ class WWWEventWave(private val event: WWWEvent) {
 
     // ---------------------------
 
-    private suspend fun getTotalTime(): Duration {
+    suspend fun getTotalTime(): Duration {
         if (cachedTotalTime == null) {
             val startDateTime = event.getStartDateTimeAsLocal()
             val endDateTime = getEndTime()
