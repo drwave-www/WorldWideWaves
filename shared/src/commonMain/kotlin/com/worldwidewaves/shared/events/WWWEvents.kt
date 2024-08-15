@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.InitFavoriteEvent
 import com.worldwidewaves.shared.generated.resources.Res
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -85,7 +86,7 @@ class WWWEvents(
         validationResults.filterValues { !it.first }
             .mapNotNull { it.value.second }
             .forEach { errorMessage ->
-                println("Validation Error: $errorMessage")
+                Napier.e("Validation Error: $errorMessage")
             }
 
         _eventsFlow.value = validationResults.filterValues { it.first }

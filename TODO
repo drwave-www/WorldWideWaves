@@ -1,9 +1,10 @@
 
 Next:
 
-- Avion: clean statics
-- Avion: - nettoyer tous les TODOs
-- Avion: warming zone + affichage progression wave
+- clean statics
+- nettoyer tous les TODOs
+- ajouter des logs dans shared avec Napier
+- warming zone + affichage progression wave
     - show wave progression layer on map
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
 
