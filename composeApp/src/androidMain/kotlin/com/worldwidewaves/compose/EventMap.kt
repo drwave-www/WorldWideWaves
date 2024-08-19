@@ -128,7 +128,7 @@ class EventMap(
                 map.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(cLat, cLng),
-                        event.mapDefaultzoom ?: event.mapMinzoom.toDouble()
+                        event.mapDefaultzoom ?: event.mapMinzoom
                     )
                 )
             }

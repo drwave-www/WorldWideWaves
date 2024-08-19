@@ -86,7 +86,7 @@ class AboutInfoScreen : TabScreen {
         Text(
             text = stringResource(ShRes.string.infos_core),
             style = TextStyle(textAlign = TextAlign.Justify),
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             fontFamily = displayFontFamily
         )
     }

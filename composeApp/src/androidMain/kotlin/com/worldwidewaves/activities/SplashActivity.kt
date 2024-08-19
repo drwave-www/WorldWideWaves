@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.background
@@ -64,9 +65,10 @@ class SplashActivity : AppCompatActivity() {
         window.decorView.post { // Merge with ActivityTools...
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.hide(WindowInsets.Type.statusBars())
+                window.insetsController?.hide(WindowInsets.Type.navigationBars())
             } else {
                 @Suppress("DEPRECATION")
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
         }
         window.statusBarColor = android.graphics.Color.TRANSPARENT
@@ -83,7 +85,7 @@ class SplashActivity : AppCompatActivity() {
         events.invokeWhenLoaded {
             lifecycleScope.launch {
                 val elapsedTime = System.currentTimeMillis() - startTime
-                delay(maxOf(1500 - elapsedTime, 0))
+                delay(maxOf(2000 - elapsedTime, 0))
                 startActivity(intent)
             }
         }

@@ -13,7 +13,8 @@ Next:
     - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
     - flags, ..
 
-- add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
+- Large map screen
+    add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => manage all cases for user location
 

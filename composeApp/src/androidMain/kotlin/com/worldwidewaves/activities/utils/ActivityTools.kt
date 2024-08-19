@@ -1,13 +1,5 @@
 package com.worldwidewaves.activities.utils
 
-import android.view.Window
-import android.view.WindowInsets
-import android.view.WindowManager
-import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import com.worldwidewaves.theme.backgroundLight
-
 /*
  * Copyright 2024 DrWave
  *
@@ -28,18 +20,39 @@ import com.worldwidewaves.theme.backgroundLight
  * limitations under the License.
  */
 
+import android.os.Build
+import android.view.View
+import android.view.Window
+import android.view.WindowInsets
+import android.view.WindowManager
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.worldwidewaves.theme.backgroundLight
 
 fun setStatusBarColor(window: Window) {
     window.decorView.post {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = backgroundLight.toArgb()
 
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.navigationBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        }
+
         // Ensure the content fits within the system windows
         WindowCompat.setDecorFitsSystemWindows(window, true)
         WindowInsetsControllerCompat(window, window.decorView).let { controller ->
-            controller.show(WindowInsets.Type.statusBars())
-            controller.systemBarsBehavior =
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                controller.show(WindowInsets.Type.statusBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+
     }
 }

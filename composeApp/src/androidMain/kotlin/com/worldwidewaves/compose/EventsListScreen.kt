@@ -388,7 +388,7 @@ class EventsListScreen(
                         style = TextStyle(
                             color = extendedLight.quinary.color,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = 28.sp
+                            fontSize = 26.sp
                         )
                     )
                     Text(
@@ -398,7 +398,7 @@ class EventsListScreen(
                             color = MaterialTheme.colorScheme.primary,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 34.sp
+                            fontSize = 30.sp
                         )
                     )
                 }

@@ -329,51 +329,53 @@ private fun EventNumbers(event: WWWEvent) {
         }
     }
 
-    Box(
-        modifier = Modifier
-            .border(
-                width = 2.dp,
-                color = quinaryLight,
-                shape = RoundedCornerShape(topStart = 50.dp, bottomEnd = 50.dp)
-            )
-            .padding(20.dp)
-    ) {
-        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-            Text(
-                text = stringResource(ShRes.string.be_waved),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Right,
-                color = quinaryLight,
-                fontFamily = extraFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            eventNumbers.forEach { (key, value) ->
-                Row(
+    Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
+        Box(
+            modifier = Modifier
+                .border(
+                    width = 2.dp,
+                    color = quinaryLight,
+                    shape = RoundedCornerShape(topStart = 50.dp, bottomEnd = 50.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+                Text(
+                    text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(key),
-                        color = quinaryLight,
-                        fontFamily = extraFontFamily,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        text = value,
-                        color = when (key) {
-                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                            ShRes.string.wave_start_time -> Color.Yellow
-                            else -> MaterialTheme.colorScheme.primary
-                        },
-                        fontFamily = extraFontFamily,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    textAlign = TextAlign.Right,
+                    color = quinaryLight,
+                    fontFamily = extraFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                eventNumbers.forEach { (key, value) ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(key),
+                            color = quinaryLight,
+                            fontFamily = extraFontFamily,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                        Text(
+                            text = value,
+                            color = when (key) {
+                                ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                ShRes.string.wave_start_time -> Color.Yellow
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                            fontFamily = extraFontFamily,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
