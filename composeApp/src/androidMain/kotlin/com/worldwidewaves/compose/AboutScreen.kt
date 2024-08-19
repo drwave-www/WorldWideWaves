@@ -42,6 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_WIDTH
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.logo_description
 import com.worldwidewaves.shared.generated.resources.tab_faq_name
@@ -76,7 +81,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
+        Surface(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
             tabManager.TabView()
         }
     }
@@ -87,16 +92,16 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
         Box(
             modifier = Modifier
-                .height(60.dp)
-                .width(150.dp),
+                .height(DIM_INT_TABBAR_HEIGHT.dp)
+                .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
             contentAlignment = Alignment.Center
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 10.dp, end = 10.dp)
-                        .offset(y = (-20).dp),
+                        .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
+                        .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
                     color = Color.White, thickness = 2.dp
                 )
             }
@@ -105,7 +110,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                 fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                 fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                fontSize = 20.sp
+                fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
             )
         }
     }

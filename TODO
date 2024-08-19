@@ -1,7 +1,6 @@
 
 Next:
 
-- clean statics
 - nettoyer tous les TODOs
 - ajouter des logs dans shared avec Napier
 - warming zone + affichage progression wave
@@ -17,6 +16,8 @@ Next:
     add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => manage all cases for user location
+
+- replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 
 - round2 : routing on streets
 

@@ -69,6 +69,20 @@ import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.models.EventsViewModel
 import com.worldwidewaves.shared.SetEventFavorite
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COUNTRY_FONSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_DATE_FONSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_LOCATION_FONSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FAVS_IMAGE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_BORDER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_NOEVENTS_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_OVERLAY_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getCommunityImage
 import com.worldwidewaves.shared.events.getCountryImage
@@ -138,10 +152,10 @@ class EventsListScreen(
         Column(
             modifier = modifier
                 .fillMaxHeight()
-                .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+                .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
             FavoritesSelector(onAllEventsCLicked, onFavoriteEventsClicked)
-            Spacer(modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
             Events(viewModel, events, modifier = Modifier.weight(1f))
         }
     }
@@ -197,8 +211,8 @@ class EventsListScreen(
     ) {
         Box(
             modifier = modifier
-                .clip(RoundedCornerShape(25.dp))
-                .height(50.dp)
+                .clip(RoundedCornerShape(DIM_EVENTS_SELECTOR_ROUND.dp))
+                .height(DIM_EVENTS_SELECTOR_HEIGHT.dp)
                 .background(backgroundColor)
                 .clickable { onClick() },
             contentAlignment = Alignment.Center
@@ -206,7 +220,7 @@ class EventsListScreen(
             Text(
                 color = textColor,
                 fontWeight = fontWeight,
-                fontSize = 16.sp,
+                fontSize = DIM_EVENTS_SELECTOR_FONTSIZE.sp,
                 text = text,
                 fontFamily = displayFontFamily
             )
@@ -235,7 +249,7 @@ class EventsListScreen(
                         style = TextStyle(
                             color = extendedLight.quinary.color,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = 24.sp
+                            fontSize = DIM_EVENTS_NOEVENTS_FONTSIZE.sp
                         )
                     )
                 }
@@ -265,7 +279,7 @@ class EventsListScreen(
         event: WWWEvent,
         modifier: Modifier = Modifier
     ) {
-        val heightModifier = Modifier.height(159.dp)
+        val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
 
         Box(modifier = heightModifier) {
 
@@ -297,7 +311,7 @@ class EventsListScreen(
         ) {
             event.community?.let {
                 EventFlag(
-                    modifier = Modifier.padding(start = 10.dp, top = 10.dp),
+                    modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, top = DIM_DEFAULT_INT_PADDING.dp),
                     imageResource = event.getCommunityImage() as DrawableResource,
                     contentDescription = event.community!!
                 )
@@ -305,7 +319,7 @@ class EventsListScreen(
 
             event.country?.let {
                 EventFlag(
-                    modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                    modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
                     imageResource = event.getCountryImage() as DrawableResource,
                     contentDescription = event.community!!
                 )
@@ -321,8 +335,8 @@ class EventsListScreen(
     ) {
         Image(
             modifier = modifier
-                .width(65.dp)
-                .border(1.dp, Color.White),
+                .width(DIM_EVENTS_FLAG_WIDTH.dp)
+                .border(DIM_EVENTS_FLAG_BORDER.dp, Color.White),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(imageResource),
             contentDescription = contentDescription
@@ -345,7 +359,8 @@ class EventsListScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(end = 10.dp, bottom = 10.dp), contentAlignment = Alignment.BottomEnd
+                .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+            contentAlignment = Alignment.BottomEnd
         ) {
             Surface(
                 modifier = Modifier.clip(CircleShape),
@@ -353,7 +368,7 @@ class EventsListScreen(
             ) {
                 Image(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(DIM_EVENTS_FAVS_IMAGE_SIZE.dp)
                         .clickable {
                             scope.launch {
                                 isFavorite = !isFavorite
@@ -388,7 +403,7 @@ class EventsListScreen(
                         style = TextStyle(
                             color = extendedLight.quinary.color,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = 26.sp
+                            fontSize = DIM_EVENTS_EVENT_LOCATION_FONSIZE.sp
                         )
                     )
                     Text(
@@ -398,7 +413,7 @@ class EventsListScreen(
                             color = MaterialTheme.colorScheme.primary,
                             fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 30.sp
+                            fontSize = DIM_EVENTS_EVENT_DATE_FONSIZE.sp
                         )
                     )
                 }
@@ -409,7 +424,7 @@ class EventsListScreen(
                     style = TextStyle(
                         color = extendedLight.quinary.color,
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 14.sp
+                        fontSize = DIM_EVENTS_EVENT_COUNTRY_FONSIZE.sp
                     ),
                     modifier = Modifier
                         .offset(y = (-8).dp)

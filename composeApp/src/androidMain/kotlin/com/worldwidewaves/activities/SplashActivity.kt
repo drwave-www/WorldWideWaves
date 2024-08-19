@@ -25,7 +25,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
-import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
@@ -40,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_LOGO_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.background
 import com.worldwidewaves.shared.generated.resources.background_description
@@ -85,7 +86,7 @@ class SplashActivity : AppCompatActivity() {
         events.invokeWhenLoaded {
             lifecycleScope.launch {
                 val elapsedTime = System.currentTimeMillis() - startTime
-                delay(maxOf(2000 - elapsedTime, 0))
+                delay(maxOf(CONST_SPLASH_MIN_DURATION - elapsedTime, 0))
                 startActivity(intent)
             }
         }
@@ -111,9 +112,9 @@ private fun SplashScreen() {
                 painter = painterResource(ShRes.drawable.www_logo_transparent),
                 contentDescription = stringResource(ShRes.string.logo_description),
                 modifier = Modifier
-                    .width(200.dp)
+                    .width(CONST_SPLASH_LOGO_WIDTH.dp)
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = DIM_DEFAULT_INT_PADDING.dp)
             )
         }
     }

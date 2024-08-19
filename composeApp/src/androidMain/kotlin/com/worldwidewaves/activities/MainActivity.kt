@@ -21,10 +21,6 @@ package com.worldwidewaves.activities
  */
 
 import android.os.Bundle
-import android.view.View
-import android.view.Window
-import android.view.WindowInsets
-import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
@@ -34,16 +30,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.settings_icon
@@ -51,7 +45,6 @@ import com.worldwidewaves.shared.generated.resources.settings_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.theme.AppTheme
-import com.worldwidewaves.theme.backgroundLight
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -109,7 +102,7 @@ open class MainActivity : AppCompatActivity() {
         Image(
             painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
             contentDescription = contentDescription,
-            modifier = Modifier.height(45.dp),
+            modifier = Modifier.height(DIM_EXT_TABBAR_HEIGHT.dp),
             contentScale = ContentScale.Fit
         )
     }

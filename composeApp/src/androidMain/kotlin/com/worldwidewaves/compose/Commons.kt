@@ -27,6 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
@@ -70,24 +80,22 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
         }
 
         Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .offset(y = (-5).dp),
+            modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
             contentAlignment = Alignment.TopEnd
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 15.dp, end = 15.dp)
-                    .size(width = 115.dp, height = 26.dp)
+                    .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
+                    .size(width = DIM_COMMON_SOONRUNNING_WIDTH.dp, height = DIM_COMMON_SOONRUNNING_HEIGHT.dp)
                     .background(backgroundColor)
-                    .padding(end = 10.dp),
+                    .padding(end = DIM_DEFAULT_INT_PADDING.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = stringResource(textId),
                     style = TextStyle(
                         fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = 16.sp
+                        fontSize = DIM_COMMON_SOONRUNNING_FONTSIZE.sp
                     )
                 )
             }
@@ -108,7 +116,7 @@ fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(Res.drawable.event_done),
                 contentDescription = stringResource(Res.string.event_done),
-                modifier = Modifier.width(130.dp),
+                modifier = Modifier.width(DIM_COMMON_DONE_IMAGE_WIDTH.dp),
             )
         }
     }
@@ -129,7 +137,7 @@ fun WWWSocialNetworks(
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
             contentDescription = "Instagram logo",
-            modifier = Modifier.width(90.dp)
+            modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp)
         )
         Column(
             modifier = Modifier.padding(start = 10.dp),
@@ -144,17 +152,17 @@ fun WWWSocialNetworks(
                     }
                 }),
                 text = instagramAccount,
-                fontSize = 16.sp,
+                fontSize = DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE.sp,
                 fontWeight = FontWeight.Black,
                 fontFamily = displayFontFamily,
                 textDecoration = TextDecoration.Underline
             )
             Text(
                 text = instagramHashtag,
-                fontSize = 16.sp,
+                fontSize = DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE.sp,
                 fontFamily = displayFontFamily
             )
         }
     }
-    Spacer(modifier = Modifier.size(20.dp))
+    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
 }

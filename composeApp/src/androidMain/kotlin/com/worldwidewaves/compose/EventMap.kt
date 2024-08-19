@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
@@ -206,8 +207,8 @@ class EventMap(
     }
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest.Builder(1500)
-            .setFastestInterval(750)
+        LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.toLong())
+            .setFastestInterval(CONST_TIMER_GPS_UPDATE.toLong() / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 

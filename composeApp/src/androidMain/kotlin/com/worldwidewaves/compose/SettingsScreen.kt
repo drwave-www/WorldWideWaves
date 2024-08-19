@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 
 class SettingsScreen : TabScreen {
 
@@ -35,7 +36,7 @@ class SettingsScreen : TabScreen {
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Box(modifier = modifier.padding(start = 20.dp, end = 20.dp, top = 20.dp)) {
+        Box(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
             Text("Settings Screen", fontFamily = MaterialTheme.typography.bodyMedium.fontFamily)
         }
     }

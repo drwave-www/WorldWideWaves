@@ -63,6 +63,26 @@ import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_MITER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_STROKE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DESC_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_BORDER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERROUND
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
@@ -115,9 +135,7 @@ class EventActivity : AbstractEventBackActivity() {
                     coroutineScope
                 ) { geolocText = it }
                 lastKnownLocation = newLocation
-            }).Screen(
-                modifier = Modifier.fillMaxWidth()
-            )
+            }).Screen(modifier = Modifier.fillMaxWidth())
             GeolocalizeMe(geolocText)
             EventNumbers(event)
             WWWEventSocialNetworks(event)
@@ -156,11 +174,11 @@ private fun updateGeolocText(
 @Composable
 private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.padding(horizontal = 20.dp),
+        modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
         fontFamily = extraFontFamily,
         color = quinaryLight,
-        fontSize = 16.sp,
+        fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
         textAlign = TextAlign.Justify,
         fontWeight = FontWeight.Bold
     )
@@ -195,12 +213,12 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
     Box(
         modifier = modifier
             .fillMaxSize()
-            .let { if (event.isDone()) it.padding(bottom = 20.dp) else it },
+            .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
     ) {
         val textStyle = TextStyle(
             fontFamily = extraFontFamily,
-            fontSize = 90.sp,
+            fontSize = DIM_EVENT_DATE_FONTSIZE.sp,
             fontWeight = FontWeight.Black
         )
         Text(
@@ -212,8 +230,8 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
             style = textStyle.copy(
                 color = MaterialTheme.colorScheme.primary,
                 drawStyle = Stroke(
-                    miter = 20f,
-                    width = 5f,
+                    miter = DIM_EVENT_DATE_MITER,
+                    width = DIM_EVENT_DATE_STROKE,
                     join = StrokeJoin.Miter
                 )
             )
@@ -226,8 +244,8 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
 @Composable
 fun DividerLine() {
     HorizontalDivider(
-        modifier = Modifier.width(200.dp),
-        color = Color.White, thickness = 2.dp
+        modifier = Modifier.width(DIM_DIVIDER_WIDTH.dp),
+        color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
     )
 }
 
@@ -238,8 +256,8 @@ private fun ButtonWave(event: WWWEvent) {
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .width(300.dp)
-            .height(40.dp)
+            .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
+            .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
             .clickable(onClick = {
                 /* TODO: click on Wave button */
             })
@@ -250,7 +268,7 @@ private fun ButtonWave(event: WWWEvent) {
                 .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(ShRes.string.wave_now).uppercase(),
             color = quinaryLight,
-            fontSize = 24.sp,
+            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Black,
             fontFamily = displayFontFamily
@@ -275,15 +293,15 @@ private fun WWWEventSocialNetworks(event: WWWEvent) {
 private fun GeolocalizeMe(geolocText: StringResource) {
     Row(
         modifier = Modifier
-            .height(45.dp)
-            .padding(start = 20.dp, end = 20.dp),
+            .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
+            .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) { // TODO: change colors depending on in/out area changes
         // check https://medium.com/nerd-for-tech/jetpack-compose-pulsating-effect-4b9f2928d31a
         Box(
             modifier = Modifier
-                .border(2.dp, MaterialTheme.colorScheme.primary)
+                .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
                 .fillMaxHeight()
                 .weight(1f),
             contentAlignment = Alignment.Center
@@ -291,7 +309,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
             Text(
                 text = stringResource(geolocText),
                 color = quinaryLight,
-                fontSize = 14.sp,
+                fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp,
                 fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
             )
         }
@@ -329,17 +347,20 @@ private fun EventNumbers(event: WWWEvent) {
         }
     }
 
-    Box(modifier = Modifier.padding(start = 20.dp, end = 20.dp)) {
+    Box(modifier = Modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
         Box(
             modifier = Modifier
                 .border(
-                    width = 2.dp,
+                    width = DIM_EVENT_NUMBERS_BORDERWIDTH.dp,
                     color = quinaryLight,
-                    shape = RoundedCornerShape(topStart = 50.dp, bottomEnd = 50.dp)
+                    shape = RoundedCornerShape(
+                        topStart = DIM_EVENT_NUMBERS_BORDERROUND.dp,
+                        bottomEnd = DIM_EVENT_NUMBERS_BORDERROUND.dp
+                    )
                 )
-                .padding(20.dp)
+                .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
+            Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
                 Text(
                     text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
@@ -347,9 +368,9 @@ private fun EventNumbers(event: WWWEvent) {
                     color = quinaryLight,
                     fontFamily = extraFontFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
+                    fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 eventNumbers.forEach { (key, value) ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -359,7 +380,7 @@ private fun EventNumbers(event: WWWEvent) {
                             text = stringResource(key),
                             color = quinaryLight,
                             fontFamily = extraFontFamily,
-                            fontSize = 15.sp,
+                            fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp,
                             fontWeight = FontWeight.Black
                         )
                         Text(
@@ -370,11 +391,11 @@ private fun EventNumbers(event: WWWEvent) {
                                 else -> MaterialTheme.colorScheme.primary
                             },
                             fontFamily = extraFontFamily,
-                            fontSize = 24.sp,
+                            fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
                             fontWeight = FontWeight.Black
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                 }
             }
         }
