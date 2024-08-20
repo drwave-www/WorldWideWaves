@@ -29,6 +29,16 @@ class WWWGlobals {
 
     companion object {
 
+        // -- FS Constants --
+
+        const val FS_FILES_FOLDERS = "files"
+        const val FS_EVENTS_CONF = "$FS_FILES_FOLDERS/events.json"
+
+        const val FS_MAPS_FOLDERS = "$FS_FILES_FOLDERS/maps"
+        const val FS_MAPS_STYLE = "$FS_MAPS_FOLDERS/mapstyle.json"
+
+        // -- UI Constants --
+
         const val CONST_SPLASH_MIN_DURATION =  2000
         const val CONST_TIMER_GPS_UPDATE = 1500
 

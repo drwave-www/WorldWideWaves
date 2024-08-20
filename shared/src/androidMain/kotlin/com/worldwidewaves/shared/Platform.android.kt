@@ -23,6 +23,7 @@ package com.worldwidewaves.shared
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDERS
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -51,7 +52,8 @@ object AndroidPlatform : WWWPlatform {
 
     private val context: Context
         get() = _contextRef?.get()
-            ?: throw UninitializedPropertyAccessException("com.worldwidewaves.shared.AndroidPlatform must be initialized with a context before use.")
+            ?: throw UninitializedPropertyAccessException(
+                "AndroidPlatform must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
@@ -62,12 +64,11 @@ object AndroidPlatform : WWWPlatform {
         if (_contextRef == null) {
             _contextRef = WeakReference(context.applicationContext)
         } else {
-            throw IllegalStateException("com.worldwidewaves.shared.AndroidPlatform can only be initialized once.")
+            throw IllegalStateException("AndroidPlatform can only be initialized once.")
         }
         return this
     }
 
-    // fun getEvents() : WWWEvents = events.value
 }
 
 // ---------------------------
@@ -109,7 +110,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val cachedFile = File(cacheDir, "$eventId.$extension")
 
     return try {
-        val fileBytes: ByteArray = Res.readBytes("files/maps/$eventId.$extension") // TODO: static folder name
+        val fileBytes: ByteArray = Res.readBytes("$FS_MAPS_FOLDERS/$eventId.$extension")
         val assetSize = fileBytes.size
 
         if (cachedFile.exists()) {

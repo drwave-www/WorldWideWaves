@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.InitFavoriteEvent
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
 import com.worldwidewaves.shared.generated.resources.Res
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +46,7 @@ class DefaultEventsConfigurationProvider : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String {
         return withContext(Dispatchers.IO) {
-            Res.readBytes("files/events.json").decodeToString()
+            Res.readBytes(FS_EVENTS_CONF).decodeToString()
         }
     }
 }

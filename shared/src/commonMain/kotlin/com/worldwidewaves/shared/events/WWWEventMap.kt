@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.generated.resources.Res
@@ -39,7 +40,7 @@ class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String {
         return withContext(Dispatchers.IO) {
-            Res.readBytes("files/maps/mapstyle.json").decodeToString()
+            Res.readBytes(FS_MAPS_STYLE).decodeToString()
         }
     }
 }

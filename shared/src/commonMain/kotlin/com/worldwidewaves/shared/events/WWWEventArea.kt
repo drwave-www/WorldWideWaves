@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDERS
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun getGeoJsonData(eventId: String): JsonObject {
         val geojsonData = withContext(Dispatchers.IO) {
-            Res.readBytes("files/maps/$eventId.geojson").decodeToString()
+            Res.readBytes("$FS_MAPS_FOLDERS/$eventId.geojson").decodeToString()
         }
         return Json.parseToJsonElement(geojsonData).jsonObject
     }
