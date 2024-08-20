@@ -1,28 +1,37 @@
 
 Next:
 
+- bug on geolocme
 - nettoyer tous les TODOs
 - ajouter des logs dans shared avec Napier
 - warming zone + affichage progression wave
     - show wave progression layer on map
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
 
-- scripting to add a new event : param city/country
-    - openAI: images + descriptions
-    - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
-    - flags, ..
-
 - Large map screen
     add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
     => manage all cases for user location
 
+- wave progression
+    - add a layer on the map
+    - add a progress bar on the map
+    - add a progress bar on the wave screen
+
+- map styling
+
+- wave screen
+
+- scripting to add a new event : param city/country
+    - openAI: images + descriptions
+    - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
+    - flags, ..
+
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 
-- round2 : routing on streets
+- round2 wave : routing on streets
 
 Cleanings :
-- Compose: replace all static sizes by configurables ones
 - code coverage of current devs
 - check cached files are renewed when app version evolves
 - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
