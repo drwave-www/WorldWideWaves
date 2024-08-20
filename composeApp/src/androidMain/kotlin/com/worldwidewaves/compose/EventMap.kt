@@ -21,6 +21,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
@@ -108,7 +109,7 @@ class EventMap(
         }
 
         // Calculate height based on aspect ratio and available width
-        val calculatedHeight = configuration.screenWidthDp.dp / (16f / 9f) // TODO fixed value
+        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         // The map view
         AndroidView(

@@ -283,7 +283,7 @@ class WWWEventAreaTest {
         val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
 
         runBlocking {
-            val polygon = eventArea.getCachedPolygon()
+            val polygon = eventArea.getPolygon()
             val expectedPolygon = listOf(
                 Position(latitude=0.0, longitude=0.0),
                 Position(latitude=10.0, longitude=0.0),
@@ -301,7 +301,7 @@ class WWWEventAreaTest {
         val eventArea = createWWWEventArea(randomEvent, emptyPolygonGeoJson)
 
         runBlocking {
-            val polygon = eventArea.getCachedPolygon()
+            val polygon = eventArea.getPolygon()
             assertTrue(polygon.isEmpty(), "Expected polygon to be empty")
         }
     }

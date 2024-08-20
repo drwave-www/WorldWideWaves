@@ -46,6 +46,7 @@ class DefaultEventsConfigurationProvider : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String {
         return withContext(Dispatchers.IO) {
+            Napier.i("Loading events configuration from $FS_EVENTS_CONF")
             Res.readBytes(FS_EVENTS_CONF).decodeToString()
         }
     }
@@ -91,8 +92,7 @@ class WWWEvents(
             }
 
         _eventsFlow.value = validationResults.filterValues { it.first }
-            .keys
-            .onEach { initFavoriteEvent.call(it) }
+            .keys.onEach { initFavoriteEvent.call(it) }
             .toList()
     }
 

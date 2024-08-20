@@ -83,6 +83,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
@@ -297,8 +298,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
             .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ) { // TODO: change colors depending on in/out area changes
-        // check https://medium.com/nerd-for-tech/jetpack-compose-pulsating-effect-4b9f2928d31a
+    ) {
         Box(
             modifier = Modifier
                 .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
@@ -337,7 +337,7 @@ private fun EventNumbers(event: WWWEvent) {
                     ShRes.string.wave_progression to waveNumbers.waveProgression
             ))
             while (event.isRunning()) {
-                delay(10000) // 10s : TODO: static number
+                delay(WAVE_REFRESH_INTERVAL)
                 val newProgressionValue = event.wave.getLiteralProgression()
                 if (newProgressionValue != lastProgressionValue) {
                     eventNumbers[ShRes.string.wave_progression] = newProgressionValue

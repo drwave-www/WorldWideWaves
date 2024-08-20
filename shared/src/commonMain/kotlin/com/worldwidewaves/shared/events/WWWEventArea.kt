@@ -20,9 +20,10 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDERS
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -55,7 +56,8 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun getGeoJsonData(eventId: String): JsonObject {
         val geojsonData = withContext(Dispatchers.IO) {
-            Res.readBytes("$FS_MAPS_FOLDERS/$eventId.geojson").decodeToString()
+            Napier.i("Loading geojson data for event $eventId")
+            Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
         }
         return Json.parseToJsonElement(geojsonData).jsonObject
     }
@@ -80,13 +82,13 @@ open class WWWEventArea(
     // ---------------------------
 
     suspend fun isPositionWithin(position: Position): Boolean {
-        return getCachedPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
+        return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
     }
 
     open suspend fun getBoundingBox(): BoundingBox {
         cachedBoundingBox?.let { return it }
 
-        val polygon = getCachedPolygon().takeIf { it.isNotEmpty() }
+        val polygon = getPolygon().takeIf { it.isNotEmpty() }
             ?: throw IllegalStateException("Polygon is empty")
 
         return polygonBbox(polygon).also { cachedBoundingBox = it }
@@ -94,7 +96,7 @@ open class WWWEventArea(
 
     // ---------------------------
 
-    suspend fun getCachedPolygon(): List<Position> {
+    suspend fun getPolygon(): List<Position> {
         if (this.areaPolygon.isEmpty()) {
             this.areaPolygon.addAll(
                 withContext(Dispatchers.Default) {
@@ -132,6 +134,7 @@ open class WWWEventArea(
                 }
             )
         }
+
         return this.areaPolygon
     }
 }
@@ -165,18 +168,16 @@ data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val 
 fun polygonBbox(polygon: List<Position>): BoundingBox {
     if (polygon.isEmpty())
         throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
+
     val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygon.fold(
         Quadruple(
             Double.MAX_VALUE, Double.MAX_VALUE,
             Double.MIN_VALUE, Double.MIN_VALUE
         )
-    )
-    { (minLat, minLon, maxLat, maxLon), pos ->
+    ) { (minLat, minLon, maxLat, maxLon), pos ->
         Quadruple(
-            minOf(minLat, pos.latitude),
-            minOf(minLon, pos.longitude),
-            maxOf(maxLat, pos.latitude),
-            maxOf(maxLon, pos.longitude)
+            minOf(minLat, pos.latitude), minOf(minLon, pos.longitude),
+            maxOf(maxLat, pos.latitude), maxOf(maxLon, pos.longitude)
         )
     }
     return BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude)

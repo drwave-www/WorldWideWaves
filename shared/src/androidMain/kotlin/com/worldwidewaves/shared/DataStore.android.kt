@@ -21,10 +21,11 @@ package com.worldwidewaves.shared
  */
 
 import android.content.Context
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
 
 actual fun keyValueStorePath(): String {
     return (getPlatform().getContext() as Context)
         .filesDir
-        .resolve("datastore/$dataStoreFileName")
+        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
         .absolutePath
 }

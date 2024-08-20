@@ -117,7 +117,7 @@ class AboutInfoScreen : TabScreen {
                     contentDescription = "Instagram logo",
                     modifier = Modifier.width(25.dp)
                 )
-                Text( // TODO Convert it to WWWALink
+                Text(
                     modifier = Modifier
                         .padding(start = DIM_DEFAULT_INT_PADDING.dp)
                         .clickable(onClick = {

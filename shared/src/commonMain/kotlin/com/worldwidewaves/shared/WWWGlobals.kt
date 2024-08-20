@@ -20,27 +20,27 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-
 class WWWGlobals {
 
     companion object {
 
         // -- FS Constants --
 
-        const val FS_FILES_FOLDERS = "files"
-        const val FS_EVENTS_CONF = "$FS_FILES_FOLDERS/events.json"
+        const val FS_DATASTORE_FOLDER = "datastore"
 
-        const val FS_MAPS_FOLDERS = "$FS_FILES_FOLDERS/maps"
-        const val FS_MAPS_STYLE = "$FS_MAPS_FOLDERS/mapstyle.json"
+        private const val FS_FILES_FOLDER = "files"
+        const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
+
+        const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
+        const val FS_MAPS_STYLE = "$FS_MAPS_FOLDER/mapstyle.json"
+
+        // -- Wave Constants --
+        const val WAVE_REFRESH_INTERVAL = 10000L // ms
 
         // -- UI Constants --
 
-        const val CONST_SPLASH_MIN_DURATION =  2000
-        const val CONST_TIMER_GPS_UPDATE = 1500
+        const val CONST_SPLASH_MIN_DURATION =  2000 // ms
+        const val CONST_TIMER_GPS_UPDATE = 1500 // ms
 
         // ----------------------------
 
@@ -70,6 +70,8 @@ class WWWGlobals {
         const val DIM_EVENT_DATE_FONTSIZE = 90
         const val DIM_EVENT_DATE_MITER = 20f
         const val DIM_EVENT_DATE_STROKE = 5f
+
+        const val DIM_EVENT_MAP_RATIO = (16f / 9f)
 
         const val DIM_EVENT_WAVEBUTTON_WIDTH = 300
         const val DIM_EVENT_WAVEBUTTON_HEIGHT = 40

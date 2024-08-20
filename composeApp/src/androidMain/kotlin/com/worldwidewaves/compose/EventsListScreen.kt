@@ -90,6 +90,7 @@ import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.event_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
@@ -241,10 +242,10 @@ class EventsListScreen(
                 items(events) { event -> Event(viewModel, event) }
             } else {
                 item {
-                    Text( // TODO: better explanation of favorites
+                    Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
-                        text = "No events found",
+                        text = stringResource(ShRes.string.event_favorites_empty),
                         fontFamily = displayFontFamily,
                         style = TextStyle(
                             color = extendedLight.quinary.color,

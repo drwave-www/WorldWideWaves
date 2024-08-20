@@ -23,7 +23,7 @@ package com.worldwidewaves.shared
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDERS
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -45,7 +45,7 @@ import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
 
-object AndroidPlatform : WWWPlatform {
+object AndroidPlatform : WWWPlatform  {
     private var _contextRef: WeakReference<Context>? = null
 
     // private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
@@ -61,11 +61,7 @@ object AndroidPlatform : WWWPlatform {
     override fun getContext(): Any = context
 
     fun initialize(context: Context): AndroidPlatform {
-        if (_contextRef == null) {
-            _contextRef = WeakReference(context.applicationContext)
-        } else {
-            throw IllegalStateException("AndroidPlatform can only be initialized once.")
-        }
+        _contextRef = WeakReference(context.applicationContext)
         return this
     }
 
@@ -106,24 +102,18 @@ actual fun getEventImage(type: String, id: String): Any? {
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val cachedFile = File(cacheDir, "$eventId.$extension")
+    val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
     return try {
-        val fileBytes: ByteArray = Res.readBytes("$FS_MAPS_FOLDERS/$eventId.$extension")
-        val assetSize = fileBytes.size
-
-        if (cachedFile.exists()) {
-            val cachedFileSize = cachedFile.length().toInt()
-            if (cachedFileSize == assetSize) {
-                return cachedFile.absolutePath
-            }
+        Log.i("getMBTilesAbsoluteFilePath", "Trying to get $eventId.$extension")
+        val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
+        if (cachedFile.exists() && cachedFile.length().toInt() == fileBytes.size) {
+            cachedFile.absolutePath
+        } else {
+            Log.i("getMBTilesAbsoluteFilePath", "Caching $eventId.$extension")
+            cachedFile.outputStream().use { it.write(fileBytes) }
+            cachedFile.absolutePath
         }
-
-        cachedFile.outputStream().use { outputStream ->
-            outputStream.write(fileBytes)
-        }
-        cachedFile.absolutePath
     } catch (e: MissingResourceException) {
         Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
         null
@@ -134,22 +124,18 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
 
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val file = File(cacheDir, fileName)
-    return file.exists()
+    return File(context.cacheDir, fileName).exists()
 }
 
 actual fun cachedFilePath(fileName: String): String? {
     val context = AndroidPlatform.getContext() as Context
-    val file = File(context.cacheDir, fileName)
-    return if (file.exists()) file.toURI().path else null
+    return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
 }
 
 actual fun cacheStringToFile(fileName: String, content: String) {
     val context = AndroidPlatform.getContext() as Context
-    val cacheDir = context.cacheDir
-    val file = File(cacheDir, fileName)
-    file.writeText(content)
+    Log.i("cacheStringToFile", "Caching data to $fileName")
+    File(context.cacheDir, fileName).writeText(content)
 }
 
 // ---------------------------

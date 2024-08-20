@@ -76,30 +76,24 @@ fun WWWEvent.isRunning(): Boolean {
 
 // ---------------------------
 
-fun WWWEvent.getLocationImage(): Any? = getEventImage("location", this.id)
-fun WWWEvent.getCommunityImage(): Any? = this.community?.let { getEventImage("community", it) }
-fun WWWEvent.getCountryImage(): Any? = this.country?.let { getEventImage("country", it) }
+private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
+
+fun WWWEvent.getLocationImage(): Any? = getEventImageByType("location", this.id)
+fun WWWEvent.getCommunityImage(): Any? = getEventImageByType("community", this.community)
+fun WWWEvent.getCountryImage(): Any? = getEventImageByType("country", this.country)
 
 // ---------------------------
 
-fun WWWEvent.getTimeZone(): TimeZone {
-    return TimeZone.of(this.timeZone)
-}
+fun WWWEvent.getTimeZone(): TimeZone = TimeZone.of(this.timeZone)
 
-fun WWWEvent.getStartDateSimpleAsLocal(): String {
-    return runCatching {
-        val dateTimeString = "${this.date}T${this.startHour}:00"
-        val localDateTime = LocalDateTime.parse(dateTimeString)
-        val timezone = getTimeZone()
-        localDateTime.toInstant(timezone).toLocalDateTime(timezone).let { dateTime ->
-            "${dateTime.dayOfMonth.toString().padStart(2, '0')}/${dateTime.monthNumber.toString().padStart(2, '0')}"
-        }
-    }.getOrDefault("00/00")
-}
+fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
+    LocalDateTime.parse("${this.date}T${this.startHour}:00")
+        .toInstant(getTimeZone())
+        .toLocalDateTime(getTimeZone())
+        .let { "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}" }
+}.getOrDefault("00/00")
 
-fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime {
-    val dateTimeString = "${date}T${startHour}"
-    val localDateTime = LocalDateTime.parse(dateTimeString)
-    val timezone = getTimeZone()
-    return localDateTime.toInstant(timezone).toLocalDateTime(timezone)
-}
+fun WWWEvent.getStartDateTimeAsLocal(): LocalDateTime =
+    LocalDateTime.parse("${date}T${startHour}")
+        .toInstant(getTimeZone())
+        .toLocalDateTime(getTimeZone())
