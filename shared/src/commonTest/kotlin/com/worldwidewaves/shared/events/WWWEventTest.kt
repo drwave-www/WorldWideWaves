@@ -1,5 +1,10 @@
 package com.worldwidewaves.shared.events
 
+import kotlinx.datetime.LocalDateTime
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
 /*
  * Copyright 2024 DrWave
  *
@@ -22,6 +27,75 @@ package com.worldwidewaves.shared.events
 
 class WWWEventTest {
 
+    private val testEvent = WWWEvent(
+        id = "paris_france",
+        type = "city",
+        location = "Paris",
+        country = "france",
+        community = "europe",
+        date = "2024-03-15",
+        startHour = "18:00",
+        speed = 5,
+        description = "Experience the wave in Paris",
+        instagramAccount = "worldwidewaves.paris",
+        instagramUrl = "https://www.instagram.com/worldwidewaves.paris/",
+        instagramHashtag = "#waveparis",
+        mapBbox = "2.2241,48.8156,2.4699,48.9022",
+        mapCenter = "48.8619,2.3417",
+        mapOsmadminid = 71525,
+        mapMinzoom = 10.0,
+        mapMaxzoom = 14.0,
+        mapDefaultzoom = 13.0,
+        mapLanguage = "fr",
+        mapOsmarea = "europe/france/ile-de-france",
+        timeZone = "Europe/Paris"
+    )
+
+    @Test
+    fun testIsDone() { // TODO: correct this test
+        assertEquals(true, testEvent.isDone())
+    }
+
+    @Test
+    fun testIsSoon() { // TODO: correct this test
+        assertEquals(false, testEvent.isSoon())
+    }
+
+    @Test
+    fun testIsRunning() { // TODO: correct this test
+        assertEquals(false, testEvent.isRunning())
+    }
+
+    @Test
+    fun testGetLocationImage() {
+        assertNotNull(testEvent.getLocationImage())
+    }
+
+    @Test
+    fun testGetCommunityImage() {
+        assertNotNull(testEvent.getCommunityImage())
+    }
+
+    @Test
+    fun testGetCountryImage() {
+        assertNotNull(testEvent.getCountryImage())
+    }
+
+    @Test
+    fun testGetTimeZone() {
+        assertEquals("Europe/Paris", testEvent.getTimeZone().id)
+    }
+
+    @Test
+    fun testGetStartDateSimpleAsLocal() {
+        assertEquals("15/03", testEvent.getStartDateSimpleAsLocal())
+    }
+
+    @Test
+    fun testGetStartDateTimeAsLocal() {
+        val expectedDateTime = LocalDateTime.parse("2024-03-15T18:00")
+        assertEquals(expectedDateTime, testEvent.getStartDateTimeAsLocal())
+    }
 }
 
 // ---------------------------
