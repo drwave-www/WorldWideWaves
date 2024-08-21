@@ -82,6 +82,10 @@ open class WWWEventArea(
         return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
     }
 
+    suspend fun isPositionWithinWarming(position: Position): Boolean {
+        return getWarmingPolygons().any { isPointInPolygon(position, it) }
+    }
+
     open suspend fun getBoundingBox(): BoundingBox {
         cachedBoundingBox?.let { return it }
 

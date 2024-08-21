@@ -5,6 +5,8 @@ Next:
     - manage with polygons being multiple polygons after split
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
 
+- show loading map while not everything is ready
+
 - Large map screen
     add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds

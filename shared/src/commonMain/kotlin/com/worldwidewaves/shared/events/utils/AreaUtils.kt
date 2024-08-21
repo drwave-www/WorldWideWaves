@@ -241,3 +241,26 @@ fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
             point.lat in min(segment.start.lat, segment.end.lat)..max(segment.start.lat, segment.end.lat) &&
             point.lng in min(segment.start.lng, segment.end.lng)..max(segment.start.lng, segment.end.lng)
 }
+
+// ----------------------------------------------------------------------------
+
+fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
+    val features = polygons.map { polygon ->
+        val coordinates = polygon.map { listOf(it.lng, it.lat) }
+        """
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [${coordinates}]
+            }
+        }
+        """.trimIndent()
+    }
+    return """
+    {
+        "type": "FeatureCollection",
+        "features": [${features.joinToString(",")}]
+    }
+    """.trimIndent()
+}
