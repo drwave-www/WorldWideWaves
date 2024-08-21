@@ -118,13 +118,20 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
         Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
         null
     }
+
 }
 
 // ---------------------------
 
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
-    return File(context.cacheDir, fileName).exists()
+    val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
+    return if (isDevelopmentMode) {
+        Log.i("cachedFileExists", "Development mode (not cached): $fileName")
+        false
+    } else {
+        File(context.cacheDir, fileName).exists()
+    }
 }
 
 actual fun cachedFilePath(fileName: String): String? {

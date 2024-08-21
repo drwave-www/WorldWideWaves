@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
@@ -78,16 +79,17 @@ class WWWEventMap(
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
 
-        //if (cachedFileExists(styleFilename)) { // TODO: BUGFIX: for testing, better manage cache
-        //    return cachedFileUri(styleFilename)
-        //}
+        val styleFilename = "style-${event.id}.json"
+        if (cachedFileExists(styleFilename)) { // TODO: BUGFIX: for testing, better manage cache
+            return cachedFilePath(styleFilename)
+        }
 
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
-        val styleFilename = "style-${event.id}.json"
 
         val warmingGeoJsonFilename = "warming-${event.id}.geojson"
         val warmingPolygons = event.area.getWarmingPolygons()
         val warmingGeoJson = convertPolygonsToGeoJson(warmingPolygons)
+
         cacheStringToFile(warmingGeoJsonFilename, warmingGeoJson)
         val warmingGeoJsonFilePath = cachedFilePath(warmingGeoJsonFilename)
 

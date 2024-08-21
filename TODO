@@ -1,10 +1,7 @@
 
 Next:
 
-- warming zone
-    - manage with polygons being multiple polygons after split
-    - add generated geojson from original one using one end longitude for the start of the wave (from the right)
-
+- say if we are in warming zone or not
 - show loading map while not everything is ready
 
 - Large map screen
@@ -19,7 +16,7 @@ Next:
 
 - map styling
 
-- wave screen
+- wave screen + warming procedure
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
