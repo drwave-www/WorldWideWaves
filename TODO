@@ -1,9 +1,8 @@
 
 Next:
 
-- ajouter des logs dans shared avec Napier
-- warming zone + affichage progression wave
-    - show wave progression layer on map
+- warming zone
+    - manage with polygons being multiple polygons after split
     - add generated geojson from original one using one end longitude for the start of the wave (from the right)
 
 - Large map screen

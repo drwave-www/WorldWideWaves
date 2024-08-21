@@ -20,6 +20,7 @@
     "mapDefaultzoom": 13,
     "mapLanguage": "fr",
     "mapOsmarea": "europe/france/ile-de-france",
+    "mapWarmingZoneLongitude": 2.39492,
     "timeZone": "Europe/Paris"
   },
   {
@@ -43,6 +44,7 @@
     "mapDefaultzoom": 13,
     "mapLanguage": "pt",
     "mapOsmarea": "south-america/brazil/sudeste",
+    "mapWarmingZoneLongitude": 0,
     "timeZone": "America/Sao_Paulo"
   },
   {
@@ -65,6 +67,7 @@
     "mapDefaultzoom": 5,
     "mapLanguage": "en",
     "mapOsmarea": "north-america/us",
+    "mapWarmingZoneLongitude": 0,
     "timeZone": "America/New_York"
   },
   {
@@ -86,6 +89,7 @@
     "mapDefaultzoom": 2,
     "mapLanguage": "en",
     "mapOsmarea": "planet",
+    "mapWarmingZoneLongitude": 0,
     "timeZone": "UTC"
   }
 ]

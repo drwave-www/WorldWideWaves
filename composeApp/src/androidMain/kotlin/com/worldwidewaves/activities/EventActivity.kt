@@ -84,12 +84,12 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
-import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein

@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
