@@ -63,8 +63,8 @@ class WWWGlobals {
         const val DIM_EXT_TABBAR_HEIGHT = 45
 
         val DIM_BACK_PADDING = listOf(10, 10, 10, 15)
-        const val DIM_BACK_ARROW_FONTSIZE = 16
-        const val DIM_BACK_TEXT_FONTSIZE = 24
+        const val DIM_BACK_FONTSIZE = 18
+        const val DIM_BACK_EVENT_LOCATION_FONTSIZE = 24
 
         const val DIM_EVENT_DESC_FONTSIZE = 16
         const val DIM_EVENT_DATE_FONTSIZE = 90
