@@ -6,13 +6,23 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -23,6 +33,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
@@ -63,7 +74,8 @@ import java.io.File
 
 class EventMap(
     private val event: WWWEvent,
-    private val onLocationUpdate: (LatLng) -> Unit
+    private val onMapLoaded: () -> Unit = {},
+    private val onLocationUpdate: (LatLng) -> Unit = {}
 ) {
 
     enum class CameraPosition {
@@ -81,6 +93,7 @@ class EventMap(
         val configuration = LocalConfiguration.current
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
+        var mapLoaded by remember { mutableStateOf(false) }
 
         // Request GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
@@ -103,6 +116,9 @@ class EventMap(
 
 //                        map.setMinZoomPreference(event.mapMinzoom)
 //                        map.setMaxZoomPreference(event.mapMaxzoom)
+
+                        onMapLoaded()
+                        mapLoaded = true
                     }
                 }
             }
@@ -112,10 +128,20 @@ class EventMap(
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         // The map view
-        AndroidView(
-            modifier = modifier.fillMaxWidth().height(calculatedHeight),
-            factory = { mapView }
-        )
+        Box(modifier.fillMaxWidth().height(calculatedHeight)) {
+            if (!mapLoaded) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = extendedLight.quinary.color,
+                    modifier = Modifier.align(Alignment.Center).size(calculatedHeight/2)
+                )
+            }
+            AndroidView(
+                factory = { mapView },
+                modifier = Modifier.fillMaxSize()
+                .alpha(if (mapLoaded) 1f else 0f)
+            )
+        }
     }
 
     // -------------------------

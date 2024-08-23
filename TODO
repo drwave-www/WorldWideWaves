@@ -1,8 +1,6 @@
 
 Next:
 
-- show loading map while not everything is ready
-
 - Large map screen
     add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
