@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back

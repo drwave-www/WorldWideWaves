@@ -6,10 +6,8 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,15 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
@@ -75,8 +70,14 @@ import java.io.File
 class EventMap(
     private val event: WWWEvent,
     private val onMapLoaded: () -> Unit = {},
-    private val onLocationUpdate: (LatLng) -> Unit = {}
+    private val onLocationUpdate: (LatLng) -> Unit = {},
+    private val onMapClick: ((latitude: Double, longitude: Double) -> Unit)? = null,
+    private val mapConfig: EventMapConfig = EventMapConfig()
 ) {
+
+    data class EventMapConfig(
+        val initialCameraPosition: CameraPosition? = EventMap.CameraPosition.BOUNDS
+    )
 
     enum class CameraPosition {
         BOUNDS,
@@ -87,10 +88,8 @@ class EventMap(
 
     @Composable
     fun Screen(
-        modifier: Modifier,
-        initialCameraPosition: CameraPosition? = CameraPosition.BOUNDS,
+        modifier: Modifier
     ) {
-        val configuration = LocalConfiguration.current
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         var mapLoaded by remember { mutableStateOf(false) }
@@ -103,7 +102,7 @@ class EventMap(
             val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
             mapView.getMapAsync { map ->
 
-                setCameraPosition(initialCameraPosition, map)
+                setCameraPosition(mapConfig.initialCameraPosition, map)
 
                 styleUri?.let { uri ->
                     map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
@@ -112,6 +111,11 @@ class EventMap(
                         // Add a marker for the user's position
                         if (hasLocationPermission) {
                             addLocationMarkerToMap(map, context, style)
+                        }
+
+                        map.addOnMapClickListener { point ->
+                            onMapClick?.invoke(point.latitude, point.longitude)
+                            true
                         }
 
 //                        map.setMinZoomPreference(event.mapMinzoom)
@@ -124,22 +128,20 @@ class EventMap(
             }
         }
 
-        // Calculate height based on aspect ratio and available width
-        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
-
         // The map view
-        Box(modifier.fillMaxWidth().height(calculatedHeight)) {
+        BoxWithConstraints(modifier) {
             if (!mapLoaded) {
+                val size = maxWidth / 3
                 CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = extendedLight.quinary.color,
-                    modifier = Modifier.align(Alignment.Center).size(calculatedHeight/2)
+                    modifier = Modifier.align(Alignment.Center).size(size)
                 )
             }
             AndroidView(
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize()
-                .alpha(if (mapLoaded) 1f else 0f)
+                    .alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }

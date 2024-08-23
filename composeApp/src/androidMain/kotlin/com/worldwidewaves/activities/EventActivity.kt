@@ -20,6 +20,7 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,6 +55,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,6 +77,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DESC_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_BORDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERROUND
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
@@ -118,10 +122,16 @@ class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
+        val context = LocalContext.current
         val eventDate = event.getStartDateSimpleAsLocal()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
+
+
+        // Calculate height based on aspect ratio and available width
+        val configuration = LocalConfiguration.current
+        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,13 +141,20 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            EventMap(event, onLocationUpdate = { newLocation ->
-                updateGeolocText(event,
-                    newLocation, lastKnownLocation,
-                    coroutineScope
-                ) { geolocText = it }
-                lastKnownLocation = newLocation
-            }).Screen(modifier = Modifier.fillMaxWidth())
+            EventMap(event,
+                onLocationUpdate = { newLocation ->
+                    updateGeolocText(event,
+                        newLocation, lastKnownLocation,
+                        coroutineScope
+                    ) { geolocText = it }
+                    lastKnownLocation = newLocation
+                },
+                onMapClick = { _, _ ->
+                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
+                        putExtra("eventId", event.id)
+                    })
+                }
+            ).Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
             GeolocalizeMe(geolocText)
             EventNumbers(event)
             WWWEventSocialNetworks(event)
@@ -249,13 +266,15 @@ fun DividerLine() {
 
 @Composable
 private fun ButtonWave(event: WWWEvent) {
+    // val context = LocalContext.current
+
     Surface(
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
             .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
             .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
             .clickable(onClick = {
-                /* TODO: click on Wave button */
+                // TODO: Wave screen
             })
     ) {
         Text(
