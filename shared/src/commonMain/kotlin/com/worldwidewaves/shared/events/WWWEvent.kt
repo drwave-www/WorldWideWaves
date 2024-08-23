@@ -53,6 +53,7 @@ data class WWWEvent(
     val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
     val mapOsmarea: String,
+    val mapWarmingZoneLongitude: Double,
     val timeZone: String
 ) {
     @Transient var map = WWWEventMap(this)

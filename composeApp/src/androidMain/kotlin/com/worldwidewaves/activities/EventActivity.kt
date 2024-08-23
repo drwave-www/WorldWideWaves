@@ -84,14 +84,15 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
-import com.worldwidewaves.shared.events.Position
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
+import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.generated.resources.wave_end_time
@@ -153,17 +154,11 @@ private fun updateGeolocText(
 ) {
     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
         coroutineScope.launch {
-            val newGeolocText = if (
-                event.area.isPositionWithin(
-                    Position(
-                        newLocation.latitude,
-                        newLocation.longitude
-                    )
-                )
-            ) {
-                ShRes.string.geoloc_yourein
-            } else {
-                ShRes.string.geoloc_yourenotin
+            val currentPosition = Position(newLocation.latitude, newLocation.longitude)
+            val newGeolocText = when {
+                event.area.isPositionWithinWarming(currentPosition) -> ShRes.string.geoloc_warm_in
+                event.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
+                else -> ShRes.string.geoloc_yourenotin
             }
             onGeolocTextUpdated(newGeolocText)
         }

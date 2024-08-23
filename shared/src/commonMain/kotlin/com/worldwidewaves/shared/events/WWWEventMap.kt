@@ -22,7 +22,9 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.cacheStringToFile
+import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
@@ -76,21 +78,27 @@ class WWWEventMap(
 
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
-        val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
+
         val styleFilename = "style-${event.id}.json"
+        if (cachedFileExists(styleFilename)) { // TODO: BUGFIX: for testing, better manage cache
+            return cachedFilePath(styleFilename)
+        }
 
-        //if (cachedFileExists(styleFilename)) { // TODO: for testing, better manage cache
-        //    return cachedFileUri(styleFilename)
-        //}
+        val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
 
-        // TODO : generate the start area polygon from the geojson file, see below for code
+        val warmingGeoJsonFilename = "warming-${event.id}.geojson"
+        val warmingPolygons = event.area.getWarmingPolygons()
+        val warmingGeoJson = convertPolygonsToGeoJson(warmingPolygons)
+
+        cacheStringToFile(warmingGeoJsonFilename, warmingGeoJson)
+        val warmingGeoJsonFilePath = cachedFilePath(warmingGeoJsonFilename)
 
         val newFileStr = mapDataProvider.geoMapStyleData()
             .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
             .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
+            .replace("___GEOJSON_WARMING_URI___", "file:///$warmingGeoJsonFilePath")
 
         cacheStringToFile(styleFilename, newFileStr)
-
         return cachedFilePath(styleFilename)
     }
 

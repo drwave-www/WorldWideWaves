@@ -10,6 +10,10 @@
     "geojson": {
       "data": "___GEOJSON_URI___",
       "type": "geojson"
+    },
+    "geojsonwarming": {
+      "data": "___GEOJSON_WARMING_URI___",
+      "type": "geojson"
     }
   },
   "layers": [
@@ -21,7 +25,25 @@
       }
     },
     {
-      "id": "adminboundaryartea",
+      "id": "warmingboundaryarea",
+      "source": "geojsonwarming",
+      "type": "fill",
+      "paint": {
+        "fill-color": "#a60c32",
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "warmingboundaryline",
+      "source": "geojsonwarming",
+      "type": "line",
+      "paint": {
+        "line-color": "#66000a",
+        "line-width": 5
+      }
+    },
+    {
+      "id": "waveboundaryarea",
       "source": "geojson",
       "type": "fill",
       "paint": {
@@ -30,12 +52,12 @@
       }
     },
     {
-      "id": "adminboundaryline",
+      "id": "waveboundaryline",
       "source": "geojson",
       "type": "line",
       "paint": {
-        "line-color": "#5DB075",
-        "line-width": 10
+        "line-color": "#1e3b26",
+        "line-width": 5
       }
     },
     {

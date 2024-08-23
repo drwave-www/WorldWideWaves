@@ -48,6 +48,7 @@ class WWWEventTest {
         mapDefaultzoom = 13.0,
         mapLanguage = "fr",
         mapOsmarea = "europe/france/ile-de-france",
+        mapWarmingZoneLongitude = 2.3417,
         timeZone = "Europe/Paris"
     )
 
@@ -151,7 +152,7 @@ fun createRandomWWWEvent(id: String): WWWEvent {
     )
     val timeZones = listOf("Europe/Paris", "America/Sao_Paulo", "America/New_York", "Asia/Tokyo", "Australia/Sydney")
 
-    return WWWEvent(
+    return WWWEvent( // TODO: improve this random data generation
         id = id,
         type = types.random(),
         location = locations.random(),
@@ -172,6 +173,7 @@ fun createRandomWWWEvent(id: String): WWWEvent {
         mapDefaultzoom = 13.0,
         mapLanguage = mapLanguages.random(),
         mapOsmarea = mapOsmareas.random(),
+        mapWarmingZoneLongitude = mapCenters.random().split(",")[1].toDouble(),
         timeZone = timeZones.random()
     )
 }

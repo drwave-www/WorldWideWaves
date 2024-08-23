@@ -1,11 +1,6 @@
 
 Next:
 
-- ajouter des logs dans shared avec Napier
-- warming zone + affichage progression wave
-    - show wave progression layer on map
-    - add generated geojson from original one using one end longitude for the start of the wave (from the right)
-
 - Large map screen
     add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
@@ -18,7 +13,7 @@ Next:
 
 - map styling
 
-- wave screen
+- wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
