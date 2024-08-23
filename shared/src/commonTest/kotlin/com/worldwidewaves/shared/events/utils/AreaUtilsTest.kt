@@ -41,6 +41,39 @@ import kotlin.test.assertTrue
 
 class AreaUtilsTest {
 
+    /**
+     * Test points inside and outside a simple square polygon
+     *
+     * This test validates the correctness of the `isPointInPolygon` function by testing both an inside point
+     * and an outside point relative to a simple square polygon.
+     *
+     * The square polygon is defined with vertices at the following coordinates:
+     * (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
+     *
+     * Coordinate system:
+     *
+     *      ^ Latitude (Y)
+     *    3 |
+     *      |
+     *      |
+     *    2 |
+     *      |           O
+     *      |
+     *    1 o-------o
+     *      |       |
+     *      |   X   |
+     *      |       |
+     *    0 o-------o-------o-------o---> Longitude (X)
+     *      0       1       2       3
+     *
+     * In this system:
+     * - The **polygon** is a square with vertices at (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), and (1.0, 0.0).
+     * - The **inside point** (X) is at (0.5, 0.5), which lies within the bounds of the polygon.
+     * - The **outside point** (O) is at (2.0, 2.0), outside the polygon.
+     *
+     * The function first checks if the inside point is correctly identified as within the polygon,
+     * and then verifies that the outside point is correctly identified as outside the polygon.
+     */
     @Test
     fun testIsPointInSimplePolygon() {
         val polygon = listOf(
@@ -71,6 +104,37 @@ class AreaUtilsTest {
         )
     }
 
+    /**
+     * Test a point outside a simple square polygon
+     *
+     * This test validates the correctness of the `isPointInPolygon` function by testing a point
+     * that is located outside a simple square polygon. The polygon is defined as a square,
+     * and the point is located outside of this polygon above the square.
+     *
+     * The square polygon is defined by the following coordinates:
+     * (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
+     *
+     * Coordinate system:
+     *
+     *      ^ Latitude (Y)
+     *    3 |
+     *      |
+     *      |
+     *    2 |   O
+     *      |
+     *    1 o-------o
+     *      |       |
+     *      |       |
+     *      |       |
+     *    0 o-------o-------o-------o---> Longitude (X)
+     *      0       1       2       3
+     *
+     * In this system:
+     * - The **polygon** is a simple square with vertices at (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), and (1.0, 0.0).
+     * - The **point** is at (1.5, 2.0), which is located outside of the polygon.
+     *
+     * The function asserts that the point is correctly identified as outside the polygon.
+     */
     @Test
     fun testIsPointOutsideSimplePolygon() {
         val point = Position(1.5, 0.5)
@@ -83,6 +147,38 @@ class AreaUtilsTest {
         assertFalse(isPointInPolygon(point, polygon))
     }
 
+    /**
+     * Test a point inside a concave polygon
+     *
+     * This test checks whether the `isPointInPolygon` function can correctly identify a point
+     * located inside a concave polygon. The polygon in this test forms a simple concave shape,
+     * where one vertex indents into the polygon, creating a concave structure.
+     *
+     * The concave polygon is defined by the following coordinates:
+     * (0.0, 0.0), (0.0, 1.0), (0.5, 0.5), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
+     *
+     * Coordinate system:
+     *
+     *      ^ Latitude (Y)
+     *    3 |
+     *      |
+     *      |
+     *    2 |
+     *      |
+     *      |
+     *    1 o-------o
+     *      |     /
+     *      |   X
+     *      |     \
+     *    0 o-------o-------o-------o---> Longitude (X)
+     *      0       1       2       3
+     *
+     * In this system:
+     * - The **concave polygon** is formed by the vertices, creating a concave "V" shape.
+     * - The **point** is at (0.5, 0.5), which is inside the concave part of the polygon.
+     *
+     * The function tests whether the point is correctly identified as being inside the concave polygon.
+     */
     @Test
     fun testIsPointInConcavePolygon() {
         val point = Position(0.5, 0.5)
@@ -96,6 +192,7 @@ class AreaUtilsTest {
         )
         assertTrue(isPointInPolygon(point, polygon))
     }
+
 
     @Test
     fun testIsPointOutsideConcavePolygon() {

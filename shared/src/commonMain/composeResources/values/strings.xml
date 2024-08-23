@@ -22,6 +22,7 @@
     <string name="geoloc_error">Unable to locate you</string>
     <string name="geoloc_yourein">YOUR ARE IN the area!</string>
     <string name="geoloc_yourenotin">YOU ARE NOT in the area!</string>
+    <string name="geoloc_warm_in">YOUR ARE IN the area and will warm!</string>
     <string name="geoloc_desc">FAQ</string>
 
     <string name="be_waved">be waved!</string>

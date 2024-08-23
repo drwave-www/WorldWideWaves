@@ -1,7 +1,6 @@
 
 Next:
 
-- say if we are in warming zone or not
 - show loading map while not everything is ready
 
 - Large map screen
@@ -16,7 +15,7 @@ Next:
 
 - map styling
 
-- wave screen + warming procedure
+- wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
