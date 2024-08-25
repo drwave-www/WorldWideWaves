@@ -60,7 +60,9 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
  * limitations under the License.
  */
 
-abstract class AbstractEventBackActivity : MainActivity() {
+abstract class AbstractEventBackActivity(
+    private val activateInfiniteScroll : Boolean = true
+) : MainActivity() {
 
     private val wwwEvents: WWWEvents by inject()
 
@@ -138,11 +140,11 @@ abstract class AbstractEventBackActivity : MainActivity() {
                 }
 
                 // Content Event screen
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                ) { Screen(modifier = Modifier, event) }
+                val screenModifier = Modifier.fillMaxSize()
+                if (activateInfiniteScroll)
+                    screenModifier.verticalScroll(scrollState)
+
+                Box(modifier = screenModifier) { Screen(modifier = Modifier, event) }
 
             }
         } else { // Error, should not occur

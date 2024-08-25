@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,8 +29,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -46,6 +50,7 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import java.io.File
+import kotlin.math.log2
 
 /*
  * Copyright 2024 DrWave
@@ -76,10 +81,11 @@ class EventMap(
 ) {
 
     data class EventMapConfig(
-        val initialCameraPosition: CameraPosition? = EventMap.CameraPosition.BOUNDS
+        val initialCameraPosition: MapCameraPosition? = MapCameraPosition.BOUNDS
     )
 
-    enum class CameraPosition {
+    enum class MapCameraPosition {
+        WINDOW,
         BOUNDS,
         DEFAULT_CENTER
     }
@@ -87,15 +93,17 @@ class EventMap(
     // -------------------------
 
     @Composable
-    fun Screen(
-        modifier: Modifier
-    ) {
+    fun Screen(modifier: Modifier) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         var mapLoaded by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
 
         // Request GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
+
+        // DEBUG
+        mapLoaded = true
 
         // Setup Map Style and properties
         LaunchedEffect(Unit) {
@@ -110,7 +118,7 @@ class EventMap(
 
                         // Add a marker for the user's position
                         if (hasLocationPermission) {
-                            addLocationMarkerToMap(map, context, style)
+                            addLocationMarkerToMap(map, context, coroutineScope, style)
                         }
 
                         map.addOnMapClickListener { point ->
@@ -118,8 +126,15 @@ class EventMap(
                             true
                         }
 
+                        // TODO: determine the accurate min and max zoom values
 //                        map.setMinZoomPreference(event.mapMinzoom)
 //                        map.setMaxZoomPreference(event.mapMaxzoom)
+                        // TODO: determine the accurate bounds
+//                        val (swLng, swLat, neLng, neLat) = event.map.getBbox()
+//                        map.setLatLngBoundsForCameraTarget(LatLngBounds.Builder()
+//                            .include(LatLng(swLat, swLng)) // Southwest corner
+//                            .include(LatLng(neLat, neLng)) // Northeast corner
+//                            .build())
 
                         onMapLoaded()
                         mapLoaded = true
@@ -129,7 +144,7 @@ class EventMap(
         }
 
         // The map view
-        BoxWithConstraints(modifier) {
+        BoxWithConstraints(modifier = modifier) {
             if (!mapLoaded) {
                 val size = maxWidth / 3
                 CircularProgressIndicator(
@@ -140,7 +155,8 @@ class EventMap(
             }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .alpha(if (mapLoaded) 1f else 0f)
             )
         }
@@ -149,11 +165,11 @@ class EventMap(
     // -------------------------
 
     private fun setCameraPosition(
-        initialCameraPosition: CameraPosition?,
+        initialCameraPosition: MapCameraPosition?,
         map: MapLibreMap
     ) {
         when (initialCameraPosition) {
-            CameraPosition.DEFAULT_CENTER -> {
+            MapCameraPosition.DEFAULT_CENTER -> {
                 val (cLat, cLng) = event.map.getCenter()
                 map.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
@@ -163,13 +179,44 @@ class EventMap(
                 )
             }
 
-            CameraPosition.BOUNDS -> {
+            MapCameraPosition.BOUNDS -> {
                 val (swLng, swLat, neLng, neLat) = event.map.getBbox()
                 val bounds = LatLngBounds.Builder()
                     .include(LatLng(swLat, swLng)) // Southwest corner
                     .include(LatLng(neLat, neLng)) // Northeast corner
                     .build()
                 map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            }
+
+            MapCameraPosition.WINDOW -> { // TODO: calcul is wrong
+                val (swLng, swLat, neLng, neLat) = event.map.getBbox()
+                val bounds = LatLngBounds.Builder()
+                    .include(LatLng(swLat, swLng)) // Southwest corner
+                    .include(LatLng(neLat, neLng)) // Northeast corner
+                    .build()
+
+                // Calculate the aspect ratio of the map view
+                val mapViewWidth = map.width.toDouble()
+                val mapViewHeight = map.height.toDouble()
+                val mapViewAspectRatio = mapViewWidth / mapViewHeight
+
+                // Calculate the aspect ratio of the bounding box
+                val boundsWidth = bounds.longitudeEast - bounds.longitudeWest
+                val boundsHeight = bounds.latitudeNorth - bounds.latitudeSouth
+                val boundsAspectRatio = boundsWidth / boundsHeight
+
+                // Adjust the zoom level to fit the bounding box within the map view
+                val newZoom = if (mapViewAspectRatio > boundsAspectRatio) {
+                    // Fit to height
+                    val heightZoom = map.cameraPosition.zoom + log2(mapViewHeight / boundsHeight)
+                    heightZoom
+                } else {
+                    // Fit to width
+                    val widthZoom = map.cameraPosition.zoom + log2(mapViewWidth / boundsWidth)
+                    widthZoom
+                }
+
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(bounds.center, newZoom))
             }
 
             null -> {}
@@ -182,6 +229,7 @@ class EventMap(
     private fun addLocationMarkerToMap(
         map: MapLibreMap,
         context: Context,
+        coroutineScope: CoroutineScope,
         style: Style
     ) {
         map.locationComponent.activateLocationComponent(
@@ -195,12 +243,28 @@ class EventMap(
             object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult?) {
                     result?.lastLocation?.let { location ->
+
                         onLocationUpdate(
                             LatLng(
                                 location.latitude,
                                 location.longitude
                             )
                         )
+
+                        // Follow user while he's within bounds
+                        if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                            coroutineScope.launch {
+                                if (event.area.isPositionWithin(Position(location.latitude, location.longitude))) {
+                                    map.animateCamera(
+                                        CameraUpdateFactory.newCameraPosition(
+                                            CameraPosition.Builder()
+                                                .target(LatLng(location.latitude, location.longitude))
+                                                .build()
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -241,51 +305,54 @@ class EventMap(
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
+    // ------------------------
+
+    /**
+     * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
+     * source : https://gist.github.com/PiotrPrus/d65378c36b0a0c744e647946f344103c
+     */
+    @Composable
+    fun rememberMapViewWithLifecycle(): MapView {
+        val context = LocalContext.current
+
+        val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
+        maplibreMapOptions.apply {
+            camera(CameraPosition.Builder().bearing(0.0).tilt(0.0).build())
+
+            localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
+
+            compassEnabled(true)
+            compassFadesWhenFacingNorth(true)
+
+            val activateMapGestures = mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+
+            zoomGesturesEnabled(activateMapGestures)
+            scrollGesturesEnabled(activateMapGestures)
+            horizontalScrollGesturesEnabled(activateMapGestures)
+            rotateGesturesEnabled(activateMapGestures)
+            tiltGesturesEnabled(activateMapGestures)
+            doubleTapGesturesEnabled(activateMapGestures)
+        }
+        MapLibre.getInstance(context)
+
+        val mapView = remember { MapView(context, maplibreMapOptions) }
+
+        // Makes MapView follow the lifecycle of this composable
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        DisposableEffect(lifecycle, mapView) {
+            val lifecycleObserver = getMapLifecycleObserver(mapView)
+            lifecycle.addObserver(lifecycleObserver)
+            onDispose {
+                lifecycle.removeObserver(lifecycleObserver)
+            }
+        }
+
+        return mapView
+    }
+
 }
 
 // -- Use the MapLibre MapView as a composable --------------------------------
-
-/**
- * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
- * source : https://gist.github.com/PiotrPrus/d65378c36b0a0c744e647946f344103c
- */
-@Composable
-fun rememberMapViewWithLifecycle(): MapView {
-    val context = LocalContext.current
-
-    val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
-    maplibreMapOptions.apply {
-        camera(CameraPosition.Builder().bearing(0.0).tilt(0.0).build())
-
-        localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
-
-        compassEnabled(true)
-        compassFadesWhenFacingNorth(true)
-
-        // TODO: depending on map type / screen, to configure
-        zoomGesturesEnabled(false)
-        scrollGesturesEnabled(false)
-        horizontalScrollGesturesEnabled(false)
-        rotateGesturesEnabled(false)
-        tiltGesturesEnabled(false)
-        doubleTapGesturesEnabled(false)
-    }
-    MapLibre.getInstance(context)
-
-    val mapView = remember { MapView(context, maplibreMapOptions) }
-
-    // Makes MapView follow the lifecycle of this composable
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(lifecycle, mapView) {
-        val lifecycleObserver = getMapLifecycleObserver(mapView)
-        lifecycle.addObserver(lifecycleObserver)
-        onDispose {
-            lifecycle.removeObserver(lifecycleObserver)
-        }
-    }
-
-    return mapView
-}
 
 private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->

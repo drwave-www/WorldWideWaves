@@ -22,20 +22,19 @@ package com.worldwidewaves.activities
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.events.WWWEvent
 
-class EventFullMapActivity : AbstractEventBackActivity() {
+class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
-        Box(modifier = modifier.fillMaxWidth()) {
-            EventMap(event).Screen(
-                modifier = Modifier.fillMaxSize()
-            )
+        Box(modifier = modifier) {
+            EventMap(event, mapConfig = EventMap.EventMapConfig(
+                initialCameraPosition = EventMap.MapCameraPosition.WINDOW
+            )).Screen(modifier = Modifier.fillMaxSize())
         }
     }
 
