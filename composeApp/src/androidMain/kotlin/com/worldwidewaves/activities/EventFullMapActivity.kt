@@ -40,6 +40,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
             EventMap(event, mapConfig = EventMap.EventMapConfig(
                 initialCameraPosition = EventMap.MapCameraPosition.WINDOW
             )).Screen(modifier = Modifier.fillMaxSize())
+
             ButtonWave(event = event, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
         }
     }
