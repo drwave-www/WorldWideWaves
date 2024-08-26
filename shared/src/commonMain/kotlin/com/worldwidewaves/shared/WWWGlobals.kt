@@ -24,6 +24,9 @@ class WWWGlobals {
 
     companion object {
 
+        // -- URL Constants --
+        const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
+
         // -- FS Constants --
 
         const val FS_DATASTORE_FOLDER = "datastore"
@@ -32,7 +35,10 @@ class WWWGlobals {
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
 
         const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
-        const val FS_MAPS_STYLE = "$FS_MAPS_FOLDER/mapstyle.json"
+
+        const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
+        const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
+        const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
         const val WAVE_REFRESH_INTERVAL = 10000L // ms
@@ -40,7 +46,7 @@ class WWWGlobals {
         // -- UI Constants --
 
         const val CONST_SPLASH_MIN_DURATION =  2000 // ms
-        const val CONST_TIMER_GPS_UPDATE = 1500 // ms
+        const val CONST_TIMER_GPS_UPDATE = 3000 // ms
 
         // ----------------------------
 
@@ -63,8 +69,8 @@ class WWWGlobals {
         const val DIM_EXT_TABBAR_HEIGHT = 45
 
         val DIM_BACK_PADDING = listOf(10, 10, 10, 15)
-        const val DIM_BACK_ARROW_FONTSIZE = 16
-        const val DIM_BACK_TEXT_FONTSIZE = 24
+        const val DIM_BACK_FONTSIZE = 18
+        const val DIM_BACK_EVENT_LOCATION_FONTSIZE = 24
 
         const val DIM_EVENT_DESC_FONTSIZE = 16
         const val DIM_EVENT_DATE_FONTSIZE = 90

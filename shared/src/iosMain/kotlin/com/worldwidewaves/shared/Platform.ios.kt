@@ -33,6 +33,8 @@ import platform.Foundation.create
 import platform.Foundation.writeToFile
 import platform.UIKit.UIDevice
 
+// TODO : Check https://skie.touchlab.co/
+
 class IOSPlatform : WWWPlatform {
     override val name: String =
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
@@ -72,7 +74,7 @@ actual fun cacheStringToFile(fileName: String, content: String) {
     nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
 }
 
-private fun getCacheDir(): String {
+actual fun getCacheDir(): String {
     return NSSearchPathForDirectoriesInDomains(
         NSCachesDirectory,
         NSUserDomainMask,
@@ -81,5 +83,9 @@ private fun getCacheDir(): String {
 }
 
 actual fun getLocalDatetime(): LocalDateTime {
+    TODO("Not yet implemented")
+}
+
+actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
 }

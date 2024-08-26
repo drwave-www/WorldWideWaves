@@ -19,14 +19,16 @@
 # limitations under the License.
 #
 
+DEST_DIR=../../shared/src/commonMain/composeResources/files/maps
+
 cd "$(dirname "$0")" # always work from executable folder
 
-set -x
+#set -x
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 
-# ----------
+# -----------------------------------------------------------------------------
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
@@ -35,12 +37,9 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
   echo
 
   OSMADMINID=$(conf $event mapOsmadminid)
-  echo $OSMADMINID
 
-
-  DEST_GEOJSON=../../shared/src/commonMain/composeResources/files/maps/$event.geojson
+  DEST_GEOJSON=$DEST_DIR/$event.geojson
   wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson
   cp data/$event.geojson $DEST_GEOJSON
-
 
 done

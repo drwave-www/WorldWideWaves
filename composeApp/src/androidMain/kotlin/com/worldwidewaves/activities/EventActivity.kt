@@ -20,9 +20,9 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,11 +34,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,11 +52,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
@@ -74,15 +75,13 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DESC_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_BORDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERROUND
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
@@ -96,17 +95,17 @@ import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.generated.resources.wave_end_time
-import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
 import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
-import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -118,10 +117,16 @@ class EventActivity : AbstractEventBackActivity() {
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
+        val context = LocalContext.current
         val eventDate = event.getStartDateSimpleAsLocal()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
+
+
+        // Calculate height based on aspect ratio and available width
+        val configuration = LocalConfiguration.current
+        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,13 +136,20 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            EventMap(event, onLocationUpdate = { newLocation ->
-                updateGeolocText(event,
-                    newLocation, lastKnownLocation,
-                    coroutineScope
-                ) { geolocText = it }
-                lastKnownLocation = newLocation
-            }).Screen(modifier = Modifier.fillMaxWidth())
+            EventMap(event,
+                onLocationUpdate = { newLocation ->
+                    updateGeolocText(event,
+                        newLocation, lastKnownLocation,
+                        coroutineScope
+                    ) { geolocText = it }
+                    lastKnownLocation = newLocation
+                },
+                onMapClick = { _, _ ->
+                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
+                        putExtra("eventId", event.id)
+                    })
+                }
+            ).Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
             GeolocalizeMe(geolocText)
             EventNumbers(event)
             WWWEventSocialNetworks(event)
@@ -248,37 +260,9 @@ fun DividerLine() {
 // ----------------------------
 
 @Composable
-private fun ButtonWave(event: WWWEvent) {
-    Surface(
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
-            .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
-            .clickable(onClick = {
-                /* TODO: click on Wave button */
-            })
-    ) {
-        Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentHeight(align = Alignment.CenterVertically),
-            text = stringResource(ShRes.string.wave_now).uppercase(),
-            color = quinaryLight,
-            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Black,
-            fontFamily = displayFontFamily
-        )
-    }
-}
-
-// ----------------------------
-
-@Composable
 private fun WWWEventSocialNetworks(event: WWWEvent) {
     WWWSocialNetworks(
         instagramAccount = event.instagramAccount,
-        instagramUrl = event.instagramUrl,
         instagramHashtag = event.instagramHashtag
     )
 }
@@ -322,7 +306,7 @@ private fun EventNumbers(event: WWWEvent) {
     LaunchedEffect(event) {
         var lastProgressionValue = ""
         coroutineScope.launch {
-            val waveNumbers = event.wave.getAllNumbers()
+            val waveNumbers = withContext(Dispatchers.IO) { event.wave.getAllNumbers() }
             eventNumbers.clear()
             eventNumbers.putAll(mapOf(
                     ShRes.string.wave_speed to waveNumbers.waveSpeed,

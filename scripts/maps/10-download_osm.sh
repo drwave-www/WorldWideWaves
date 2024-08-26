@@ -36,7 +36,10 @@ mkdir -p ./data
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 
-# ----------
+# -----------------------------------------------------------------------------
+
+# DEBUG
+EVENTS=paris_france
 
 for event in $EVENTS; do # Download OSM area as PBF file 
                          # and generates a dedicated PBF file for corresponding BBOX
@@ -51,7 +54,7 @@ for event in $EVENTS; do # Download OSM area as PBF file
   [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREA -o $SPBF
 
   echo "-- Extract bbox $BBOX from area $AREA.."
-  [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF
+  [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics
 
   echo "-- Generates OpenMapTiles environment for event $event"
   tpl $event templates/.env-template data/.env-${event}

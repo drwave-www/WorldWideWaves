@@ -72,13 +72,24 @@ class WWWEvents(
 
     // ---------------------------
 
+    // Job to manage the coroutine for loading events
     private var loadJob: Job? = null
+
+    // JSON decoder configured to ignore unknown keys in the JSON data
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
 
+    /**
+     * Initiates the loading of events if not already started.
+     * Uses the apply scope function to return the current instance.
+     */
     private fun loadEvents() = apply {
         loadJob = loadJob ?: loadEventsJob()
     }
 
+    /**
+     * Launches a coroutine to load events from the configuration provider.
+     * The coroutine runs on the IO dispatcher.
+     */
     private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
         val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
         val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
@@ -106,12 +117,23 @@ class WWWEvents(
         return eventsFlow.value.find { it.id == id }
     }
 
-    fun invokeWhenLoaded(function: () -> Job) {
+    fun onEventLoaded(function: () -> Job) {
         this.loadJob?.invokeOnCompletion { function() }
     }
 
     // ---------------------------
 
+    /**
+     * Validates a list of `WWWEvent` objects.
+     *
+     * This function checks each event in the provided list for various validation criteria.
+     * It returns a map where each event is associated with a pair containing a boolean indicating
+     * whether the event is valid and a string message describing the validation error, if any.
+     *
+     * @param events The list of `WWWEvent` objects to validate.
+     * @return A map where each `WWWEvent` is associated with a pair of a boolean and a string.
+     *         The boolean indicates whether the event is valid, and the string contains the validation error message, if any.
+     */
     private fun isValidEventsData(events: List<WWWEvent>): Map<WWWEvent, Pair<Boolean, String?>> {
         return events.associateWith { event ->
             when {
@@ -123,10 +145,7 @@ class WWWEvents(
                 event.speed <= 0 -> Pair(false, "Speed must be a positive integer")
                 event.description.isEmpty() -> Pair(false, "Description is empty")
                 event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
-                !event.instagramUrl.startsWith("https://") -> Pair(false, "Instagram URL must start with https://")
                 event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
-                event.mapBbox.split(",").size != 4 -> Pair(false, "Map Bbox must have 4 elements")
-                event.mapCenter.split(",").size != 2 -> Pair(false, "Map Center must have 2 elements")
                 event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
                 event.mapMinzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Minzoom must be a double")
                 event.mapMaxzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Maxzoom must be a double")

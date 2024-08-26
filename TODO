@@ -1,17 +1,19 @@
 
 Next:
 
-- Large map screen
-    add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
-    => move and zoom methods to keep bounds
-    => manage all cases for user location
+- correct the area limitation mechanism on large map screen
 
+- review tests in WWWEventWaveTest
 - wave progression
     - add a layer on the map
     - add a progress bar on the map
     - add a progress bar on the wave screen
 
-- map styling
+- warning to the datetime of the events, add a timezone in event's config
+
+- Large map screen
+    => add map actions
+    => test on my phone in paris
 
 - wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
 
@@ -54,3 +56,4 @@ Ideas:
     - video promo des ONG participantes
     - videos explicatives WWW
     - par pays / events
+- Une association par event, avec un lien cagnotte et une video youtube de présentation

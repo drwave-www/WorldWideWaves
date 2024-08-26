@@ -24,6 +24,9 @@
             android:name=".activities.EventActivity"
             android:exported="true" />
         <activity
+            android:name=".activities.EventFullMapActivity"
+            android:exported="true" />
+        <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
             <intent-filter>

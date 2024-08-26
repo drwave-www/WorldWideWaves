@@ -68,6 +68,7 @@ android {
     dependencies {
         implementation(libs.koin.android)
         implementation(libs.kotlinx.datetime)
+        implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
     }
 }

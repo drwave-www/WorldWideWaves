@@ -83,7 +83,7 @@ class SplashActivity : AppCompatActivity() {
     private fun loadMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         val startTime = System.currentTimeMillis()
-        events.invokeWhenLoaded {
+        events.onEventLoaded {
             lifecycleScope.launch {
                 val elapsedTime = System.currentTimeMillis() - startTime
                 delay(maxOf(CONST_SPLASH_MIN_DURATION - elapsedTime, 0))

@@ -45,17 +45,22 @@ import org.koin.core.component.KoinComponent
 // ---------------------------
 
 interface GeoJsonDataProvider {
-    suspend fun getGeoJsonData(eventId: String): JsonObject
+    suspend fun getGeoJsonData(eventId: String): JsonObject?
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun getGeoJsonData(eventId: String): JsonObject {
-        val geojsonData = withContext(Dispatchers.IO) {
-            Napier.i("Loading geojson data for event $eventId")
-            Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
+        return try {
+            val geojsonData = withContext(Dispatchers.IO) {
+                Napier.i("Loading geojson data for event $eventId")
+                Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+            }
+            Json.parseToJsonElement(geojsonData).jsonObject
+        } catch (e: Exception) {
+            Napier.e("Error loading geojson data for event $eventId", e)
+            null
         }
-        return Json.parseToJsonElement(geojsonData).jsonObject
     }
 }
 
@@ -69,38 +74,115 @@ open class WWWEventArea(
     private val areaPolygon: Polygon = mutableListOf()
     private var cachedWarmingPolygons: List<Polygon>? = null
     private var cachedBoundingBox: BoundingBox? = null
+    private var cachedCenter: Position? = null
 
     // ---------------------------
 
+    /**
+     * Retrieves the file path of the GeoJSON file for the event.
+     *
+     * This function attempts to get the absolute path of the GeoJSON file associated with the event.
+     * It uses the event's ID to locate the file within the cache directory.
+     *
+     * @return The absolute path of the GeoJSON file as a String, or `null` if the file is not found.
+     */
     internal suspend fun getGeoJsonFilePath(): String? {
         return getMapFileAbsolutePath(event.id, "geojson")
     }
 
     // ---------------------------
 
+    /**
+     * Checks if a given position is within the event area.
+     *
+     * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
+     * to determine if the specified position lies within the polygon.
+     *
+     * @param position The position to check.
+     * @return `true` if the position is within the polygon, `false` otherwise.
+     */
     suspend fun isPositionWithin(position: Position): Boolean {
         return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
     }
 
+    /**
+     * Checks if a given position is within any of the warming polygons.
+     *
+     * This function retrieves the warming polygons and checks if the specified position
+     * is within any of these polygons using the `isPointInPolygon` function.
+     *
+     * @param position The position to check.
+     * @return `true` if the position is within any warming polygon, `false` otherwise.
+     */
     suspend fun isPositionWithinWarming(position: Position): Boolean {
         return getWarmingPolygons().any { isPointInPolygon(position, it) }
     }
 
+    // ---------------------------
+
+    /**
+     * Retrieves the bounding box of the polygon.
+     *
+     * This function calculates the bounding box of the polygon associated with the event area.
+     * If the bounding box has been previously calculated and cached, it returns the cached value.
+     * Otherwise, it calculates the bounding box, caches it, and then returns it.
+     *
+     * @return A [BoundingBox] object representing the bounding box of the polygon.
+     * @throws IllegalStateException if the polygon is empty.
+     */
     open suspend fun getBoundingBox(): BoundingBox {
         cachedBoundingBox?.let { return it }
 
         val polygon = getPolygon().takeIf { it.isNotEmpty() }
-            ?: throw IllegalStateException("Polygon is empty")
+            ?: return BoundingBox( // Default bounding box
+                ne = Position(0.0, 0.0),
+                sw = Position(0.0, 0.0)
+            )
 
         return polygonBbox(polygon).also { cachedBoundingBox = it }
     }
 
+    /**
+     * Calculates the center position of the event area.
+     *
+     * This function computes the center of the event area by averaging the latitudes and longitudes
+     * of the northeast and southwest corners of the bounding box. If the center has been previously
+     * calculated and cached, it returns the cached value.
+     *
+     * @return The center position of the event area as a [Position] object.
+     */
+    suspend fun getCenter(): Position {
+        cachedCenter?.let { return it }
+
+        val boundingBox = getBoundingBox()
+        val center = Position(
+            lat = (boundingBox.ne.lat + boundingBox.sw.lat) / 2,
+            lng = (boundingBox.ne.lng + boundingBox.sw.lng) / 2
+        )
+
+        return center.also { cachedCenter = it }
+    }
+
     // ---------------------------
 
+    /**
+     * Retrieves the polygon representing the event area.
+     *
+     * This function fetches the polygon data from the `geoJsonDataProvider` if the `areaPolygon` is empty.
+     * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
+     *
+     * @return A `Polygon` object representing the event area.
+     */
     suspend fun getPolygon(): Polygon {
         if (this.areaPolygon.isEmpty()) {
             val newPolygon = withContext(Dispatchers.Default) {
                 val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
+
+                if (geometryCollection == null) {
+                    Napier.e("Error loading geojson data for event ${event.id}")
+                    return@withContext emptyList()
+                }
+
                 val type = geometryCollection["type"]?.jsonPrimitive?.content
                 val coordinates = geometryCollection["coordinates"]?.jsonArray
 
@@ -140,6 +222,15 @@ open class WWWEventArea(
 
     // ---------------------------
 
+    /**
+     * Retrieves the warming polygons for the event area.
+     *
+     * This function returns a list of polygons representing the warming zones for the event area.
+     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
+     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
+     *
+     * @return A list of polygons representing the warming zones.
+     */
     suspend fun getWarmingPolygons(): List<Polygon> {
         return cachedWarmingPolygons ?: splitPolygonByLongitude(getPolygon(), event.mapWarmingZoneLongitude).right.also {
             cachedWarmingPolygons = it
