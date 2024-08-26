@@ -12,10 +12,10 @@ tileset:
   id: www_paris_france
   description: "WWW EVENT #location#"
   attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
-  center: [ #mapCenter#]
+  center: [ #mapCenter#, 10 ]
   bounds: [ #mapBbox#]
-  maxzoom: #mapMaxzoom#
-  minzoom: #mapMinzoom#
+  maxzoom: 14
+  minzoom: 10
   pixel_scale: 256
   languages:
     - en # English, Latin
