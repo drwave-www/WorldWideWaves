@@ -22,8 +22,13 @@ package com.worldwidewaves.activities
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.events.WWWEvent
 
@@ -31,10 +36,11 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
-        Box(modifier = modifier) {
+        Box(modifier = modifier.fillMaxWidth()) {
             EventMap(event, mapConfig = EventMap.EventMapConfig(
                 initialCameraPosition = EventMap.MapCameraPosition.WINDOW
             )).Screen(modifier = Modifier.fillMaxSize())
+            ButtonWave(event = event, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
         }
     }
 

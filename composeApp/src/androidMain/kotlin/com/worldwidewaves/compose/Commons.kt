@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +40,9 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_PAD
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
@@ -46,7 +52,9 @@ import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
 import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.instagram_icon
+import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.displayFontFamily
+import com.worldwidewaves.theme.quinaryLight
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -119,6 +127,35 @@ fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
                 modifier = Modifier.width(DIM_COMMON_DONE_IMAGE_WIDTH.dp),
             )
         }
+    }
+}
+
+// ----------------------------
+
+@Composable
+fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
+    // val context = LocalContext.current
+
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier
+            .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
+            .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
+            .clickable(onClick = {
+                // TODO: Wave screen
+            })
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentHeight(align = Alignment.CenterVertically),
+            text = stringResource(Res.string.wave_now).uppercase(),
+            color = quinaryLight,
+            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Black,
+            fontFamily = displayFontFamily
+        )
     }
 }
 

@@ -1,14 +1,14 @@
 
 Next:
 
-- Large map screen
-    => add map actions
-    => test on my phone in paris
-
 - wave progression
     - add a layer on the map
     - add a progress bar on the map
     - add a progress bar on the wave screen
+
+- Large map screen
+    => add map actions
+    => test on my phone in paris
 
 - map styling
     - add a correct style to the map with icons, ...
