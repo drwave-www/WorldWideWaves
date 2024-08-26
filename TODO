@@ -2,9 +2,7 @@
 Next:
 
 - Large map screen
-    => move and zoom methods to keep bounds
     => add map actions
-    => correct zoom level
     => test on my phone in paris
 
 - wave progression
@@ -13,6 +11,9 @@ Next:
     - add a progress bar on the wave screen
 
 - map styling
+    - add a correct style to the map with icons, ...
+    - review the extracted map bounds, to be the same than the geojson bounds
+    - correct the script to use correct value for zoom as min/max are now used for the map itself
 
 - wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
 
