@@ -100,9 +100,6 @@ class EventMap(
         // Request GPS location Android permissions
         val hasLocationPermission = requestLocationPermission()
 
-        // DEBUG
-        mapLoaded = true
-
         // Setup Map Style and properties
         LaunchedEffect(Unit) {
             val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
