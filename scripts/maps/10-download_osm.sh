@@ -38,6 +38,9 @@ mkdir -p ./data
 
 # ----------
 
+# DEBUG
+#EVENTS=paris_france
+
 for event in $EVENTS; do # Download OSM area as PBF file 
                          # and generates a dedicated PBF file for corresponding BBOX
                          # EVENTS is defined in lib.inc.sh

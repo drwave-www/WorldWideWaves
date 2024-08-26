@@ -33,6 +33,9 @@ set -x
 
 # ----------
 
+# DEBUG
+#EVENTS=paris_france
+
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
 
