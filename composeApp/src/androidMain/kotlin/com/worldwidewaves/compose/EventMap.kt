@@ -52,6 +52,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
@@ -156,14 +157,8 @@ class EventMap(
     }
 
     private fun restrictToBounds(map: MapLibreMap) {
-        val (sw, ne) = event.map.getBbox()
-        val bounds = LatLngBounds.Builder()
-            .include(LatLng(sw.lat, sw.lng)) // Southwest corner
-            .include(LatLng(ne.lat, ne.lng)) // Northeast corner
-            .build()
-
         // Restrict camera movement to event map bounds
-        map.setLatLngBoundsForCameraTarget(bounds)
+        map.setLatLngBoundsForCameraTarget(event.map.getBbox().toLatLngBounds())
         map.setMinZoomPreference(event.mapMinzoom)
         map.setMaxZoomPreference(event.mapMaxzoom)
     }
@@ -293,14 +288,9 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToMapBounds(map: MapLibreMap) {
-        val (sw, ne) = event.map.getBbox()
-        val bounds = LatLngBounds.Builder()
-            .include(LatLng(sw.lat, sw.lng))
-            .include(LatLng(ne.lat, ne.lng))
-            .build()
-        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
-    }
+    private fun moveToMapBounds(map: MapLibreMap) =
+        map.animateCamera(CameraUpdateFactory.newLatLngBounds(
+            event.map.getBbox().toLatLngBounds(), 0))
 
     // -------------------------------------------------------------------------
 
