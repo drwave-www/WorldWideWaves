@@ -1,5 +1,25 @@
 package com.worldwidewaves.compose
 
+/*
+ * Copyright 2024 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
@@ -7,6 +27,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -52,26 +73,6 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import java.io.File
 
-/*
- * Copyright 2024 DrWave
- *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 class EventMap(
     private val event: WWWEvent,
     private val onMapLoaded: () -> Unit = {},
@@ -84,11 +85,7 @@ class EventMap(
         val initialCameraPosition: MapCameraPosition? = MapCameraPosition.BOUNDS
     )
 
-    enum class MapCameraPosition {
-        WINDOW,
-        BOUNDS,
-        DEFAULT_CENTER
-    }
+    enum class MapCameraPosition { WINDOW, BOUNDS, DEFAULT_CENTER }
 
     // -------------------------
 
@@ -114,28 +111,14 @@ class EventMap(
 
                 styleUri?.let { uri ->
                     map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
-                        map.uiSettings.setAttributionMargins(15, 0, 0, 15)
-
-                        // Add a marker for the user's position
-                        if (hasLocationPermission) {
+                        map.uiSettings.setAttributionMargins(0, 0, 0, 0)
+                        if (hasLocationPermission) // Add a marker for the user's position
                             addLocationMarkerToMap(map, context, coroutineScope, style)
-                        }
-
-                        map.addOnMapClickListener { point ->
-                            onMapClick?.invoke(point.latitude, point.longitude)
-                            true
-                        }
-
-                        // TODO: determine the accurate min and max zoom values
-//                        map.setMinZoomPreference(event.mapMinzoom)
-//                        map.setMaxZoomPreference(event.mapMaxzoom)
-                        // TODO: determine the accurate bounds
-//                        val (swLng, swLat, neLng, neLat) = event.map.getBbox()
-//                        map.setLatLngBoundsForCameraTarget(LatLngBounds.Builder()
-//                            .include(LatLng(swLat, swLng)) // Southwest corner
-//                            .include(LatLng(neLat, neLng)) // Northeast corner
-//                            .build())
-
+                        if (onMapClick != null)
+                            map.addOnMapClickListener { point ->
+                                onMapClick.invoke(point.latitude, point.longitude)
+                                true
+                            }
                         onMapLoaded()
                         mapLoaded = true
                     }
@@ -145,29 +128,22 @@ class EventMap(
 
         // The map view
         BoxWithConstraints(modifier = modifier) {
-            if (!mapLoaded) {
-                val size = maxWidth / 3
+            if (!mapLoaded)
                 CircularProgressIndicator(
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = extendedLight.quinary.color,
-                    modifier = Modifier.align(Alignment.Center).size(size)
+                    modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
                 )
-            }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (mapLoaded) 1f else 0f)
+                modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }
 
     // -------------------------
 
-    private fun setCameraPosition(
-        initialCameraPosition: MapCameraPosition?,
-        map: MapLibreMap
-    ) {
+    private fun setCameraPosition(initialCameraPosition: MapCameraPosition?, map: MapLibreMap) {
         when (initialCameraPosition) {
             MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map)
             MapCameraPosition.BOUNDS -> moveToMapBounds(map)
@@ -190,7 +166,6 @@ class EventMap(
         map.setLatLngBoundsForCameraTarget(bounds)
         map.setMinZoomPreference(event.mapMinzoom)
         map.setMaxZoomPreference(event.mapMaxzoom)
-        map.setPadding(0, 0, 0, 0)
     }
 
     // -- Private Map location setup functions --------------------------------
@@ -213,18 +188,15 @@ class EventMap(
             object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult?) {
                     result?.lastLocation?.let { location ->
-
                         onLocationUpdate(LatLng(location.latitude, location.longitude))
-
                         // Follow user while he's within bounds
                         if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
                             moveToLocation(coroutineScope, location, map)
                         }
                     }
                 }
-
                 override fun onFailure(exception: Exception) {
-                    // Handle failure if needed
+                    Log.e("EventMap","Failed to get location: $exception")
                 }
             },
             Looper.getMainLooper()
@@ -240,11 +212,7 @@ class EventMap(
      * @param location The location to move the camera to.
      * @param map The MapLibre map object.
      */
-    private fun moveToLocation(
-        coroutineScope: CoroutineScope,
-        location: Location,
-        map: MapLibreMap
-    ) {
+    private fun moveToLocation(coroutineScope: CoroutineScope, location: Location, map: MapLibreMap) {
         coroutineScope.launch {
             if (event.area.isPositionWithin(Position(location.latitude, location.longitude))) {
                 map.animateCamera(
@@ -341,8 +309,7 @@ class EventMap(
         style: Style
     ): LocationComponentActivationOptions {
 
-        return LocationComponentActivationOptions
-            .builder(context, style)
+        return LocationComponentActivationOptions.builder(context, style)
             .locationComponentOptions(
                 LocationComponentOptions.builder(context)
                     .pulseEnabled(true)
@@ -351,9 +318,7 @@ class EventMap(
                     .build()
             )
             .useDefaultLocationEngine(true)
-            .locationEngineRequest(
-                buildLocationEngineRequest()
-            )
+            .locationEngineRequest(buildLocationEngineRequest())
             .build()
     }
 
@@ -375,7 +340,12 @@ class EventMap(
 
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
         maplibreMapOptions.apply {
-            camera(CameraPosition.Builder().bearing(0.0).tilt(0.0).build())
+            camera(CameraPosition.Builder()
+                .padding(0.0,0.0,0.0,0.0)
+                .bearing(0.0)
+                .tilt(0.0)
+                .build()
+            )
 
             localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
 
