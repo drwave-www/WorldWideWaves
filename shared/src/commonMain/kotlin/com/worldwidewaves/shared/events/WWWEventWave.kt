@@ -81,7 +81,7 @@ class WWWEventWave(val event: WWWEvent) {
     // ---------------------------
 
     private fun calculateDistance(bbox: BoundingBox, avgLatitude: Double): Double {
-        return abs(bbox.maxLongitude - bbox.minLongitude) *
+        return abs(bbox.ne.lng - bbox.sw.lng) *
                 METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR *
                 cos(avgLatitude * PI / 180.0)
     }
@@ -89,7 +89,7 @@ class WWWEventWave(val event: WWWEvent) {
     private suspend fun getEndTime(): LocalDateTime {
         val startDateTime = event.getStartDateTimeAsLocal()
         val bbox = event.area.getBoundingBox()
-        val avgLatitude = (bbox.minLatitude + bbox.maxLatitude) / 2.0
+        val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
         val distance = calculateDistance(bbox, avgLatitude)
         val duration = (distance / event.speed).toDuration(DurationUnit.SECONDS)
         return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())

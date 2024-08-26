@@ -156,10 +156,10 @@ class EventMap(
     }
 
     private fun restrictToBounds(map: MapLibreMap) {
-        val (swLng, swLat, neLng, neLat) = event.map.getBbox()
+        val (sw, ne) = event.map.getBbox()
         val bounds = LatLngBounds.Builder()
-            .include(LatLng(swLat, swLng)) // Southwest corner
-            .include(LatLng(neLat, neLng)) // Northeast corner
+            .include(LatLng(sw.lat, sw.lng)) // Southwest corner
+            .include(LatLng(ne.lat, ne.lng)) // Northeast corner
             .build()
 
         // Restrict camera movement to event map bounds
@@ -248,9 +248,9 @@ class EventMap(
      * @param map The MapLibre map object.
      */
     private fun moveToWindowBounds(map: MapLibreMap) {
-        val (swLng, swLat, neLng, neLat) = event.map.getBbox()
-        val eventMapWidth = neLng - swLng
-        val eventMapHeight = neLat - swLat
+        val (sw, ne) = event.map.getBbox()
+        val eventMapWidth = ne.lng - sw.lng
+        val eventMapHeight = ne.lat - sw.lat
         val (centerLat, centerLng) = event.map.getCenter()
 
         val mapLibreWidth = map.width.toDouble()
@@ -268,12 +268,12 @@ class EventMap(
             Pair(centerLng - lngDiff, centerLng + lngDiff)
         } else {
             // Event map is taller or equal, keep original longitudes
-            Pair(swLng, neLng)
+            Pair(sw.lng, ne.lng)
         }
 
         val (newSwLat, newNeLat) = if (eventAspectRatio > mapLibreAspectRatio) {
             // Event map is wider, keep original latitudes
-            Pair(swLat, neLat)
+            Pair(sw.lat, ne.lat)
         } else {
             // Event map is taller or equal, adjust latitudes to fit width
             val latDiff = eventMapWidth / mapLibreAspectRatio / 2
@@ -294,10 +294,10 @@ class EventMap(
      * @param map The MapLibre map object.
      */
     private fun moveToMapBounds(map: MapLibreMap) {
-        val (swLng, swLat, neLng, neLat) = event.map.getBbox()
+        val (sw, ne) = event.map.getBbox()
         val bounds = LatLngBounds.Builder()
-            .include(LatLng(swLat, swLng))
-            .include(LatLng(neLat, neLng))
+            .include(LatLng(sw.lat, sw.lng))
+            .include(LatLng(ne.lat, ne.lng))
             .build()
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
     }

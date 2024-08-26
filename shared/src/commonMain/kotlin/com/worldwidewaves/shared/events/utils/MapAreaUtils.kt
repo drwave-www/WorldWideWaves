@@ -35,10 +35,8 @@ typealias Polygon = List<Position>
 data class Segment(val start: Position, val end: Position)
 
 data class BoundingBox(
-    val minLatitude: Double,
-    val minLongitude: Double,
-    val maxLatitude: Double,
-    val maxLongitude: Double
+    val sw: Position,
+    val ne: Position
 )
 
 // ----------------------------------------------------------------------------
@@ -108,7 +106,11 @@ fun polygonBbox(polygon: Polygon): BoundingBox {
             maxOf(maxLat, pos.lat), maxOf(maxLon, pos.lng)
         )
     }
-    return BoundingBox(minLatitude, minLongitude, maxLatitude, maxLongitude)
+
+    return BoundingBox(
+        sw = Position(minLatitude, minLongitude),
+        ne = Position(maxLatitude, maxLongitude)
+    )
 }
 
 // ----------------------------------------------------------------------------

@@ -24,6 +24,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
@@ -56,16 +58,22 @@ class WWWEventMap(
     private val mapDataProvider: MapDataProvider = DefaultMapDataProvider()
 ) {
 
-    fun getCenter(): Pair<Double, Double> {
+    fun getCenter(): Position {
         val coordinates = event.mapCenter.split(",").mapNotNull { it.toDoubleOrNull() }
         require(coordinates.size == 2) { "Invalid mapCenter format" }
-        return Pair(coordinates[0], coordinates[1])
+        return Position(lat = coordinates[1], lng = coordinates[0])
     }
 
-    fun getBbox(): List<Double> {
+    fun getBbox(): BoundingBox {
         val coordinates = event.mapBbox.split(",").mapNotNull { it.toDoubleOrNull() }
         require(coordinates.size == 4) { "Invalid mapBbox format" }
-        return coordinates
+
+        val (minLon, minLat, maxLon, maxLat) = coordinates
+
+        return BoundingBox(
+            sw = Position(lat = minLat.coerceAtMost(maxLat), lng = minLon.coerceAtMost(maxLon)),
+            ne = Position(lat = minLat.coerceAtLeast(maxLat), lng = minLon.coerceAtLeast(maxLon))
+        )
     }
 
     // ---------------------------q
