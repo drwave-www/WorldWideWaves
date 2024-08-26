@@ -2,9 +2,10 @@
 Next:
 
 - Large map screen
-    add options to WWWEventMap (size in modifier with default, movable/zoomable, etc...)
     => move and zoom methods to keep bounds
-    => manage all cases for user location
+    => add map actions
+    => correct zoom level
+    => test on my phone in paris
 
 - wave progression
     - add a layer on the map

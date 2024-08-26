@@ -43,15 +43,6 @@
       }
     },
     {
-      "id": "waveboundaryarea",
-      "source": "geojson",
-      "type": "fill",
-      "paint": {
-        "fill-color": "#5DB075",
-        "fill-opacity": 0.8
-      }
-    },
-    {
       "id": "waveboundaryline",
       "source": "geojson",
       "type": "line",

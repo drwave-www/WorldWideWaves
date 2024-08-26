@@ -329,7 +329,7 @@ class EventMap(
             zoomGesturesEnabled(activateMapGestures)
             scrollGesturesEnabled(activateMapGestures)
             horizontalScrollGesturesEnabled(activateMapGestures)
-            rotateGesturesEnabled(activateMapGestures)
+            //rotateGesturesEnabled(activateMapGestures)
             tiltGesturesEnabled(activateMapGestures)
             doubleTapGesturesEnabled(activateMapGestures)
         }

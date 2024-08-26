@@ -140,9 +140,9 @@ abstract class AbstractEventBackActivity(
                 }
 
                 // Content Event screen
-                val screenModifier = Modifier.fillMaxSize()
+                var screenModifier = Modifier.fillMaxSize()
                 if (activateInfiniteScroll)
-                    screenModifier.verticalScroll(scrollState)
+                    screenModifier = screenModifier.verticalScroll(scrollState)
 
                 Box(modifier = screenModifier) { Screen(modifier = Modifier, event) }
 
