@@ -36,13 +36,10 @@ interface WWWEventWave {
     suspend fun getAllNumbers(): WaveNumbers
 
     fun getLiteralStartTime(): String
-
     fun getLiteralSpeed(): String
 
     suspend fun getLiteralEndTime(): String
-
     suspend fun getLiteralTotalTime(): String
-
     suspend fun getLiteralProgression(): String
 
 }

@@ -32,7 +32,9 @@ class WWWGlobals {
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
 
         const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
-        const val FS_MAPS_STYLE = "$FS_MAPS_FOLDER/mapstyle.json"
+
+        const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
+        const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
 
         // -- Wave Constants --
         const val WAVE_REFRESH_INTERVAL = 10000L // ms
