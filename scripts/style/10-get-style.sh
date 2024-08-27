@@ -68,5 +68,8 @@ docker compose up
 
 DEST_DIR=../../shared/src/commonMain/composeResources/files/style/
 rm -rf $DEST_DIR
+
+# Update app files
+(cd data; find ./glyphs ./sprites -type f | sed -e 's/^\.\///') > ./data/listing
 cp -r data $DEST_DIR
-(cd data; find ./glyphs ./sprites -type f | sed -e 's/^\.\///') > $DEST_DIR/listing
+
