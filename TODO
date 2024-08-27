@@ -2,11 +2,12 @@
 Next:
 
 - simplify/refactor/check code for glyphs/sprite copy/caching
-
+- review the usage of Res.* in platform if it can be in shared in some cases ?
 - review the usage of threading in the app
+- review cache mechanism : when it is cached, when it is not, ... (perf/relevancy)
 
 - terminate map styling
-    - no texts at all ? perhaps we want street names ?
+    - no texts at all ? perhaps we want (some) street names ?
 
 - correct the area limitation mechanism on large map screen
 
