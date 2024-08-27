@@ -20,21 +20,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.getLocalDatetime
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
-
-// ---------------------------
-
-const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 
 data class WaveNumbers(
     val waveSpeed: String,
@@ -46,94 +31,18 @@ data class WaveNumbers(
 
 // ---------------------------
 
-class WWWEventWave(val event: WWWEvent) {
+interface WWWEventWave {
 
-    private var cachedLiteralStartTime: String? = null
-    private var cachedLiteralEndTime: String? = null
-    private var cachedTotalTime: Duration? = null
+    suspend fun getAllNumbers(): WaveNumbers
 
-    // ---------------------------
+    fun getLiteralStartTime(): String
 
-    suspend fun getAllNumbers(): WaveNumbers {
-        return WaveNumbers(
-            waveSpeed = event.wave.getLiteralSpeed(),
-            waveStartTime = event.wave.getLiteralStartTime(),
-            waveEndTime = event.wave.getLiteralEndTime(),
-            waveTotalTime = event.wave.getLiteralTotalTime(),
-            waveProgression = event.wave.getLiteralProgression()
-        )
-    }
+    fun getLiteralSpeed(): String
 
-    // ---------------------------
+    suspend fun getLiteralEndTime(): String
 
-    fun getLiteralStartTime(): String {
-        return cachedLiteralStartTime ?: event.getStartDateTimeAsLocal().let { localDateTime ->
-            val hour = localDateTime.hour.toString().padStart(2, '0')
-            val minute = localDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute"
-        }.also { cachedLiteralStartTime = it }
-    }
+    suspend fun getLiteralTotalTime(): String
 
-    // ---------------------------
-
-    fun getLiteralSpeed(): String = "${event.speed} m/s"
-
-    // ---------------------------
-
-    private fun calculateDistance(bbox: BoundingBox, avgLatitude: Double): Double {
-        return abs(bbox.ne.lng - bbox.sw.lng) *
-                METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR *
-                cos(avgLatitude * PI / 180.0)
-    }
-
-    private suspend fun getEndTime(): LocalDateTime {
-        val startDateTime = event.getStartDateTimeAsLocal()
-        val bbox = event.area.getBoundingBox()
-        val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
-        val distance = calculateDistance(bbox, avgLatitude)
-        val duration = (distance / event.speed).toDuration(DurationUnit.SECONDS)
-        return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
-    }
-
-    suspend fun getLiteralEndTime(): String {
-        return cachedLiteralEndTime ?: run {
-            val endDateTime = getEndTime()
-            val hour = endDateTime.hour.toString().padStart(2, '0')
-            val minute = endDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute".also { cachedLiteralEndTime = it }
-        }
-    }
-
-    // ---------------------------
-
-    private suspend fun getTotalTime(): Duration {
-        return cachedTotalTime ?: run {
-            val startDateTime = event.getStartDateTimeAsLocal()
-            val endDateTime = getEndTime()
-            (
-                    endDateTime.toInstant(event.getTimeZone()).epochSeconds -
-                            startDateTime.toInstant(event.getTimeZone()).epochSeconds
-                    ).toDuration(DurationUnit.SECONDS).also { cachedTotalTime = it }
-        }
-    }
-
-    suspend fun getLiteralTotalTime(): String {
-        return "${getTotalTime().inWholeMinutes} min"
-    }
-
-    // ---------------------------
-
-    suspend fun getLiteralProgression(): String {
-        return when {
-            event.isDone() -> "100%"
-            !event.isRunning() -> "0%"
-            else -> {
-                val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
-                        event.getStartDateTimeAsLocal().toInstant(event.getTimeZone()).epochSeconds
-                val totalTime = getTotalTime().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).let { "$it%" }
-            }
-        }
-    }
+    suspend fun getLiteralProgression(): String
 
 }

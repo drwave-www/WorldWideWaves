@@ -100,8 +100,8 @@ class TabManager(
                         currentTab = index
                     })) {
                         tabBarItem(
-                            originalScreen == null && currentTab == index,
-                            index,
+                            currentTab == index, // && originalScreen == null
+                                    index,
                             tab.getName()
                         )
                     }

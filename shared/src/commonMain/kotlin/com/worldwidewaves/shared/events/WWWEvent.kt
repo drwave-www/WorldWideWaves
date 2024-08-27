@@ -56,7 +56,7 @@ data class WWWEvent(
 ) {
     @Transient var map = WWWEventMap(this)
     @Transient var area = WWWEventArea(this)
-    @Transient var wave = WWWEventWave(this)
+    @Transient var wave = WWWEventWaveLinear(this)
 }
 
 // ---------------------------
