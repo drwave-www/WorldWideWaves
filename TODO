@@ -1,10 +1,14 @@
 
 Next:
 
-- map styling
-    - add a correct style to the map with icons, ...
-    - review the extracted map bounds, to be the same than the geojson bounds
-    - correct the script to use correct value for zoom as min/max are now used for the map itself
+- simplify/refactor/check code for glyphs/sprite copy/caching
+
+- review the usage of threading in the app
+
+- terminate map styling
+    - no texts at all ? perhaps we want street names ?
+
+- correct the area limitation mechanism on large map screen
 
 - wave progression
     - add a layer on the map

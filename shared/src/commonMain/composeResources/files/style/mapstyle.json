@@ -10,6 +10,14 @@
     "openmaptiles": {
       "type": "vector",
       "url": "__MBTILES_URI__"
+    },
+    "geojson": {
+      "data": "__GEOJSON_URI__",
+      "type": "geojson"
+    },
+    "geojsonwarming": {
+      "data": "__GEOJSON_WARMING_URI__",
+      "type": "geojson"
     }
   },
   "sprite": "__SPRITE_URI__",
@@ -20,6 +28,33 @@
       "type": "background",
       "paint": {
         "background-color": "rgb(239,239,239)"
+      }
+    },
+    {
+      "id": "warmingboundaryarea",
+      "source": "geojsonwarming",
+      "type": "fill",
+      "paint": {
+        "fill-color": "#a60c32",
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "warmingboundaryline",
+      "source": "geojsonwarming",
+      "type": "line",
+      "paint": {
+        "line-color": "#66000a",
+        "line-width": 5
+      }
+    },
+    {
+      "id": "waveboundaryline",
+      "source": "geojson",
+      "type": "line",
+      "paint": {
+        "line-color": "#1e3b26",
+        "line-width": 5
       }
     },
     {

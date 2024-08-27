@@ -72,7 +72,7 @@ actual fun cacheStringToFile(fileName: String, content: String) {
     nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
 }
 
-private fun getCacheDir(): String {
+actual fun getCacheDir(): String {
     return NSSearchPathForDirectoriesInDomains(
         NSCachesDirectory,
         NSUserDomainMask,
@@ -81,5 +81,9 @@ private fun getCacheDir(): String {
 }
 
 actual fun getLocalDatetime(): LocalDateTime {
+    TODO("Not yet implemented")
+}
+
+actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
 }

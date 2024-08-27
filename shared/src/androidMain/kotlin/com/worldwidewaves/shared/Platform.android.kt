@@ -23,6 +23,7 @@ package com.worldwidewaves.shared
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toUri
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
@@ -41,11 +42,12 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.MissingResourceException
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
 
-object AndroidPlatform : WWWPlatform  {
+object AndroidPlatform : WWWPlatform  { // TODO: manage with the cache in production on app update
     private var _contextRef: WeakReference<Context>? = null
 
     // private var events : Lazy<WWWEvents> = lazy { WWWEvents() }
@@ -143,6 +145,27 @@ actual fun cacheStringToFile(fileName: String, content: String) {
     val context = AndroidPlatform.getContext() as Context
     Log.i("cacheStringToFile", "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
+}
+
+@OptIn(ExperimentalResourceApi::class)
+actual suspend fun cacheDeepFile(fileName: String) {
+    try {
+        val context = AndroidPlatform.getContext() as Context
+        val fileBytes = Res.readBytes(fileName)
+        val cacheFile = File(context.cacheDir, fileName)
+
+        Log.i("cacheDeepFile", "Caching data to $cacheFile")
+
+        cacheFile.parentFile?.mkdirs()
+        cacheFile.outputStream().use { it.write(fileBytes) }
+    } catch (e: Exception) {
+        Log.e("cacheDeepFile", "Error caching file: $fileName", e)
+    }
+}
+
+actual fun getCacheDir(): String {
+    val context = AndroidPlatform.getContext() as Context
+    return context.cacheDir.absolutePath
 }
 
 // ---------------------------

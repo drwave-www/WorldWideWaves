@@ -21,11 +21,13 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
+import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -79,13 +81,30 @@ class WWWEventMap(
         cacheStringToFile(warmingGeoJsonFilename, warmingGeoJson)
         val warmingGeoJsonFilePath = cachedFilePath(warmingGeoJsonFilename)
 
+        val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
+
         val newFileStr = mapDataProvider.geoMapStyleData()
-            .replace("___MBTILES_URI___", "mbtiles:///$mbtilesFilePath")
-            .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
-            .replace("___GEOJSON_WARMING_URI___", "file:///$warmingGeoJsonFilePath")
+            .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
+            .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
+            .replace("__GEOJSON_WARMING_URI__", "file:///$warmingGeoJsonFilePath")
+            .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
+            .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
         cacheStringToFile(styleFilename, newFileStr)
         return cachedFilePath(styleFilename)
+    }
+
+    @OptIn(ExperimentalResourceApi::class)
+    suspend fun cacheSpriteAndGlyphs(): String { // TODO: use statics
+        val listingFilePath = "files/style/listing"
+        val listingContent = Res.readBytes(listingFilePath).decodeToString()
+        val fileNames = listingContent.lines().filter { it.isNotBlank() }
+
+        fileNames.forEach { fileName ->
+            cacheDeepFile("files/style/$fileName")
+        }
+
+        return getCacheDir()
     }
 
 }
