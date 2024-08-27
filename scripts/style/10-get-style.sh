@@ -69,4 +69,4 @@ docker compose up
 DEST_DIR=../../shared/src/commonMain/composeResources/files/style/
 rm -rf $DEST_DIR
 cp -r data $DEST_DIR
-
+(cd data; find ./glyphs ./sprites) > $DEST_DIR/listing
