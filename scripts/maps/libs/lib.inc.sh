@@ -23,9 +23,20 @@ function tpl() { # Replace event configuration values in template file
                  # CALL: tpl $event $template_file $output_file
   TPL=$(mktemp)
   cp $2 $TPL
+
+  mapOsmadminid=$(conf $1 mapOsmadminid)
+  bbox_output=$(./libs/get_bbox.dep.sh $mapOsmadminid)
+
+  bbox=$(echo "$bbox_output" | head -n 1 | cut -d ':' -f 2)
+  center=$(echo "$bbox_output" | tail -n 1 | cut -d ':' -f 2)
+
   for prop in $(./bin/jq -r --arg event "$1" '.[] | select(.id == $event) | keys[]' $EVENTS_FILE); do
     TMP=$(mktemp)
-    cat $TPL | sed -e 's/#'$prop'#/'"$(conf $1 $prop | sed -e 's/\//\\\//g')"'/g' > $TMP
+    cat $TPL | sed \
+      -e 's/#'$prop'#/'"$(conf $1 $prop | sed -e 's/\//\\\//g')"'/g' \
+      -e "s/#mapCenter#/$center/g" \
+      -e "s/#mapBbox#/$bbox/g" \
+      > $TMP
     rm -f $TPL
     TPL=$TMP
   done

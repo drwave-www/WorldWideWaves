@@ -22,5 +22,10 @@ minlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.minlon')
 maxlat=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlat')
 maxlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlon')
 
+# Calculate the center of the bounding box
+center_lat=$(echo "($minlat + $maxlat) / 2" | bc -l | awk '{printf "%.7f\n", $0}' )
+center_lon=$(echo "($minlon + $maxlon) / 2" | bc -l | awk '{printf "%.7f\n", $0}')
+
 # Output the bounding box coordinates
-echo "Bounding Box: $minlon,$minlat,$maxlon,$maxlat"
+echo "bbox: $minlon,$minlat,$maxlon,$maxlat"
+echo "center: $center_lon,$center_lat"
