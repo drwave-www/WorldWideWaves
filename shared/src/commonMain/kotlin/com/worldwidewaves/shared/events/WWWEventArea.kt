@@ -69,6 +69,7 @@ open class WWWEventArea(
     private val areaPolygon: Polygon = mutableListOf()
     private var cachedWarmingPolygons: List<Polygon>? = null
     private var cachedBoundingBox: BoundingBox? = null
+    private var cachedCenter: Position? = null
 
     // ---------------------------
 
@@ -93,6 +94,18 @@ open class WWWEventArea(
             ?: throw IllegalStateException("Polygon is empty")
 
         return polygonBbox(polygon).also { cachedBoundingBox = it }
+    }
+
+    suspend fun getCenter(): Position {
+        cachedCenter?.let { return it }
+
+        val boundingBox = getBoundingBox()
+        val center = Position(
+            lat = (boundingBox.ne.lat + boundingBox.sw.lat) / 2,
+            lng = (boundingBox.ne.lng + boundingBox.sw.lng) / 2
+        )
+
+        return center.also { cachedCenter = it }
     }
 
     // ---------------------------

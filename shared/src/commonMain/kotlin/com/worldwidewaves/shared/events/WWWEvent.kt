@@ -45,8 +45,6 @@ data class WWWEvent(
     val instagramUrl: String,
     val instagramHashtag: String,
     var favorite: Boolean = false,
-    val mapBbox: String, // swLng,swLat,neLng,neLa
-    val mapCenter: String, // cLat,cLong
     val mapOsmadminid: Int,
     val mapMinzoom: Double,
     val mapMaxzoom: Double,

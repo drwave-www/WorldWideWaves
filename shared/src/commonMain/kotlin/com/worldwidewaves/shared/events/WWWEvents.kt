@@ -125,8 +125,6 @@ class WWWEvents(
                 event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
                 !event.instagramUrl.startsWith("https://") -> Pair(false, "Instagram URL must start with https://")
                 event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
-                event.mapBbox.split(",").size != 4 -> Pair(false, "Map Bbox must have 4 elements")
-                event.mapCenter.split(",").size != 2 -> Pair(false, "Map Center must have 2 elements")
                 event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
                 event.mapMinzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Minzoom must be a double")
                 event.mapMaxzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Maxzoom must be a double")

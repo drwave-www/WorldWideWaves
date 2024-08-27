@@ -105,7 +105,7 @@ class EventMap(
             val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
             mapView.getMapAsync { map ->
 
-                setCameraPosition(mapConfig.initialCameraPosition, map)
+                setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
 
                 styleUri?.let { uri ->
                     map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
@@ -141,23 +141,17 @@ class EventMap(
 
     // -------------------------
 
-    private fun setCameraPosition(initialCameraPosition: MapCameraPosition?, map: MapLibreMap) {
+    private fun setCameraPosition(
+        initialCameraPosition: MapCameraPosition?,
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope
+    ) {
         when (initialCameraPosition) {
-            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map)
-            MapCameraPosition.BOUNDS -> moveToMapBounds(map)
-            MapCameraPosition.WINDOW -> {
-                restrictToBounds(map)
-                moveToWindowBounds(map)
-            }
+            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map, coroutineScope)
+            MapCameraPosition.BOUNDS -> moveToMapBounds(map, coroutineScope)
+            MapCameraPosition.WINDOW -> moveToWindowBounds(map, coroutineScope)
             null -> {}
         }
-    }
-
-    private fun restrictToBounds(map: MapLibreMap) {
-        // Restrict camera movement to event map bounds
-        map.setLatLngBoundsForCameraTarget(event.map.getBbox().toLatLngBounds())
-        map.setMinZoomPreference(event.mapMinzoom)
-        map.setMaxZoomPreference(event.mapMaxzoom)
     }
 
     // -- Private Map location setup functions --------------------------------
@@ -224,14 +218,16 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToCenter(map: MapLibreMap) {
-        val (cLat, cLng) = event.map.getCenter()
-        map.animateCamera(
-            CameraUpdateFactory.newLatLngZoom(
-                LatLng(cLat, cLng),
-                event.mapDefaultzoom ?: event.mapMinzoom
+    private fun moveToCenter(map: MapLibreMap, coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            val (cLat, cLng) = event.area.getCenter()
+            map.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(cLat, cLng),
+                    event.mapDefaultzoom ?: event.mapMinzoom
+                )
             )
-        )
+        }
     }
 
     /**
@@ -239,45 +235,55 @@ class EventMap(
      * while maintaining the correct aspect ratio and centering.*
      * @param map The MapLibre map object.
      */
-    private fun moveToWindowBounds(map: MapLibreMap) {
-        val (sw, ne) = event.map.getBbox()
-        val eventMapWidth = ne.lng - sw.lng
-        val eventMapHeight = ne.lat - sw.lat
-        val (centerLat, centerLng) = event.map.getCenter()
+    private fun moveToWindowBounds(map: MapLibreMap, coroutineScope: CoroutineScope) {
+        coroutineScope.launch {
+            val bbox = event.area.getBoundingBox()
 
-        val mapLibreWidth = map.width.toDouble()
-        val mapLibreHeight = map.height.toDouble()
+            // Set the camera target and zoom level
+            map.setLatLngBoundsForCameraTarget(bbox.toLatLngBounds())
+            map.setMinZoomPreference(event.mapMinzoom)
+            map.setMaxZoomPreference(event.mapMaxzoom)
 
-        // Calculate the aspect ratios of the event map and MapLibre component.
-        val eventAspectRatio = eventMapWidth / eventMapHeight
-        val mapLibreAspectRatio = mapLibreWidth / mapLibreHeight
+            // Maximize the view to the map
+            val (sw, ne) = bbox
+            val eventMapWidth = ne.lng - sw.lng
+            val eventMapHeight = ne.lat - sw.lat
+            val (centerLat, centerLng) = event.area.getCenter()
 
-        // Calculate the new southwest and northeast longitudes or latitudes,
-        // depending on whether the event map is wider or taller than the MapLibre component.
-        val (newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
-            // Event map is wider, adjust longitudes to fit height
-            val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-            Pair(centerLng - lngDiff, centerLng + lngDiff)
-        } else {
-            // Event map is taller or equal, keep original longitudes
-            Pair(sw.lng, ne.lng)
+            val mapLibreWidth = map.width.toDouble()
+            val mapLibreHeight = map.height.toDouble()
+
+            // Calculate the aspect ratios of the event map and MapLibre component.
+            val eventAspectRatio = eventMapWidth / eventMapHeight
+            val mapLibreAspectRatio = mapLibreWidth / mapLibreHeight
+
+            // Calculate the new southwest and northeast longitudes or latitudes,
+            // depending on whether the event map is wider or taller than the MapLibre component.
+            val (newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
+                // Event map is wider, adjust longitudes to fit height
+                val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
+                Pair(centerLng - lngDiff, centerLng + lngDiff)
+            } else {
+                // Event map is taller or equal, keep original longitudes
+                Pair(sw.lng, ne.lng)
+            }
+
+            val (newSwLat, newNeLat) = if (eventAspectRatio > mapLibreAspectRatio) {
+                // Event map is wider, keep original latitudes
+                Pair(sw.lat, ne.lat)
+            } else {
+                // Event map is taller or equal, adjust latitudes to fit width
+                val latDiff = eventMapWidth / mapLibreAspectRatio / 2
+                Pair(centerLat - latDiff, centerLat + latDiff)
+            }
+
+            val bounds = LatLngBounds.Builder()
+                .include(LatLng(newSwLat, newSwLng))
+                .include(LatLng(newNeLat, newNeLng))
+                .build()
+
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
         }
-
-        val (newSwLat, newNeLat) = if (eventAspectRatio > mapLibreAspectRatio) {
-            // Event map is wider, keep original latitudes
-            Pair(sw.lat, ne.lat)
-        } else {
-            // Event map is taller or equal, adjust latitudes to fit width
-            val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-            Pair(centerLat - latDiff, centerLat + latDiff)
-        }
-
-        val bounds = LatLngBounds.Builder()
-            .include(LatLng(newSwLat, newSwLng))
-            .include(LatLng(newNeLat, newNeLng))
-            .build()
-
-        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
     }
 
     /**
@@ -285,9 +291,13 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToMapBounds(map: MapLibreMap) =
-        map.animateCamera(CameraUpdateFactory.newLatLngBounds(
-            event.map.getBbox().toLatLngBounds(), 0))
+    private fun moveToMapBounds(map: MapLibreMap, coroutineScope: CoroutineScope) = coroutineScope.launch {
+        map.animateCamera(
+            CameraUpdateFactory.newLatLngBounds(
+                event.area.getBoundingBox().toLatLngBounds(), 0
+            )
+        )
+    }
 
     // -------------------------------------------------------------------------
 
