@@ -4,7 +4,7 @@
   "name": "paris_france",
   "sources": {
     "fca30fb8-41f2-4a30-b7ec-47fabfd07102": {
-      "url": "___FILE_URI___",
+      "url": "___MBTILES_URI___",
       "type": "vector"
     },
     "geojson": {

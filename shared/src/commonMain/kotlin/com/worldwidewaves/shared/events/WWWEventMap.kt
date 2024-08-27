@@ -80,7 +80,7 @@ class WWWEventMap(
         val warmingGeoJsonFilePath = cachedFilePath(warmingGeoJsonFilename)
 
         val newFileStr = mapDataProvider.geoMapStyleData()
-            .replace("___FILE_URI___", "mbtiles:///$mbtilesFilePath")
+            .replace("___MBTILES_URI___", "mbtiles:///$mbtilesFilePath")
             .replace("___GEOJSON_URI___", "file:///$geojsonFilePath")
             .replace("___GEOJSON_WARMING_URI___", "file:///$warmingGeoJsonFilePath")
 
