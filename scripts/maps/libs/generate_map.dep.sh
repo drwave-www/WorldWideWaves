@@ -1,4 +1,5 @@
-##!/bin/bash # Created from original openmaptiles/quickstart.sh
+#!/bin/bash
+## Created from original openmaptiles/quickstart.sh
 #
 # Copyright 2024 DrWave
 #

@@ -90,7 +90,7 @@ abstract class AbstractEventBackActivity(
     }
 
     private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
-        wwwEvents.invokeWhenLoaded {
+        wwwEvents.onEventLoaded {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
             }

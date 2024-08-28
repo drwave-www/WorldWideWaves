@@ -24,7 +24,16 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 
-
+/**
+ * Converts a `BoundingBox` to a `LatLngBounds`.
+ *
+ * This function creates a `LatLngBounds` object from the southwest and northeast corners
+ * of the `BoundingBox`. The resulting `LatLngBounds` can be used with MapLibre to define
+ * the geographical bounds of a map view.
+ *
+ * @receiver The `BoundingBox` to convert.
+ * @return A `LatLngBounds` object representing the same geographical area as the `BoundingBox`.
+ */
 fun BoundingBox.toLatLngBounds(): LatLngBounds {
     return LatLngBounds.Builder()
         .include(LatLng(this.sw.lat, this.sw.lng)) // Southwest corner

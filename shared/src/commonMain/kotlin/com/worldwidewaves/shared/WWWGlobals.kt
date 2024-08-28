@@ -35,6 +35,7 @@ class WWWGlobals {
 
         const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
         const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
+        const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
         const val WAVE_REFRESH_INTERVAL = 10000L // ms

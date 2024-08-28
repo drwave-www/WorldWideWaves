@@ -21,7 +21,7 @@
 
 cd "$(dirname "$0")" # always work from executable folder
 
-set -x
+#set -x
 
 # ---------- Download dependencies --------------------------------------------
 
@@ -31,7 +31,7 @@ set -x
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 
-# ----------
+# -----------------------------------------------------------------------------
 
 # DEBUG
 EVENTS=paris_france

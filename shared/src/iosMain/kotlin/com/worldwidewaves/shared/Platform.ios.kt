@@ -33,6 +33,8 @@ import platform.Foundation.create
 import platform.Foundation.writeToFile
 import platform.UIKit.UIDevice
 
+// TODO : Check https://skie.touchlab.co/
+
 class IOSPlatform : WWWPlatform {
     override val name: String =
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion

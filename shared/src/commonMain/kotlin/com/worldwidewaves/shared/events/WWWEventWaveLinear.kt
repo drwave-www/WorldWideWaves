@@ -46,6 +46,14 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
 
     // ---------------------------
 
+    /**
+     * Retrieves all wave-related numbers for the event.
+     *
+     * This function gathers various wave-related metrics such as speed, start time, end time,
+     * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
+     *
+     * @return A `WaveNumbers` object containing the wave speed, start time, end time, total time, and progression.
+     */
     override suspend fun getAllNumbers(): WaveNumbers {
         return WaveNumbers(
             waveSpeed = event.wave.getLiteralSpeed(),
@@ -58,6 +66,15 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
 
     // ---------------------------
 
+    /**
+     * Retrieves the literal start time of the event in "HH:mm" format.
+     *
+     * This function first checks if the start time has been cached. If it has, it returns the cached value.
+     * If not, it calculates the start time by converting the event's start date and time to a local `LocalDateTime`,
+     * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
+     *
+     * @return A string representing the start time of the event in "HH:mm" format.
+     */
     override fun getLiteralStartTime(): String {
         return cachedLiteralStartTime ?: event.getStartDateTimeAsLocal().let { localDateTime ->
             val hour = localDateTime.hour.toString().padStart(2, '0')
@@ -72,12 +89,37 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
 
     // ---------------------------
 
+    /**
+     * Calculates the distance between the easternmost and westernmost points of a bounding box,
+     * adjusted for the average latitude.
+     *
+     * This function computes the distance in meters between the northeast and southwest corners
+     * of the bounding box along the longitude, taking into account the average latitude to adjust
+     * for the Earth's curvature.
+     *
+     * @param bbox The bounding box containing the northeast and southwest coordinates.
+     * @param avgLatitude The average latitude of the bounding box, used to adjust the distance calculation.
+     * @return The distance in meters between the easternmost and westernmost points of the bounding box.
+     */
     private fun calculateDistance(bbox: BoundingBox, avgLatitude: Double): Double {
         return abs(bbox.ne.lng - bbox.sw.lng) *
                 METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR *
                 cos(avgLatitude * PI / 180.0)
     }
 
+    /**
+     * Calculates the end time of the event based on its start time, bounding box, and speed.
+     *
+     * This function determines the end time of the event by performing the following steps:
+     * 1. Retrieves the start date and time of the event in the local time zone.
+     * 2. Obtains the bounding box of the event area.
+     * 3. Calculates the average latitude of the bounding box.
+     * 4. Computes the distance across the bounding box at the average latitude.
+     * 5. Calculates the duration of the event based on the distance and the event's speed.
+     * 6. Adds the duration to the start time to get the end time.
+     *
+     * @return The calculated end time of the event as a `LocalDateTime` object.
+     */
     private suspend fun getEndTime(): LocalDateTime {
         val startDateTime = event.getStartDateTimeAsLocal()
         val bbox = event.area.getBoundingBox()
@@ -87,6 +129,15 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
         return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
     }
 
+    /**
+     * Retrieves the literal end time of the wave event in "HH:mm" format.
+     *
+     * This function checks if the end time has been previously cached. If it has, it returns the cached value.
+     * Otherwise, it calculates the end time by calling `getEndTime()`, formats it to "HH:mm" format,
+     * caches the result, and then returns it.
+     *
+     * @return A string representing the end time in "HH:mm" format.
+     */
     override suspend fun getLiteralEndTime(): String {
         return cachedLiteralEndTime ?: run {
             val endDateTime = getEndTime()
@@ -98,6 +149,16 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
 
     // ---------------------------
 
+    /**
+     * Calculates the total duration of the event from its start time to its end time.
+     *
+     * This function first checks if the total duration has been previously calculated and cached.
+     * If not, it calculates the duration by finding the difference between the event's end time
+     * and start time in seconds, and then converts this difference to a `Duration` object.
+     * The calculated duration is then cached for future use.
+     *
+     * @return The total duration of the event as a `Duration` object.
+     */
     private suspend fun getTotalTime(): Duration {
         return cachedTotalTime ?: run {
             val startDateTime = event.getStartDateTimeAsLocal()
@@ -109,12 +170,30 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
         }
     }
 
+    /**
+     * Retrieves the total time of the wave event in a human-readable format.
+     *
+     * This function calculates the total time of the wave event and returns it as a string
+     * in the format of "X min", where X is the total time in whole minutes.
+     *
+     * @return A string representing the total time of the wave event in minutes.
+     */
     override suspend fun getLiteralTotalTime(): String {
         return "${getTotalTime().inWholeMinutes} min"
     }
 
     // ---------------------------
 
+    /**
+     * Calculates the literal progression of the event as a percentage.
+     *
+     * This function determines the progression of the event based on its current state and elapsed time.
+     * If the event is done, it returns "100%". If the event is not running, it returns "0%".
+     * Otherwise, it calculates the elapsed time since the event started and expresses it as a percentage
+     * of the total event duration.
+     *
+     * @return A string representing the progression of the event as a percentage.
+     */
     override suspend fun getLiteralProgression(): String {
         return when {
             event.isDone() -> "100%"

@@ -7,7 +7,7 @@
 # community, and shared human experience by leveraging real-time coordination and location-based services.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
+# You may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
@@ -19,57 +19,81 @@
 # limitations under the License.
 #
 
-cd "$(dirname "$0")" # always work from executable folder
+# Navigate to the directory of the script
+cd "$(dirname "$0")"
 
-#set -x
-
-# Download jq for JSON decoding with bash
+# Download jq for JSON processing if not already present
 mkdir -p ./bin
-[ ! -f ./bin/jq ] && wget -np -q https://github.com/stedolan/jq/releases/latest/download/jq-linux64 -O ./bin/jq && chmod +x ./bin/jq
+if [ ! -f ./bin/jq ]; then
+  wget -q https://github.com/stedolan/jq/releases/latest/download/jq-linux64 -O ./bin/jq
+  chmod +x ./bin/jq
+fi
 
 # ---------- Download dependencies --------------------------------------------
 
-# git clone osm-liberty style 
-[ ! -d osm-liberty ] && git clone git@github.com:maputnik/osm-liberty.git && rm -rf osm-liberty/.git
+# Clone osm-liberty if not already present
+if [ ! -d osm-liberty ]; then
+  git clone --depth=1 git@github.com:maputnik/osm-liberty.git osm-liberty
+  rm -rf osm-liberty/.git
+fi
 
-# git clone font-glyphs
-[ ! -d font-glyphs ] && git clone git@github.com:orangemug/font-glyphs.git && (cd font-glyphs && git submodule sync && git submodule update --init) && rm -rf font-glyphs/.git
+# Clone font-glyphs if not already present
+if [ ! -d font-glyphs ]; then
+  git clone --depth=1 git@github.com:orangemug/font-glyphs.git font-glyphs
+  (cd font-glyphs && git submodule update --init)
+  rm -rf font-glyphs/.git
+fi
 
-# ----------
+# ---------- Adapt style for MapLibre -----------------------------------------
 
+# Create the data directory if it doesn't exist
 mkdir -p ./data
 
 IN_STYLE_FILE=./osm-liberty/style.json
 OUT_STYLE_FILE=./data/mapstyle.json
 
-# Adapt the style for MapLibre native / WWW
+# Modify the style.json for MapLibre native/WWW use
 ./bin/jq '
- (.sources.openmaptiles.url) |= "__MBTILES_URI__"
- | del(.sources.natural_earth_shaded_relief)
- | del(.layers[] | select(.id == "natural_earth"))
- | (.sprite) |= "__SPRITE_URI__"
- | (.glyphs) |= sub("^(.*)/\\{fontstack\\}(.*)$"; "__GLYPHS_URI__/{fontstack}/{range}.pbf")
-' $IN_STYLE_FILE > $OUT_STYLE_FILE
+  (.sources.openmaptiles.url) |= "__MBTILES_URI__"
+  | del(.sources.natural_earth_shaded_relief)
+  | del(.layers[] | select(.id == "natural_earth"))
+  | (.sprite) |= "__SPRITE_URI__"
+  | (.glyphs) |= sub("^(.*)/\\{fontstack\\}(.*)$"; "__GLYPHS_URI__/{fontstack}/{range}.pbf")
+' "$IN_STYLE_FILE" > "$OUT_STYLE_FILE"
 
-# Copy the sprites
+# Copy sprites to the data directory
 cp -r osm-liberty/sprites/ ./data/
 
-# Generate and copy the glyphs for Roboto used in the style
-docker compose up
-[ ! -d ./data/glyphs ] && (
-   docker compose run --rm build sh -c 'cd /font-glyphs ; npm audit fix ; npm install . ; ./generate.sh'
-   mkdir -p data/glyphs
-   cp -r \
-     font-glyphs/glyphs/Roboto\ Condensed\ Italic/ \
-     font-glyphs/glyphs/Roboto\ Medium \
-     font-glyphs/glyphs/Roboto\ Regular/ \
-     ./data/glyphs/
-)
+# ---------- Generate glyphs and copy them ------------------------------------
+
+# Run the Docker Compose to generate glyphs
+docker compose up -d
+
+# Generate glyphs for Roboto fonts if not already present
+if [ ! -d ./data/glyphs ]; then
+  docker compose run --rm build sh -c '
+    cd /font-glyphs
+    npm audit fix
+    npm install .
+    ./generate.sh
+  '
+  mkdir -p ./data/glyphs
+  cp -r \
+    font-glyphs/glyphs/Roboto\ Condensed\ Italic/ \
+    font-glyphs/glyphs/Roboto\ Medium/ \
+    font-glyphs/glyphs/Roboto\ Regular/ \
+    ./data/glyphs/
+fi
+
+# ---------- Update App Resources ---------------------------------------------
 
 DEST_DIR=../../shared/src/commonMain/composeResources/files/style/
-rm -rf $DEST_DIR
 
-# Update app files
-(cd data; find ./glyphs ./sprites -type f | sed -e 's/^\.\///') > ./data/listing
-cp -r data $DEST_DIR
+# Clean and copy updated data to the app's resource directory
+rm -rf "$DEST_DIR"
+mkdir -p "$DEST_DIR"
+cp -r ./data/* "$DEST_DIR"
+
+# Generate listing of glyph and sprite files
+(cd ./data && find ./glyphs ./sprites -type f | sed 's/^\.\///') > ./data/listing
 

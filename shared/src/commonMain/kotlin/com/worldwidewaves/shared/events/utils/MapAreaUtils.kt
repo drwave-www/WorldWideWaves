@@ -34,10 +34,33 @@ typealias Polygon = List<Position>
 
 data class Segment(val start: Position, val end: Position)
 
+/**
+ * Represents a bounding box defined by its southwest and northeast corners.
+ *
+ * @property sw The southwest corner of the bounding box.
+ * @property ne The northeast corner of the bounding box.
+ * @constructor Creates a bounding box using `Position` objects for the southwest and northeast corners.
+ * @constructor Creates a bounding box using latitude and longitude values for the southwest and northeast corners.
+ *
+ * @param swLat The latitude of the southwest corner.
+ * @param swLng The longitude of the southwest corner.
+ * @param neLat The latitude of the northeast corner.
+ * @param neLng The longitude of the northeast corner.
+ */
 data class BoundingBox(
     val sw: Position,
     val ne: Position
-)
+) {
+    constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
+        sw = Position(swLat, swLng),
+        ne = Position(neLat, neLng)
+    )
+
+    val minLatitude: Double get() = sw.lat
+    val maxLatitude: Double get() = ne.lat
+    val minLongitude: Double get() = sw.lng
+    val maxLongitude: Double get() = ne.lng
+}
 
 // ----------------------------------------------------------------------------
 
@@ -116,6 +139,27 @@ fun polygonBbox(polygon: Polygon): BoundingBox {
 // ----------------------------------------------------------------------------
 
 /**
+ * Data class representing the result of splitting a polygon into two parts.
+ *
+ * @property left The list of polygons on the left side of the split.
+ * @property right The list of polygons on the right side of the split.
+ */
+data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
+    enum class ResultPosition { LEFT, RIGHT }
+    companion object {
+        fun fromPolygon(polygon: Polygon, resultPosition: ResultPosition = RIGHT): SplitPolygonResult {
+            return if (polygon.size > 1) {
+                when (resultPosition) {
+                    LEFT -> SplitPolygonResult(listOf(polygon), emptyList())
+                    RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon))
+                }
+            } else empty()
+        }
+        fun empty() = SplitPolygonResult(emptyList(), emptyList())
+    }
+}
+
+/**
  * Splits a polygon by a given longitude.
  *
  * This function takes a polygon represented as a list of [Position] objects and a longitude value
@@ -135,22 +179,6 @@ fun polygonBbox(polygon: Polygon): BoundingBox {
  * @return A[SplitPolygonResult] object containing the left and right polygons.
  *
  */
-
-data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
-    enum class ResultPosition { LEFT, RIGHT }
-    companion object {
-        fun fromPolygon(polygon: Polygon, resultPosition: ResultPosition = RIGHT): SplitPolygonResult {
-            return if (polygon.size > 1) {
-                when (resultPosition) {
-                    LEFT -> SplitPolygonResult(listOf(polygon), emptyList())
-                    RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon))
-                }
-            } else empty()
-        }
-        fun empty() = SplitPolygonResult(emptyList(), emptyList())
-    }
-}
-
 fun splitPolygonByLongitude(polygon: List<Position>, longitudeToCut: Double): SplitPolygonResult {
     val leftSide = mutableListOf<Position>()
     val rightSide = mutableListOf<Position>()
@@ -191,7 +219,15 @@ fun splitPolygonByLongitude(polygon: List<Position>, longitudeToCut: Double): Sp
     }
 }
 
-// Helper function to group polygon points into ring polygons
+/**
+ * Groups a list of positions into ring polygons.
+ *
+ * This function takes a list of positions representing a polygon and splits it into multiple ring polygons.
+ * A ring polygon is a closed loop of positions where the first and last positions are the same.
+ *
+ * @param polygon A list of positions representing the vertices of the polygon.
+ * @return A list of ring polygons, each represented as a list of positions.
+ */
 private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
     val polygons = mutableListOf<Polygon>()
     val currentPolygon = mutableListOf<Position>()
@@ -233,8 +269,20 @@ private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
     }
 }
 
-// Helper function to check if a point lies on a line segment
-private const val EPSILON = 1e-10 // Adjust the tolerance as needed
+/**
+ * Checks if a given point lies on a line segment.
+ *
+ * This function determines if a point is on a line segment by calculating the cross product
+ * of the vectors formed by the segment's endpoints and the point. If the cross product is
+ * close to zero (within a small tolerance), the point is considered to be on the line segment.
+ * Additionally, the function checks if the point's coordinates are within the bounds of the
+ * segment's endpoints.
+ *
+ * @param point The point to check.
+ * @param segment The line segment defined by two endpoints.
+ * @return `true` if the point lies on the line segment, `false` otherwise.
+ */
+private const val EPSILON = 1e-10 // A small tolerance value used to account for floating-point precision errors.
 
 fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
     val crossProduct = (segment.end.lat - segment.start.lat) * (point.lng - segment.start.lng) -
@@ -246,6 +294,12 @@ fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
 
 // ----------------------------------------------------------------------------
 
+/**
+ * Converts a list of polygons into a GeoJSON string.
+ *
+ * @param polygons A list of polygons, where each polygon is represented as a list of `Position` objects.
+ * @return A string in GeoJSON format representing the input polygons.
+ */
 fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
     val features = polygons.map { polygon ->
         val coordinates = polygon.map { listOf(it.lng, it.lat) }

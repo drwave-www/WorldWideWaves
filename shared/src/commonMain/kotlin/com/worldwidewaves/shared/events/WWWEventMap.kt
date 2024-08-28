@@ -21,6 +21,8 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_FOLDER
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_LISTING
 import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
@@ -94,17 +96,24 @@ class WWWEventMap(
         return cachedFilePath(styleFilename)
     }
 
+    // ---------------------------
+
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String { // TODO: use statics
-        val listingFilePath = "files/style/listing"
-        val listingContent = Res.readBytes(listingFilePath).decodeToString()
-        val fileNames = listingContent.lines().filter { it.isNotBlank() }
+        return try {
+            val listingFilePath = FS_STYLE_LISTING
+            val listingContent = Res.readBytes(listingFilePath).decodeToString()
+            val fileNames = listingContent.lines().filter { it.isNotBlank() }
 
-        fileNames.forEach { fileName ->
-            cacheDeepFile("files/style/$fileName")
+            fileNames.forEach { fileName ->
+                cacheDeepFile("$FS_STYLE_FOLDER/$fileName")
+            }
+
+            getCacheDir()
+        } catch (e: Exception) {
+            Napier.e("Error caching sprite and glyphs", e)
+            throw e
         }
-
-        return getCacheDir()
     }
 
 }
