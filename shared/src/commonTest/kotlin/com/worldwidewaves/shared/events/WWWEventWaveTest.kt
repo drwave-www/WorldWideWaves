@@ -44,27 +44,27 @@ class WWWEventWaveTest {
 
     @Test
     fun testGetLiteralStartTime() = runTest {
-        val wave = WWWEventWave(testEvent)
-        assertEquals("10:00", wave.getLiteralStartTime())
+        val wave = WWWEventWaveLinear(testEvent)
+        assertEquals("18:00", wave.getLiteralStartTime())
     }
 
     @Test
     fun testGetLiteralSpeed() = runTest {
-        val wave = WWWEventWave(testEvent)
+        val wave = WWWEventWaveLinear(testEvent)
         assertEquals("10 m/s", wave.getLiteralSpeed())
     }
 
     @Test
     fun testGetLiteralEndTime() = runTest {
-        val wave = WWWEventWave(testEvent)
+        val wave = WWWEventWaveLinear(testEvent)
         // Mocking getBoundingBox is necessary for this test
         val mockEventArea = object : WWWEventArea(testEvent, DefaultGeoJsonDataProvider()) {
             override suspend fun getBoundingBox(): BoundingBox {
                 return BoundingBox(
-                    minLatitude = 48.85,
-                    minLongitude = 2.35,
-                    maxLatitude = 48.86,
-                    maxLongitude = 2.36
+                    swLat = 48.85,
+                    swLng = 2.35,
+                    neLat = 48.86,
+                    neLng = 2.36
                 )
             }}
         testEvent.area = mockEventArea
@@ -80,15 +80,15 @@ class WWWEventWaveTest {
 
     @Test
     fun testGetLiteralTotalTime() = runTest {
-        val wave = WWWEventWave(testEvent)
+        val wave = WWWEventWaveLinear(testEvent)
         // Mocking getBoundingBox is necessary for this test
         val mockEventArea = object : WWWEventArea(testEvent, DefaultGeoJsonDataProvider()) {
             override suspend fun getBoundingBox(): BoundingBox {
                 return BoundingBox(
-                    minLatitude = 48.85,
-                    minLongitude = 2.35,
-                    maxLatitude = 48.86,
-                    maxLongitude = 2.36
+                    swLat = 48.85,
+                    swLng = 2.35,
+                    neLat = 48.86,
+                    neLng = 2.36
                 )
             }
         }
@@ -99,21 +99,21 @@ class WWWEventWaveTest {
 
     @Test
     fun testGetLiteralProgressionNotStarted() = runTest {
-        val wave = WWWEventWave(testEvent)
+        val wave = WWWEventWaveLinear(testEvent)
         assertEquals("0%", wave.getLiteralProgression())
     }
 
     @Test
     fun testGetLiteralProgressionDone() = runTest {
         val doneEvent = testEvent.copy(id = "paris_france") // Assuming "paris_france" is a done event
-        val wave = WWWEventWave(doneEvent)
+        val wave = WWWEventWaveLinear(doneEvent)
         assertEquals("100%", wave.getLiteralProgression())
     }
 
     @Test
     fun testGetLiteralProgressionRunning() = runTest {
         val runningEvent = testEvent.copy(id = "riodejaneiro_brazil")
-        val wave = WWWEventWave(runningEvent)
+        val wave = WWWEventWaveLinear(runningEvent)
 
         // Mocking getLocalDatetime and getTotalTime for this test
         val mockGetLocalDatetime = {
@@ -127,7 +127,7 @@ class WWWEventWaveTest {
     }
 
     // Helper function to inject mocked functions for testing getLiteralProgression
-    private suspend fun WWWEventWave.getLiteralProgression(
+    private suspend fun WWWEventWaveLinear.getLiteralProgression(
         getLocalDatetime: () -> LocalDateTime,
         getTotalTime: suspend () -> Duration
     ): String {

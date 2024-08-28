@@ -1,6 +1,7 @@
 
 Next:
 
+- review tests in WWWEventWaveTest
 - review the usage of threading in the app
 - review cache mechanism : when it is cached, when it is not, ... (perf/relevancy)
 
