@@ -28,6 +28,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -52,6 +53,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
@@ -59,6 +61,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.painterResource
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -75,6 +78,7 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import java.io.File
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
     private val event: WWWEvent,
@@ -97,6 +101,7 @@ class EventMap(
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
         var mapLoaded by remember { mutableStateOf(false) }
+        var mapError by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
 
         // Request GPS location Android permissions
@@ -107,35 +112,44 @@ class EventMap(
             val styleUri = withContext(Dispatchers.IO) {
                 event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
             }
-            mapView.getMapAsync { map ->
-
-                setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
-
-                styleUri?.let { uri ->
-                    map.setStyle( Style.Builder().fromUri(uri.toString()) ) { style ->
+            styleUri?.let { uri ->
+                mapView.getMapAsync { map ->
+                    setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
+                    map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-                        if (hasLocationPermission) // Add a marker for the user's position
-                            addLocationMarkerToMap(map, context, coroutineScope, style)
-                        if (onMapClick != null)
+                        if (hasLocationPermission) addLocationMarkerToMap(map, context, coroutineScope, style)
+                        onMapClick?.let { clickListener ->
                             map.addOnMapClickListener { point ->
-                                onMapClick.invoke(point.latitude, point.longitude)
+                                clickListener(point.latitude, point.longitude)
                                 true
                             }
+                        }
                         onMapLoaded()
                         mapLoaded = true
                     }
                 }
+            } ?: run {
+                mapError = true
             }
         }
 
         // The map view
         BoxWithConstraints(modifier = modifier) {
-            if (!mapLoaded)
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = extendedLight.quinary.color,
-                    modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
-                )
+            if (!mapLoaded) {
+                if (!mapError) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = extendedLight.quinary.color,
+                        modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier.size(maxWidth / 4).align(Alignment.Center),
+                        painter = painterResource(ShRes.drawable.map_error),
+                        contentDescription = "error"
+                    )
+                }
+            }
             AndroidView(
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)

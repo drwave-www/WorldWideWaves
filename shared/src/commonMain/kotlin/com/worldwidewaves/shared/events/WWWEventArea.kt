@@ -45,17 +45,22 @@ import org.koin.core.component.KoinComponent
 // ---------------------------
 
 interface GeoJsonDataProvider {
-    suspend fun getGeoJsonData(eventId: String): JsonObject
+    suspend fun getGeoJsonData(eventId: String): JsonObject?
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun getGeoJsonData(eventId: String): JsonObject {
-        val geojsonData = withContext(Dispatchers.IO) {
-            Napier.i("Loading geojson data for event $eventId")
-            Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
+        return try {
+            val geojsonData = withContext(Dispatchers.IO) {
+                Napier.i("Loading geojson data for event $eventId")
+                Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+            }
+            Json.parseToJsonElement(geojsonData).jsonObject
+        } catch (e: Exception) {
+            Napier.e("Error loading geojson data for event $eventId", e)
+            null
         }
-        return Json.parseToJsonElement(geojsonData).jsonObject
     }
 }
 
@@ -90,7 +95,7 @@ open class WWWEventArea(
     /**
      * Checks if a given position is within the event area.
      *
-     * This function retrieves the polygon representing the event area and uses the ray casting algorithm
+     * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
      * to determine if the specified position lies within the polygon.
      *
      * @param position The position to check.
@@ -129,7 +134,10 @@ open class WWWEventArea(
         cachedBoundingBox?.let { return it }
 
         val polygon = getPolygon().takeIf { it.isNotEmpty() }
-            ?: throw IllegalStateException("Polygon is empty")
+            ?: return BoundingBox( // Default bounding box
+                ne = Position(0.0, 0.0),
+                sw = Position(0.0, 0.0)
+            )
 
         return polygonBbox(polygon).also { cachedBoundingBox = it }
     }
@@ -169,6 +177,12 @@ open class WWWEventArea(
         if (this.areaPolygon.isEmpty()) {
             val newPolygon = withContext(Dispatchers.Default) {
                 val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
+
+                if (geometryCollection == null) {
+                    Napier.e("Error loading geojson data for event ${event.id}")
+                    return@withContext emptyList()
+                }
+
                 val type = geometryCollection["type"]?.jsonPrimitive?.content
                 val coordinates = geometryCollection["coordinates"]?.jsonArray
 

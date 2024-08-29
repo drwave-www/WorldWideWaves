@@ -53,7 +53,6 @@ import com.worldwidewaves.shared.generated.resources.tab_faq_name
 import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
-import com.worldwidewaves.shared.generated.resources.www_instagram_url
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
