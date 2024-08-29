@@ -43,7 +43,7 @@ class WWWGlobals {
         // -- UI Constants --
 
         const val CONST_SPLASH_MIN_DURATION =  2000 // ms
-        const val CONST_TIMER_GPS_UPDATE = 1500 // ms
+        const val CONST_TIMER_GPS_UPDATE = 3000 // ms
 
         // ----------------------------
 

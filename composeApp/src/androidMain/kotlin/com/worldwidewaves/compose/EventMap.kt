@@ -242,7 +242,7 @@ class EventMap(
      */
     private fun moveToWindowBounds(map: MapLibreMap, coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            val bbox = withContext(Dispatchers.IO) { event.area.getBoundingBox() }
+            val bbox = event.area.getBoundingBox()
 
             // Set the camera target and zoom level
             map.setLatLngBoundsForCameraTarget(bbox.toLatLngBounds())
