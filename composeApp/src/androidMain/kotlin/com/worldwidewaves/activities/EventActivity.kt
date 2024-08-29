@@ -102,8 +102,10 @@ import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -305,7 +307,7 @@ private fun EventNumbers(event: WWWEvent) {
     LaunchedEffect(event) {
         var lastProgressionValue = ""
         coroutineScope.launch {
-            val waveNumbers = event.wave.getAllNumbers()
+            val waveNumbers = withContext(Dispatchers.IO) { event.wave.getAllNumbers() }
             eventNumbers.clear()
             eventNumbers.putAll(mapOf(
                     ShRes.string.wave_speed to waveNumbers.waveSpeed,

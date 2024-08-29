@@ -2,12 +2,10 @@
 Next:
 
 - review tests in WWWEventWaveTest
-- review the usage of threading in the app
 - review cache mechanism : when it is cached, when it is not, ... (perf/relevancy)
 
 - terminate map styling
     - style of geojsons
-    - no texts at all ? perhaps we want (some) street names ?
 
 - correct the area limitation mechanism on large map screen
 

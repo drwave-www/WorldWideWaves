@@ -56,7 +56,9 @@ import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -102,7 +104,9 @@ class EventMap(
 
         // Setup Map Style and properties
         LaunchedEffect(Unit) {
-            val styleUri = event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
+            val styleUri = withContext(Dispatchers.IO) {
+                event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
+            }
             mapView.getMapAsync { map ->
 
                 setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
@@ -200,7 +204,8 @@ class EventMap(
      */
     private fun moveToLocation(coroutineScope: CoroutineScope, location: Location, map: MapLibreMap) {
         coroutineScope.launch {
-            if (event.area.isPositionWithin(Position(location.latitude, location.longitude))) {
+            val isWithin = withContext(Dispatchers.IO) { event.area.isPositionWithin(Position(location.latitude, location.longitude)) }
+            if (isWithin) {
                 map.animateCamera(
                     CameraUpdateFactory.newCameraPosition(
                         CameraPosition.Builder()
@@ -220,7 +225,7 @@ class EventMap(
      */
     private fun moveToCenter(map: MapLibreMap, coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            val (cLat, cLng) = event.area.getCenter()
+            val (cLat, cLng) = withContext(Dispatchers.IO) { event.area.getCenter() }
             map.animateCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(cLat, cLng),
@@ -237,7 +242,7 @@ class EventMap(
      */
     private fun moveToWindowBounds(map: MapLibreMap, coroutineScope: CoroutineScope) {
         coroutineScope.launch {
-            val bbox = event.area.getBoundingBox()
+            val bbox = withContext(Dispatchers.IO) { event.area.getBoundingBox() }
 
             // Set the camera target and zoom level
             map.setLatLngBoundsForCameraTarget(bbox.toLatLngBounds())

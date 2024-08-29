@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,7 +47,7 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     // ---------------------------
 
     private fun loadEvents() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             wwwEvents.eventsFlow.collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList
