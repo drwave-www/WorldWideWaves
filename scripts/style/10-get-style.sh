@@ -19,6 +19,10 @@
 # limitations under the License.
 #
 
+DEST_DIR=../../shared/src/commonMain/composeResources/files/style/
+IN_STYLE_FILE=./osm-liberty/style.json
+OUT_STYLE_FILE=./data/mapstyle.json
+
 # Navigate to the directory of the script
 cd "$(dirname "$0")"
 
@@ -48,9 +52,6 @@ fi
 
 # Create the data directory if it doesn't exist
 mkdir -p ./data
-
-IN_STYLE_FILE=./osm-liberty/style.json
-OUT_STYLE_FILE=./data/mapstyle.json
 
 # Modify the style.json for MapLibre native/WWW use
 ./bin/jq '
@@ -86,8 +87,6 @@ if [ ! -d ./data/glyphs ]; then
 fi
 
 # ---------- Update App Resources ---------------------------------------------
-
-DEST_DIR=../../shared/src/commonMain/composeResources/files/style/
 
 # Clean and copy updated data to the app's resource directory
 rm -rf "$DEST_DIR"

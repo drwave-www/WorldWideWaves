@@ -19,6 +19,8 @@
 # limitations under the License.
 #
 
+DEST_DIR=../../shared/src/commonMain/composeResources/files/maps
+
 cd "$(dirname "$0")" # always work from executable folder
 
 #set -x
@@ -36,7 +38,7 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
 
   OSMADMINID=$(conf $event mapOsmadminid)
 
-  DEST_GEOJSON=../../shared/src/commonMain/composeResources/files/maps/$event.geojson
+  DEST_GEOJSON=$DEST_DIR/$event.geojson
   wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson
   cp data/$event.geojson $DEST_GEOJSON
 
