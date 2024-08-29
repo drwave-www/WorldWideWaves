@@ -227,10 +227,7 @@ class EventMap(
         coroutineScope.launch {
             val (cLat, cLng) = withContext(Dispatchers.IO) { event.area.getCenter() }
             map.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(cLat, cLng),
-                    event.mapDefaultzoom ?: event.mapMinzoom
-                )
+                CameraUpdateFactory.newLatLngZoom(LatLng(cLat, cLng), event.mapMinzoom)
             )
         }
     }

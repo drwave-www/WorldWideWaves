@@ -48,7 +48,6 @@ data class WWWEvent(
     val mapOsmadminid: Int,
     val mapMinzoom: Double,
     val mapMaxzoom: Double,
-    val mapDefaultzoom: Double? = null,
     val mapLanguage: String,
     val mapOsmarea: String,
     val mapWarmingZoneLongitude: Double,
