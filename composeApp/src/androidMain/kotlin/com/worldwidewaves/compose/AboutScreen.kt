@@ -133,7 +133,6 @@ fun AboutDividerLine() {
 fun AboutWWWSocialNetworks() {
     WWWSocialNetworks(
         instagramAccount = stringResource(ShRes.string.www_instagram),
-        instagramUrl = stringResource(ShRes.string.www_instagram_url),
         instagramHashtag = stringResource(ShRes.string.www_hashtag)
     )
 }

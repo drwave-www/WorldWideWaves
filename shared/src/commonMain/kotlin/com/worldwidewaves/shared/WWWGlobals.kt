@@ -24,6 +24,9 @@ class WWWGlobals {
 
     companion object {
 
+        // -- URL Constants --
+        const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
+
         // -- FS Constants --
 
         const val FS_DATASTORE_FOLDER = "datastore"

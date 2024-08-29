@@ -38,7 +38,6 @@ class WWWEventTest {
         speed = 5,
         description = "Experience the wave in Paris",
         instagramAccount = "worldwidewaves.paris",
-        instagramUrl = "https://www.instagram.com/worldwidewaves.paris/",
         instagramHashtag = "#waveparis",
         mapOsmadminid = 71525,
         mapMinzoom = 10.0,
@@ -116,21 +115,7 @@ fun createRandomWWWEvent(id: String): WWWEvent {
         "worldwidewaves.tokyo",
         "worldwidewaves.sydney"
     )
-    val instagramUrls = listOf(
-        "https://www.instagram.com/worldwidewaves.paris/",
-        "https://www.instagram.com/worldwidewaves.rio/",
-        "https://www.instagram.com/worldwidewaves.usa/",
-        "https://www.instagram.com/worldwidewaves.tokyo/",
-        "https://www.instagram.com/worldwidewaves.sydney/"
-    )
     val instagramHashtags = listOf("#waveparis", "#waverio", "#waveusa", "#wavetokyo", "#wavesydney")
-    val mapBboxes = listOf(
-        "2.2241,48.8156,2.4699,48.9022",
-        "-43.7955,-23.0823,-43.1052,-22.7469",
-        "-125.0017,24.3963,-66.9346,49.3844",
-        "139.6917,35.6895,139.7514,35.7295",
-        "151.2093,-33.8688,151.2293,-33.8588"
-    )
     val mapCenters = listOf(
         "48.8619,2.3417",
         "-22.9068,-43.1729",
@@ -160,7 +145,6 @@ fun createRandomWWWEvent(id: String): WWWEvent {
         speed = 5,
         description = descriptions.random(),
         instagramAccount = instagramAccounts.random(),
-        instagramUrl = instagramUrls.random(),
         instagramHashtag = instagramHashtags.random(),
         mapOsmadminid = mapOsmadminids.random(),
         mapMinzoom = 10.0,

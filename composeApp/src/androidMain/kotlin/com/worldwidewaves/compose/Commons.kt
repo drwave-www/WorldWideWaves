@@ -43,6 +43,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.isRunning
@@ -165,7 +166,6 @@ fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
 fun WWWSocialNetworks(
     modifier: Modifier = Modifier,
     instagramAccount: String,
-    instagramUrl: String,
     instagramHashtag: String
 ) {
     val uriHandler = LocalUriHandler.current
@@ -183,7 +183,7 @@ fun WWWSocialNetworks(
             Text(
                 modifier = Modifier.clickable(onClick = {
                     try {
-                        uriHandler.openUri(instagramUrl)
+                        uriHandler.openUri("$URL_BASE_INSTAGRAM/$instagramAccount")
                     } catch (e: Exception) {
                         Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
                     }

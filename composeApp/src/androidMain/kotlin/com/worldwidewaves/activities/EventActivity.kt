@@ -263,7 +263,6 @@ fun DividerLine() {
 private fun WWWEventSocialNetworks(event: WWWEvent) {
     WWWSocialNetworks(
         instagramAccount = event.instagramAccount,
-        instagramUrl = event.instagramUrl,
         instagramHashtag = event.instagramHashtag
     )
 }

@@ -42,7 +42,6 @@ data class WWWEvent(
     val speed: Int,
     val description: String,
     val instagramAccount: String,
-    val instagramUrl: String,
     val instagramHashtag: String,
     var favorite: Boolean = false,
     val mapOsmadminid: Int,
