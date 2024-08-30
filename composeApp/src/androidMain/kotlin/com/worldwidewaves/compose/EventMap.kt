@@ -310,14 +310,12 @@ class EventMap(
                     override fun onCancel() {}
                     override fun onFinish() {
                         // Constrain the camera movement to the bounds of the map
-                        constrainCameraOnMap(map, coroutineScope)
+                        // TODO fix : constrainCameraOnMap(map, coroutineScope)
                     }
                 }
             )
         }
 
-        // Constrain the camera movement to ensure the map bounds are always visible
-        //
     }
 
     /**
