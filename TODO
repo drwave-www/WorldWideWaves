@@ -1,14 +1,9 @@
 
 Next:
 
-- review tests in WWWEventWaveTest
-- review cache mechanism : when it is cached, when it is not, ... (perf/relevancy)
-
-- terminate map styling
-    - style of geojsons
-
 - correct the area limitation mechanism on large map screen
 
+- review tests in WWWEventWaveTest
 - wave progression
     - add a layer on the map
     - add a progress bar on the map

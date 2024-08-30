@@ -60,6 +60,47 @@ mkdir -p ./data
   | del(.layers[] | select(.id == "natural_earth"))
   | (.sprite) |= "__SPRITE_URI__"
   | (.glyphs) |= sub("^(.*)/\\{fontstack\\}(.*)$"; "__GLYPHS_URI__/{fontstack}/{range}.pbf")
+  | .sources.geojson = { "data": "__GEOJSON_URI__", "type": "geojson" }
+  | .sources.geojsonwarming = { "data": "__GEOJSON_WARMING_URI__", "type": "geojson" }
+  | .layers += [
+      {
+        "id": "waveboundaryarea",
+        "source": "geojson",
+        "type": "fill",
+        "paint": {
+          "fill-color": "#0000ff",
+          "fill-opacity": 0.1
+        }
+      },
+      {
+        "id": "waveboundaryline",
+        "source": "geojson",
+        "type": "line",
+        "paint": {
+          "line-color": "#0000ff",
+          "line-width": 3
+        }
+      },
+
+      {
+        "id": "warmingboundaryarea",
+        "source": "geojsonwarming",
+        "type": "fill",
+        "paint": {
+          "fill-color": "#ff0000",
+          "fill-opacity": 0.1
+        }
+      },
+      {
+        "id": "warmingboundaryline",
+        "source": "geojsonwarming",
+        "type": "line",
+        "paint": {
+          "line-color": "#ff0000",
+          "line-width": 3
+        }
+      }
+    ]
 ' "$IN_STYLE_FILE" > "$OUT_STYLE_FILE"
 
 # Copy sprites to the data directory
