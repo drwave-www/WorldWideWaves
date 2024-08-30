@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
@@ -66,6 +67,15 @@ class WWWEventMap(
 
     // ---------------------------
 
+    /**
+     * Retrieves the URI for the map style.
+     *
+     * This function generates a map style JSON file based on event data and caches it for reuse.
+     * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
+     * and returns the URI of the cached style JSON.
+     *
+     * @return The URI of the cached style JSON file, or null if an error occurs.
+     */
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
 
@@ -98,6 +108,15 @@ class WWWEventMap(
 
     // ---------------------------
 
+    /**
+     * Caches sprite and glyphs resources required for the map style.
+     *
+     * This function reads a file listing the required resources, caches them individually,
+     * and returns the path to the cache directory.
+     *
+     * @return The path to the cache directory containing the sprite and glyphs resources.
+     * @throws Exception if an error occurs during caching.
+     */
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String { // TODO: use statics
         return try {
@@ -113,6 +132,18 @@ class WWWEventMap(
         } catch (e: Exception) {
             Napier.e("Error caching sprite and glyphs", e)
             throw e
+        }
+    }
+
+    /**
+     * Checks if a given position is within the event area's bounding box.
+     *
+     * @param position The position to check.
+     * @return True if the position is within the bounding box, false otherwise.
+     */
+    suspend fun isPositionWithin(position: Position): Boolean {
+        return with(event.area.getBoundingBox()) {
+            position.lat in sw.lat..ne.lat && position.lng in sw.lng..ne.lng
         }
     }
 

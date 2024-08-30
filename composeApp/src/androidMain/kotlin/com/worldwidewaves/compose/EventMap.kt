@@ -74,6 +74,7 @@ import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -140,11 +141,15 @@ class EventMap(
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = extendedLight.quinary.color,
-                        modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(maxWidth / 3)
                     )
                 } else {
                     Image(
-                        modifier = Modifier.size(maxWidth / 4).align(Alignment.Center),
+                        modifier = Modifier
+                            .size(maxWidth / 4)
+                            .align(Alignment.Center),
                         painter = painterResource(ShRes.drawable.map_error),
                         contentDescription = "error"
                     )
@@ -152,7 +157,9 @@ class EventMap(
             }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }
@@ -298,7 +305,70 @@ class EventMap(
                 .include(LatLng(newNeLat, newNeLng))
                 .build()
 
-            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,0),
+                object: CancelableCallback {
+                    override fun onCancel() {}
+                    override fun onFinish() {
+                        // Constrain the camera movement to the bounds of the map
+                        constrainCameraOnMap(map, coroutineScope)
+                    }
+                }
+            )
+        }
+
+        // Constrain the camera movement to ensure the map bounds are always visible
+        //
+    }
+
+    /**
+     * Constrains the map camera movement to stay within the event area's bounding box.
+     *
+     * This function adds a camera move listener to the map. When the camera moves, it checks if the
+     * visible region extends beyond the event area's bounding box. If so, it animates the camera
+     * back to a position where the visible region is contained within the bounding box.
+     *
+     * @param map The MapLibreMap object to constrain.
+     * @param coroutineScope The CoroutineScope used to launch the camera animation.
+     */
+    private var lastCameraMoveTime = 0L
+    private val debounceDelay = 200L // milliseconds
+
+    private fun constrainCameraOnMap(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope
+    ) {
+        map.addOnCameraMoveListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastCameraMoveTime > debounceDelay) {
+                lastCameraMoveTime = currentTime
+
+                map.cameraPosition.target?.let { target ->
+                    coroutineScope.launch {
+                        val mapBounds = event.area.getBoundingBox()
+                        val viewBounds = map.projection.visibleRegion.latLngBounds
+                        val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
+                        val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
+
+                        val newTarget = LatLng(target.latitude, target.longitude).apply {
+                            longitude = when {
+                                viewBounds.longitudeWest < mapBounds.sw.lng -> mapBounds.sw.lng + dimLng
+                                viewBounds.longitudeEast > mapBounds.ne.lng -> mapBounds.ne.lng - dimLng
+                                else -> longitude
+                            }
+                            latitude = when {
+                                viewBounds.latitudeSouth < mapBounds.sw.lat -> mapBounds.sw.lat + dimLat
+                                viewBounds.latitudeNorth > mapBounds.ne.lat -> mapBounds.ne.lat - dimLat
+                                else -> latitude
+                            }
+                        }
+
+                        if (newTarget.latitude != target.latitude || newTarget.longitude != target.longitude) {
+                            Log.v("constrainCameraOnMap", "Constraining camera to $newTarget")
+                            map.animateCamera(CameraUpdateFactory.newLatLng(newTarget))
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -317,6 +387,16 @@ class EventMap(
 
     // -------------------------------------------------------------------------
 
+    /**
+     * Builds `LocationComponentActivationOptions` for configuring the Mapbox location component.
+     *
+     * This function sets up the location component enabling a
+     * pulsing animation around the user location.
+     *
+     * @param context The context of the application.
+     * @param style The map style to use with the location component.
+     * @return The configured `LocationComponentActivationOptions` object.
+     */
     private fun buildLocationComponentActivationOptions(
         context: Context,
         style: Style
@@ -335,6 +415,11 @@ class EventMap(
             .build()
     }
 
+    /**
+     * Builds a `LocationEngineRequest` for location updates.
+     *
+     * @return The configured `LocationEngineRequest` object.
+     */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.toLong())
             .setFastestInterval(CONST_TIMER_GPS_UPDATE.toLong() / 2)
@@ -397,6 +482,17 @@ class EventMap(
 
 // -- Use the MapLibre MapView as a composable --------------------------------
 
+/**
+ * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView` with the
+ * lifecycle of a `LifecycleOwner`.
+ *
+ * This observer ensures that the `MapView` receives the corresponding lifecycle events
+ * (`onCreate`, `onStart`, `onResume`, `onPause`, `onStop`, `onDestroy`) as the
+ * `LifecycleOwner` transitions through its lifecycle states.
+ *
+ * @param mapView The `MapView` to observe lifecycle events for.
+ * @return A `LifecycleEventObserver` that manages the `MapView`'s lifecycle.
+ */
 private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->
         when (event) {
