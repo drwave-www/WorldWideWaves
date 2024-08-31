@@ -20,7 +20,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_DEFAULT_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
@@ -47,13 +46,8 @@ data class WWWEventWaveLinear(
     override val warming: Warming
 ) : WWWEventWave() {
 
-    private var observationInterval: Long = WAVE_DEFAULT_REFRESH_INTERVAL
-    private var cachedEndTime: LocalDateTime? = null
+    private var cachedLiteralEndTime: String? = null
     private var cachedTotalTime: Duration? = null
-
-    // ---------------------------
-
-    override suspend fun getObservationInterval(): Long = observationInterval
 
     // ---------------------------
 
@@ -88,15 +82,31 @@ data class WWWEventWaveLinear(
      *
      * @return The calculated end time of the event as a `LocalDateTime` object.
      */
-    override suspend fun getEndTime(): LocalDateTime {
-        return cachedEndTime ?: run {
-            val startDateTime = event.getStartDateTime()
-            val bbox = event.area.getBoundingBox()
-            val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
-            val distance = calculateDistance(bbox, avgLatitude)
-            val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
-            startDateTime.toInstant(event.getTZ()).plus(duration).toLocalDateTime(event.getTZ())
-        }.also { cachedEndTime = it }
+    private suspend fun getEndTime(): LocalDateTime {
+        val startDateTime = event.getStartDateTime()
+        val bbox = event.area.getBoundingBox()
+        val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
+        val distance = calculateDistance(bbox, avgLatitude)
+        val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
+        return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
+    }
+
+    /**
+     * Retrieves the literal end time of the wave event in "HH:mm" format.
+     *
+     * This function checks if the end time has been previously cached. If it has, it returns the cached value.
+     * Otherwise, it calculates the end time by calling `getEndTime()`, formats it to "HH:mm" format,
+     * caches the result, and then returns it.
+     *
+     * @return A string representing the end time in "HH:mm" format.
+     */
+    override suspend fun getLiteralEndTime(): String {
+        return cachedLiteralEndTime ?: run {
+            val endDateTime = getEndTime()
+            val hour = endDateTime.hour.toString().padStart(2, '0')
+            val minute = endDateTime.minute.toString().padStart(2, '0')
+            "$hour:$minute".also { cachedLiteralEndTime = it }
+        }
     }
 
     // ---------------------------
@@ -111,14 +121,27 @@ data class WWWEventWaveLinear(
      *
      * @return The total duration of the event as a `Duration` object.
      */
-    override suspend fun getTotalTime(): Duration {
+    private suspend fun getTotalTime(): Duration {
         return cachedTotalTime ?: run {
             val startDateTime = event.getStartDateTime()
             val endDateTime = getEndTime()
-            (endDateTime.toInstant(event.getTZ()).epochSeconds -
-                            startDateTime.toInstant(event.getTZ()).epochSeconds
+            (
+                    endDateTime.toInstant(event.getTimeZone()).epochSeconds -
+                            startDateTime.toInstant(event.getTimeZone()).epochSeconds
                     ).toDuration(DurationUnit.SECONDS).also { cachedTotalTime = it }
         }
+    }
+
+    /**
+     * Retrieves the total time of the wave event in a human-readable format.
+     *
+     * This function calculates the total time of the wave event and returns it as a string
+     * in the format of "X min", where X is the total time in whole minutes.
+     *
+     * @return A string representing the total time of the wave event in minutes.
+     */
+    override suspend fun getLiteralTotalTime(): String {
+        return "${getTotalTime().inWholeMinutes} min"
     }
 
     // ---------------------------
@@ -133,35 +156,17 @@ data class WWWEventWaveLinear(
      *
      * @return A string representing the progression of the event as a percentage.
      */
-    override suspend fun getProgression(): Double {
+    override suspend fun getLiteralProgression(): String {
         return when {
-            event.isDone() -> 100.0
-            !event.isRunning() -> 0.0
+            event.isDone() -> "100%"
+            !event.isRunning() -> "0%"
             else -> {
-                val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
-                        event.getStartDateTime().toInstant(event.getTZ()).epochSeconds
+                val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
+                        event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
                 val totalTime = getTotalTime().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
+                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0).let { "$it%" }
             }
         }
-    }
-
-    // ---------------------------
-
-    override suspend fun isWarmingEnded(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun hasUserBeenHit(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    // ---------------------------
-
-    override fun isValid() : Pair<Boolean, String?> {
-        val superValid = super.isValid()
-        if (!superValid.first) return superValid
-        return Pair(true, null) // TODO
     }
 
 }

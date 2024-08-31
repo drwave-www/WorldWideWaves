@@ -20,35 +20,50 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_LISTING
 import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
-import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+
+// ---------------------------
+
+interface MapDataProvider {
+    suspend fun geoMapStyleData(): String
+}
+
+class DefaultMapDataProvider : MapDataProvider {
+    @OptIn(ExperimentalResourceApi::class)
+    override suspend fun geoMapStyleData(): String {
+        return withContext(Dispatchers.IO) {
+            Napier.i("Loading map style data from $FS_MAPS_STYLE")
+            Res.readBytes(FS_MAPS_STYLE).decodeToString()
+        }
+    }
+}
 
 // ---------------------------
 
 class WWWEventMap(
-    private val event: WWWEvent
-) : KoinComponent {
+    private val event: WWWEvent,
+    private val mapDataProvider: MapDataProvider = DefaultMapDataProvider()
+) {
 
-    private val mapDataProvider: MapDataProvider by inject()
-
-    // ---------------------------
-
-    private suspend fun getMbtilesFilePath(): String? =
-        getMapFileAbsolutePath(event.id, "mbtiles")
+    private suspend fun getMbtilesFilePath(): String? {
+        return getMapFileAbsolutePath(event.id, "mbtiles")
+    }
 
     // ---------------------------
 
@@ -63,17 +78,23 @@ class WWWEventMap(
      */
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
+
         val styleFilename = "style-${event.id}.json"
-        if (cachedFileExists(styleFilename))
+        if (cachedFileExists(styleFilename)) { // TODO: BUGFIX: for testing, better manage cache
             return cachedFilePath(styleFilename)
+        }
 
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
-        val warmingGeoJsonFilePath = cacheStringToFile(
-            "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.wave.getWarmingPolygons())
-        ).let { cachedFilePath(it) }
+
+        val warmingGeoJsonFilename = "warming-${event.id}.geojson"
+        val warmingPolygons = event.wave.getWarmingPolygons()
+        val warmingGeoJson = convertPolygonsToGeoJson(warmingPolygons)
+
+        cacheStringToFile(warmingGeoJsonFilename, warmingGeoJson)
+        val warmingGeoJsonFilePath = cachedFilePath(warmingGeoJsonFilename)
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
+
         val newFileStr = mapDataProvider.geoMapStyleData()
             .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
             .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
@@ -97,13 +118,16 @@ class WWWEventMap(
      * @throws Exception if an error occurs during caching.
      */
     @OptIn(ExperimentalResourceApi::class)
-    suspend fun cacheSpriteAndGlyphs(): String {
+    suspend fun cacheSpriteAndGlyphs(): String { // TODO: use statics
         return try {
-            Res.readBytes(FS_STYLE_LISTING)
-                .decodeToString()
-                .lines()
-                .filter { it.isNotBlank() }
-                .forEach { cacheDeepFile("$FS_STYLE_FOLDER/$it") }
+            val listingFilePath = FS_STYLE_LISTING
+            val listingContent = Res.readBytes(listingFilePath).decodeToString()
+            val fileNames = listingContent.lines().filter { it.isNotBlank() }
+
+            fileNames.forEach { fileName ->
+                cacheDeepFile("$FS_STYLE_FOLDER/$fileName")
+            }
+
             getCacheDir()
         } catch (e: Exception) {
             Napier.e("Error caching sprite and glyphs", e)
@@ -117,9 +141,10 @@ class WWWEventMap(
      * @param position The position to check.
      * @return True if the position is within the bounding box, false otherwise.
      */
-    suspend fun isPositionWithin(position: Position): Boolean =
-        with(event.area.getBoundingBox()) {
+    suspend fun isPositionWithin(position: Position): Boolean {
+        return with(event.area.getBoundingBox()) {
             position.lat in sw.lat..ne.lat && position.lng in sw.lng..ne.lng
         }
+    }
 
 }

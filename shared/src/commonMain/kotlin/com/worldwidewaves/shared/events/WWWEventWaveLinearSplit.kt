@@ -20,57 +20,45 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import kotlin.time.Duration
 
 // ---------------------------
+
+@Serializable
+data class Move(
+    val id: Int,
+    val longitude: Double
+)
+
+@Serializable
+data class Adjustments(
+    val moves: List<Move>
+)
 
 @Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
     override val warming: Warming,
-    val nbSplits: Int
+    val nbSplits: Int,
+    val adjustments: Adjustments,
 ) : WWWEventWave() {
 
-    // ---------------------------
-
-    override suspend fun getObservationInterval(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getEndTime(): LocalDateTime {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getTotalTime(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getProgression(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isWarmingEnded(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun hasUserBeenHit(): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun getLiteralEndTime(): String {
+        throw NotImplementedError("Not yet implemented")
     }
 
     // ---------------------------
 
-    override fun isValid(): Pair<Boolean, String?> {
-        val superValid = super.isValid()
-        if (!superValid.first) return superValid
+    override suspend fun getLiteralTotalTime(): String {
+        throw NotImplementedError("Not yet implemented")
+    }
 
-        return when {
-            nbSplits <= 2 ->
-                Pair(false, "Number of splits must be greater than 2")
-            else -> Pair(true, null)
-        }
+    // ---------------------------
+
+
+    override suspend fun getLiteralProgression(): String {
+        throw NotImplementedError("Not yet implemented")
     }
 
 }

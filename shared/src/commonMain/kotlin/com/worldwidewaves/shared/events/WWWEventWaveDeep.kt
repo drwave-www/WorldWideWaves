@@ -20,9 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import kotlin.time.Duration
 
 // ---------------------------
 
@@ -33,36 +31,22 @@ data class WWWEventWaveDeep(
     override val warming: Warming
 ) : WWWEventWave() {
 
-    override suspend fun getObservationInterval(): Long {
-        TODO("Not yet implemented")
-    }
 
-    override suspend fun getEndTime(): LocalDateTime {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getTotalTime(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getProgression(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isWarmingEnded(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun hasUserBeenHit(): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun getLiteralEndTime(): String {
+        throw NotImplementedError("Not yet implemented")
     }
 
     // ---------------------------
 
-    override fun isValid() : Pair<Boolean, String?> {
-        val superValid = super.isValid()
-        if (!superValid.first) return superValid
-        return Pair(true, null) // TODO
+    override suspend fun getLiteralTotalTime(): String {
+        throw NotImplementedError("Not yet implemented")
+    }
+
+    // ---------------------------
+
+
+    override suspend fun getLiteralProgression(): String {
+        throw NotImplementedError("Not yet implemented")
     }
 
 }

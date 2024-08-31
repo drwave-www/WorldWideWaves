@@ -1,10 +1,9 @@
 
 Next:
 
-- Complete tests before going forward
-- gerer le multi polygon de rio de janeiro
-
 - wave progression
+    - manage with several wave areas and their start hour/days, with their direction
+    - move warming zone dans la wave
     - adapt end time and progression to take into account the warming zone
     - add a time delay for warming, in linear wave
     - add a layer on the map
@@ -24,7 +23,6 @@ Next:
     - openAI: images + descriptions
     - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
     - flags, ..
-- create wave packages for each event, generate an image for the first page and loads only when required
 
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 
@@ -72,11 +70,3 @@ Ideas:
     - videos explicatives WWW
     - par pays / events
 - Une association par event, avec un lien cagnotte et une video youtube de présentation
-- Realite augmentee pour "voir" la vague ?
-
-
-Reference:
-- reduction of pbf : https://techblog.dac.digital/openstreetmap-map-size-reduction-guide-43372bbf38c9
-    --> + https://wiki.openstreetmap.org/wiki/Map_features
-    --> + https://wiki.openstreetmap.org/wiki/Category:Features
-
