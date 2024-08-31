@@ -51,6 +51,8 @@ data class WWWEvent(
     val mapOsmarea: String,
     val timeZone: String
 ) {
+    enum class Status { DONE, SOON, RUNNING }
+
     @Transient
     var map = WWWEventMap(this)
 
@@ -76,9 +78,16 @@ data class WaveDef(
     val linearSplit: WWWEventWaveLinearSplit? = null
 )
 
-
-
 // ---------------------------
+
+fun WWWEvent.getStatus(): WWWEvent.Status {
+    return when {
+        isDone() -> WWWEvent.Status.DONE
+        isSoon() -> WWWEvent.Status.SOON
+        isRunning() -> WWWEvent.Status.RUNNING
+        else -> throw IllegalStateException("Event status is undefined")
+    }
+}
 
 fun WWWEvent.isDone(): Boolean {
     return this.id == "paris_france" // TODO: test

@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_DEFAULT_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
@@ -46,8 +47,13 @@ data class WWWEventWaveLinear(
     override val warming: Warming
 ) : WWWEventWave() {
 
+    private var observationInterval: Long = WAVE_DEFAULT_REFRESH_INTERVAL
     private var cachedEndTime: LocalDateTime? = null
     private var cachedTotalTime: Duration? = null
+
+    // ---------------------------
+
+    override suspend fun getObservationInterval(): Long = observationInterval
 
     // ---------------------------
 
@@ -138,6 +144,16 @@ data class WWWEventWaveLinear(
                 (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
             }
         }
+    }
+
+    // ---------------------------
+
+    override suspend fun isWarmingEnded(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hasUserBeenHit(): Boolean {
+        TODO("Not yet implemented")
     }
 
 }

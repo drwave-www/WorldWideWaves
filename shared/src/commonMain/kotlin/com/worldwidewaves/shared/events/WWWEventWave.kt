@@ -1,16 +1,26 @@
 package com.worldwidewaves.shared.events
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 /*
  * Copyright 2024 DrWave
@@ -59,22 +69,29 @@ abstract class WWWEventWave {
 
     // ---------------------------
 
-    private var positionRequester: (() -> Position)? = null
+    private var observationStarted = false
+    private var lastObservedStatus: WWWEvent.Status? = null
+    private var lastObservedProgression: Double? = null
+
+    protected var positionRequester: (() -> Position?)? = null
     private var cachedLiteralStartTime: String? = null
 
     // ---------------------------
 
-    private val waveStatusChangedListeners = mutableListOf<() -> Unit>()
-    private val waveProgressionChangedListeners = mutableListOf<() -> Unit>()
-    private val waveWarmingEndedChangedListeners = mutableListOf<() -> Unit>()
-    private val waveUserIsGoingToBeHitChangedListeners = mutableListOf<() -> Unit>()
-    private val waveUserHasBeenHitChangedListeners = mutableListOf<() -> Unit>()
+    private val waveStatusChangedListeners = mutableListOf<(WWWEvent.Status) -> Unit>()
+    private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
+    private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
+    private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
+    private val waveUserHasBeenHitListeners = mutableListOf<() -> Unit>()
 
     // ---------------------------
 
+    abstract suspend fun getObservationInterval(): Long
     abstract suspend fun getEndTime(): LocalDateTime
     abstract suspend fun getTotalTime(): Duration
     abstract suspend fun getProgression(): Double
+    abstract suspend fun isWarmingEnded(): Boolean
+    abstract suspend fun hasUserBeenHit(): Boolean
 
     // ---------------------------
 
@@ -86,37 +103,86 @@ abstract class WWWEventWave {
 
     fun setEvent(event: WWWEvent) = apply { this._event = event }
 
-    fun setPositionRequester(positionRequester: () -> Position) = apply {
+    fun setPositionRequester(positionRequester: () -> Position?) = apply {
         this.positionRequester = positionRequester
     }
 
     // ---------------------------
 
-    fun addOnWaveStatusChangedListener(listener: () -> Unit) = apply {
+    /**
+     * Starts observing the wave event if not already started.
+     *
+     * Launches a coroutine to initialize the last observed status and progression,
+     * then calls `observeWave` to begin periodic checks.
+     */
+    private fun startObservation() {
+        if (!observationStarted) {
+            CoroutineScope(Dispatchers.IO).launch {
+                lastObservedStatus = event.getStatus()
+                lastObservedProgression = getProgression()
+
+                val eventTimeZone: TimeZone = event.getTimeZone() // TODO: test
+                val now: Instant = Clock.System.now().toLocalDateTime(eventTimeZone).toInstant(eventTimeZone)
+                val eventStartTime: Instant = event.getStartDateTime().toInstant(eventTimeZone)
+                val durationUntilEvent: Duration = eventStartTime - now
+
+                if (!event.isDone() && !(event.isSoon() && durationUntilEvent > WAVE_OBSERVE_DELAY.hours)) {
+                    observeWave()
+                }
+
+                observationStarted = true
+            }
+        }
+    }
+
+    /**
+     * Observes the wave event for changes in status and progression.
+     *
+     * Launches a coroutine to periodically check the wave's status and progression.
+     * If changes are detected, the corresponding change handlers are invoked.
+     */
+    private fun observeWave() {
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(getObservationInterval())
+            getProgression().takeIf { it != lastObservedProgression }?.also {
+                lastObservedProgression = it
+                onWaveProgressionChanged(it)
+            }
+            event.getStatus().takeIf { it != lastObservedStatus }?.also {
+                lastObservedStatus = it
+                onWaveStatusChanged(it)
+            }
+        }
+    }
+
+    // ---------------------------
+
+    fun addOnWaveStatusChangedListener(listener: (WWWEvent.Status) -> Unit) = apply {
         waveStatusChangedListeners.add(listener)
-    }
+    }.also { startObservation() }
 
-    fun addOnWaveProgressionChangedListener(listener: () -> Unit) = apply {
+    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit) = apply {
         waveProgressionChangedListeners.add(listener)
-    }
+    }.also { startObservation() }
 
-    fun addOnWaveWarmingEndedChangedListener(listener: () -> Unit) = apply {
-        waveWarmingEndedChangedListeners.add(listener)
-    }
+    fun addOnWaveWarmingEndedListener(listener: () -> Unit) = apply {
+        waveWarmingEndedListeners.add(listener)
+    }.also { startObservation() }
 
-    fun addOnWaveUserIsGoingToBeHitChangedListener(listener: () -> Unit) = apply {
-        waveUserIsGoingToBeHitChangedListeners.add(listener)
-    }
+    fun addOnWaveUserIsGoingToBeHitListener(listener: () -> Unit) = apply {
+        waveUserIsGoingToBeHitListeners.add(listener)
+    }.also { startObservation() }
 
-    fun addOnWaveUserUserHasBeenHitChangedListener(listener: () -> Unit) = apply {
-        waveUserHasBeenHitChangedListeners.add(listener)
-    }
+    fun addOnWaveUserUserHasBeenHitListener(listener: () -> Unit) = apply {
+        waveUserHasBeenHitListeners.add(listener)
+    }.also { startObservation() }
 
-    protected fun onWaveStatusChangedListener() = waveStatusChangedListeners.forEach { it() }
-    protected fun onWaveProgressionChangedListener() = waveProgressionChangedListeners.forEach { it() }
-    protected fun onWaveWarmingEndedChangedListener() = waveWarmingEndedChangedListeners.forEach { it() }
-    protected fun onWaveUserIsGoingToBeHitChangedListener() = waveUserIsGoingToBeHitChangedListeners.forEach { it() }
-    protected fun onWaveUserUserHasBeenHitChangedListener() = waveUserHasBeenHitChangedListeners.forEach { it() }
+    private fun onWaveStatusChanged(status: WWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
+    private fun onWaveProgressionChanged(progression: Double) = waveProgressionChangedListeners.forEach { it(progression) }
+
+    protected fun onWaveWarmingEnded() = waveWarmingEndedListeners.forEach { it() }
+    protected fun onWaveUserIsGoingToBeHit() = waveUserIsGoingToBeHitListeners.forEach { it() }
+    protected fun onWaveUserUserHasBeenHit() = waveUserHasBeenHitListeners.forEach { it() }
 
     // ---------------------------
 

@@ -84,6 +84,9 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
 import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.getLocationImage
+import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
+import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
@@ -113,7 +116,7 @@ class EventActivity : AbstractEventBackActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
         val context = LocalContext.current
-        val eventDate = event.getLiteralStartDateSimple()
+        val eventDate = event.getStartDateSimpleAsLocal()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
