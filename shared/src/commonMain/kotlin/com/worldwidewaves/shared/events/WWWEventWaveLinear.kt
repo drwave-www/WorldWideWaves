@@ -38,9 +38,8 @@ const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 
 // ---------------------------
 
-class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
+class WWWEventWaveLinear(override val event: WWWEvent) : WWWEventWave() {
 
-    private var cachedLiteralStartTime: String? = null
     private var cachedLiteralEndTime: String? = null
     private var cachedTotalTime: Duration? = null
 
@@ -56,36 +55,14 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
      */
     override suspend fun getAllNumbers(): WaveNumbers {
         return WaveNumbers(
-            waveSpeed = event.wave.getLiteralSpeed(),
-            waveStartTime = event.wave.getLiteralStartTime(),
-            waveEndTime = event.wave.getLiteralEndTime(),
-            waveTotalTime = event.wave.getLiteralTotalTime(),
-            waveProgression = event.wave.getLiteralProgression()
+            waveTimezone = getLiteralTimezone(),
+            waveSpeed = getLiteralSpeed(),
+            waveStartTime = getLiteralStartTime(),
+            waveEndTime = getLiteralEndTime(),
+            waveTotalTime = getLiteralTotalTime(),
+            waveProgression = getLiteralProgression()
         )
     }
-
-    // ---------------------------
-
-    /**
-     * Retrieves the literal start time of the event in "HH:mm" format.
-     *
-     * This function first checks if the start time has been cached. If it has, it returns the cached value.
-     * If not, it calculates the start time by converting the event's start date and time to a local `LocalDateTime`,
-     * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
-     *
-     * @return A string representing the start time of the event in "HH:mm" format.
-     */
-    override fun getLiteralStartTime(): String {
-        return cachedLiteralStartTime ?: event.getStartDateTimeAsLocal().let { localDateTime ->
-            val hour = localDateTime.hour.toString().padStart(2, '0')
-            val minute = localDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute"
-        }.also { cachedLiteralStartTime = it }
-    }
-
-    // ---------------------------
-
-    override fun getLiteralSpeed(): String = "${event.speed} m/s"
 
     // ---------------------------
 
@@ -121,7 +98,7 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
      * @return The calculated end time of the event as a `LocalDateTime` object.
      */
     private suspend fun getEndTime(): LocalDateTime {
-        val startDateTime = event.getStartDateTimeAsLocal()
+        val startDateTime = event.getStartDateTime()
         val bbox = event.area.getBoundingBox()
         val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
         val distance = calculateDistance(bbox, avgLatitude)
@@ -161,7 +138,7 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
      */
     private suspend fun getTotalTime(): Duration {
         return cachedTotalTime ?: run {
-            val startDateTime = event.getStartDateTimeAsLocal()
+            val startDateTime = event.getStartDateTime()
             val endDateTime = getEndTime()
             (
                     endDateTime.toInstant(event.getTimeZone()).epochSeconds -
@@ -200,7 +177,7 @@ class WWWEventWaveLinear(val event: WWWEvent) : WWWEventWave {
             !event.isRunning() -> "0%"
             else -> {
                 val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
-                        event.getStartDateTimeAsLocal().toInstant(event.getTimeZone()).epochSeconds
+                        event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
                 val totalTime = getTotalTime().inWholeSeconds
                 (elapsedTime.toDouble() / totalTime * 100).let { "$it%" }
             }

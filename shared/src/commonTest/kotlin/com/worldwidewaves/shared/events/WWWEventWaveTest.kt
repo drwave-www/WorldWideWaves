@@ -131,7 +131,7 @@ class WWWEventWaveTest {
     ): String {
         // Use the provided mocked functions directly
         val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
-                event.getStartDateTimeAsLocal().toInstant(event.getTimeZone()).epochSeconds
+                event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
         val totalTime = getTotalTime().inWholeSeconds
         val progression = (elapsedTime.toDouble() / totalTime) * 100
         return "$progression%"

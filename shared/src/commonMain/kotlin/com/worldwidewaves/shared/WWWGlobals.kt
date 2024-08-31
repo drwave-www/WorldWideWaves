@@ -93,6 +93,7 @@ class WWWGlobals {
         const val DIM_EVENT_NUMBERS_SPACER = 16
         const val DIM_EVENT_NUMBERS_LABEL_FONTSIZE = 15
         const val DIM_EVENT_NUMBERS_VALUE_FONTSIZE = 24
+        const val DIM_EVENT_NUMBERS_TZ_FONTSIZE = 12
 
         const val DIM_INFO_TEXT_FONTSIZE = 16
         const val DIM_INFO_DRWAVE_FONTSIZE = 26

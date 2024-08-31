@@ -7,8 +7,6 @@ Next:
     - add a progress bar on the map
     - add a progress bar on the wave screen
 
-- warning to the datetime of the events, add a timezone in event's config
-
 - Large map screen
     => add map actions
     => test on my phone in paris
