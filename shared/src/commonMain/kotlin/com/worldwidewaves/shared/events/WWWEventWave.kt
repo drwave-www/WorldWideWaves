@@ -6,9 +6,11 @@ import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 /*
  * Copyright 2024 DrWave
@@ -57,13 +59,22 @@ abstract class WWWEventWave {
 
     // ---------------------------
 
+    private var positionRequester: (() -> Position)? = null
     private var cachedLiteralStartTime: String? = null
 
     // ---------------------------
 
-    abstract suspend fun getLiteralEndTime(): String
-    abstract suspend fun getLiteralTotalTime(): String
-    abstract suspend fun getLiteralProgression(): String
+    private val waveStatusChangedListeners = mutableListOf<() -> Unit>()
+    private val waveProgressionChangedListeners = mutableListOf<() -> Unit>()
+    private val waveWarmingEndedChangedListeners = mutableListOf<() -> Unit>()
+    private val waveUserIsGoingToBeHitChangedListeners = mutableListOf<() -> Unit>()
+    private val waveUserHasBeenHitChangedListeners = mutableListOf<() -> Unit>()
+
+    // ---------------------------
+
+    abstract suspend fun getEndTime(): LocalDateTime
+    abstract suspend fun getTotalTime(): Duration
+    abstract suspend fun getProgression(): Double
 
     // ---------------------------
 
@@ -75,7 +86,74 @@ abstract class WWWEventWave {
 
     fun setEvent(event: WWWEvent) = apply { this._event = event }
 
+    fun setPositionRequester(positionRequester: () -> Position) = apply {
+        this.positionRequester = positionRequester
+    }
+
     // ---------------------------
+
+    fun addOnWaveStatusChangedListener(listener: () -> Unit) = apply {
+        waveStatusChangedListeners.add(listener)
+    }
+
+    fun addOnWaveProgressionChangedListener(listener: () -> Unit) = apply {
+        waveProgressionChangedListeners.add(listener)
+    }
+
+    fun addOnWaveWarmingEndedChangedListener(listener: () -> Unit) = apply {
+        waveWarmingEndedChangedListeners.add(listener)
+    }
+
+    fun addOnWaveUserIsGoingToBeHitChangedListener(listener: () -> Unit) = apply {
+        waveUserIsGoingToBeHitChangedListeners.add(listener)
+    }
+
+    fun addOnWaveUserUserHasBeenHitChangedListener(listener: () -> Unit) = apply {
+        waveUserHasBeenHitChangedListeners.add(listener)
+    }
+
+    protected fun onWaveStatusChangedListener() = waveStatusChangedListeners.forEach { it() }
+    protected fun onWaveProgressionChangedListener() = waveProgressionChangedListeners.forEach { it() }
+    protected fun onWaveWarmingEndedChangedListener() = waveWarmingEndedChangedListeners.forEach { it() }
+    protected fun onWaveUserIsGoingToBeHitChangedListener() = waveUserIsGoingToBeHitChangedListeners.forEach { it() }
+    protected fun onWaveUserUserHasBeenHitChangedListener() = waveUserHasBeenHitChangedListeners.forEach { it() }
+
+    // ---------------------------
+
+    /**
+     * Retrieves the literal end time of the wave event in "HH:mm" format.
+     *
+     * This function checks if the end time has been previously cached. If it has, it returns the cached value.
+     * Otherwise, it calculates the end time by calling `getEndTime()`, formats it to "HH:mm" format,
+     * caches the result, and then returns it.
+     *
+     */
+    suspend fun getLiteralEndTime(): String {
+        val endDateTime = getEndTime()
+        val hour = endDateTime.hour.toString().padStart(2, '0')
+        val minute = endDateTime.minute.toString().padStart(2, '0')
+        return "$hour:$minute"
+    }
+
+    /**
+     * Retrieves the total time of the wave event in a human-readable format.
+     *
+     * This function calculates the total time of the wave event and returns it as a string
+     * in the format of "X min", where X is the total time in whole minutes.
+     *
+     */
+    suspend fun getLiteralTotalTime(): String {
+        return "${getTotalTime().inWholeMinutes} min"
+    }
+
+    /**
+     * Retrieves the literal progression of the event as a percentage string.
+     */
+    suspend fun getLiteralProgression(): String {
+        return "${getProgression()}%"
+    }
+
+    //---------------------------
 
     /**
      * Retrieves all wave-related numbers for the event.
@@ -83,7 +161,6 @@ abstract class WWWEventWave {
      * This function gathers various wave-related metrics such as speed, start time, end time,
      * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
      *
-     * @return A `WaveNumbers` object containing the wave speed, start time, end time, total time, and progression.
      */
     suspend fun getAllNumbers(): WaveNumbers {
         return WaveNumbers(
@@ -103,7 +180,6 @@ abstract class WWWEventWave {
      *
      * This function returns the speed of the event as a string formatted with "m/s".
      *
-     * @return A string representing the speed of the event in meters per second.
      */
     fun getLiteralSpeed(): String = "$speed m/s"
 
@@ -114,7 +190,6 @@ abstract class WWWEventWave {
      * If not, it calculates the start time by converting the event's start date and time to a local `LocalDateTime`,
      * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
      *
-     * @return A string representing the start time of the event in "HH:mm" format.
      */
     fun getLiteralStartTime(): String {
         return cachedLiteralStartTime ?: event.getStartDateTime().let { localDateTime ->
@@ -130,7 +205,6 @@ abstract class WWWEventWave {
      * This function calculates the current offset of the event's time zone from UTC
      * and returns it as a string in the format "UTC+x".
      *
-     * @return A string representing the event's time zone offset in the form "UTC+x".
      */
     fun getLiteralTimezone(): String {
         val offset = TimeZone.of(event.timeZone).offsetAt(Clock.System.now())
@@ -152,8 +226,7 @@ abstract class WWWEventWave {
      * This function retrieves the warming polygons and checks if the specified position
      * is within any of these polygons using the `isPointInPolygon` function.
      *
-     * @param position The position to check.
-     * @return `true` if the position is within any warming polygon, `false` otherwise.
+
      */
     suspend fun isPositionWithinWarming(position: Position): Boolean {
         return getWarmingPolygons().any { isPointInPolygon(position, it) }
@@ -166,7 +239,6 @@ abstract class WWWEventWave {
      * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
      * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
      *
-     * @return A list of polygons representing the warming zones.
      */
     suspend fun getWarmingPolygons(): List<Polygon> {
         if (cachedWarmingPolygons == null) {

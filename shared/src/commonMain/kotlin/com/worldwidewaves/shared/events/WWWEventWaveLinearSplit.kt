@@ -20,7 +20,9 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 // ---------------------------
 
@@ -44,21 +46,16 @@ data class WWWEventWaveLinearSplit(
     val adjustments: Adjustments,
 ) : WWWEventWave() {
 
-    override suspend fun getLiteralEndTime(): String {
-        throw NotImplementedError("Not yet implemented")
+    override suspend fun getEndTime(): LocalDateTime {
+        TODO("Not yet implemented")
     }
 
-    // ---------------------------
-
-    override suspend fun getLiteralTotalTime(): String {
-        throw NotImplementedError("Not yet implemented")
+    override suspend fun getTotalTime(): Duration {
+        TODO("Not yet implemented")
     }
 
-    // ---------------------------
-
-
-    override suspend fun getLiteralProgression(): String {
-        throw NotImplementedError("Not yet implemented")
+    override suspend fun getProgression(): Double {
+        TODO("Not yet implemented")
     }
 
 }

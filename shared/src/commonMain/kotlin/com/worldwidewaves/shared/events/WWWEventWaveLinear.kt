@@ -46,7 +46,7 @@ data class WWWEventWaveLinear(
     override val warming: Warming
 ) : WWWEventWave() {
 
-    private var cachedLiteralEndTime: String? = null
+    private var cachedEndTime: LocalDateTime? = null
     private var cachedTotalTime: Duration? = null
 
     // ---------------------------
@@ -82,31 +82,15 @@ data class WWWEventWaveLinear(
      *
      * @return The calculated end time of the event as a `LocalDateTime` object.
      */
-    private suspend fun getEndTime(): LocalDateTime {
-        val startDateTime = event.getStartDateTime()
-        val bbox = event.area.getBoundingBox()
-        val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
-        val distance = calculateDistance(bbox, avgLatitude)
-        val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
-        return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
-    }
-
-    /**
-     * Retrieves the literal end time of the wave event in "HH:mm" format.
-     *
-     * This function checks if the end time has been previously cached. If it has, it returns the cached value.
-     * Otherwise, it calculates the end time by calling `getEndTime()`, formats it to "HH:mm" format,
-     * caches the result, and then returns it.
-     *
-     * @return A string representing the end time in "HH:mm" format.
-     */
-    override suspend fun getLiteralEndTime(): String {
-        return cachedLiteralEndTime ?: run {
-            val endDateTime = getEndTime()
-            val hour = endDateTime.hour.toString().padStart(2, '0')
-            val minute = endDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute".also { cachedLiteralEndTime = it }
-        }
+    override suspend fun getEndTime(): LocalDateTime {
+        return cachedEndTime ?: run {
+            val startDateTime = event.getStartDateTime()
+            val bbox = event.area.getBoundingBox()
+            val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
+            val distance = calculateDistance(bbox, avgLatitude)
+            val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
+            startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
+        }.also { cachedEndTime = it }
     }
 
     // ---------------------------
@@ -121,27 +105,14 @@ data class WWWEventWaveLinear(
      *
      * @return The total duration of the event as a `Duration` object.
      */
-    private suspend fun getTotalTime(): Duration {
+    override suspend fun getTotalTime(): Duration {
         return cachedTotalTime ?: run {
             val startDateTime = event.getStartDateTime()
             val endDateTime = getEndTime()
-            (
-                    endDateTime.toInstant(event.getTimeZone()).epochSeconds -
+            (endDateTime.toInstant(event.getTimeZone()).epochSeconds -
                             startDateTime.toInstant(event.getTimeZone()).epochSeconds
                     ).toDuration(DurationUnit.SECONDS).also { cachedTotalTime = it }
         }
-    }
-
-    /**
-     * Retrieves the total time of the wave event in a human-readable format.
-     *
-     * This function calculates the total time of the wave event and returns it as a string
-     * in the format of "X min", where X is the total time in whole minutes.
-     *
-     * @return A string representing the total time of the wave event in minutes.
-     */
-    override suspend fun getLiteralTotalTime(): String {
-        return "${getTotalTime().inWholeMinutes} min"
     }
 
     // ---------------------------
@@ -156,15 +127,15 @@ data class WWWEventWaveLinear(
      *
      * @return A string representing the progression of the event as a percentage.
      */
-    override suspend fun getLiteralProgression(): String {
+    override suspend fun getProgression(): Double {
         return when {
-            event.isDone() -> "100%"
-            !event.isRunning() -> "0%"
+            event.isDone() -> 100.0
+            !event.isRunning() -> 0.0
             else -> {
                 val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
                         event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
                 val totalTime = getTotalTime().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0).let { "$it%" }
+                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
             }
         }
     }
