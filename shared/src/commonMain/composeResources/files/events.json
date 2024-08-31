@@ -7,7 +7,16 @@
     "community": "europe",
     "date": "2024-03-15",
     "startHour": "18:00",
-    "speed": "5",
+    "wavedef": {
+      "linear": {
+        "direction": "west",
+        "speed": 5,
+        "warming": {
+          "type": "longitude-cut",
+          "longitude": 2.39492
+        }
+      }
+    },
     "description": "Experience the wave in Paris, where the charm of the Eiffel Tower meets the elegance of the Champs-Élysées",
     "instagramAccount": "worldwidewaves.paris",
     "instagramHashtag": "#waveparis",
@@ -15,7 +24,6 @@
     "mapMaxzoom": 18,
     "mapLanguage": "fr",
     "mapOsmarea": "europe/france/ile-de-france",
-    "mapWarmingZoneLongitude": 2.39492,
     "timeZone": "Europe/Paris"
   },
   {
@@ -26,7 +34,15 @@
     "community": "europe",
     "date": "2024-03-15",
     "startHour": "18:00",
-    "speed": "5",
+    "wavedef": {
+      "deep": {
+        "speed": 5,
+        "direction": "west",
+        "warming": {
+          "type": "geojson"
+        }
+      }
+    },
     "description": "Join the wave in Rio de Janeiro, where the rhythm of Copacabana meets the majesty of Christ the Redeemer",
     "instagramAccount": "worldwidewaves.rio",
     "instagramHashtag": "#waverio",
@@ -34,7 +50,6 @@
     "mapMaxzoom": 14,
     "mapLanguage": "pt",
     "mapOsmarea": "south-america/brazil/sudeste",
-    "mapWarmingZoneLongitude": 0,
     "timeZone": "America/Sao_Paulo"
   },
   {
@@ -43,8 +58,26 @@
     "location": "United States",
     "community": "usa",
     "date": "2024-04-22",
-    "startHour": "20:30",
-    "speed": "5",
+    "startHour": "12:30",
+    "wavedef": {
+      "linearSplit": {
+        "speed": 5,
+        "direction": "west",
+        "nbSplits":  50,
+        "adjustments": {
+          "moves": [
+            {
+              "id": 1,
+              "longitude": -0.5
+            }
+          ]
+        },
+        "warming": {
+          "type": "longitude-percent",
+          "longitude": 5
+        }
+      }
+    },
     "description": "Feel the wave across the United States, from the bustling streets of New York to the sunny beaches of California",
     "instagramAccount": "worldwidewaves.usa",
     "instagramHashtag": "#waveusa",
@@ -52,7 +85,6 @@
     "mapMaxzoom": 7,
     "mapLanguage": "en",
     "mapOsmarea": "north-america/us",
-    "mapWarmingZoneLongitude": 0,
     "timeZone": "America/New_York"
   },
   {
@@ -61,7 +93,25 @@
     "location": "The World !!!",
     "date": "2024-05-01",
     "startHour": "12:00",
-    "speed": "5",
+    "wavedef": {
+      "linearSplit": {
+        "speed": 5,
+        "direction": "west",
+        "nbSplits":  500,
+        "adjustments": {
+          "moves": [
+            {
+              "id": 45,
+              "longitude": 0.3
+            }
+          ]
+        },
+        "warming": {
+          "type": "longitude-percent",
+          "longitude": 5
+        }
+      }
+    },
     "description": "Be part of the global wave, uniting people from every corner of the world in a celebration of unity and diversity",
     "instagramAccount": "worldwidewaves.world",
     "instagramHashtag": "#waveworld",
@@ -69,7 +119,6 @@
     "mapMaxzoom": 5,
     "mapLanguage": "en",
     "mapOsmarea": "planet",
-    "mapWarmingZoneLongitude": 0,
     "timeZone": "UTC"
   }
 ]

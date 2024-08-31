@@ -2,15 +2,22 @@
 Next:
 
 - wave progression
+    - manage with several wave areas and their start hour/days, with their direction
+    - move warming zone dans la wave
+    - adapt end time and progression to take into account the warming zone
+    - add a time delay for warming, in linear wave
     - add a layer on the map
     - add a progress bar on the map
-    - add a progress bar on the wave screen
+    - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')
 
 - Large map screen
     => add map actions
     => test on my phone in paris
 
+- cleanup events.json, splitting properties in the right object, ex: mapMaxZoom, etc...
+
 - wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
+      - add a progress bar on the wave screen
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
@@ -18,6 +25,8 @@ Next:
     - flags, ..
 
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
+
+- deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
 
 - round2 wave : routing on streets
 
@@ -27,6 +36,8 @@ Next:
     --> add 'wave hours', so countries and the world can have several waves over days during the process
 
 - add the ability to define a geojson for warming zones
+
+- systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
 Cleanings :
 - code coverage of current devs

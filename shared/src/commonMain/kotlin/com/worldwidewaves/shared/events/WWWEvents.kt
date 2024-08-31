@@ -142,7 +142,6 @@ class WWWEvents(
                 event.location.isEmpty() -> Pair(false, "Location is empty")
                 !event.date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> Pair(false, "Date format is invalid")
                 !event.startHour.matches(Regex("\\d{2}:\\d{2}")) -> Pair(false, "Start hour format is invalid")
-                event.speed <= 0 -> Pair(false, "Speed must be a positive integer")
                 event.description.isEmpty() -> Pair(false, "Description is empty")
                 event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
                 event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")

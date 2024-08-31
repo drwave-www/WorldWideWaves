@@ -1,8 +1,14 @@
 package com.worldwidewaves.shared.events
 
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.isPointInPolygon
+import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
+import kotlinx.serialization.Serializable
 
 /*
  * Copyright 2024 DrWave
@@ -24,6 +30,11 @@ import kotlinx.datetime.offsetAt
  * limitations under the License.
  */
 
+@Serializable
+data class Warming(
+    val type: String,
+    val longitude: Double? = null,
+)
 
 data class WaveNumbers(
     val waveTimezone: String,
@@ -38,14 +49,52 @@ data class WaveNumbers(
 
 abstract class WWWEventWave {
 
-    abstract val event: WWWEvent
+    private var _event: WWWEvent? = null
+
+    abstract val speed: Double
+    abstract val direction: String
+    abstract val warming: Warming
+
+    // ---------------------------
+
     private var cachedLiteralStartTime: String? = null
 
-    abstract suspend fun getAllNumbers(): WaveNumbers
+    // ---------------------------
 
     abstract suspend fun getLiteralEndTime(): String
     abstract suspend fun getLiteralTotalTime(): String
     abstract suspend fun getLiteralProgression(): String
+
+    // ---------------------------
+
+    protected val event: WWWEvent
+        get() = this._event ?: run {
+            Napier.e(tag = "WWWEventWave", message = "Event not set")
+            throw IllegalStateException("Event not set")
+        }
+
+    fun setEvent(event: WWWEvent) = apply { this._event = event }
+
+    // ---------------------------
+
+    /**
+     * Retrieves all wave-related numbers for the event.
+     *
+     * This function gathers various wave-related metrics such as speed, start time, end time,
+     * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
+     *
+     * @return A `WaveNumbers` object containing the wave speed, start time, end time, total time, and progression.
+     */
+    suspend fun getAllNumbers(): WaveNumbers {
+        return WaveNumbers(
+            waveTimezone = getLiteralTimezone(),
+            waveSpeed = getLiteralSpeed(),
+            waveStartTime = getLiteralStartTime(),
+            waveEndTime = getLiteralEndTime(),
+            waveTotalTime = getLiteralTotalTime(),
+            waveProgression = getLiteralProgression()
+        )
+    }
 
     // ---------------------------
 
@@ -56,7 +105,7 @@ abstract class WWWEventWave {
      *
      * @return A string representing the speed of the event in meters per second.
      */
-    fun getLiteralSpeed(): String = "${event.speed} m/s"
+    fun getLiteralSpeed(): String = "$speed m/s"
 
     /**
      * Retrieves the literal start time of the event in "HH:mm" format.
@@ -91,6 +140,48 @@ abstract class WWWEventWave {
             hoursOffset > 0 -> "UTC+$hoursOffset"
             else -> "UTC$hoursOffset"
         }
+    }
+
+    // ---------------------------
+
+    private var cachedWarmingPolygons: List<Polygon>? = null
+
+    /**
+     * Checks if a given position is within any of the warming polygons.
+     *
+     * This function retrieves the warming polygons and checks if the specified position
+     * is within any of these polygons using the `isPointInPolygon` function.
+     *
+     * @param position The position to check.
+     * @return `true` if the position is within any warming polygon, `false` otherwise.
+     */
+    suspend fun isPositionWithinWarming(position: Position): Boolean {
+        return getWarmingPolygons().any { isPointInPolygon(position, it) }
+    }
+
+    /**
+     * Retrieves the warming polygons for the event area.
+     *
+     * This function returns a list of polygons representing the warming zones for the event area.
+     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
+     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
+     *
+     * @return A list of polygons representing the warming zones.
+     */
+    suspend fun getWarmingPolygons(): List<Polygon> {
+        if (cachedWarmingPolygons == null) {
+            cachedWarmingPolygons = when (warming.type) {
+                "longitude-cut" -> splitPolygonByLongitude(
+                    event.area.getPolygon(),
+                    warming.longitude ?: run {
+                        Napier.e(tag = "WWWEventWave", message = "Longitude not set in configuration")
+                        return emptyList()
+                    }
+                ).right
+                else -> emptyList()
+            }
+        }
+        return cachedWarmingPolygons!!
     }
 
 }

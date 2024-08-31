@@ -78,7 +78,7 @@ mkdir -p ./data
         "type": "line",
         "paint": {
           "line-color": "#0000ff",
-          "line-width": 3
+          "line-width": 2
         }
       },
 
@@ -97,7 +97,7 @@ mkdir -p ./data
         "type": "line",
         "paint": {
           "line-color": "#ff0000",
-          "line-width": 3
+          "line-width": 2
         }
       }
     ]

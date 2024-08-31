@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.getEventImage
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -39,7 +40,7 @@ data class WWWEvent(
     val community: String? = null,
     val date: String,
     val startHour: String,
-    val speed: Int,
+    val wavedef: WaveDef,
     val description: String,
     val instagramAccount: String,
     val instagramHashtag: String,
@@ -48,13 +49,34 @@ data class WWWEvent(
     val mapMaxzoom: Double,
     val mapLanguage: String,
     val mapOsmarea: String,
-    val mapWarmingZoneLongitude: Double,
     val timeZone: String
 ) {
-    @Transient var map = WWWEventMap(this)
-    @Transient var area = WWWEventArea(this)
-    @Transient var wave = WWWEventWaveLinear(this)
+    @Transient
+    var map = WWWEventMap(this)
+
+    @Transient
+    var area = WWWEventArea(this)
+
+    @Transient
+    var wave = try {
+        (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
+        ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
+            setEvent(this@WWWEvent)
+        }
+    } catch (e: IllegalStateException) {
+        Napier.e("$id: Exception initializing wave: ${e.message}")
+        throw e
+    }
 }
+
+@Serializable
+data class WaveDef(
+    val linear: WWWEventWaveLinear? = null,
+    val deep: WWWEventWaveDeep? = null,
+    val linearSplit: WWWEventWaveLinearSplit? = null
+)
+
+
 
 // ---------------------------
 
@@ -72,7 +94,8 @@ fun WWWEvent.isRunning(): Boolean {
 
 // ---------------------------
 
-private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
+private fun getEventImageByType(type: String, id: String?): Any? =
+    id?.let { getEventImage(type, it) }
 
 fun WWWEvent.getLocationImage(): Any? = getEventImageByType("location", this.id)
 fun WWWEvent.getCommunityImage(): Any? = getEventImageByType("community", this.community)
@@ -94,7 +117,11 @@ fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
     LocalDateTime.parse("${this.date}T${this.startHour}:00")
         .toInstant(getTimeZone())
         .toLocalDateTime(getTimeZone())
-        .let { "${it.dayOfMonth.toString().padStart(2, '0')}/${it.monthNumber.toString().padStart(2, '0')}" }
+        .let {
+            "${it.dayOfMonth.toString().padStart(2, '0')}/${
+                it.monthNumber.toString().padStart(2, '0')
+            }"
+        }
 }.getOrDefault("00/00")
 
 /**

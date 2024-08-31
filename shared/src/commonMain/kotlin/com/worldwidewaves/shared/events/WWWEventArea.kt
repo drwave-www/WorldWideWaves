@@ -26,7 +26,6 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.polygonBbox
-import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
@@ -72,7 +71,6 @@ open class WWWEventArea(
 ) : KoinComponent {
 
     private val areaPolygon: Polygon = mutableListOf()
-    private var cachedWarmingPolygons: List<Polygon>? = null
     private var cachedBoundingBox: BoundingBox? = null
     private var cachedCenter: Position? = null
 
@@ -103,19 +101,6 @@ open class WWWEventArea(
      */
     suspend fun isPositionWithin(position: Position): Boolean {
         return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
-    }
-
-    /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-     * @param position The position to check.
-     * @return `true` if the position is within any warming polygon, `false` otherwise.
-     */
-    suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
     }
 
     // ---------------------------
@@ -218,23 +203,6 @@ open class WWWEventArea(
         }
 
         return this.areaPolygon
-    }
-
-    // ---------------------------
-
-    /**
-     * Retrieves the warming polygons for the event area.
-     *
-     * This function returns a list of polygons representing the warming zones for the event area.
-     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
-     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
-     *
-     * @return A list of polygons representing the warming zones.
-     */
-    suspend fun getWarmingPolygons(): List<Polygon> {
-        return cachedWarmingPolygons ?: splitPolygonByLongitude(getPolygon(), event.mapWarmingZoneLongitude).right.also {
-            cachedWarmingPolygons = it
-        }
     }
 
 }

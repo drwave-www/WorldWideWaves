@@ -25,6 +25,7 @@ import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.Serializable
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -38,31 +39,15 @@ const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 
 // ---------------------------
 
-class WWWEventWaveLinear(override val event: WWWEvent) : WWWEventWave() {
+@Serializable
+data class WWWEventWaveLinear(
+    override val speed: Double,
+    override val direction: String,
+    override val warming: Warming
+) : WWWEventWave() {
 
     private var cachedLiteralEndTime: String? = null
     private var cachedTotalTime: Duration? = null
-
-    // ---------------------------
-
-    /**
-     * Retrieves all wave-related numbers for the event.
-     *
-     * This function gathers various wave-related metrics such as speed, start time, end time,
-     * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
-     *
-     * @return A `WaveNumbers` object containing the wave speed, start time, end time, total time, and progression.
-     */
-    override suspend fun getAllNumbers(): WaveNumbers {
-        return WaveNumbers(
-            waveTimezone = getLiteralTimezone(),
-            waveSpeed = getLiteralSpeed(),
-            waveStartTime = getLiteralStartTime(),
-            waveEndTime = getLiteralEndTime(),
-            waveTotalTime = getLiteralTotalTime(),
-            waveProgression = getLiteralProgression()
-        )
-    }
 
     // ---------------------------
 
@@ -102,7 +87,7 @@ class WWWEventWaveLinear(override val event: WWWEvent) : WWWEventWave() {
         val bbox = event.area.getBoundingBox()
         val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
         val distance = calculateDistance(bbox, avgLatitude)
-        val duration = (distance / event.speed).toDuration(DurationUnit.SECONDS)
+        val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
         return startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
     }
 
