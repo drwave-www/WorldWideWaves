@@ -179,7 +179,7 @@ class WWWEventWaveLinear(override val event: WWWEvent) : WWWEventWave() {
                 val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
                         event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
                 val totalTime = getTotalTime().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).let { "$it%" }
+                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0).let { "$it%" }
             }
         }
     }
