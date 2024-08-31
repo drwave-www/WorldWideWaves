@@ -1,7 +1,6 @@
 
 Next:
 
-- review tests in WWWEventWaveTest
 - wave progression
     - add a layer on the map
     - add a progress bar on the map
@@ -22,7 +21,12 @@ Next:
 
 - round2 wave : routing on streets
 
-- add maps generation for countries, then for the world : no road names, limited zooms, different wave behavior
+- add maps generation for countries, then for the world : no road names, limited zooms
+- adapt wave behavior on countries and the world
+    --> add end date additionally to end hour for countries and the world
+    --> add 'wave hours', so countries and the world can have several waves over days during the process
+
+- add the ability to define a geojson for warming zones
 
 Cleanings :
 - code coverage of current devs
