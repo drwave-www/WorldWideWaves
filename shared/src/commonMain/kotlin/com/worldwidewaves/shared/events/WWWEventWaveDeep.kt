@@ -33,6 +33,10 @@ data class WWWEventWaveDeep(
     override val warming: Warming
 ) : WWWEventWave() {
 
+    override suspend fun getObservationInterval(): Long {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getEndTime(): LocalDateTime {
         TODO("Not yet implemented")
     }
@@ -42,6 +46,14 @@ data class WWWEventWaveDeep(
     }
 
     override suspend fun getProgression(): Double {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isWarmingEnded(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hasUserBeenHit(): Boolean {
         TODO("Not yet implemented")
     }
 

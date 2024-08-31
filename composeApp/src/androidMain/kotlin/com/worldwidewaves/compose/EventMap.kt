@@ -192,6 +192,8 @@ class EventMap(
         coroutineScope: CoroutineScope,
         style: Style
     ) {
+        var lastLocation: Location? = null
+
         map.locationComponent.activateLocationComponent(
             buildLocationComponentActivationOptions(context, style)
         )
@@ -203,7 +205,12 @@ class EventMap(
             object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult?) {
                     result?.lastLocation?.let { location ->
+                        // Record the new location
+                        lastLocation = location
+
+                        // Notify the UI of the user's location
                         onLocationUpdate(LatLng(location.latitude, location.longitude))
+
                         // Follow user while he's within bounds
                         if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
                             moveToLocation(coroutineScope, location, map)
@@ -216,6 +223,13 @@ class EventMap(
             },
             Looper.getMainLooper()
         )
+
+        // Allow the wave to now the current location of the user
+        event.wave.setPositionRequester {
+            lastLocation?.let {
+                Position(it.latitude, it.longitude)
+            }
+        }
     }
 
     // ------------------------
@@ -229,7 +243,9 @@ class EventMap(
      */
     private fun moveToLocation(coroutineScope: CoroutineScope, location: Location, map: MapLibreMap) {
         coroutineScope.launch {
-            val isWithin = withContext(Dispatchers.IO) { event.area.isPositionWithin(Position(location.latitude, location.longitude)) }
+            val isWithin = withContext(Dispatchers.IO) {
+                event.area.isPositionWithin(Position(location.latitude, location.longitude))
+            }
             if (isWithin) {
                 map.animateCamera(
                     CameraUpdateFactory.newCameraPosition(

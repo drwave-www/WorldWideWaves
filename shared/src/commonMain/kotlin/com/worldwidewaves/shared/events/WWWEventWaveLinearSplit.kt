@@ -46,6 +46,10 @@ data class WWWEventWaveLinearSplit(
     val adjustments: Adjustments,
 ) : WWWEventWave() {
 
+    override suspend fun getObservationInterval(): Long {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getEndTime(): LocalDateTime {
         TODO("Not yet implemented")
     }
@@ -55,6 +59,14 @@ data class WWWEventWaveLinearSplit(
     }
 
     override suspend fun getProgression(): Double {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isWarmingEnded(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun hasUserBeenHit(): Boolean {
         TODO("Not yet implemented")
     }
 

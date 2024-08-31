@@ -83,12 +83,10 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_REFRESH_INTERVAL
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.getLocationImage
 import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.events.isDone
-import com.worldwidewaves.shared.events.isRunning
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
@@ -104,7 +102,6 @@ import com.worldwidewaves.theme.extraFontFamily
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
@@ -305,8 +302,7 @@ private fun EventNumbers(event: WWWEvent) {
     val coroutineScope = rememberCoroutineScope()
 
     // Retrieve wave numbers and frequently update progession
-    LaunchedEffect(event) {
-        var lastProgressionValue = ""
+    LaunchedEffect(eventNumbers) {
         coroutineScope.launch {
             val waveNumbers = withContext(Dispatchers.IO) { event.wave.getAllNumbers() }
             eventNumbers.clear()
@@ -318,12 +314,11 @@ private fun EventNumbers(event: WWWEvent) {
                     ShRes.string.wave_progression to waveNumbers.waveProgression
             ))
             eventTimeZone.value = waveNumbers.waveTimezone
-            while (event.isRunning()) {
-                delay(WAVE_REFRESH_INTERVAL)
-                val newProgressionValue = event.wave.getLiteralProgression()
-                if (newProgressionValue != lastProgressionValue) {
-                    eventNumbers[ShRes.string.wave_progression] = newProgressionValue
-                    lastProgressionValue = newProgressionValue
+
+            // Listen for progression changes
+            event.wave.addOnWaveProgressionChangedListener { _ ->
+                coroutineScope.launch {
+                    eventNumbers[ShRes.string.wave_progression] = event.wave.getLiteralProgression()
                 }
             }
         }
