@@ -85,7 +85,12 @@ abstract class WWWEventWave {
      */
     fun getLiteralTimezone(): String {
         val offset = TimeZone.of(event.timeZone).offsetAt(Clock.System.now())
-        return "UTC${offset.totalSeconds / 3600}"
+        val hoursOffset = offset.totalSeconds / 3600
+        return when {
+            hoursOffset == 0 -> "UTC"
+            hoursOffset > 0 -> "UTC+$hoursOffset"
+            else -> "UTC$hoursOffset"
+        }
     }
 
 }
