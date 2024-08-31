@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.di.commonModule
 import com.worldwidewaves.shared.di.datastoreModule
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
@@ -30,7 +29,6 @@ import org.koin.test.inject
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class WWWEventsTest : KoinTest {
 
     private val wwwEvents: WWWEvents by inject()

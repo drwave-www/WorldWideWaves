@@ -30,6 +30,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing event data.
+ *
+ * This ViewModel fetches events from a data source (`WWWEvents`), exposes them as a
+ * `StateFlow`, and provides filtering functionality for displaying all events or only
+ * favorite events.
+ *
+ * @param wwwEvents The data source for retrieving events.
+ */
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private var originalEvents: List<WWWEvent> = emptyList()

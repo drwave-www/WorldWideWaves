@@ -1,8 +1,6 @@
 
 Next:
 
-- correct the area limitation mechanism on large map screen
-
 - review tests in WWWEventWaveTest
 - wave progression
     - add a layer on the map
@@ -25,6 +23,8 @@ Next:
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 
 - round2 wave : routing on streets
+
+- add maps generation for countries, then for the world : no road names, limited zooms, different wave behavior
 
 Cleanings :
 - code coverage of current devs

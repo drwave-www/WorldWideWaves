@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -37,7 +36,6 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class WWWEventWaveTest {
 
     private val testEvent = createRandomWWWEvent("test_event")

@@ -53,6 +53,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.Quadruple
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
@@ -79,6 +80,7 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import java.io.File
+import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
@@ -101,6 +103,7 @@ class EventMap(
     fun Screen(modifier: Modifier) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
+
         var mapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
@@ -116,6 +119,7 @@ class EventMap(
             styleUri?.let { uri ->
                 mapView.getMapAsync { map ->
                     setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
+
                     map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
                         if (hasLocationPermission) addLocationMarkerToMap(map, context, coroutineScope, style)
@@ -192,7 +196,7 @@ class EventMap(
             buildLocationComponentActivationOptions(context, style)
         )
         map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not follow with normal behavior
+        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
 
         map.locationComponent.locationEngine?.requestLocationUpdates(
             buildLocationEngineRequest(),
@@ -248,7 +252,7 @@ class EventMap(
         coroutineScope.launch {
             val (cLat, cLng) = withContext(Dispatchers.IO) { event.area.getCenter() }
             map.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(LatLng(cLat, cLng), event.mapMinzoom)
+                CameraUpdateFactory.newLatLng(LatLng(cLat, cLng))
             )
         }
     }
@@ -262,42 +266,24 @@ class EventMap(
         coroutineScope.launch {
             val bbox = event.area.getBoundingBox()
 
-            // Set the camera target and zoom level
-            map.setLatLngBoundsForCameraTarget(bbox.toLatLngBounds())
-            map.setMinZoomPreference(event.mapMinzoom)
-            map.setMaxZoomPreference(event.mapMaxzoom)
-
             // Maximize the view to the map
             val (sw, ne) = bbox
             val eventMapWidth = ne.lng - sw.lng
             val eventMapHeight = ne.lat - sw.lat
             val (centerLat, centerLng) = event.area.getCenter()
 
-            val mapLibreWidth = map.width.toDouble()
-            val mapLibreHeight = map.height.toDouble()
-
             // Calculate the aspect ratios of the event map and MapLibre component.
             val eventAspectRatio = eventMapWidth / eventMapHeight
-            val mapLibreAspectRatio = mapLibreWidth / mapLibreHeight
+            val mapLibreAspectRatio = map.width.toDouble() / map.height.toDouble()
 
             // Calculate the new southwest and northeast longitudes or latitudes,
             // depending on whether the event map is wider or taller than the MapLibre component.
-            val (newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
-                // Event map is wider, adjust longitudes to fit height
+            val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
                 val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-                Pair(centerLng - lngDiff, centerLng + lngDiff)
+                Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
             } else {
-                // Event map is taller or equal, keep original longitudes
-                Pair(sw.lng, ne.lng)
-            }
-
-            val (newSwLat, newNeLat) = if (eventAspectRatio > mapLibreAspectRatio) {
-                // Event map is wider, keep original latitudes
-                Pair(sw.lat, ne.lat)
-            } else {
-                // Event map is taller or equal, adjust latitudes to fit width
                 val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-                Pair(centerLat - latDiff, centerLat + latDiff)
+                Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
             }
 
             val bounds = LatLngBounds.Builder()
@@ -309,63 +295,49 @@ class EventMap(
                 object: CancelableCallback {
                     override fun onCancel() {}
                     override fun onFinish() {
+                        // Set the min/max camera zoom level
+                        map.setMinZoomPreference(map.cameraPosition.zoom)
+                        map.setMaxZoomPreference(event.mapMaxzoom)
+
                         // Constrain the camera movement to the bounds of the map
-                        // TODO fix : constrainCameraOnMap(map, coroutineScope)
+                        map.addOnCameraMoveListener {
+                            constrainCameraOnMap(map, coroutineScope)
+                        }
                     }
                 }
             )
         }
-
     }
 
     /**
      * Constrains the map camera movement to stay within the event area's bounding box.
      *
      * This function adds a camera move listener to the map. When the camera moves, it checks if the
-     * visible region extends beyond the event area's bounding box. If so, it animates the camera
-     * back to a position where the visible region is contained within the bounding box.
+     * visible region extends beyond the event area's bounding box. If so, it adjusts the camera bounds
+     * to ensure the visible region is contained within the bounding box.
      *
-     * @param map The MapLibreMap object to constrain.
-     * @param coroutineScope The CoroutineScope used to launch the camera animation.
      */
-    private var lastCameraMoveTime = 0L
-    private val debounceDelay = 200L // milliseconds
+    private val epsilon = 1e-7
+    private var dimPosition = Position(0.0, 0.0)
 
     private fun constrainCameraOnMap(
         map: MapLibreMap,
         coroutineScope: CoroutineScope
     ) {
-        map.addOnCameraMoveListener {
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - lastCameraMoveTime > debounceDelay) {
-                lastCameraMoveTime = currentTime
+        val viewBounds = map.projection.visibleRegion.latLngBounds
+        val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
+        val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
 
-                map.cameraPosition.target?.let { target ->
-                    coroutineScope.launch {
-                        val mapBounds = event.area.getBoundingBox()
-                        val viewBounds = map.projection.visibleRegion.latLngBounds
-                        val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
-                        val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
+        if (abs(dimLat - dimPosition.lat) > epsilon || abs(dimLng - dimPosition.lng) > epsilon) {
+            dimPosition = Position(dimLat, dimLng)
 
-                        val newTarget = LatLng(target.latitude, target.longitude).apply {
-                            longitude = when {
-                                viewBounds.longitudeWest < mapBounds.sw.lng -> mapBounds.sw.lng + dimLng
-                                viewBounds.longitudeEast > mapBounds.ne.lng -> mapBounds.ne.lng - dimLng
-                                else -> longitude
-                            }
-                            latitude = when {
-                                viewBounds.latitudeSouth < mapBounds.sw.lat -> mapBounds.sw.lat + dimLat
-                                viewBounds.latitudeNorth > mapBounds.ne.lat -> mapBounds.ne.lat - dimLat
-                                else -> latitude
-                            }
-                        }
-
-                        if (newTarget.latitude != target.latitude || newTarget.longitude != target.longitude) {
-                            Log.v("constrainCameraOnMap", "Constraining camera to $newTarget")
-                            map.animateCamera(CameraUpdateFactory.newLatLng(newTarget))
-                        }
-                    }
-                }
+            coroutineScope.launch {
+                val mapBounds = event.area.getBoundingBox()
+                val bounds = LatLngBounds.Builder()
+                    .include(LatLng(mapBounds.sw.lat + dimLat, mapBounds.sw.lng + dimLng))
+                    .include(LatLng(mapBounds.ne.lat - dimLat, mapBounds.ne.lng - dimLng))
+                    .build()
+                map.setLatLngBoundsForCameraTarget(bounds)
             }
         }
     }
@@ -452,12 +424,11 @@ class EventMap(
 
             zoomGesturesEnabled(activateMapGestures)
             scrollGesturesEnabled(activateMapGestures)
-            horizontalScrollGesturesEnabled(activateMapGestures)
-            tiltGesturesEnabled(activateMapGestures)
             doubleTapGesturesEnabled(activateMapGestures)
 
             // Always deactivate rotation gestures
             rotateGesturesEnabled(false)
+            tiltGesturesEnabled(false)
         }
         MapLibre.getInstance(context)
 

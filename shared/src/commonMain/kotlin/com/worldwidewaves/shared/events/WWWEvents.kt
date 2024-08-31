@@ -147,7 +147,6 @@ class WWWEvents(
                 event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
                 event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
                 event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
-                event.mapMinzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Minzoom must be a double")
                 event.mapMaxzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Maxzoom must be a double")
                 event.mapLanguage.isEmpty() -> Pair(false, "Map language is empty")
                 event.mapOsmarea.isEmpty() -> Pair(false, "Map Osmarea is empty")
