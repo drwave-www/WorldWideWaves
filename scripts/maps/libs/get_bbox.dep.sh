@@ -46,5 +46,13 @@ center_lat=$(echo "($minlat + $maxlat) / 2" | bc -l | awk '{printf "%.7f\n", $0}
 center_lon=$(echo "($minlon + $maxlon) / 2" | bc -l | awk '{printf "%.7f\n", $0}')
 
 # Output the bounding box coordinates
-echo "bbox: $minlon,$minlat,$maxlon,$maxlat"
-echo "center: $center_lon,$center_lat"
+bbox=$minlon,$minlat,$maxlon,$maxlat
+center=$center_lon,$center_lat
+if [ "$2" = "bbox" ]; then
+  echo $bbox
+elif [ "$2" = "center" ]; then 
+  echo $center
+else
+  echo "bbox: $bbox"
+  echo "center: $center"
+fi

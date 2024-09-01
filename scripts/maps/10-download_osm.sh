@@ -31,7 +31,7 @@ mkdir -p ./data
 # git clone openmpatiles-tools to download OSM areas
 [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
 
-[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chnmod +x ./bin/osmconvert
+[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
@@ -39,13 +39,24 @@ mkdir -p ./data
 # -----------------------------------------------------------------------------
 
 # DEBUG
-EVENTS=paris_france
+#EVENTS=paris_france
 
 for event in $EVENTS; do # Download OSM area as PBF file 
                          # and generates a dedicated PBF file for corresponding BBOX
                          # EVENTS is defined in lib.inc.sh
   echo "==> EVENT $event"
-  BBOX=$(conf $event mapBbox)
+  TYPE=$(conf $event type)
+
+  if [ "$TYPE" = "world" ]; then
+    echo "Skip the world"
+    continue
+  fi
+
+  OSMADMINID=$(conf $event mapOsmadminid)
+  BBOX=$(./libs/get_bbox.dep.sh $OSMADMINID bbox)
+
+  echo "Retrieved BBOX for OSM admin id $OSMADMINID : $BBOX"
+
   AREA=$(conf $event mapOsmarea)
   SPBF=data/osm-$(echo $AREA | sed -e 's/\//_/g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
@@ -57,9 +68,9 @@ for event in $EVENTS; do # Download OSM area as PBF file
   [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics
 
   echo "-- Generates OpenMapTiles environment for event $event"
-  tpl $event templates/.env-template data/.env-${event}
+  tpl $event templates/.env-template-${TYPE} data/.env-${event}
 
   echo "-- Generates OpenMapTiles tileset definition for event $event"
-  tpl $event templates/template-omt.yaml data/${event}.yaml
+  tpl $event templates/template-omt-${TYPE}.yaml data/${event}.yaml
 
 done

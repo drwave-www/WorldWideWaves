@@ -34,12 +34,20 @@ cd "$(dirname "$0")" # always work from executable folder
 # -----------------------------------------------------------------------------
 
 # DEBUG
-EVENTS=paris_france
+#EVENTS=paris_france
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
 
   echo "==> EVENT $event"
+
+  TYPE=$(conf $event type)
+
+  if [ "$TYPE" = "world" ]; then
+    echo "Skip the world"
+    continue
+  fi
+
   echo
   ./libs/generate_map.dep.sh $event
 

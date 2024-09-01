@@ -36,6 +36,13 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
   echo "==> EVENT $event"
   echo
 
+  TYPE=$(conf $event type)
+
+  if [ "$TYPE" = "world" ]; then
+    echo "Skip the world"
+    continue
+  fi
+
   OSMADMINID=$(conf $event mapOsmadminid)
 
   DEST_GEOJSON=$DEST_DIR/$event.geojson
