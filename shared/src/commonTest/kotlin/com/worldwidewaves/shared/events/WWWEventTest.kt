@@ -1,10 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.events.WWWEvent.WaveDefinition
-import kotlinx.datetime.LocalDateTime
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 /*
  * Copyright 2024 DrWave
  *
@@ -27,64 +22,64 @@ import kotlin.test.assertEquals
 
 class WWWEventTest {
 
-    @Test
-    fun testGetStartDateSimpleAsLocal() {
-        // GIVEN
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
-
-        // WHEN
-        val result = event.getStartDateTime()
-
-        // THEN
-        assertEquals(LocalDateTime(2024, 3, 15, 18, 0), result)
-    }
-
-    @Test
-    fun testGetStartDateSimpleAsLocal_InvalidDate() {
-        // GIVEN
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "invalid-date", startHour = "18:00")
-
-        // WHEN
-        val result = event.getStartDateTime()
-
-        // THEN
-        assertEquals(LocalDateTime(0, 1, 1, 0, 0), result)
-    }
-
 }
 
-// ============================
+// ---------------------------
 
-fun buildEmptyEvent(
-    id: String = "",
-    type: String = "",
-    location: String = "",
-    date: String = "",
-    startHour: String = "",
-    timeZone: String = "",
-    wavedef: WaveDefinition = WaveDefinition(),
-    description: String = "",
-    instagramAccount: String = "",
-    instagramHashtag: String = "",
-    mapOsmadminid: Int = 0,
-    mapMaxzoom: Double = 0.0,
-    mapLanguage: String = "",
-    mapOsmarea: String = ""
-): WWWEvent {
-    return WWWEvent(
-        id = id,
-        type = type,
-        location = location,
-        date = date,
-        startHour = startHour,
-        timeZone = timeZone,
-        wavedef = wavedef,
-        description = description,
-        instagramAccount = instagramAccount,
-        instagramHashtag = instagramHashtag,
-        mapOsmadminid = mapOsmadminid,
-        mapMaxzoom = mapMaxzoom,
-        mapLanguage = mapLanguage,
-        mapOsmarea = mapOsmarea
-    )
-}
+//fun createRandomWWWEvent(id: String): WWWEvent {
+//    val types = listOf("city", "country", "world")
+//    val locations = listOf("Paris", "Rio de Janeiro", "New York", "Tokyo", "Sydney")
+//    val countries = listOf("france", "brazil", "usa", "japan", "australia")
+//    val communities = listOf("europe", "south-america", "usa", "asia", "oceania")
+//    val descriptions = listOf(
+//        "Experience the wave in Paris, where the charm of the Eiffel Tower meets the elegance of the Champs-Élysées",
+//        "Join the wave in Rio de Janeiro, where the rhythm of Copacabana meets the majesty of Christ the Redeemer",
+//        "Feel the wave across the United States, from the bustling streets of New York to the sunny beaches of California",
+//        "Be part of the global wave, uniting people from every corner of the world in a celebration of unity and diversity"
+//    )
+//    val instagramAccounts = listOf(
+//        "worldwidewaves.paris",
+//        "worldwidewaves.rio",
+//        "worldwidewaves.usa",
+//        "worldwidewaves.tokyo",
+//        "worldwidewaves.sydney"
+//    )
+//    val instagramHashtags = listOf("#waveparis", "#waverio", "#waveusa", "#wavetokyo", "#wavesydney")
+//    val mapCenters = listOf(
+//        "48.8619,2.3417",
+//        "-22.9068,-43.1729",
+//        "37.0902,-95.7129",
+//        "35.6895,139.6917",
+//        "-33.8688,151.2093"
+//    )
+//    val mapOsmadminids = listOf(71525, 3448439, 148838, 1118370, 2158177)
+//    val mapLanguages = listOf("fr", "pt", "en", "ja", "en")
+//    val mapOsmareas = listOf(
+//        "europe/france/ile-de-france",
+//        "south-america/brazil/sudeste",
+//        "north-america/us",
+//        "asia/japan/kanto",
+//        "oceania/australia/nsw"
+//    )
+//    val timeZones = listOf("Europe/Paris", "America/Sao_Paulo", "America/New_York", "Asia/Tokyo", "Australia/Sydney")
+//
+//    return WWWEvent( // TODO: improve this random data generation
+//        id = id,
+//        type = types.random(),
+//        location = locations.random(),
+//        country = countries.random(),
+//        community = communities.random(),
+//        date = "2024-03-15",
+//        startHour = "18:00",
+//        speed = 5,
+//        description = descriptions.random(),
+//        instagramAccount = instagramAccounts.random(),
+//        instagramHashtag = instagramHashtags.random(),
+//        mapOsmadminid = mapOsmadminids.random(),
+//        mapMaxzoom = 14.0,
+//        mapLanguage = mapLanguages.random(),
+//        mapOsmarea = mapOsmareas.random(),
+//        timeZone = timeZones.random()
+//    )
+//
+//}

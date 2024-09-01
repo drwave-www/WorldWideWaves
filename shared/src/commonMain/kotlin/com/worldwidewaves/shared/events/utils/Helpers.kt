@@ -38,12 +38,6 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // ---------------------------
 
-interface DataValidator {
-    fun isValid(): Pair<Boolean, String?>
-}
-
-// ---------------------------
-
 interface IClock {
     fun now(): Instant
 }

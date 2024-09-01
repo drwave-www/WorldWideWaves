@@ -22,4 +22,5 @@ package com.worldwidewaves.shared.events
 
 class WWWEventWaveLinearTest {
 
+
 }

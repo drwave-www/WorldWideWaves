@@ -20,46 +20,32 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_LISTING
 import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-
-// ---------------------------
-
-interface MapDataProvider {
-    suspend fun geoMapStyleData(): String
-}
-
-class DefaultMapDataProvider : MapDataProvider {
-    @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoMapStyleData(): String {
-        return withContext(Dispatchers.IO) {
-            Napier.i("Loading map style data from $FS_MAPS_STYLE")
-            Res.readBytes(FS_MAPS_STYLE).decodeToString()
-        }
-    }
-}
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 // ---------------------------
 
 class WWWEventMap(
-    private val event: WWWEvent,
-    private val mapDataProvider: MapDataProvider = DefaultMapDataProvider()
-) {
+    private val event: WWWEvent
+) : KoinComponent {
+
+    private val mapDataProvider: MapDataProvider by inject()
+
+    // ---------------------------
 
     private suspend fun getMbtilesFilePath(): String? {
         return getMapFileAbsolutePath(event.id, "mbtiles")

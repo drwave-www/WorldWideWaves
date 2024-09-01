@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.getEventImage
-import io.github.aakira.napier.Napier
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -40,7 +39,7 @@ data class WWWEvent(
     val community: String? = null,
     val date: String,
     val startHour: String,
-    val wavedef: WaveDef,
+    val wavedef: WaveDefinition,
     val description: String,
     val instagramAccount: String,
     val instagramHashtag: String,
@@ -53,6 +52,15 @@ data class WWWEvent(
 ) {
     enum class Status { DONE, SOON, RUNNING }
 
+    @Serializable
+    data class WaveDefinition(
+        val linear: WWWEventWaveLinear? = null,
+        val deep: WWWEventWaveDeep? = null,
+        val linearSplit: WWWEventWaveLinearSplit? = null
+    )
+
+    // ---------------------------
+
     @Transient
     var map = WWWEventMap(this)
 
@@ -60,88 +68,83 @@ data class WWWEvent(
     var area = WWWEventArea(this)
 
     @Transient
-    var wave = try {
-        (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
+    var wave = (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
         ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
             setEvent(this@WWWEvent)
         }
-    } catch (e: IllegalStateException) {
-        Napier.e("$id: Exception initializing wave: ${e.message}")
-        throw e
-    }
-}
 
-@Serializable
-data class WaveDef(
-    val linear: WWWEventWaveLinear? = null,
-    val deep: WWWEventWaveDeep? = null,
-    val linearSplit: WWWEventWaveLinearSplit? = null
-)
+    // ---------------------------
 
-// ---------------------------
-
-fun WWWEvent.getStatus(): WWWEvent.Status {
-    return when {
-        isDone() -> WWWEvent.Status.DONE
-        isSoon() -> WWWEvent.Status.SOON
-        isRunning() -> WWWEvent.Status.RUNNING
-        else -> throw IllegalStateException("Event status is undefined")
-    }
-}
-
-fun WWWEvent.isDone(): Boolean {
-    return this.id == "paris_france" // TODO: test
-}
-
-fun WWWEvent.isSoon(): Boolean {
-    return this.id == "unitedstates" // TODO: test…
-}
-
-fun WWWEvent.isRunning(): Boolean {
-    return this.id == "riodejaneiro_brazil" // TODO: test…
-}
-
-// ---------------------------
-
-private fun getEventImageByType(type: String, id: String?): Any? =
-    id?.let { getEventImage(type, it) }
-
-fun WWWEvent.getLocationImage(): Any? = getEventImageByType("location", this.id)
-fun WWWEvent.getCommunityImage(): Any? = getEventImageByType("community", this.community)
-fun WWWEvent.getCountryImage(): Any? = getEventImageByType("country", this.country)
-
-// ---------------------------
-
-fun WWWEvent.getTimeZone(): TimeZone = TimeZone.of(this.timeZone)
-
-/**
- * Converts the start date and time of the event to a simple local date format.
- *
- * This function parses the event's start date and time, converts it to the local time zone,
- * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
- *
- * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
- */
-fun WWWEvent.getStartDateSimpleAsLocal(): String = runCatching {
-    LocalDateTime.parse("${this.date}T${this.startHour}:00")
-        .toInstant(getTimeZone())
-        .toLocalDateTime(getTimeZone())
-        .let {
-            "${it.dayOfMonth.toString().padStart(2, '0')}/${
-                it.monthNumber.toString().padStart(2, '0')
-            }"
+    fun getStatus(): Status {
+        return when {
+            isDone() -> Status.DONE
+            isSoon() -> Status.SOON
+            isRunning() -> Status.RUNNING
+            else -> throw IllegalStateException("Event status is undefined")
         }
-}.getOrDefault("00/00")
+    }
 
-/**
- * Converts the start date and time of the event to a local `LocalDateTime`.
- *
- * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
- * and then converts it to a `LocalDateTime` in the same time zone.
- *
- * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
- */
-fun WWWEvent.getStartDateTime(): LocalDateTime =
-    LocalDateTime.parse("${date}T${startHour}")
-        .toInstant(getTimeZone())
-        .toLocalDateTime(getTimeZone())
+    fun isDone(): Boolean {
+        return this.id == "paris_france" // TODO: test
+    }
+
+    fun isSoon(): Boolean {
+        return this.id == "unitedstates" // TODO: test…
+    }
+
+    fun isRunning(): Boolean {
+        return this.id == "riodejaneiro_brazil" // TODO: test…
+    }
+
+    // ---------------------------
+
+    private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
+
+    fun getLocationImage(): Any? = getEventImageByType("location", this.id)
+    fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
+    fun getCountryImage(): Any? = getEventImageByType("country", this.country)
+
+    // ---------------------------
+
+    fun getTimeZone(): TimeZone {
+        return TimeZone.of(this.timeZone)
+    }
+
+    /**
+     * Converts the start date and time of the event to a simple local date format.
+     *
+     * This function parses the event's start date and time, converts it to the local time zone,
+     * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
+     *
+     * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
+     */
+    fun getStartDateSimpleAsLocal(): String {
+        return runCatching {
+            LocalDateTime.parse("${this.date}T${this.startHour}:00")
+                .toInstant(getTimeZone())
+                .toLocalDateTime(getTimeZone())
+                .let {
+                    "${it.dayOfMonth.toString().padStart(2, '0')}/${
+                        it.monthNumber.toString().padStart(2, '0')
+                    }"
+                }
+        }.getOrDefault("00/00")
+    }
+
+    /**
+     * Converts the start date and time of the event to a local `LocalDateTime`.
+     *
+     * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
+     * and then converts it to a `LocalDateTime` in the same time zone.
+     *
+     * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
+     */
+    fun getStartDateTime(): LocalDateTime {
+        return LocalDateTime.parse("${date}T${startHour}")
+            .toInstant(getTimeZone())
+            .toLocalDateTime(getTimeZone())
+    }
+
+}
+
+
