@@ -84,9 +84,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getLocationImage
-import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
-import com.worldwidewaves.shared.events.isDone
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone

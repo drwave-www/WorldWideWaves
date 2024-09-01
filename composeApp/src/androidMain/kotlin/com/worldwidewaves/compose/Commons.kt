@@ -45,9 +45,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.isDone
-import com.worldwidewaves.shared.events.isRunning
-import com.worldwidewaves.shared.events.isSoon
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running

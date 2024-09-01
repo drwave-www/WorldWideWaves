@@ -84,10 +84,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSI
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.getCommunityImage
-import com.worldwidewaves.shared.events.getCountryImage
-import com.worldwidewaves.shared.events.getLocationImage
-import com.worldwidewaves.shared.events.getStartDateSimpleAsLocal
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
 import com.worldwidewaves.shared.generated.resources.event_favorites_empty

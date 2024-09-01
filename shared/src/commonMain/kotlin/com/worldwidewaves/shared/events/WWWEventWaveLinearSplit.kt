@@ -27,17 +27,6 @@ import kotlin.time.Duration
 // ---------------------------
 
 @Serializable
-data class Move(
-    val id: Int,
-    val longitude: Double
-)
-
-@Serializable
-data class Adjustments(
-    val moves: List<Move>
-)
-
-@Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
@@ -45,6 +34,19 @@ data class WWWEventWaveLinearSplit(
     val nbSplits: Int,
     val adjustments: Adjustments,
 ) : WWWEventWave() {
+
+    @Serializable
+    data class Move(
+        val id: Int,
+        val longitude: Double
+    )
+
+    @Serializable
+    data class Adjustments(
+        val moves: List<Move>
+    )
+
+    // ---------------------------
 
     override suspend fun getObservationInterval(): Long {
         TODO("Not yet implemented")

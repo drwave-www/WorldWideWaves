@@ -20,55 +20,29 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
+import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.polygonBbox
-import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
-
-// ---------------------------
-
-interface GeoJsonDataProvider {
-    suspend fun getGeoJsonData(eventId: String): JsonObject?
-}
-
-class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
-    @OptIn(ExperimentalResourceApi::class)
-    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
-        return try {
-            val geojsonData = withContext(Dispatchers.IO) {
-                Napier.i("Loading geojson data for event $eventId")
-                Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
-            }
-            Json.parseToJsonElement(geojsonData).jsonObject
-        } catch (e: Exception) {
-            Napier.e("Error loading geojson data for event $eventId", e)
-            null
-        }
-    }
-}
+import org.koin.core.component.inject
 
 // ---------------------------
 
 open class WWWEventArea(
-    private val event: WWWEvent,
-    private val geoJsonDataProvider: GeoJsonDataProvider = DefaultGeoJsonDataProvider()
+    private val event: WWWEvent
 ) : KoinComponent {
+
+    private val geoJsonDataProvider: GeoJsonDataProvider by inject()
+    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
     private val areaPolygon: Polygon = mutableListOf()
     private var cachedBoundingBox: BoundingBox? = null
@@ -160,46 +134,43 @@ open class WWWEventArea(
      */
     suspend fun getPolygon(): Polygon {
         if (this.areaPolygon.isEmpty()) {
-            val newPolygon = withContext(Dispatchers.Default) {
+            return coroutineScopeProvider.withDefaultContext{
                 val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
 
                 if (geometryCollection == null) {
                     Napier.e("Error loading geojson data for event ${event.id}")
-                    return@withContext emptyList()
-                }
+                    emptyList()
+                } else {
+                    val type = geometryCollection["type"]?.jsonPrimitive?.content
+                    val coordinates = geometryCollection["coordinates"]?.jsonArray
 
-                val type = geometryCollection["type"]?.jsonPrimitive?.content
-                val coordinates = geometryCollection["coordinates"]?.jsonArray
-
-                when (type) {
-                    "Polygon" -> {
-                        coordinates?.flatMap { ring ->
-                            ring.jsonArray.map { point ->
-                                Position(
-                                    point.jsonArray[1].jsonPrimitive.double,
-                                    point.jsonArray[0].jsonPrimitive.double
-                                )
-                            }
-                        } ?: emptyList()
-                    }
-
-                    "MultiPolygon" -> {
-                        coordinates?.flatMap { multiPolygon ->
-                            multiPolygon.jsonArray.flatMap { ring ->
+                    when (type) {
+                        "Polygon" -> {
+                            coordinates?.flatMap { ring ->
                                 ring.jsonArray.map { point ->
                                     Position(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
                                 }
-                            }
-                        } ?: emptyList()
+                            } ?: emptyList()
+                        }
+                        "MultiPolygon" -> {
+                            coordinates?.flatMap { multiPolygon ->
+                                multiPolygon.jsonArray.flatMap { ring ->
+                                    ring.jsonArray.map { point ->
+                                        Position(
+                                            point.jsonArray[1].jsonPrimitive.double,
+                                            point.jsonArray[0].jsonPrimitive.double
+                                        )
+                                    }
+                                }
+                            } ?: emptyList()
+                        }
+                        else -> emptyList()
                     }
-
-                    else -> emptyList()
                 }
             }
-            return newPolygon
         }
 
         return this.areaPolygon

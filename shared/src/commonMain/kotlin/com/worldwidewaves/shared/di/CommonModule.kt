@@ -20,8 +20,6 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.DefaultGeoJsonDataProvider
-import com.worldwidewaves.shared.events.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.WWWEvents
@@ -29,6 +27,5 @@ import org.koin.dsl.module
 
 val commonModule = module {
     single { WWWEvents(get()) }
-    single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
-    factory { (event: WWWEvent) -> WWWEventArea(event, get()) }
+    factory { (event: WWWEvent) -> WWWEventArea(event) }
 }

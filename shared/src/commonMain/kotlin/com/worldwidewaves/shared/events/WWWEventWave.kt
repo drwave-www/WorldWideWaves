@@ -1,17 +1,15 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -19,6 +17,9 @@ import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
@@ -42,26 +43,30 @@ import kotlin.time.Duration.Companion.hours
  * limitations under the License.
  */
 
-@Serializable
-data class Warming(
-    val type: String,
-    val longitude: Double? = null,
-)
 
-data class WaveNumbers(
-    val waveTimezone: String,
-    val waveSpeed: String,
-    val waveStartTime: String,
-    val waveEndTime: String,
-    val waveTotalTime: String,
-    val waveProgression: String
-)
 
 // ---------------------------
 
-abstract class WWWEventWave {
+@Serializable
+abstract class WWWEventWave : KoinComponent {
 
-    private var _event: WWWEvent? = null
+    @Serializable
+    data class Warming(
+        val type: String,
+        val longitude: Double? = null,
+    )
+
+    @Serializable
+    data class WaveNumbers(
+        val waveTimezone: String,
+        val waveSpeed: String,
+        val waveStartTime: String,
+        val waveEndTime: String,
+        val waveTotalTime: String,
+        val waveProgression: String
+    )
+
+    // ---------------------------
 
     abstract val speed: Double
     abstract val direction: String
@@ -69,12 +74,20 @@ abstract class WWWEventWave {
 
     // ---------------------------
 
-    private var observationStarted = false
-    private var lastObservedStatus: WWWEvent.Status? = null
-    private var lastObservedProgression: Double? = null
+    private val clock: IClock by inject()
+    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
-    protected var positionRequester: (() -> Position?)? = null
-    private var cachedLiteralStartTime: String? = null
+    // ---------------------------
+
+    @Transient private var _event: WWWEvent? = null
+
+    @Transient private var observationStarted = false
+    @Transient private var lastObservedStatus: WWWEvent.Status? = null
+    @Transient private var lastObservedProgression: Double? = null
+
+    @Transient protected var positionRequester: (() -> Position?)? = null
+    @Transient private var cachedLiteralStartTime: String? = null
+    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
 
     // ---------------------------
 
@@ -117,22 +130,32 @@ abstract class WWWEventWave {
      */
     private fun startObservation() {
         if (!observationStarted) {
-            CoroutineScope(Dispatchers.IO).launch {
+            observationStarted = true
+
+            coroutineScopeProvider.scopeIO.launch {
                 lastObservedStatus = event.getStatus()
                 lastObservedProgression = getProgression()
 
-                val eventTimeZone: TimeZone = event.getTimeZone() // TODO: test
-                val now: Instant = Clock.System.now().toLocalDateTime(eventTimeZone).toInstant(eventTimeZone)
-                val eventStartTime: Instant = event.getStartDateTime().toInstant(eventTimeZone)
-                val durationUntilEvent: Duration = eventStartTime - now
-
-                if (!event.isDone() && !(event.isSoon() && durationUntilEvent > WAVE_OBSERVE_DELAY.hours)) {
+                if (event.isRunning() || (event.isSoon() && isNearTheEvent())) {
                     observeWave()
                 }
-
-                observationStarted = true
             }
         }
+    }
+
+    /**
+     * Determines if the current time is near the event start time.
+     *
+     * This function calculates the duration between the current time and the event start time.
+     * It then checks if this duration is greater than the predefined observation delay.
+     *
+     */
+    fun isNearTheEvent(): Boolean {
+        val eventTimeZone: TimeZone = event.getTimeZone()
+        val now: Instant = clock.now().toLocalDateTime(eventTimeZone).toInstant(eventTimeZone)
+        val eventStartTime: Instant = event.getStartDateTime().toInstant(eventTimeZone)
+        val durationUntilEvent: Duration = eventStartTime - now
+        return durationUntilEvent <= WAVE_OBSERVE_DELAY.hours
     }
 
     /**
@@ -142,7 +165,7 @@ abstract class WWWEventWave {
      * If changes are detected, the corresponding change handlers are invoked.
      */
     private fun observeWave() {
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScopeProvider.scopeIO.launch {
             delay(getObservationInterval())
             getProgression().takeIf { it != lastObservedProgression }?.also {
                 lastObservedProgression = it
@@ -273,7 +296,7 @@ abstract class WWWEventWave {
      *
      */
     fun getLiteralTimezone(): String {
-        val offset = TimeZone.of(event.timeZone).offsetAt(Clock.System.now())
+        val offset = TimeZone.of(event.timeZone).offsetAt(clock.now())
         val hoursOffset = offset.totalSeconds / 3600
         return when {
             hoursOffset == 0 -> "UTC"
@@ -283,8 +306,6 @@ abstract class WWWEventWave {
     }
 
     // ---------------------------
-
-    private var cachedWarmingPolygons: List<Polygon>? = null
 
     /**
      * Checks if a given position is within any of the warming polygons.

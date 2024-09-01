@@ -21,43 +21,28 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.InitFavoriteEvent
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
-import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
+import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-
-// ---------------------------
-
-interface EventsConfigurationProvider {
-    suspend fun geoEventsConfiguration(): String
-}
-
-class DefaultEventsConfigurationProvider : EventsConfigurationProvider {
-    @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoEventsConfiguration(): String {
-        return withContext(Dispatchers.IO) {
-            Napier.i("Loading events configuration from $FS_EVENTS_CONF")
-            Res.readBytes(FS_EVENTS_CONF).decodeToString()
-        }
-    }
-}
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 // ---------------------------
 
 class WWWEvents(
-    private val initFavoriteEvent: InitFavoriteEvent,
-    private val eventsConfigurationProvider: EventsConfigurationProvider = DefaultEventsConfigurationProvider()
-) {
+    private val initFavoriteEvent: InitFavoriteEvent
+) : KoinComponent {
+
+    private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
+    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+
+    // ---------------------------
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
@@ -90,7 +75,7 @@ class WWWEvents(
      * Launches a coroutine to load events from the configuration provider.
      * The coroutine runs on the IO dispatcher.
      */
-    private fun loadEventsJob() = CoroutineScope(Dispatchers.IO).launch {
+    private fun loadEventsJob() = coroutineScopeProvider.scopeIO.launch {
         val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
         val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
 
