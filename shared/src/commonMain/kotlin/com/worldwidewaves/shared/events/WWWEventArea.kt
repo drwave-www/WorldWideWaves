@@ -25,8 +25,8 @@ import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygon
-import com.worldwidewaves.shared.events.utils.polygonBbox
+import com.worldwidewaves.shared.events.utils.isPointInPolygons
+import com.worldwidewaves.shared.events.utils.polygonsBbox
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.double
@@ -44,7 +44,7 @@ open class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
-    private val areaPolygon: Polygon = mutableListOf()
+    private val areaPolygon: MutableList<Polygon> = mutableListOf()
     private var cachedBoundingBox: BoundingBox? = null
     private var cachedCenter: Position? = null
 
@@ -73,7 +73,7 @@ open class WWWEventArea(
      * @return `true` if the position is within the polygon, `false` otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
-        getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
+        getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
 
     // ---------------------------
 
@@ -88,9 +88,9 @@ open class WWWEventArea(
      * @throws IllegalStateException if the polygon is empty.
      */
     open suspend fun getBoundingBox(): BoundingBox =
-        cachedBoundingBox ?: getPolygon().takeIf { it.isNotEmpty() }
+        cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
-                polygonBbox(it).also { bbox -> cachedBoundingBox = bbox }
+                polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
             } ?: BoundingBox(Position(0.0, 0.0), Position(0.0, 0.0))
 
     /**
@@ -120,9 +120,9 @@ open class WWWEventArea(
      *
      * @return A `Polygon` object representing the event area.
      */
-    suspend fun getPolygon(): Polygon {
+    suspend fun getPolygons(): List<Polygon> {
         if (areaPolygon.isEmpty()) {
-            return coroutineScopeProvider.withDefaultContext {
+            coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
                     val coordinates = geometryCollection["coordinates"]?.jsonArray
@@ -134,7 +134,7 @@ open class WWWEventArea(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
                                 )
-                            }
+                            }.apply { areaPolygon.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
                             multiPolygon.jsonArray.flatMap { ring ->
@@ -143,14 +143,13 @@ open class WWWEventArea(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
-                                }
+                                }.apply { areaPolygon.add(this) }
                             }
                         }
-                        else -> emptyList()
-                    } ?: emptyList()
+                        else -> { Napier.e("${event.id}: Unsupported GeoJSON type: $type") }
+                    }
                 } ?: run {
                     Napier.e("${event.id}: Error loading geojson data for event")
-                    emptyList()
                 }
             }
         }

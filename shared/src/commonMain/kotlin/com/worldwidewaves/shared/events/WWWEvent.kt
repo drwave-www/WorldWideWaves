@@ -48,7 +48,7 @@ data class WWWEvent(
     val instagramAccount: String,
     val instagramHashtag: String,
     var favorite: Boolean = false,
-    val mapOsmadminid: Int,
+    val mapOsmadminid: Int, // https://nominatim.openstreetmap.org/ui/search.html?
     val mapMaxzoom: Double,
     val mapLanguage: String,
     val mapOsmarea: String,

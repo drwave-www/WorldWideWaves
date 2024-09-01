@@ -37,15 +37,6 @@ data class Segment(val start: Position, val end: Position)
 /**
  * Represents a bounding box defined by its southwest and northeast corners.
  *
- * @property sw The southwest corner of the bounding box.
- * @property ne The northeast corner of the bounding box.
- * @constructor Creates a bounding box using `Position` objects for the southwest and northeast corners.
- * @constructor Creates a bounding box using latitude and longitude values for the southwest and northeast corners.
- *
- * @param swLat The latitude of the southwest corner.
- * @param swLng The longitude of the southwest corner.
- * @param neLat The latitude of the northeast corner.
- * @param neLng The longitude of the northeast corner.
  */
 data class BoundingBox(
     val sw: Position,
@@ -73,10 +64,6 @@ data class BoundingBox(
  * It's based on the algorithm described in
  * [https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart](https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart).
  *
- * @param tap The point to check.
- * @param polygon The polygon to test against.
- * @return `true` if the point is inside the polygon, `false` otherwise.
- *
  */
 fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
     var (bx, by) = polygon.last().let { it.lat - tap.lat to it.lng - tap.lng }
@@ -97,6 +84,13 @@ fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
     return (depth and 1) == 1
 }
 
+/**
+ * Determines if a point is inside any of the given polygons.
+ */
+fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean {
+    return polygons.any { isPointInPolygon(tap, it) }
+}
+
 // ----------------------------------------------------------------------------
 
 /**
@@ -107,22 +101,16 @@ fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
  *
  * It throws an [IllegalArgumentException] if the input polygon is empty.
  *
- * @param polygon The polygon for which to calculate the bounding box.
- * @return A [BoundingBox] object representing the bounding box of the polygon.
- *
  */
 
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
-fun polygonBbox(polygon: Polygon): BoundingBox {
-    if (polygon.isEmpty())
+fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
+    if (polygons.isEmpty() || polygons.flatten().isEmpty())
         throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
-    val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygon.fold(
-        Quadruple(
-            Double.MAX_VALUE, Double.MAX_VALUE,
-            Double.MIN_VALUE, Double.MIN_VALUE
-        )
+    val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
+        Quadruple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
     ) { (minLat, minLon, maxLat, maxLon), pos ->
         Quadruple(
             minOf(minLat, pos.lat), minOf(minLon, pos.lng),
@@ -136,13 +124,15 @@ fun polygonBbox(polygon: Polygon): BoundingBox {
     )
 }
 
+fun polygonBbox(polygon: Polygon): BoundingBox {
+    return polygonsBbox(listOf(polygon))
+}
+
 // ----------------------------------------------------------------------------
 
 /**
  * Data class representing the result of splitting a polygon into two parts.
  *
- * @property left The list of polygons on the left side of the split.
- * @property right The list of polygons on the right side of the split.
  */
 data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
     enum class ResultPosition { LEFT, RIGHT }
@@ -173,10 +163,6 @@ data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>)
  *
  * The function handles cases where the polygon intersects the cut line by calculating intersection
  * points and adding them to both the left and right sides.
- *
- * @param polygon The polygon to be split, represented as a list of [Position] objects.
- * @param longitudeToCut The longitude value to split the polygon by.
- * @return A[SplitPolygonResult] object containing the left and right polygons.
  *
  */
 fun splitPolygonByLongitude(polygon: List<Position>, longitudeToCut: Double): SplitPolygonResult {
@@ -225,8 +211,6 @@ fun splitPolygonByLongitude(polygon: List<Position>, longitudeToCut: Double): Sp
  * This function takes a list of positions representing a polygon and splits it into multiple ring polygons.
  * A ring polygon is a closed loop of positions where the first and last positions are the same.
  *
- * @param polygon A list of positions representing the vertices of the polygon.
- * @return A list of ring polygons, each represented as a list of positions.
  */
 private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
     val polygons = mutableListOf<Polygon>()
@@ -278,9 +262,6 @@ private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
  * Additionally, the function checks if the point's coordinates are within the bounds of the
  * segment's endpoints.
  *
- * @param point The point to check.
- * @param segment The line segment defined by two endpoints.
- * @return `true` if the point lies on the line segment, `false` otherwise.
  */
 private const val EPSILON = 1e-10 // A small tolerance value used to account for floating-point precision errors.
 
@@ -297,8 +278,6 @@ fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
 /**
  * Converts a list of polygons into a GeoJSON string.
  *
- * @param polygons A list of polygons, where each polygon is represented as a list of `Position` objects.
- * @return A string in GeoJSON format representing the input polygons.
  */
 fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
     val features = polygons.map { polygon ->
