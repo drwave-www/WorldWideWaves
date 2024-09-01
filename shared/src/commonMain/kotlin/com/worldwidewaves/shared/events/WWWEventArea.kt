@@ -21,13 +21,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.MutableArea
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
@@ -60,7 +59,7 @@ data class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
+    @Transient private val cachedAreaPolygons: MutableList<Polygon> = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
 
@@ -104,7 +103,7 @@ data class WWWEventArea(
      * Otherwise, it calculates the bounding box, caches it, and then returns it.
      *
      */
-    suspend fun bbox(): BoundingBox =
+    suspend fun getBoundingBox(): BoundingBox =
         cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
@@ -119,7 +118,7 @@ data class WWWEventArea(
      *
      */
     suspend fun getCenter(): Position =
-        cachedCenter ?: bbox().let { bbox ->
+        cachedCenter ?: getBoundingBox().let { bbox ->
             Position(
                 lat = (bbox.ne.lat + bbox.sw.lat) / 2,
                 lng = (bbox.ne.lng + bbox.sw.lng) / 2
@@ -135,7 +134,7 @@ data class WWWEventArea(
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
      */
-     suspend fun getPolygons(): Area {
+     suspend fun getPolygons(): List<Polygon> {
         if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->

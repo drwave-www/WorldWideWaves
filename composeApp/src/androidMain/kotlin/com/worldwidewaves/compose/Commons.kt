@@ -20,6 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,7 +48,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
@@ -52,6 +57,7 @@ import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,9 +83,20 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 @Composable
-fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifier) {
-    if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
-        val (backgroundColor, textId) = if (eventStatus == Status.SOON) {
+fun EventOverlaySoonOrRunning(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    var isSoon by remember { mutableStateOf(false) }
+    var isRunning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isSoon = event.isSoon()
+            isRunning = event.isRunning()
+        }
+    }
+
+    if (isSoon || isRunning) {
+        val (backgroundColor, textId) = if (isSoon) {
             MaterialTheme.colorScheme.secondary to Res.string.event_soon
         } else {
             MaterialTheme.colorScheme.tertiary to Res.string.event_running
@@ -108,8 +125,17 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
 // ----------------------------
 
 @Composable
-fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
-    if (eventStatus == Status.DONE) {
+fun EventOverlayDone(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    var isDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isDone = event.isDone()
+        }
+    }
+
+    if (isDone) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(
                 color = Color.run { White.copy(alpha = 0.5f) },

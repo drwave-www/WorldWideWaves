@@ -37,8 +37,6 @@ import org.koin.core.context.startKoin
 class MainApplication : Application(), Configuration.Provider {
     private val wwwShutdownHandler: WWWShutdownHandler by inject()
 
-    var platform : AndroidPlatform? = null
-
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
@@ -54,8 +52,8 @@ class MainApplication : Application(), Configuration.Provider {
         }
 
         // Initialize the WWW platform
-        platform = getKoin().get<WWWPlatform>() as AndroidPlatform
-        platform?.initialize(this)
+        val platform = getKoin().get<WWWPlatform>() as AndroidPlatform
+        platform.initialize(this)
     }
 
     override fun onTerminate() {

@@ -44,9 +44,11 @@ import org.koin.core.component.inject
 
 @Serializable
 class WWWEventMap(
+
     val maxZoom: Double,
     val language: String,
     val zone: String
+
 ) : KoinComponent, DataValidator {
 
     private var _event: IWWWEvent? = null
@@ -90,7 +92,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val warmingGeoJsonFilePath = cacheStringToFile(
             "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.warming.area.getPolygons())
+            convertPolygonsToGeoJson(event.wave.warming.area.getPolygons())
         ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
@@ -134,7 +136,7 @@ class WWWEventMap(
      *
      */
     suspend fun isPositionWithin(position: Position): Boolean =
-        with(event.area.bbox()) {
+        with(event.area.getBoundingBox()) {
             position.lat in sw.lat..ne.lat && position.lng in sw.lng..ne.lng
         }
 
@@ -157,7 +159,7 @@ class WWWEventMap(
             !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
                 this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
 
-            else -> { /* No validation errors */ }
+            else -> { }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
 

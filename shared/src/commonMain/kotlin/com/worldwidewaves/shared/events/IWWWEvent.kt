@@ -22,20 +22,13 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlin.time.Duration
 
 // ---------------------------
 
 interface IWWWEvent : DataValidator {
-
-    data class EventObservation(
-        val progression: Double,
-        val status: Status
-    )
 
     val id: String
     val type: String
@@ -53,7 +46,6 @@ interface IWWWEvent : DataValidator {
 
     val wavedef: WWWWaveDefinition
     val area: WWWEventArea
-    val warming: WWWEventWaveWarming
     val wave: WWWEventWave
     val map: WWWEventMap
 
@@ -61,7 +53,7 @@ interface IWWWEvent : DataValidator {
 
     // ---------------------------
 
-    enum class Status { UNDEFINED, DONE, NEXT, SOON, RUNNING }
+    enum class Status { DONE, NEXT, SOON, RUNNING }
 
     // ---------------------------
 
@@ -79,36 +71,8 @@ interface IWWWEvent : DataValidator {
     // ---------------------------
 
     fun getTZ(): TimeZone
-    fun getStartDateTime(): Instant
-    suspend fun getEndDateTime(): Instant
-
-    fun getLiteralTimezone(): String
     fun getLiteralStartDateSimple(): String
-    fun getLiteralStartTime(): String
-    suspend fun getLiteralEndTime(): String
-
-    suspend fun getLiteralTotalTime(): String
-
-    fun getWaveStartDateTime() : Instant
-    fun getWarmingDuration(): Duration
-    fun isWarmingEnded(): Boolean
-    fun isNearTime(): Boolean
-
-    // ---------------------------
-
-    suspend fun getAllNumbers(): WaveNumbersLiterals
-
-    // ---------------------------
-
-    fun addOnStatusChangedListener(listener: (Status) -> Unit): Int
-    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int
-    fun addOnWarmingEndedListener(listener: () -> Unit): Int
-    fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int
-    fun addOnUserHasBeenHitListener(listener: () -> Unit): Int
-
-    fun stopObservation()
-    fun stopListeners(vararg listenerKeys: Int)
-    fun stopListeners(listenerKeys: List<Int>)
+    fun getStartDateTime(): Instant
 
 }
 

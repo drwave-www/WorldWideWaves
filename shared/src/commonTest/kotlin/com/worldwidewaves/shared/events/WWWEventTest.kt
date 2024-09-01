@@ -22,53 +22,16 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type
-import com.worldwidewaves.shared.events.utils.IClock
-import io.github.aakira.napier.Antilog
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.datetime.IllegalTimeZoneException
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.dsl.module
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class WWWEventTest {
-
-    private var mockClock = mockk<IClock>()
-
-    // ---------------------------
-
-    init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
-    }
-
-    @BeforeTest
-    fun setUp() {
-        startKoin { modules(module { single { mockClock } }) }
-    }
-
-    @AfterTest
-    fun tearDown() {
-        stopKoin()
-    }
 
     @Test
     fun testGetStartDateSimpleAsLocal() {
@@ -100,7 +63,8 @@ class WWWEventTest {
     @Test
     fun testGetLiteralStartDateSimple_ValidDate() {
         // GIVEN
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
+        val event =
+            buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
 
         // WHEN
         val result = event.getLiteralStartDateSimple()
@@ -340,42 +304,6 @@ class WWWEventTest {
         assertTrue(errors!!.any { it.contains("Time zone is invalid") })
     }
 
-    // ---------------------------
-
-    @Test
-    fun testIsNearTheEvent() {
-        // GIVEN --------------------------------
-        val now = Instant.parse("2023-12-31T23:15:00+12:45") // Close from the event
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-01-01", startHour = "01:00")
-
-        every { mockClock.now() } returns now
-
-        // WHEN ---------------------------------
-        val result = event.isNearTime()
-
-        // THEN ---------------------------------
-        assertTrue(result)
-        verify { mockClock.now() }
-    }
-
-    @Test
-    fun testIsNearTheEvent_Fails() {
-
-        // GIVEN --------------------------------
-        val now = Instant.parse("2023-01-01T00:00:00+01:00") // Far from the event
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-01-01", startHour = "01:00")
-
-        every { mockClock.now() } returns now
-
-        // WHEN ---------------------------------
-        val result = event.isNearTime()
-
-        // THEN ---------------------------------
-        assertFalse(result) // Assert that it's NOT near the event
-
-        verify { mockClock.now() }
-    }
-
 }
 
 // ============================
@@ -412,8 +340,6 @@ fun buildEmptyEvent(
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
         area = WWWEventArea(osmAdminid),
-        warming = WWWEventWaveWarming(Type.LONGITUDE_CUT, 0.0),
         map = WWWEventMap(maxzoom, language, zone)
     )
-
 }

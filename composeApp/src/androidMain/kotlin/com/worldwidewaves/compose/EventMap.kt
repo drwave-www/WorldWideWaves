@@ -29,7 +29,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +52,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
@@ -61,7 +59,6 @@ import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.CheckGPSEnable
-import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +73,6 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineCallback
-import org.maplibre.android.location.engine.LocationEngineProxy
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.modes.CameraMode
@@ -85,18 +81,11 @@ import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.FillLayer
-import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.Polygon
 import java.io.File
 import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
-    private val platform: WWWPlatform?,
     private val event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
@@ -110,17 +99,12 @@ class EventMap(
 
     enum class MapCameraPosition { WINDOW, BOUNDS, DEFAULT_CENTER }
 
-    private var mapViewState: MapView? = null
-
     // -------------------------
 
     @Composable
     fun Screen(modifier: Modifier) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
-
-        // Store mapView in shared state
-        mapViewState = mapView
 
         var mapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
@@ -185,44 +169,6 @@ class EventMap(
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
             )
-        }
-    }
-
-    // -- Wave polygons -------------------------------------------------------
-
-    fun updateWavePolygons(context: Context, wavePolygons: List<Polygon>, clearPolygons: Boolean) {
-        (context as? AppCompatActivity)?.runOnUiThread {
-            mapViewState?.getMapAsync { map ->
-                map.getStyle { style ->
-                    val sourceId = "wave-polygons-source"
-                    val layerId = "wave-polygons-layer"
-
-                    if (clearPolygons) {
-                        style.removeLayer(layerId)
-                        style.removeSource(sourceId)
-                    }
-
-                    // Create or update the source with new polygons
-                    val geoJsonSource = style.getSourceAs(sourceId) ?: GeoJsonSource(sourceId)
-                    geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(wavePolygons.map {
-                        Feature.fromGeometry(
-                            it
-                        )
-                    }))
-                    if (style.getSource(sourceId) == null) {
-                        style.addSource(geoJsonSource)
-                    }
-
-                    // Create or update the layer
-                    if (style.getLayer(layerId) == null) {
-                        val fillLayer = FillLayer(layerId, sourceId).withProperties(
-                            PropertyFactory.fillColor(Color.parseColor("#D33682")),
-                            PropertyFactory.fillOpacity(0.5f)
-                        )
-                        style.addLayer(fillLayer)
-                    }
-                }
-            }
         }
     }
 
@@ -301,7 +247,7 @@ class EventMap(
         onCameraPositionSet: (() -> Unit)?
     ) {
         coroutineScope.launch {
-            val bbox = event.area.bbox()
+            val bbox = event.area.getBoundingBox()
 
             // Maximize the view to the map // FIXME: move to shared
             val (sw, ne) = bbox
@@ -371,7 +317,7 @@ class EventMap(
             dimPosition = Position(dimLat, dimLng)
 
             coroutineScope.launch {
-                val mapBounds = event.area.bbox()
+                val mapBounds = event.area.getBoundingBox()
                 val bounds = LatLngBounds.Builder()
                     .include(LatLng(mapBounds.sw.lat + dimLat, mapBounds.sw.lng + dimLng))
                     .include(LatLng(mapBounds.ne.lat - dimLat, mapBounds.ne.lng - dimLng))
@@ -393,7 +339,7 @@ class EventMap(
     ) = coroutineScope.launch {
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(
-                event.area.bbox().toLatLngBounds(), 0
+                event.area.getBoundingBox().toLatLngBounds(), 0
             ),
             object : CancelableCallback {
                 override fun onFinish() { onCameraPositionSet?.invoke() }
@@ -471,10 +417,7 @@ class EventMap(
                     .foregroundTintColor(Color.BLACK)
                     .build()
             )
-            .useDefaultLocationEngine(false)
-            .locationEngine(LocationEngineProxy( // Manage with location simulation
-                WWWSimulationEnabledLocationEngine(context, platform)
-            ))
+            .useDefaultLocationEngine(true)
             .locationEngineRequest(buildLocationEngineRequest())
             .build()
     }

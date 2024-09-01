@@ -24,31 +24,25 @@ package com.worldwidewaves.shared.events.utils
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
 
 // ---------------------------
 
@@ -71,22 +65,12 @@ interface IClock {
     }
 }
 
-class SystemClock : IClock, KoinComponent {
-    private var platform : WWWPlatform? = null
-
-    init {
-        try { platform = get() } catch (e: Exception) {
-            Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
-        }
-    }
-
+class SystemClock : IClock {
     override fun now(): Instant {
-        return if (platform?.isUnderSimulation() == true) {
-            platform!!.getSimulation()!!.now()
-        } else {
-            Clock.System.now()
-        }
-    }
+        val instant = Instant.parse("2024-03-19T13:00:00Z")
+        val timeZone = TimeZone.of("America/Sao_Paulo")
+        return instant.toLocalDateTime(timeZone).toInstant(timeZone)
+    } // = Clock.System.now() // FIXME DEBUG
 }
 
 // ---------------------------
@@ -96,8 +80,6 @@ interface CoroutineScopeProvider {
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T
     fun launchIO(block: suspend CoroutineScope.() -> Unit): Job
     fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job
-    fun scopeIO(): CoroutineScope
-    fun scopeDefault(): CoroutineScope
     fun cancelAllCoroutines()
 }
 
@@ -105,11 +87,8 @@ class DefaultCoroutineScopeProvider(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : CoroutineScopeProvider {
-    private val supervisorJob = SupervisorJob()
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        Napier.e("CoroutineExceptionHandler got $exception")
-    }
-    private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.Default)
 
     override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
         scope.launch(ioDispatcher, block = block)
@@ -117,18 +96,14 @@ class DefaultCoroutineScopeProvider(
     override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job =
         scope.launch(defaultDispatcher, block = block)
 
-    override fun scopeIO(): CoroutineScope = scope + ioDispatcher
-
-    override fun scopeDefault(): CoroutineScope  = scope + defaultDispatcher
-
     override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(ioDispatcher) { block() }
+        withContext(ioDispatcher) { scope.block() }
 
     override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(defaultDispatcher) { block() }
+        withContext(defaultDispatcher) { scope.block() }
 
     override fun cancelAllCoroutines() {
-        supervisorJob.cancel()
+        job.cancel()
     }
 }
 

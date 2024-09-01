@@ -21,15 +21,9 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import android.location.Location
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.close
-import kotlinx.datetime.Instant
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.geojson.Point
 
 /**
  * Converts a `BoundingBox` to a `LatLngBounds`.
@@ -43,21 +37,3 @@ fun BoundingBox.toLatLngBounds(): LatLngBounds = LatLngBounds.Builder()
         .include(LatLng(this.sw.lat, this.sw.lng)) // Southwest corner
         .include(LatLng(this.ne.lat, this.ne.lng)) // Northeast corner
         .build()
-
-fun Position.toLocation(now: Instant): Location {
-        val location = Location("custom_provider")
-        location.latitude = this.lat
-        location.longitude = this.lng
-        location.altitude = 0.0
-        location.time = now.toEpochMilliseconds()
-        return location
-}
-
-fun LatLng.toPosition(): Position = Position(this.latitude, this.longitude)
-
-fun Polygon.toMapLibrePolygon() : org.maplibre.geojson.Polygon {
-        close()
-        return org.maplibre.geojson.Polygon.fromLngLats(
-                listOf (map { Point.fromLngLat(it.lng, it.lat) })
-        )
-}

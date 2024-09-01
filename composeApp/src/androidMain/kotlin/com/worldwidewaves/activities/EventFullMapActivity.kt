@@ -38,7 +38,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         Box(modifier = modifier.fillMaxWidth()) {
-            EventMap(platform, event, mapConfig = EventMap.EventMapConfig(
+            EventMap(event, mapConfig = EventMap.EventMapConfig(
                 initialCameraPosition = EventMap.MapCameraPosition.WINDOW
             )).Screen(modifier = Modifier.fillMaxSize())
 

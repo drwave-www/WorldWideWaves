@@ -31,7 +31,8 @@ import kotlin.time.Duration.Companion.hours
 @Serializable
 data class WWWEventWaveDeep(
     override val speed: Double,
-    override val direction: Direction
+    override val direction: Direction,
+    override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
     override suspend fun getWavePolygons(

@@ -1,20 +1,9 @@
 
 Next:
-- 1: resoudre le pb de difference de vitesse entre la wave et la progression
-- 2: tester RECOMPOSE sur une liste de polygons splittes (faire deux splits et recomposer)
-- 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
-      --> Faire une fonction de telemetrie
-- add tests for all missing functions
-- Add a full test for event behavior AND wave progression using listeners
-- wave mechanics : wire in event screen :
-    - wave starting, warming area blinks, warming choreography
-    - wave is coming, prepare yourself, mains levees, ...
-    - addOnWaveWarmingEndedListener
-    - addOnWaveUserIsGoingToBeHitListener
-    - addOnWaveUserUserHasBeenHitListener
 
 - ======== Bugs/Issues/Refactorings =========
-    - verifier la bonne gestion des heures internationales, j'ai un doute..
+    - -180/180 : test d'un split polygon sur la ligne de changement de date
+    - reorganize tests and ensure everything is well tested, object by object
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom
@@ -24,9 +13,13 @@ Next:
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
 
+- Wave linear
+    - wave progression
+        - add a layer on the map
+        - add a progress bar on the map
+
 - Wave simulator
     - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')
-    - warn we are in a simulation mode in all event screens (click on banner allow for show details + cancellation)
 
 - Large map screen
     => add map actions (center user vs center wave)

@@ -52,7 +52,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -67,7 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.viewmodels.EventsViewModel
+import com.worldwidewaves.models.EventsViewModel
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -131,7 +130,7 @@ class EventsListScreen(
 
         EventsList(
             modifier, events,
-            onAllEventsClicked = { if (starredSelected) toggleStarredSelection() },
+            onAllEventsCLicked = { if (starredSelected) toggleStarredSelection() },
             onFavoriteEventsClicked = { if (!starredSelected) toggleStarredSelection() }
         )
     }
@@ -147,7 +146,7 @@ class EventsListScreen(
     private fun EventsList(
         modifier: Modifier,
         events: List<IWWWEvent>,
-        onAllEventsClicked: () -> Unit,
+        onAllEventsCLicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit
     ) {
         Column(
@@ -155,7 +154,7 @@ class EventsListScreen(
                 .fillMaxHeight()
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked)
+            FavoritesSelector(onAllEventsCLicked, onFavoriteEventsClicked)
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
             Events(viewModel, events, modifier = Modifier.weight(1f))
         }
@@ -286,9 +285,6 @@ class EventsListScreen(
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
-        val eventStatus by produceState(initialValue = IWWWEvent.Status.UNDEFINED, key1 = event.id) {
-            viewModel.eventStatus[event.id]?.collect { value = it } ?: run { value = IWWWEvent.Status.UNDEFINED }
-        }
 
         Box(modifier = heightModifier) {
 
@@ -303,8 +299,8 @@ class EventsListScreen(
             }
 
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
-            EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDone(eventStatus)
+            EventOverlaySoonOrRunning(event)
+            EventOverlayDone(event)
             EventOverlayFavorite(viewModel, event)
         }
     }

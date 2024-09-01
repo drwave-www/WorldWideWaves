@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.isLatitudeInRange
 import com.worldwidewaves.shared.events.utils.GeoUtils.isLongitudeEqual
 import com.worldwidewaves.shared.events.utils.GeoUtils.isLongitudeInRange
 import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
+import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import kotlin.math.PI
@@ -118,16 +119,32 @@ class GeoUtilsTest {
     }
 
     @Test
+    fun testNormalizeLongitude() {
+        assertEquals(0.0, normalizeLongitude(0.0), EPSILON)
+        assertEquals(180.0, normalizeLongitude(180.0), EPSILON)
+        assertEquals(-180.0, normalizeLongitude(-180.0), EPSILON)
+        assertEquals(-170.0, normalizeLongitude(190.0), EPSILON)
+        assertEquals(170.0, normalizeLongitude(-190.0), EPSILON)
+        assertEquals(0.0, normalizeLongitude(360.0), EPSILON)
+        assertEquals(0.0, normalizeLongitude(-360.0), EPSILON)
+    }
+
+    @Test
     fun testIsLongitudeEqual() {
         assertTrue(isLongitudeEqual(0.0, 0.0))
+        assertTrue(isLongitudeEqual(180.0, -180.0))
         assertFalse(isLongitudeEqual(0.0, 180.0))
+        assertTrue(isLongitudeEqual(360.0, 0.0))
+        assertTrue(isLongitudeEqual(-360.0, 0.0))
     }
 
     @Test
     fun testIsLongitudeInRange() {
         assertTrue(isLongitudeInRange(0.0, -180.0, 180.0))
         assertTrue(isLongitudeInRange(180.0, -180.0, 180.0))
+        assertTrue(isLongitudeInRange(-190.0, -180.0, 180.0)) // -190.0 is equivalent to 170.0 after normalization
         assertTrue(isLongitudeInRange(170.0, 160.0, 180.0))
+        assertFalse(isLongitudeInRange(190.0, 160.0, 180.0))
     }
 
     @Test

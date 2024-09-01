@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
+import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import kotlin.math.abs
 
 /**
@@ -29,24 +30,25 @@ import kotlin.math.abs
  */
 data class Segment(val start: Position, val end: Position) {
 
-    init {
-        start.init()
-        end.init()
-    }
+    fun normalized(): Segment = Segment(start.normalized(), end.normalized())
 
     /**
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
      */
     fun intersectWithLng(cutId: Int, cutLng: Double): CutPosition? {
+        val normalizedCutLng = normalizeLongitude(cutLng)
+        val normalizedStartLng = normalizeLongitude(start.lng)
+        val normalizedEndLng = normalizeLongitude(end.lng)
+
         // Calculate the latitude of intersection
         val latDiff = end.lat - start.lat
-        val lngDiff = end.lng - start.lng
+        val lngDiff = normalizeLongitude(normalizedEndLng - normalizedStartLng)
 
         // Check for vertical line - No unique intersection for a vertical line
         if (abs(lngDiff) < EPSILON) return null
 
-        val t = (cutLng - start.lng) / lngDiff
+        val t = normalizeLongitude(normalizedCutLng - normalizedStartLng) / lngDiff
         val lat = start.lat + t * latDiff
 
         // Check if the intersection point is on the segment
@@ -54,12 +56,18 @@ data class Segment(val start: Position, val end: Position) {
 
         // Determine the direction and create the CutPosition
         return when {
-            start.lng == cutLng && end.lng == cutLng ->
+            normalizedStartLng == normalizedCutLng && normalizedEndLng == normalizedCutLng ->
                 null // No intersection for a vertical line
-            (end.lng - start.lng) > 0 -> // Moving eastward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = start, cutRight = end)
-            else -> // Moving westward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = end, cutRight = start)
+            normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 ->
+                // Moving eastward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
+                    cutLeft = start.detached(), cutRight = end.detached()
+                )
+            else ->
+                // Moving westward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
+                    cutLeft = end.detached(), cutRight = start.detached()
+                )
         }
     }
 
@@ -85,8 +93,8 @@ data class Segment(val start: Position, val end: Position) {
         val y = y1 + ua * (y2 - y1)
 
         return CutPosition(lat = y, lng = x, cutId = cutId,
-            cutLeft = if (x1 < x2) start else end,
-            cutRight = if (x1 < x2) end else start
+            cutLeft = if (x1 < x2) start.detached() else end.detached(),
+            cutRight = if (x1 < x2) end.detached() else start.detached()
         )
     }
 

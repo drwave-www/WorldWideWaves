@@ -5,7 +5,6 @@ import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 
 /*
  * Copyright 2024 DrWave
@@ -55,8 +54,7 @@ class WWWGlobals {
         // -- Wave Constants --
         val WAVE_OBSERVE_DELAY = 2.hours // hours
         val WAVE_WARMING_DURATION = 3.minutes
-        const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
-        val WAVE_WARN_BEFORE_HIT = 15.seconds
+        val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
 
         // -- UI Constants --
 
