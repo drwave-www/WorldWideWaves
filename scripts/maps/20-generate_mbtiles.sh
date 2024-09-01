@@ -33,8 +33,14 @@ cd "$(dirname "$0")" # always work from executable folder
 
 # -----------------------------------------------------------------------------
 
-# DEBUG
-#EVENTS=paris_france
+if [ ! -z "$1" ]; then
+  if $(exists $1); then
+    EVENTS=$1
+  else
+    echo "Unexistent event $1"
+    exit 1
+  fi
+fi
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
@@ -49,6 +55,6 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
   fi
 
   echo
-  ./libs/generate_map.dep.sh $event
+  [ ! -f ./data/$event.mbtiles ] && ./libs/generate_map.dep.sh $event
 
 done

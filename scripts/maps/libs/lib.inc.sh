@@ -31,8 +31,12 @@ if [ ! -f ./bin/jq ]; then
   chmod +x ./bin/jq
 fi
 
-# List of all configured events with valid mapBbox
-EVENTS=$(./bin/jq -r '.[] | select(.mapBbox != "unknown") | .id' "$EVENTS_FILE")
+# List of all configured events
+EVENTS=$(./bin/jq -r '.[] | .id' "$EVENTS_FILE")
+
+exists() {
+  echo $EVENTS | grep "$1" > /dev/null
+}
 
 # Function to read an event's configuration property
 # Usage: conf <event_id> <property_name>

@@ -38,8 +38,14 @@ mkdir -p ./data
 
 # -----------------------------------------------------------------------------
 
-# DEBUG
-#EVENTS=paris_france
+if [ ! -z "$1" ]; then
+  if $(exists $1); then
+    EVENTS=$1
+  else
+    echo "Unexistent event $1"
+    exit 1
+  fi
+fi
 
 for event in $EVENTS; do # Download OSM area as PBF file 
                          # and generates a dedicated PBF file for corresponding BBOX
