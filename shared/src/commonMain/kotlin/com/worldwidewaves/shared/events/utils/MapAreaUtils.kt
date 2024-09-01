@@ -110,7 +110,10 @@ fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
         throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
     val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
-        Quadruple(Double.MAX_VALUE, Double.MAX_VALUE, Double.MIN_VALUE, Double.MIN_VALUE)
+        Quadruple(
+            Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+            Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY
+        )
     ) { (minLat, minLon, maxLat, maxLon), pos ->
         Quadruple(
             minOf(minLat, pos.lat), minOf(minLon, pos.lng),
