@@ -1,5 +1,13 @@
 package com.worldwidewaves.shared.events.utils
 
+import io.github.aakira.napier.Napier
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
 /*
  * Copyright 2024 DrWave
  *
@@ -20,834 +28,399 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-class AreaUtilsTest {
-//
-//    /**
-//     * Test points inside and outside a simple square polygon
-//     *
-//     * This test validates the correctness of the `isPointInPolygon` function by testing both an inside point
-//     * and an outside point relative to a simple square polygon.
-//     *
-//     * The square polygon is defined with vertices at the following coordinates:
-//     * (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
-//     *
-//     * Coordinate system:
-//     *
-//     *      ^ Latitude (Y)
-//     *    3 |
-//     *      |
-//     *      |
-//     *    2 |
-//     *      |           O
-//     *      |
-//     *    1 o-------o
-//     *      |       |
-//     *      |   X   |
-//     *      |       |
-//     *    0 o-------o-------o-------o---> Longitude (X)
-//     *      0       1       2       3
-//     *
-//     * In this system:
-//     * - The **polygon** is a square with vertices at (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), and (1.0, 0.0).
-//     * - The **inside point** (X) is at (0.5, 0.5), which lies within the bounds of the polygon.
-//     * - The **outside point** (O) is at (2.0, 2.0), outside the polygon.
-//     *
-//     * The function first checks if the inside point is correctly identified as within the polygon,
-//     * and then verifies that the outside point is correctly identified as outside the polygon.
-//     */
-//    @Test
-//    fun testIsPointInSimplePolygon() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val insidePoint = Position(0.5, 0.5)
-//        val outsidePoint = Position(1.5, 1.5)
-//
-//        // Debug information
-//        println("Testing point inside polygon: $insidePoint")
-//        println("Polygon vertices: $polygon")
-//
-//        assertTrue(
-//            isPointInPolygon(insidePoint, polygon),
-//            "Expected point to be inside the polygon"
-//        )
-//
-//        // Debug information
-//        println("Testing point outside polygon: $outsidePoint")
-//
-//        assertFalse(
-//            isPointInPolygon(outsidePoint, polygon),
-//            "Expected point to be outside the polygon"
-//        )
-//    }
-//
-//    /**
-//     * Test a point outside a simple square polygon
-//     *
-//     * This test validates the correctness of the `isPointInPolygon` function by testing a point
-//     * that is located outside a simple square polygon. The polygon is defined as a square,
-//     * and the point is located outside of this polygon above the square.
-//     *
-//     * The square polygon is defined by the following coordinates:
-//     * (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
-//     *
-//     * Coordinate system:
-//     *
-//     *      ^ Latitude (Y)
-//     *    3 |
-//     *      |
-//     *      |
-//     *    2 |   O
-//     *      |
-//     *    1 o-------o
-//     *      |       |
-//     *      |       |
-//     *      |       |
-//     *    0 o-------o-------o-------o---> Longitude (X)
-//     *      0       1       2       3
-//     *
-//     * In this system:
-//     * - The **polygon** is a simple square with vertices at (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), and (1.0, 0.0).
-//     * - The **point** is at (1.5, 2.0), which is located outside of the polygon.
-//     *
-//     * The function asserts that the point is correctly identified as outside the polygon.
-//     */
-//    @Test
-//    fun testIsPointOutsideSimplePolygon() {
-//        val point = Position(1.5, 0.5)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0), Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertFalse(isPointInPolygon(point, polygon))
-//    }
-//
-//    /**
-//     * Test a point inside a concave polygon
-//     *
-//     * This test checks whether the `isPointInPolygon` function can correctly identify a point
-//     * located inside a concave polygon. The polygon in this test forms a simple concave shape,
-//     * where one vertex indents into the polygon, creating a concave structure.
-//     *
-//     * The concave polygon is defined by the following coordinates:
-//     * (0.0, 0.0), (0.0, 1.0), (0.5, 0.5), (1.0, 1.0), (1.0, 0.0), and closes back at (0.0, 0.0).
-//     *
-//     * Coordinate system:
-//     *
-//     *      ^ Latitude (Y)
-//     *    3 |
-//     *      |
-//     *      |
-//     *    2 |
-//     *      |
-//     *      |
-//     *    1 o-------o
-//     *      |     /
-//     *      |   X
-//     *      |     \
-//     *    0 o-------o-------o-------o---> Longitude (X)
-//     *      0       1       2       3
-//     *
-//     * In this system:
-//     * - The **concave polygon** is formed by the vertices, creating a concave "V" shape.
-//     * - The **point** is at (0.5, 0.5), which is inside the concave part of the polygon.
-//     *
-//     * The function tests whether the point is correctly identified as being inside the concave polygon.
-//     */
-//    @Test
-//    fun testIsPointInConcavePolygon() {
-//        val point = Position(0.5, 0.5)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(0.5, 0.5),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertTrue(isPointInPolygon(point, polygon))
-//    }
-//
-//
-//    @Test
-//    fun testIsPointOutsideConcavePolygon() {
-//        val point = Position(0.2, 0.8)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(0.5, 0.5),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertFalse(isPointInPolygon(point, polygon))
-//    }
-//
-//    // Edge Cases
-//
-//    @Test
-//    fun testPointOnVertex() {
-//        val point = Position(0.0, 0.0)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on a vertex as inside
-//    }
-//
-//    @Test
-//    fun testPointOnHorizontalEdge() {
-//        val point = Position(0.5, 0.0)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
-//    }
-//
-//    @Test
-//    fun testPointOnVerticalEdge() {
-//        val point = Position(0.0, 0.5)
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
-//    }
-//
-//    // -----------------------
-//
-//    @Test
-//    fun testSimplePolygon() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
-//        val actualBbox = polygonBbox(polygon)
-//        assertEquals(expectedBbox, actualBbox)
-//    }
-//
-//    @Test
-//    fun testBadPolygon() {
-//        val polygon : Polygon = emptyList()
-//        assertFailsWith<IllegalArgumentException> {
-//            polygonBbox(polygon)
-//        }
-//    }
-//
-//    @Test
-//    fun testComplexPolygon() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 2.0),
-//            Position(1.0, 1.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
-//        val actualBbox = polygonBbox(polygon)
-//        assertEquals(expectedBbox, actualBbox)
-//    }
-//
-//    @Test
-//    fun testPointOnEdge() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val pointOnEdge = Position(0.5, 0.0)
-//        assertTrue(isPointInPolygon(pointOnEdge, polygon))
-//    }
-//
-//    @Test
-//    fun testPolygonWithHole() {
-//        val outerPolygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 3.0),
-//            Position(3.0, 3.0),
-//            Position(3.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val innerPolygon = listOf(
-//            Position(1.0, 1.0),
-//            Position(1.0, 2.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 1.0),
-//            Position(1.0, 1.0)
-//        )
-//        val combinedPolygon = outerPolygon + innerPolygon
-//        val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
-//        val actualBbox = polygonBbox(combinedPolygon)
-//        assertEquals(expectedBbox, actualBbox)
-//    }
-//
-//    @Test
-//    fun testDegeneratePolygon() {
-//        val polygon = listOf(
-//            Position(1.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 1.0)
-//        )
-//        val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
-//        val actualBbox = polygonBbox(polygon)
-//        assertEquals(expectedBbox, actualBbox)
-//    }
-//
-//    // -----------------------
-//
-//    private fun createMockGeoJsonDataProvider(geoJson: String): GeoJsonDataProvider {
-//        return object: GeoJsonDataProvider {
-//            override suspend fun getGeoJsonData(eventId: String): JsonObject {
-//                return Json.parseToJsonElement(geoJson).jsonObject
-//            }
-//        }
-//    }
-//
-//    private fun createWWWEventArea(event: WWWEvent, geoJson: String): WWWEventArea {
-//        val geoJsonDataProvider = createMockGeoJsonDataProvider(geoJson)
-//        return WWWEventArea(event, geoJsonDataProvider)
-//    }
-//
-//    private val polygonGeoJson = """
-//        {"type":"Polygon","coordinates":[[[0.0,0.0],[0.0,10.0],[10.0,10.0],[10.0,0.0],[0.0,0.0]]]}
-//    """.trimIndent()
-//
-//    private val emptyPolygonGeoJson = """
-//        {"type":"Polygon","coordinates":[]}
-//    """.trimIndent()
-//
-//    @Test
-//    fun testIsPositionWithin() {
-//        val randomEvent = createRandomWWWEvent("test_event")
-//        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
-//        val position = Position(5.0, 5.0) // Position within the polygon
-//
-//        runBlocking {
-//            assertTrue(eventArea.isPositionWithin(position), "Expected position to be within the event area")
-//        }
-//    }
-//
-//    @Test
-//    fun testGetBoundingBox() {
-//        val randomEvent = createRandomWWWEvent("test_event")
-//        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
-//
-//        runBlocking {
-//            val boundingBox = eventArea.getBoundingBox()
-//            assertNotNull(boundingBox, "Expected bounding box to be not null")
-//            assertTrue(boundingBox.minLatitude <= boundingBox.maxLatitude, "Invalid bounding box coordinates")
-//            assertTrue(boundingBox.minLongitude <= boundingBox.maxLongitude, "Invalid bounding box coordinates")
-//        }
-//    }
-//
-//    @Test
-//    fun testGetCachedPolygon() {
-//        val randomEvent = createRandomWWWEvent("test_event")
-//        val eventArea = createWWWEventArea(randomEvent, polygonGeoJson)
-//
-//        runBlocking {
-//            val polygon = eventArea.getPolygon()
-//            val expectedPolygon = listOf(
-//                Position(lat=0.0, lng=0.0),
-//                Position(lat=10.0, lng=0.0),
-//                Position(lat=10.0, lng=10.0),
-//                Position(lat=0.0, lng=10.0),
-//                Position(lat=0.0, lng=0.0)
-//            )
-//            assertEquals(expectedPolygon, polygon, "Expected polygon to match the predefined polygon")
-//        }
-//    }
-//
-//    @Test
-//    fun testGetCachedPolygonEmpty() {
-//        val randomEvent = createRandomWWWEvent("test_event")
-//        val eventArea = createWWWEventArea(randomEvent, emptyPolygonGeoJson)
-//
-//        runBlocking {
-//            val polygon = eventArea.getPolygon()
-//            assertTrue(polygon.isEmpty(), "Expected polygon to be empty")
-//        }
-//    }
-//
-//    // -----------------------
-//
-//    private fun areRingPolygonsEqual(polygon1: Polygon, polygon2: Polygon): Boolean {
-//        if (polygon1.size != polygon2.size) {
-//            Napier.d("Polygons are not equal: different sizes. Polygon1 size: ${polygon1.size}, Polygon2 size: ${polygon2.size}")
-//            return false
-//        }
-//
-//        // Remove the repeating point from the end of each polygon
-//        val cleanedPolygon1 = removeRepeatingPoint(polygon1)
-//        val cleanedPolygon2 = removeRepeatingPoint(polygon2)
-//
-//        // Normalize both polygons to start from the same point
-//        val normalizedPolygon1 = normalizePolygon(cleanedPolygon1)
-//        val normalizedPolygon2 = normalizePolygon(cleanedPolygon2)
-//
-//        // Check if all points match
-//        for (i in normalizedPolygon1.indices) {
-//            if (normalizedPolygon1[i] != normalizedPolygon2[i]) {
-//                Napier.d("Polygons are not equal: mismatch at index $i. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2")
-//                return false
-//            }
-//        }
-//
-//        return true
-//    }
-//
-//    private fun normalizePolygon(polygon: Polygon): Polygon {
-//        if (polygon.isEmpty()) return polygon
-//
-//        // Find the smallest point lexicographically to use as the starting point
-//        val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng })) ?: return polygon
-//        val startIndex = polygon.indexOf(minPoint)
-//
-//        // Rotate the polygon to start from the smallest point
-//        return (polygon.subList(startIndex, polygon.size) + polygon.subList(0, startIndex))
-//    }
-//
-//    private fun removeRepeatingPoint(polygon: Polygon): Polygon {
-//        if (polygon.size > 1 && polygon.first() == polygon.last()) {
-//            return polygon.dropLast(1)
-//        }
-//        return polygon
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude() {
-//        val polygon = listOf(
-//            Position(lat = 0.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 2.0),
-//            Position(lat = 2.0, lng = 2.0),
-//            Position(lat = 2.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        val expectedLeftSide = listOf(
-//            Position(lat = 0.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 1.0),
-//            Position(lat = 2.0, lng = 1.0),
-//            Position(lat = 2.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 0.0)
-//        )
-//        val expectedRightSide = listOf(
-//            Position(lat = 0.0, lng = 1.0),
-//            Position(lat = 0.0, lng = 2.0),
-//            Position(lat = 2.0, lng = 2.0),
-//            Position(lat = 2.0, lng = 1.0),
-//            Position(lat = 0.0, lng = 1.0)
-//        )
-//
-//        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
-//        assertTrue(result.right.size == 1 && areRingPolygonsEqual(result.right[0], expectedRightSide), "Expected right side of the split polygon to match")
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitudeWithVertexOnCut() {
-//        val polygon = listOf(
-//            Position(lat = 0.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        val expectedLeftSide = listOf(
-//            Position(lat = 0.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 0.0)
-//        )
-//
-//        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
-//        assertTrue(result.right.isEmpty(), "Expected right side of the split polygon to be empty")
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitudeWithDegenerateShape() {
-//        val polygon = listOf(
-//            Position(lat = 1.0, lng = 0.0),
-//            Position(lat = 1.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 2.0),
-//            Position(lat = 1.0, lng = 3.0),
-//            Position(lat = 1.0, lng = 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
-//        assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_SinglePointPolygon() {
-//        val polygon = listOf(Position(0.0, 0.0))
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(emptyList(), result.left)
-//        assertEquals(emptyList(), result.right)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_TwoPointPolygon() {
-//        val polygon = listOf(Position(0.0, 0.0), Position(0.0, 1.0))
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(emptyList(), result.left)
-//        assertEquals(emptyList(), result.right)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = listOf(
-//        Position(0.0, 1.0),
-//        Position(1.0, 1.0),
-//        Position(2.0, 1.0),
-//        Position(0.0, 1.0)
-//    )
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(emptyList(), result.left)
-//        assertEquals(emptyList(), result.right)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_MultiplePolygonsLeft() {
-//        // This scenario is not possible with a single longitude cut,
-//        // but the structure supports it for more general polygon splitting.
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 2.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(1, result.left.size)
-//        assertEquals(1, result.right.size)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_MultiplePolygonsRight() {
-//        // This scenario is not possible with a single longitude cut,
-//        // but the structure supports it for more general polygon splitting.
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 2.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(1, result.left.size)
-//        assertEquals(1, result.right.size)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_ComplexShape1() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 3.0),
-//            Position(1.0, 2.0),
-//            Position(2.0, 3.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertTrue(result.left.all { it.first() == it.last() })
-//        assertTrue(result.right.all { it.first() == it.last() })
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_ComplexShape2() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(1.0, 1.0),
-//            Position(2.0, 0.0),
-//            Position(2.0, 2.0),
-//            Position(1.0, 3.0),
-//            Position(0.0, 2.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 1.5
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertTrue(result.left.all { it.first() == it.last() })
-//        assertTrue(result.right.all { it.first() == it.last() })
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_LongitudeOutsidePolygon() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 2.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(listOf(polygon), result.left)
-//        assertEquals(emptyList(), result.right)
-//    }
-//
-//    @Test
-//    fun testSplitPolygonByLongitude_EmptyPolygon() {
-//        val polygon = emptyList<Position>()
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//        assertEquals(emptyList(), result.left)
-//        assertEquals(emptyList(), result.right)
-//    }
-//
-//    @Test
-//    fun testSplitLargePolygonWithConcaveSections() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 5.0),
-//            Position(2.0, 3.0),
-//            Position(4.0, 5.0),
-//            Position(4.0, 0.0),
-//            Position(3.0,1.0),
-//            Position(1.0, 1.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 2.5
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        assertTrue(result.left.isNotEmpty())
-//        assertTrue(result.right.isNotEmpty())
-//        assertTrue(result.left.all { it.first() == it.last() })
-//        assertTrue(result.right.all { it.first() == it.last() })
-//    }
-//
-//    @Test
-//    fun testSplitPolygonWithZigzagPattern() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 2.0),
-//            Position(1.0, 1.0),
-//            Position(1.0, 3.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//
-//        val longitudeToCut = 1.5
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        val expectedLeftSide = listOf(
-//            Position(lat = 0.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 1.5),
-//            Position(lat = 0.5, lng = 1.5),
-//            Position(lat = 1.0, lng = 1.0),
-//            Position(lat = 1.0, lng = 1.5),
-//            Position(lat = 2.0, lng = 1.5),
-//            Position(lat = 2.0, lng = 0.0),
-//            Position(lat = 0.0, lng = 0.0)
-//        )
-//
-//        val expectedRightSide1 = listOf(
-//            Position(lat = 0.0, lng = 1.5),
-//            Position(lat = 0.0, lng = 2.0),
-//            Position(lat = 0.5, lng = 1.5),
-//            Position(lat = 0.0, lng = 1.5)
-//        )
-//        val expectedRightSide2 = listOf(
-//            Position(lat = 1.0, lng = 1.5),
-//            Position(lat = 1.0, lng = 3.0),
-//            Position(lat = 2.0, lng = 2.0),
-//            Position(lat = 2.0, lng = 1.5),
-//            Position(lat = 1.0, lng = 1.5)
-//        )
-//
-//        assertTrue(result.left.isNotEmpty())
-//        assertTrue(result.right.isNotEmpty())
-//        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
-//        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
-//        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
-//    }
-//
-//    @Test
-//    fun testSplitPolygonWithSpiralShape() {
-//        val polygon = mutableListOf(Position(0.0, 0.0))
-//        var angle = 0.0
-//        val radius = 1.0
-//        val numPoints = 36
-//        for (i in 1..numPoints) {
-//            angle += PI / 12
-//            val x = radius * cos(angle)
-//            val y = radius * sin(angle)
-//            polygon.add(Position(x, y))
-//        }
-//        polygon.add(Position(0.0, 0.0)) // Close thepolygon
-//
-//        val longitudeToCut = 0.5
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        assertTrue(result.left.isNotEmpty())
-//        assertTrue(result.right.isNotEmpty())
-//        assertTrue(result.left.all { it.first() == it.last() })
-//        assertTrue(result.right.all { it.first() == it.last() })
-//    }
-//
-//    @Test
-//    fun testSplitPolygonWithMultipleIntersections() {
-//        val polygon = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 4.0),
-//            Position(1.0, 3.0),
-//            Position(2.0, 4.0),
-//            Position(2.0, 2.0),
-//            Position(3.0, 3.0),
-//            Position(4.0, 2.0),
-//            Position(4.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val longitudeToCut = 2.5
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        assertTrue(result.left.isNotEmpty())
-//        assertTrue(result.right.isNotEmpty())
-//        assertTrue(result.left.all { it.first() == it.last() })
-//        assertTrue(result.right.all { it.first() == it.last() })
-//    }
-//
-//    @Test
-//    fun testSplitConcavePolygon_MultipleRightRings() {
-//        val polygon = listOf(
-//        Position(0.0, 0.0),
-//        Position(0.0, 2.0),
-//        Position(1.0, 1.0),
-//        Position(2.0, 2.0),
-//        Position(2.0, 0.0),
-//        Position(0.0, 0.0))
-//
-//        val longitudeToCut = 1.0
-//        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-//
-//        val expectedLeftSide = listOf(
-//            Position(0.0, 0.0),
-//            Position(0.0, 1.0),
-//            Position(1.0, 1.0),
-//            Position(2.0, 1.0),
-//            Position(2.0, 0.0),
-//            Position(0.0, 0.0)
-//        )
-//        val expectedRightSide1 = listOf(
-//            Position(0.0, 1.0),
-//            Position(0.0, 2.0),
-//            Position(1.0, 1.0),
-//            Position(0.0, 1.0) // Closed ring polygon
-//        )
-//        val expectedRightSide2 = listOf(
-//            Position(1.0, 1.0),
-//            Position(2.0, 2.0),
-//            Position(2.0, 1.0),
-//            Position(1.0, 1.0) // Closed ring polygon
-//        )
-//
-//        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
-//        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
-//        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
-//    }
-//
-//    // -----------------------
-//
-//    @Test
-//    fun pointOnHorizontalSegment() {
-//        val segment = Segment(Position(1.0, 0.0), Position(1.0, 2.0))
-//        val point = Position(1.0, 1.0)
-//        assertTrue(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOnVerticalSegment() {
-//        val segment = Segment(Position(0.0, 1.0), Position(2.0, 1.0))
-//        val point = Position(1.0, 1.0)
-//        assertTrue(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOnDiagonalSegment() {
-//        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
-//        val point = Position(1.0, 1.0)
-//        assertTrue(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOutsideSegmentHorizontal() {
-//        val segment = Segment(Position(1.0, 0.0), Position(1.0, 2.0))
-//        val point = Position(2.0, 1.0)
-//        assertFalse(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOutsideSegmentVertical() {
-//        val segment = Segment(Position(0.0, 1.0), Position(2.0, 1.0))
-//        val point = Position(1.0, 2.0)
-//        assertFalse(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOutsideSegmentDiagonal() {
-//        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
-//        val point = Position(1.0, 0.0)
-//        assertFalse(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointOnSegmentEndpoint() {
-//        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
-//        val point = Position(0.0, 0.0)
-//        assertTrue(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointCollinearButOutsideSegment() {
-//        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
-//        val point = Position(3.0, 3.0)
-//        assertFalse(isPointOnLineSegment(point, segment))
-//    }
-//
-//    @Test
-//    fun pointNotCollinear() {
-//        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
-//        val point = Position(1.0, 2.0)
-//        assertFalse(isPointOnLineSegment(point, segment))
-//    }
+class AreaUtilsTestSplitPolygon {
+
+    @Test
+    fun testSplitPolygonByLongitude() {
+        val polygon = listOf(
+            Position(lat = 0.0, lng = 0.0),
+            Position(lat = 0.0, lng = 2.0),
+            Position(lat = 2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 0.0),
+            Position(lat = 0.0, lng = 0.0)
+        )
+        val longitudeToCut = 1.0
+
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        val expectedLeftSide = listOf(
+            Position(lat = 0.0, lng = 0.0),
+            Position(lat = 0.0, lng = 1.0),
+            Position(lat = 2.0, lng = 1.0),
+            Position(lat = 2.0, lng = 0.0),
+            Position(lat = 0.0, lng = 0.0)
+        )
+        val expectedRightSide = listOf(
+            Position(lat = 0.0, lng = 1.0),
+            Position(lat = 0.0, lng = 2.0),
+            Position(lat = 2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 1.0),
+            Position(lat = 0.0, lng = 1.0)
+        )
+
+        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
+        assertTrue(result.right.size == 1 && areRingPolygonsEqual(result.right[0], expectedRightSide), "Expected right side of the split polygon to match")
+    }
+
+    @Test
+    fun testSplitPolygonByLongitudeWithVertexOnCut() {
+        val polygon = listOf(
+            Position(lat = 0.0, lng = 0.0),
+            Position(lat = 0.0, lng = 1.0),
+            Position(lat = 1.0, lng = 1.0),
+            Position(lat = 1.0, lng = 0.0),
+            Position(lat = 0.0, lng = 0.0)
+        )
+        val longitudeToCut = 1.0
+
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        val expectedLeftSide = listOf(
+            Position(lat = 0.0, lng = 0.0),
+            Position(lat = 0.0, lng = 1.0),
+            Position(lat = 1.0, lng = 1.0),
+            Position(lat = 1.0, lng = 0.0),
+            Position(lat = 0.0, lng = 0.0)
+        )
+
+        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
+        assertTrue(result.right.isEmpty(), "Expected right side of the split polygon to be empty")
+    }
+
+    @Test
+    fun testSplitPolygonByLongitudeWithDegenerateShape() {
+        val polygon = listOf(
+            Position(lat = 1.0, lng = 0.0),
+            Position(lat = 1.0, lng = 1.0),
+            Position(lat = 1.0, lng = 2.0),
+            Position(lat = 1.0, lng = 3.0),
+            Position(lat = 1.0, lng = 0.0)
+        )
+        val longitudeToCut = 1.0
+
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
+        assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_SinglePointPolygon() {
+        val polygon = listOf(Position(0.0, 0.0))
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(emptyList(), result.left)
+        assertEquals(emptyList(), result.right)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_TwoPointPolygon() {
+        val polygon = listOf(Position(0.0, 0.0), Position(0.0, 1.0))
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(emptyList(), result.left)
+        assertEquals(emptyList(), result.right)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = listOf(
+        Position(0.0, 1.0),
+        Position(1.0, 1.0),
+        Position(2.0, 1.0),
+        Position(0.0, 1.0)
+    )
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(emptyList(), result.left)
+        assertEquals(emptyList(), result.right)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_MultiplePolygonsLeft() {
+        // This scenario is not possible with a single longitude cut,
+        // but the structure supports it for more general polygon splitting.
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(1, result.left.size)
+        assertEquals(1, result.right.size)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_MultiplePolygonsRight() {
+        // This scenario is not possible with a single longitude cut,
+        // but the structure supports it for more general polygon splitting.
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(1, result.left.size)
+        assertEquals(1, result.right.size)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_ComplexShape1() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 3.0),
+            Position(1.0, 2.0),
+            Position(2.0, 3.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it.first() == it.last() })
+        assertTrue(result.right.all { it.first() == it.last() })
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_ComplexShape2() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(1.0, 1.0),
+            Position(2.0, 0.0),
+            Position(2.0, 2.0),
+            Position(1.0, 3.0),
+            Position(0.0, 2.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 1.5
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it.first() == it.last() })
+        assertTrue(result.right.all { it.first() == it.last() })
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_LongitudeOutsidePolygon() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 2.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(listOf(polygon), result.left)
+        assertEquals(emptyList(), result.right)
+    }
+
+    @Test
+    fun testSplitPolygonByLongitude_EmptyPolygon() {
+        val polygon = emptyList<Position>()
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertEquals(emptyList(), result.left)
+        assertEquals(emptyList(), result.right)
+    }
+
+    @Test
+    fun testSplitLargePolygonWithConcaveSections() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 5.0),
+            Position(2.0, 3.0),
+            Position(4.0, 5.0),
+            Position(4.0, 0.0),
+            Position(3.0,1.0),
+            Position(1.0, 1.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 2.5
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        assertTrue(result.left.isNotEmpty())
+        assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it.first() == it.last() })
+        assertTrue(result.right.all { it.first() == it.last() })
+    }
+
+    @Test
+    fun testSplitPolygonWithZigzagPattern() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(1.0, 1.0),
+            Position(1.0, 3.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+
+        val longitudeToCut = 1.5
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        val expectedLeftSide = listOf(
+            Position(lat = 0.0, lng = 0.0),
+            Position(lat = 0.0, lng = 1.5),
+            Position(lat = 0.5, lng = 1.5),
+            Position(lat = 1.0, lng = 1.0),
+            Position(lat = 1.0, lng = 1.5),
+            Position(lat = 2.0, lng = 1.5),
+            Position(lat = 2.0, lng = 0.0),
+            Position(lat = 0.0, lng = 0.0)
+        )
+
+        val expectedRightSide1 = listOf(
+            Position(lat = 0.0, lng = 1.5),
+            Position(lat = 0.0, lng = 2.0),
+            Position(lat = 0.5, lng = 1.5),
+            Position(lat = 0.0, lng = 1.5)
+        )
+        val expectedRightSide2 = listOf(
+            Position(lat = 1.0, lng = 1.5),
+            Position(lat = 1.0, lng = 3.0),
+            Position(lat = 2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 1.5),
+            Position(lat = 1.0, lng = 1.5)
+        )
+
+        assertTrue(result.left.isNotEmpty())
+        assertTrue(result.right.isNotEmpty())
+        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
+        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
+        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
+    }
+
+    @Test
+    fun testSplitPolygonWithSpiralShape() {
+        val polygon = mutableListOf(Position(0.0, 0.0))
+        var angle = 0.0
+        val radius = 1.0
+        val numPoints = 36
+        for (i in 1..numPoints) {
+            angle += PI / 12
+            val x = radius * cos(angle)
+            val y = radius * sin(angle)
+            polygon.add(Position(x, y))
+        }
+        polygon.add(Position(0.0, 0.0)) // Close thepolygon
+
+        val longitudeToCut = 0.5
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        assertTrue(result.left.isNotEmpty())
+        assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it.first() == it.last() })
+        assertTrue(result.right.all { it.first() == it.last() })
+    }
+
+    @Test
+    fun testSplitPolygonWithMultipleIntersections() {
+        val polygon = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 4.0),
+            Position(1.0, 3.0),
+            Position(2.0, 4.0),
+            Position(2.0, 2.0),
+            Position(3.0, 3.0),
+            Position(4.0, 2.0),
+            Position(4.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val longitudeToCut = 2.5
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        assertTrue(result.left.isNotEmpty())
+        assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it.first() == it.last() })
+        assertTrue(result.right.all { it.first() == it.last() })
+    }
+
+    @Test
+    fun testSplitConcavePolygon_MultipleRightRings() {
+        val polygon = listOf(
+        Position(0.0, 0.0),
+        Position(0.0, 2.0),
+        Position(1.0, 1.0),
+        Position(2.0, 2.0),
+        Position(2.0, 0.0),
+        Position(0.0, 0.0))
+
+        val longitudeToCut = 1.0
+        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+
+        val expectedLeftSide = listOf(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(2.0, 1.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val expectedRightSide1 = listOf(
+            Position(0.0, 1.0),
+            Position(0.0, 2.0),
+            Position(1.0, 1.0),
+            Position(0.0, 1.0) // Closed ring polygon
+        )
+        val expectedRightSide2 = listOf(
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(2.0, 1.0),
+            Position(1.0, 1.0) // Closed ring polygon
+        )
+
+        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
+        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
+        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
+    }
+
+    // -----------------------
+
+    private fun areRingPolygonsEqual(polygon1: Polygon, polygon2: Polygon): Boolean {
+        if (polygon1.size != polygon2.size) {
+            Napier.d("Polygons are not equal: different sizes. Polygon1 size: ${polygon1.size}, Polygon2 size: ${polygon2.size}")
+            return false
+        }
+
+        // Remove the repeating point from the end of each polygon
+        val cleanedPolygon1 = removeRepeatingPoint(polygon1)
+        val cleanedPolygon2 = removeRepeatingPoint(polygon2)
+
+        // Normalize both polygons to start from the same point
+        val normalizedPolygon1 = normalizePolygon(cleanedPolygon1)
+        val normalizedPolygon2 = normalizePolygon(cleanedPolygon2)
+
+        // Check if all points match
+        for (i in normalizedPolygon1.indices) {
+            if (normalizedPolygon1[i] != normalizedPolygon2[i]) {
+                Napier.d("Polygons are not equal: mismatch at index $i. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2")
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private fun normalizePolygon(polygon: Polygon): Polygon {
+        if (polygon.isEmpty()) return polygon
+
+        // Find the smallest point lexicographically to use as the starting point
+        val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng })) ?: return polygon
+        val startIndex = polygon.indexOf(minPoint)
+
+        // Rotate the polygon to start from the smallest point
+        return (polygon.subList(startIndex, polygon.size) + polygon.subList(0, startIndex))
+    }
+
+    private fun removeRepeatingPoint(polygon: Polygon): Polygon {
+        if (polygon.size > 1 && polygon.first() == polygon.last()) {
+            return polygon.dropLast(1)
+        }
+        return polygon
+    }
 
 }

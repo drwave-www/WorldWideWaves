@@ -340,13 +340,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     suspend fun getWarmingPolygons(): List<Polygon> {
         if (cachedWarmingPolygons == null) {
             cachedWarmingPolygons = when (warming.type) {
-                "longitude-cut" -> splitPolygonByLongitude(
-                    event.area.getPolygon(),
-                    warming.longitude ?: run {
-                        Napier.e(tag = "WWWEventWave", message = "Longitude not set in configuration")
-                        return emptyList()
-                    }
-                ).right
+                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
+                    splitPolygonByLongitude(polygon, warming.longitude!!).right
+                }
                 else -> emptyList()
             }
         }

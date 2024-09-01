@@ -1,5 +1,8 @@
 package com.worldwidewaves.shared.events.utils
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -109,6 +112,16 @@ class AreaUtilsTestBoundingBox {
         val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
         val actualBbox = polygonBbox(polygon)
         assertEquals(expectedBbox, actualBbox)
+    }
+
+    // ========================================================================
+
+    private fun createMockGeoJsonDataProvider(geoJson: String): GeoJsonDataProvider {
+        return object: GeoJsonDataProvider {
+            override suspend fun getGeoJsonData(eventId: String): JsonObject {
+                return Json.parseToJsonElement(geoJson).jsonObject
+            }
+        }
     }
 
 }
