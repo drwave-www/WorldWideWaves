@@ -39,7 +39,8 @@
         "speed": 5,
         "direction": "west",
         "warming": {
-          "type": "geojson"
+          "type": "longitude-cut",
+          "longitude": -43.28212428287723
         }
       }
     },
