@@ -1,5 +1,5 @@
 [versions]
-agp = "8.6.0"
+agp = "8.7.0"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
@@ -18,13 +18,13 @@ lifecycleLivedataKtx = "2.8.6"
 lifecycleViewmodelKtx = "2.8.6"
 mockkAndroid = "1.13.12"
 mockkCommon = "1.12.0"
-navigationFragmentKtx = "2.8.1"
-navigationUiKtx = "2.8.1"
+navigationFragmentKtx = "2.8.2"
+navigationUiKtx = "2.8.2"
 material3Android = "1.3.0"
-uiTextGoogleFonts = "1.7.2"
+uiTextGoogleFonts = "1.7.3"
 workRuntimeKtx = "2.9.1"
 places = "4.0.0"
-uiGraphicsAndroid = "1.7.2"
+uiGraphicsAndroid = "1.7.3"
 annotationJvm = "1.8.2"
 dataStorePreferences = "1.1.1"
 kotlinxAtomic = "0.24.0"
@@ -33,6 +33,7 @@ maplibreAndroid = "11.1.0" # 11.2.0 is SEGV_MAPERR
 maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
 napier = "2.7.1"
+lifecycleViewmodelAndroid = "2.8.6"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -68,6 +69,7 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
+androidx-lifecycle-viewmodel-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-android", version.ref = "lifecycleViewmodelAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

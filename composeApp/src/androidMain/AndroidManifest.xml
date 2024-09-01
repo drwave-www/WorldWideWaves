@@ -18,6 +18,9 @@
         android:screenOrientation="portrait"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
+        <profileable android:shell="true"
+            tools:targetApi="q" />
+
         <activity
             android:name=".activities.MainActivity"
             android:exported="false" />

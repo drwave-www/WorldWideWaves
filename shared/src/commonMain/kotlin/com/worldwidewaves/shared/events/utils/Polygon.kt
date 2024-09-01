@@ -21,8 +21,13 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
+
+typealias Area = List<Polygon>
+typealias MutableArea = MutableList<Polygon>
 
 open class Polygon(position: Position? = null) : Iterable<Position> { // Not thread-safe
 
@@ -32,7 +37,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     internal val positionsIndex = mutableMapOf<Int, Position>()
 
     private var isClockwise: Boolean = true
-    private var area: Double = 0.0
+
+    @VisibleForTesting
+    var area: Double = 0.0
 
     private var minLat: Double = POSITIVE_INFINITY
     private var minLng: Double = POSITIVE_INFINITY
@@ -51,6 +58,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     companion object {
         fun fromPositions(vararg positions: Position): Polygon =
             Polygon().apply { positions.forEach { add(it) } }
+        fun fromPositions(positions: List<Position>): Polygon =
+            Polygon().apply { positions.forEach { add(it) } }
     }
 
     // --------------------------------
@@ -65,16 +74,21 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     private fun removePositionFromIndex(id: Int) : Position {
-        val positionToRemove = requireNotNull(positionsIndex.remove(id)) { "Position with id $id not found" }
+        val positionToRemove = requireNotNull(positionsIndex.remove(id)) {
+            "Position with id $id not found"
+        }
         if (positionToRemove is CutPosition) cutPositions.remove(positionToRemove)
         return positionToRemove
     }
 
     // -- Direction logic -------------
 
-    fun isClockwise(): Boolean = when {
-        size < 3 -> true // Two-point polygon is considered clockwise
-        else -> isClockwise
+    fun isClockwise(): Boolean {
+        val retClockwise = when {
+            size < 3 -> true // Two-point polygon is considered clockwise
+            else -> area + (head!!.lng - tail!!.lng) * (head!!.lat + tail!!.lat) > 0 // Ensure closing
+        }
+        return retClockwise
     }
 
     private fun updateAreaAndDirection(p1: Position?, p2: Position?, isRemoving: Boolean = false) {
@@ -151,11 +165,11 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Add/Remove positions --------
 
     fun add(position: Position) : Position {
-        if (tail != null && position == tail) {
-            return tail!! // skip us time
+        if (tail != null && position == tail) { // Do not add consecutive same point
+            return tail!!
         }
 
-        val addPosition = position.xfer()
+        val addPosition = position.xfer() // Disconnect the position from a possible other polygon
         indexNewPosition(addPosition)
 
         if (head == null) {
@@ -177,6 +191,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
         updateAreaAndDirection(positionToRemove.prev, positionToRemove, true)
         updateAreaAndDirection(positionToRemove, positionToRemove.next, true)
+        forceDirectionComputation()
 
         when (positionToRemove.id) {
             head?.id -> {
@@ -199,7 +214,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun insertAfter(newPosition: Position, id: Int): Position {
-        val current = requireNotNull(positionsIndex[id]) { "Position with id $id not found" }
+        val current = requireNotNull(positionsIndex[id]) {
+            "Position with id $id not found"
+        }
         val addPosition = newPosition.xfer().apply {
             next = current.next
             prev = current
@@ -213,8 +230,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
 
         updateBoundingBoxForPosition(addPosition)
-        updateAreaAndDirection(current, addPosition)
-        updateAreaAndDirection(addPosition, addPosition.next)
+        forceDirectionComputation()
         return addPosition
     }
 
@@ -231,13 +247,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
         indexNewPosition(addPosition)
         updateBoundingBoxForPosition(addPosition)
-        updateAreaAndDirection(addPosition, current)
-        updateAreaAndDirection(addPosition.prev, addPosition)
+        forceDirectionComputation()
         return addPosition
     }
 
     fun removePositionsUpTo(pointId: Int): Boolean {
-        // Check if the polygon is empty or if the toCut id doesn't exist
+        // Check if the polygon is empty or if the position id doesn't exist
         require(isNotEmpty() && positionsIndex.containsKey(pointId)) { return false }
 
         // If toCut is the head, nothing to delete
@@ -256,6 +271,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         head = current
         head?.prev = null
 
+        updateBoundingBox()
+        forceDirectionComputation()
         return true
     }
 
@@ -315,7 +332,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun cutIterator() = cutPositions.iterator()
 
-    // --------------------------------
+    // -------------------------------
 
     fun clear(): Polygon {
         positionsIndex.clear()
@@ -334,8 +351,10 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
+    fun isClosed(): Boolean = isEmpty() || first() == last()
     fun first(): Position? = head
     fun last(): Position? = tail
+    fun search(current: Position): Position? = this.find { it == current }
     val size: Int get() = positionsIndex.size
     val cutSize: Int get() = cutPositions.size
     fun isEmpty(): Boolean = positionsIndex.isEmpty()
@@ -347,11 +366,11 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // --------------------------------
 
     override fun toString(): String {
-        val maxPointsToShow = 30
+        val maxPointsToShow = 75
         val pointsString = take(maxPointsToShow).joinToString(", ") { "(${it.lat}, ${it.lng})" }
         val pointsDisplay = if (size > maxPointsToShow) "$pointsString, ..." else pointsString
         val closedStatus = if (isNotEmpty()) ", closed=${first() == last()}" else ""
-        val cutIdStatus = if (this is PolygonUtils.CutPolygon) ", cutId=$cutId" else ""
+        val cutIdStatus = if (this is CutPolygon) ", cutId=$cutId" else ""
 
         return "Polygon(size=$size$closedStatus$cutIdStatus, points=[$pointsDisplay])"
     }
@@ -383,6 +402,10 @@ fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
     }
 }
 
+fun <T: Polygon> T.inverted(): Polygon = createNew().apply {
+    this@inverted.reverseIterator().forEach { add(it) }
+}
+
 inline fun <reified T: Polygon> T.move() : T = createNew().xferFrom(this) as T
 
 operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
@@ -401,7 +424,7 @@ fun <T: Polygon> T.xferFrom(polygon: Polygon) : T {
 
 fun <T: Polygon> T.close() : T {
     if (isNotEmpty() && first() != last()) {
-        add(first()!!)
+        add(first()!!.detached())
     }
     return this
 }

@@ -26,7 +26,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Looper
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,10 +42,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.generated.resources.ask_gps_enable
 import com.worldwidewaves.shared.generated.resources.no
 import com.worldwidewaves.shared.generated.resources.yes
+import com.worldwidewaves.shared.toLocation
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.android.location.engine.LocationEngineCallback
+import org.maplibre.android.location.engine.LocationEngineRequest
+import org.maplibre.android.location.engine.LocationEngineResult
+import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @Composable
@@ -97,4 +106,36 @@ fun CheckGPSEnable() {
             .create()
             .show()
     }
+}
+
+/**
+ * `WWWSimulationEnabledLocationEngine` is a custom implementation of `MapLibreFusedLocationEngineImpl`
+ * that provides simulated location data when the platform is in simulation mode.
+ *
+ * This class overrides the default location engine behavior to return simulated locations
+ * if the platform indicates that it is under simulation. Otherwise, it falls back to the
+ * default location engine behavior.
+ *
+ */
+class WWWSimulationEnabledLocationEngine(context : Context, val platform: WWWPlatform?) : MapLibreFusedLocationEngineImpl(context) {
+
+    private fun getSimulatedLocation(): Location? {
+        return if (platform?.isUnderSimulation() == true) {
+            val simulation = platform.getSimulation()!!
+            simulation.getUserPosition().toLocation(simulation.now())
+        } else null
+    }
+
+    override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) =
+        getSimulatedLocation()?.let { location ->
+            callback.onSuccess(LocationEngineResult.create(location))
+        } ?: super.getLastLocation(callback)
+
+    override fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        listener: LocationListener,
+        looper: Looper?
+    ) = getSimulatedLocation()?.let { location ->
+        listener.onLocationChanged(location)
+    } ?: super.requestLocationUpdates(request, listener, looper)
 }

@@ -30,7 +30,7 @@ import kotlin.test.Test
 
 class KoinTest : KoinTest {
 
-    class MockWWWPlatform : WWWPlatform {
+    class MockWWWPlatform : WWWPlatform() {
         override val name: String = "MockPlatform"
         override fun getContext(): Any = "MockContext"
     }

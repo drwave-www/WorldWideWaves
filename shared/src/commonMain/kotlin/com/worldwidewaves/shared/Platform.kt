@@ -1,7 +1,12 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 /*
  * Copyright 2024 DrWave
@@ -24,11 +29,29 @@ import kotlinx.datetime.LocalDateTime
  * limitations under the License.
  */
 
-interface WWWPlatform {
-    val name: String
+abstract class WWWPlatform {
+    abstract val name: String
+    abstract fun getContext(): Any
 
-    fun getContext(): Any
+    init {
+        val instant = Instant.parse("2024-03-15T17:00:00Z")
+        val timeZone = TimeZone.of("Europe/Paris")
+        val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
+        setSimulation(WWWSimulation(now, Position(lat = 48.8566, lng = 2.3522), 50)) // Center of Paris
+    }
 
+    private var _simulation : WWWSimulation? = null
+
+    fun disableSimulation() {
+        _simulation = null
+    }
+
+    fun setSimulation(simulation : WWWSimulation) {
+        _simulation = simulation
+    }
+
+    fun getSimulation() : WWWSimulation? = _simulation
+    fun isUnderSimulation() : Boolean = _simulation != null
 }
 
 expect fun getPlatform(): WWWPlatform

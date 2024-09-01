@@ -1,6 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import kotlin.math.abs
 
 /*
@@ -27,6 +26,8 @@ import kotlin.math.abs
 /**
  * Represents a bounding box defined by its southwest and northeast corners.
  *
+ * Does not support International Date Line wrapping.
+ *
  */
 data class BoundingBox(val sw: Position, val ne: Position) {
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
@@ -35,7 +36,6 @@ data class BoundingBox(val sw: Position, val ne: Position) {
     )
 
     // --- Companion object
-
 
     companion object {
         fun fromPositions(positions: List<Position>): BoundingBox? {
@@ -65,8 +65,6 @@ data class BoundingBox(val sw: Position, val ne: Position) {
 
     val height: Double get() = ne.lat - sw.lat
 
-    val crossesAntimeridian: Boolean get() = ne.lng < sw.lng
-
     // --- Public methods
 
     fun latitudeOfWidestPart(): Double = when {
@@ -78,19 +76,12 @@ data class BoundingBox(val sw: Position, val ne: Position) {
     fun contains(position: Position): Boolean {
         val lat = position.lat
         val lng = position.lng
-        return lat in minLatitude..maxLatitude &&
-                if (crossesAntimeridian) lng >= minLongitude || lng <= maxLongitude
-                else lng in minLongitude..maxLongitude
+        return lat in minLatitude..maxLatitude && lng in minLongitude..maxLongitude
     }
-
 
     fun intersects(other: BoundingBox): Boolean {
         val latOverlap = !(other.maxLatitude < minLatitude || other.minLatitude > maxLatitude)
-        val lngOverlap = if (crossesAntimeridian || other.crossesAntimeridian) {
-            !(other.minLongitude > maxLongitude && other.maxLongitude < minLongitude)
-        } else {
-            !(other.maxLongitude < minLongitude || other.minLongitude > maxLongitude)
-        }
+        val lngOverlap = !(other.maxLongitude < minLongitude || other.minLongitude > maxLongitude)
         return latOverlap && lngOverlap
     }
 
@@ -98,8 +89,8 @@ data class BoundingBox(val sw: Position, val ne: Position) {
         val latDelta = height * (factor - 1) / 2
         val lngDelta = width * (factor - 1) / 2
         return BoundingBox(
-            sw = Position(minLatitude - latDelta, normalizeLongitude(minLongitude - lngDelta)),
-            ne = Position(maxLatitude + latDelta, normalizeLongitude(maxLongitude + lngDelta))
+            sw = Position(minLatitude - latDelta, minLongitude - lngDelta),
+            ne = Position(maxLatitude + latDelta, maxLongitude + lngDelta)
         )
     }
 

@@ -46,7 +46,7 @@ import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
 
-object AndroidPlatform : WWWPlatform  { // TODO: manage with the cache in production on app update
+object AndroidPlatform : WWWPlatform()  { // TODO: manage with the cache in production on app update
     private var _contextRef: WeakReference<Context>? = null
 
     private val context: Context
