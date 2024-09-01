@@ -31,6 +31,7 @@ maplibreAndroid = "11.1.0"
 maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
 napier = "2.7.1"
+mockk = "1.13.12"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -64,6 +65,10 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
+mockk-core = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+mockk-common = { group = "io.mockk", name = "mockk-common", version.ref = "mockk" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

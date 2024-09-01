@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.events.utils.IClock
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -50,6 +51,8 @@ class WWWEventWaveTest : KoinTest {
 
     @BeforeTest
     fun setUp() {
+
+        debugBuild()
 
         startKoin { modules(
             module {
@@ -86,7 +89,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTimeZone() } answers { eventTimeZone }
+        every { event.getTZ() } answers { eventTimeZone }
         every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
 
         // WHEN ---------------------------------
@@ -96,11 +99,10 @@ class WWWEventWaveTest : KoinTest {
         assertTrue(result)
 
         verify { clock.now() }
-        verify { event.getTimeZone() }
+        verify { event.getTZ() }
         verify { event.getStartDateTime() }
 
-        confirmVerified(clock)
-        confirmVerified(event)
+        confirmVerified(clock, event)
     }
 
     @Test
@@ -112,7 +114,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTimeZone() } answers { eventTimeZone }
+        every { event.getTZ() } answers { eventTimeZone }
         every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
 
         // WHEN ---------------------------------
@@ -122,7 +124,7 @@ class WWWEventWaveTest : KoinTest {
         assertFalse(result) // Assert that it's NOT near the event
 
         verify { clock.now() }
-        verify { event.getTimeZone() }
+        verify { event.getTZ() }
         verify { event.getStartDateTime() }
 
         confirmVerified(clock)

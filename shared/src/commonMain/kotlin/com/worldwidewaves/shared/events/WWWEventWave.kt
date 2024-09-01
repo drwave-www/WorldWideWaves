@@ -1,6 +1,7 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
+import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Polygon
@@ -48,15 +49,24 @@ import kotlin.time.Duration.Companion.hours
 // ---------------------------
 
 @Serializable
-abstract class WWWEventWave : KoinComponent {
+abstract class WWWEventWave : KoinComponent, DataValidator {
 
     @Serializable
     data class Warming(
         val type: String,
         val longitude: Double? = null,
-    )
+    ) : DataValidator {
+        override fun isValid(): Pair<Boolean, String?> = when {
+            type == "longitude-cut" && longitude == null ->
+                Pair(false, "Longitude must not be null for type 'longitude-cut'")
+            type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
+                Pair(false, "Longitude must be between -180 and 180")
+            else -> Pair(true, null)
+        }
+    }
 
-    @Serializable
+    // ---------------------------
+
     data class WaveNumbers(
         val waveTimezone: String,
         val waveSpeed: String,
@@ -151,7 +161,7 @@ abstract class WWWEventWave : KoinComponent {
      *
      */
     fun isNearTheEvent(): Boolean {
-        val eventTimeZone: TimeZone = event.getTimeZone()
+        val eventTimeZone: TimeZone = event.getTZ()
         val now: Instant = clock.now().toLocalDateTime(eventTimeZone).toInstant(eventTimeZone)
         val eventStartTime: Instant = event.getStartDateTime().toInstant(eventTimeZone)
         val durationUntilEvent: Duration = eventStartTime - now
@@ -296,7 +306,7 @@ abstract class WWWEventWave : KoinComponent {
      *
      */
     fun getLiteralTimezone(): String {
-        val offset = TimeZone.of(event.timeZone).offsetAt(clock.now())
+        val offset = event.getTZ().offsetAt(clock.now())
         val hoursOffset = offset.totalSeconds / 3600
         return when {
             hoursOffset == 0 -> "UTC"
@@ -341,6 +351,14 @@ abstract class WWWEventWave : KoinComponent {
             }
         }
         return cachedWarmingPolygons!!
+    }
+
+    // ---------------------------
+
+    override fun isValid(): Pair<Boolean, String?> = when {
+        speed <= 0 || speed >= 20 -> Pair(false, "Speed must be greater than 0 and less than 20")
+        direction != "west" && direction != "east" -> Pair(false, "Direction must be either 'west' or 'east'")
+        else -> warming.isValid()
     }
 
 }

@@ -40,6 +40,7 @@ class IOSPlatform : WWWPlatform {
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
 
     override fun getContext(): Any {
+        debugBuild()
         TODO("Not yet implemented")
     }
 }
@@ -67,11 +68,12 @@ actual fun cachedFilePath(fileName: String): String? {
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-actual fun cacheStringToFile(fileName: String, content: String) {
+actual fun cacheStringToFile(fileName: String, content: String) : String {
     val cacheDir = getCacheDir()
     val filePath = "$cacheDir/$fileName"
     val nsString = NSString.create(string = content)
     nsString.writeToFile(filePath, true, NSUTF8StringEncoding, null)
+    return fileName
 }
 
 actual fun getCacheDir(): String {

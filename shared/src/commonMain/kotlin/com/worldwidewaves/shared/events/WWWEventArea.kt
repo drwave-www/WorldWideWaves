@@ -58,9 +58,8 @@ open class WWWEventArea(
      *
      * @return The absolute path of the GeoJSON file as a String, or `null` if the file is not found.
      */
-    internal suspend fun getGeoJsonFilePath(): String? {
-        return getMapFileAbsolutePath(event.id, "geojson")
-    }
+    internal suspend fun getGeoJsonFilePath(): String? =
+        getMapFileAbsolutePath(event.id, "geojson")
 
     // ---------------------------
 
@@ -73,9 +72,8 @@ open class WWWEventArea(
      * @param position The position to check.
      * @return `true` if the position is within the polygon, `false` otherwise.
      */
-    suspend fun isPositionWithin(position: Position): Boolean {
-        return getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
-    }
+    suspend fun isPositionWithin(position: Position): Boolean =
+        getPolygon().let { it.isNotEmpty() && isPointInPolygon(position, it) }
 
     // ---------------------------
 
@@ -89,17 +87,11 @@ open class WWWEventArea(
      * @return A [BoundingBox] object representing the bounding box of the polygon.
      * @throws IllegalStateException if the polygon is empty.
      */
-    open suspend fun getBoundingBox(): BoundingBox {
-        cachedBoundingBox?.let { return it }
-
-        val polygon = getPolygon().takeIf { it.isNotEmpty() }
-            ?: return BoundingBox( // Default bounding box
-                ne = Position(0.0, 0.0),
-                sw = Position(0.0, 0.0)
-            )
-
-        return polygonBbox(polygon).also { cachedBoundingBox = it }
-    }
+    open suspend fun getBoundingBox(): BoundingBox =
+        cachedBoundingBox ?: getPolygon().takeIf { it.isNotEmpty() }
+            ?.let {
+                polygonBbox(it).also { bbox -> cachedBoundingBox = bbox }
+            } ?: BoundingBox(Position(0.0, 0.0), Position(0.0, 0.0))
 
     /**
      * Calculates the center position of the event area.
@@ -110,17 +102,13 @@ open class WWWEventArea(
      *
      * @return The center position of the event area as a [Position] object.
      */
-    suspend fun getCenter(): Position {
-        cachedCenter?.let { return it }
-
-        val boundingBox = getBoundingBox()
-        val center = Position(
-            lat = (boundingBox.ne.lat + boundingBox.sw.lat) / 2,
-            lng = (boundingBox.ne.lng + boundingBox.sw.lng) / 2
-        )
-
-        return center.also { cachedCenter = it }
-    }
+    suspend fun getCenter(): Position =
+        cachedCenter ?: getBoundingBox().let { bbox ->
+            Position(
+                lat = (bbox.ne.lat + bbox.sw.lat) / 2,
+                lng = (bbox.ne.lng + bbox.sw.lng) / 2
+            ).also { cachedCenter = it }
+        }
 
     // ---------------------------
 
@@ -133,47 +121,40 @@ open class WWWEventArea(
      * @return A `Polygon` object representing the event area.
      */
     suspend fun getPolygon(): Polygon {
-        if (this.areaPolygon.isEmpty()) {
-            return coroutineScopeProvider.withDefaultContext{
-                val geometryCollection = geoJsonDataProvider.getGeoJsonData(event.id)
-
-                if (geometryCollection == null) {
-                    Napier.e("Error loading geojson data for event ${event.id}")
-                    emptyList()
-                } else {
+        if (areaPolygon.isEmpty()) {
+            return coroutineScopeProvider.withDefaultContext {
+                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
                     val coordinates = geometryCollection["coordinates"]?.jsonArray
 
                     when (type) {
-                        "Polygon" -> {
-                            coordinates?.flatMap { ring ->
+                        "Polygon" -> coordinates?.flatMap { ring ->
+                            ring.jsonArray.map { point ->
+                                Position(
+                                    point.jsonArray[1].jsonPrimitive.double,
+                                    point.jsonArray[0].jsonPrimitive.double
+                                )
+                            }
+                        }
+                        "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
+                            multiPolygon.jsonArray.flatMap { ring ->
                                 ring.jsonArray.map { point ->
                                     Position(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
                                 }
-                            } ?: emptyList()
-                        }
-                        "MultiPolygon" -> {
-                            coordinates?.flatMap { multiPolygon ->
-                                multiPolygon.jsonArray.flatMap { ring ->
-                                    ring.jsonArray.map { point ->
-                                        Position(
-                                            point.jsonArray[1].jsonPrimitive.double,
-                                            point.jsonArray[0].jsonPrimitive.double
-                                        )
-                                    }
-                                }
-                            } ?: emptyList()
+                            }
                         }
                         else -> emptyList()
-                    }
+                    } ?: emptyList()
+                } ?: run {
+                    Napier.e("${event.id}: Error loading geojson data for event")
+                    emptyList()
                 }
             }
         }
-
-        return this.areaPolygon
+        return areaPolygon
     }
 
 }

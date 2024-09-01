@@ -1,5 +1,8 @@
 package com.worldwidewaves.shared
 
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+
 /*
  * Copyright 2024 DrWave
  *
@@ -19,6 +22,10 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+fun debugBuild() {
+    Napier.base(DebugAntilog())
+}
 
 class WWWGlobals {
 
@@ -132,7 +139,6 @@ class WWWGlobals {
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
         const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
         const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = 16
-
 
     }
 

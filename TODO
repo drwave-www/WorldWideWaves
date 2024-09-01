@@ -1,11 +1,9 @@
 
 Next:
 
-
+- Complete tests before going forward
 
 - wave progression
-    - manage with several wave areas and their start hour/days, with their direction
-    - move warming zone dans la wave
     - adapt end time and progression to take into account the warming zone
     - add a time delay for warming, in linear wave
     - add a layer on the map

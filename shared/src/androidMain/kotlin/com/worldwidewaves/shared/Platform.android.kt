@@ -59,6 +59,7 @@ object AndroidPlatform : WWWPlatform  { // TODO: manage with the cache in produc
     override fun getContext(): Any = context
 
     fun initialize(context: Context): AndroidPlatform {
+        debugBuild()
         _contextRef = WeakReference(context.applicationContext)
         return this
     }
@@ -116,13 +117,11 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     return try {
         Log.i("getMBTilesAbsoluteFilePath", "Trying to get $eventId.$extension")
         val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
-        if (cachedFile.exists() && cachedFile.length().toInt() == fileBytes.size) {
-            cachedFile.absolutePath
-        } else {
+        if (!cachedFile.exists() || cachedFile.length().toInt() != fileBytes.size) {
             Log.i("getMBTilesAbsoluteFilePath", "Caching $eventId.$extension")
             cachedFile.outputStream().use { it.write(fileBytes) }
-            cachedFile.absolutePath
         }
+        cachedFile.absolutePath
     } catch (e: MissingResourceException) {
         Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
         null
@@ -144,6 +143,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
+
     return if (isDevelopmentMode) {
         Log.i("cachedFileExists", "Development mode (not cached): $fileName")
         false
@@ -177,10 +177,11 @@ actual fun cachedFilePath(fileName: String): String? {
  * @param fileName The name of the file to which the content will be cached.
  * @param content The string content to be written to the file.
  */
-actual fun cacheStringToFile(fileName: String, content: String) {
+actual fun cacheStringToFile(fileName: String, content: String) : String {
     val context = AndroidPlatform.getContext() as Context
     Log.i("cacheStringToFile", "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
+    return fileName
 }
 
 /**
@@ -233,6 +234,5 @@ actual fun getCacheDir(): String {
  *
  * @return The current local date and time as a `LocalDateTime` object.
  */
-actual fun getLocalDatetime(): LocalDateTime {
-    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-}
+actual fun getLocalDatetime(): LocalDateTime =
+    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

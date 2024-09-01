@@ -386,7 +386,7 @@ class EventsListScreen(
 
     @Composable
     private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
-        val eventDate = event.getStartDateSimpleAsLocal()
+        val eventDate = event.getLiteralStartDateSimple()
 
         Box(modifier = modifier) {
             Column {
