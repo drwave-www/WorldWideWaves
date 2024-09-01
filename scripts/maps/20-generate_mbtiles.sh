@@ -2,9 +2,10 @@
 #
 # Copyright 2024 DrWave
 #
-# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
-# culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
-# community, and shared human experience by leveraging real-time coordination and location-based services.
+# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+# countries, culminating in a global wave. The project aims to transcend physical and cultural
+# boundaries, fostering unity, community, and shared human experience by leveraging real-time
+# coordination and location-based services.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,19 +29,38 @@ cd "$(dirname "$0")" # always work from executable folder
 # Download OpenMapTiles to generate events maps -------------------------------
 [ ! -d openmaptiles ] && git clone git@github.com:openmaptiles/openmaptiles.git && rm -rf openmaptiles/.git
 
+# Adapt openmaptiles docker-compose file
+# Increase PostgreSQL shared memory size
+./bin/yq '.services.postgres |= select(.shm_size == null ) |= .shm_size = "512m" | .' openmaptiles/docker-compose.yml -i
+
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 
 # -----------------------------------------------------------------------------
 
-# DEBUG
-EVENTS=paris_france
+if [ ! -z "$1" ]; then
+  if $(exists $1); then
+    EVENTS=$1
+    rm -f ./data/$1.mbtiles
+  else
+    echo "Unexistent event $1"
+    exit 1
+  fi
+fi
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
 
   echo "==> EVENT $event"
+
+  TYPE=$(conf $event type)
+
+  if [ "$TYPE" = "world" ]; then
+    echo "Skip the world"
+    continue
+  fi
+
   echo
-  ./libs/generate_map.dep.sh $event
+  [ ! -f ./data/$event.mbtiles ] && ./libs/generate_map.dep.sh $event
 
 done

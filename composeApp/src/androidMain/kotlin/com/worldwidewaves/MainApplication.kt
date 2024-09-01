@@ -3,9 +3,10 @@ package com.worldwidewaves
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +26,18 @@ import androidx.work.Configuration
 import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.sharedModule
 import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class MainApplication : Application(), Configuration.Provider {
+    private val wwwShutdownHandler: WWWShutdownHandler by inject()
+
+    var platform : AndroidPlatform? = null
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -48,7 +54,12 @@ class MainApplication : Application(), Configuration.Provider {
         }
 
         // Initialize the WWW platform
-        val platform = getKoin().get<WWWPlatform>() as AndroidPlatform
-        platform.initialize(this)
+        platform = getKoin().get<WWWPlatform>() as AndroidPlatform
+        platform?.initialize(this)
+    }
+
+    override fun onTerminate() {
+        wwwShutdownHandler.onAppShutdown()
+        super.onTerminate()
     }
 }

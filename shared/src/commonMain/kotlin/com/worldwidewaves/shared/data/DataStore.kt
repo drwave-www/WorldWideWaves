@@ -1,11 +1,12 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.data
 
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +24,27 @@ package com.worldwidewaves.shared
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import io.github.aakira.napier.Napier
+import com.worldwidewaves.shared.events.utils.Log
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import okio.Path.Companion.toPath
 
 // ----------------------------
 
+internal const val dataStoreFileName = "wwwaves.preferences_pb"
+
 private lateinit var dataStore: DataStore<Preferences>
 private val lock = SynchronizedObject()
 
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {
     if (::dataStore.isInitialized) {
-        Napier.v("DataStore already initialized with path: ${producePath()}")
-        dataStore
-    } else {
-        Napier.i("Creating DataStore with path: ${producePath()}")
-        PreferenceDataStoreFactory
-            .createWithPath(produceFile = { producePath().toPath() })
-            .also { createdDataStore -> dataStore = createdDataStore }
+        Log.v(::createDataStore.name,"DataStore already initialized with path: ${producePath()}")
+        return dataStore
     }
+    Log.i(::createDataStore.name,"Creating DataStore with path: ${producePath()}")
+    dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+    dataStore
 }
 
 expect fun keyValueStorePath(): String
 
-internal const val dataStoreFileName = "wwwaves.preferences_pb"

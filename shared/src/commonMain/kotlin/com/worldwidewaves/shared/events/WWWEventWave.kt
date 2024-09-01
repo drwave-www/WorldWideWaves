@@ -1,11 +1,29 @@
 package com.worldwidewaves.shared.events
 
+import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.events.utils.Area
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
+import io.github.aakira.napier.Napier
+import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
+import kotlin.math.roundToInt
+import kotlin.time.Duration
+
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +38,122 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+@Serializable
+abstract class WWWEventWave : KoinComponent, DataValidator {
 
-data class WaveNumbers(
-    val waveSpeed: String,
-    val waveStartTime: String,
-    val waveEndTime: String,
-    val waveTotalTime: String,
-    val waveProgression: String
-)
+    enum class Direction { WEST, EAST }
+    enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
 
-// ---------------------------
+    data class WaveNumbersLiterals(
+        val waveTimezone: String = "",
+        val waveSpeed: String = "..",
+        val waveStartTime: String = "..",
+        val waveEndTime: String = "..",
+        val waveTotalTime: String = "..",
+        val waveProgression: String = ".."
+    )
 
-interface WWWEventWave {
+    data class WavePolygons(
+        val timestamp: Instant,
+        val traversedPolygons: Area, // Maps of cutId to list of polygons
+        val remainingPolygons: Area,
+        val addedTraversedPolygons: Area? = null
+    )
 
-    suspend fun getAllNumbers(): WaveNumbers
+    // ---------------------------
 
-    fun getLiteralStartTime(): String
-    fun getLiteralSpeed(): String
+    abstract val speed: Double // m/s
+    abstract val direction: Direction // E/W
 
-    suspend fun getLiteralEndTime(): String
-    suspend fun getLiteralTotalTime(): String
-    suspend fun getLiteralProgression(): String
+    // ---------------------------
+
+    protected val clock: IClock by inject()
+
+    // ---------------------------
+
+    @Transient private var _event: IWWWEvent? = null
+    @Transient protected var positionRequester: (() -> Position?)? = null
+
+    // ---------------------------
+
+    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons?
+    abstract suspend fun getWaveDuration(): Duration
+    abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
+    abstract suspend fun timeBeforeHit(): Duration?
+
+    // ---------------------------
+
+    protected val event: IWWWEvent
+        get() = requireNotNull(this._event) { "Event not set" }
+
+    protected suspend fun bbox(): BoundingBox = event.area.bbox()
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : WWWEventWave> setRelatedEvent(event: IWWWEvent): T {
+        this._event = event
+        return this as T
+    }
+
+    fun setPositionRequester(positionRequester: () -> Position?) = apply {
+        this.positionRequester = positionRequester
+    }
+
+    @VisibleForTesting
+    fun getUserPosition(): Position? {
+        var platform : WWWPlatform? = null
+        try { platform = get() } catch (e: Exception) {
+            Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
+        }
+        return if (platform?.isUnderSimulation() == true) {
+            platform.getSimulation()!!.getUserPosition()
+        } else {
+            positionRequester?.invoke()
+        }
+    }
+
+    // ---------------------------
+
+    /**
+     * Calculates the literal progression of the event as a percentage.
+     *
+     * This function determines the progression of the event based on its current state and elapsed time.
+     * If the event is done, it returns "100%". If the event is not running, it returns "0%".
+     * Otherwise, it calculates the elapsed time since the event started and expresses it as a percentage
+     * of the total event duration.
+     *
+     */
+    suspend fun getProgression(): Double = when {
+        event.isDone() -> 100.0
+        !event.isRunning() || !event.isWarmingEnded() -> 0.0
+        else -> {
+            val elapsedTime = clock.now().epochSeconds - event.getWaveStartDateTime().epochSeconds
+            val totalTime = getWaveDuration().inWholeSeconds
+            (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
+        }
+    }
+
+    /**
+     * Retrieves the literal progression of the event as a percentage string.
+     */
+    suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
+
+    /**
+     * Retrieves the literal speed of the event in meters per second.
+     *
+     * This function returns the speed of the event as a string formatted with "m/s".
+     *
+     */
+    fun getLiteralSpeed(): String = "$speed m/s"
+
+    // ---------------------------
+
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            speed <= 0 || speed >= 20 ->
+                add("Speed must be greater than 0 and less than 20")
+
+            else -> { /* No validation errors */ }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
 
 }
