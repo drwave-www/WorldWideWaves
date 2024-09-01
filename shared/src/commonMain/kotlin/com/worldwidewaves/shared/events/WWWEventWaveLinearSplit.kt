@@ -31,20 +31,8 @@ data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
     override val warming: Warming,
-    val nbSplits: Int,
-    val adjustments: Adjustments,
+    val nbSplits: Int
 ) : WWWEventWave() {
-
-    @Serializable
-    data class Move(
-        val id: Int,
-        val longitude: Double
-    )
-
-    @Serializable
-    data class Adjustments(
-        val moves: List<Move>
-    )
 
     // ---------------------------
 
@@ -70,6 +58,19 @@ data class WWWEventWaveLinearSplit(
 
     override suspend fun hasUserBeenHit(): Boolean {
         TODO("Not yet implemented")
+    }
+
+    // ---------------------------
+
+    override fun isValid(): Pair<Boolean, String?> {
+        val superValid = super.isValid()
+        if (!superValid.first) return superValid
+
+        return when {
+            nbSplits <= 2 ->
+                Pair(false, "Number of splits must be greater than 2")
+            else -> Pair(true, null)
+        }
     }
 
 }

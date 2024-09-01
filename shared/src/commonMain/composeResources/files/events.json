@@ -64,14 +64,6 @@
         "speed": 5,
         "direction": "west",
         "nbSplits":  50,
-        "adjustments": {
-          "moves": [
-            {
-              "id": 1,
-              "longitude": -0.5
-            }
-          ]
-        },
         "warming": {
           "type": "longitude-percent",
           "longitude": 5
@@ -98,14 +90,6 @@
         "speed": 5,
         "direction": "west",
         "nbSplits":  500,
-        "adjustments": {
-          "moves": [
-            {
-              "id": 45,
-              "longitude": 0.3
-            }
-          ]
-        },
         "warming": {
           "type": "longitude-percent",
           "longitude": 5

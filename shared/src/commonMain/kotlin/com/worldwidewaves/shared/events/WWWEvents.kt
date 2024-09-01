@@ -35,41 +35,30 @@ import org.koin.core.component.inject
 
 // ---------------------------
 
-class WWWEvents(
-    private val initFavoriteEvent: InitFavoriteEvent
-) : KoinComponent {
+class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponent {
 
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
     private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
     // ---------------------------
 
+    private var loadJob: Job? = null
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     val eventsFlow = _eventsFlow.asStateFlow()
 
-    init {
-        loadEvents()
-    }
-
-    fun resetEventsFlow() {
-        _eventsFlow.value = emptyList()
-    }
+    fun resetEventsFlow() = _eventsFlow::value.set(emptyList())
 
     // ---------------------------
 
-    // Job to manage the coroutine for loading events
-    private var loadJob: Job? = null
+    init { loadEvents() }
 
-    // JSON decoder configured to ignore unknown keys in the JSON data
-    private val jsonDecoder = Json { ignoreUnknownKeys = true }
+    // ---------------------------
 
     /**
      * Initiates the loading of events if not already started.
-     * Uses the apply scope function to return the current instance.
      */
-    private fun loadEvents() = apply {
-        loadJob = loadJob ?: loadEventsJob()
-    }
+    private fun loadEvents() = loadJob ?: loadEventsJob().also { loadJob = it }
 
     /**
      * Launches a coroutine to load events from the configuration provider.
@@ -94,50 +83,12 @@ class WWWEvents(
 
     // ---------------------------
 
-    fun events(): StateFlow<List<WWWEvent>> {
-        return eventsFlow
-    }
-
-    fun getEventById(id: String): WWWEvent? {
-        return eventsFlow.value.find { it.id == id }
-    }
-
-    fun onEventLoaded(function: () -> Job) {
-        this.loadJob?.invokeOnCompletion { function() }
-    }
+    fun events(): StateFlow<List<WWWEvent>> = eventsFlow
+    fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
+    fun onEventLoaded(function: () -> Job) = this.loadJob?.invokeOnCompletion { function() }
 
     // ---------------------------
 
-    /**
-     * Validates a list of `WWWEvent` objects.
-     *
-     * This function checks each event in the provided list for various validation criteria.
-     * It returns a map where each event is associated with a pair containing a boolean indicating
-     * whether the event is valid and a string message describing the validation error, if any.
-     *
-     * @param events The list of `WWWEvent` objects to validate.
-     * @return A map where each `WWWEvent` is associated with a pair of a boolean and a string.
-     *         The boolean indicates whether the event is valid, and the string contains the validation error message, if any.
-     */
-    private fun isValidEventsData(events: List<WWWEvent>): Map<WWWEvent, Pair<Boolean, String?>> {
-        return events.associateWith { event ->
-            when {
-                event.id.isEmpty() -> Pair(false, "ID is empty")
-                event.type.isEmpty() -> Pair(false, "Type is empty")
-                event.location.isEmpty() -> Pair(false, "Location is empty")
-                !event.date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) -> Pair(false, "Date format is invalid")
-                !event.startHour.matches(Regex("\\d{2}:\\d{2}")) -> Pair(false, "Start hour format is invalid")
-                event.description.isEmpty() -> Pair(false, "Description is empty")
-                event.instagramAccount.isEmpty() -> Pair(false, "Instagram account is empty")
-                event.instagramHashtag.isEmpty() -> Pair(false, "Instagram hashtag is empty")
-                event.mapOsmadminid.toString().toIntOrNull() == null -> Pair(false, "Map Osmadminid must be an integer")
-                event.mapMaxzoom.toString().toDoubleOrNull() == null -> Pair(false, "Map Maxzoom must be a double")
-                event.mapLanguage.isEmpty() -> Pair(false, "Map language is empty")
-                event.mapOsmarea.isEmpty() -> Pair(false, "Map Osmarea is empty")
-                event.timeZone.isEmpty() -> Pair(false, "Time zone is empty")
-                else -> Pair(true, null)
-            }
-        }
-    }
+    private fun isValidEventsData(events: List<WWWEvent>) = events.associateWith(WWWEvent::isValid)
 
 }

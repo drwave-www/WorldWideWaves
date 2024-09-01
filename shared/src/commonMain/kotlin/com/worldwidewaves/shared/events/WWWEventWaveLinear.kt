@@ -95,7 +95,7 @@ data class WWWEventWaveLinear(
             val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
             val distance = calculateDistance(bbox, avgLatitude)
             val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
-            startDateTime.toInstant(event.getTimeZone()).plus(duration).toLocalDateTime(event.getTimeZone())
+            startDateTime.toInstant(event.getTZ()).plus(duration).toLocalDateTime(event.getTZ())
         }.also { cachedEndTime = it }
     }
 
@@ -115,8 +115,8 @@ data class WWWEventWaveLinear(
         return cachedTotalTime ?: run {
             val startDateTime = event.getStartDateTime()
             val endDateTime = getEndTime()
-            (endDateTime.toInstant(event.getTimeZone()).epochSeconds -
-                            startDateTime.toInstant(event.getTimeZone()).epochSeconds
+            (endDateTime.toInstant(event.getTZ()).epochSeconds -
+                            startDateTime.toInstant(event.getTZ()).epochSeconds
                     ).toDuration(DurationUnit.SECONDS).also { cachedTotalTime = it }
         }
     }
@@ -138,8 +138,8 @@ data class WWWEventWaveLinear(
             event.isDone() -> 100.0
             !event.isRunning() -> 0.0
             else -> {
-                val elapsedTime = getLocalDatetime().toInstant(event.getTimeZone()).epochSeconds -
-                        event.getStartDateTime().toInstant(event.getTimeZone()).epochSeconds
+                val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
+                        event.getStartDateTime().toInstant(event.getTZ()).epochSeconds
                 val totalTime = getTotalTime().inWholeSeconds
                 (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
             }
@@ -154,6 +154,14 @@ data class WWWEventWaveLinear(
 
     override suspend fun hasUserBeenHit(): Boolean {
         TODO("Not yet implemented")
+    }
+
+    // ---------------------------
+
+    override fun isValid() : Pair<Boolean, String?> {
+        val superValid = super.isValid()
+        if (!superValid.first) return superValid
+        return Pair(true, null) // TODO
     }
 
 }

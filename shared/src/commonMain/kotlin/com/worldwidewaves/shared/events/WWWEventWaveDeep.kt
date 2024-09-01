@@ -57,4 +57,12 @@ data class WWWEventWaveDeep(
         TODO("Not yet implemented")
     }
 
+    // ---------------------------
+
+    override fun isValid() : Pair<Boolean, String?> {
+        val superValid = super.isValid()
+        if (!superValid.first) return superValid
+        return Pair(true, null) // TODO
+    }
+
 }

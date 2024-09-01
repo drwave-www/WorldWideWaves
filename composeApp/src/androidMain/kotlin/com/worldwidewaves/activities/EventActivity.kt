@@ -113,7 +113,7 @@ class EventActivity : AbstractEventBackActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: WWWEvent) {
         val context = LocalContext.current
-        val eventDate = event.getStartDateSimpleAsLocal()
+        val eventDate = event.getLiteralStartDateSimple()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
