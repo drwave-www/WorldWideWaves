@@ -62,15 +62,20 @@ data class WWWEventWaveLinearSplit(
 
     // ---------------------------
 
-    override fun isValid(): Pair<Boolean, String?> {
-        val superValid = super.isValid()
-        if (!superValid.first) return superValid
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        val superValid = super.validationErrors()
+        val errors = superValid?.toMutableList() ?: mutableListOf()
 
-        return when {
-            nbSplits <= 2 ->
-                Pair(false, "Number of splits must be greater than 2")
-            else -> Pair(true, null)
-        }
+        return errors.apply {
+            when {
+                nbSplits <= 2 ->
+                    add("Number of splits must be greater than 2")
+
+                // TODO
+
+                else -> { }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "wavelinearsplit: $it" }
     }
 
 }

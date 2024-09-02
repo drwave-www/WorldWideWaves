@@ -56,13 +56,17 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val type: String,
         val longitude: Double? = null,
     ) : DataValidator {
-        override fun isValid(): Pair<Boolean, String?> = when {
-            type == "longitude-cut" && longitude == null ->
-                Pair(false, "Longitude must not be null for type 'longitude-cut'")
-            type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
-                Pair(false, "Longitude must be between -180 and 180")
-            else -> Pair(true, null)
-        }
+        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+            when {
+                type == "longitude-cut" && longitude == null ->
+                    add("Longitude must not be null for type 'longitude-cut'")
+
+                type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
+                    add("Longitude must be between -180 and 180")
+
+                else -> {}
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "warming: $it" }
     }
 
     // ---------------------------
@@ -351,10 +355,17 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    override fun isValid(): Pair<Boolean, String?> = when {
-        speed <= 0 || speed >= 20 -> Pair(false, "Speed must be greater than 0 and less than 20")
-        direction != "west" && direction != "east" -> Pair(false, "Direction must be either 'west' or 'east'")
-        else -> warming.isValid()
-    }
+    override fun validationErrors(): List<String>? = mutableListOf<String>()
+        .apply {
+            when {
+                speed <= 0 || speed >= 20 ->
+                    add("Speed must be greater than 0 and less than 20")
+
+                direction != "west" && direction != "east" ->
+                    add("Direction must be either 'west' or 'east'")
+
+                else -> warming.validationErrors()?.let { addAll(it) }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
 
 }

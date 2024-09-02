@@ -63,14 +63,17 @@ data class WWWEvent(
         val deep: WWWEventWaveDeep? = null,
         val linearSplit: WWWEventWaveLinearSplit? = null
     ) : DataValidator {
-        override fun isValid(): Pair<Boolean, String?> =
+        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
             when {
                 linear == null && deep == null && linearSplit == null ->
-                    Pair(false, "event should contain one and only one wave definition")
+                    this.add("event should contain one and only one wave definition")
+
                 listOfNotNull(linear, deep, linearSplit).size != 1 ->
-                    Pair(false, "only one of linear, deep, or linearSplit should be non-null")
-                else -> (linear ?: deep ?: linearSplit)!!.isValid()
+                    this.add("only one of linear, deep, or linearSplit should be non-null")
+
+                else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
             }
+        }.takeIf { it.isNotEmpty() }?.map { "wavedef: $it" }
     }
 
     // ---------------------------
@@ -158,52 +161,75 @@ data class WWWEvent(
     /**
      * This function checks the event for various validation criteria.
      */
-    override fun isValid() : Pair<Boolean, String?> = when {
-        id.isEmpty() ->
-            Pair(false, "ID is empty")
-        !id.matches(Regex("^[a-z_]+$")) ->
-            Pair(false, "ID must be lowercase with only simple letters or underscores")
-        type.isEmpty() ->
-            Pair(false, "Type is empty")
-        type !in listOf("city", "country", "world") ->
-            Pair(false, "Type must be either 'city', 'country', or 'world'")
-        location.isEmpty() ->
-            Pair(false, "Location is empty")
-        type == "city" && country.isNullOrEmpty() ->
-            Pair(false, "Country must be specified for type 'city'")
-        !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
-            Pair(false, "Date format is invalid or date is not valid")
-        !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
-            Pair(false, "Start hour format is invalid or time is not valid")
-        description.isEmpty() ->
-            Pair(false, "Description is empty")
-        instagramAccount.isEmpty() ->
-            Pair(false, "Instagram account is empty")
-        !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
-            Pair(false, "Instagram account is invalid")
-        instagramHashtag.isEmpty() ->
-            Pair(false, "Instagram hashtag is empty")
-        !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
-            Pair(false, "Instagram hashtag is invalid")
-        mapOsmadminid.toString().toIntOrNull() == null ->
-            Pair(false, "Map Osmadminid must be an integer")
-        mapMaxzoom.toString().toDoubleOrNull() == null || mapMaxzoom <= 0 || mapMaxzoom >= 20 ->
-            Pair(false, "Map Maxzoom must be a positive double less than 20")
-        mapLanguage.isEmpty() ->
-            Pair(false, "Map language is empty")
-        !mapLanguage.matches(Regex("^[a-z]{2,3}$")) ->
-            Pair(false, "Map language must be a valid ISO-639 code")
-        mapOsmarea.isEmpty() ->
-            Pair(false, "Map Osmarea is empty")
-        !mapOsmarea.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
-            Pair(false, "Map Osmarea must be a valid string composed of one or several strings separated by '/'")
-        timeZone.isEmpty() ->
-            Pair(false, "Time zone is empty")
-        runCatching { TimeZone.of(timeZone) }.isFailure ->
-            Pair(false, "Time zone is invalid")
-        !wavedef.isValid().first -> Pair(false, "Wave definition is invalid")
-        else -> wavedef.isValid()
-    }
+    override fun validationErrors() : List<String>? = mutableListOf<String>()
+        .apply {
+            when {
+                id.isEmpty() ->
+                    this.add("ID is empty")
+
+                !id.matches(Regex("^[a-z_]+$")) ->
+                    this.add("ID must be lowercase with only simple letters or underscores")
+
+                type.isEmpty() ->
+                    this.add("Type is empty")
+
+                type !in listOf("city", "country", "world") ->
+                    this.add("Type must be either 'city', 'country', or 'world'")
+
+                location.isEmpty() ->
+                    this.add("Location is empty")
+
+                type == "city" && country.isNullOrEmpty() ->
+                    this.add("Country must be specified for type 'city'")
+
+                !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
+                    this.add("Date format is invalid or date is not valid")
+
+                !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
+                    this.add("Start hour format is invalid or time is not valid")
+
+                description.isEmpty() ->
+                    this.add("Description is empty")
+
+                instagramAccount.isEmpty() ->
+                    this.add("Instagram account is empty")
+
+                !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
+                    this.add("Instagram account is invalid")
+
+                instagramHashtag.isEmpty() ->
+                    this.add("Instagram hashtag is empty")
+
+                !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
+                    this.add("Instagram hashtag is invalid")
+
+                mapOsmadminid.toString().toIntOrNull() == null ->
+                    this.add("Map Osmadminid must be an integer")
+
+                mapMaxzoom.toString().toDoubleOrNull() == null || mapMaxzoom <= 0 || mapMaxzoom >= 20 ->
+                    this.add("Map Maxzoom must be a positive double less than 20")
+
+                mapLanguage.isEmpty() ->
+                    this.add("Map language is empty")
+
+                !mapLanguage.matches(Regex("^[a-z]{2,3}$")) ->
+                    this.add("Map language must be a valid ISO-639 code")
+
+                mapOsmarea.isEmpty() ->
+                    this.add("Map Osmarea is empty")
+
+                !mapOsmarea.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
+                    this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
+
+                timeZone.isEmpty() ->
+                    this.add("Time zone is empty")
+
+                runCatching { TimeZone.of(timeZone) }.isFailure ->
+                    this.add("Time zone is invalid")
+
+                else -> wavedef.validationErrors()?.let { addAll(it) }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "event: $it" }
 
 }
 

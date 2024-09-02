@@ -158,10 +158,13 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    override fun isValid() : Pair<Boolean, String?> {
-        val superValid = super.isValid()
-        if (!superValid.first) return superValid
-        return Pair(true, null) // TODO
+    override fun validationErrors() : List<String>? {
+        val superValid = super.validationErrors()
+        val errors = superValid?.toMutableList() ?: mutableListOf()
+
+        // TODO
+
+        return errors.takeIf { it.isNotEmpty() }?.map { "wavelinear: $it" }
     }
 
 }

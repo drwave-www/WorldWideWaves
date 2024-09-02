@@ -68,15 +68,15 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponen
         val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
         val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
 
-        val validationResults = isValidEventsData(events)
+        val validationErrors = eventsConfValidationErrors(events)
 
-        validationResults.filterValues { !it.first }
-            .mapNotNull { it.value.second }
+        validationErrors.filterValues { it?.isEmpty() == false }
+            .mapNotNull { it.value }
             .forEach { errorMessage ->
                 Napier.e("Validation Error: $errorMessage")
             }
 
-        _eventsFlow.value = validationResults.filterValues { it.first }
+        _eventsFlow.value = validationErrors.filterValues { it == null }
             .keys.onEach { initFavoriteEvent.call(it) }
             .toList()
     }
@@ -89,6 +89,6 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponen
 
     // ---------------------------
 
-    private fun isValidEventsData(events: List<WWWEvent>) = events.associateWith(WWWEvent::isValid)
+    private fun eventsConfValidationErrors(events: List<WWWEvent>) = events.associateWith(WWWEvent::validationErrors)
 
 }

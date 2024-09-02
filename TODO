@@ -1,9 +1,6 @@
 
 Next:
 
-- Complete tests before going forward
-- gerer le multi polygon de rio de janeiro
-
 - wave progression
     - adapt end time and progression to take into account the warming zone
     - add a time delay for warming, in linear wave
@@ -19,6 +16,8 @@ Next:
 
 - wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
       - add a progress bar on the wave screen
+
+Www: pourquoi replacement automatique de la map sur la position ? OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
@@ -40,6 +39,12 @@ Next:
 - add the ability to define a geojson for warming zones
 
 - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
+
+- systeme de notifications :
+   - coder des NotificationUseCase dans shared a partir d'un context qui peuvent reagir et pousser des notifs
+   --> app en fond de tache, smooth, avec un parametres de config
+
+- parametres de l'app
 
 Cleanings :
 - code coverage of current devs
