@@ -3,9 +3,10 @@ package com.worldwidewaves.compose
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,17 +47,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.Quadruple
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
+import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,7 +86,7 @@ import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
-    private val event: WWWEvent,
+    private val event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
     private val onMapClick: ((latitude: Double, longitude: Double) -> Unit)? = null,
@@ -107,35 +109,43 @@ class EventMap(
         var mapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
+        var hasLocationPermission by remember { mutableStateOf(false) }
 
         // Request GPS location Android permissions
-        val hasLocationPermission = requestLocationPermission()
+        hasLocationPermission = requestLocationPermission()
+        if (hasLocationPermission) CheckGPSEnable()
 
-        // Setup Map Style and properties
+        // Setup Map Style and properties, initialize the map view
         LaunchedEffect(Unit) {
+
             val styleUri = withContext(Dispatchers.IO) {
                 event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
             }
+
             styleUri?.let { uri ->
                 mapView.getMapAsync { map ->
-                    setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
 
                     map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-                        if (hasLocationPermission) addLocationMarkerToMap(map, context, coroutineScope, style)
+
+                        setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope) {
+                            if (hasLocationPermission) {
+                                addLocationMarkerToMap(map, context, coroutineScope, style)
+                            }
+                        }
+
                         onMapClick?.let { clickListener ->
                             map.addOnMapClickListener { point ->
                                 clickListener(point.latitude, point.longitude)
                                 true
                             }
                         }
+
                         onMapLoaded()
                         mapLoaded = true
                     }
                 }
-            } ?: run {
-                mapError = true
-            }
+            } ?: run { mapError = true }
         }
 
         // The map view
@@ -145,15 +155,11 @@ class EventMap(
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = extendedLight.quinary.color,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(maxWidth / 3)
+                        modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
                     )
                 } else {
                     Image(
-                        modifier = Modifier
-                            .size(maxWidth / 4)
-                            .align(Alignment.Center),
+                        modifier = Modifier.size(maxWidth / 4).align(Alignment.Center),
                         painter = painterResource(ShRes.drawable.map_error),
                         contentDescription = "error"
                     )
@@ -161,78 +167,26 @@ class EventMap(
             }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (mapLoaded) 1f else 0f)
+                modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }
 
-    // -------------------------
+    // -- Map camera managers -------------------------------------------------
 
     private fun setCameraPosition(
         initialCameraPosition: MapCameraPosition?,
         map: MapLibreMap,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)? = null
     ) {
         when (initialCameraPosition) {
-            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map, coroutineScope)
-            MapCameraPosition.BOUNDS -> moveToMapBounds(map, coroutineScope)
-            MapCameraPosition.WINDOW -> moveToWindowBounds(map, coroutineScope)
+            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map, coroutineScope, onCameraPositionSet)
+            MapCameraPosition.BOUNDS -> moveToMapBounds(map, coroutineScope, onCameraPositionSet)
+            MapCameraPosition.WINDOW -> moveToWindowBounds(map, coroutineScope, onCameraPositionSet)
             null -> {}
         }
     }
-
-    // -- Private Map location setup functions --------------------------------
-
-    @SuppressLint("MissingPermission")
-    private fun addLocationMarkerToMap(
-        map: MapLibreMap,
-        context: Context,
-        coroutineScope: CoroutineScope,
-        style: Style
-    ) {
-        var lastLocation: Location? = null
-
-        map.locationComponent.activateLocationComponent(
-            buildLocationComponentActivationOptions(context, style)
-        )
-        map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
-
-        map.locationComponent.locationEngine?.requestLocationUpdates(
-            buildLocationEngineRequest(),
-            object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    result?.lastLocation?.let { location ->
-                        // Record the new location
-                        lastLocation = location
-
-                        // Notify the UI of the user's location
-                        onLocationUpdate(LatLng(location.latitude, location.longitude))
-
-                        // Follow user while he's within bounds
-                        if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                            moveToLocation(coroutineScope, location, map)
-                        }
-                    }
-                }
-                override fun onFailure(exception: Exception) {
-                    Log.e("EventMap","Failed to get location: $exception")
-                }
-            },
-            Looper.getMainLooper()
-        )
-
-        // Allow the wave to now the current location of the user
-        event.wave.setPositionRequester {
-            lastLocation?.let {
-                Position(it.latitude, it.longitude)
-            }
-        }
-    }
-
-    // ------------------------
 
     /**
      * Animates the MapLibre camera to the given location if the location is within the event area.
@@ -247,10 +201,12 @@ class EventMap(
                 event.area.isPositionWithin(Position(location.latitude, location.longitude))
             }
             if (isWithin) {
+                val currentZoom = map.cameraPosition.zoom
                 map.animateCamera(
                     CameraUpdateFactory.newCameraPosition(
                         CameraPosition.Builder()
                             .target(LatLng(location.latitude, location.longitude))
+                            .zoom(currentZoom)
                             .build()
                     )
                 )
@@ -259,16 +215,23 @@ class EventMap(
     }
 
     /**
-     * Animates the MapLibre camera to the center of the event map with the default zoom level.
-     * If the default zoom level is not available, it uses the minimum zoom level.
+     * Animates the MapLibre camera to the center of the event map area
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToCenter(map: MapLibreMap, coroutineScope: CoroutineScope) {
+    private fun moveToCenter(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) {
         coroutineScope.launch {
             val (cLat, cLng) = withContext(Dispatchers.IO) { event.area.getCenter() }
             map.animateCamera(
-                CameraUpdateFactory.newLatLng(LatLng(cLat, cLng))
+                CameraUpdateFactory.newLatLng(LatLng(cLat, cLng)),
+                object : CancelableCallback {
+                    override fun onFinish() { onCameraPositionSet?.invoke() }
+                    override fun onCancel() {}
+                }
             )
         }
     }
@@ -278,11 +241,15 @@ class EventMap(
      * while maintaining the correct aspect ratio and centering.*
      * @param map The MapLibre map object.
      */
-    private fun moveToWindowBounds(map: MapLibreMap, coroutineScope: CoroutineScope) {
+    private fun moveToWindowBounds(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) {
         coroutineScope.launch {
             val bbox = event.area.getBoundingBox()
 
-            // Maximize the view to the map
+            // Maximize the view to the map // FIXME: move to shared
             val (sw, ne) = bbox
             val eventMapWidth = ne.lng - sw.lng
             val eventMapHeight = ne.lat - sw.lat
@@ -296,10 +263,10 @@ class EventMap(
             // depending on whether the event map is wider or taller than the MapLibre component.
             val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
                 val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-                Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+                Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
             } else {
                 val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-                Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+                Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
             }
 
             val bounds = LatLngBounds.Builder()
@@ -309,17 +276,19 @@ class EventMap(
 
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,0),
                 object: CancelableCallback {
-                    override fun onCancel() {}
                     override fun onFinish() {
                         // Set the min/max camera zoom level
                         map.setMinZoomPreference(map.cameraPosition.zoom)
-                        map.setMaxZoomPreference(event.mapMaxzoom)
+                        map.setMaxZoomPreference(event.map.maxZoom)
 
                         // Constrain the camera movement to the bounds of the map
                         map.addOnCameraMoveListener {
                             constrainCameraOnMap(map, coroutineScope)
                         }
+
+                        onCameraPositionSet?.invoke()
                     }
+                    override fun onCancel() {}
                 }
             )
         }
@@ -340,7 +309,7 @@ class EventMap(
         map: MapLibreMap,
         coroutineScope: CoroutineScope
     ) {
-        val viewBounds = map.projection.visibleRegion.latLngBounds
+        val viewBounds = map.projection.visibleRegion.latLngBounds // FIXME: move to shared
         val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
         val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
 
@@ -363,15 +332,70 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToMapBounds(map: MapLibreMap, coroutineScope: CoroutineScope) = coroutineScope.launch {
+    private fun moveToMapBounds(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) = coroutineScope.launch {
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(
                 event.area.getBoundingBox().toLatLngBounds(), 0
-            )
+            ),
+            object : CancelableCallback {
+                override fun onFinish() { onCameraPositionSet?.invoke() }
+                override fun onCancel() {}
+            }
         )
     }
 
-    // -------------------------------------------------------------------------
+    // -- Location marker builders  -------------------------------------------
+
+    @SuppressLint("MissingPermission")
+    private fun addLocationMarkerToMap(
+        map: MapLibreMap,
+        context: Context,
+        coroutineScope: CoroutineScope,
+        style: Style
+    ) {
+        var lastLocation: Location? = null
+        var userHasBeenLocated = false
+
+        map.locationComponent.activateLocationComponent(
+            buildLocationComponentActivationOptions(context, style)
+        )
+        map.locationComponent.isLocationComponentEnabled = true
+        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+
+        map.locationComponent.locationEngine?.requestLocationUpdates(
+            buildLocationEngineRequest(),
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let { location ->
+                        // Notify the UI of the user's location
+                        onLocationUpdate(LatLng(location.latitude, location.longitude))
+
+                        // Follow user, the first time only
+                        if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                            moveToLocation(coroutineScope, location, map) // Area bounds are checked here
+                            userHasBeenLocated = true
+                        }
+
+                        // Record the new location
+                        lastLocation = location
+                    }
+                }
+                override fun onFailure(exception: Exception) {
+                    Log.e("EventMap","Failed to get location: $exception")
+                }
+            },
+            Looper.getMainLooper()
+        )
+
+        // Allow the wave to know the current location of the user
+        event.wave.setPositionRequester {
+            lastLocation?.let { Position(it.latitude, it.longitude) }
+        }
+    }
 
     /**
      * Builds `LocationComponentActivationOptions` for configuring the Mapbox location component.
@@ -379,9 +403,6 @@ class EventMap(
      * This function sets up the location component enabling a
      * pulsing animation around the user location.
      *
-     * @param context The context of the application.
-     * @param style The map style to use with the location component.
-     * @return The configured `LocationComponentActivationOptions` object.
      */
     private fun buildLocationComponentActivationOptions(
         context: Context,
@@ -404,15 +425,14 @@ class EventMap(
     /**
      * Builds a `LocationEngineRequest` for location updates.
      *
-     * @return The configured `LocationEngineRequest` object.
      */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.toLong())
-            .setFastestInterval(CONST_TIMER_GPS_UPDATE.toLong() / 2)
+        LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
+            .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
-    // -------------------------------------------------------------------------
+    // -- Use the MapLibre MapView as a composable --------------------------------
 
     /**
      * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
@@ -422,6 +442,7 @@ class EventMap(
     fun rememberMapViewWithLifecycle(): MapView {
         val context = LocalContext.current
 
+        // Build the MapLibre view
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
         maplibreMapOptions.apply {
             camera(CameraPosition.Builder()
@@ -446,7 +467,8 @@ class EventMap(
             rotateGesturesEnabled(false)
             tiltGesturesEnabled(false)
         }
-        MapLibre.getInstance(context)
+
+        MapLibre.getInstance(context) // Required by the API
 
         val mapView = remember { MapView(context, maplibreMapOptions) }
 
@@ -465,8 +487,6 @@ class EventMap(
 
 }
 
-// -- Use the MapLibre MapView as a composable --------------------------------
-
 /**
  * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView` with the
  * lifecycle of a `LifecycleOwner`.
@@ -475,8 +495,6 @@ class EventMap(
  * (`onCreate`, `onStart`, `onResume`, `onPause`, `onStop`, `onDestroy`) as the
  * `LifecycleOwner` transitions through its lifecycle states.
  *
- * @param mapView The `MapView` to observe lifecycle events for.
- * @return A `LifecycleEventObserver` that manages the `MapView`'s lifecycle.
  */
 private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->

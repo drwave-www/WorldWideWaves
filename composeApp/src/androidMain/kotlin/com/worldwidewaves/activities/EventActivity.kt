@@ -3,9 +3,10 @@ package com.worldwidewaves.activities
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +55,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,7 +82,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
@@ -95,7 +94,10 @@ import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
 import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
-import com.worldwidewaves.theme.extraFontFamily
+import com.worldwidewaves.theme.extraBoldTextStyle
+import com.worldwidewaves.theme.extraLightTextStyle
+import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
+import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -111,13 +113,12 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventActivity : AbstractEventBackActivity() {
 
     @Composable
-    override fun Screen(modifier: Modifier, event: WWWEvent) {
+    override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val eventDate = event.getLiteralStartDateSimple()
         val coroutineScope = rememberCoroutineScope()
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
-
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -153,7 +154,7 @@ class EventActivity : AbstractEventBackActivity() {
 }
 
 private fun updateGeolocText(
-    event: WWWEvent,
+    event: IWWWEvent,
     newLocation: LatLng,
     lastKnownLocation: LatLng?,
     coroutineScope: CoroutineScope,
@@ -175,15 +176,13 @@ private fun updateGeolocText(
 // ----------------------------
 
 @Composable
-private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
+private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
-        fontFamily = extraFontFamily,
-        color = quinaryLight,
+        style = extraQuinaryColoredBoldTextStyle(),
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
-        textAlign = TextAlign.Justify,
-        fontWeight = FontWeight.Bold
+        textAlign = TextAlign.Justify
     )
 }
 
@@ -191,7 +190,7 @@ private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
 
 @Composable
 private fun EventOverlay(
-    event: WWWEvent,
+    event: IWWWEvent,
     eventDate: String
 ) {
     Box {
@@ -212,18 +211,20 @@ private fun EventOverlay(
 // ----------------------------
 
 @Composable
-private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modifier = Modifier) {
+private fun EventOverlayDate(event: IWWWEvent, eventDate: String, modifier: Modifier = Modifier) {
+    var isDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        isDone = event.isDone()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
-        contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
+            .let { if (isDone) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
+        contentAlignment = if (isDone) Alignment.BottomCenter else Alignment.Center
     ) {
-        val textStyle = TextStyle(
-            fontFamily = extraFontFamily,
-            fontSize = DIM_EVENT_DATE_FONTSIZE.sp,
-            fontWeight = FontWeight.Black
-        )
+        val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
         Text(
             text = eventDate,
             style = textStyle.copy(color = quinaryLight)
@@ -255,7 +256,7 @@ fun DividerLine() {
 // ----------------------------
 
 @Composable
-private fun WWWEventSocialNetworks(event: WWWEvent) {
+private fun WWWEventSocialNetworks(event: IWWWEvent) {
     WWWSocialNetworks(
         instagramAccount = event.instagramAccount,
         instagramHashtag = event.instagramHashtag
@@ -282,9 +283,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
         ) {
             Text(
                 text = stringResource(geolocText),
-                color = quinaryLight,
-                fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp,
-                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
+                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE)
             )
         }
     }
@@ -293,22 +292,30 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 // ----------------------------
 
 @Composable
-private fun EventNumbers(event: WWWEvent) {
+private fun EventNumbers(event: IWWWEvent) {
     val eventNumbers = remember { mutableStateMapOf<StringResource, String>() }
     val eventTimeZone = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+
+    val order = listOf(
+        ShRes.string.wave_start_time,
+        ShRes.string.wave_end_time,
+        ShRes.string.wave_speed,
+        ShRes.string.wave_total_time,
+        ShRes.string.wave_progression
+    )
 
     // Retrieve wave numbers and frequently update progession
     LaunchedEffect(eventNumbers) {
         coroutineScope.launch {
             val waveNumbers = withContext(Dispatchers.IO) { event.wave.getAllNumbers() }
             eventNumbers.clear()
-            eventNumbers.putAll(mapOf(
-                    ShRes.string.wave_speed to waveNumbers.waveSpeed,
-                    ShRes.string.wave_start_time to waveNumbers.waveStartTime,
-                    ShRes.string.wave_end_time to waveNumbers.waveEndTime,
-                    ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
-                    ShRes.string.wave_progression to waveNumbers.waveProgression
+            eventNumbers.putAll(linkedMapOf(
+                ShRes.string.wave_start_time to waveNumbers.waveStartTime,
+                ShRes.string.wave_end_time to waveNumbers.waveEndTime,
+                ShRes.string.wave_speed to waveNumbers.waveSpeed,
+                ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
+                ShRes.string.wave_progression to waveNumbers.waveProgression
             ))
             eventTimeZone.value = waveNumbers.waveTimezone
 
@@ -338,55 +345,58 @@ private fun EventNumbers(event: WWWEvent) {
                 Text(
                     text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                    color = quinaryLight,
-                    fontFamily = extraFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp
+                    style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE).copy(
+                        textAlign = TextAlign.Right
+                    )
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
-                eventNumbers.forEach { (key, value) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Label
-                        Text(
-                            text = stringResource(key),
-                            color = quinaryLight,
-                            fontFamily = extraFontFamily,
-                            fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        Row(verticalAlignment = Alignment.Bottom) {
-                            // Value
+                if (eventNumbers.isNotEmpty()) {
+                    order.forEach { key ->
+                        val value = eventNumbers[key]!!
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Label
                             Text(
-                                text = value,
-                                color = when (key) {
-                                    ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                                    ShRes.string.wave_start_time -> Color.Yellow
-                                    else -> MaterialTheme.colorScheme.primary
-                                },
-                                fontFamily = extraFontFamily,
-                                fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            // optional Timezone
-                            if (key in listOf(ShRes.string.wave_start_time, ShRes.string.wave_end_time)) {
-                                Text(
-                                    text = " ${eventTimeZone.value}",
-                                    color = when (key) {
-                                        ShRes.string.wave_start_time -> Color.Yellow
-                                        else -> MaterialTheme.colorScheme.primary
-                                    },
-                                    fontFamily = extraFontFamily,
-                                    fontSize = DIM_EVENT_NUMBERS_TZ_FONTSIZE.sp,
-                                    fontWeight = FontWeight.Light
+                                text = stringResource(key),
+                                style = extraQuinaryColoredBoldTextStyle(
+                                    DIM_EVENT_NUMBERS_LABEL_FONTSIZE
                                 )
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Value
+                                Text(
+                                    text = value,
+                                    style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
+                                        color = when (key) {
+                                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                            ShRes.string.wave_start_time -> Color.Yellow
+                                            else -> MaterialTheme.colorScheme.primary
+                                        }
+                                    )
+                                )
+                                // optional Timezone
+                                if (key in listOf(
+                                        ShRes.string.wave_start_time,
+                                        ShRes.string.wave_end_time
+                                    )
+                                ) {
+                                    Text(
+                                        text = " ${eventTimeZone.value}",
+                                        style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                            color = when (key) {
+                                                ShRes.string.wave_start_time -> Color.Yellow
+                                                else -> MaterialTheme.colorScheme.primary
+                                            }
+                                        )
+                                    )
+                                }
                             }
                         }
+                        Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                     }
-                    Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                 }
             }
         }

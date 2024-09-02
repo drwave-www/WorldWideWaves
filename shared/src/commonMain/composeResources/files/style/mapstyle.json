@@ -59,7 +59,7 @@
       "type": "fill",
       "source": "openmaptiles",
       "source-layer": "landuse",
-      "maxzoom": 8,
+      "maxzoom": 5,
       "filter": [
         "==",
         "class",
@@ -1689,7 +1689,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
-      "minzoom": 5,
+      "minzoom": 3,
       "filter": [
         "all",
         [
@@ -2088,7 +2088,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "transportation",
-      "minzoom": 5,
+      "minzoom": 3,
       "filter": [
         "all",
         [
@@ -3299,7 +3299,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "boundary",
-      "minzoom": 8,
+      "minzoom": 3,
       "filter": [
         "all",
         [
@@ -3398,7 +3398,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "boundary",
-      "minzoom": 5,
+      "minzoom": 3,
       "filter": [
         "all",
         [
@@ -3767,7 +3767,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "transportation_name",
-      "minzoom": 7,
+      "minzoom": 3,
       "filter": [
         "all",
         [
@@ -3953,7 +3953,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "place",
-      "minzoom": 5,
+      "minzoom": 3,
       "filter": [
         "all",
         [

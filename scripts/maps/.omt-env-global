@@ -18,10 +18,10 @@ DIFF_MODE=false
 IMPOSM_CONFIG_FILE=/usr/src/app/config/repl_config.json
 
 # Number of parallel processes to use when importing sql files
-MAX_PARALLEL_PSQL=5
+MAX_PARALLEL_PSQL=8
 
 # Number of parallel threads to use when generating vector map tiles
-COPY_CONCURRENCY=8
+COPY_CONCURRENCY=10
 
 # Variables for generate tiles using tilelive-pgquery
 PGHOSTS_LIST=

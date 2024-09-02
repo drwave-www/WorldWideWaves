@@ -1,9 +1,12 @@
+package com.worldwidewaves.theme
+
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +20,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -29,7 +31,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_FONTSIZE
 
 @Immutable
 data class ExtendedColorScheme(
@@ -117,3 +124,46 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
     )
 }
 
+// -- WWW Text presets --------------------------------------------------------
+
+fun defaultTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    TextStyle(fontSize = fontSize.sp)
+
+fun commonTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = AppTypography.bodyMedium.fontFamily)
+
+fun commonJustifiedTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
+
+fun commonBoldStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun primaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = lightScheme.primary)
+
+fun primaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    primaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun quinaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = extendedLight.quinary.color)
+
+fun quinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
+
+fun extraBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraLightTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+
+fun extraPrimaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(color = lightScheme.primary)
+
+fun extraPrimaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraPrimaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraQuinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(color = extendedLight.quinary.color, fontWeight = FontWeight.Bold)

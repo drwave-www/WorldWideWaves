@@ -1,16 +1,12 @@
 package com.worldwidewaves.shared.events.utils
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +21,18 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestBoundingBox {
+import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+
+class PolygonUtilsBoundingBoxTest {
 
     @Test
     fun testSimplePolygon() {
-        val polygon = listOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -37,21 +40,21 @@ class AreaUtilsTestBoundingBox {
             Position(0.0, 0.0)
         )
         val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
     @Test
     fun testBadPolygon() {
-        val polygon : Polygon = emptyList()
+        val polygon = Polygon()
         assertFailsWith<IllegalArgumentException> {
-            polygonBbox(polygon)
+            polygon.bbox()
         }
     }
 
     @Test
     fun testComplexPolygon() {
-        val polygon = listOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
@@ -60,13 +63,13 @@ class AreaUtilsTestBoundingBox {
             Position(0.0, 0.0)
         )
         val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
     @Test
     fun testPointOnEdge() {
-        val polygon = listOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -74,19 +77,19 @@ class AreaUtilsTestBoundingBox {
             Position(0.0, 0.0)
         )
         val pointOnEdge = Position(0.5, 0.0)
-        assertTrue(isPointInPolygon(pointOnEdge, polygon))
+        assertTrue(polygon.containsPosition(pointOnEdge))
     }
 
     @Test
     fun testPolygonWithHole() {
-        val outerPolygon = listOf(
+        val outerPolygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 3.0),
             Position(3.0, 3.0),
             Position(3.0, 0.0),
             Position(0.0, 0.0)
         )
-        val innerPolygon = listOf(
+        val innerPolygon = Polygon.fromPositions(
             Position(1.0, 1.0),
             Position(1.0, 2.0),
             Position(2.0, 2.0),
@@ -95,20 +98,48 @@ class AreaUtilsTestBoundingBox {
         )
         val combinedPolygon = outerPolygon + innerPolygon
         val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
-        val actualBbox = polygonBbox(combinedPolygon)
+        val actualBbox = combinedPolygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
     @Test
     fun testDegeneratePolygon() {
-        val polygon = listOf(
+        val polygon = Polygon.fromPositions(
             Position(1.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 1.0)
         )
         val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testPolygonsBbox() {
+        val polygon1 = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(2.0, 0.0),
+            Position(2.0, 2.0),
+            Position(0.0, 2.0)
+        )
+        val polygon2 = Polygon.fromPositions(
+            Position(1.0, 1.0),
+            Position(3.0, 1.0),
+            Position(3.0, 3.0),
+            Position(1.0, 3.0)
+        )
+
+        val bbox = polygonsBbox(listOf(polygon1, polygon2))
+
+        assertEquals(0.0, bbox.sw.lat)
+        assertEquals(0.0, bbox.sw.lng)
+        assertEquals(3.0, bbox.ne.lat)
+        assertEquals(3.0, bbox.ne.lng)
+
+        // Test with empty list
+        assertFailsWith<IllegalArgumentException> {
+            polygonsBbox(emptyList())
+        }
     }
 
 }

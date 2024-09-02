@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +22,18 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygons
-import com.worldwidewaves.shared.events.utils.polygonsBbox
 import com.worldwidewaves.shared.getMapFileAbsolutePath
-import io.github.aakira.napier.Napier
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -37,16 +42,32 @@ import org.koin.core.component.inject
 
 // ---------------------------
 
-open class WWWEventArea(
-    private val event: WWWEvent
-) : KoinComponent {
+@Serializable
+data class WWWEventArea(
+    val osmAdminid: Int
+) : KoinComponent, DataValidator {
+
+    private var _event: IWWWEvent? = null
+    private var event: IWWWEvent
+        get() = _event ?: throw IllegalStateException("Event not set")
+        set(value) {
+            _event = value
+        }
+
+    // ---------------------------
 
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
-    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    private val areaPolygon: MutableList<Polygon> = mutableListOf()
-    private var cachedBoundingBox: BoundingBox? = null
-    private var cachedCenter: Position? = null
+    @Transient private val cachedAreaPolygons: MutableList<Polygon> = mutableListOf()
+    @Transient private var cachedBoundingBox: BoundingBox? = null
+    @Transient private var cachedCenter: Position? = null
+
+    // ---------------------------
+
+    fun setRelatedEvent(event: WWWEvent) {
+        this.event = event
+    }
 
     // ---------------------------
 
@@ -56,7 +77,6 @@ open class WWWEventArea(
      * This function attempts to get the absolute path of the GeoJSON file associated with the event.
      * It uses the event's ID to locate the file within the cache directory.
      *
-     * @return The absolute path of the GeoJSON file as a String, or `null` if the file is not found.
      */
     internal suspend fun getGeoJsonFilePath(): String? =
         getMapFileAbsolutePath(event.id, "geojson")
@@ -69,8 +89,6 @@ open class WWWEventArea(
      * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
      * to determine if the specified position lies within the polygon.
      *
-     * @param position The position to check.
-     * @return `true` if the position is within the polygon, `false` otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
         getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
@@ -84,10 +102,8 @@ open class WWWEventArea(
      * If the bounding box has been previously calculated and cached, it returns the cached value.
      * Otherwise, it calculates the bounding box, caches it, and then returns it.
      *
-     * @return A [BoundingBox] object representing the bounding box of the polygon.
-     * @throws IllegalStateException if the polygon is empty.
      */
-    open suspend fun getBoundingBox(): BoundingBox =
+    suspend fun getBoundingBox(): BoundingBox =
         cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
@@ -100,7 +116,6 @@ open class WWWEventArea(
      * of the northeast and southwest corners of the bounding box. If the center has been previously
      * calculated and cached, it returns the cached value.
      *
-     * @return The center position of the event area as a [Position] object.
      */
     suspend fun getCenter(): Position =
         cachedCenter ?: getBoundingBox().let { bbox ->
@@ -118,10 +133,9 @@ open class WWWEventArea(
      * This function fetches the polygon data from the `geoJsonDataProvider` if the `areaPolygon` is empty.
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
-     * @return A `Polygon` object representing the event area.
      */
-    suspend fun getPolygons(): List<Polygon> {
-        if (areaPolygon.isEmpty()) {
+     suspend fun getPolygons(): List<Polygon> {
+        if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
@@ -134,7 +148,7 @@ open class WWWEventArea(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
                                 )
-                            }.apply { areaPolygon.add(this) }
+                            }.toPolygon.apply { cachedAreaPolygons.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
                             multiPolygon.jsonArray.flatMap { ring ->
@@ -143,17 +157,29 @@ open class WWWEventArea(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
-                                }.apply { areaPolygon.add(this) }
+                                }.toPolygon.apply { cachedAreaPolygons.add(this) }
                             }
                         }
-                        else -> { Napier.e("${event.id}: Unsupported GeoJSON type: $type") }
+                        else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
                     }
                 } ?: run {
-                    Napier.e("${event.id}: Error loading geojson data for event")
+                    Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
         }
-        return areaPolygon
+        return cachedAreaPolygons
     }
+
+    // ---------------------------
+
+    override fun validationErrors(): List<String>? = mutableListOf<String>()
+        .apply {
+            when {
+                osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
+                    add("OSM admin ID must be greater than 0 if it's not the world event")
+
+                else -> { /* No validation errors */ }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
 }
