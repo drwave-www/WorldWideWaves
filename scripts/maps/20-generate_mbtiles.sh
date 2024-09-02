@@ -28,6 +28,16 @@ cd "$(dirname "$0")" # always work from executable folder
 # Download OpenMapTiles to generate events maps -------------------------------
 [ ! -d openmaptiles ] && git clone git@github.com:openmaptiles/openmaptiles.git && rm -rf openmaptiles/.git
 
+# Adapt openmaptiles docker-compose file
+# Increase PostgreSQL shared memory size
+./bin/yq -e '
+  if has("services.postgres.shm_size") then 
+    . 
+  else 
+    .services.postgres.shm_size = "512m" 
+  end
+' openmaptiles/docker-compose.yml -i
+
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
 

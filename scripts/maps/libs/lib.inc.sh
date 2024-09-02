@@ -31,6 +31,12 @@ if [ ! -f ./bin/jq ]; then
   chmod +x ./bin/jq
 fi
 
+# Download yq for YAML processing if not already present
+if [ ! -f ./bin/yq ]; then
+  wget -q https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -O ./bin/yq
+  chmod +x ./bin/yq
+fi
+
 # List of all configured events
 EVENTS=$(./bin/jq -r '.[] | .id' "$EVENTS_FILE")
 
