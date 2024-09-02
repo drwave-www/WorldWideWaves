@@ -30,13 +30,7 @@ cd "$(dirname "$0")" # always work from executable folder
 
 # Adapt openmaptiles docker-compose file
 # Increase PostgreSQL shared memory size
-./bin/yq -e '
-  if has("services.postgres.shm_size") then 
-    . 
-  else 
-    .services.postgres.shm_size = "512m" 
-  end
-' openmaptiles/docker-compose.yml -i
+./bin/yq '.services.postgres |= select(.shm_size == null ) |= .shm_size = "512m" | .' openmaptiles/docker-compose.yml -i
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
