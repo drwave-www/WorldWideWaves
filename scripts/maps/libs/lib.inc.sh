@@ -76,11 +76,13 @@ tpl() {
 
   # Replace placeholders with event properties and bbox/center data
   ./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | keys[]' "$EVENTS_FILE" | while read -r prop; do
-    sed -i \
-      -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
-      -e "s/#mapCenter#/$center/g" \
-      -e "s/#mapBbox#/$bbox/g" \
-      "$tpl_file"
+    if [ "$prop" != "wavedef" ]; then
+      sed -i \
+        -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
+        -e "s/#mapCenter#/$center/g" \
+        -e "s/#mapBbox#/$bbox/g" \
+        "$tpl_file"
+    fi
   done
 
   # Move the processed template to the output file

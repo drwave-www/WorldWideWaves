@@ -64,7 +64,7 @@ for event in $EVENTS; do # Download OSM area as PBF file
   echo "Retrieved BBOX for OSM admin id $OSMADMINID : $BBOX"
 
   AREA=$(conf $event mapOsmarea)
-  SPBF=data/osm-$(echo $AREA | sed -e 's/\//_/g').osm.pbf
+  SPBF=data/osm-$(echo $AREA | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 
   echo "-- Download area $AREA from OSM.."
