@@ -1,35 +1,47 @@
 
 Next:
 
-- wave progression
-    - adapt end time and progression to take into account the warming zone
-    - add a time delay for warming, in linear wave
-    - add a layer on the map
-    - add a progress bar on the map
+- ======== Bugs/Issues/Refactorings =========
+    - Debug country generation (for united states)
+    - pourquoi replacement automatique de la map sur la position ?
+        --> OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)
+    - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
+    - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
+    - code coverage of current devs
+    - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - manage with translations
+
+- Wave linear
+    - wave progression
+        - adapt end time and progression to take into account the warming zone
+        - add a time delay for warming, in linear wave
+        - add a layer on the map
+        - add a progress bar on the map
+
+- Wave simulator
     - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')
 
 - Large map screen
-    => add map actions
-    => test on my phone in paris
+    => add map actions (center user vs center wave)
 
-- wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
-      - add a progress bar on the wave screen
+- Wave screen
 
-Www: pourquoi replacement automatique de la map sur la position ? OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)
+- Warming procedure (decouper par tranches et 'lancer' par tranches)
+
+- Packaging :
+    - generate a /events folder with all events, the map style and the events.json
+    - copy them in the assets folder of the app packages at build time (gradle)
+    - deport warming geojson generation to the build
+    - create wave packages for each event, generate an image for the first page and loads only when required
+    - et un racine, embarque avec le runtime pour events et style folder
+
+- Deep wave for city streets
 
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
     - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
     - flags, ..
-- create wave packages for each event, generate an image for the first page and loads only when required
 
-- replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
-
-- deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
-
-- round2 wave : routing on streets
-
-- add maps generation for countries, then for the world : no road names, limited zooms
 - adapt wave behavior on countries and the world
     --> add end date additionally to end hour for countries and the world
     --> add 'wave hours', so countries and the world can have several waves over days during the process
@@ -42,29 +54,18 @@ Www: pourquoi replacement automatique de la map sur la position ? OK la premièr
    - coder des NotificationUseCase dans shared a partir d'un context qui peuvent reagir et pousser des notifs
    --> app en fond de tache, smooth, avec un parametres de config
 
-- parametres de l'app
+- config parameters de l'app
 
-Cleanings :
-- code coverage of current devs
-- check cached files are renewed when app version evolves
-- apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+- World Map system
 
 Other:
-- Fill-in FAQ Contents
-- Penser au processus de démarrage de la wave : qui, comment, où ?
-     --> ie. ZONE ROUGE
-     --> où se situe cette zone rouge dans la réalité du terrain ?
-
-Waves screen :
-- select good images for flags, same ratio
-
-Common:
-- choose icons, convert images to SVG, or generate declinations --> https://icons8.com
-- manage with translations
-- manage with translation of events contents (description, location, etc, ...)
+    - Fill-in FAQ Contents
+    - select good images for flags, same ratio
+    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
+    - manage with translation of events contents (description, location, etc, ...)
 
 Debug:
-- Implement a way to simulate events & geolocation
+- Implement a way to deeply simulate events & geolocation
      ==> button "simulate now avec un bandeau en haut en cours de simulation + 'stop'"
      ==> uniquemment si l'option setting 'activate simulation's est activé
           ==> ajouter une option 'simulate position' dans les settings sinon prendre la position réelle
@@ -78,7 +79,7 @@ Ideas:
 - Realite augmentee pour "voir" la vague ? : https://www.openium.fr/expertises/realitee-augmentee/
 
 
-Reference:
+Reference/Docs:
 - reduction of pbf : https://techblog.dac.digital/openstreetmap-map-size-reduction-guide-43372bbf38c9
     --> + https://wiki.openstreetmap.org/wiki/Map_features
     --> + https://wiki.openstreetmap.org/wiki/Category:Features
