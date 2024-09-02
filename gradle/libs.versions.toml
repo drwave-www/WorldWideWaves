@@ -1,9 +1,9 @@
 [versions]
-agp = "8.7.0"
+agp = "8.6.0"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
-androidx-activityCompose = "1.9.2"
+androidx-activityCompose = "1.9.1"
 androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.1.4"
 androidx-material = "1.12.0"
@@ -14,26 +14,24 @@ kotlinxCoroutinesCore = "1.8.0"
 kotlinxCoroutinesTest = "1.8.0"
 kotlinxDatetime = "0.6.0"
 kotlinxSerializationJson = "1.7.1"
-lifecycleLivedataKtx = "2.8.6"
-lifecycleViewmodelKtx = "2.8.6"
-mockkAndroid = "1.13.12"
-mockkCommon = "1.12.0"
-navigationFragmentKtx = "2.8.2"
-navigationUiKtx = "2.8.2"
-material3Android = "1.3.0"
-uiTextGoogleFonts = "1.7.3"
+lifecycleLivedataKtx = "2.8.4"
+lifecycleViewmodelKtx = "2.8.4"
+navigationFragmentKtx = "2.7.7"
+navigationUiKtx = "2.7.7"
+material3Android = "1.2.1"
+uiTextGoogleFonts = "1.6.8"
 workRuntimeKtx = "2.9.1"
-places = "4.0.0"
-uiGraphicsAndroid = "1.7.3"
+places = "3.5.0"
+uiGraphicsAndroid = "1.6.8"
 annotationJvm = "1.8.2"
 dataStorePreferences = "1.1.1"
 kotlinxAtomic = "0.24.0"
 koin = "3.2.0"
-maplibreAndroid = "11.1.0" # 11.2.0 is SEGV_MAPERR
+maplibreAndroid = "11.1.0"
 maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
 napier = "2.7.1"
-lifecycleViewmodelAndroid = "2.8.6"
+mockk = "1.13.12"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -54,8 +52,6 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-mockk-android-v1120 = { module = "io.mockk:mockk-android", version.ref = "mockkAndroid" }
-mockk-common-v1120 = { module = "io.mockk:mockk-common", version.ref = "mockkCommon" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version.ref = "annotationJvm" }
@@ -69,7 +65,10 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
-androidx-lifecycle-viewmodel-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-android", version.ref = "lifecycleViewmodelAndroid" }
+mockk-core = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+mockk-common = { group = "io.mockk", name = "mockk-common", version.ref = "mockk" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

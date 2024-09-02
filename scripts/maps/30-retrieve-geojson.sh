@@ -2,10 +2,9 @@
 #
 # Copyright 2024 DrWave
 #
-# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
-# countries, culminating in a global wave. The project aims to transcend physical and cultural
-# boundaries, fostering unity, community, and shared human experience by leveraging real-time
-# coordination and location-based services.
+# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+# culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+# community, and shared human experience by leveraging real-time coordination and location-based services.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +39,8 @@ if [ ! -z "$1" ]; then
   fi
 fi
 
-for event in $EVENTS; do # Retrieve Geojson files from OSM
+for event in $EVENTS; do # Generate MBTILES files from PBF area files 
+                         # EVENTS is defined in lib.inc.sh
 
   echo "==> EVENT $event"
   echo
@@ -52,7 +52,7 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
     continue
   fi
 
-  OSMADMINID=$(conf $event area.osmAdminid)
+  OSMADMINID=$(conf $event mapOsmadminid)
 
   DEST_GEOJSON=$DEST_DIR/$event.geojson
   wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson

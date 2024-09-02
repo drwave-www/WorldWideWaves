@@ -1,12 +1,11 @@
-package com.worldwidewaves.shared.data
+package com.worldwidewaves.shared
 
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +22,6 @@ package com.worldwidewaves.shared.data
 
 import android.content.Context
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
-import com.worldwidewaves.shared.getPlatform
 
 /**
  * Retrieves the file path for the key-value store.
@@ -31,8 +29,11 @@ import com.worldwidewaves.shared.getPlatform
  * This function constructs the file path for the key-value store by accessing the application's
  * files directory and appending the specified folder and file name for the data store.
  *
+ * @return The absolute path of the key-value store file as a String.
  */
-actual fun keyValueStorePath(): String = (getPlatform().getContext() as Context)
+actual fun keyValueStorePath(): String {
+    return (getPlatform().getContext() as Context)
         .filesDir
         .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
         .absolutePath
+}

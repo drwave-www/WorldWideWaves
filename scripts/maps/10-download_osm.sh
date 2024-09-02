@@ -2,10 +2,9 @@
 #
 # Copyright 2024 DrWave
 #
-# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
-# countries, culminating in a global wave. The project aims to transcend physical and cultural
-# boundaries, fostering unity, community, and shared human experience by leveraging real-time
-# coordination and location-based services.
+# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+# culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+# community, and shared human experience by leveraging real-time coordination and location-based services.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,10 +31,7 @@ mkdir -p ./data
 # git clone openmpatiles-tools to download OSM areas
 [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
 
-# Download osmconvert to extract BBOX from OSM areas
-[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert && (
-  cd openmaptiles-tools && make
-)
+[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
@@ -45,8 +41,6 @@ mkdir -p ./data
 if [ ! -z "$1" ]; then
   if $(exists $1); then
     EVENTS=$1
-    rm -f data/.env-$1
-    rm -f data/$1.yaml
   else
     echo "Unexistent event $1"
     exit 1
@@ -64,19 +58,19 @@ for event in $EVENTS; do # Download OSM area as PBF file
     continue
   fi
 
-  OSMADMINID=$(conf $event area.osmAdminid)
+  OSMADMINID=$(conf $event mapOsmadminid)
   BBOX=$(./libs/get_bbox.dep.sh $OSMADMINID bbox)
 
   echo "Retrieved BBOX for OSM admin id $OSMADMINID : $BBOX"
 
-  AREAZONE=$(conf $event map.zone)
-  SPBF=data/osm-$(echo $AREAZONE | sed -e 's,/,_,g').osm.pbf
+  AREA=$(conf $event mapOsmarea)
+  SPBF=data/osm-$(echo $AREA | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 
-  echo "-- Download area $AREAZONE from OSM.."
-  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREAZONE -o $SPBF
+  echo "-- Download area $AREA from OSM.."
+  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREA -o $SPBF
 
-  echo "-- Extract bbox $BBOX from area $AREAZONE.."
+  echo "-- Extract bbox $BBOX from area $AREA.."
   [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics
 
   echo "-- Generates OpenMapTiles environment for event $event"

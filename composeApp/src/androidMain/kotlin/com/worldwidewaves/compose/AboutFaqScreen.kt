@@ -3,10 +3,9 @@ package com.worldwidewaves.compose
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -99,13 +101,9 @@ import com.worldwidewaves.shared.generated.resources.warn_safety_item_3
 import com.worldwidewaves.shared.generated.resources.warn_safety_item_4
 import com.worldwidewaves.shared.generated.resources.warn_safety_item_5
 import com.worldwidewaves.shared.generated.resources.warn_safety_title
-import com.worldwidewaves.theme.commonBoldStyle
-import com.worldwidewaves.theme.commonJustifiedTextStyle
-import com.worldwidewaves.theme.commonTextStyle
-import com.worldwidewaves.theme.extraBoldTextStyle
-import com.worldwidewaves.theme.extraPrimaryColoredBoldTextStyle
-import com.worldwidewaves.theme.primaryColoredBoldTextStyle
-import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.theme.displayFontFamily
+import com.worldwidewaves.theme.extraFontFamily
+import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -188,7 +186,9 @@ class AboutFaqScreen : TabScreen {
                         scrollToFAQPosition = coordinates.positionInRoot().y
                     },
                     text = stringResource(ShRes.string.faq),
-                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE)
+                    fontSize = DIM_FAQ_TITLE_FONTSIZE.sp,
+                    fontWeight = FontWeight.Black,
+                    fontFamily = extraFontFamily
                 )
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
 
@@ -216,27 +216,30 @@ class AboutFaqScreen : TabScreen {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                text = stringResource(ShRes.string.warn_rules_security_title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                fontSize = DIM_FAQ_SECTION_TITLE_FONTSIZE.sp, fontFamily = extraFontFamily,
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.primary,
+                text = stringResource(ShRes.string.warn_rules_security_title)
             )
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = scrollToFAQPosition),
+                fontSize = DIM_FAQ_LINK_FONTSIZE.sp, fontFamily = displayFontFamily,
+                textAlign = TextAlign.End,
+                fontWeight = FontWeight.Black,
+                color = quinaryLight,
                 text = stringResource(ShRes.string.faq_access),
-                style = quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
-                    textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.End
-                )
+                textDecoration = TextDecoration.Underline
             )
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
         Text(
             text = stringResource(ShRes.string.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
-            style = commonTextStyle().copy(textAlign = TextAlign.Justify)
+            style = TextStyle(textAlign = TextAlign.Justify),
+            fontFamily = displayFontFamily
         )
     }
 
@@ -255,9 +258,11 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                fontSize = DIM_FAQ_RULE_TITLE_FONTSIZE.sp,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Black,
+                fontFamily = extraFontFamily,
+                textAlign = TextAlign.Start
             )
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
             items.forEachIndexed { index, item ->
@@ -265,12 +270,16 @@ class AboutFaqScreen : TabScreen {
                     Text(
                         modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
-                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp,
+                        fontFamily = displayFontFamily,
+                        fontWeight = FontWeight.Black
                     )
                     Text(
                         modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
-                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp,
+                        style = TextStyle(textAlign = TextAlign.Justify),
+                        fontFamily = displayFontFamily
                     )
                 }
             }
@@ -298,13 +307,18 @@ class AboutFaqScreen : TabScreen {
         ) {
             Text(
                 text = stringResource(question),
-                style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE)
+                fontSize = DIM_FAQ_RULE_QUESTION_FONTSIZE.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = displayFontFamily,
+                color = MaterialTheme.colorScheme.primary
             )
             if (expandedFaqItem == itemIndex) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answer),
-                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
+                    fontSize = DIM_FAQ_RULE_ANSWER_FONTSIZE.sp,
+                    fontFamily = displayFontFamily,
+                    style = TextStyle(textAlign = TextAlign.Justify)
                 )
             }
         }

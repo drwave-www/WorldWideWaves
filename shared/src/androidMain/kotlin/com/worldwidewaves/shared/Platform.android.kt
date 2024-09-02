@@ -3,10 +3,9 @@ package com.worldwidewaves.shared
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,13 +45,13 @@ import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
 
-object AndroidPlatform : WWWPlatform()  { // TODO: manage with the cache in production on app update
+object AndroidPlatform : WWWPlatform  { // TODO: manage with the cache in production on app update
     private var _contextRef: WeakReference<Context>? = null
 
     private val context: Context
         get() = _contextRef?.get()
             ?: throw UninitializedPropertyAccessException(
-                "$(::AndroidPlatform.name) must be initialized with a context before use.")
+                "AndroidPlatform must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
@@ -106,6 +105,9 @@ actual fun getEventImage(type: String, id: String): Any? {
  * It first checks if the file is already cached in the device's cache directory. If the file is not cached or the
  * cached file size does not match the expected size, it reads the file from the resources and caches it.
  *
+ * @param eventId The ID of the event for which the map file is needed.
+ * @param extension The file extension of the map file (e.g., "mbtiles", "geojson").
+ * @return The absolute path of the cached map file as a String, or `null` if the file is not found.
  */
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
@@ -113,15 +115,15 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
     return try {
-        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension")
+        Log.i("getMBTilesAbsoluteFilePath", "Trying to get $eventId.$extension")
         val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
         if (!cachedFile.exists() || cachedFile.length().toInt() != fileBytes.size) {
-            Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+            Log.i("getMBTilesAbsoluteFilePath", "Caching $eventId.$extension")
             cachedFile.outputStream().use { it.write(fileBytes) }
         }
         cachedFile.absolutePath
     } catch (e: MissingResourceException) {
-        Log.e(::getMapFileAbsolutePath.name, "Resource not found: ${e.message}")
+        Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
         null
     }
 }
@@ -135,13 +137,15 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
  * It also considers whether the application is running in development mode, in which case it always
  * returns `false` to simulate the absence of cached files.
  *
+ * @param fileName The name of the file to check for existence in the cache directory.
+ * @return `true` if the file exists in the cache directory and the application is not in development mode, `false` otherwise.
  */
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
-        Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
+        Log.i("cachedFileExists", "Development mode (not cached): $fileName")
         false
     } else {
         File(context.cacheDir, fileName).exists()
@@ -155,6 +159,8 @@ actual fun cachedFileExists(fileName: String): Boolean {
  * If the file exists, it returns the absolute path of the file as a string. If the file does not exist,
  * it returns `null`.
  *
+ * @param fileName The name of the file to check in the cache directory.
+ * @return The absolute path of the cached file as a string, or `null` if the file does not exist.
  */
 actual fun cachedFilePath(fileName: String): String? {
     val context = AndroidPlatform.getContext() as Context
@@ -168,10 +174,12 @@ actual fun cachedFilePath(fileName: String): String? {
  * in the cache directory of the application. It logs the file name to which the data
  * is being cached.
  *
+ * @param fileName The name of the file to which the content will be cached.
+ * @param content The string content to be written to the file.
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
     val context = AndroidPlatform.getContext() as Context
-    Log.i(::cacheStringToFile.name, "Caching data to $fileName")
+    Log.i("cacheStringToFile", "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
@@ -183,6 +191,9 @@ actual fun cacheStringToFile(fileName: String, content: String) : String {
  * in the device's cache directory. If the cache directory does not exist, it is created. If an error
  * occurs during the process, it is logged.
  *
+ * @param fileName The name of the file to be cached. This should include the relative path within the resources.
+ *
+ * @throws Exception if an error occurs while reading the file or writing to the cache directory.
  */
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun cacheDeepFile(fileName: String) {
@@ -191,12 +202,12 @@ actual suspend fun cacheDeepFile(fileName: String) {
         val fileBytes = Res.readBytes(fileName)
         val cacheFile = File(context.cacheDir, fileName)
 
-        Log.i(::cacheDeepFile.name, "Caching data to $cacheFile")
+        Log.i("cacheDeepFile", "Caching data to $cacheFile")
 
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
     } catch (e: Exception) {
-        Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        Log.e("cacheDeepFile", "Error caching file: $fileName", e)
     }
 }
 
@@ -206,6 +217,7 @@ actual suspend fun cacheDeepFile(fileName: String) {
  * This function uses the Android context to access the cache directory and returns its absolute path.
  * The cache directory is a location where the application can store temporary files.
  *
+ * @return The absolute path to the cache directory as a String.
  */
 actual fun getCacheDir(): String {
     val context = AndroidPlatform.getContext() as Context
@@ -220,6 +232,7 @@ actual fun getCacheDir(): String {
  * This function uses the system clock to get the current instant in time and converts it to a
  * `LocalDateTime` object using the system's default time zone.
  *
+ * @return The current local date and time as a `LocalDateTime` object.
  */
 actual fun getLocalDatetime(): LocalDateTime =
     Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

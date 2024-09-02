@@ -3,10 +3,9 @@ package com.worldwidewaves.compose
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
@@ -54,7 +54,6 @@ import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import com.worldwidewaves.theme.commonTextStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -107,10 +106,10 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
             }
             Text(
                 text = stringResource(tabInfo[tabIndex]).uppercase(),
-                style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
-                )
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
+                fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
             )
         }
     }

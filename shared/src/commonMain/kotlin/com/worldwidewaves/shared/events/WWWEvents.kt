@@ -3,10 +3,9 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,156 +20,75 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
-import com.worldwidewaves.shared.events.utils.EventsDecoder
-import com.worldwidewaves.shared.events.utils.Log
-import kotlinx.coroutines.Dispatchers
+import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.jvm.JvmOverloads
 
 // ---------------------------
 
-class WWWEvents : KoinComponent {
+class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponent {
 
-    private val initFavoriteEvent: InitFavoriteEvent by inject()
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
-    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
-    private val eventsDecoder : EventsDecoder by inject()
+    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
     // ---------------------------
 
-    private var currentLoadJob: Job? = null
-    private var eventsLoaded: Boolean = false
-    private var loadingError: Exception? = null
-    private val validationErrors = mutableListOf<Pair<IWWWEvent, List<String>>>()
+    private var loadJob: Job? = null
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
+    private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
+    val eventsFlow = _eventsFlow.asStateFlow()
 
-    private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
-    private val pendingErrorCallbacks = mutableListOf<(Exception) -> Unit>()
+    fun resetEventsFlow() = _eventsFlow::value.set(emptyList())
 
-    private val _eventsFlow = MutableStateFlow<List<IWWWEvent>>(emptyList())
-    private val eventsFlow = _eventsFlow.asStateFlow()
+    // ---------------------------
+
+    init { loadEvents() }
 
     // ---------------------------
 
     /**
      * Initiates the loading of events if not already started.
      */
-    @JvmOverloads
-    fun loadEvents(
-        onLoaded: (() -> Unit)? = null,
-        onLoadingError: ((Exception) -> Unit)? = null,
-        onTermination: ((Exception?) -> Unit)? = null
-    ): WWWEvents = apply {
-
-        onLoaded?.let { addOnEventsLoadedListener(it) }
-        onLoadingError?.let { addOnEventsErrorListener(it) }
-        onTermination?.let { addOnTerminationListener(it) }
-
-        if (!eventsLoaded) {
-            currentLoadJob?.cancel() // Cancel any ongoing load job
-            currentLoadJob = loadEventsJob()
-        }
-    }
-
-    fun cancelLoading() {
-        currentLoadJob?.cancel()
-        currentLoadJob = null
-    }
+    private fun loadEvents() = loadJob ?: loadEventsJob().also { loadJob = it }
 
     /**
      * Launches a coroutine to load events from the configuration provider.
      * The coroutine runs on the IO dispatcher.
      */
-    private fun loadEventsJob() = coroutineScopeProvider.launchIO {
-        try {
-            val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
-            val events = eventsDecoder.decodeFromJson(eventsJsonString)
-            val validatedEvents = confValidationErrors(events)
+    private fun loadEventsJob() = coroutineScopeProvider.scopeIO.launch {
+        val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
+        val events = jsonDecoder.decodeFromString<List<WWWEvent>>(eventsJsonString)
 
-            validatedEvents.filterValues { it?.isNotEmpty() == true } // Log validation errors
-                .forEach { (event, errors) ->
-                    Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
-                    errors?.forEach { errorMessage ->
-                        Log.e(::WWWEvents.name, errorMessage)
-                    }
-                    validationErrors.add(event to errors!!)
-                }
+        val validationResults = isValidEventsData(events)
 
-            // Filter out invalid events
-            val validEvents = validatedEvents.filterValues { it.isNullOrEmpty() }
-                .keys.onEach { initFavoriteEvent.call(it) } // Initialize favorite status
-                .toList()
-
-            // Update the _eventsFlow in the main dispatcher to ensure thread safety
-            withContext(Dispatchers.Main) {
-                _eventsFlow.value = validEvents
+        validationResults.filterValues { !it.first }
+            .mapNotNull { it.value.second }
+            .forEach { errorMessage ->
+                Napier.e("Validation Error: $errorMessage")
             }
 
-            // The events have been loaded, so we can now call any pending callbacks
-            onEventsLoaded()
-
-        } catch (e: Exception) {
-            Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
-            onLoadingError(e)
-        }
+        _eventsFlow.value = validationResults.filterValues { it.first }
+            .keys.onEach { initFavoriteEvent.call(it) }
+            .toList()
     }
-
-    @VisibleForTesting
-    fun confValidationErrors(events: List<IWWWEvent>) =
-        events.associateWith(IWWWEvent::validationErrors)
 
     // ---------------------------
 
-    fun flow(): StateFlow<List<IWWWEvent>> = eventsFlow
-    fun list(): List<IWWWEvent> = eventsFlow.value
-    fun getEventById(id: String): IWWWEvent? = eventsFlow.value.find { it.id == id }
-
-    fun isLoaded(): Boolean = eventsLoaded
-    fun getLoadingError(): Exception? = loadingError
-    fun getValidationErrors(): List<Pair<IWWWEvent, List<String>>> = validationErrors
+    fun events(): StateFlow<List<WWWEvent>> = eventsFlow
+    fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
+    fun onEventLoaded(function: () -> Job) = this.loadJob?.invokeOnCompletion { function() }
 
     // ---------------------------
 
-    @VisibleForTesting
-    fun onEventsLoaded() {
-        eventsLoaded = true
-        pendingLoadedCallbacks.onEach { callback -> callback.invoke() }.clear()
-    }
-
-    @VisibleForTesting
-    fun onLoadingError(exception: Exception) {
-        loadingError = exception
-        pendingErrorCallbacks.onEach { callback -> callback.invoke(exception) }.clear()
-    }
-
-    fun addOnEventsLoadedListener(callback: () -> Unit) {
-        if (eventsLoaded) callback()
-        else if (!pendingLoadedCallbacks.contains(callback))
-            pendingLoadedCallbacks.add(callback)
-    }
-
-    fun addOnEventsErrorListener(callback: (Exception) -> Unit){
-        if (loadingError != null) callback(loadingError!!)
-        else if (!pendingErrorCallbacks.contains(callback))
-            pendingErrorCallbacks.add(callback)
-    }
-
-    fun addOnTerminationListener(callback: (Exception?) -> Unit) {
-        if (eventsLoaded || loadingError != null)
-            callback(loadingError)
-        else {
-            addOnEventsLoadedListener { callback(null) }
-            addOnEventsErrorListener { callback(it) }
-        }
-    }
+    private fun isValidEventsData(events: List<WWWEvent>) = events.associateWith(WWWEvent::isValid)
 
 }

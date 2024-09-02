@@ -3,10 +3,9 @@ package com.worldwidewaves.activities
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
-import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEvent
 
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
 
     @Composable
-    override fun Screen(modifier: Modifier, event: IWWWEvent) {
+    override fun Screen(modifier: Modifier, event: WWWEvent) {
         Box(modifier = modifier.fillMaxWidth()) {
-            EventMap(platform, event, mapConfig = EventMap.EventMapConfig(
+            EventMap(event, mapConfig = EventMap.EventMapConfig(
                 initialCameraPosition = EventMap.MapCameraPosition.WINDOW
             )).Screen(modifier = Modifier.fillMaxSize())
 
