@@ -29,8 +29,7 @@ import kotlin.time.Duration
 @Serializable
 data class WWWEventWaveDeep(
     override val speed: Double,
-    override val direction: String,
-    override val warming: Warming
+    override val direction: String
 ) : WWWEventWave() {
 
     override suspend fun getObservationInterval(): Long {

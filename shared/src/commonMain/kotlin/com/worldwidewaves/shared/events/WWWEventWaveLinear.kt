@@ -43,8 +43,7 @@ const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: String,
-    override val warming: Warming
+    override val direction: String
 ) : WWWEventWave() {
 
     private var observationInterval: Long = WAVE_DEFAULT_REFRESH_INTERVAL

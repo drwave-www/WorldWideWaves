@@ -313,7 +313,7 @@ class EventMap(
                     override fun onFinish() {
                         // Set the min/max camera zoom level
                         map.setMinZoomPreference(map.cameraPosition.zoom)
-                        map.setMaxZoomPreference(event.mapMaxzoom)
+                        map.setMaxZoomPreference(event.map.maxZoom)
 
                         // Constrain the camera movement to the bounds of the map
                         map.addOnCameraMoveListener {

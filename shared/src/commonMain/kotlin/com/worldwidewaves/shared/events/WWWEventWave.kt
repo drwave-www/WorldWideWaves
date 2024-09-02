@@ -4,10 +4,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygon
-import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,26 +48,6 @@ import kotlin.time.Duration.Companion.hours
 @Serializable
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
-    @Serializable
-    data class Warming(
-        val type: String,
-        val longitude: Double? = null,
-    ) : DataValidator {
-        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
-            when {
-                type == "longitude-cut" && longitude == null ->
-                    add("Longitude must not be null for type 'longitude-cut'")
-
-                type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
-                    add("Longitude must be between -180 and 180")
-
-                else -> {}
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "warming: $it" }
-    }
-
-    // ---------------------------
-
     data class WaveNumbers(
         val waveTimezone: String,
         val waveSpeed: String,
@@ -84,7 +61,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     abstract val speed: Double
     abstract val direction: String
-    abstract val warming: Warming
 
     // ---------------------------
 
@@ -101,15 +77,14 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     @Transient protected var positionRequester: (() -> Position?)? = null
     @Transient private var cachedLiteralStartTime: String? = null
-    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
 
     // ---------------------------
 
-    private val waveStatusChangedListeners = mutableListOf<(WWWEvent.Status) -> Unit>()
-    private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
-    private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
-    private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
-    private val waveUserHasBeenHitListeners = mutableListOf<() -> Unit>()
+    @Transient private val waveStatusChangedListeners = mutableListOf<(WWWEvent.Status) -> Unit>()
+    @Transient private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
+    @Transient private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
+    @Transient private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
+    @Transient private val waveUserHasBeenHitListeners = mutableListOf<() -> Unit>()
 
     // ---------------------------
 
@@ -321,40 +296,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-
-     */
-    suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
-    }
-
-    /**
-     * Retrieves the warming polygons for the event area.
-     *
-     * This function returns a list of polygons representing the warming zones for the event area.
-     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
-     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
-     *
-     */
-    suspend fun getWarmingPolygons(): List<Polygon> {
-        if (cachedWarmingPolygons == null) {
-            cachedWarmingPolygons = when (warming.type) {
-                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
-                    splitPolygonByLongitude(polygon, warming.longitude!!).right
-                }
-                else -> emptyList()
-            }
-        }
-        return cachedWarmingPolygons!!
-    }
-
-    // ---------------------------
-
     override fun validationErrors(): List<String>? = mutableListOf<String>()
         .apply {
             when {
@@ -364,7 +305,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 direction != "west" && direction != "east" ->
                     add("Direction must be either 'west' or 'east'")
 
-                else -> warming.validationErrors()?.let { addAll(it) }
+                else -> { }
             }
         }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
 

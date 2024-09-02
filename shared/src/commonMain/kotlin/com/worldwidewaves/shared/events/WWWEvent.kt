@@ -36,29 +36,33 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class WWWEvent(
+
     val id: String,
     val type: String,
     val location: String,
     val country: String? = null,
     val community: String? = null,
+
+    val timeZone: String,
     val date: String,
     val startHour: String,
-    val wavedef: WaveDefinition,
+
     val description: String,
     val instagramAccount: String,
     val instagramHashtag: String,
-    var favorite: Boolean = false,
-    val mapOsmadminid: Int, // https://nominatim.openstreetmap.org/ui/search.html?
-    val mapMaxzoom: Double,
-    val mapLanguage: String,
-    val mapOsmarea: String,
-    val timeZone: String
+
+    val wavedef: WWWWaveDefinition,
+    val area: WWWEventArea,
+    val map: WWWEventMap,
+
+    var favorite: Boolean = false
+
 ) : DataValidator {
 
     enum class Status { DONE, SOON, RUNNING }
 
     @Serializable
-    data class WaveDefinition(
+    data class WWWWaveDefinition(
         val linear: WWWEventWaveLinear? = null,
         val deep: WWWEventWaveDeep? = null,
         val linearSplit: WWWEventWaveLinearSplit? = null
@@ -78,12 +82,6 @@ data class WWWEvent(
 
     // ---------------------------
 
-    @Transient private var _map: WWWEventMap? = null
-    val map: WWWEventMap get() = _map ?: WWWEventMap(this).apply { _map = this }
-
-    @Transient private var _area: WWWEventArea? = null
-    val area: WWWEventArea get() = _area ?: WWWEventArea(this).apply { _area = this }
-
     @Transient private var _wave: WWWEventWave? = null
     val wave: WWWEventWave
         get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
@@ -91,6 +89,11 @@ data class WWWEvent(
             setEvent(this@WWWEvent)
             _wave = this
         }
+
+    init {
+        map.setRelatedEvent(this)
+        area.setRelatedEvent(this)
+    }
 
     // ---------------------------
 
@@ -182,6 +185,9 @@ data class WWWEvent(
                 type == "city" && country.isNullOrEmpty() ->
                     this.add("Country must be specified for type 'city'")
 
+                timeZone.isEmpty() ->
+                    this.add("Time zone is empty")
+
                 !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
                     this.add("Date format is invalid or date is not valid")
 
@@ -203,31 +209,12 @@ data class WWWEvent(
                 !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
                     this.add("Instagram hashtag is invalid")
 
-                mapOsmadminid.toString().toIntOrNull() == null ->
-                    this.add("Map Osmadminid must be an integer")
-
-                mapMaxzoom.toString().toDoubleOrNull() == null || mapMaxzoom <= 0 || mapMaxzoom >= 20 ->
-                    this.add("Map Maxzoom must be a positive double less than 20")
-
-                mapLanguage.isEmpty() ->
-                    this.add("Map language is empty")
-
-                !mapLanguage.matches(Regex("^[a-z]{2,3}$")) ->
-                    this.add("Map language must be a valid ISO-639 code")
-
-                mapOsmarea.isEmpty() ->
-                    this.add("Map Osmarea is empty")
-
-                !mapOsmarea.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
-                    this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
-
-                timeZone.isEmpty() ->
-                    this.add("Time zone is empty")
-
                 runCatching { TimeZone.of(timeZone) }.isFailure ->
                     this.add("Time zone is invalid")
 
                 else -> wavedef.validationErrors()?.let { addAll(it) }
+                    .also { area.validationErrors()?.let { addAll(it) } }
+                    .also { map.validationErrors()?.let { addAll(it) } }
             }
         }.takeIf { it.isNotEmpty() }?.map { "event: $it" }
 

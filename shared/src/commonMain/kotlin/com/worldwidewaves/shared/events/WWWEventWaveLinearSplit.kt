@@ -30,7 +30,6 @@ import kotlin.time.Duration
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
-    override val warming: Warming,
     val nbSplits: Int
 ) : WWWEventWave() {
 

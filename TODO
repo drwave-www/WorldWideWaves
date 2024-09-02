@@ -12,8 +12,6 @@ Next:
     => add map actions
     => test on my phone in paris
 
-- cleanup events.json, splitting properties in the right object, ex: mapMaxZoom, etc...
-
 - wave screen + warming procedure (decouper par tranches et 'lancer' par tranches)
       - add a progress bar on the wave screen
 
@@ -77,7 +75,7 @@ Ideas:
     - videos explicatives WWW
     - par pays / events
 - Une association par event, avec un lien cagnotte et une video youtube de présentation
-- Realite augmentee pour "voir" la vague ?
+- Realite augmentee pour "voir" la vague ? : https://www.openium.fr/expertises/realitee-augmentee/
 
 
 Reference:

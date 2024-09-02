@@ -163,7 +163,7 @@ private fun updateGeolocText(
         coroutineScope.launch {
             val currentPosition = Position(newLocation.latitude, newLocation.longitude)
             val newGeolocText = when {
-                event.wave.isPositionWithinWarming(currentPosition) -> ShRes.string.geoloc_warm_in
+                event.area.isPositionWithinWarming(currentPosition) -> ShRes.string.geoloc_warm_in
                 event.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
                 else -> ShRes.string.geoloc_yourenotin
             }

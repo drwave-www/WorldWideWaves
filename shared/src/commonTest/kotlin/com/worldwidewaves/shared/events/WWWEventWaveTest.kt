@@ -63,7 +63,6 @@ class WWWEventWaveTest : KoinTest {
         wave = object : WWWEventWave() {
             override val speed: Double = 0.0
             override val direction: String = "N"
-            override val warming: Warming = Warming("longitude-cut")
             override suspend fun getObservationInterval(): Long = 0L
             override suspend fun getEndTime(): LocalDateTime = LocalDateTime(2024, 1, 1, 0, 0)
             override suspend fun getTotalTime(): Duration = Duration.ZERO

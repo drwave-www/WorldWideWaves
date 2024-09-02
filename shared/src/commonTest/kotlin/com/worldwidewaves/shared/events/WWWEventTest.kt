@@ -1,6 +1,6 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.events.WWWEvent.WaveDefinition
+import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import kotlinx.datetime.LocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -59,32 +59,30 @@ fun buildEmptyEvent(
     id: String = "",
     type: String = "",
     location: String = "",
+    timeZone: String = "",
     date: String = "",
     startHour: String = "",
-    timeZone: String = "",
-    wavedef: WaveDefinition = WaveDefinition(),
     description: String = "",
     instagramAccount: String = "",
     instagramHashtag: String = "",
-    mapOsmadminid: Int = 0,
-    mapMaxzoom: Double = 0.0,
-    mapLanguage: String = "",
-    mapOsmarea: String = ""
+    wavedef: WWWWaveDefinition = WWWWaveDefinition(),
+    osmAdminid: Int = 0,
+    maxzoom: Double = 0.0,
+    language: String = "",
+    zone: String = ""
 ): WWWEvent {
     return WWWEvent(
         id = id,
         type = type,
         location = location,
+        timeZone = timeZone,
         date = date,
         startHour = startHour,
-        timeZone = timeZone,
-        wavedef = wavedef,
         description = description,
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
-        mapOsmadminid = mapOsmadminid,
-        mapMaxzoom = mapMaxzoom,
-        mapLanguage = mapLanguage,
-        mapOsmarea = mapOsmarea
+        wavedef = wavedef,
+        area = WWWEventArea(osmAdminid, warming = WWWEventArea.Warming(type = "")),
+        map = WWWEventMap(maxzoom, language, zone)
     )
 }

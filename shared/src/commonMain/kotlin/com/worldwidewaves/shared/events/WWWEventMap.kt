@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
+import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
@@ -33,17 +34,38 @@ import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 // ---------------------------
 
+@Serializable
 class WWWEventMap(
-    private val event: WWWEvent
-) : KoinComponent {
+
+    val maxZoom: Double,
+    val language: String,
+    val zone: String
+
+) : KoinComponent, DataValidator {
+
+    private var _event: WWWEvent? = null
+    private var event: WWWEvent
+        get() = _event ?: throw IllegalStateException("Event not set")
+        set(value) {
+            _event = value
+        }
+
+    // ---------------------------
 
     private val mapDataProvider: MapDataProvider by inject()
+
+    // ---------------------------
+
+    fun setRelatedEvent(event: WWWEvent) {
+        this.event = event
+    }
 
     // ---------------------------
 
@@ -70,7 +92,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val warmingGeoJsonFilePath = cacheStringToFile(
             "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.wave.getWarmingPolygons())
+            convertPolygonsToGeoJson(event.area.getWarmingPolygons())
         ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
@@ -121,5 +143,29 @@ class WWWEventMap(
         with(event.area.getBoundingBox()) {
             position.lat in sw.lat..ne.lat && position.lng in sw.lng..ne.lng
         }
+
+    // ---------------------------
+
+    override fun validationErrors(): List<String>? = mutableListOf<String>()
+        .apply {
+            when {
+                maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
+                    this.add("Map Maxzoom must be a positive double less than 20")
+
+                language.isEmpty() ->
+                    this.add("Map language is empty")
+
+                !language.matches(Regex("^[a-z]{2,3}$")) ->
+                    this.add("Map language must be a valid ISO-639 code")
+
+                zone.isEmpty() ->
+                    this.add("Map Osmarea is empty")
+
+                !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
+                    this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
+
+                else -> { }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
 
 }
