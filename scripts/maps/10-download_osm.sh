@@ -58,19 +58,19 @@ for event in $EVENTS; do # Download OSM area as PBF file
     continue
   fi
 
-  OSMADMINID=$(conf $event mapOsmadminid)
+  OSMADMINID=$(conf $event area.osmAdminid)
   BBOX=$(./libs/get_bbox.dep.sh $OSMADMINID bbox)
 
   echo "Retrieved BBOX for OSM admin id $OSMADMINID : $BBOX"
 
-  AREA=$(conf $event mapOsmarea)
-  SPBF=data/osm-$(echo $AREA | sed -e 's,/,_,g').osm.pbf
+  AREAZONE=$(conf $event map.zone)
+  SPBF=data/osm-$(echo $AREAZONE | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 
-  echo "-- Download area $AREA from OSM.."
-  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREA -o $SPBF
+  echo "-- Download area $AREAZONE from OSM.."
+  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREAZONE -o $SPBF
 
-  echo "-- Extract bbox $BBOX from area $AREA.."
+  echo "-- Extract bbox $BBOX from area $AREAZONE.."
   [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics
 
   echo "-- Generates OpenMapTiles environment for event $event"

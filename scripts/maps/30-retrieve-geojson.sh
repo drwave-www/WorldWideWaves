@@ -39,8 +39,7 @@ if [ ! -z "$1" ]; then
   fi
 fi
 
-for event in $EVENTS; do # Generate MBTILES files from PBF area files 
-                         # EVENTS is defined in lib.inc.sh
+for event in $EVENTS; do # Retrieve Geojson files from OSM
 
   echo "==> EVENT $event"
   echo
@@ -52,7 +51,7 @@ for event in $EVENTS; do # Generate MBTILES files from PBF area files
     continue
   fi
 
-  OSMADMINID=$(conf $event mapOsmadminid)
+  OSMADMINID=$(conf $event area.osmAdminid)
 
   DEST_GEOJSON=$DEST_DIR/$event.geojson
   wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson

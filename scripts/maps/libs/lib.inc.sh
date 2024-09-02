@@ -47,8 +47,8 @@ exists() {
 # Function to read an event's configuration property
 # Usage: conf <event_id> <property_name>
 conf() {
-  ./bin/jq -r --arg event "$1" --arg prop "$2" \
-    '.[] | select(.id == $event) | .[$prop]' "$EVENTS_FILE"
+  ./bin/jq -r --arg event "$1" \
+    ".[] | select(.id == \$event) | .$2" "$EVENTS_FILE"
 }
 
 # Function to replace placeholders in the template file with event configuration values
@@ -65,7 +65,7 @@ tpl() {
 
   # Retrieve the event's mapOsmadminid and bbox information
   local mapOsmadminid
-  mapOsmadminid=$(conf "$event" "mapOsmadminid")
+  mapOsmadminid=$(conf "$event" "area.osmAdminid")
 
   local bbox_output
   bbox_output=$(./libs/get_bbox.dep.sh "$mapOsmadminid")
@@ -75,12 +75,12 @@ tpl() {
   center=$(echo "$bbox_output" | tail -n 1 | cut -d ':' -f 2)
 
   # Replace placeholders with event properties and bbox/center data
-  ./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | keys[]' "$EVENTS_FILE" | while read -r prop; do
-    if [ "$prop" != "wavedef" ]; then
+  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | sed -e 's/^[0-9\.]\.*//' | sort | uniq | while read -r prop; do
+  if [ -n "$prop" ] && [ "$(conf $event $prop | wc -l)" = "1" ]; then
       sed -i \
         -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
-        -e "s/#mapCenter#/$center/g" \
-        -e "s/#mapBbox#/$bbox/g" \
+        -e "s/#map.center#/$center/g" \
+        -e "s/#map.bbox#/$bbox/g" \
         "$tpl_file"
     fi
   done
