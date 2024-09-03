@@ -30,7 +30,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        let events : Array<WWWEvent> = WWWEvents().events()
+        let events : Array<WWWEvent> = self.wwwEvents.events()
 
         List(events, id: \.self) { event in
             Text(event.location)
