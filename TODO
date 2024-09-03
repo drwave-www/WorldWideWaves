@@ -2,6 +2,8 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
+    - position is no more chown ??
+    - forbid portrait/paysage ?
     - Debug country generation (for united states)
     - pourquoi replacement automatique de la map sur la position ?
         --> OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)

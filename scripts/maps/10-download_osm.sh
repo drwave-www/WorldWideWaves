@@ -31,6 +31,7 @@ mkdir -p ./data
 # git clone openmpatiles-tools to download OSM areas
 [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
 
+# Download osmconvert to extract BBOX from OSM areas
 [ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert
 
 # ---------- Vars and support functions ---------------------------------------
