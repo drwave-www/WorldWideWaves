@@ -3,10 +3,9 @@ package com.worldwidewaves.activities.utils
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +44,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 // ----------------------------
 
 interface TabScreen {
-    @Composable fun Screen(modifier: Modifier)
+    @Composable
+    fun Screen(modifier: Modifier)
     fun getName(): String?
 }
 
@@ -72,21 +72,39 @@ class TabManager(
         Column(modifier = Modifier.fillMaxHeight()) {
 
             // Display the selected tab screen
-            Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
-                originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (originalScreen != null) {
+                        originalScreen!!(Modifier)
+                    } else {
+                        screens[currentTab].Screen(Modifier)
+                    }
+                }
             }
 
             // Tab bar
             Row(
-                modifier = modifier.fillMaxWidth().height(DIM_INT_TABBAR_HEIGHT.dp),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(DIM_INT_TABBAR_HEIGHT.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 screens.forEachIndexed { index, tab ->
-                    Box(modifier = Modifier.clickable {
+                    Box(modifier = Modifier.clickable(onClick = {
                         originalScreen = null
                         currentTab = index
-                    }) { tabBarItem(currentTab == index, index, tab.getName()) }
+                    })) {
+                        tabBarItem(
+                            currentTab == index, // && originalScreen == null
+                                    index,
+                            tab.getName()
+                        )
+                    }
                 }
             }
         }

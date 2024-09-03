@@ -2,18 +2,21 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - terminate last tests on polygon + implement -180/180 cut
-    - put a timer on GPS activation  requests
-    - perf: create the longitude-cut geojson at build phase not runtime
-    - show some map elements on min zoom
-        + styling script : jq => every minzoom < 10 = 3
-    - manage with translations
+    - position is no more chown ??
+    - forbid portrait/paysage ?
+    - Debug country generation (for united states)
+    - pourquoi replacement automatique de la map sur la position ?
+        --> OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
+    - code coverage of current devs
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - manage with translations
 
 - Wave linear
     - wave progression
+        - adapt end time and progression to take into account the warming zone
+        - add a time delay for warming, in linear wave
         - add a layer on the map
         - add a progress bar on the map
 
@@ -23,13 +26,9 @@ Next:
 - Large map screen
     => add map actions (center user vs center wave)
 
-- Wave screen (1 click user tracker = center, 2 clicks = zoom)
-    - add a button to center the user on the map / zoom on the user
-    - add a button to center the wave on the map
+- Wave screen
 
 - Warming procedure (decouper par tranches et 'lancer' par tranches)
-
-- Faire s'agenouiller 30s avant le hit
 
 - Packaging :
     - generate a /events folder with all events, the map style and the events.json
@@ -87,4 +86,3 @@ Reference/Docs:
     --> + https://wiki.openstreetmap.org/wiki/Map_features
     --> + https://wiki.openstreetmap.org/wiki/Category:Features
 
-- jetpack compose test UI : https://medium.com/@myofficework000/exploring-jetpack-compose-ui-testing-a-comprehensive-guide-eb0c2d93e111

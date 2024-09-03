@@ -3,10 +3,9 @@ package com.worldwidewaves.activities.utils
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,21 +35,24 @@ fun setStatusBarColor(window: Window) {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = backgroundLight.toArgb()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // For Android R and above, use WindowInsetsController
-            // to hide navigation bars and show status bars
-            window.insetsController?.apply {
-                hide(WindowInsets.Type.navigationBars())
-                show(WindowInsets.Type.statusBars())
-            }
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.navigationBars())
         } else {
-            // For older versions, use deprecated system UI visibility flags
             @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_VISIBLE
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
 
+        // Ensure the content fits within the system windows
         WindowCompat.setDecorFitsSystemWindows(window, true)
-        WindowInsetsControllerCompat(window, window.decorView).systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                controller.show(WindowInsets.Type.statusBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
     }
 }

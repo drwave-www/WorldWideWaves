@@ -3,10 +3,9 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +27,13 @@ import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
-import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
-import com.worldwidewaves.shared.events.utils.PolygonUtils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
@@ -51,8 +50,8 @@ class WWWEventMap(
 
 ) : KoinComponent, DataValidator {
 
-    private var _event: IWWWEvent? = null
-    private var event: IWWWEvent
+    private var _event: WWWEvent? = null
+    private var event: WWWEvent
         get() = _event ?: throw IllegalStateException("Event not set")
         set(value) {
             _event = value
@@ -82,6 +81,7 @@ class WWWEventMap(
      * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
      * and returns the URI of the cached style JSON.
      *
+     * @return The URI of the cached style JSON file, or null if an error occurs.
      */
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
@@ -92,7 +92,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val warmingGeoJsonFilePath = cacheStringToFile(
             "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.wave.getWarmingPolygons())
+            convertPolygonsToGeoJson(event.area.getWarmingPolygons())
         ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
@@ -115,6 +115,8 @@ class WWWEventMap(
      * This function reads a file listing the required resources, caches them individually,
      * and returns the path to the cache directory.
      *
+     * @return The path to the cache directory containing the sprite and glyphs resources.
+     * @throws Exception if an error occurs during caching.
      */
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String {
@@ -126,7 +128,7 @@ class WWWEventMap(
                 .forEach { cacheDeepFile("$FS_STYLE_FOLDER/$it") }
             getCacheDir()
         } catch (e: Exception) {
-            Log.e(::cacheSpriteAndGlyphs.name,"Error caching sprite and glyphs", e)
+            Napier.e("Error caching sprite and glyphs", e)
             throw e
         }
     }
@@ -134,6 +136,8 @@ class WWWEventMap(
     /**
      * Checks if a given position is within the event area's bounding box.
      *
+     * @param position The position to check.
+     * @return True if the position is within the bounding box, false otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
         with(event.area.getBoundingBox()) {
@@ -162,6 +166,6 @@ class WWWEventMap(
 
                 else -> { }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
 
 }

@@ -1,6 +1,8 @@
 tileset:
   layers:
+    - layers/landuse/landuse.yaml
     - layers/boundary/boundary.yaml
+    - layers/landcover/landcover.yaml
     - layers/water/water.yaml
     - layers/transportation/transportation.yaml
     - layers/transportation_name/transportation_name.yaml
@@ -13,8 +15,8 @@ tileset:
   attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
   center: [ #map.center#, 10 ]
   bounds: [ #map.bbox#]
-  maxzoom: 9
-  minzoom: 4
+  maxzoom: 10
+  minzoom: 5
   pixel_scale: 256
   languages:
     - #map.language#

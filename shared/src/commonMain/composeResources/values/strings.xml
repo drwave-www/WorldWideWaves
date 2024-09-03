@@ -13,30 +13,23 @@
     <string name="event_running">running</string>
     <string name="event_favorite_on">favorite_on</string>
     <string name="event_favorite_off">favorite_off</string>
-    <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
-    <string name="events_empty">Event list is empty</string>
-    <string name="events_loading_error">An error occurred when loading events</string>
-
+    <string name="event_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
 
     <string name="tab_infos_name">About</string>
     <string name="tab_faq_name">FAQ</string>
 
     <string name="geoloc_undone">Updating location..</string>
     <string name="geoloc_error">Unable to locate you</string>
-    <string name="geoloc_yourein">YOU ARE IN the area!</string>
+    <string name="geoloc_yourein">YOUR ARE IN the area!</string>
     <string name="geoloc_yourenotin">YOU ARE NOT in the area!</string>
-    <string name="geoloc_warm_in">YOU ARE IN the area and will warm!</string>
+    <string name="geoloc_warm_in">YOUR ARE IN the area and will warm!</string>
     <string name="geoloc_desc">FAQ</string>
-
-    <string name="ask_gps_enable">Your GPS seems to be disabled, do you want to enable it?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
 
     <string name="be_waved">be waved!</string>
     <string name="wave_speed">Wave speed</string>
     <string name="wave_start_time">Start time</string>
     <string name="wave_end_time">End time</string>
-    <string name="wave_total_time">Total wave time</string>
+    <string name="wave_total_time">Total time</string>
     <string name="wave_progression">Progression</string>
 
     <string name="infos_core">

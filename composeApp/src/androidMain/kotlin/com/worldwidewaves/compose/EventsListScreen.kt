@@ -3,10 +3,9 @@ package com.worldwidewaves.compose
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +60,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.models.EventsViewModel
+import com.worldwidewaves.shared.SetEventFavorite
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -81,21 +83,16 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_OVERLAY_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
-import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.events_empty
-import com.worldwidewaves.shared.generated.resources.events_favorites_empty
-import com.worldwidewaves.shared.generated.resources.events_loading_error
+import com.worldwidewaves.shared.generated.resources.event_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.theme.commonTextStyle
+import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extendedLight
-import com.worldwidewaves.theme.primaryColoredBoldTextStyle
-import com.worldwidewaves.theme.quinaryColoredTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -145,7 +142,7 @@ class EventsListScreen(
     @Composable
     private fun EventsList(
         modifier: Modifier,
-        events: List<IWWWEvent>,
+        events: List<WWWEvent>,
         onAllEventsCLicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit
     ) {
@@ -218,11 +215,11 @@ class EventsListScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
+                color = textColor,
+                fontWeight = fontWeight,
+                fontSize = DIM_EVENTS_SELECTOR_FONTSIZE.sp,
                 text = text,
-                style = commonTextStyle(DIM_EVENTS_SELECTOR_FONTSIZE).copy(
-                    color = textColor,
-                    fontWeight = fontWeight
-                )
+                fontFamily = displayFontFamily
             )
         }
     }
@@ -230,9 +227,8 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    fun Events(viewModel: EventsViewModel, events: List<IWWWEvent>, modifier: Modifier = Modifier) {
+    fun Events(viewModel: EventsViewModel, events: List<WWWEvent>, modifier: Modifier = Modifier) {
         val state = rememberLazyListState()
-        val hasLoadingError by viewModel.hasLoadingError.collectAsState()
 
         LazyColumn(
             state = state,
@@ -244,15 +240,13 @@ class EventsListScreen(
                 item {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(
-                            when {
-                                hasLoadingError -> ShRes.string.events_loading_error
-                                starredSelected -> ShRes.string.events_favorites_empty
-                                else -> ShRes.string.events_empty
-                            }
-                        ),
-                        style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
-                            textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        text = stringResource(ShRes.string.event_favorites_empty),
+                        fontFamily = displayFontFamily,
+                        style = TextStyle(
+                            color = extendedLight.quinary.color,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontSize = DIM_EVENTS_NOEVENTS_FONTSIZE.sp
                         )
                     )
                 }
@@ -261,16 +255,14 @@ class EventsListScreen(
     }
 
     @Composable
-    fun Event(viewModel: EventsViewModel, event: IWWWEvent, modifier: Modifier = Modifier) {
+    fun Event(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
-        Column(modifier = modifier.clickable(
-            onClick = {
-                context.startActivity(Intent(context, EventActivity::class.java).apply {
-                    putExtra("eventId", event.id)
-                })
-            }
-        )) {
+        Column(modifier = modifier.clickable(onClick = {
+            context.startActivity(Intent(context, EventActivity::class.java).apply {
+                putExtra("eventId", event.id)
+            })
+        })) {
             EventOverlay(viewModel, event)
             EventLocationAndDate(event)
         }
@@ -281,7 +273,7 @@ class EventsListScreen(
     @Composable
     private fun EventOverlay(
         viewModel: EventsViewModel,
-        event: IWWWEvent,
+        event: WWWEvent,
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
@@ -307,7 +299,7 @@ class EventsListScreen(
 
     @Composable
     private fun EventOverlayCountryAndCommunityFlags(
-        event: IWWWEvent,
+        event: WWWEvent,
         modifier: Modifier = Modifier
     ) {
         Column(
@@ -351,7 +343,7 @@ class EventsListScreen(
     @Composable
     private fun EventOverlayFavorite(
         viewModel: EventsViewModel,
-        event: IWWWEvent,
+        event: WWWEvent,
         modifier: Modifier = Modifier
     ) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
@@ -379,7 +371,7 @@ class EventsListScreen(
                                 isFavorite = !isFavorite
                                 setEventFavorite.call(event, isFavorite)
                                 if (starredSelected) { // Refresh the list
-                                    viewModel.filterEvents(onlyFavorites = true)
+                                    viewModel.filterFavoriteEvents()
                                 }
                             }
                         },
@@ -393,7 +385,7 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
+    private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
         val eventDate = event.getLiteralStartDateSimple()
 
         Box(modifier = modifier) {
@@ -405,20 +397,35 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = event.location.uppercase(),
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
+                        style = TextStyle(
+                            color = extendedLight.quinary.color,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontSize = DIM_EVENTS_EVENT_LOCATION_FONSIZE.sp
+                        )
                     )
                     Text(
                         text = eventDate,
                         modifier = Modifier.padding(end = 2.dp),
-                        style = primaryColoredBoldTextStyle(DIM_EVENTS_EVENT_DATE_FONSIZE)
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = DIM_EVENTS_EVENT_DATE_FONSIZE.sp
+                        )
                     )
                 }
 
                 // Country if present
                 Text(
                     text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
-                    style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
-                    modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
+                    style = TextStyle(
+                        color = extendedLight.quinary.color,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontSize = DIM_EVENTS_EVENT_COUNTRY_FONSIZE.sp
+                    ),
+                    modifier = Modifier
+                        .offset(y = (-8).dp)
+                        .padding(start = 2.dp)
                 )
             }
         }

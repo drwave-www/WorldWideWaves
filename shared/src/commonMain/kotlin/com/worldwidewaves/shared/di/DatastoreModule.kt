@@ -1,19 +1,18 @@
 package com.worldwidewaves.shared.di
 
-import com.worldwidewaves.shared.data.FavoriteEventsStore
-import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.createDataStore
-import com.worldwidewaves.shared.data.keyValueStorePath
+import com.worldwidewaves.shared.FavoriteEventsStore
+import com.worldwidewaves.shared.InitFavoriteEvent
+import com.worldwidewaves.shared.SetEventFavorite
+import com.worldwidewaves.shared.createDataStore
+import com.worldwidewaves.shared.keyValueStorePath
 import org.koin.dsl.module
 
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

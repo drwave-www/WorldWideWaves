@@ -3,10 +3,9 @@ package com.worldwidewaves.shared.di
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +20,22 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultEventsConfigurationProvider
-import com.worldwidewaves.shared.events.utils.DefaultEventsDecoder
 import com.worldwidewaves.shared.events.utils.DefaultGeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.DefaultMapDataProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
-import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.SystemClock
 import org.koin.dsl.module
 
 val helpersModule = module {
-    single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
+    single<ICoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
     single<IClock> { SystemClock() }
     single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }
     single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
     single<MapDataProvider> { DefaultMapDataProvider() }
-    single<EventsDecoder> { DefaultEventsDecoder() }
 }

@@ -1,12 +1,15 @@
 package com.worldwidewaves.shared.events.utils
 
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
+ * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
+ * community, and shared human experience by leveraging real-time coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +24,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
-import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-
-class PolygonUtilsPointInPolygonTest {
+class AreaUtilsTestPointInPolygon {
 
     /**
      * Test points inside and outside a simple square polygon
@@ -64,7 +61,7 @@ class PolygonUtilsPointInPolygonTest {
      */
     @Test
     fun testIsPointInSimplePolygon() {
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -79,7 +76,7 @@ class PolygonUtilsPointInPolygonTest {
         println("Polygon vertices: $polygon")
 
         assertTrue(
-            polygon.containsPosition(insidePoint),
+            isPointInPolygon(insidePoint, polygon),
             "Expected point to be inside the polygon"
         )
 
@@ -87,7 +84,7 @@ class PolygonUtilsPointInPolygonTest {
         println("Testing point outside polygon: $outsidePoint")
 
         assertFalse(
-            polygon.containsPosition(outsidePoint),
+            isPointInPolygon(outsidePoint, polygon),
             "Expected point to be outside the polygon"
         )
     }
@@ -126,13 +123,13 @@ class PolygonUtilsPointInPolygonTest {
     @Test
     fun testIsPointOutsideSimplePolygon() {
         val point = Position(1.5, 0.5)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0), Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertFalse(polygon.containsPosition(point))
+        assertFalse(isPointInPolygon(point, polygon))
     }
 
     /**
@@ -170,7 +167,7 @@ class PolygonUtilsPointInPolygonTest {
     @Test
     fun testIsPointInConcavePolygon() {
         val point = Position(0.5, 0.5)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(0.5, 0.5),
@@ -178,14 +175,14 @@ class PolygonUtilsPointInPolygonTest {
             Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertTrue(polygon.containsPosition(point))
+        assertTrue(isPointInPolygon(point, polygon))
     }
 
 
     @Test
     fun testIsPointOutsideConcavePolygon() {
         val point = Position(0.2, 0.8)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(0.5, 0.5),
@@ -193,7 +190,7 @@ class PolygonUtilsPointInPolygonTest {
             Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertFalse(polygon.containsPosition(point))
+        assertFalse(isPointInPolygon(point, polygon))
     }
 
     // Edge Cases
@@ -201,63 +198,40 @@ class PolygonUtilsPointInPolygonTest {
     @Test
     fun testPointOnVertex() {
         val point = Position(0.0, 0.0)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertTrue(polygon.containsPosition(point)) // Consider a point on a vertex as inside
+        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on a vertex as inside
     }
 
     @Test
     fun testPointOnHorizontalEdge() {
         val point = Position(0.5, 0.0)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertTrue(polygon.containsPosition(point)) // Consider a point on an edge as inside
+        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
     }
 
     @Test
     fun testPointOnVerticalEdge() {
         val point = Position(0.0, 0.5)
-        val polygon = Polygon.fromPositions(
+        val polygon = listOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 0.0),
             Position(0.0, 0.0)
         )
-        assertTrue(polygon.containsPosition(point)) // Consider a point on an edge as inside
-    }
-
-    @Test
-    fun testIsPointInPolygons() {
-        val polygon1 = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(2.0, 0.0),
-            Position(2.0, 2.0),
-            Position(0.0, 2.0)
-        )
-        val polygon2 = Polygon.fromPositions(
-            Position(3.0, 3.0),
-            Position(5.0, 3.0),
-            Position(5.0, 5.0),
-            Position(3.0, 5.0)
-        )
-
-        val polygons = listOf(polygon1, polygon2)
-
-        assertTrue(isPointInPolygons(Position(1.0, 1.0), polygons))
-        assertTrue(isPointInPolygons(Position(4.0, 4.0), polygons))
-        assertFalse(isPointInPolygons(Position(2.5, 2.5), polygons))
-        assertFalse(isPointInPolygons(Position(6.0, 6.0), polygons))
+        assertTrue(isPointInPolygon(point, polygon)) // Consider a point on an edge as inside
     }
 
 }

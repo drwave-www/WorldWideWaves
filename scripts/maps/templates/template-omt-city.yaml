@@ -16,7 +16,7 @@ tileset:
   center: [ #map.center#, 10 ]
   bounds: [ #map.bbox#]
   maxzoom: 14
-  minzoom: 9
+  minzoom: 10
   pixel_scale: 256
   languages:
     - #map.language#

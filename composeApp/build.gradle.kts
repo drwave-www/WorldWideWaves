@@ -56,13 +56,9 @@ android {
         versionName = "1.0"
     }
     packaging {
-        resources.excludes.addAll(
-            listOf(
-                "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md",
-                "/META-INF/{AL2.0,LGPL2.1}"
-            )
-        )
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
     buildTypes {
         getByName("release") {
@@ -82,7 +78,6 @@ android {
         debugImplementation(compose.uiTooling)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
-        implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.maplibre.android.annotation)
         implementation(libs.androidx.datastore.preferences)
