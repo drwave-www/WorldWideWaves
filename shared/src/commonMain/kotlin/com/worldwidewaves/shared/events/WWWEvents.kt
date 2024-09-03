@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -45,7 +46,7 @@ class WWWEvents : KoinComponent {
     private var loadJob: Job? = null
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
-    val eventsFlow = _eventsFlow.asStateFlow()
+    private val eventsFlow = _eventsFlow.asStateFlow()
 
     fun resetEventsFlow() = _eventsFlow::value.set(emptyList())
 
@@ -83,6 +84,7 @@ class WWWEvents : KoinComponent {
 
     // ---------------------------
 
+    fun flow(): StateFlow<List<WWWEvent>> = eventsFlow
     fun events(): List<WWWEvent> = eventsFlow.value
     fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
     fun onEventLoaded(function: () -> Job) = this.loadJob?.invokeOnCompletion { function() }

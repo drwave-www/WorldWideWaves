@@ -57,7 +57,7 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private fun loadEvents() {
         viewModelScope.launch(Dispatchers.IO) {
-            wwwEvents.eventsFlow.collect { eventsList ->
+            wwwEvents.flow().collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList
                 _hasFavorites.value = eventsList.any { it.favorite }
