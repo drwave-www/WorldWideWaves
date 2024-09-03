@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 
 // ---------------------------
@@ -30,7 +31,7 @@ import kotlin.time.Duration
 data class WWWEventWaveDeep(
     override val speed: Double,
     override val direction: String
-) : WWWEventWave() {
+) : KoinComponent, WWWEventWave() {
 
     override suspend fun getObservationInterval(): Long {
         TODO("Not yet implemented")

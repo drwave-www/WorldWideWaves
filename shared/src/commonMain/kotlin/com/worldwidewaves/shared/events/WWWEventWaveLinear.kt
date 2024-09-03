@@ -27,6 +27,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import org.koin.core.component.KoinComponent
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -44,7 +45,7 @@ const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
 data class WWWEventWaveLinear(
     override val speed: Double,
     override val direction: String
-) : WWWEventWave() {
+) : KoinComponent, WWWEventWave() {
 
     private var observationInterval: Long = WAVE_DEFAULT_REFRESH_INTERVAL
     private var cachedEndTime: LocalDateTime? = null

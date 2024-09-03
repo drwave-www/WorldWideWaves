@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 
 // ---------------------------
@@ -31,7 +32,7 @@ data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
     val nbSplits: Int
-) : WWWEventWave() {
+) : KoinComponent, WWWEventWave() {
 
     // ---------------------------
 

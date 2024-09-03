@@ -24,5 +24,5 @@ import com.worldwidewaves.shared.events.WWWEvents
 import org.koin.dsl.module
 
 val commonModule = module {
-    single { WWWEvents(get()) }
+    single { WWWEvents() }
 }

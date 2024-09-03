@@ -26,7 +26,6 @@ import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -35,8 +34,9 @@ import org.koin.core.component.inject
 
 // ---------------------------
 
-class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponent {
+class WWWEvents : KoinComponent {
 
+    private val initFavoriteEvent: InitFavoriteEvent by inject()
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
     private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
 
@@ -83,7 +83,7 @@ class WWWEvents(private val initFavoriteEvent: InitFavoriteEvent) : KoinComponen
 
     // ---------------------------
 
-    fun events(): StateFlow<List<WWWEvent>> = eventsFlow
+    fun events(): List<WWWEvent> = eventsFlow.value
     fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
     fun onEventLoaded(function: () -> Job) = this.loadJob?.invokeOnCompletion { function() }
 

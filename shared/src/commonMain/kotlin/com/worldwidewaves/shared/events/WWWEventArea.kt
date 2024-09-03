@@ -240,11 +240,11 @@ data class WWWEventArea(
     override fun validationErrors(): List<String>? = mutableListOf<String>()
         .apply {
             when {
-                osmAdminid <= 0 ->
-                    add("OSM admin ID must be greater than 0")
+                osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
+                    add("OSM admin ID must be greater than 0 if it's not the world event")
 
                 else -> warming.validationErrors()?.let { addAll(it) }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "area: $it" }
 
 }

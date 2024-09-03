@@ -21,9 +21,17 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    let events : Array<WWWEvent> = WWWEvents().events()
+    private let wwwEvents: WWWEvents
+
+    // KMM - Koin Call
+    init() {
+        HelperKt.doInitKoin()
+        self.wwwEvents = WWWEvents()
+    }
     
     var body: some View {
+        let events : Array<WWWEvent> = WWWEvents().events()
+
         List(events, id: \.self) { event in
             Text(event.location)
         }

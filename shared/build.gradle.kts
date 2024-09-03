@@ -71,8 +71,8 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        testImplementation("io.mockk:mockk:1.12.0")
-        testImplementation("io.mockk:mockk-android:1.12.0")
+        testImplementation(libs.mockk.v1120)
+        testImplementation(libs.mockk.android.v1120)
     }
 
 }
