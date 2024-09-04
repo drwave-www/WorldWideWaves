@@ -2,7 +2,6 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - forbid portrait/paysage ?
     - Debug country generation (for united states)
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
