@@ -121,13 +121,14 @@ class EventMap(
 
             styleUri?.let { uri ->
                 mapView.getMapAsync { map ->
-                    setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
 
                     map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
 
-                        if (hasLocationPermission) {
-                            addLocationMarkerToMap(map, context, coroutineScope, style)
+                        setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope) {
+                            if (hasLocationPermission) {
+                                addLocationMarkerToMap(map, context, coroutineScope, style)
+                            }
                         }
 
                         onMapClick?.let { clickListener ->
@@ -181,12 +182,13 @@ class EventMap(
     private fun setCameraPosition(
         initialCameraPosition: MapCameraPosition?,
         map: MapLibreMap,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)? = null
     ) {
         when (initialCameraPosition) {
-            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map, coroutineScope)
-            MapCameraPosition.BOUNDS -> moveToMapBounds(map, coroutineScope)
-            MapCameraPosition.WINDOW -> moveToWindowBounds(map, coroutineScope)
+            MapCameraPosition.DEFAULT_CENTER -> moveToCenter(map, coroutineScope, onCameraPositionSet)
+            MapCameraPosition.BOUNDS -> moveToMapBounds(map, coroutineScope, onCameraPositionSet)
+            MapCameraPosition.WINDOW -> moveToWindowBounds(map, coroutineScope, onCameraPositionSet)
             null -> {}
         }
     }
@@ -236,9 +238,7 @@ class EventMap(
 
         // Allow the wave to now the current location of the user
         event.wave.setPositionRequester {
-            lastLocation?.let {
-                Position(it.latitude, it.longitude)
-            }
+            lastLocation?.let { Position(it.latitude, it.longitude) }
         }
     }
 
@@ -257,10 +257,12 @@ class EventMap(
                 event.area.isPositionWithin(Position(location.latitude, location.longitude))
             }
             if (isWithin) {
+                val currentZoom = map.cameraPosition.zoom
                 map.animateCamera(
                     CameraUpdateFactory.newCameraPosition(
                         CameraPosition.Builder()
                             .target(LatLng(location.latitude, location.longitude))
+                            .zoom(currentZoom)
                             .build()
                     )
                 )
@@ -274,11 +276,19 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToCenter(map: MapLibreMap, coroutineScope: CoroutineScope) {
+    private fun moveToCenter(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) {
         coroutineScope.launch {
             val (cLat, cLng) = withContext(Dispatchers.IO) { event.area.getCenter() }
             map.animateCamera(
-                CameraUpdateFactory.newLatLng(LatLng(cLat, cLng))
+                CameraUpdateFactory.newLatLng(LatLng(cLat, cLng)),
+                object : CancelableCallback {
+                    override fun onFinish() { onCameraPositionSet?.invoke() }
+                    override fun onCancel() {}
+                }
             )
         }
     }
@@ -288,7 +298,11 @@ class EventMap(
      * while maintaining the correct aspect ratio and centering.*
      * @param map The MapLibre map object.
      */
-    private fun moveToWindowBounds(map: MapLibreMap, coroutineScope: CoroutineScope) {
+    private fun moveToWindowBounds(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) {
         coroutineScope.launch {
             val bbox = event.area.getBoundingBox()
 
@@ -319,7 +333,6 @@ class EventMap(
 
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,0),
                 object: CancelableCallback {
-                    override fun onCancel() {}
                     override fun onFinish() {
                         // Set the min/max camera zoom level
                         map.setMinZoomPreference(map.cameraPosition.zoom)
@@ -329,7 +342,10 @@ class EventMap(
                         map.addOnCameraMoveListener {
                             constrainCameraOnMap(map, coroutineScope)
                         }
+
+                        onCameraPositionSet?.invoke()
                     }
+                    override fun onCancel() {}
                 }
             )
         }
@@ -373,11 +389,19 @@ class EventMap(
      *
      * @param map The MapLibre map object.
      */
-    private fun moveToMapBounds(map: MapLibreMap, coroutineScope: CoroutineScope) = coroutineScope.launch {
+    private fun moveToMapBounds(
+        map: MapLibreMap,
+        coroutineScope: CoroutineScope,
+        onCameraPositionSet: (() -> Unit)?
+    ) = coroutineScope.launch {
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(
                 event.area.getBoundingBox().toLatLngBounds(), 0
-            )
+            ),
+            object : CancelableCallback {
+                override fun onFinish() { onCameraPositionSet?.invoke() }
+                override fun onCancel() {}
+            }
         )
     }
 
