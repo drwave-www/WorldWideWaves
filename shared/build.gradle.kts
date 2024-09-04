@@ -48,7 +48,7 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation("io.mockk:mockk-common:1.12.0")
+            implementation(libs.mockk.common.v1120)
         }
     }
 }

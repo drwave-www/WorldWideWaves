@@ -123,7 +123,15 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
             coroutineScopeProvider.scopeIO.launch {
                 lastObservedStatus = event.getStatus()
-                lastObservedProgression = getProgression()
+
+                try {
+                    lastObservedProgression = getProgression()
+                } catch (e: Throwable) {
+                    Napier.e(
+                        tag = "WWWEventWave",
+                        message = "Error initializing last observed progression: $e"
+                    )
+                }
 
                 if (event.isRunning() || (event.isSoon() && isNearTheEvent())) {
                     observeWave()
@@ -155,14 +163,18 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     private fun observeWave() {
         coroutineScopeProvider.scopeIO.launch {
-            delay(getObservationInterval())
-            getProgression().takeIf { it != lastObservedProgression }?.also {
-                lastObservedProgression = it
-                onWaveProgressionChanged(it)
-            }
-            event.getStatus().takeIf { it != lastObservedStatus }?.also {
-                lastObservedStatus = it
-                onWaveStatusChanged(it)
+            try {
+                delay(getObservationInterval())
+                getProgression().takeIf { it != lastObservedProgression }?.also {
+                    lastObservedProgression = it
+                    onWaveProgressionChanged(it)
+                }
+                event.getStatus().takeIf { it != lastObservedStatus }?.also {
+                    lastObservedStatus = it
+                    onWaveStatusChanged(it)
+                }
+            } catch (e: Throwable) {
+                Napier.e(tag = "WWWEventWave", message = "Error observing wave changes: $e")
             }
         }
     }
@@ -242,12 +254,12 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     suspend fun getAllNumbers(): WaveNumbers {
         return WaveNumbers(
-            waveTimezone = getLiteralTimezone(),
-            waveSpeed = getLiteralSpeed(),
-            waveStartTime = getLiteralStartTime(),
-            waveEndTime = getLiteralEndTime(),
-            waveTotalTime = getLiteralTotalTime(),
-            waveProgression = getLiteralProgression()
+            waveTimezone = try { getLiteralTimezone() } catch (e: Throwable) { "error" },
+            waveSpeed = try { getLiteralSpeed() } catch (e: Throwable) { "error" },
+            waveStartTime = try { getLiteralStartTime() } catch (e: Throwable) { "error" },
+            waveEndTime = try { getLiteralEndTime() } catch (e: Throwable) { "error" },
+            waveTotalTime = try { getLiteralTotalTime() } catch (e: Throwable) { "error" },
+            waveProgression = try { getLiteralProgression() } catch (e: Throwable) { "error" }
         )
     }
 

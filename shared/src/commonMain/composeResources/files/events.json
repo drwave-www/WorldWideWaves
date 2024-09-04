@@ -56,7 +56,7 @@
       }
     },
     "map": {
-      "maxZoom": 14,
+      "maxZoom": 17,
       "language": "pt",
       "zone": "south-america/brazil/sudeste"
     }
@@ -87,7 +87,7 @@
       }
     },
     "map": {
-      "maxZoom": 7,
+      "maxZoom": 12,
       "language": "en",
       "zone": "north-america/us"
     }

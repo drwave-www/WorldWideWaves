@@ -2,12 +2,15 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - Debug country generation (for united states)
+    - show some map elements
+        + styling script : jq => every minzoom < 10 = 3
+    - better code coverage of current devs
+    - manage with translations
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
-    - code coverage of current devs
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
-    - manage with translations
+
+- setup kotest : https://kotest.io/docs/framework/framework.html
 
 - Wave linear
     - wave progression
@@ -22,7 +25,9 @@ Next:
 - Large map screen
     => add map actions (center user vs center wave)
 
-- Wave screen
+- Wave screen (1 click user tracker = center, 2 clicks = zoom)
+    - add a button to center the user on the map / zoom on the user
+    - add a button to center the wave on the map
 
 - Warming procedure (decouper par tranches et 'lancer' par tranches)
 
@@ -82,3 +87,4 @@ Reference/Docs:
     --> + https://wiki.openstreetmap.org/wiki/Map_features
     --> + https://wiki.openstreetmap.org/wiki/Category:Features
 
+- jetpack compose test UI : https://medium.com/@myofficework000/exploring-jetpack-compose-ui-testing-a-comprehensive-guide-eb0c2d93e111
