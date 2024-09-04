@@ -2,11 +2,8 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - position is no more chown ??
     - forbid portrait/paysage ?
     - Debug country generation (for united states)
-    - pourquoi replacement automatique de la map sur la position ?
-        --> OK la première fois mais ensuite on laisse sauf demande explicite (plus tard)
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
     - code coverage of current devs

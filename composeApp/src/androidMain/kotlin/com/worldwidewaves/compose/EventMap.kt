@@ -107,28 +107,36 @@ class EventMap(
         var mapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
+        var hasLocationPermission by remember { mutableStateOf(false) }
 
         // Request GPS location Android permissions
-        val hasLocationPermission = requestLocationPermission()
+        hasLocationPermission = requestLocationPermission()
 
-        // Setup Map Style and properties
+        // Setup Map Style and properties, initialize the map view
         LaunchedEffect(Unit) {
+
             val styleUri = withContext(Dispatchers.IO) {
                 event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
             }
+
             styleUri?.let { uri ->
                 mapView.getMapAsync { map ->
                     setCameraPosition(mapConfig.initialCameraPosition, map, coroutineScope)
 
                     map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-                        if (hasLocationPermission) addLocationMarkerToMap(map, context, coroutineScope, style)
+
+                        if (hasLocationPermission) {
+                            addLocationMarkerToMap(map, context, coroutineScope, style)
+                        }
+
                         onMapClick?.let { clickListener ->
                             map.addOnMapClickListener { point ->
                                 clickListener(point.latitude, point.longitude)
                                 true
                             }
                         }
+
                         onMapLoaded()
                         mapLoaded = true
                     }
@@ -193,6 +201,7 @@ class EventMap(
         style: Style
     ) {
         var lastLocation: Location? = null
+        var userHasBeenLocated = false
 
         map.locationComponent.activateLocationComponent(
             buildLocationComponentActivationOptions(context, style)
@@ -205,16 +214,17 @@ class EventMap(
             object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult?) {
                     result?.lastLocation?.let { location ->
-                        // Record the new location
-                        lastLocation = location
-
                         // Notify the UI of the user's location
                         onLocationUpdate(LatLng(location.latitude, location.longitude))
 
-                        // Follow user while he's within bounds
-                        if (mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                            moveToLocation(coroutineScope, location, map)
+                        // Follow user, the first time only
+                        if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                            moveToLocation(coroutineScope, location, map) // Area bounds are checked here
+                            userHasBeenLocated = true
                         }
+
+                        // Record the new location
+                        lastLocation = location
                     }
                 }
                 override fun onFailure(exception: Exception) {

@@ -26,8 +26,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
@@ -35,6 +37,7 @@ import androidx.core.content.ContextCompat
 fun requestLocationPermission(): Boolean {
     val context = LocalContext.current
     val permissionState = remember { mutableStateOf(false) }
+    val currentPermissionState by rememberUpdatedState(permissionState.value)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -67,5 +70,5 @@ fun requestLocationPermission(): Boolean {
         }
     }
 
-    return permissionState.value
+    return currentPermissionState
 }
