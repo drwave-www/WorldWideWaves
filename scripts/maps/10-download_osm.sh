@@ -42,6 +42,8 @@ mkdir -p ./data
 if [ ! -z "$1" ]; then
   if $(exists $1); then
     EVENTS=$1
+    rm -f data/.env-$1
+    rm -f data/$1.yaml
   else
     echo "Unexistent event $1"
     exit 1

@@ -40,6 +40,7 @@ cd "$(dirname "$0")" # always work from executable folder
 if [ ! -z "$1" ]; then
   if $(exists $1); then
     EVENTS=$1
+    rm -f ./data/$1.mbtiles
   else
     echo "Unexistent event $1"
     exit 1
