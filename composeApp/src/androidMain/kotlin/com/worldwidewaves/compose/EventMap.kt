@@ -271,8 +271,7 @@ class EventMap(
     }
 
     /**
-     * Animates the MapLibre camera to the center of the event map with the default zoom level.
-     * If the default zoom level is not available, it uses the minimum zoom level.
+     * Animates the MapLibre camera to the center of the event map area
      *
      * @param map The MapLibre map object.
      */
