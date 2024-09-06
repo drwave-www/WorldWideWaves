@@ -94,10 +94,6 @@ class WWWEvents : KoinComponent {
                 .keys.onEach { initFavoriteEvent.call(it) }
                 .toList()
 
-            val t = validationErrors.filterValues { it.isNullOrEmpty() }
-                .keys.onEach { initFavoriteEvent.call(it) }
-                .toList()
-
             // The events have been loaded, so we can now call any pending callbacks
             onEventsLoaded()
 
