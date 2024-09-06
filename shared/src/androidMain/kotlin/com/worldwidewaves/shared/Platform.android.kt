@@ -105,9 +105,6 @@ actual fun getEventImage(type: String, id: String): Any? {
  * It first checks if the file is already cached in the device's cache directory. If the file is not cached or the
  * cached file size does not match the expected size, it reads the file from the resources and caches it.
  *
- * @param eventId The ID of the event for which the map file is needed.
- * @param extension The file extension of the map file (e.g., "mbtiles", "geojson").
- * @return The absolute path of the cached map file as a String, or `null` if the file is not found.
  */
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
@@ -137,8 +134,6 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
  * It also considers whether the application is running in development mode, in which case it always
  * returns `false` to simulate the absence of cached files.
  *
- * @param fileName The name of the file to check for existence in the cache directory.
- * @return `true` if the file exists in the cache directory and the application is not in development mode, `false` otherwise.
  */
 actual fun cachedFileExists(fileName: String): Boolean {
     val context = AndroidPlatform.getContext() as Context
@@ -159,8 +154,6 @@ actual fun cachedFileExists(fileName: String): Boolean {
  * If the file exists, it returns the absolute path of the file as a string. If the file does not exist,
  * it returns `null`.
  *
- * @param fileName The name of the file to check in the cache directory.
- * @return The absolute path of the cached file as a string, or `null` if the file does not exist.
  */
 actual fun cachedFilePath(fileName: String): String? {
     val context = AndroidPlatform.getContext() as Context
@@ -174,8 +167,6 @@ actual fun cachedFilePath(fileName: String): String? {
  * in the cache directory of the application. It logs the file name to which the data
  * is being cached.
  *
- * @param fileName The name of the file to which the content will be cached.
- * @param content The string content to be written to the file.
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
     val context = AndroidPlatform.getContext() as Context
@@ -191,9 +182,6 @@ actual fun cacheStringToFile(fileName: String, content: String) : String {
  * in the device's cache directory. If the cache directory does not exist, it is created. If an error
  * occurs during the process, it is logged.
  *
- * @param fileName The name of the file to be cached. This should include the relative path within the resources.
- *
- * @throws Exception if an error occurs while reading the file or writing to the cache directory.
  */
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun cacheDeepFile(fileName: String) {
@@ -217,7 +205,6 @@ actual suspend fun cacheDeepFile(fileName: String) {
  * This function uses the Android context to access the cache directory and returns its absolute path.
  * The cache directory is a location where the application can store temporary files.
  *
- * @return The absolute path to the cache directory as a String.
  */
 actual fun getCacheDir(): String {
     val context = AndroidPlatform.getContext() as Context
@@ -232,7 +219,6 @@ actual fun getCacheDir(): String {
  * This function uses the system clock to get the current instant in time and converts it to a
  * `LocalDateTime` object using the system's default time zone.
  *
- * @return The current local date and time as a `LocalDateTime` object.
  */
 actual fun getLocalDatetime(): LocalDateTime =
     Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

@@ -65,9 +65,6 @@ data class WWWEventWaveLinear(
      * of the bounding box along the longitude, taking into account the average latitude to adjust
      * for the Earth's curvature.
      *
-     * @param bbox The bounding box containing the northeast and southwest coordinates.
-     * @param avgLatitude The average latitude of the bounding box, used to adjust the distance calculation.
-     * @return The distance in meters between the easternmost and westernmost points of the bounding box.
      */
     private fun calculateDistance(bbox: BoundingBox, avgLatitude: Double): Double {
         return abs(bbox.ne.lng - bbox.sw.lng) *
@@ -86,7 +83,6 @@ data class WWWEventWaveLinear(
      * 5. Calculates the duration of the event based on the distance and the event's speed.
      * 6. Adds the duration to the start time to get the end time.
      *
-     * @return The calculated end time of the event as a `LocalDateTime` object.
      */
     override suspend fun getEndTime(): LocalDateTime {
         return cachedEndTime ?: run {
@@ -109,7 +105,6 @@ data class WWWEventWaveLinear(
      * and start time in seconds, and then converts this difference to a `Duration` object.
      * The calculated duration is then cached for future use.
      *
-     * @return The total duration of the event as a `Duration` object.
      */
     override suspend fun getTotalTime(): Duration {
         return cachedTotalTime ?: run {
@@ -131,7 +126,6 @@ data class WWWEventWaveLinear(
      * Otherwise, it calculates the elapsed time since the event started and expresses it as a percentage
      * of the total event duration.
      *
-     * @return A string representing the progression of the event as a percentage.
      */
     override suspend fun getProgression(): Double {
         return when {

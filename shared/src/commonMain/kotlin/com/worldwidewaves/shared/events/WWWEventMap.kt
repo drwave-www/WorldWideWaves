@@ -81,7 +81,6 @@ class WWWEventMap(
      * It retrieves MBTiles, GeoJSON, sprites, and glyphs, fills a template with the data,
      * and returns the URI of the cached style JSON.
      *
-     * @return The URI of the cached style JSON file, or null if an error occurs.
      */
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
@@ -115,8 +114,6 @@ class WWWEventMap(
      * This function reads a file listing the required resources, caches them individually,
      * and returns the path to the cache directory.
      *
-     * @return The path to the cache directory containing the sprite and glyphs resources.
-     * @throws Exception if an error occurs during caching.
      */
     @OptIn(ExperimentalResourceApi::class)
     suspend fun cacheSpriteAndGlyphs(): String {
@@ -136,8 +133,6 @@ class WWWEventMap(
     /**
      * Checks if a given position is within the event area's bounding box.
      *
-     * @param position The position to check.
-     * @return True if the position is within the bounding box, false otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
         with(event.area.getBoundingBox()) {

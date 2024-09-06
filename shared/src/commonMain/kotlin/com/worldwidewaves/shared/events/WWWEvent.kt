@@ -136,7 +136,6 @@ data class WWWEvent(
      * This function parses the event's start date and time, converts it to the local time zone,
      * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
      *
-     * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
      */
     fun getLiteralStartDateSimple(): String = getStartDateTime().let {
         "${it.dayOfMonth.toString().padStart(2, '0')}/${
@@ -150,7 +149,6 @@ data class WWWEvent(
      * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
      * and then converts it to a `LocalDateTime` in the same time zone.
      *
-     * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
      */
     fun getStartDateTime(): LocalDateTime = runCatching {
         LocalDateTime.parse("${date}T${startHour}")

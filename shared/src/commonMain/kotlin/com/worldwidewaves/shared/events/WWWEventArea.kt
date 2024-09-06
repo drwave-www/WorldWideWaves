@@ -101,7 +101,6 @@ data class WWWEventArea(
      * This function attempts to get the absolute path of the GeoJSON file associated with the event.
      * It uses the event's ID to locate the file within the cache directory.
      *
-     * @return The absolute path of the GeoJSON file as a String, or `null` if the file is not found.
      */
     internal suspend fun getGeoJsonFilePath(): String? =
         getMapFileAbsolutePath(event.id, "geojson")
@@ -114,8 +113,6 @@ data class WWWEventArea(
      * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
      * to determine if the specified position lies within the polygon.
      *
-     * @param position The position to check.
-     * @return `true` if the position is within the polygon, `false` otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
         getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
@@ -129,8 +126,6 @@ data class WWWEventArea(
      * If the bounding box has been previously calculated and cached, it returns the cached value.
      * Otherwise, it calculates the bounding box, caches it, and then returns it.
      *
-     * @return A [BoundingBox] object representing the bounding box of the polygon.
-     * @throws IllegalStateException if the polygon is empty.
      */
     suspend fun getBoundingBox(): BoundingBox =
         cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
@@ -145,7 +140,6 @@ data class WWWEventArea(
      * of the northeast and southwest corners of the bounding box. If the center has been previously
      * calculated and cached, it returns the cached value.
      *
-     * @return The center position of the event area as a [Position] object.
      */
     suspend fun getCenter(): Position =
         cachedCenter ?: getBoundingBox().let { bbox ->
@@ -163,7 +157,6 @@ data class WWWEventArea(
      * This function fetches the polygon data from the `geoJsonDataProvider` if the `areaPolygon` is empty.
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
-     * @return A `Polygon` object representing the event area.
      */
     private suspend fun getPolygons(): List<Polygon> {
         if (areaPolygon.isEmpty()) {

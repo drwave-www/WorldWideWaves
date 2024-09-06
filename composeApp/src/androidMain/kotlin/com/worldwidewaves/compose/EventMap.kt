@@ -394,7 +394,7 @@ class EventMap(
             Looper.getMainLooper()
         )
 
-        // Allow the wave to now the current location of the user
+        // Allow the wave to know the current location of the user
         event.wave.setPositionRequester {
             lastLocation?.let { Position(it.latitude, it.longitude) }
         }
@@ -406,9 +406,6 @@ class EventMap(
      * This function sets up the location component enabling a
      * pulsing animation around the user location.
      *
-     * @param context The context of the application.
-     * @param style The map style to use with the location component.
-     * @return The configured `LocationComponentActivationOptions` object.
      */
     private fun buildLocationComponentActivationOptions(
         context: Context,
@@ -431,7 +428,6 @@ class EventMap(
     /**
      * Builds a `LocationEngineRequest` for location updates.
      *
-     * @return The configured `LocationEngineRequest` object.
      */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.toLong())
@@ -502,8 +498,6 @@ class EventMap(
  * (`onCreate`, `onStart`, `onResume`, `onPause`, `onStop`, `onDestroy`) as the
  * `LifecycleOwner` transitions through its lifecycle states.
  *
- * @param mapView The `MapView` to observe lifecycle events for.
- * @return A `LifecycleEventObserver` that manages the `MapView`'s lifecycle.
  */
 private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->
