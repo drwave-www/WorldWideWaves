@@ -32,7 +32,9 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_FONTSIZE
 
 @Immutable
 data class ExtendedColorScheme(
@@ -122,7 +124,11 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
 
 // -- WWW Text presets --------------------------------------------------------
 
-val commonTextStyle = TextStyle(
+val defaultTextStyle = TextStyle(
+    fontSize = DIM_DEFAULT_FONTSIZE.sp
+)
+
+val commonTextStyle = defaultTextStyle.copy(
     fontFamily = AppTypography.bodyMedium.fontFamily
 )
 
@@ -150,7 +156,7 @@ val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(
     fontWeight = FontWeight.Bold
 )
 
-val extraTextStyle = TextStyle(
+val extraTextStyle = defaultTextStyle.copy(
     fontFamily = extraFontFamily
 )
 
