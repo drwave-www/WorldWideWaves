@@ -370,7 +370,7 @@ class EventsListScreen(
                                 isFavorite = !isFavorite
                                 setEventFavorite.call(event, isFavorite)
                                 if (starredSelected) { // Refresh the list
-                                    viewModel.filterFavoriteEvents()
+                                    viewModel.filterEvents(onlyFavorites = true)
                                 }
                             }
                         },

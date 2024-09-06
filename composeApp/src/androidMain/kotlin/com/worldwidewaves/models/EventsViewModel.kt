@@ -60,27 +60,15 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
             wwwEvents.flow().collect { eventsList ->
                 originalEvents = eventsList
                 _events.value = eventsList
-                _hasFavorites.value = eventsList.any { it.favorite }
+                _hasFavorites.value = eventsList.any(WWWEvent::favorite)
             }
         }
     }
 
     // ---------------------------
 
-    fun filterFavoriteEvents() {
-        _events.value = originalEvents.filter { it.favorite }
-    }
-
-    fun filterAllEvents() {
-        _events.value = originalEvents
-    }
-
-    fun filterEvents(starredSelected: Boolean) {
-        if (starredSelected) {
-            filterFavoriteEvents()
-        } else {
-            filterAllEvents()
-        }
+    fun filterEvents(onlyFavorites: Boolean) {
+        _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
     }
 
 }
