@@ -60,7 +60,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -91,8 +90,10 @@ import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.theme.displayFontFamily
+import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
+import com.worldwidewaves.theme.primaryColoredBoldTextStyle
+import com.worldwidewaves.theme.quinaryColoredTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -215,11 +216,12 @@ class EventsListScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                color = textColor,
-                fontWeight = fontWeight,
-                fontSize = DIM_EVENTS_SELECTOR_FONTSIZE.sp,
                 text = text,
-                fontFamily = displayFontFamily
+                style = commonTextStyle.copy(
+                    color = textColor,
+                    fontWeight = fontWeight,
+                    fontSize = DIM_EVENTS_SELECTOR_FONTSIZE.sp
+                )
             )
         }
     }
@@ -240,13 +242,10 @@ class EventsListScreen(
                 item {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
                         text = stringResource(ShRes.string.event_favorites_empty),
-                        fontFamily = displayFontFamily,
-                        style = TextStyle(
-                            color = extendedLight.quinary.color,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = DIM_EVENTS_NOEVENTS_FONTSIZE.sp
+                        style = quinaryColoredTextStyle.copy(
+                            fontSize = DIM_EVENTS_NOEVENTS_FONTSIZE.sp,
+                            textAlign = TextAlign.Center
                         )
                     )
                 }
@@ -397,19 +396,14 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = event.location.uppercase(),
-                        style = TextStyle(
-                            color = extendedLight.quinary.color,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        style = quinaryColoredTextStyle.copy(
                             fontSize = DIM_EVENTS_EVENT_LOCATION_FONSIZE.sp
                         )
                     )
                     Text(
                         text = eventDate,
                         modifier = Modifier.padding(end = 2.dp),
-                        style = TextStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
+                        style = primaryColoredBoldTextStyle.copy(
                             fontSize = DIM_EVENTS_EVENT_DATE_FONSIZE.sp
                         )
                     )
@@ -418,9 +412,7 @@ class EventsListScreen(
                 // Country if present
                 Text(
                     text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
-                    style = TextStyle(
-                        color = extendedLight.quinary.color,
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                    style = quinaryColoredTextStyle.copy(
                         fontSize = DIM_EVENTS_EVENT_COUNTRY_FONSIZE.sp
                     ),
                     modifier = Modifier

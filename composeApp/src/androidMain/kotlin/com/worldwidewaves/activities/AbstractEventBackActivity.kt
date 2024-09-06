@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +33,8 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
-import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.theme.primaryColoredTextStyle
+import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
@@ -123,18 +123,17 @@ abstract class AbstractEventBackActivity(
                                 .align(Alignment.BottomStart)
                                 .clickable(onClick = { finish() }),
                             text = "< " + stringResource(ShRes.string.back),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = DIM_BACK_FONTSIZE.sp,
+                            style = primaryColoredTextStyle.copy(
+                                fontSize = DIM_BACK_FONTSIZE.sp
+                            )
                         )
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = event.location.uppercase(),
-                            color = quinaryLight,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = DIM_BACK_EVENT_LOCATION_FONTSIZE.sp,
+                            style = quinaryColoredBoldTextStyle.copy(
+                                fontSize = DIM_BACK_EVENT_LOCATION_FONTSIZE.sp,
+                                textAlign = TextAlign.Center
+                            )
                         )
                     }
                 }
@@ -150,9 +149,7 @@ abstract class AbstractEventBackActivity(
         } else { // Error, should not occur
             Text(
                 text = "Event not found",
-                color = MaterialTheme.colorScheme.primary,
-                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                fontSize = 16.sp,
+                style = primaryColoredTextStyle
             )
         }
     }

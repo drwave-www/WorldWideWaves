@@ -24,8 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -51,8 +49,9 @@ import com.worldwidewaves.shared.generated.resources.event_running
 import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.wave_now
-import com.worldwidewaves.theme.displayFontFamily
-import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.theme.commonBoldStyle
+import com.worldwidewaves.theme.commonTextStyle
+import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -99,8 +98,7 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = TextStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                    style = commonTextStyle.copy(
                         fontSize = DIM_COMMON_SOONRUNNING_FONTSIZE.sp
                     )
                 )
@@ -148,11 +146,10 @@ fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(Res.string.wave_now).uppercase(),
-            color = quinaryLight,
-            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Black,
-            fontFamily = displayFontFamily
+            style = quinaryColoredBoldTextStyle.copy(
+                fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
+                textAlign = TextAlign.Center
+            )
         )
     }
 }
@@ -186,15 +183,16 @@ fun WWWSocialNetworks(
                     }
                 }),
                 text = instagramAccount,
-                fontSize = DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = displayFontFamily,
-                textDecoration = TextDecoration.Underline
+                style = commonBoldStyle.copy(
+                    fontSize = DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE.sp,
+                    textDecoration = TextDecoration.Underline
+                )
             )
             Text(
                 text = instagramHashtag,
-                fontSize = DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE.sp,
-                fontFamily = displayFontFamily
+                style = commonTextStyle.copy(
+                    fontSize = DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE.sp
+                )
             )
         }
     }

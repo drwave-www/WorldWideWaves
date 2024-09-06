@@ -142,9 +142,7 @@ class EventMap(
                         mapLoaded = true
                     }
                 }
-            } ?: run {
-                mapError = true
-            }
+            } ?: run { mapError = true }
         }
 
         // The map view
@@ -177,7 +175,7 @@ class EventMap(
         }
     }
 
-    // -------------------------
+    // -- Map camera managers -------------------------------------------------
 
     private fun setCameraPosition(
         initialCameraPosition: MapCameraPosition?,
@@ -192,57 +190,6 @@ class EventMap(
             null -> {}
         }
     }
-
-    // -- Private Map location setup functions --------------------------------
-
-    @SuppressLint("MissingPermission")
-    private fun addLocationMarkerToMap(
-        map: MapLibreMap,
-        context: Context,
-        coroutineScope: CoroutineScope,
-        style: Style
-    ) {
-        var lastLocation: Location? = null
-        var userHasBeenLocated = false
-
-        map.locationComponent.activateLocationComponent(
-            buildLocationComponentActivationOptions(context, style)
-        )
-        map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
-
-        map.locationComponent.locationEngine?.requestLocationUpdates(
-            buildLocationEngineRequest(),
-            object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    result?.lastLocation?.let { location ->
-                        // Notify the UI of the user's location
-                        onLocationUpdate(LatLng(location.latitude, location.longitude))
-
-                        // Follow user, the first time only
-                        if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                            moveToLocation(coroutineScope, location, map) // Area bounds are checked here
-                            userHasBeenLocated = true
-                        }
-
-                        // Record the new location
-                        lastLocation = location
-                    }
-                }
-                override fun onFailure(exception: Exception) {
-                    Log.e("EventMap","Failed to get location: $exception")
-                }
-            },
-            Looper.getMainLooper()
-        )
-
-        // Allow the wave to now the current location of the user
-        event.wave.setPositionRequester {
-            lastLocation?.let { Position(it.latitude, it.longitude) }
-        }
-    }
-
-    // ------------------------
 
     /**
      * Animates the MapLibre camera to the given location if the location is within the event area.
@@ -404,7 +351,54 @@ class EventMap(
         )
     }
 
-    // -------------------------------------------------------------------------
+    // -- Location marker builders  -------------------------------------------
+
+    @SuppressLint("MissingPermission")
+    private fun addLocationMarkerToMap(
+        map: MapLibreMap,
+        context: Context,
+        coroutineScope: CoroutineScope,
+        style: Style
+    ) {
+        var lastLocation: Location? = null
+        var userHasBeenLocated = false
+
+        map.locationComponent.activateLocationComponent(
+            buildLocationComponentActivationOptions(context, style)
+        )
+        map.locationComponent.isLocationComponentEnabled = true
+        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+
+        map.locationComponent.locationEngine?.requestLocationUpdates(
+            buildLocationEngineRequest(),
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let { location ->
+                        // Notify the UI of the user's location
+                        onLocationUpdate(LatLng(location.latitude, location.longitude))
+
+                        // Follow user, the first time only
+                        if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                            moveToLocation(coroutineScope, location, map) // Area bounds are checked here
+                            userHasBeenLocated = true
+                        }
+
+                        // Record the new location
+                        lastLocation = location
+                    }
+                }
+                override fun onFailure(exception: Exception) {
+                    Log.e("EventMap","Failed to get location: $exception")
+                }
+            },
+            Looper.getMainLooper()
+        )
+
+        // Allow the wave to now the current location of the user
+        event.wave.setPositionRequester {
+            lastLocation?.let { Position(it.latitude, it.longitude) }
+        }
+    }
 
     /**
      * Builds `LocationComponentActivationOptions` for configuring the Mapbox location component.
@@ -445,7 +439,7 @@ class EventMap(
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
-    // -------------------------------------------------------------------------
+    // -- Use the MapLibre MapView as a composable --------------------------------
 
     /**
      * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
@@ -455,6 +449,7 @@ class EventMap(
     fun rememberMapViewWithLifecycle(): MapView {
         val context = LocalContext.current
 
+        // Build the MapLibre view
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
         maplibreMapOptions.apply {
             camera(CameraPosition.Builder()
@@ -479,7 +474,8 @@ class EventMap(
             rotateGesturesEnabled(false)
             tiltGesturesEnabled(false)
         }
-        MapLibre.getInstance(context)
+
+        MapLibre.getInstance(context) // Reauired by the API
 
         val mapView = remember { MapView(context, maplibreMapOptions) }
 
@@ -497,8 +493,6 @@ class EventMap(
     }
 
 }
-
-// -- Use the MapLibre MapView as a composable --------------------------------
 
 /**
  * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView` with the

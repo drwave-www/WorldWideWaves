@@ -29,6 +29,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.core.view.WindowCompat
 
 @Immutable
@@ -116,4 +119,59 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
         content = content
     )
 }
+
+// -- WWW Text presets --------------------------------------------------------
+
+val commonTextStyle = TextStyle(
+    fontFamily = AppTypography.bodyMedium.fontFamily
+)
+
+val commonJustifiedTextStyle = commonTextStyle.copy(
+    textAlign = TextAlign.Justify
+)
+
+val commonBoldStyle = commonTextStyle.copy(
+    fontWeight = FontWeight.Bold
+)
+
+val primaryColoredTextStyle = commonTextStyle.copy(
+    color = lightScheme.primary
+)
+
+val primaryColoredBoldTextStyle = primaryColoredTextStyle.copy(
+    fontWeight = FontWeight.Bold
+)
+
+val quinaryColoredTextStyle = commonTextStyle.copy(
+    color = extendedLight.quinary.color
+)
+
+val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(
+    fontWeight = FontWeight.Bold
+)
+
+val extraTextStyle = TextStyle(
+    fontFamily = extraFontFamily
+)
+
+val extraBoldTextStyle = extraTextStyle.copy(
+    fontWeight = FontWeight.Bold
+)
+
+val extraLightTextStyle = extraTextStyle.copy(
+    fontWeight = FontWeight.Light
+)
+
+val extraPrimaryTextStyle = extraTextStyle.copy(
+    color = lightScheme.primary
+)
+
+val primaryColoredExtraBoldTextStyle = extraPrimaryTextStyle.copy(
+    fontWeight = FontWeight.Bold
+)
+
+val quinaryColoredExtraBoldTextStyle = extraTextStyle.copy(
+    color = extendedLight.quinary.color,
+    fontWeight = FontWeight.Bold
+)
 

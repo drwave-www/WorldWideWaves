@@ -54,8 +54,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,7 +93,10 @@ import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
 import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
-import com.worldwidewaves.theme.extraFontFamily
+import com.worldwidewaves.theme.extraBoldTextStyle
+import com.worldwidewaves.theme.extraLightTextStyle
+import com.worldwidewaves.theme.quinaryColoredExtraBoldTextStyle
+import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -179,11 +180,9 @@ private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
-        fontFamily = extraFontFamily,
-        color = quinaryLight,
+        style = quinaryColoredExtraBoldTextStyle,
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
-        textAlign = TextAlign.Justify,
-        fontWeight = FontWeight.Bold
+        textAlign = TextAlign.Justify
     )
 }
 
@@ -219,10 +218,8 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
             .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
     ) {
-        val textStyle = TextStyle(
-            fontFamily = extraFontFamily,
-            fontSize = DIM_EVENT_DATE_FONTSIZE.sp,
-            fontWeight = FontWeight.Black
+        val textStyle = extraBoldTextStyle.copy(
+            fontSize = DIM_EVENT_DATE_FONTSIZE.sp
         )
         Text(
             text = eventDate,
@@ -282,9 +279,9 @@ private fun GeolocalizeMe(geolocText: StringResource) {
         ) {
             Text(
                 text = stringResource(geolocText),
-                color = quinaryLight,
-                fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp,
-                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
+                style = quinaryColoredTextStyle.copy(
+                    fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp
+                )
             )
         }
     }
@@ -338,11 +335,10 @@ private fun EventNumbers(event: WWWEvent) {
                 Text(
                     text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                    color = quinaryLight,
-                    fontFamily = extraFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp
+                    style = quinaryColoredExtraBoldTextStyle.copy(
+                        fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp,
+                        textAlign = TextAlign.Right
+                    )
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 eventNumbers.forEach { (key, value) ->
@@ -353,35 +349,34 @@ private fun EventNumbers(event: WWWEvent) {
                         // Label
                         Text(
                             text = stringResource(key),
-                            color = quinaryLight,
-                            fontFamily = extraFontFamily,
-                            fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp,
-                            fontWeight = FontWeight.Black
+                            style = quinaryColoredExtraBoldTextStyle.copy(
+                                fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp
+                            )
                         )
-                        Row(verticalAlignment = Alignment.Bottom) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             // Value
                             Text(
                                 text = value,
-                                color = when (key) {
-                                    ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                                    ShRes.string.wave_start_time -> Color.Yellow
-                                    else -> MaterialTheme.colorScheme.primary
-                                },
-                                fontFamily = extraFontFamily,
-                                fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
-                                fontWeight = FontWeight.Black
+                                style = extraBoldTextStyle.copy(
+                                    fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
+                                    color = when (key) {
+                                        ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                        ShRes.string.wave_start_time -> Color.Yellow
+                                        else -> MaterialTheme.colorScheme.primary
+                                    },
+                                )
                             )
                             // optional Timezone
                             if (key in listOf(ShRes.string.wave_start_time, ShRes.string.wave_end_time)) {
                                 Text(
                                     text = " ${eventTimeZone.value}",
-                                    color = when (key) {
-                                        ShRes.string.wave_start_time -> Color.Yellow
-                                        else -> MaterialTheme.colorScheme.primary
-                                    },
-                                    fontFamily = extraFontFamily,
-                                    fontSize = DIM_EVENT_NUMBERS_TZ_FONTSIZE.sp,
-                                    fontWeight = FontWeight.Light
+                                    style = extraLightTextStyle.copy(
+                                        fontSize = DIM_EVENT_NUMBERS_TZ_FONTSIZE.sp,
+                                        color = when (key) {
+                                            ShRes.string.wave_start_time -> Color.Yellow
+                                            else -> MaterialTheme.colorScheme.primary
+                                        }
+                                    )
                                 )
                             }
                         }
