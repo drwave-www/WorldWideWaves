@@ -180,7 +180,7 @@ private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
-        style = extraQuinaryColoredBoldTextStyle,
+        style = extraQuinaryColoredBoldTextStyle(),
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
         textAlign = TextAlign.Justify
     )
@@ -218,9 +218,7 @@ private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modif
             .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
     ) {
-        val textStyle = extraBoldTextStyle.copy(
-            fontSize = DIM_EVENT_DATE_FONTSIZE.sp
-        )
+        val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
         Text(
             text = eventDate,
             style = textStyle.copy(color = quinaryLight)
@@ -279,9 +277,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
         ) {
             Text(
                 text = stringResource(geolocText),
-                style = quinaryColoredTextStyle.copy(
-                    fontSize = DIM_EVENT_GEOLOCME_FONTSIZE.sp
-                )
+                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE)
             )
         }
     }
@@ -335,8 +331,7 @@ private fun EventNumbers(event: WWWEvent) {
                 Text(
                     text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = extraQuinaryColoredBoldTextStyle.copy(
-                        fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp,
+                    style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE).copy(
                         textAlign = TextAlign.Right
                     )
                 )
@@ -349,29 +344,25 @@ private fun EventNumbers(event: WWWEvent) {
                         // Label
                         Text(
                             text = stringResource(key),
-                            style = extraQuinaryColoredBoldTextStyle.copy(
-                                fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp
-                            )
+                            style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_LABEL_FONTSIZE)
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // Value
                             Text(
                                 text = value,
-                                style = extraBoldTextStyle.copy(
-                                    fontSize = DIM_EVENT_NUMBERS_VALUE_FONTSIZE.sp,
+                                style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
                                     color = when (key) {
                                         ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
                                         ShRes.string.wave_start_time -> Color.Yellow
                                         else -> MaterialTheme.colorScheme.primary
-                                    },
+                                    }
                                 )
                             )
                             // optional Timezone
                             if (key in listOf(ShRes.string.wave_start_time, ShRes.string.wave_end_time)) {
                                 Text(
                                     text = " ${eventTimeZone.value}",
-                                    style = extraLightTextStyle.copy(
-                                        fontSize = DIM_EVENT_NUMBERS_TZ_FONTSIZE.sp,
+                                    style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
                                         color = when (key) {
                                             ShRes.string.wave_start_time -> Color.Yellow
                                             else -> MaterialTheme.colorScheme.primary

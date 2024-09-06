@@ -152,15 +152,11 @@ class EventMap(
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = extendedLight.quinary.color,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(maxWidth / 3)
+                        modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
                     )
                 } else {
                     Image(
-                        modifier = Modifier
-                            .size(maxWidth / 4)
-                            .align(Alignment.Center),
+                        modifier = Modifier.size(maxWidth / 4).align(Alignment.Center),
                         painter = painterResource(ShRes.drawable.map_error),
                         contentDescription = "error"
                     )
@@ -168,9 +164,7 @@ class EventMap(
             }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (mapLoaded) 1f else 0f)
+                modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }

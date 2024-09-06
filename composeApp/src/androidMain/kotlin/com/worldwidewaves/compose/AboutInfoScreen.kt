@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
@@ -89,9 +88,7 @@ class AboutInfoScreen : TabScreen {
     private fun MainInfo() {
         Text(
             text = stringResource(ShRes.string.infos_core),
-            style = commonJustifiedTextStyle.copy(
-                fontSize = DIM_INFO_TEXT_FONTSIZE.sp
-            )
+            style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
         )
     }
 
@@ -105,9 +102,7 @@ class AboutInfoScreen : TabScreen {
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(ShRes.string.drwave),
-                style = extraBoldTextStyle.copy(
-                    fontSize = DIM_INFO_DRWAVE_FONTSIZE.sp
-                )
+                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
             Row {
                 Image(
@@ -126,9 +121,8 @@ class AboutInfoScreen : TabScreen {
                             }
                         }),
                     text = stringResource(ShRes.string.drwave_instagram),
-                    style = commonTextStyle.copy(
-                        textDecoration = TextDecoration.Underline,
-                        fontSize = DIM_INFO_DRWAVE_INSTA_FONTSIZE.sp
+                    style = commonTextStyle(DIM_INFO_DRWAVE_INSTA_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline
                     )
                 )
             }

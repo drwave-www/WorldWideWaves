@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
@@ -123,15 +122,12 @@ abstract class AbstractEventBackActivity(
                                 .align(Alignment.BottomStart)
                                 .clickable(onClick = { finish() }),
                             text = "< " + stringResource(ShRes.string.back),
-                            style = primaryColoredTextStyle.copy(
-                                fontSize = DIM_BACK_FONTSIZE.sp
-                            )
+                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
                         )
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = event.location.uppercase(),
-                            style = quinaryColoredBoldTextStyle.copy(
-                                fontSize = DIM_BACK_EVENT_LOCATION_FONTSIZE.sp,
+                            style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )
                         )
@@ -149,7 +145,7 @@ abstract class AbstractEventBackActivity(
         } else { // Error, should not occur
             Text(
                 text = "Event not found",
-                style = primaryColoredTextStyle
+                style = primaryColoredTextStyle()
             )
         }
     }

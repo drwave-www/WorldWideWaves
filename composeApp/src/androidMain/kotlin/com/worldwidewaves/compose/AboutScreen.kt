@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
@@ -107,10 +106,9 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
             }
             Text(
                 text = stringResource(tabInfo[tabIndex]).uppercase(),
-                style = commonTextStyle.copy(
+                style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
                     color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
-                    fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
+                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
                 )
             )
         }

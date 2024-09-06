@@ -101,10 +101,9 @@ import com.worldwidewaves.shared.generated.resources.warn_safety_title
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.commonTextStyle
-import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraBoldTextStyle
-import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.extraPrimaryColoredBoldTextStyle
+import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -188,9 +187,7 @@ class AboutFaqScreen : TabScreen {
                         scrollToFAQPosition = coordinates.positionInRoot().y
                     },
                     text = stringResource(ShRes.string.faq),
-                    style = extraBoldTextStyle.copy(
-                        fontSize = DIM_FAQ_TITLE_FONTSIZE.sp
-                    )
+                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE)
                 )
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
 
@@ -219,8 +216,7 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 text = stringResource(ShRes.string.warn_rules_security_title),
-                style = extraPrimaryColoredBoldTextStyle.copy(
-                    fontSize = DIM_FAQ_SECTION_TITLE_FONTSIZE.sp,
+                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
                     textAlign = TextAlign.Start
                 )
             )
@@ -229,8 +225,7 @@ class AboutFaqScreen : TabScreen {
                     .fillMaxWidth()
                     .clickable(onClick = scrollToFAQPosition),
                 text = stringResource(ShRes.string.faq_access),
-                style = quinaryColoredBoldTextStyle.copy(
-                    fontSize = DIM_FAQ_LINK_FONTSIZE.sp, fontFamily = displayFontFamily,
+                style = quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
                     textDecoration = TextDecoration.Underline,
                     textAlign = TextAlign.End
                 )
@@ -240,7 +235,7 @@ class AboutFaqScreen : TabScreen {
         Text(
             text = stringResource(ShRes.string.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
-            style = commonTextStyle.copy(textAlign = TextAlign.Justify)
+            style = commonTextStyle().copy(textAlign = TextAlign.Justify)
         )
     }
 
@@ -259,8 +254,7 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                style = extraPrimaryColoredBoldTextStyle.copy(
-                    fontSize = DIM_FAQ_RULE_TITLE_FONTSIZE.sp,
+                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
                     textAlign = TextAlign.Start
                 )
             )
@@ -270,16 +264,12 @@ class AboutFaqScreen : TabScreen {
                     Text(
                         modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
-                        style = commonBoldStyle.copy(
-                            fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp
-                        )
+                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
                     )
                     Text(
                         modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
-                        style = commonJustifiedTextStyle.copy(
-                            fontSize = DIM_FAQ_RULE_CONTENTS_FONTSIZE.sp
-                        )
+                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
                     )
                 }
             }
@@ -307,17 +297,13 @@ class AboutFaqScreen : TabScreen {
         ) {
             Text(
                 text = stringResource(question),
-                style = primaryColoredBoldTextStyle.copy(
-                    fontSize = DIM_FAQ_RULE_QUESTION_FONTSIZE.sp
-                )
+                style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE)
             )
             if (expandedFaqItem == itemIndex) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answer),
-                    style = commonJustifiedTextStyle.copy(
-                        fontSize = DIM_FAQ_RULE_ANSWER_FONTSIZE.sp
-                    )
+                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
                 )
             }
         }

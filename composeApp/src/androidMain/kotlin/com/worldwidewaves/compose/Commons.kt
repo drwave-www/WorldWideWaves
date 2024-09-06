@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
@@ -98,9 +97,7 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = commonTextStyle.copy(
-                        fontSize = DIM_COMMON_SOONRUNNING_FONTSIZE.sp
-                    )
+                    style = commonTextStyle(DIM_COMMON_SOONRUNNING_FONTSIZE)
                 )
             }
         }
@@ -146,8 +143,7 @@ fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(Res.string.wave_now).uppercase(),
-            style = quinaryColoredBoldTextStyle.copy(
-                fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
+            style = quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
                 textAlign = TextAlign.Center
             )
         )
@@ -183,16 +179,13 @@ fun WWWSocialNetworks(
                     }
                 }),
                 text = instagramAccount,
-                style = commonBoldStyle.copy(
-                    fontSize = DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE.sp,
+                style = commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
                     textDecoration = TextDecoration.Underline
                 )
             )
             Text(
                 text = instagramHashtag,
-                style = commonTextStyle.copy(
-                    fontSize = DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE.sp
-                )
+                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE)
             )
         }
     }

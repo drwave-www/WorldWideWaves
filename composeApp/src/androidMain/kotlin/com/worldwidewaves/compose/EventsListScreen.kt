@@ -63,7 +63,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.models.EventsViewModel
@@ -217,10 +216,9 @@ class EventsListScreen(
         ) {
             Text(
                 text = text,
-                style = commonTextStyle.copy(
+                style = commonTextStyle(DIM_EVENTS_SELECTOR_FONTSIZE).copy(
                     color = textColor,
-                    fontWeight = fontWeight,
-                    fontSize = DIM_EVENTS_SELECTOR_FONTSIZE.sp
+                    fontWeight = fontWeight
                 )
             )
         }
@@ -243,8 +241,7 @@ class EventsListScreen(
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(ShRes.string.event_favorites_empty),
-                        style = quinaryColoredTextStyle.copy(
-                            fontSize = DIM_EVENTS_NOEVENTS_FONTSIZE.sp,
+                        style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
                             textAlign = TextAlign.Center
                         )
                     )
@@ -396,25 +393,19 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = event.location.uppercase(),
-                        style = quinaryColoredTextStyle.copy(
-                            fontSize = DIM_EVENTS_EVENT_LOCATION_FONSIZE.sp
-                        )
+                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
                     )
                     Text(
                         text = eventDate,
                         modifier = Modifier.padding(end = 2.dp),
-                        style = primaryColoredBoldTextStyle.copy(
-                            fontSize = DIM_EVENTS_EVENT_DATE_FONSIZE.sp
-                        )
+                        style = primaryColoredBoldTextStyle(DIM_EVENTS_EVENT_DATE_FONSIZE)
                     )
                 }
 
                 // Country if present
                 Text(
                     text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
-                    style = quinaryColoredTextStyle.copy(
-                        fontSize = DIM_EVENTS_EVENT_COUNTRY_FONSIZE.sp
-                    ),
+                    style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
                     modifier = Modifier
                         .offset(y = (-8).dp)
                         .padding(start = 2.dp)

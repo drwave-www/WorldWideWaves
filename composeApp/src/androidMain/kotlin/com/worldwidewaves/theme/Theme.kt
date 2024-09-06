@@ -125,23 +125,44 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
 
 // -- WWW Text presets --------------------------------------------------------
 
-val defaultTextStyle = TextStyle(fontSize = DIM_DEFAULT_FONTSIZE.sp)
+fun defaultTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    TextStyle(fontSize = fontSize.sp)
 
-val commonTextStyle = defaultTextStyle.copy(fontFamily = AppTypography.bodyMedium.fontFamily)
-val commonJustifiedTextStyle = commonTextStyle.copy(textAlign = TextAlign.Justify)
-val commonBoldStyle = commonTextStyle.copy(fontWeight = FontWeight.Bold)
+fun commonTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = AppTypography.bodyMedium.fontFamily)
 
-val primaryColoredTextStyle = commonTextStyle.copy(color = lightScheme.primary)
-val primaryColoredBoldTextStyle = primaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
+fun commonJustifiedTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
 
-val quinaryColoredTextStyle = commonTextStyle.copy(color = extendedLight.quinary.color)
-val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
+fun commonBoldStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-val extraTextStyle = defaultTextStyle.copy(fontFamily = extraFontFamily)
-val extraBoldTextStyle = extraTextStyle.copy(fontWeight = FontWeight.Bold)
-val extraLightTextStyle = extraTextStyle.copy(fontWeight = FontWeight.Light)
+fun primaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = lightScheme.primary)
 
-val extraPrimaryColoredTextStyle = extraTextStyle.copy(color = lightScheme.primary)
-val extraPrimaryColoredBoldTextStyle = extraPrimaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
+fun primaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    primaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-val extraQuinaryColoredBoldTextStyle = extraTextStyle.copy(color = extendedLight.quinary.color, fontWeight = FontWeight.Bold)
+fun quinaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = extendedLight.quinary.color)
+
+fun quinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
+
+fun extraBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraLightTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+
+fun extraPrimaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(color = lightScheme.primary)
+
+fun extraPrimaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraPrimaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+
+fun extraQuinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(color = extendedLight.quinary.color, fontWeight = FontWeight.Bold)

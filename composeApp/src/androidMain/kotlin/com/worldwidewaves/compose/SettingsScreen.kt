@@ -37,7 +37,7 @@ class SettingsScreen : TabScreen {
     @Composable
     override fun Screen(modifier: Modifier) {
         Box(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
-            Text("Settings Screen", style = commonTextStyle)
+            Text("Settings Screen", style = commonTextStyle())
         }
     }
 
