@@ -49,21 +49,27 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
     val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
 
+    private val loadingError = MutableStateFlow(false)
+    val hasLoadingError: StateFlow<Boolean> = loadingError.asStateFlow()
+
     init {
-        loadEvents()
+        loadEvents {
+            loadingError.value = true
+        }
     }
 
     // ---------------------------
 
-    private fun loadEvents() = wwwEvents.loadEvents {
-        viewModelScope.launch(Dispatchers.IO) {
-            wwwEvents.flow().collect { eventsList ->
-                originalEvents = eventsList
-                _events.value = eventsList
-                _hasFavorites.value = eventsList.any(WWWEvent::favorite)
+    private fun loadEvents(onLoadingError: ((Exception) -> Unit)? = null) =
+        wwwEvents.loadEvents(onLoadingError = onLoadingError).also {
+            viewModelScope.launch(Dispatchers.IO) {
+                wwwEvents.flow().collect { eventsList ->
+                    originalEvents = eventsList
+                    _events.value = eventsList
+                    _hasFavorites.value = eventsList.any(WWWEvent::favorite)
+                }
             }
         }
-    }
 
     // ---------------------------
 

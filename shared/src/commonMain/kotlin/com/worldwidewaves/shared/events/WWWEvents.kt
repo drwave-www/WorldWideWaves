@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.jvm.JvmOverloads
 
 // ---------------------------
 
@@ -45,7 +46,9 @@ class WWWEvents : KoinComponent {
     // ---------------------------
 
     private var eventsLoaded: Boolean = false
-    private val pendingCallbacks = mutableListOf<() -> Unit>()
+    private var loadingError: Exception? = null
+    private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
+    private val pendingErrorCallbacks = mutableListOf<(Exception) -> Unit>()
 
     private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
     private val eventsFlow = _eventsFlow.asStateFlow()
@@ -55,8 +58,17 @@ class WWWEvents : KoinComponent {
     /**
      * Initiates the loading of events if not already started.
      */
-    fun loadEvents(callback: (() -> Unit)? = null): WWWEvents = apply {
-        callback?.let { addOnEventsLoadedListener(it) }
+    @JvmOverloads
+    fun loadEvents(
+        onLoaded: (() -> Unit)? = null,
+        onLoadingError: ((Exception) -> Unit)? = null,
+        onTermination: ((Exception?) -> Unit)? = null
+    ): WWWEvents = apply {
+
+        onLoaded?.let { addOnEventsLoadedListener(it) }
+        onLoadingError?.let { addOnEventsErrorListener(it) }
+        onTermination?.let { addOnTerminationListener(it) }
+
         if (!eventsLoaded) {
             loadEventsJob()
         }
@@ -67,19 +79,22 @@ class WWWEvents : KoinComponent {
      * The coroutine runs on the IO dispatcher.
      */
     private fun loadEventsJob() = coroutineScopeProvider.scopeIO.launch {
-        val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
-
         try {
+            val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
             val events = eventsDecoder.decodeFromJson(eventsJsonString)
-            val validationErrors = eventsConfValidationErrors(events)
+            val validationErrors = confValidationErrors(events)
 
-            validationErrors.filterValues { it?.isEmpty() == false }
+            validationErrors.filterValues { it?.isEmpty() == false } // Log validation errors
                 .mapNotNull { it.value }
                 .forEach { errorMessage ->
                     Log.e(::WWWEvents.name, "Validation Error: $errorMessage")
                 }
 
-            _eventsFlow.value = validationErrors.filterValues { it == null }
+            _eventsFlow.value = validationErrors.filterValues { it.isNullOrEmpty() }
+                .keys.onEach { initFavoriteEvent.call(it) }
+                .toList()
+
+            val t = validationErrors.filterValues { it.isNullOrEmpty() }
                 .keys.onEach { initFavoriteEvent.call(it) }
                 .toList()
 
@@ -88,11 +103,12 @@ class WWWEvents : KoinComponent {
 
         } catch (e: Exception) {
             Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
+            onLoadingError(e)
         }
     }
 
     @VisibleForTesting
-    fun eventsConfValidationErrors(events: List<WWWEvent>) =
+    fun confValidationErrors(events: List<WWWEvent>) =
         events.associateWith(WWWEvent::validationErrors)
 
     // ---------------------------
@@ -106,11 +122,33 @@ class WWWEvents : KoinComponent {
     @VisibleForTesting
     fun onEventsLoaded() {
         eventsLoaded = true
-        pendingCallbacks.onEach { callback -> callback.invoke() }.clear()
+        pendingLoadedCallbacks.onEach { callback -> callback.invoke() }.clear()
+    }
+
+    @VisibleForTesting
+    fun onLoadingError(exception: Exception) {
+        loadingError = exception
+        pendingErrorCallbacks.onEach { callback -> callback.invoke(exception) }.clear()
     }
 
     fun addOnEventsLoadedListener(callback: () -> Unit) {
-        if (eventsLoaded) callback() else pendingCallbacks.add(callback)
+        if (eventsLoaded) callback() else pendingLoadedCallbacks.add(callback)
     }
+
+    fun addOnEventsErrorListener(callback: (Exception) -> Unit){
+        if (loadingError != null) callback(loadingError!!)
+        else pendingErrorCallbacks.add(callback)
+    }
+
+    fun addOnTerminationListener(callback: (Exception?) -> Unit) {
+        if (eventsLoaded || loadingError != null)
+            callback(loadingError)
+        else {
+            addOnEventsLoadedListener { callback(null) }
+            addOnEventsErrorListener { callback(it) }
+        }
+    }
+
+    fun getLoadingError(): Exception? = loadingError
 
 }

@@ -25,6 +25,11 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.Dispatchers
@@ -42,11 +47,13 @@ import org.koin.test.inject
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class WWWEventsTest : KoinTest {
 
     private val dispatcher = StandardTestDispatcher() // Create dispatcher instance
+    private val exception = Exception("Test exception")
 
     private val mockedKoinDeclaration: KoinAppDeclaration = {
         modules(
@@ -67,6 +74,14 @@ class WWWEventsTest : KoinTest {
     }
 
     // ----------------------------
+
+    init {
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
@@ -95,21 +110,205 @@ class WWWEventsTest : KoinTest {
         assertTrue(events.getEventById("1") == null)
     }
 
-    @Test
-    fun `WWWEvents should callback on loaded through loadEvents`()  = runTest {
+    // ----------------------------
+
+    enum class RegistrationMethod { ONCALL, BEFORE, AFTER }
+    enum class CallbackType { ONLOADED, ONERROR, ONTERMINATION }
+
+    private fun createCallbackTests(
+        registrationMethod: RegistrationMethod,
+        callbackType: CallbackType,
+        shouldThrowException: Boolean,
+        shouldBeCalled: Boolean = true
+    ) = runTest { // use co-routines test
+
         // GIVEN
         var callbackCalled = false // capture() doesn't work here
         val events: WWWEvents by inject()
 
-        // WHEN
-        events.loadEvents {
-            callbackCalled = true
+        if (shouldThrowException) {
+            val eventsConfigurationProvider: EventsConfigurationProvider by inject()
+            coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
         }
 
-        testScheduler.advanceUntilIdle()
+        // WHEN
+        when (registrationMethod) {
+            RegistrationMethod.BEFORE -> {
+                when (callbackType) {
+                    CallbackType.ONLOADED -> events.addOnEventsLoadedListener { callbackCalled = true }
+                    CallbackType.ONERROR -> events.addOnEventsErrorListener { callbackCalled = true }
+                    CallbackType.ONTERMINATION -> events.addOnTerminationListener { callbackCalled = true }
+                }
+                events.loadEvents()
+                testScheduler.advanceUntilIdle() // Wait for termination
+            }
+            RegistrationMethod.ONCALL -> {
+                when (callbackType) {
+                    CallbackType.ONLOADED -> events.loadEvents(onLoaded = { callbackCalled = true })
+                    CallbackType.ONERROR -> events.loadEvents(onLoadingError = { callbackCalled = true })
+                    CallbackType.ONTERMINATION -> events.loadEvents(onTermination = { callbackCalled = true })
+                }
+                testScheduler.advanceUntilIdle() // Wait for termination
+            }
+            RegistrationMethod.AFTER -> {
+                events.loadEvents()
+                testScheduler.advanceUntilIdle() // Wait for termination
+                when (callbackType) {
+                    CallbackType.ONLOADED -> events.addOnEventsLoadedListener { callbackCalled = true }
+                    CallbackType.ONERROR -> events.addOnEventsErrorListener { callbackCalled = true }
+                    CallbackType.ONTERMINATION -> events.addOnTerminationListener { callbackCalled = true }
+                }
+            }
+        }
 
         // THEN
-        assertTrue { callbackCalled }
+        assertEquals(shouldBeCalled, callbackCalled)
     }
+
+    // ----------------------------
+
+    @Test
+    fun `On LOADED WWWEvents should callback OnLoaded through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONLOADED, shouldThrowException = false
+    )
+
+    @Test
+    fun `On LOADED WWWEvents should not callback OnError through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONERROR, shouldThrowException = false, shouldBeCalled = false
+    )
+
+    @Test
+    fun `On LOADED WWWEvents should callback OnLoaded when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONLOADED, shouldThrowException = false
+    )
+
+    @Test
+    fun `On LOADED WWWEvents should not callback OnError when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONERROR, shouldThrowException = false, shouldBeCalled = false
+    )
+
+    @Test
+    fun `On LOADED WWWEvents should callback OnLoaded when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONLOADED, shouldThrowException = false
+    )
+
+    @Test
+    fun `On LOADED WWWEvents should not callback OnError when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONERROR, shouldThrowException = false, shouldBeCalled = false
+    )
+
+    // ----------------------------
+
+    @Test
+    fun `On ERROR WWWEvents should callback OnError through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONERROR, shouldThrowException = true
+    )
+
+    @Test
+    fun `On ERROR WWWEvents should not callback OnLoaded through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONLOADED, shouldThrowException = true, shouldBeCalled = false
+    )
+
+    @Test
+    fun `On ERROR WWWEvents should callback OnError when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONERROR, shouldThrowException = true
+    )
+
+    @Test
+    fun `On ERROR WWWEvents should not callback OnLoaded when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONLOADED, shouldThrowException = true, shouldBeCalled = false
+    )
+
+    @Test
+    fun `On ERROR WWWEvents should callback OnError when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONERROR, shouldThrowException = true
+    )
+
+    @Test
+    fun `On ERROR WWWEvents should not callback OnLoaded when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONLOADED, shouldThrowException = true, shouldBeCalled = false
+    )
+
+    // ----------------------------
+
+    @Test
+    fun `On TERMINATE-LOADED WWWEvents should callback OnTermination through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONTERMINATION, shouldThrowException = false
+    )
+
+    @Test
+    fun `On TERMINATE-ERROR WWWEvents should callback OnTermination through loadEvents`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONTERMINATION, shouldThrowException = true
+    )
+
+    @Test
+    fun `On TERMINATE-LOADED WWWEvents should callback OnTermination when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONTERMINATION, shouldThrowException = false
+    )
+
+    @Test
+    fun `On TERMINATE-LOADED WWWEvents should callback OnTermination when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONTERMINATION, shouldThrowException = false
+    )
+
+    @Test
+    fun `On TERMINATE-ERROR WWWEvents should callback OnTermination when listener registered before loading`() = createCallbackTests(
+        RegistrationMethod.BEFORE, CallbackType.ONTERMINATION, shouldThrowException = true
+    )
+
+    @Test
+    fun `On TERMINATE-ERROR WWWEvents should callback OnTermination when listener registered after loading`() = createCallbackTests(
+        RegistrationMethod.AFTER, CallbackType.ONTERMINATION, shouldThrowException = true
+    )
+
+    // ----------------------------
+
+    @Test
+    fun `WWWEvents should be initialized with events`() = runTest {
+        // GIVEN
+        val events: WWWEvents by inject()
+        every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
+            Pair(mockk<WWWEvent>( relaxed = true ), emptyList()),
+            Pair(mockk<WWWEvent>( relaxed = true ), emptyList())
+        )
+        val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
+        coEvery { initFavoriteEvent.call(any()) } returns Unit
+
+        // WHEN
+        events.loadEvents()
+        testScheduler.advanceUntilIdle() // Wait for termination
+
+        // THEN
+        assertEquals(2, events.flow().value.size)
+        assertEquals(2, events.list().size)
+    }
+
+    @Test
+    fun `getEventById should be return events by id`() = runTest {
+        // GIVEN
+        val events: WWWEvents by inject()
+        val fakeEventId = "fake_event_id"
+        val eventWithId = mockk<WWWEvent>( relaxed = true ) {
+            every { id } returns fakeEventId
+        }
+        every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
+            Pair(eventWithId, null),
+            Pair(mockk<WWWEvent>( relaxed = true ), emptyList())
+        )
+        val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
+        coEvery { initFavoriteEvent.call(any()) } returns Unit
+
+        // WHEN
+        events.loadEvents()
+        testScheduler.advanceUntilIdle() // Wait for termination
+
+        val eventById = events.getEventById(fakeEventId)
+
+        // THEN
+        assertEquals(2, events.flow().value.size)
+        assertEquals(2, events.list().size)
+        assertEquals(eventWithId, eventById)
+    }
+
 
 }
