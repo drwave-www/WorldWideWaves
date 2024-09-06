@@ -1,3 +1,5 @@
+package com.worldwidewaves.theme
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,7 +19,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -124,65 +125,23 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
 
 // -- WWW Text presets --------------------------------------------------------
 
-val defaultTextStyle = TextStyle(
-    fontSize = DIM_DEFAULT_FONTSIZE.sp
-)
+val defaultTextStyle = TextStyle(fontSize = DIM_DEFAULT_FONTSIZE.sp)
 
-val commonTextStyle = defaultTextStyle.copy(
-    fontFamily = AppTypography.bodyMedium.fontFamily
-)
+val commonTextStyle = defaultTextStyle.copy(fontFamily = AppTypography.bodyMedium.fontFamily)
+val commonJustifiedTextStyle = commonTextStyle.copy(textAlign = TextAlign.Justify)
+val commonBoldStyle = commonTextStyle.copy(fontWeight = FontWeight.Bold)
 
-val commonJustifiedTextStyle = commonTextStyle.copy(
-    textAlign = TextAlign.Justify
-)
+val primaryColoredTextStyle = commonTextStyle.copy(color = lightScheme.primary)
+val primaryColoredBoldTextStyle = primaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
 
-val commonBoldStyle = commonTextStyle.copy(
-    fontWeight = FontWeight.Bold
-)
+val quinaryColoredTextStyle = commonTextStyle.copy(color = extendedLight.quinary.color)
+val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
 
+val extraTextStyle = defaultTextStyle.copy(fontFamily = extraFontFamily)
+val extraBoldTextStyle = extraTextStyle.copy(fontWeight = FontWeight.Bold)
+val extraLightTextStyle = extraTextStyle.copy(fontWeight = FontWeight.Light)
 
-val primaryColoredTextStyle = commonTextStyle.copy(
-    color = lightScheme.primary
-)
+val extraPrimaryColoredTextStyle = extraTextStyle.copy(color = lightScheme.primary)
+val extraPrimaryColoredBoldTextStyle = extraPrimaryColoredTextStyle.copy(fontWeight = FontWeight.Bold)
 
-val primaryColoredBoldTextStyle = primaryColoredTextStyle.copy(
-    fontWeight = FontWeight.Bold
-)
-
-
-val quinaryColoredTextStyle = commonTextStyle.copy(
-    color = extendedLight.quinary.color
-)
-
-val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(
-    fontWeight = FontWeight.Bold
-)
-
-
-val extraTextStyle = defaultTextStyle.copy(
-    fontFamily = extraFontFamily
-)
-
-val extraBoldTextStyle = extraTextStyle.copy(
-    fontWeight = FontWeight.Bold
-)
-
-val extraLightTextStyle = extraTextStyle.copy(
-    fontWeight = FontWeight.Light
-)
-
-
-val extraPrimaryColoredTextStyle = extraTextStyle.copy(
-    color = lightScheme.primary
-)
-
-val extraPrimaryColoredBoldTextStyle = extraPrimaryColoredTextStyle.copy(
-    fontWeight = FontWeight.Bold
-)
-
-
-val extraQuinaryColoredBoldTextStyle = extraTextStyle.copy(
-    color = extendedLight.quinary.color,
-    fontWeight = FontWeight.Bold
-)
-
+val extraQuinaryColoredBoldTextStyle = extraTextStyle.copy(color = extendedLight.quinary.color, fontWeight = FontWeight.Bold)

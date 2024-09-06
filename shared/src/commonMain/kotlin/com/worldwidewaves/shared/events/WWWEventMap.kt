@@ -27,13 +27,13 @@ import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
@@ -128,7 +128,7 @@ class WWWEventMap(
                 .forEach { cacheDeepFile("$FS_STYLE_FOLDER/$it") }
             getCacheDir()
         } catch (e: Exception) {
-            Napier.e("Error caching sprite and glyphs", e)
+            Log.e(::cacheSpriteAndGlyphs.name,"Error caching sprite and glyphs", e)
             throw e
         }
     }

@@ -4,8 +4,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -99,7 +99,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     protected val event: WWWEvent
         get() = this._event ?: run {
-            Napier.e(tag = "WWWEventWave", message = "Event not set")
+            Log.e(::event.name, "Event not set")
             throw IllegalStateException("Event not set")
         }
 
@@ -127,7 +127,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 try {
                     lastObservedProgression = getProgression()
                 } catch (e: Throwable) {
-                    Napier.e(
+                    Log.e(
                         tag = "WWWEventWave",
                         message = "Error initializing last observed progression: $e"
                     )
@@ -174,7 +174,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                     onWaveStatusChanged(it)
                 }
             } catch (e: Throwable) {
-                Napier.e(tag = "WWWEventWave", message = "Error observing wave changes: $e")
+                Log.e(::observeWave.name, "Error observing wave changes: $e")
             }
         }
     }

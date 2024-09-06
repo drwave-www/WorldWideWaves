@@ -24,7 +24,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.generated.resources.Res
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -84,7 +83,7 @@ class DefaultEventsConfigurationProvider(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String {
         return coroutineScopeProvider.withIOContext {
-            Napier.i("Loading events configuration from $FS_EVENTS_CONF")
+            Log.i(::geoEventsConfiguration.name, "Loading events configuration from $FS_EVENTS_CONF")
             Res.readBytes(FS_EVENTS_CONF).decodeToString()
         }
     }
@@ -101,12 +100,12 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     override suspend fun getGeoJsonData(eventId: String): JsonObject? {
         return try {
             val geojsonData = withContext(Dispatchers.IO) {
-                Napier.i("Loading geojson data for event $eventId")
+                Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
                 Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
             }
             Json.parseToJsonElement(geojsonData).jsonObject
         } catch (e: Exception) {
-            Napier.e("Error loading geojson data for event $eventId", e)
+            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId", throwable = e)
             null
         }
     }
@@ -122,7 +121,7 @@ class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String {
         return withContext(Dispatchers.IO) {
-            Napier.i("Loading map style data from $FS_MAPS_STYLE")
+            Log.i(::geoMapStyleData.name,"Loading map style data from $FS_MAPS_STYLE")
             Res.readBytes(FS_MAPS_STYLE).decodeToString()
         }
     }

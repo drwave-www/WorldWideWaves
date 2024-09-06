@@ -1,3 +1,5 @@
+package com.worldwidewaves.theme
+
 /*
  * Copyright 2024 DrWave
  *
@@ -17,7 +19,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontFamily
@@ -31,49 +32,24 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-val bodyFontFamily = FontFamily(
-    Font(
-        googleFont = GoogleFont("Montserrat"),
-        fontProvider = provider,
-    )
-)
-
-val displayFontFamily = FontFamily(
-    Font(
-        googleFont = GoogleFont("Montserrat"),
-        fontProvider = provider,
-    )
-)
-
-val extraFontFamily = FontFamily(
-    Font(
-        googleFont = GoogleFont("Montserrat Alternates"),
-        fontProvider = provider,
-    )
-)
-
-// Default Material 3 typography values
-val baseline = Typography()
+val bodyFontFamily = FontFamily(Font(GoogleFont("Montserrat"), provider))
+val displayFontFamily = FontFamily(Font(GoogleFont("Montserrat"), provider))
+val extraFontFamily = FontFamily(Font(GoogleFont("Montserrat Alternates"), provider))
 
 val AppTypography = Typography(
-    displayLarge = baseline.displayLarge.copy(fontFamily = displayFontFamily),
-    displayMedium = baseline.displayMedium.copy(fontFamily = displayFontFamily),
-    displaySmall = baseline.displaySmall.copy(fontFamily = displayFontFamily),
-
-    headlineLarge = baseline.headlineLarge.copy(fontFamily = displayFontFamily),
-    headlineMedium = baseline.headlineMedium.copy(fontFamily = displayFontFamily),
-    headlineSmall = baseline.headlineSmall.copy(fontFamily = displayFontFamily),
-
-    titleLarge = baseline.titleLarge.copy(fontFamily = displayFontFamily),
-    titleMedium = baseline.titleMedium.copy(fontFamily = displayFontFamily),
-    titleSmall = baseline.titleSmall.copy(fontFamily = displayFontFamily),
-
-    bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
-    bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
-    bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
-
-    labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamily),
-    labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
-    labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily),
+    displayLarge = Typography().displayLarge.copy(fontFamily = displayFontFamily),
+    displayMedium = Typography().displayMedium.copy(fontFamily = displayFontFamily),
+    displaySmall = Typography().displaySmall.copy(fontFamily = displayFontFamily),
+    headlineLarge = Typography().headlineLarge.copy(fontFamily = displayFontFamily),
+    headlineMedium = Typography().headlineMedium.copy(fontFamily = displayFontFamily),
+    headlineSmall = Typography().headlineSmall.copy(fontFamily = displayFontFamily),
+    titleLarge = Typography().titleLarge.copy(fontFamily = displayFontFamily),
+    titleMedium = Typography().titleMedium.copy(fontFamily = displayFontFamily),
+    titleSmall = Typography().titleSmall.copy(fontFamily = displayFontFamily),
+    bodyLarge = Typography().bodyLarge.copy(fontFamily = bodyFontFamily),
+    bodyMedium = Typography().bodyMedium.copy(fontFamily = bodyFontFamily),
+    bodySmall = Typography().bodySmall.copy(fontFamily = bodyFontFamily),
+    labelLarge = Typography().labelLarge.copy(fontFamily = bodyFontFamily),
+    labelMedium = Typography().labelMedium.copy(fontFamily = bodyFontFamily),
+    labelSmall = Typography().labelSmall.copy(fontFamily = bodyFontFamily),
 )
-

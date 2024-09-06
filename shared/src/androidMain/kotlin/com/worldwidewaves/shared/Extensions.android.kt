@@ -34,9 +34,7 @@ import org.maplibre.android.geometry.LatLngBounds
  * @receiver The `BoundingBox` to convert.
  * @return A `LatLngBounds` object representing the same geographical area as the `BoundingBox`.
  */
-fun BoundingBox.toLatLngBounds(): LatLngBounds {
-    return LatLngBounds.Builder()
+fun BoundingBox.toLatLngBounds(): LatLngBounds = LatLngBounds.Builder()
         .include(LatLng(this.sw.lat, this.sw.lng)) // Southwest corner
         .include(LatLng(this.ne.lat, this.ne.lng)) // Northeast corner
         .build()
-}

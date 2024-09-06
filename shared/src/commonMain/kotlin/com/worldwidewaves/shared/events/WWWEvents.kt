@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
-import io.github.aakira.napier.Napier
+import com.worldwidewaves.shared.events.utils.Log
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,7 +74,7 @@ class WWWEvents : KoinComponent {
         validationErrors.filterValues { it?.isEmpty() == false }
             .mapNotNull { it.value }
             .forEach { errorMessage ->
-                Napier.e("Validation Error: $errorMessage")
+                Log.e(::WWWEvents.name, "Validation Error: $errorMessage")
             }
 
         _eventsFlow.value = validationErrors.filterValues { it == null }

@@ -31,9 +31,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
  *
  * @return The absolute path of the key-value store file as a String.
  */
-actual fun keyValueStorePath(): String {
-    return (getPlatform().getContext() as Context)
+actual fun keyValueStorePath(): String = (getPlatform().getContext() as Context)
         .filesDir
         .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
         .absolutePath
-}

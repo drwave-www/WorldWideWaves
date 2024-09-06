@@ -44,8 +44,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 // ----------------------------
 
 interface TabScreen {
-    @Composable
-    fun Screen(modifier: Modifier)
+    @Composable fun Screen(modifier: Modifier)
     fun getName(): String?
 }
 
@@ -72,39 +71,21 @@ class TabManager(
         Column(modifier = Modifier.fillMaxHeight()) {
 
             // Display the selected tab screen
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    if (originalScreen != null) {
-                        originalScreen!!(Modifier)
-                    } else {
-                        screens[currentTab].Screen(Modifier)
-                    }
-                }
+            Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
+                originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)
             }
 
             // Tab bar
             Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .height(DIM_INT_TABBAR_HEIGHT.dp),
+                modifier = modifier.fillMaxWidth().height(DIM_INT_TABBAR_HEIGHT.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 screens.forEachIndexed { index, tab ->
-                    Box(modifier = Modifier.clickable(onClick = {
+                    Box(modifier = Modifier.clickable {
                         originalScreen = null
                         currentTab = index
-                    })) {
-                        tabBarItem(
-                            currentTab == index, // && originalScreen == null
-                                    index,
-                            tab.getName()
-                        )
-                    }
+                    }) { tabBarItem(currentTab == index, index, tab.getName()) }
                 }
             }
         }

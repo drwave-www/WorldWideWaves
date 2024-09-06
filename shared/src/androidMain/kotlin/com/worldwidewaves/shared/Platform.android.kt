@@ -51,7 +51,7 @@ object AndroidPlatform : WWWPlatform  { // TODO: manage with the cache in produc
     private val context: Context
         get() = _contextRef?.get()
             ?: throw UninitializedPropertyAccessException(
-                "AndroidPlatform must be initialized with a context before use.")
+                "$(::AndroidPlatform.name) must be initialized with a context before use.")
 
     override val name: String
         get() = "Android ${Build.VERSION.SDK_INT}"
@@ -115,15 +115,15 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
     return try {
-        Log.i("getMBTilesAbsoluteFilePath", "Trying to get $eventId.$extension")
+        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension")
         val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
         if (!cachedFile.exists() || cachedFile.length().toInt() != fileBytes.size) {
-            Log.i("getMBTilesAbsoluteFilePath", "Caching $eventId.$extension")
+            Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
             cachedFile.outputStream().use { it.write(fileBytes) }
         }
         cachedFile.absolutePath
     } catch (e: MissingResourceException) {
-        Log.e("getMBTilesAbsoluteFilePath", "Resource not found: ${e.message}")
+        Log.e(::getMapFileAbsolutePath.name, "Resource not found: ${e.message}")
         null
     }
 }
@@ -145,7 +145,7 @@ actual fun cachedFileExists(fileName: String): Boolean {
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
-        Log.i("cachedFileExists", "Development mode (not cached): $fileName")
+        Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
         false
     } else {
         File(context.cacheDir, fileName).exists()
@@ -179,7 +179,7 @@ actual fun cachedFilePath(fileName: String): String? {
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
     val context = AndroidPlatform.getContext() as Context
-    Log.i("cacheStringToFile", "Caching data to $fileName")
+    Log.i(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
@@ -202,12 +202,12 @@ actual suspend fun cacheDeepFile(fileName: String) {
         val fileBytes = Res.readBytes(fileName)
         val cacheFile = File(context.cacheDir, fileName)
 
-        Log.i("cacheDeepFile", "Caching data to $cacheFile")
+        Log.i(::cacheDeepFile.name, "Caching data to $cacheFile")
 
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
     } catch (e: Exception) {
-        Log.e("cacheDeepFile", "Error caching file: $fileName", e)
+        Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
     }
 }
 

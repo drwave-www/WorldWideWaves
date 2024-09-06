@@ -24,6 +24,7 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.isPointInPolygon
@@ -31,7 +32,6 @@ import com.worldwidewaves.shared.events.utils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import com.worldwidewaves.shared.getMapFileAbsolutePath
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.double
@@ -191,10 +191,10 @@ data class WWWEventArea(
                                 }.apply { areaPolygon.add(this) }
                             }
                         }
-                        else -> { Napier.e("${event.id}: Unsupported GeoJSON type: $type") }
+                        else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
                     }
                 } ?: run {
-                    Napier.e("${event.id}: Error loading geojson data for event")
+                    Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
         }

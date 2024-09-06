@@ -35,24 +35,21 @@ fun setStatusBarColor(window: Window) {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         window.statusBarColor = backgroundLight.toArgb()
 
-         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.hide(WindowInsets.Type.navigationBars())
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        }
-
-        // Ensure the content fits within the system windows
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                controller.show(WindowInsets.Type.statusBars())
-            } else {
-                @Suppress("DEPRECATION")
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // For Android R and above, use WindowInsetsController
+            // to hide navigation bars and show status bars
+            window.insetsController?.apply {
+                hide(WindowInsets.Type.navigationBars())
+                show(WindowInsets.Type.statusBars())
             }
-            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            // For older versions, use deprecated system UI visibility flags
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_VISIBLE
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowInsetsControllerCompat(window, window.decorView).systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
 }

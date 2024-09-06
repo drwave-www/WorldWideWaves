@@ -21,8 +21,8 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
-import io.github.aakira.napier.Napier
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -157,7 +157,7 @@ data class WWWEvent(
             .toInstant(getTZ())
             .toLocalDateTime(getTZ())
     }.getOrElse {
-        Napier.e("$id: Error parsing start date and time: $it")
+        Log.e(::getStartDateTime.name,"$id: Error parsing start date and time: $it")
         LocalDateTime(0, 1, 1, 0, 0)
     }
 
