@@ -2,6 +2,7 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
+    - code header on 80 cols
     - show some map elements
         + styling script : jq => every minzoom < 10 = 3
     - better code coverage of current devs

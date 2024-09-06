@@ -55,7 +55,7 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     // ---------------------------
 
-    private fun loadEvents() {
+    private fun loadEvents() = wwwEvents.loadEvents {
         viewModelScope.launch(Dispatchers.IO) {
             wwwEvents.flow().collect { eventsList ->
                 originalEvents = eventsList

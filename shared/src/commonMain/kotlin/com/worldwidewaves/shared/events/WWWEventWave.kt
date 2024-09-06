@@ -3,7 +3,7 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.delay
@@ -65,7 +65,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     // ---------------------------
 
     private val clock: IClock by inject()
-    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     // ---------------------------
 

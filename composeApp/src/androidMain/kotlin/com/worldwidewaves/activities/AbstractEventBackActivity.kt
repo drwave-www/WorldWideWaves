@@ -89,7 +89,7 @@ abstract class AbstractEventBackActivity(
     }
 
     private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
-        wwwEvents.onEventLoaded {
+        wwwEvents.addOnEventsLoadedListener {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
             }

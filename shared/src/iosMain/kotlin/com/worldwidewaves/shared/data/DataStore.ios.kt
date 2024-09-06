@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.data
 
 /*
  * Copyright 2024 DrWave

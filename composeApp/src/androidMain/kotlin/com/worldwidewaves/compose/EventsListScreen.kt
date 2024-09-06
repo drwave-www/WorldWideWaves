@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.models.EventsViewModel
-import com.worldwidewaves.shared.SetEventFavorite
+import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -84,7 +84,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.event_favorites_empty
+import com.worldwidewaves.shared.generated.resources.events_empty
+import com.worldwidewaves.shared.generated.resources.events_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
@@ -240,7 +241,10 @@ class EventsListScreen(
                 item {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(ShRes.string.event_favorites_empty),
+                        text = stringResource(
+                            if (starredSelected) ShRes.string.events_favorites_empty
+                            else ShRes.string.events_empty
+                        ),
                         style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
                             textAlign = TextAlign.Center
                         )
@@ -254,11 +258,13 @@ class EventsListScreen(
     fun Event(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
-        Column(modifier = modifier.clickable(onClick = {
-            context.startActivity(Intent(context, EventActivity::class.java).apply {
-                putExtra("eventId", event.id)
-            })
-        })) {
+        Column(modifier = modifier.clickable(
+            onClick = {
+                context.startActivity(Intent(context, EventActivity::class.java).apply {
+                    putExtra("eventId", event.id)
+                })
+            }
+        )) {
             EventOverlay(viewModel, event)
             EventLocationAndDate(event)
         }
@@ -406,9 +412,7 @@ class EventsListScreen(
                 Text(
                     text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
                     style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
-                    modifier = Modifier
-                        .offset(y = (-8).dp)
-                        .padding(start = 2.dp)
+                    modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                 )
             }
         }

@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
@@ -60,7 +60,7 @@ data class WWWEventArea(
     // ---------------------------
 
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
-    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     @Transient private val areaPolygon: MutableList<Polygon> = mutableListOf()
     @Transient private var cachedWarmingPolygons: List<Polygon>? = null

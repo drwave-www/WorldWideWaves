@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.data
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

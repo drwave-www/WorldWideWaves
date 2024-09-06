@@ -23,7 +23,9 @@ package com.worldwidewaves.shared.events.utils
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
+import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -52,22 +54,27 @@ class SystemClock : IClock {
 
 // ---------------------------
 
-interface ICoroutineScopeProvider {
+interface CoroutineScopeProvider {
     val scopeIO: CoroutineScope
     val scopeDefault: CoroutineScope
     suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T
 }
-class DefaultCoroutineScopeProvider : ICoroutineScopeProvider {
-    override val scopeIO: CoroutineScope = CoroutineScope(Dispatchers.IO)
-    override val scopeDefault: CoroutineScope = CoroutineScope(Dispatchers.Default)
+
+class DefaultCoroutineScopeProvider(
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) : CoroutineScopeProvider {
+
+    override val scopeIO: CoroutineScope = CoroutineScope(ioDispatcher)
+    override val scopeDefault: CoroutineScope = CoroutineScope(defaultDispatcher)
 
     override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(Dispatchers.IO, block)
+        return withContext(ioDispatcher, block)
     }
 
     override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(Dispatchers.Default, block)
+        return withContext(defaultDispatcher, block)
     }
 }
 
@@ -78,7 +85,7 @@ interface EventsConfigurationProvider {
 }
 
 class DefaultEventsConfigurationProvider(
-    private val coroutineScopeProvider: ICoroutineScopeProvider = DefaultCoroutineScopeProvider()
+    private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String {
@@ -109,6 +116,17 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
             null
         }
     }
+}
+
+// ---------------------------
+
+interface EventsDecoder {
+    fun decodeFromJson(jsonString: String): List<WWWEvent>
+}
+class DefaultEventsDecoder : EventsDecoder {
+    private val jsonDecoder = Json { ignoreUnknownKeys = true }
+    override fun decodeFromJson(jsonString: String) =
+        jsonDecoder.decodeFromString<List<WWWEvent>>(jsonString)
 }
 
 // ---------------------------
