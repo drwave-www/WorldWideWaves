@@ -104,7 +104,7 @@ import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.displayFontFamily
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
-import com.worldwidewaves.theme.primaryColoredExtraBoldTextStyle
+import com.worldwidewaves.theme.extraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -219,7 +219,7 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 text = stringResource(ShRes.string.warn_rules_security_title),
-                style = primaryColoredExtraBoldTextStyle.copy(
+                style = extraPrimaryColoredBoldTextStyle.copy(
                     fontSize = DIM_FAQ_SECTION_TITLE_FONTSIZE.sp,
                     textAlign = TextAlign.Start
                 )
@@ -259,7 +259,7 @@ class AboutFaqScreen : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                style = primaryColoredExtraBoldTextStyle.copy(
+                style = extraPrimaryColoredBoldTextStyle.copy(
                     fontSize = DIM_FAQ_RULE_TITLE_FONTSIZE.sp,
                     textAlign = TextAlign.Start
                 )

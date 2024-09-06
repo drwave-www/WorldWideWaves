@@ -140,6 +140,7 @@ val commonBoldStyle = commonTextStyle.copy(
     fontWeight = FontWeight.Bold
 )
 
+
 val primaryColoredTextStyle = commonTextStyle.copy(
     color = lightScheme.primary
 )
@@ -148,6 +149,7 @@ val primaryColoredBoldTextStyle = primaryColoredTextStyle.copy(
     fontWeight = FontWeight.Bold
 )
 
+
 val quinaryColoredTextStyle = commonTextStyle.copy(
     color = extendedLight.quinary.color
 )
@@ -155,6 +157,7 @@ val quinaryColoredTextStyle = commonTextStyle.copy(
 val quinaryColoredBoldTextStyle = quinaryColoredTextStyle.copy(
     fontWeight = FontWeight.Bold
 )
+
 
 val extraTextStyle = defaultTextStyle.copy(
     fontFamily = extraFontFamily
@@ -168,15 +171,17 @@ val extraLightTextStyle = extraTextStyle.copy(
     fontWeight = FontWeight.Light
 )
 
-val extraPrimaryTextStyle = extraTextStyle.copy(
+
+val extraPrimaryColoredTextStyle = extraTextStyle.copy(
     color = lightScheme.primary
 )
 
-val primaryColoredExtraBoldTextStyle = extraPrimaryTextStyle.copy(
+val extraPrimaryColoredBoldTextStyle = extraPrimaryColoredTextStyle.copy(
     fontWeight = FontWeight.Bold
 )
 
-val quinaryColoredExtraBoldTextStyle = extraTextStyle.copy(
+
+val extraQuinaryColoredBoldTextStyle = extraTextStyle.copy(
     color = extendedLight.quinary.color,
     fontWeight = FontWeight.Bold
 )

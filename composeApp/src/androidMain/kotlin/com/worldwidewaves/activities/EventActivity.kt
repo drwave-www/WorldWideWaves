@@ -95,7 +95,7 @@ import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
-import com.worldwidewaves.theme.quinaryColoredExtraBoldTextStyle
+import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
@@ -180,7 +180,7 @@ private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
-        style = quinaryColoredExtraBoldTextStyle,
+        style = extraQuinaryColoredBoldTextStyle,
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
         textAlign = TextAlign.Justify
     )
@@ -335,7 +335,7 @@ private fun EventNumbers(event: WWWEvent) {
                 Text(
                     text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = quinaryColoredExtraBoldTextStyle.copy(
+                    style = extraQuinaryColoredBoldTextStyle.copy(
                         fontSize = DIM_EVENT_NUMBERS_TITLE_FONTSIZE.sp,
                         textAlign = TextAlign.Right
                     )
@@ -349,7 +349,7 @@ private fun EventNumbers(event: WWWEvent) {
                         // Label
                         Text(
                             text = stringResource(key),
-                            style = quinaryColoredExtraBoldTextStyle.copy(
+                            style = extraQuinaryColoredBoldTextStyle.copy(
                                 fontSize = DIM_EVENT_NUMBERS_LABEL_FONTSIZE.sp
                             )
                         )
