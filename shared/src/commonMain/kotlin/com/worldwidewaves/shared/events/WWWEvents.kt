@@ -47,6 +47,8 @@ class WWWEvents : KoinComponent {
 
     private var eventsLoaded: Boolean = false
     private var loadingError: Exception? = null
+    private val validationErrors = mutableListOf<Pair<WWWEvent, List<String>>>()
+
     private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
     private val pendingErrorCallbacks = mutableListOf<(Exception) -> Unit>()
 
@@ -82,16 +84,20 @@ class WWWEvents : KoinComponent {
         try {
             val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
             val events = eventsDecoder.decodeFromJson(eventsJsonString)
-            val validationErrors = confValidationErrors(events)
+            val validatedEvents = confValidationErrors(events)
 
-            validationErrors.filterValues { it?.isEmpty() == false } // Log validation errors
-                .mapNotNull { it.value }
+            validatedEvents.filterValues { it?.isEmpty() == false } // Log validation errors
+                .onEach { (event, errors) ->
+                    validationErrors.add(event to errors!!)
+                }
+                .values
                 .forEach { errorMessage ->
                     Log.e(::WWWEvents.name, "Validation Error: $errorMessage")
                 }
 
+
             // Filter out invalid events
-            _eventsFlow.value = validationErrors.filterValues { it.isNullOrEmpty() }
+            _eventsFlow.value = validatedEvents.filterValues { it.isNullOrEmpty() }
                 .keys.onEach { initFavoriteEvent.call(it) } // Initialize favorite status
                 .toList()
 
@@ -113,6 +119,10 @@ class WWWEvents : KoinComponent {
     fun flow(): StateFlow<List<WWWEvent>> = eventsFlow
     fun list(): List<WWWEvent> = eventsFlow.value
     fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
+
+    fun isLoaded(): Boolean = eventsLoaded
+    fun getLoadingError(): Exception? = loadingError
+    fun getValidationErrors(): List<Pair<WWWEvent, List<String>>> = validationErrors
 
     // ---------------------------
 
@@ -145,7 +155,5 @@ class WWWEvents : KoinComponent {
             addOnEventsErrorListener { callback(it) }
         }
     }
-
-    fun getLoadingError(): Exception? = loadingError
 
 }

@@ -48,6 +48,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class WWWEventsTest : KoinTest {
@@ -114,12 +115,14 @@ class WWWEventsTest : KoinTest {
 
     enum class RegistrationMethod { ONCALL, BEFORE, AFTER }
     enum class CallbackType { ONLOADED, ONERROR, ONTERMINATION }
+    enum class ErrorType { READCONF, DECODE, VALIDATION }
 
     private fun createCallbackTests(
         registrationMethod: RegistrationMethod,
         callbackType: CallbackType,
         shouldThrowException: Boolean,
-        shouldBeCalled: Boolean = true
+        shouldBeCalled: Boolean = true,
+        errorType: ErrorType = ErrorType.VALIDATION
     ) = runTest { // use co-routines test
 
         // GIVEN
@@ -127,8 +130,20 @@ class WWWEventsTest : KoinTest {
         val events: WWWEvents by inject()
 
         if (shouldThrowException) {
-            val eventsConfigurationProvider: EventsConfigurationProvider by inject()
-            coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+            when (errorType) {
+                ErrorType.VALIDATION -> {
+                    val eventsConfigurationProvider : EventsConfigurationProvider by inject()
+                    coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+                }
+                ErrorType.DECODE -> {
+                    val eventsDecoder: EventsDecoder by inject()
+                    coEvery { eventsDecoder.decodeFromJson(any()) } throws exception
+                }
+                ErrorType.READCONF -> {
+                    val eventsConfigurationProvider : EventsConfigurationProvider by inject()
+                    coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+                }
+            }
         }
 
         // WHEN
@@ -264,6 +279,23 @@ class WWWEventsTest : KoinTest {
     // ----------------------------
 
     @Test
+    fun `On READCONF ERROR WWWEvents should callback OnError`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONERROR, shouldThrowException = true, errorType = ErrorType.READCONF
+    )
+
+    @Test
+    fun `On DECODE ERROR WWWEvents should callback OnError`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONERROR, shouldThrowException = true, errorType = ErrorType.DECODE
+    )
+
+    @Test
+    fun `On VALIDATION ERROR WWWEvents should callback OnError`() = createCallbackTests(
+        RegistrationMethod.ONCALL, CallbackType.ONERROR, shouldThrowException = true, errorType = ErrorType.VALIDATION
+    )
+
+    // ----------------------------
+
+    @Test
     fun `WWWEvents should be initialized with events`() = runTest {
         // GIVEN
         val events: WWWEvents by inject()
@@ -279,8 +311,24 @@ class WWWEventsTest : KoinTest {
         testScheduler.advanceUntilIdle() // Wait for termination
 
         // THEN
+        assertTrue(events.isLoaded())
         assertEquals(2, events.flow().value.size)
         assertEquals(2, events.list().size)
+    }
+
+    @Test
+    fun `WWWEvents in ERROR should return the associated Exception`() = runTest {
+        // GIVEN
+        val events: WWWEvents by inject()
+        val eventsConfigurationProvider : EventsConfigurationProvider by inject()
+        coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+
+        // WHEN
+        events.loadEvents()
+        testScheduler.advanceUntilIdle() // Wait for termination
+
+        // THEN
+        assertNotNull(events.getLoadingError())
     }
 
     @Test
@@ -308,6 +356,44 @@ class WWWEventsTest : KoinTest {
         assertEquals(2, events.flow().value.size)
         assertEquals(2, events.list().size)
         assertEquals(eventWithId, eventById)
+    }
+
+    @Test
+    fun `WWWEvents should filter events with validation errors`() = runTest {
+        // GIVEN
+        val events: WWWEvents by inject()
+        val fakeEventId = "fake_event_id"
+        val eventWithId = mockk<WWWEvent>( relaxed = true ) {
+            every { id } returns fakeEventId
+        }
+        val eventFiltered = mockk<WWWEvent>( relaxed = true )
+        val validationError1 = "Validation error 1"
+        val validationError2 = "Validation error 2"
+        every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
+            Pair(eventWithId, emptyList()),
+            Pair(eventFiltered, listOf(validationError1, validationError2)
+            )
+        )
+        val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
+        coEvery { initFavoriteEvent.call(any()) } returns Unit
+
+        // WHEN
+        events.loadEvents()
+        testScheduler.advanceUntilIdle() // Wait for termination
+
+        val eventById = events.getEventById(fakeEventId)
+
+        val validationErrors = events.getValidationErrors().firstOrNull()
+
+        // THEN
+        assertEquals(1, events.flow().value.size) // Only one event kept
+        assertEquals(1, events.list().size)
+        assertEquals(eventWithId, eventById)
+        assertNotNull(validationErrors)
+        assertEquals(eventFiltered, validationErrors.first)
+        assertEquals(2, validationErrors.second.size)
+        assertTrue(validationErrors.second.contains(validationError1))
+        assertTrue(validationErrors.second.contains(validationError2))
     }
 
 
