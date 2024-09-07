@@ -90,8 +90,9 @@ class WWWEvents : KoinComponent {
                     Log.e(::WWWEvents.name, "Validation Error: $errorMessage")
                 }
 
+            // Filter out invalid events
             _eventsFlow.value = validationErrors.filterValues { it.isNullOrEmpty() }
-                .keys.onEach { initFavoriteEvent.call(it) }
+                .keys.onEach { initFavoriteEvent.call(it) } // Initialize favorite status
                 .toList()
 
             // The events have been loaded, so we can now call any pending callbacks
