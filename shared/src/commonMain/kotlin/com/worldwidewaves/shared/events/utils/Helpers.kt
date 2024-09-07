@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.events.utils
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import kotlinx.coroutines.CoroutineDispatcher
@@ -121,7 +122,7 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
 // ---------------------------
 
 interface EventsDecoder {
-    fun decodeFromJson(jsonString: String): List<WWWEvent>
+    fun decodeFromJson(jsonString: String): List<IWWWEvent>
 }
 class DefaultEventsDecoder : EventsDecoder {
     private val jsonDecoder = Json { ignoreUnknownKeys = true }

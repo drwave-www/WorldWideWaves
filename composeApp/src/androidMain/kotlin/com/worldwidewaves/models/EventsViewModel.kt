@@ -22,7 +22,7 @@ package com.worldwidewaves.models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,13 +41,13 @@ import kotlinx.coroutines.launch
  */
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
-    private var originalEvents: List<WWWEvent> = emptyList()
+    private var originalEvents: List<IWWWEvent> = emptyList()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
 
-    private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
-    val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
+    private val _events = MutableStateFlow<List<IWWWEvent>>(emptyList())
+    val events: StateFlow<List<IWWWEvent>> = _events.asStateFlow()
 
     private val loadingError = MutableStateFlow(false)
     val hasLoadingError: StateFlow<Boolean> = loadingError.asStateFlow()
@@ -66,7 +66,7 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
                 wwwEvents.flow().collect { eventsList ->
                     originalEvents = eventsList
                     _events.value = eventsList
-                    _hasFavorites.value = eventsList.any(WWWEvent::favorite)
+                    _hasFavorites.value = eventsList.any(IWWWEvent::favorite)
                 }
             }
         }

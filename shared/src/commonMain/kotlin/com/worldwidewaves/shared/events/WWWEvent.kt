@@ -20,6 +20,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
@@ -37,29 +38,27 @@ import kotlinx.serialization.Transient
 @Serializable
 data class WWWEvent(
 
-    val id: String,
-    val type: String,
-    val location: String,
-    val country: String? = null,
-    val community: String? = null,
+    override val id: String,
+    override val type: String,
+    override val location: String,
+    override val country: String? = null,
+    override val community: String? = null,
 
-    val timeZone: String,
-    val date: String,
-    val startHour: String,
+    override val timeZone: String,
+    override val date: String,
+    override val startHour: String,
 
-    val description: String,
-    val instagramAccount: String,
-    val instagramHashtag: String,
+    override val description: String,
+    override  val instagramAccount: String,
+    override val instagramHashtag: String,
 
-    val wavedef: WWWWaveDefinition,
-    val area: WWWEventArea,
-    val map: WWWEventMap,
+    override val wavedef: WWWWaveDefinition,
+    override val area: WWWEventArea,
+    override val map: WWWEventMap,
 
-    var favorite: Boolean = false
+    override var favorite: Boolean = false
 
-) : DataValidator {
-
-    enum class Status { DONE, SOON, RUNNING }
+) : IWWWEvent, DataValidator {
 
     @Serializable
     data class WWWWaveDefinition(
@@ -83,7 +82,7 @@ data class WWWEvent(
     // ---------------------------
 
     @Transient private var _wave: WWWEventWave? = null
-    val wave: WWWEventWave
+    override val wave: WWWEventWave
         get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
         ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
             setEvent(this@WWWEvent)
@@ -97,7 +96,7 @@ data class WWWEvent(
 
     // ---------------------------
 
-    fun getStatus(): Status {
+    override fun getStatus(): Status {
         return when {
             isDone() -> Status.DONE
             isSoon() -> Status.SOON
@@ -106,15 +105,15 @@ data class WWWEvent(
         }
     }
 
-    fun isDone(): Boolean {
+    override fun isDone(): Boolean {
         return this.id == "paris_france" // TODO: test
     }
 
-    fun isSoon(): Boolean {
+    override fun isSoon(): Boolean {
         return this.id == "unitedstates" // TODO: test…
     }
 
-    fun isRunning(): Boolean {
+    override fun isRunning(): Boolean {
         return this.id == "riodejaneiro_brazil" // TODO: test…
     }
 
@@ -122,13 +121,13 @@ data class WWWEvent(
 
     private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
 
-    fun getLocationImage(): Any? = getEventImageByType("location", this.id)
-    fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
-    fun getCountryImage(): Any? = getEventImageByType("country", this.country)
+    override fun getLocationImage(): Any? = getEventImageByType("location", this.id)
+    override fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
+    override fun getCountryImage(): Any? = getEventImageByType("country", this.country)
 
     // ---------------------------
 
-    fun getTZ(): TimeZone = TimeZone.of(this.timeZone)
+    override fun getTZ(): TimeZone = TimeZone.of(this.timeZone)
 
     /**
      * Converts the start date and time of the event to a simple local date format.
@@ -137,7 +136,7 @@ data class WWWEvent(
      * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
      *
      */
-    fun getLiteralStartDateSimple(): String = getStartDateTime().let {
+    override fun getLiteralStartDateSimple(): String = getStartDateTime().let {
         "${it.dayOfMonth.toString().padStart(2, '0')}/${
             it.monthNumber.toString().padStart(2, '0')
         }"
@@ -150,7 +149,7 @@ data class WWWEvent(
      * and then converts it to a `LocalDateTime` in the same time zone.
      *
      */
-    fun getStartDateTime(): LocalDateTime = runCatching {
+    override fun getStartDateTime(): LocalDateTime = runCatching {
         LocalDateTime.parse("${date}T${startHour}")
             .toInstant(getTZ())
             .toLocalDateTime(getTZ())

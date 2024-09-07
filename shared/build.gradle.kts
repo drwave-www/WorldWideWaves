@@ -7,7 +7,18 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    id("dev.mokkery") version "2.3.0"
+    kotlin("plugin.allopen") version "2.0.20"
 }
+
+fun isTestingTask(name: String) = name.endsWith("Test")
+
+val isTesting = gradle
+    .startParameter
+    .taskNames
+    .any(::isTestingTask)
+
+if (isTesting) allOpen { annotation("com.worldwidewaves.shared.OpenForMokkery") }
 
 kotlin {
     androidTarget {
@@ -16,6 +27,8 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
+
+
 
     listOf(
         iosX64(),
@@ -48,7 +61,6 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation(libs.mockk.common.v1120)
         }
     }
 }
@@ -71,7 +83,6 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        testImplementation(libs.mockk.android.v1120)
     }
 
 }

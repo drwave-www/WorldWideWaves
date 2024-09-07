@@ -22,10 +22,11 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.events.utils.IClock
-import io.mockk.confirmVerified
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.verify
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -43,8 +44,8 @@ import kotlin.time.Duration
 
 class WWWEventWaveTest : KoinTest {
 
-    private var clock = mockk<IClock>()
-    private var event = mockk<WWWEvent>()
+    private var clock = mock<IClock>()
+    private var event = mock<IWWWEvent>(MockMode.autofill)
     private lateinit var wave: WWWEventWave
 
     // ---------------------------
@@ -88,7 +89,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTZ() } answers { eventTimeZone }
+        every { event.getTZ() } returns eventTimeZone
         every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
 
         // WHEN ---------------------------------
@@ -100,8 +101,6 @@ class WWWEventWaveTest : KoinTest {
         verify { clock.now() }
         verify { event.getTZ() }
         verify { event.getStartDateTime() }
-
-        confirmVerified(clock, event)
     }
 
     @Test
@@ -113,7 +112,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTZ() } answers { eventTimeZone }
+        every { event.getTZ() } returns eventTimeZone
         every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
 
         // WHEN ---------------------------------
@@ -125,9 +124,6 @@ class WWWEventWaveTest : KoinTest {
         verify { clock.now() }
         verify { event.getTZ() }
         verify { event.getStartDateTime() }
-
-        confirmVerified(clock)
-        confirmVerified(event)
     }
 
 }

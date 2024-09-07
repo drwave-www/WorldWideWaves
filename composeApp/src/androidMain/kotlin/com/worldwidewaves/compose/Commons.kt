@@ -41,7 +41,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
@@ -75,7 +75,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 @Composable
-fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
+fun EventOverlaySoonOrRunning(event: IWWWEvent, modifier: Modifier = Modifier) {
     if (event.isSoon() || event.isRunning()) {
         val (backgroundColor, textId) = if (event.isSoon()) {
             MaterialTheme.colorScheme.secondary to Res.string.event_soon
@@ -107,7 +107,7 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
+fun EventOverlayDone(event: IWWWEvent, modifier: Modifier = Modifier) {
     if (event.isDone()) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(
@@ -126,7 +126,7 @@ fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
+fun ButtonWave(event: IWWWEvent, modifier: Modifier = Modifier) {
     // val context = LocalContext.current
 
     Surface(

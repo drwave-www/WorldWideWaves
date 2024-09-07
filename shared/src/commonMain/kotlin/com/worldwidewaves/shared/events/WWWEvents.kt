@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.OpenForMokkery
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -36,6 +37,7 @@ import kotlin.jvm.JvmOverloads
 
 // ---------------------------
 
+@OpenForMokkery
 class WWWEvents : KoinComponent {
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
@@ -47,12 +49,12 @@ class WWWEvents : KoinComponent {
 
     private var eventsLoaded: Boolean = false
     private var loadingError: Exception? = null
-    private val validationErrors = mutableListOf<Pair<WWWEvent, List<String>>>()
+    private val validationErrors = mutableListOf<Pair<IWWWEvent, List<String>>>()
 
     private val pendingLoadedCallbacks = mutableListOf<() -> Unit>()
     private val pendingErrorCallbacks = mutableListOf<(Exception) -> Unit>()
 
-    private val _eventsFlow = MutableStateFlow<List<WWWEvent>>(emptyList())
+    private val _eventsFlow = MutableStateFlow<List<IWWWEvent>>(emptyList())
     private val eventsFlow = _eventsFlow.asStateFlow()
 
     // ---------------------------
@@ -111,18 +113,18 @@ class WWWEvents : KoinComponent {
     }
 
     @VisibleForTesting
-    fun confValidationErrors(events: List<WWWEvent>) =
-        events.associateWith(WWWEvent::validationErrors)
+    fun confValidationErrors(events: List<IWWWEvent>) =
+        events.associateWith(IWWWEvent::validationErrors)
 
     // ---------------------------
 
-    fun flow(): StateFlow<List<WWWEvent>> = eventsFlow
-    fun list(): List<WWWEvent> = eventsFlow.value
-    fun getEventById(id: String): WWWEvent? = eventsFlow.value.find { it.id == id }
+    fun flow(): StateFlow<List<IWWWEvent>> = eventsFlow
+    fun list(): List<IWWWEvent> = eventsFlow.value
+    fun getEventById(id: String): IWWWEvent? = eventsFlow.value.find { it.id == id }
 
     fun isLoaded(): Boolean = eventsLoaded
     fun getLoadingError(): Exception? = loadingError
-    fun getValidationErrors(): List<Pair<WWWEvent, List<String>>> = validationErrors
+    fun getValidationErrors(): List<Pair<IWWWEvent, List<String>>> = validationErrors
 
     // ---------------------------
 

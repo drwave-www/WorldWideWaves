@@ -23,6 +23,8 @@ import io.github.aakira.napier.Napier
  * limitations under the License.
  */
 
+annotation class OpenForMokkery()
+
 fun debugBuild() {
     Napier.base(DebugAntilog())
 }

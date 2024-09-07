@@ -25,13 +25,17 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
+import dev.mokkery.MockMode.autofill
+import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.spy
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -59,15 +63,15 @@ class WWWEventsTest : KoinTest {
     private val mockedKoinDeclaration: KoinAppDeclaration = {
         modules(
             module {
-                single { spyk(WWWEvents()) }
-                single<InitFavoriteEvent> { mockk() }
+                single { spy(WWWEvents()) }
+                single<InitFavoriteEvent> { mock() }
                 single<EventsConfigurationProvider> {
-                    spyk(object : EventsConfigurationProvider {
+                    spy(object : EventsConfigurationProvider {
                         override suspend fun geoEventsConfiguration(): String = "[]" // Empty events
                     })
                 }
-                single<EventsDecoder> { spyk(object : EventsDecoder{
-                    override fun decodeFromJson(jsonString: String): List<WWWEvent> = emptyList()
+                single<EventsDecoder> { spy(object : EventsDecoder{
+                    override fun decodeFromJson(jsonString: String): List<IWWWEvent> = emptyList()
                 }) }
                 single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider(dispatcher, dispatcher) }
             }
@@ -133,15 +137,15 @@ class WWWEventsTest : KoinTest {
             when (errorType) {
                 ErrorType.VALIDATION -> {
                     val eventsConfigurationProvider : EventsConfigurationProvider by inject()
-                    coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+                    everySuspend { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
                 }
                 ErrorType.DECODE -> {
                     val eventsDecoder: EventsDecoder by inject()
-                    coEvery { eventsDecoder.decodeFromJson(any()) } throws exception
+                    everySuspend { eventsDecoder.decodeFromJson(any()) } throws exception
                 }
                 ErrorType.READCONF -> {
                     val eventsConfigurationProvider : EventsConfigurationProvider by inject()
-                    coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+                    everySuspend { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
                 }
             }
         }
@@ -300,11 +304,11 @@ class WWWEventsTest : KoinTest {
         // GIVEN
         val events: WWWEvents by inject()
         every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
-            Pair(mockk<WWWEvent>( relaxed = true ), emptyList()),
-            Pair(mockk<WWWEvent>( relaxed = true ), emptyList())
+            Pair(mock<IWWWEvent>( autofill ), emptyList()),
+            Pair(mock<IWWWEvent>( autofill ), emptyList())
         )
         val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
-        coEvery { initFavoriteEvent.call(any()) } returns Unit
+        everySuspend { initFavoriteEvent.call(any()) } returns Unit
 
         // WHEN
         events.loadEvents()
@@ -321,7 +325,7 @@ class WWWEventsTest : KoinTest {
         // GIVEN
         val events: WWWEvents by inject()
         val eventsConfigurationProvider : EventsConfigurationProvider by inject()
-        coEvery { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
+        everySuspend { eventsConfigurationProvider.geoEventsConfiguration() } throws exception
 
         // WHEN
         events.loadEvents()
@@ -336,15 +340,15 @@ class WWWEventsTest : KoinTest {
         // GIVEN
         val events: WWWEvents by inject()
         val fakeEventId = "fake_event_id"
-        val eventWithId = mockk<WWWEvent>( relaxed = true ) {
+        val eventWithId = mock<IWWWEvent>( autofill ) {
             every { id } returns fakeEventId
         }
         every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
             Pair(eventWithId, null),
-            Pair(mockk<WWWEvent>( relaxed = true ), emptyList())
+            Pair(mock<IWWWEvent>( autofill ), emptyList())
         )
         val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
-        coEvery { initFavoriteEvent.call(any()) } returns Unit
+        everySuspend { initFavoriteEvent.call(any()) } returns Unit
 
         // WHEN
         events.loadEvents()
@@ -363,10 +367,10 @@ class WWWEventsTest : KoinTest {
         // GIVEN
         val events: WWWEvents by inject()
         val fakeEventId = "fake_event_id"
-        val eventWithId = mockk<WWWEvent>( relaxed = true ) {
+        val eventWithId = mock<IWWWEvent>( autofill ) {
             every { id } returns fakeEventId
         }
-        val eventFiltered = mockk<WWWEvent>( relaxed = true )
+        val eventFiltered = mock<IWWWEvent>( autofill )
         val validationError1 = "Validation error 1"
         val validationError2 = "Validation error 2"
         every { events.confValidationErrors(any()) } returns mapOf( // List two unaccessed events
@@ -375,7 +379,7 @@ class WWWEventsTest : KoinTest {
             )
         )
         val initFavoriteEvent: InitFavoriteEvent by inject() // Fake init event favorite status
-        coEvery { initFavoriteEvent.call(any()) } returns Unit
+        everySuspend { initFavoriteEvent.call(any()) } returns Unit
 
         // WHEN
         events.loadEvents()

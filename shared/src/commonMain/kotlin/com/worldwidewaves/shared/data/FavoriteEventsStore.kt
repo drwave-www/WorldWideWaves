@@ -5,7 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.OpenForMokkery
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,7 @@ import kotlinx.coroutines.withContext
  * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
  * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "LiBooleancense");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -35,6 +36,7 @@ import kotlinx.coroutines.withContext
  * limitations under the License.
  */
 
+@OpenForMokkery
 class FavoriteEventsStore(
     private val dataStore: DataStore<Preferences>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -61,14 +63,15 @@ class FavoriteEventsStore(
 
 // ----------------------------
 
+@OpenForMokkery
 class InitFavoriteEvent(private val favoriteEventsStore: FavoriteEventsStore) {
-    suspend fun call(event: WWWEvent) {
+    suspend fun call(event: IWWWEvent) {
         event.favorite = favoriteEventsStore.isFavorite(event.id)
     }
 }
 
 class SetEventFavorite(private val favoriteEventsStore: FavoriteEventsStore) {
-    suspend fun call(event: WWWEvent, isFavorite: Boolean) =
+    suspend fun call(event: IWWWEvent, isFavorite: Boolean) =
         favoriteEventsStore.setFavoriteStatus(event.id, isFavorite)
             .also { event.favorite = isFavorite }
 }

@@ -1,9 +1,9 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.delay
@@ -69,10 +69,10 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    @Transient private var _event: WWWEvent? = null
+    @Transient private var _event: IWWWEvent? = null
 
     @Transient private var observationStarted = false
-    @Transient private var lastObservedStatus: WWWEvent.Status? = null
+    @Transient private var lastObservedStatus: IWWWEvent.Status? = null
     @Transient private var lastObservedProgression: Double? = null
 
     @Transient protected var positionRequester: (() -> Position?)? = null
@@ -80,7 +80,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    @Transient private val waveStatusChangedListeners = mutableListOf<(WWWEvent.Status) -> Unit>()
+    @Transient private val waveStatusChangedListeners = mutableListOf<(IWWWEvent.Status) -> Unit>()
     @Transient private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
     @Transient private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
     @Transient private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
@@ -97,13 +97,13 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    protected val event: WWWEvent
+    protected val event: IWWWEvent
         get() = this._event ?: run {
             Log.e(::event.name, "Event not set")
             throw IllegalStateException("Event not set")
         }
 
-    fun setEvent(event: WWWEvent) = apply { this._event = event }
+    fun setEvent(event: IWWWEvent) = apply { this._event = event }
 
     fun setPositionRequester(positionRequester: () -> Position?) = apply {
         this.positionRequester = positionRequester
@@ -181,7 +181,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    fun addOnWaveStatusChangedListener(listener: (WWWEvent.Status) -> Unit) = apply {
+    fun addOnWaveStatusChangedListener(listener: (IWWWEvent.Status) -> Unit) = apply {
         waveStatusChangedListeners.add(listener)
     }.also { startObservation() }
 
@@ -201,7 +201,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         waveUserHasBeenHitListeners.add(listener)
     }.also { startObservation() }
 
-    private fun onWaveStatusChanged(status: WWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
+    private fun onWaveStatusChanged(status: IWWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
     private fun onWaveProgressionChanged(progression: Double) = waveProgressionChangedListeners.forEach { it(progression) }
 
     protected fun onWaveWarmingEnded() = waveWarmingEndedListeners.forEach { it() }

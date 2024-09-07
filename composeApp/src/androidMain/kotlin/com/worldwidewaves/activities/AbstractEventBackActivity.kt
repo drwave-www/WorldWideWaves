@@ -28,7 +28,7 @@ import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
@@ -72,7 +72,7 @@ abstract class AbstractEventBackActivity(
 
         setStatusBarColor(window)
 
-        var selectedEvent by mutableStateOf<WWWEvent?>(null)
+        var selectedEvent by mutableStateOf<IWWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")
 
         if (eventId != null) {
@@ -88,7 +88,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
+    private fun loadEvent(eventId: String, onEventLoaded: (IWWWEvent?) -> Unit) {
         wwwEvents.addOnEventsLoadedListener {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
@@ -99,7 +99,7 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    private fun BackwardScreen(event: WWWEvent?) {
+    private fun BackwardScreen(event: IWWWEvent?) {
         val scrollState = rememberScrollState()
 
         if (event != null) {
@@ -153,6 +153,6 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    abstract fun Screen(modifier: Modifier, event: WWWEvent)
+    abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 
 }

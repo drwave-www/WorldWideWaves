@@ -51,7 +51,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.Quadruple
 import com.worldwidewaves.shared.generated.resources.map_error
@@ -84,7 +84,7 @@ import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
-    private val event: WWWEvent,
+    private val event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
     private val onMapClick: ((latitude: Double, longitude: Double) -> Unit)? = null,
@@ -465,7 +465,7 @@ class EventMap(
             tiltGesturesEnabled(false)
         }
 
-        MapLibre.getInstance(context) // Reauired by the API
+        MapLibre.getInstance(context) // Required by the API
 
         val mapView = remember { MapView(context, maplibreMapOptions) }
 

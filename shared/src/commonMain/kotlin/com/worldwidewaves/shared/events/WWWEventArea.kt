@@ -21,9 +21,9 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
@@ -50,8 +50,8 @@ data class WWWEventArea(
 
 ) : KoinComponent, DataValidator {
 
-    private var _event: WWWEvent? = null
-    private var event: WWWEvent
+    private var _event: IWWWEvent? = null
+    private var event: IWWWEvent
         get() = _event ?: throw IllegalStateException("Event not set")
         set(value) {
             _event = value

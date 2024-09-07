@@ -81,7 +81,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSI
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
 import com.worldwidewaves.shared.generated.resources.events_empty
@@ -144,7 +144,7 @@ class EventsListScreen(
     @Composable
     private fun EventsList(
         modifier: Modifier,
-        events: List<WWWEvent>,
+        events: List<IWWWEvent>,
         onAllEventsCLicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit
     ) {
@@ -229,7 +229,7 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    fun Events(viewModel: EventsViewModel, events: List<WWWEvent>, modifier: Modifier = Modifier) {
+    fun Events(viewModel: EventsViewModel, events: List<IWWWEvent>, modifier: Modifier = Modifier) {
         val state = rememberLazyListState()
         val hasLoadingError by viewModel.hasLoadingError.collectAsState()
 
@@ -260,7 +260,7 @@ class EventsListScreen(
     }
 
     @Composable
-    fun Event(viewModel: EventsViewModel, event: WWWEvent, modifier: Modifier = Modifier) {
+    fun Event(viewModel: EventsViewModel, event: IWWWEvent, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
         Column(modifier = modifier.clickable(
@@ -280,7 +280,7 @@ class EventsListScreen(
     @Composable
     private fun EventOverlay(
         viewModel: EventsViewModel,
-        event: WWWEvent,
+        event: IWWWEvent,
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
@@ -306,7 +306,7 @@ class EventsListScreen(
 
     @Composable
     private fun EventOverlayCountryAndCommunityFlags(
-        event: WWWEvent,
+        event: IWWWEvent,
         modifier: Modifier = Modifier
     ) {
         Column(
@@ -350,7 +350,7 @@ class EventsListScreen(
     @Composable
     private fun EventOverlayFavorite(
         viewModel: EventsViewModel,
-        event: WWWEvent,
+        event: IWWWEvent,
         modifier: Modifier = Modifier
     ) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
@@ -392,7 +392,7 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    private fun EventLocationAndDate(event: WWWEvent, modifier: Modifier = Modifier) {
+    private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
         val eventDate = event.getLiteralStartDateSimple()
 
         Box(modifier = modifier) {

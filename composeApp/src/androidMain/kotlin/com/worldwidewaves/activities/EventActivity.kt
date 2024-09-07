@@ -81,7 +81,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
@@ -112,7 +112,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventActivity : AbstractEventBackActivity() {
 
     @Composable
-    override fun Screen(modifier: Modifier, event: WWWEvent) {
+    override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val eventDate = event.getLiteralStartDateSimple()
         val coroutineScope = rememberCoroutineScope()
@@ -154,7 +154,7 @@ class EventActivity : AbstractEventBackActivity() {
 }
 
 private fun updateGeolocText(
-    event: WWWEvent,
+    event: IWWWEvent,
     newLocation: LatLng,
     lastKnownLocation: LatLng?,
     coroutineScope: CoroutineScope,
@@ -176,7 +176,7 @@ private fun updateGeolocText(
 // ----------------------------
 
 @Composable
-private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
+private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = event.description,
@@ -190,7 +190,7 @@ private fun EventDescription(event: WWWEvent, modifier: Modifier = Modifier) {
 
 @Composable
 private fun EventOverlay(
-    event: WWWEvent,
+    event: IWWWEvent,
     eventDate: String
 ) {
     Box {
@@ -211,7 +211,7 @@ private fun EventOverlay(
 // ----------------------------
 
 @Composable
-private fun EventOverlayDate(event: WWWEvent, eventDate: String, modifier: Modifier = Modifier) {
+private fun EventOverlayDate(event: IWWWEvent, eventDate: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -250,7 +250,7 @@ fun DividerLine() {
 // ----------------------------
 
 @Composable
-private fun WWWEventSocialNetworks(event: WWWEvent) {
+private fun WWWEventSocialNetworks(event: IWWWEvent) {
     WWWSocialNetworks(
         instagramAccount = event.instagramAccount,
         instagramHashtag = event.instagramHashtag
@@ -286,7 +286,7 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 // ----------------------------
 
 @Composable
-private fun EventNumbers(event: WWWEvent) {
+private fun EventNumbers(event: IWWWEvent) {
     val eventNumbers = remember { mutableStateMapOf<StringResource, String>() }
     val eventTimeZone = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()

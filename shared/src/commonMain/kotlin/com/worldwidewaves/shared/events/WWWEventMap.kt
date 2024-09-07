@@ -50,8 +50,8 @@ class WWWEventMap(
 
 ) : KoinComponent, DataValidator {
 
-    private var _event: WWWEvent? = null
-    private var event: WWWEvent
+    private var _event: IWWWEvent? = null
+    private var event: IWWWEvent
         get() = _event ?: throw IllegalStateException("Event not set")
         set(value) {
             _event = value
