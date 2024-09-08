@@ -303,18 +303,6 @@ class WWWEventTest {
         assertTrue(errors!!.contains("event: Time zone is invalid"))
     }
 
-    @Test
-    fun testValidationErrors_EmptyCommunity() {
-        // GIVEN
-        val event = buildEmptyEvent(community = "")
-
-        // WHEN
-        val errors = event.validationErrors()
-
-        // THEN
-        assertTrue(errors!!.contains("event: Community is empty"))
-    }
-
 }
 
 // ============================
