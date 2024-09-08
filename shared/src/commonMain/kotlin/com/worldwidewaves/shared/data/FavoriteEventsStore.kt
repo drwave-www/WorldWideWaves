@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import com.worldwidewaves.shared.OpenForMokkery
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,7 +35,6 @@ import kotlinx.coroutines.withContext
  * limitations under the License.
  */
 
-@OpenForMokkery
 class FavoriteEventsStore(
     private val dataStore: DataStore<Preferences>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -63,7 +61,6 @@ class FavoriteEventsStore(
 
 // ----------------------------
 
-@OpenForMokkery
 class InitFavoriteEvent(private val favoriteEventsStore: FavoriteEventsStore) {
     suspend fun call(event: IWWWEvent) {
         event.favorite = favoriteEventsStore.isFavorite(event.id)

@@ -2,18 +2,14 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - revoir l'ordre des numbers
     - demander d'activer le GPS sur rentrée dans l'app et veille + sur clic position lorsqu'elle sera là
     - code header on 80 cols
-    - show some map elements
+    - show some map elements on min zoom
         + styling script : jq => every minzoom < 10 = 3
-    - better code coverage of current devs
     - manage with translations
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
-
-- setup kotest : https://kotest.io/docs/framework/framework.html
 
 - Wave linear
     - wave progression

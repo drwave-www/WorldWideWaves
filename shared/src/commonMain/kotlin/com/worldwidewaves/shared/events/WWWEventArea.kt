@@ -26,9 +26,9 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygons
-import com.worldwidewaves.shared.events.utils.polygonsBbox
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -178,6 +178,6 @@ data class WWWEventArea(
 
                 else -> { /* No validation errors */ }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "area: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
 }

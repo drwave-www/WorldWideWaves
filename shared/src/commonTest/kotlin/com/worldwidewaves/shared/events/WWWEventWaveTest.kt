@@ -21,15 +21,14 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.debugBuild
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -62,14 +61,12 @@ class WWWEventWaveTest : KoinTest {
 
         wave = object : WWWEventWave() {
             override val speed: Double = 0.0
-            override val direction: String = "N"
-            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = "")
-            override suspend fun isPositionWithinWarming(position: Position): Boolean = false
+            override val direction: Direction = Direction.EAST
+            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = METERS)
             override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
-            override suspend fun getWarmingDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHit(): Boolean = false
-        }.setEvent(event)
+        }.setRelatedEvent(event)
     }
 
     @AfterTest
@@ -88,8 +85,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTZ() } returns eventTimeZone
-        every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
+        every { event.getStartDateTime() } returns eventStartTime
 
         // WHEN ---------------------------------
         val result = wave.isNearTheEvent()
@@ -98,7 +94,6 @@ class WWWEventWaveTest : KoinTest {
         assertTrue(result)
 
         verify { clock.now() }
-        verify { event.getTZ() }
         verify { event.getStartDateTime() }
     }
 
@@ -111,8 +106,7 @@ class WWWEventWaveTest : KoinTest {
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
         every { clock.now() } returns now
-        every { event.getTZ() } returns eventTimeZone
-        every { event.getStartDateTime() } returns eventStartTime.toLocalDateTime(eventTimeZone)
+        every { event.getStartDateTime() } returns eventStartTime
 
         // WHEN ---------------------------------
         val result = wave.isNearTheEvent()
@@ -121,7 +115,6 @@ class WWWEventWaveTest : KoinTest {
         assertFalse(result) // Assert that it's NOT near the event
 
         verify { clock.now() }
-        verify { event.getTZ() }
         verify { event.getStartDateTime() }
     }
 

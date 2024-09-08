@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import com.worldwidewaves.shared.events.utils.DataValidator
-import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 
 // ---------------------------
@@ -52,14 +52,14 @@ interface IWWWEvent : DataValidator {
 
     // ---------------------------
 
-    enum class Status { DONE, SOON, RUNNING }
+    enum class Status { DONE, NEXT, SOON, RUNNING }
 
     // ---------------------------
 
-    fun getStatus(): Status
-    fun isDone(): Boolean
+    suspend fun getStatus(): Status
+    suspend fun isDone(): Boolean
     fun isSoon(): Boolean
-    fun isRunning(): Boolean
+    suspend fun isRunning(): Boolean
 
     // ---------------------------
 
@@ -71,7 +71,7 @@ interface IWWWEvent : DataValidator {
 
     fun getTZ(): TimeZone
     fun getLiteralStartDateSimple(): String
-    fun getStartDateTime(): LocalDateTime
+    fun getStartDateTime(): Instant
 
 }
 

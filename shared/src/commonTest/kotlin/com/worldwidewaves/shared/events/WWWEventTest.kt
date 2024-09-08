@@ -4,6 +4,7 @@ import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -34,11 +35,10 @@ class WWWEventTest {
     @Test
     fun testGetStartDateSimpleAsLocal() {
         // GIVEN
-        val event =
-            buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
+        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
 
         // WHEN
-        val result = event.getStartDateTime()
+        val result = event.getStartDateTime().toLocalDateTime(TimeZone.of("Pacific/Auckland"))
 
         // THEN
         assertEquals(LocalDateTime(2024, 3, 15, 18, 0), result)
@@ -132,7 +132,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: ID is empty"))
+        assertTrue(errors!!.any { it.contains("ID is empty") })
     }
 
     @Test
@@ -144,7 +144,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: ID must be lowercase with only simple letters or underscores"))
+        assertTrue(errors!!.any { it.contains("ID must be lowercase with only simple letters or underscores") })
     }
 
     @Test
@@ -156,7 +156,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Type is empty"))
+        assertTrue(errors!!.any { it.contains("Type is empty") })
     }
 
     @Test
@@ -168,7 +168,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Type must be either 'city', 'country', or 'world'"))
+        assertTrue(errors!!.any { it.contains("Type must be either 'city', 'country', or 'world'") })
     }
 
     @Test
@@ -180,7 +180,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Location is empty"))
+        assertTrue(errors!!.any { it.contains("Location is empty") })
     }
 
     @Test
@@ -192,7 +192,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Country must be specified for type 'city'"))
+        assertTrue(errors!!.any { it.contains("Country must be specified for type 'city'") })
     }
 
     @Test
@@ -204,7 +204,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Time zone is empty"))
+        assertTrue(errors!!.any { it.contains("Time zone is empty") })
     }
 
     @Test
@@ -216,7 +216,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Date format is invalid or date is not valid"))
+        assertTrue(errors!!.any { it.contains("Date format is invalid or date is not valid") })
     }
 
     @Test
@@ -228,7 +228,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Start hour format is invalid or time is not valid"))
+        assertTrue(errors!!.any { it.contains("Start hour format is invalid or time is not valid") })
     }
 
     @Test
@@ -240,7 +240,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Description is empty"))
+        assertTrue(errors!!.any { it.contains("Description is empty") })
     }
 
     @Test
@@ -252,7 +252,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Instagram account is empty"))
+        assertTrue(errors!!.any { it.contains("Instagram account is empty") })
     }
 
     @Test
@@ -264,7 +264,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Instagram account is invalid"))
+        assertTrue(errors!!.any { it.contains("Instagram account is invalid") })
     }
 
     @Test
@@ -276,7 +276,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Instagram hashtag is empty"))
+        assertTrue(errors!!.any { it.contains("Instagram hashtag is empty") })
     }
 
     @Test
@@ -288,7 +288,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Instagram hashtag is invalid"))
+        assertTrue(errors!!.any { it.contains("Instagram hashtag is invalid") })
     }
 
     @Test
@@ -300,7 +300,7 @@ class WWWEventTest {
         val errors = event.validationErrors()
 
         // THEN
-        assertTrue(errors!!.contains("event: Time zone is invalid"))
+        assertTrue(errors!!.any { it.contains("Time zone is invalid") })
     }
 
 }

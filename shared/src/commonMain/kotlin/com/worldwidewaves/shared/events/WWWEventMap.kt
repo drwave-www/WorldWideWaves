@@ -29,8 +29,8 @@ import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
+import com.worldwidewaves.shared.events.utils.PolygonUtils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
@@ -161,6 +161,6 @@ class WWWEventMap(
 
                 else -> { }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
 
 }

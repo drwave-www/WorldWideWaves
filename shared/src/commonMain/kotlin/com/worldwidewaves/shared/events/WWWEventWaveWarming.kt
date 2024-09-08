@@ -20,25 +20,36 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
 import com.worldwidewaves.shared.events.utils.DataValidator
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class WWWEventWaveWarming(
-    val type: String,
+    val type: Type,
     val longitude: Double? = null,
+    val meters: Int? = null
 ) : DataValidator {
+
+    enum class Type { LONGITUDE_CUT, METERS }
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
         when {
-            type == "longitude-cut" && longitude == null ->
-                add("Longitude must not be null for type 'longitude-cut'")
+            type == LONGITUDE_CUT && longitude == null ->
+                add("Longitude must not be null for type 'LONGITUDE_CUT'")
 
-            type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
+            type == LONGITUDE_CUT && (longitude!! < -180 || longitude > 180) ->
                 add("Longitude must be between -180 and 180")
+
+            type == METERS && meters == null ->
+                add("Meters must not be null for type 'METERS'")
+
+            type == METERS && (meters!! > 5000 || meters < 10) ->
+                add("Meters must be between 10 and 5000")
 
             else -> {}
         }
-    }.takeIf { it.isNotEmpty() }?.map { "warming: $it" }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveWarming::class.simpleName} : $it" }
 
 }

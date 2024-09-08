@@ -90,11 +90,12 @@ class WWWEvents : KoinComponent {
                 .onEach { (event, errors) ->
                     validationErrors.add(event to errors!!)
                 }
-                .values
-                .forEach { errorMessage ->
-                    Log.e(::WWWEvents.name, "Validation Error: $errorMessage")
+                .forEach { (event, errors) ->
+                    Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
+                    errors?.forEach { errorMessage ->
+                        Log.e(::WWWEvents.name, errorMessage)
+                    }
                 }
-
 
             // Filter out invalid events
             _eventsFlow.value = validatedEvents.filterValues { it.isNullOrEmpty() }

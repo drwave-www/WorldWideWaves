@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -24,7 +25,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestPointInPolygon {
+class AreaUtilsPointInPolygonTest {
 
     /**
      * Test points inside and outside a simple square polygon

@@ -64,9 +64,10 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
         wwwEvents.loadEvents(onLoadingError = onLoadingError).also {
             viewModelScope.launch(Dispatchers.IO) {
                 wwwEvents.flow().collect { eventsList ->
-                    originalEvents = eventsList
-                    _events.value = eventsList
-                    _hasFavorites.value = eventsList.any(IWWWEvent::favorite)
+                    val sortedEvents = eventsList.sortedBy { it.getStartDateTime() }
+                    originalEvents = sortedEvents
+                    _events.value = sortedEvents
+                    _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
                 }
             }
         }

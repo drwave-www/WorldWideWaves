@@ -24,13 +24,14 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 // ---------------------------
 
 @Serializable
 data class WWWEventWaveDeep(
     override val speed: Double,
-    override val direction: String,
+    override val direction: Direction,
     override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
@@ -39,11 +40,7 @@ data class WWWEventWaveDeep(
     }
 
     override suspend fun getWaveDuration(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getWarmingDuration(): Duration {
-        TODO("Not yet implemented")
+        return 2.hours // TODO
     }
 
     override suspend fun hasUserBeenHit(): Boolean {
@@ -58,7 +55,7 @@ data class WWWEventWaveDeep(
 
         // TODO
 
-        return errors.takeIf { it.isNotEmpty() }?.map { "wavedeep: $it" }
+        return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveDeep::class.simpleName}: $it" }
     }
 
 }

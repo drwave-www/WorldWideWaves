@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonBbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -25,7 +27,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestBoundingBox {
+class AreaUtilsBoundingBoxTest {
 
     @Test
     fun testSimplePolygon() {

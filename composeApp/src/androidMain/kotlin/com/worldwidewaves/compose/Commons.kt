@@ -20,6 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,6 +57,7 @@ import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -76,8 +83,19 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun EventOverlaySoonOrRunning(event: IWWWEvent, modifier: Modifier = Modifier) {
-    if (event.isSoon() || event.isRunning()) {
-        val (backgroundColor, textId) = if (event.isSoon()) {
+    val scope = rememberCoroutineScope()
+    var isSoon by remember { mutableStateOf(false) }
+    var isRunning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isSoon = event.isSoon()
+            isRunning = event.isRunning()
+        }
+    }
+
+    if (isSoon || isRunning) {
+        val (backgroundColor, textId) = if (isSoon) {
             MaterialTheme.colorScheme.secondary to Res.string.event_soon
         } else {
             MaterialTheme.colorScheme.tertiary to Res.string.event_running
@@ -103,12 +121,20 @@ fun EventOverlaySoonOrRunning(event: IWWWEvent, modifier: Modifier = Modifier) {
         }
     }
 }
-
 // ----------------------------
 
 @Composable
 fun EventOverlayDone(event: IWWWEvent, modifier: Modifier = Modifier) {
-    if (event.isDone()) {
+    val scope = rememberCoroutineScope()
+    var isDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isDone = event.isDone()
+        }
+    }
+
+    if (isDone) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(
                 color = Color.run { White.copy(alpha = 0.5f) },

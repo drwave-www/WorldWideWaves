@@ -85,6 +85,7 @@ android {
         debugImplementation(compose.uiTooling)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
+        implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.maplibre.android.annotation)
         implementation(libs.androidx.datastore.preferences)

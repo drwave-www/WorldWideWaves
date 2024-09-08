@@ -22,8 +22,10 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -32,6 +34,9 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.time.Duration.Companion.days
 
 // ---------------------------
 
@@ -58,7 +63,7 @@ data class WWWEvent(
 
     override var favorite: Boolean = false
 
-) : IWWWEvent, DataValidator {
+) : IWWWEvent, DataValidator, KoinComponent {
 
     @Serializable
     data class WWWWaveDefinition(
@@ -76,8 +81,12 @@ data class WWWEvent(
 
                 else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wavedef: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWWaveDefinition::class.simpleName}: $it" }
     }
+
+    // ---------------------------
+
+    private val clock: IClock by inject()
 
     // ---------------------------
 
@@ -85,7 +94,7 @@ data class WWWEvent(
     override val wave: WWWEventWave
         get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
         ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
-            setEvent(this@WWWEvent)
+            setRelatedEvent<WWWEventWave>(this@WWWEvent)
             _wave = this
         }
 
@@ -96,34 +105,31 @@ data class WWWEvent(
 
     // ---------------------------
 
-    override fun getStatus(): Status {
+    override suspend fun getStatus(): Status {
         return when {
             isDone() -> Status.DONE
             isSoon() -> Status.SOON
             isRunning() -> Status.RUNNING
-            else -> throw IllegalStateException("$id : Event status is undefined")
+            else -> Status.NEXT
         }
     }
 
-    override fun isDone(): Boolean {
-        return this.id == "paris_france" // TODO: test
-//        val endDateTime = this.wave.getEndTime()
-//        return endDateTime < LocalDateTime.now()
+    override suspend fun isDone(): Boolean {
+        val endDateTime = this.wave.getEndTime()
+        return endDateTime < clock.now()
     }
 
     override fun isSoon(): Boolean {
-        return this.id == "unitedstates" // TODO: test…
-//        val eventDateTime = getStartDateTime()
-//        val now = LocalDateTime.now()
-//        return eventDateTime > now && eventDateTime <= now.plusHours(24)
+        val eventDateTime = getStartDateTime()
+        val now = clock.now()
+        return eventDateTime > now && eventDateTime <= now.plus(30.days)
     }
 
-    override fun isRunning(): Boolean {
-        return this.id == "riodejaneiro_brazil" // TODO: test…
-//        val startDateTime = getStartDateTime()
-//        val endDateTime = this.wave.getEndTime()
-//        val now = LocalDateTime.now()
-//        return startDateTime <= now && endDateTime > now
+    override suspend fun isRunning(): Boolean {
+        val startDateTime = getStartDateTime()
+        val endDateTime = this.wave.getEndTime()
+        val now = clock.now()
+        return startDateTime <= now && endDateTime > now
     }
 
     // ---------------------------
@@ -147,8 +153,8 @@ data class WWWEvent(
      */
     override fun getLiteralStartDateSimple(): String = try {
         getStartDateTime().let {
-            "${it.dayOfMonth.toString().padStart(2, '0')}/${
-                it.monthNumber.toString().padStart(2, '0')
+            "${it.toLocalDateTime(getTZ()).dayOfMonth.toString().padStart(2, '0')}/${
+                it.toLocalDateTime(getTZ()).monthNumber.toString().padStart(2, '0')
             }"
         }
     } catch (e: Exception) {
@@ -162,12 +168,11 @@ data class WWWEvent(
      * and then converts it to a `LocalDateTime` in the same time zone.
      *
      */
-    override fun getStartDateTime(): LocalDateTime = runCatching {
-        LocalDateTime.parse("${date}T${startHour}")
-            .toInstant(getTZ())
-            .toLocalDateTime(getTZ())
+    override fun getStartDateTime(): Instant = runCatching {
+        val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
+        localDateTime.toInstant(getTZ())
     }.getOrElse {
-        Log.e(::getStartDateTime.name,"$id: Error parsing start date and time: $it")
+        Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $it")
         throw IllegalStateException("$id: Error parsing start date and time")
     }
 
@@ -226,7 +231,7 @@ data class WWWEvent(
                     .also { area.validationErrors()?.let { addAll(it) } }
                     .also { map.validationErrors()?.let { addAll(it) } }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "event: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
 
 }
 

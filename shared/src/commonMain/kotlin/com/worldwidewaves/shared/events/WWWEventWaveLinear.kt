@@ -20,11 +20,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygon
-import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
-import kotlinx.datetime.toInstant
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitPolygonByLongitude
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
@@ -37,7 +38,7 @@ import kotlin.time.toDuration
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: String,
+    override val direction: Direction,
     override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
@@ -57,7 +58,7 @@ data class WWWEventWaveLinear(
     override suspend fun getWarmingPolygons(): List<Polygon> {
         if (cachedWarmingPolygons == null) {
             cachedWarmingPolygons = when (warming.type) {
-                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
+                LONGITUDE_CUT -> event.area.getPolygons().flatMap { polygon ->
                     splitPolygonByLongitude(polygon, warming.longitude!!).right
                 }
                 else -> emptyList()
@@ -77,24 +78,33 @@ data class WWWEventWaveLinear(
      * The calculated duration is then cached for future use.
      *
      */
-    override suspend fun getWaveDuration(): Duration { // FIXME: buggy, infinite loop
+    override suspend fun getWaveDuration(): Duration {
         return cachedTotalTime ?: run {
-            val startDateTime = event.getStartDateTime()
-            val endDateTime = getEndTime()
-            (endDateTime.toInstant(event.getTZ()).epochSeconds -
-                            startDateTime.toInstant(event.getTZ()).epochSeconds
-                    ).toDuration(DurationUnit.SECONDS).also { cachedTotalTime = it }
+            val bbox = event.area.getBoundingBox()
+            val latitude = (bbox.maxLatitude + bbox.minLatitude) / 2
+            val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
+            val durationInSeconds = maxEastWestDistance / speed
+            durationInSeconds.toDuration(DurationUnit.SECONDS)
+                .also { cachedTotalTime = it }
         }
-    }
-
-    override suspend fun getWarmingDuration(): Duration {
-        TODO("Not yet implemented")
     }
 
     // ---------------------------
 
     override suspend fun hasUserBeenHit(): Boolean {
-        TODO("Not yet implemented")
+        val userPosition = getUserPosition() ?: return false
+        val bbox = event.area.getBoundingBox()
+        val waveCurrentLongitude = currentWaveLongitude(bbox)
+        return userPosition.lng in bbox.minLongitude..waveCurrentLongitude
+    }
+
+    @VisibleForTesting
+    fun currentWaveLongitude(bbox: BoundingBox): Double {
+        val latitude = (bbox.maxLatitude + bbox.minLatitude) / 2
+        val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
+        val distanceTraveled = speed * (clock.now() - event.getStartDateTime()).inWholeSeconds
+
+        return bbox.minLongitude + (distanceTraveled / maxEastWestDistance) * (bbox.maxLongitude - bbox.minLongitude) * if (direction == Direction.WEST) 1 else -1
     }
 
     // ---------------------------
@@ -105,7 +115,7 @@ data class WWWEventWaveLinear(
 
         // TODO
 
-        return errors.takeIf { it.isNotEmpty() }?.map { "wavelinear: $it" }
+        return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveLinear::class.simpleName}: $it" }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
 import kotlin.math.PI
 import kotlin.math.cos
@@ -28,7 +29,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestSplitPolygon {
+class AreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude() {

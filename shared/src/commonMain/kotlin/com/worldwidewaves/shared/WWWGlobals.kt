@@ -2,6 +2,9 @@ package com.worldwidewaves.shared
 
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
 
 /*
  * Copyright 2024 DrWave
@@ -22,8 +25,6 @@ import io.github.aakira.napier.Napier
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-annotation class OpenForMokkery()
 
 fun debugBuild() {
     Napier.base(DebugAntilog())
@@ -50,12 +51,13 @@ class WWWGlobals {
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
-        const val WAVE_OBSERVE_DELAY = 2 // hours
+        val WAVE_OBSERVE_DELAY = 2.hours // hours
+        val WAVE_WARMING_DURATION = 3.minutes
 
         // -- UI Constants --
 
-        const val CONST_SPLASH_MIN_DURATION =  2000 // ms
-        const val CONST_TIMER_GPS_UPDATE = 3000 // ms
+        val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
+        val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
 
         // ----------------------------
 

@@ -31,8 +31,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -48,9 +50,22 @@ interface DataValidator {
 
 interface IClock {
     fun now(): Instant
+
+    companion object {
+        fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
+            val localDateTime = instant.toLocalDateTime(timeZone)
+            val hour = localDateTime.hour.toString().padStart(2, '0')
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            return "$hour:$minute"
+        }
+    }
 }
 class SystemClock : IClock {
-    override fun now(): Instant = Clock.System.now()
+    override fun now(): Instant {
+        val instant = Instant.parse("2024-03-19T13:00:00Z")
+        val timeZone = TimeZone.of("America/Sao_Paulo")
+        return instant.toLocalDateTime(timeZone).toInstant(timeZone)
+    } // = Clock.System.now() // FIXME DEBUG
 }
 
 // ---------------------------

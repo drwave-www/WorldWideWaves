@@ -24,13 +24,14 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 // ---------------------------
 
 @Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
-    override val direction: String,
+    override val direction: Direction,
     override val warming: WWWEventWaveWarming,
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
@@ -42,11 +43,7 @@ data class WWWEventWaveLinearSplit(
     // ---------------------------
 
     override suspend fun getWaveDuration(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getWarmingDuration(): Duration {
-        TODO("Not yet implemented")
+        return 2.hours // TODO
     }
 
     override suspend fun hasUserBeenHit(): Boolean {
@@ -68,7 +65,7 @@ data class WWWEventWaveLinearSplit(
 
                 else -> { }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wavelinearsplit: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveLinearSplit::class.simpleName}: $it" }
     }
 
 }

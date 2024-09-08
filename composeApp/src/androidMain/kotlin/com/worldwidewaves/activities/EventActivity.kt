@@ -212,11 +212,17 @@ private fun EventOverlay(
 
 @Composable
 private fun EventOverlayDate(event: IWWWEvent, eventDate: String, modifier: Modifier = Modifier) {
+    var isDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        isDone = event.isDone()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .let { if (event.isDone()) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
-        contentAlignment = if (event.isDone()) Alignment.BottomCenter else Alignment.Center
+            .let { if (isDone) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
+        contentAlignment = if (isDone) Alignment.BottomCenter else Alignment.Center
     ) {
         val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
         Text(
@@ -291,17 +297,25 @@ private fun EventNumbers(event: IWWWEvent) {
     val eventTimeZone = remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
+    val order = listOf(
+        ShRes.string.wave_start_time,
+        ShRes.string.wave_end_time,
+        ShRes.string.wave_speed,
+        ShRes.string.wave_total_time,
+        ShRes.string.wave_progression
+    )
+
     // Retrieve wave numbers and frequently update progession
     LaunchedEffect(eventNumbers) {
         coroutineScope.launch {
             val waveNumbers = withContext(Dispatchers.IO) { event.wave.getAllNumbers() }
             eventNumbers.clear()
-            eventNumbers.putAll(mapOf(
-                    ShRes.string.wave_speed to waveNumbers.waveSpeed,
-                    ShRes.string.wave_start_time to waveNumbers.waveStartTime,
-                    ShRes.string.wave_end_time to waveNumbers.waveEndTime,
-                    ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
-                    ShRes.string.wave_progression to waveNumbers.waveProgression
+            eventNumbers.putAll(linkedMapOf(
+                ShRes.string.wave_start_time to waveNumbers.waveStartTime,
+                ShRes.string.wave_end_time to waveNumbers.waveEndTime,
+                ShRes.string.wave_speed to waveNumbers.waveSpeed,
+                ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
+                ShRes.string.wave_progression to waveNumbers.waveProgression
             ))
             eventTimeZone.value = waveNumbers.waveTimezone
 
@@ -336,43 +350,53 @@ private fun EventNumbers(event: IWWWEvent) {
                     )
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
-                eventNumbers.forEach { (key, value) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Label
-                        Text(
-                            text = stringResource(key),
-                            style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_LABEL_FONTSIZE)
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Value
+                if (eventNumbers.isNotEmpty()) {
+                    order.forEach { key ->
+                        val value = eventNumbers[key]!!
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Label
                             Text(
-                                text = value,
-                                style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
-                                    color = when (key) {
-                                        ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
-                                        ShRes.string.wave_start_time -> Color.Yellow
-                                        else -> MaterialTheme.colorScheme.primary
-                                    }
+                                text = stringResource(key),
+                                style = extraQuinaryColoredBoldTextStyle(
+                                    DIM_EVENT_NUMBERS_LABEL_FONTSIZE
                                 )
                             )
-                            // optional Timezone
-                            if (key in listOf(ShRes.string.wave_start_time, ShRes.string.wave_end_time)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Value
                                 Text(
-                                    text = " ${eventTimeZone.value}",
-                                    style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                    text = value,
+                                    style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
                                         color = when (key) {
+                                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
                                             ShRes.string.wave_start_time -> Color.Yellow
                                             else -> MaterialTheme.colorScheme.primary
                                         }
                                     )
                                 )
+                                // optional Timezone
+                                if (key in listOf(
+                                        ShRes.string.wave_start_time,
+                                        ShRes.string.wave_end_time
+                                    )
+                                ) {
+                                    Text(
+                                        text = " ${eventTimeZone.value}",
+                                        style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                            color = when (key) {
+                                                ShRes.string.wave_start_time -> Color.Yellow
+                                                else -> MaterialTheme.colorScheme.primary
+                                            }
+                                        )
+                                    )
+                                }
                             }
                         }
+                        Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                     }
-                    Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
                 }
             }
         }
