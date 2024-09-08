@@ -22,11 +22,9 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.events.utils.IClock
-import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
-import dev.mokkery.mock
-import dev.mokkery.verify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -44,8 +42,8 @@ import kotlin.time.Duration
 
 class WWWEventWaveTest : KoinTest {
 
-    private var clock = mock<IClock>()
-    private var event = mock<IWWWEvent>(MockMode.autofill)
+    private var clock = mockk<IClock>()
+    private var event = mockk<IWWWEvent>(relaxed = true)
     private lateinit var wave: WWWEventWave
 
     // ---------------------------

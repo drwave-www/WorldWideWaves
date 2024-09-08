@@ -54,6 +54,8 @@ interface IWWWEvent : DataValidator {
 
     enum class Status { DONE, SOON, RUNNING }
 
+    // ---------------------------
+
     fun getStatus(): Status
     fun isDone(): Boolean
     fun isSoon(): Boolean

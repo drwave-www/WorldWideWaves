@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.OpenForMokkery
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -37,7 +36,6 @@ import kotlin.jvm.JvmOverloads
 
 // ---------------------------
 
-@OpenForMokkery
 class WWWEvents : KoinComponent {
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
