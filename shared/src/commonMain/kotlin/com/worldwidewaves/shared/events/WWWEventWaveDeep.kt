@@ -47,6 +47,10 @@ data class WWWEventWaveDeep(
         TODO("Not yet implemented")
     }
 
+    override suspend fun timeBeforeHit(): Duration? {
+        TODO("Not yet implemented")
+    }
+
     // ---------------------------
 
     override fun validationErrors() : List<String>? {

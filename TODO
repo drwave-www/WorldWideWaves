@@ -13,8 +13,7 @@ Next:
 
 - Wave linear
     - wave progression
-        - adapt end time and progression to take into account the warming zone
-        - add a time delay for warming, in linear wave
+        - ajouter a la wave un timeRemainingBeforeHit()
         - add a layer on the map
         - add a progress bar on the map
 
@@ -29,6 +28,8 @@ Next:
     - add a button to center the wave on the map
 
 - Warming procedure (decouper par tranches et 'lancer' par tranches)
+
+- Faire s'agenouiller 30s avant le hit
 
 - Packaging :
     - generate a /events folder with all events, the map style and the events.json

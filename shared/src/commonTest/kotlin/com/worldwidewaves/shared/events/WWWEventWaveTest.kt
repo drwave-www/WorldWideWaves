@@ -28,7 +28,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -66,6 +65,7 @@ class WWWEventWaveTest : KoinTest {
             override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHit(): Boolean = false
+            override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
         }.setRelatedEvent(event)
     }
 
@@ -80,7 +80,6 @@ class WWWEventWaveTest : KoinTest {
     fun testIsNearTheEvent() {
 
         // GIVEN --------------------------------
-        val eventTimeZone = TimeZone.of("Pacific/Chatham") // Exotic timezone
         val now = Instant.parse("2023-12-31T13:15:00+02:00") // Close from the event
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 
@@ -101,7 +100,6 @@ class WWWEventWaveTest : KoinTest {
     fun testIsNearTheEvent_Fails() {
 
         // GIVEN --------------------------------
-        val eventTimeZone = TimeZone.of("Pacific/Chatham") // Exotic timezone
         val now = Instant.parse("2023-01-01T00:00:00+01:00") // Far from the event
         val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
 

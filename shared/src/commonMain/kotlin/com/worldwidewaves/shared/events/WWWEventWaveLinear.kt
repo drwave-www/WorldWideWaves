@@ -29,6 +29,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -95,6 +96,16 @@ data class WWWEventWaveLinear(
         val bbox = event.area.getBoundingBox()
         val waveCurrentLongitude = currentWaveLongitude(bbox)
         return userPosition.lng in bbox.minLongitude..waveCurrentLongitude
+    }
+
+    override suspend fun timeBeforeHit(): Duration? {
+        val userPosition = getUserPosition() ?: return null
+        val bbox = event.area.getBoundingBox()
+        val waveCurrentLongitude = currentWaveLongitude(bbox)
+        val distanceToUser = calculateDistance(waveCurrentLongitude, userPosition.lng, userPosition.lat)
+
+        val timeInSeconds = distanceToUser / speed
+        return timeInSeconds.seconds
     }
 
     fun currentWaveLongitude(bbox: BoundingBox): Double {

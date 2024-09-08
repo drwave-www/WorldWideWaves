@@ -95,6 +95,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     abstract suspend fun getWarmingPolygons(): List<Polygon>
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHit(): Boolean
+    abstract suspend fun timeBeforeHit(): Duration?
 
     // ---------------------------
 

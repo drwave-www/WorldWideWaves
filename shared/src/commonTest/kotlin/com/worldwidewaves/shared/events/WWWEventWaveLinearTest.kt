@@ -30,6 +30,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -121,7 +122,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { bbox.maxLongitude } returns 50.0
         coEvery { event.area.getBoundingBox() } returns bbox
         mockkObject(GeoUtils)
-        every { GeoUtils.calculateDistance(10.0, 50.0, 30.0) } returns 4000.0
+        every { calculateDistance(10.0, 50.0, 30.0) } returns 4000.0
 
         // WHEN
         val result = wave.getWaveDuration()
@@ -144,6 +145,7 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // WHEN
         val result = wave.hasUserBeenHit()
+        testScheduler.advanceUntilIdle()
 
         // THEN
         assertTrue(result)
@@ -191,6 +193,46 @@ class WWWEventWaveLinearTest : KoinTest {
         // THEN
         val expectedLongitude = 30.0 - (10.0 * 600 / calculateDistance(20.0, 30.0, 12.5)) * 10.0
         assertEquals(expectedLongitude, result, 0.0001)
+    }
+
+    @Test
+    fun testTimeBeforeHit_UserPositionAvailable() = runTest {
+        // GIVEN
+        val bbox = BoundingBox(
+            sw = Position(10.0, 20.0),
+            ne = Position(15.0, 30.0)
+        )
+        val userPosition = Position(12.5, 25.0)
+        val startTime = Instant.parse("2024-01-01T00:00:00Z")
+        val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
+
+        every { clock.now() } returns currentTime
+        every { event.getStartDateTime() } returns startTime
+        coEvery { event.area.getBoundingBox() } returns bbox
+        every { wave.getUserPosition() } returns userPosition
+
+        // WHEN
+        val result = wave.timeBeforeHit()
+        testScheduler.advanceUntilIdle()
+
+        // THEN
+        val waveCurrentLongitude = wave.currentWaveLongitude(bbox)
+        val distanceToUser = calculateDistance(waveCurrentLongitude, userPosition.lng, userPosition.lat)
+        val expectedTime = (distanceToUser / wave.speed).seconds
+        assertEquals(expectedTime, result)
+    }
+
+    @Test
+    fun testTimeBeforeHit_UserPositionNull() = runTest {
+        // GIVEN
+        every { wave.getUserPosition() } returns null
+
+        // WHEN
+        val result = wave.timeBeforeHit()
+        testScheduler.advanceUntilIdle()
+
+        // THEN
+        assertNull(result)
     }
 
 }

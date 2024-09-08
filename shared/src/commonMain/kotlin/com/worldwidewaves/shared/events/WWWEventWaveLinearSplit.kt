@@ -50,6 +50,10 @@ data class WWWEventWaveLinearSplit(
         TODO("Not yet implemented")
     }
 
+    override suspend fun timeBeforeHit(): Duration? {
+        TODO("Not yet implemented")
+    }
+
     // ---------------------------
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
