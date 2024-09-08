@@ -50,7 +50,6 @@ class WWWGlobals {
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
-        const val WAVE_DEFAULT_REFRESH_INTERVAL = 10000L // ms
         const val WAVE_OBSERVE_DELAY = 2 // hours
 
         // -- UI Constants --

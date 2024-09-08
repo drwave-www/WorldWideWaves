@@ -27,10 +27,8 @@ import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.polygonsBbox
-import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -44,10 +42,7 @@ import org.koin.core.component.inject
 
 @Serializable
 data class WWWEventArea(
-
-    val osmAdminid: Int,
-    val warming: Warming
-
+    val osmAdminid: Int
 ) : KoinComponent, DataValidator {
 
     private var _event: IWWWEvent? = null
@@ -63,29 +58,8 @@ data class WWWEventArea(
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     @Transient private val cachedAreaPolygon: MutableList<Polygon> = mutableListOf()
-    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
-
-    // ---------------------------
-
-    @Serializable
-    data class Warming(
-        val type: String,
-        val longitude: Double? = null,
-    ) : DataValidator {
-        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
-            when {
-                type == "longitude-cut" && longitude == null ->
-                    add("Longitude must not be null for type 'longitude-cut'")
-
-                type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
-                    add("Longitude must be between -180 and 180")
-
-                else -> {}
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "warming: $it" }
-    }
 
     // ---------------------------
 
@@ -158,7 +132,7 @@ data class WWWEventArea(
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
      */
-    private suspend fun getPolygons(): List<Polygon> {
+     suspend fun getPolygons(): List<Polygon> {
         if (cachedAreaPolygon.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
@@ -196,47 +170,13 @@ data class WWWEventArea(
 
     // ---------------------------
 
-    /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-
-     */
-    suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
-    }
-
-    /**
-     * Retrieves the warming polygons for the event area.
-     *
-     * This function returns a list of polygons representing the warming zones for the event area.
-     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
-     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
-     *
-     */
-    suspend fun getWarmingPolygons(): List<Polygon> {
-        if (cachedWarmingPolygons == null) {
-            cachedWarmingPolygons = when (warming.type) {
-                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
-                    splitPolygonByLongitude(polygon, warming.longitude!!).right
-                }
-                else -> emptyList()
-            }
-        }
-        return cachedWarmingPolygons!!
-    }
-
-    // ---------------------------
-
     override fun validationErrors(): List<String>? = mutableListOf<String>()
         .apply {
             when {
                 osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
                     add("OSM admin ID must be greater than 0 if it's not the world event")
 
-                else -> warming.validationErrors()?.let { addAll(it) }
+                else -> { /* No validation errors */ }
             }
         }.takeIf { it.isNotEmpty() }?.map { "area: $it" }
 

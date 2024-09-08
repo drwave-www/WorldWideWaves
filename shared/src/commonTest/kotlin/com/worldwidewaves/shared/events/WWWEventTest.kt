@@ -338,7 +338,7 @@ fun buildEmptyEvent(
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
-        area = WWWEventArea(osmAdminid, warming = WWWEventArea.Warming(type = "")),
+        area = WWWEventArea(osmAdminid),
         map = WWWEventMap(maxzoom, language, zone)
     )
 }

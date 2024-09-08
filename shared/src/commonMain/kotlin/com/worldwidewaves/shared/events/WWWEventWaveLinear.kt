@@ -20,85 +20,68 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_DEFAULT_REFRESH_INTERVAL
-import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.getLocalDatetime
-import kotlinx.datetime.LocalDateTime
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.isPointInPolygon
+import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 // ---------------------------
 
-const val METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR = 111320.0
-
-// ---------------------------
-
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: String
+    override val direction: String,
+    override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
-    private var observationInterval: Long = WAVE_DEFAULT_REFRESH_INTERVAL
-    private var cachedEndTime: LocalDateTime? = null
-    private var cachedTotalTime: Duration? = null
-
-    // ---------------------------
-
-    override suspend fun getObservationInterval(): Long = observationInterval
+    @Transient private var cachedTotalTime: Duration? = null
+    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
 
     // ---------------------------
 
     /**
-     * Calculates the distance between the easternmost and westernmost points of a bounding box,
-     * adjusted for the average latitude.
+     * Checks if a given position is within any of the warming polygons.
      *
-     * This function computes the distance in meters between the northeast and southwest corners
-     * of the bounding box along the longitude, taking into account the average latitude to adjust
-     * for the Earth's curvature.
+     * This function retrieves the warming polygons and checks if the specified position
+     * is within any of these polygons using the `isPointInPolygon` function.
      *
+
      */
-    private fun calculateDistance(bbox: BoundingBox, avgLatitude: Double): Double {
-        return abs(bbox.ne.lng - bbox.sw.lng) *
-                METERS_PER_DEGREE_LONGITUDE_AT_EQUATOR *
-                cos(avgLatitude * PI / 180.0)
+    override suspend fun isPositionWithinWarming(position: Position): Boolean {
+        return getWarmingPolygons().any { isPointInPolygon(position, it) }
     }
 
     /**
-     * Calculates the end time of the event based on its start time, bounding box, and speed.
+     * Retrieves the warming polygons for the event area.
      *
-     * This function determines the end time of the event by performing the following steps:
-     * 1. Retrieves the start date and time of the event in the local time zone.
-     * 2. Obtains the bounding box of the event area.
-     * 3. Calculates the average latitude of the bounding box.
-     * 4. Computes the distance across the bounding box at the average latitude.
-     * 5. Calculates the duration of the event based on the distance and the event's speed.
-     * 6. Adds the duration to the start time to get the end time.
+     * This function returns a list of polygons representing the warming zones for the event area.
+     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
+     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
      *
      */
-    override suspend fun getEndTime(): LocalDateTime {
-        return cachedEndTime ?: run {
-            val startDateTime = event.getStartDateTime()
-            val bbox = event.area.getBoundingBox()
-            val avgLatitude = (bbox.sw.lat + bbox.ne.lat) / 2.0
-            val distance = calculateDistance(bbox, avgLatitude)
-            val duration = (distance / speed).toDuration(DurationUnit.SECONDS)
-            startDateTime.toInstant(event.getTZ()).plus(duration).toLocalDateTime(event.getTZ())
-        }.also { cachedEndTime = it }
+    override suspend fun getWarmingPolygons(): List<Polygon> {
+        if (cachedWarmingPolygons == null) {
+            cachedWarmingPolygons = when (warming.type) {
+                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
+                    splitPolygonByLongitude(polygon, warming.longitude!!).right
+                }
+                else -> emptyList()
+            }
+        }
+        return cachedWarmingPolygons!!
     }
 
     // ---------------------------
 
     /**
-     * Calculates the total duration of the event from its start time to its end time.
+     * Calculates the total duration of the wave from its start time to its end time.
      *
      * This function first checks if the total duration has been previously calculated and cached.
      * If not, it calculates the duration by finding the difference between the event's end time
@@ -106,7 +89,7 @@ data class WWWEventWaveLinear(
      * The calculated duration is then cached for future use.
      *
      */
-    override suspend fun getTotalTime(): Duration {
+    override suspend fun getWaveDuration(): Duration { // FIXME: buggy, infinite loop
         return cachedTotalTime ?: run {
             val startDateTime = event.getStartDateTime()
             val endDateTime = getEndTime()
@@ -116,35 +99,11 @@ data class WWWEventWaveLinear(
         }
     }
 
-    // ---------------------------
-
-    /**
-     * Calculates the literal progression of the event as a percentage.
-     *
-     * This function determines the progression of the event based on its current state and elapsed time.
-     * If the event is done, it returns "100%". If the event is not running, it returns "0%".
-     * Otherwise, it calculates the elapsed time since the event started and expresses it as a percentage
-     * of the total event duration.
-     *
-     */
-    override suspend fun getProgression(): Double {
-        return when {
-            event.isDone() -> 100.0
-            !event.isRunning() -> 0.0
-            else -> {
-                val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
-                        event.getStartDateTime().toInstant(event.getTZ()).epochSeconds
-                val totalTime = getTotalTime().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
-            }
-        }
-    }
-
-    // ---------------------------
-
-    override suspend fun isWarmingEnded(): Boolean {
+    override suspend fun getWarmingDuration(): Duration {
         TODO("Not yet implemented")
     }
+
+    // ---------------------------
 
     override suspend fun hasUserBeenHit(): Boolean {
         TODO("Not yet implemented")

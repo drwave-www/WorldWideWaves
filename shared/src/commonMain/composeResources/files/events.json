@@ -14,15 +14,15 @@
     "wavedef": {
       "linear": {
         "direction": "west",
-        "speed": 5
+        "speed": 5,
+        "warming": {
+          "type": "longitude-cut",
+          "longitude": 2.39492
+        }
       }
     },
     "area": {
-      "osmAdminid": 71525,
-      "warming": {
-        "type": "longitude-cut",
-        "longitude": 2.39492
-      }
+      "osmAdminid": 71525
     },
     "map": {
       "maxZoom": 18,
@@ -45,15 +45,15 @@
     "wavedef": {
       "deep": {
         "speed": 5,
-        "direction": "west"
+        "direction": "west",
+        "warming": {
+          "type": "longitude-cut",
+          "longitude": -43.28212428287723
+        }
       }
     },
     "area": {
-      "osmAdminid": 2697338,
-      "warming": {
-        "type": "longitude-cut",
-        "longitude": -43.28212428287723
-      }
+      "osmAdminid": 2697338
     },
     "map": {
       "maxZoom": 18,
@@ -76,15 +76,15 @@
       "linearSplit": {
         "speed": 5,
         "direction": "west",
-        "nbSplits":  50
+        "nbSplits":  50,
+        "warming": {
+          "type": "longitude-percent",
+          "longitude": 5
+        }
       }
     },
     "area": {
-      "osmAdminid": 9331155,
-      "warming": {
-        "type": "longitude-percent",
-        "longitude": 5
-      }
+      "osmAdminid": 9331155
     },
     "map": {
       "maxZoom": 18,
@@ -114,11 +114,7 @@
       }
     },
     "area": {
-      "osmAdminid": 0,
-      "warming": {
-        "type": "longitude-percent",
-        "longitude": 5
-      }
+      "osmAdminid": 0
     },
     "map": {
       "maxZoom": 5,

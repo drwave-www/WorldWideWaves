@@ -20,7 +20,8 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.LocalDateTime
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
@@ -31,28 +32,25 @@ import kotlin.time.Duration
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: String,
+    override val warming: WWWEventWaveWarming,
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
 
+    override suspend fun isPositionWithinWarming(position: Position): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWarmingPolygons(): List<Polygon> {
+        return emptyList()
+    }
+
     // ---------------------------
 
-    override suspend fun getObservationInterval(): Long {
+    override suspend fun getWaveDuration(): Duration {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getEndTime(): LocalDateTime {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getTotalTime(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getProgression(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isWarmingEnded(): Boolean {
+    override suspend fun getWarmingDuration(): Duration {
         TODO("Not yet implemented")
     }
 

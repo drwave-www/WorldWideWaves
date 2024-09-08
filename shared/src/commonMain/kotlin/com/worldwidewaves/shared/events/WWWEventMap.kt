@@ -91,7 +91,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val warmingGeoJsonFilePath = cacheStringToFile(
             "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.area.getWarmingPolygons())
+            convertPolygonsToGeoJson(event.wave.getWarmingPolygons())
         ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()

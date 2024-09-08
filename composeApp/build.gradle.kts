@@ -47,7 +47,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
+    packaging {
+        resources.excludes.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+            )
+        )
+    }
     defaultConfig {
         applicationId = "com.worldwidewaves"
         minSdk = libs.versions.android.minSdk.get().toInt()

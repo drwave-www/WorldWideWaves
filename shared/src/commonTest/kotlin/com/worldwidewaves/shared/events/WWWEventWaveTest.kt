@@ -22,11 +22,12 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.koin.core.context.startKoin
@@ -62,11 +63,11 @@ class WWWEventWaveTest : KoinTest {
         wave = object : WWWEventWave() {
             override val speed: Double = 0.0
             override val direction: String = "N"
-            override suspend fun getObservationInterval(): Long = 0L
-            override suspend fun getEndTime(): LocalDateTime = LocalDateTime(2024, 1, 1, 0, 0)
-            override suspend fun getTotalTime(): Duration = Duration.ZERO
-            override suspend fun getProgression(): Double = 0.0
-            override suspend fun isWarmingEnded(): Boolean = false
+            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = "")
+            override suspend fun isPositionWithinWarming(position: Position): Boolean = false
+            override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
+            override suspend fun getWaveDuration(): Duration = Duration.ZERO
+            override suspend fun getWarmingDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHit(): Boolean = false
         }.setEvent(event)
     }
