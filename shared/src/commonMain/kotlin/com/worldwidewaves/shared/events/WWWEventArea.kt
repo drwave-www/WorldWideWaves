@@ -62,7 +62,7 @@ data class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val areaPolygon: MutableList<Polygon> = mutableListOf()
+    @Transient private val cachedAreaPolygon: MutableList<Polygon> = mutableListOf()
     @Transient private var cachedWarmingPolygons: List<Polygon>? = null
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
@@ -159,7 +159,7 @@ data class WWWEventArea(
      *
      */
     private suspend fun getPolygons(): List<Polygon> {
-        if (areaPolygon.isEmpty()) {
+        if (cachedAreaPolygon.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
@@ -172,7 +172,7 @@ data class WWWEventArea(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
                                 )
-                            }.apply { areaPolygon.add(this) }
+                            }.apply { cachedAreaPolygon.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
                             multiPolygon.jsonArray.flatMap { ring ->
@@ -181,7 +181,7 @@ data class WWWEventArea(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
-                                }.apply { areaPolygon.add(this) }
+                                }.apply { cachedAreaPolygon.add(this) }
                             }
                         }
                         else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
@@ -191,7 +191,7 @@ data class WWWEventArea(
                 }
             }
         }
-        return areaPolygon
+        return cachedAreaPolygon
     }
 
     // ---------------------------

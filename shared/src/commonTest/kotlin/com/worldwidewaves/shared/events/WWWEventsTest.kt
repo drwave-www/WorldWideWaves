@@ -59,7 +59,7 @@ class WWWEventsTest : KoinTest {
     private val mockedKoinDeclaration: KoinAppDeclaration = {
         modules(
             module {
-                single { spyk(WWWEvents()) }
+                single { spyk(WWWEvents()) } // <-- tested class
                 single<InitFavoriteEvent> { mockk() }
                 single<EventsConfigurationProvider> {
                     spyk(object : EventsConfigurationProvider {

@@ -107,14 +107,23 @@ data class WWWEvent(
 
     override fun isDone(): Boolean {
         return this.id == "paris_france" // TODO: test
+//        val endDateTime = this.wave.getEndTime()
+//        return endDateTime < LocalDateTime.now()
     }
 
     override fun isSoon(): Boolean {
         return this.id == "unitedstates" // TODO: test…
+//        val eventDateTime = getStartDateTime()
+//        val now = LocalDateTime.now()
+//        return eventDateTime > now && eventDateTime <= now.plusHours(24)
     }
 
     override fun isRunning(): Boolean {
         return this.id == "riodejaneiro_brazil" // TODO: test…
+//        val startDateTime = getStartDateTime()
+//        val endDateTime = this.wave.getEndTime()
+//        val now = LocalDateTime.now()
+//        return startDateTime <= now && endDateTime > now
     }
 
     // ---------------------------
@@ -136,10 +145,14 @@ data class WWWEvent(
      * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
      *
      */
-    override fun getLiteralStartDateSimple(): String = getStartDateTime().let {
-        "${it.dayOfMonth.toString().padStart(2, '0')}/${
-            it.monthNumber.toString().padStart(2, '0')
-        }"
+    override fun getLiteralStartDateSimple(): String = try {
+        getStartDateTime().let {
+            "${it.dayOfMonth.toString().padStart(2, '0')}/${
+                it.monthNumber.toString().padStart(2, '0')
+            }"
+        }
+    } catch (e: Exception) {
+        "error"
     }
 
     /**
@@ -155,7 +168,7 @@ data class WWWEvent(
             .toLocalDateTime(getTZ())
     }.getOrElse {
         Log.e(::getStartDateTime.name,"$id: Error parsing start date and time: $it")
-        LocalDateTime(0, 1, 1, 0, 0)
+        throw IllegalStateException("$id: Error parsing start date and time")
     }
 
     /**
