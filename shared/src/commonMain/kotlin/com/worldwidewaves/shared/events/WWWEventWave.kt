@@ -7,6 +7,7 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.isPointInPolygon
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,7 +91,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun isPositionWithinWarming(position: Position): Boolean
     abstract suspend fun getWarmingPolygons(): List<Polygon>
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun getWarmingDuration(): Duration
@@ -139,6 +139,18 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 }
             }
         }
+    }
+
+    /**
+     * Checks if a given position is within any of the warming polygons.
+     *
+     * This function retrieves the warming polygons and checks if the specified position
+     * is within any of these polygons using the `isPointInPolygon` function.
+     *
+
+     */
+    suspend fun isPositionWithinWarming(position: Position): Boolean {
+        return getWarmingPolygons().any { isPointInPolygon(position, it) }
     }
 
     /**

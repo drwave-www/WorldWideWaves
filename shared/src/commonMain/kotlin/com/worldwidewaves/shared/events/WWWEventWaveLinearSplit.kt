@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
@@ -35,10 +34,6 @@ data class WWWEventWaveLinearSplit(
     override val warming: WWWEventWaveWarming,
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
-
-    override suspend fun isPositionWithinWarming(position: Position): Boolean {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getWarmingPolygons(): List<Polygon> {
         return emptyList()

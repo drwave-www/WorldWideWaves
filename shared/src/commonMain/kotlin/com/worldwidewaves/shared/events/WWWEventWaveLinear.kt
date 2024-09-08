@@ -47,18 +47,6 @@ data class WWWEventWaveLinear(
     // ---------------------------
 
     /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-
-     */
-    override suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
-    }
-
-    /**
      * Retrieves the warming polygons for the event area.
      *
      * This function returns a list of polygons representing the warming zones for the event area.
