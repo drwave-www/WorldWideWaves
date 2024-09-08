@@ -20,7 +20,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
@@ -98,13 +97,17 @@ data class WWWEventWaveLinear(
         return userPosition.lng in bbox.minLongitude..waveCurrentLongitude
     }
 
-    @VisibleForTesting
     fun currentWaveLongitude(bbox: BoundingBox): Double {
         val latitude = (bbox.maxLatitude + bbox.minLatitude) / 2
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
         val distanceTraveled = speed * (clock.now() - event.getStartDateTime()).inWholeSeconds
 
-        return bbox.minLongitude + (distanceTraveled / maxEastWestDistance) * (bbox.maxLongitude - bbox.minLongitude) * if (direction == Direction.WEST) 1 else -1
+        val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (bbox.maxLongitude - bbox.minLongitude)
+        return if (direction == Direction.WEST) {
+            bbox.maxLongitude - longitudeDelta
+        } else {
+            bbox.minLongitude + longitudeDelta
+        }
     }
 
     // ---------------------------

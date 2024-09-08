@@ -2,6 +2,7 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils
+import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.PolygonUtils
 import com.worldwidewaves.shared.events.utils.Position
@@ -20,6 +21,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -146,6 +148,49 @@ class WWWEventWaveLinearTest : KoinTest {
         // THEN
         assertTrue(result)
         coVerify { wave.getUserPosition() }
+    }
+
+    @Test
+    fun testCurrentWaveLongitude_EastDirection() {
+        // GIVEN
+        val bbox = BoundingBox(
+            sw = Position(10.0, 20.0),
+            ne = Position(15.0, 30.0)
+        )
+        val startTime = Instant.parse("2024-01-01T00:00:00Z")
+        val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
+
+        every { clock.now() } returns currentTime
+        every { event.getStartDateTime() } returns startTime
+
+        // WHEN
+        val result = wave.currentWaveLongitude(bbox)
+
+        // THEN
+        val expectedLongitude = 20.0 + (10.0 * 600 / calculateDistance(20.0, 30.0, 12.5)) * 10.0
+        assertEquals(expectedLongitude, result, 0.0001)
+    }
+
+    @Test
+    fun testCurrentWaveLongitude_WestDirection() {
+        // GIVEN
+        wave = wave.copy(direction = WWWEventWave.Direction.WEST).setRelatedEvent(event)
+        val bbox = BoundingBox(
+            sw = Position(10.0, 20.0),
+            ne = Position(15.0, 30.0)
+        )
+        val startTime = Instant.parse("2024-01-01T00:00:00Z")
+        val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
+
+        every { clock.now() } returns currentTime
+        every { event.getStartDateTime() } returns startTime
+
+        // WHEN
+        val result = wave.currentWaveLongitude(bbox)
+
+        // THEN
+        val expectedLongitude = 30.0 - (10.0 * 600 / calculateDistance(20.0, 30.0, 12.5)) * 10.0
+        assertEquals(expectedLongitude, result, 0.0001)
     }
 
 }
