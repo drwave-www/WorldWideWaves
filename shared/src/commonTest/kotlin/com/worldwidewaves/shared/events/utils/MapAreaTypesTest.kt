@@ -136,12 +136,18 @@ class MapAreaTypesTest {
 
     @Test
     fun testListToPolygon() {
-        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(3.0, 3.0))
+        val positions = listOf(
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(3.0, 3.0)
+        )
         val polygon = positions.toPolygon
         assertEquals(positions.size, polygon.size)
-        positions.forEachIndexed { index, position ->
-            assertEquals(position.lat, polygon.getPosition(index + 42)!!.lat)
-            assertEquals(position.lng, polygon.getPosition(index + 42)!!.lng)
+        val iterator = polygon.iterator()
+        positions.forEach { position ->
+            val polyPosition = iterator.next()
+            assertEquals(position.lat, polyPosition.lat)
+            assertEquals(position.lng, polyPosition.lng)
         }
     }
 

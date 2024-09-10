@@ -117,63 +117,49 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         if (position is CutPosition) {
             cutPositions.remove(position)
         }
-        var current = head
-        var previous: Position? = null
 
-        while (current != null) {
-            if (current.id == id) {
-                if (previous == null) head = current.next else previous.next = current.next
-                if (current == tail) tail = previous
-                return true
-            }
-            previous = current
-            current = current.next
+        head = if (position == head) position.next else {
+            val previous = positionsIndex.values.find { it.next?.id == id }
+            previous?.next = position.next
+            head
         }
-        return false
+
+        tail = positionsIndex.values.find { it.next?.id == position.id }?.apply { next = null }
+
+        return true
     }
 
     fun insertAfter(newPosition: Position, id: Int): Boolean {
-        var current = head
+        val current = positionsIndex[id] ?: return false
         val addPosition = Position(newPosition.lat, newPosition.lng).init()
 
-        while (current != null) {
-            if (current.id == id) {
-                addPosition.next = current.next
-                current.next = addPosition
-                positionsIndex[addPosition.id] = addPosition
-                if (addPosition is CutPosition) {
-                    cutPositions.add(addPosition)
-                }
-                return true
-            }
-            current = current.next
+        addPosition.next = current.next
+        current.next = addPosition
+
+        positionsIndex[addPosition.id] = addPosition
+        if (addPosition is CutPosition) {
+            cutPositions.add(addPosition)
         }
-        return false
+        return true
     }
 
     fun insertBefore(newPosition: Position, id1: Int): Boolean {
-        var current = head
-        var previous: Position? = null
+        val current = positionsIndex[id1] ?: return false
         val addPosition = Position(newPosition.lat, newPosition.lng).init()
 
-        while (current != null) {
-            if (current.id == id1) {
-                addPosition.next = current
-                if (previous == null) {
-                    head = addPosition
-                } else {
-                    previous.next = addPosition
-                }
-                positionsIndex[addPosition.id] = addPosition
-                if (addPosition is CutPosition) {
-                    cutPositions.add(addPosition)
-                }
-                return true
-            }
-            previous = current
-            current = current.next
+        addPosition.next = current
+        if (current == head) {
+            head = addPosition
+        } else {
+            val previous = positionsIndex.values.find { it.next?.id == id1 }
+            previous?.next = addPosition
         }
-        return false
+
+        positionsIndex[addPosition.id] = addPosition
+        if (addPosition is CutPosition) {
+            cutPositions.add(addPosition)
+        }
+        return true
     }
 
     // --------------------------------
