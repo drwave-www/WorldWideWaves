@@ -20,9 +20,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
-import io.github.aakira.napier.Napier
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -31,35 +34,36 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.time.Duration.Companion.days
 
 // ---------------------------
 
 @Serializable
 data class WWWEvent(
 
-    val id: String,
-    val type: String,
-    val location: String,
-    val country: String? = null,
-    val community: String? = null,
+    override val id: String,
+    override val type: String,
+    override val location: String,
+    override val country: String? = null,
+    override val community: String? = null,
 
-    val timeZone: String,
-    val date: String,
-    val startHour: String,
+    override val timeZone: String,
+    override val date: String,
+    override val startHour: String,
 
-    val description: String,
-    val instagramAccount: String,
-    val instagramHashtag: String,
+    override val description: String,
+    override  val instagramAccount: String,
+    override val instagramHashtag: String,
 
-    val wavedef: WWWWaveDefinition,
-    val area: WWWEventArea,
-    val map: WWWEventMap,
+    override val wavedef: WWWWaveDefinition,
+    override val area: WWWEventArea,
+    override val map: WWWEventMap,
 
-    var favorite: Boolean = false
+    override var favorite: Boolean = false
 
-) : DataValidator {
-
-    enum class Status { DONE, SOON, RUNNING }
+) : IWWWEvent, DataValidator, KoinComponent {
 
     @Serializable
     data class WWWWaveDefinition(
@@ -77,16 +81,20 @@ data class WWWEvent(
 
                 else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wavedef: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWWaveDefinition::class.simpleName}: $it" }
     }
 
     // ---------------------------
 
+    private val clock: IClock by inject()
+
+    // ---------------------------
+
     @Transient private var _wave: WWWEventWave? = null
-    val wave: WWWEventWave
+    override val wave: WWWEventWave
         get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
         ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
-            setEvent(this@WWWEvent)
+            setRelatedEvent<WWWEventWave>(this@WWWEvent)
             _wave = this
         }
 
@@ -97,38 +105,44 @@ data class WWWEvent(
 
     // ---------------------------
 
-    fun getStatus(): Status {
+    override suspend fun getStatus(): Status {
         return when {
             isDone() -> Status.DONE
             isSoon() -> Status.SOON
             isRunning() -> Status.RUNNING
-            else -> throw IllegalStateException("$id : Event status is undefined")
+            else -> Status.NEXT
         }
     }
 
-    fun isDone(): Boolean {
-        return this.id == "paris_france" // TODO: test
+    override suspend fun isDone(): Boolean {
+        val endDateTime = this.wave.getEndTime()
+        return endDateTime < clock.now()
     }
 
-    fun isSoon(): Boolean {
-        return this.id == "unitedstates" // TODO: test…
+    override fun isSoon(): Boolean {
+        val eventDateTime = getStartDateTime()
+        val now = clock.now()
+        return eventDateTime > now && eventDateTime <= now.plus(30.days)
     }
 
-    fun isRunning(): Boolean {
-        return this.id == "riodejaneiro_brazil" // TODO: test…
+    override suspend fun isRunning(): Boolean {
+        val startDateTime = getStartDateTime()
+        val endDateTime = this.wave.getEndTime()
+        val now = clock.now()
+        return startDateTime <= now && endDateTime > now
     }
 
     // ---------------------------
 
     private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
 
-    fun getLocationImage(): Any? = getEventImageByType("location", this.id)
-    fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
-    fun getCountryImage(): Any? = getEventImageByType("country", this.country)
+    override fun getLocationImage(): Any? = getEventImageByType("location", this.id)
+    override fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
+    override fun getCountryImage(): Any? = getEventImageByType("country", this.country)
 
     // ---------------------------
 
-    fun getTZ(): TimeZone = TimeZone.of(this.timeZone)
+    override fun getTZ(): TimeZone = TimeZone.of(this.timeZone)
 
     /**
      * Converts the start date and time of the event to a simple local date format.
@@ -136,12 +150,15 @@ data class WWWEvent(
      * This function parses the event's start date and time, converts it to the local time zone,
      * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
      *
-     * @return A string representing the start date in the "dd/MM" format, or "00/00" if the conversion fails.
      */
-    fun getLiteralStartDateSimple(): String = getStartDateTime().let {
-        "${it.dayOfMonth.toString().padStart(2, '0')}/${
-            it.monthNumber.toString().padStart(2, '0')
-        }"
+    override fun getLiteralStartDateSimple(): String = try {
+        getStartDateTime().let {
+            "${it.toLocalDateTime(getTZ()).dayOfMonth.toString().padStart(2, '0')}/${
+                it.toLocalDateTime(getTZ()).monthNumber.toString().padStart(2, '0')
+            }"
+        }
+    } catch (e: Exception) {
+        "error"
     }
 
     /**
@@ -150,15 +167,13 @@ data class WWWEvent(
      * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
      * and then converts it to a `LocalDateTime` in the same time zone.
      *
-     * @return A `LocalDateTime` representing the start date and time of the event in the local time zone.
      */
-    fun getStartDateTime(): LocalDateTime = runCatching {
-        LocalDateTime.parse("${date}T${startHour}")
-            .toInstant(getTZ())
-            .toLocalDateTime(getTZ())
+    override fun getStartDateTime(): Instant = runCatching {
+        val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
+        localDateTime.toInstant(getTZ())
     }.getOrElse {
-        Napier.e("$id: Error parsing start date and time: $it")
-        LocalDateTime(0, 1, 1, 0, 0)
+        Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $it")
+        throw IllegalStateException("$id: Error parsing start date and time")
     }
 
     /**
@@ -216,7 +231,7 @@ data class WWWEvent(
                     .also { area.validationErrors()?.let { addAll(it) } }
                     .also { map.validationErrors()?.let { addAll(it) } }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "event: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
 
 }
 

@@ -1,12 +1,12 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.data
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import com.worldwidewaves.shared.events.WWWEvent
-import io.github.aakira.napier.Napier
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -22,7 +22,7 @@ import kotlinx.coroutines.withContext
  * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
  * community, and shared human experience by leveraging real-time coordination and location-based services.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "LiBooleancense");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -49,7 +49,10 @@ class FavoriteEventsStore(
 
     suspend fun isFavorite(eventId: String): Boolean = withContext(dispatcher) {
         dataStore.data
-            .catch { Napier.e("Error reading favorites", it); emit(emptyPreferences()) }
+            .catch {
+                Log.e(::isFavorite.name, "Error reading favorites", throwable = it)
+                emit(emptyPreferences())
+            }
             .map { it[favoriteKey(eventId)] ?: false }
             .firstOrNull() ?: false
     }
@@ -59,13 +62,13 @@ class FavoriteEventsStore(
 // ----------------------------
 
 class InitFavoriteEvent(private val favoriteEventsStore: FavoriteEventsStore) {
-    suspend fun call(event: WWWEvent) {
+    suspend fun call(event: IWWWEvent) {
         event.favorite = favoriteEventsStore.isFavorite(event.id)
     }
 }
 
 class SetEventFavorite(private val favoriteEventsStore: FavoriteEventsStore) {
-    suspend fun call(event: WWWEvent, isFavorite: Boolean) =
+    suspend fun call(event: IWWWEvent, isFavorite: Boolean) =
         favoriteEventsStore.setFavoriteStatus(event.id, isFavorite)
             .also { event.favorite = isFavorite }
 }

@@ -26,37 +26,36 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 @Composable
 fun requestLocationPermission(): Boolean {
     val context = LocalContext.current
-    val permissionState = remember { mutableStateOf(false) }
+    var permissionGranted by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        permissionState.value =
-            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-                    && permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
     }
 
     LaunchedEffect(Unit) {
         val fineLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
 
         if (fineLocationGranted && coarseLocationGranted) {
-            permissionState.value = true
+            permissionGranted = true
         } else {
             launcher.launch(
                 arrayOf(
@@ -67,5 +66,5 @@ fun requestLocationPermission(): Boolean {
         }
     }
 
-    return permissionState.value
+    return permissionGranted
 }

@@ -1,11 +1,4 @@
-package com.worldwidewaves.shared.di
-
-import com.worldwidewaves.shared.data.FavoriteEventsStore
-import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.createDataStore
-import com.worldwidewaves.shared.data.keyValueStorePath
-import org.koin.dsl.module
+package com.worldwidewaves.shared.data
 
 /*
  * Copyright 2024 DrWave
@@ -27,10 +20,18 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val datastoreModule = module {
-    single { createDataStore { keyValueStorePath() } }
+import android.content.Context
+import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
+import com.worldwidewaves.shared.getPlatform
 
-    single { FavoriteEventsStore(get()) }
-    factory { InitFavoriteEvent(favoriteEventsStore = get()) }
-    factory { SetEventFavorite(favoriteEventsStore = get()) }
-}
+/**
+ * Retrieves the file path for the key-value store.
+ *
+ * This function constructs the file path for the key-value store by accessing the application's
+ * files directory and appending the specified folder and file name for the data store.
+ *
+ */
+actual fun keyValueStorePath(): String = (getPlatform().getContext() as Context)
+        .filesDir
+        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
+        .absolutePath

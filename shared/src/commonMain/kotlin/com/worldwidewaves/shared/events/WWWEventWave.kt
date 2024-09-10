@@ -1,25 +1,29 @@
 package com.worldwidewaves.shared.events
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
 import com.worldwidewaves.shared.events.utils.Position
-import io.github.aakira.napier.Napier
+import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /*
  * Copyright 2024 DrWave
@@ -41,10 +45,6 @@ import kotlin.time.Duration.Companion.hours
  * limitations under the License.
  */
 
-
-
-// ---------------------------
-
 @Serializable
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
@@ -59,28 +59,32 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract val speed: Double
-    abstract val direction: String
+    enum class Direction { WEST, EAST }
+
+    abstract val speed: Double // m/s
+    abstract val direction: Direction
+    abstract val warming: WWWEventWaveWarming
 
     // ---------------------------
 
-    private val clock: IClock by inject()
-    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+    protected val clock: IClock by inject()
+    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     // ---------------------------
 
-    @Transient private var _event: WWWEvent? = null
+    @Transient private var _event: IWWWEvent? = null
 
     @Transient private var observationStarted = false
-    @Transient private var lastObservedStatus: WWWEvent.Status? = null
+    @Transient private var lastObservedStatus: IWWWEvent.Status? = null
     @Transient private var lastObservedProgression: Double? = null
 
     @Transient protected var positionRequester: (() -> Position?)? = null
     @Transient private var cachedLiteralStartTime: String? = null
+    @Transient private var cachedLiteralEndTime: String? = null
 
     // ---------------------------
 
-    @Transient private val waveStatusChangedListeners = mutableListOf<(WWWEvent.Status) -> Unit>()
+    @Transient private val waveStatusChangedListeners = mutableListOf<(IWWWEvent.Status) -> Unit>()
     @Transient private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
     @Transient private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
     @Transient private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
@@ -88,26 +92,35 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun getObservationInterval(): Long
-    abstract suspend fun getEndTime(): LocalDateTime
-    abstract suspend fun getTotalTime(): Duration
-    abstract suspend fun getProgression(): Double
-    abstract suspend fun isWarmingEnded(): Boolean
+    abstract suspend fun getWarmingPolygons(): List<Polygon>
+    abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHit(): Boolean
+    abstract suspend fun timeBeforeHit(): Duration?
 
     // ---------------------------
 
-    protected val event: WWWEvent
+    protected val event: IWWWEvent
         get() = this._event ?: run {
-            Napier.e(tag = "WWWEventWave", message = "Event not set")
+            Log.e(::event.name, "Event not set")
             throw IllegalStateException("Event not set")
         }
 
-    fun setEvent(event: WWWEvent) = apply { this._event = event }
+    @Suppress("UNCHECKED_CAST")
+    fun <T : WWWEventWave> setRelatedEvent(event: IWWWEvent): T {
+        this._event = event
+        return this as T
+    }
 
     fun setPositionRequester(positionRequester: () -> Position?) = apply {
         this.positionRequester = positionRequester
     }
+
+    @VisibleForTesting
+    fun getUserPosition(): Position? = positionRequester?.invoke()
+
+    // ---------------------------
+
+    fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
 
     // ---------------------------
 
@@ -123,13 +136,33 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
             coroutineScopeProvider.scopeIO.launch {
                 lastObservedStatus = event.getStatus()
-                lastObservedProgression = getProgression()
+
+                try {
+                    lastObservedProgression = getProgression()
+                } catch (e: Throwable) {
+                    Log.e(
+                        tag = "WWWEventWave",
+                        message = "Error initializing last observed progression: $e"
+                    )
+                }
 
                 if (event.isRunning() || (event.isSoon() && isNearTheEvent())) {
                     observeWave()
                 }
             }
         }
+    }
+
+    /**
+     * Checks if a given position is within any of the warming polygons.
+     *
+     * This function retrieves the warming polygons and checks if the specified position
+     * is within any of these polygons using the `isPointInPolygon` function.
+     *
+
+     */
+    suspend fun isPositionWithinWarming(position: Position): Boolean {
+        return getWarmingPolygons().any { isPointInPolygon(position, it) }
     }
 
     /**
@@ -140,11 +173,10 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      *
      */
     fun isNearTheEvent(): Boolean {
-        val eventTimeZone: TimeZone = event.getTZ()
-        val now: Instant = clock.now().toLocalDateTime(eventTimeZone).toInstant(eventTimeZone)
-        val eventStartTime: Instant = event.getStartDateTime().toInstant(eventTimeZone)
+        val now: Instant = clock.now()
+        val eventStartTime: Instant = event.getStartDateTime()
         val durationUntilEvent: Duration = eventStartTime - now
-        return durationUntilEvent <= WAVE_OBSERVE_DELAY.hours
+        return durationUntilEvent <= WAVE_OBSERVE_DELAY
     }
 
     /**
@@ -155,21 +187,42 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     private fun observeWave() {
         coroutineScopeProvider.scopeIO.launch {
-            delay(getObservationInterval())
-            getProgression().takeIf { it != lastObservedProgression }?.also {
-                lastObservedProgression = it
-                onWaveProgressionChanged(it)
+            while (!event.isDone()) {
+                try {
+                    getProgression().takeIf { it != lastObservedProgression }?.also {
+                        lastObservedProgression = it
+                        onWaveProgressionChanged(it)
+                    }
+                    event.getStatus().takeIf { it != lastObservedStatus }?.also {
+                        lastObservedStatus = it
+                        onWaveStatusChanged(it)
+                    }
+
+                    delay(getObservationInterval())
+
+                } catch (e: Throwable) {
+                    Log.e(::observeWave.name, "Error observing wave changes: $e")
+                }
             }
-            event.getStatus().takeIf { it != lastObservedStatus }?.also {
-                lastObservedStatus = it
-                onWaveStatusChanged(it)
-            }
+        }
+    }
+
+    suspend fun getObservationInterval(): Long {
+        val now = clock.now()
+        val eventStartTime = event.getStartDateTime()
+        val durationUntilEvent = eventStartTime - now
+
+        return when {
+            durationUntilEvent > 1.hours + 5.minutes -> 1.hours.inWholeMilliseconds
+            durationUntilEvent > 5.minutes + 30.seconds -> 5.minutes.inWholeMilliseconds
+            durationUntilEvent > 35.seconds -> 1.seconds.inWholeMilliseconds
+            event.isRunning() -> 500L else -> 500L
         }
     }
 
     // ---------------------------
 
-    fun addOnWaveStatusChangedListener(listener: (WWWEvent.Status) -> Unit) = apply {
+    fun addOnWaveStatusChangedListener(listener: (IWWWEvent.Status) -> Unit) = apply {
         waveStatusChangedListeners.add(listener)
     }.also { startObservation() }
 
@@ -189,12 +242,78 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         waveUserHasBeenHitListeners.add(listener)
     }.also { startObservation() }
 
-    private fun onWaveStatusChanged(status: WWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
+    private fun onWaveStatusChanged(status: IWWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
     private fun onWaveProgressionChanged(progression: Double) = waveProgressionChangedListeners.forEach { it(progression) }
 
     protected fun onWaveWarmingEnded() = waveWarmingEndedListeners.forEach { it() }
     protected fun onWaveUserIsGoingToBeHit() = waveUserIsGoingToBeHitListeners.forEach { it() }
     protected fun onWaveUserUserHasBeenHit() = waveUserHasBeenHitListeners.forEach { it() }
+
+    // ---------------------------
+
+    /**
+     * Retrieves all wave-related numbers for the event.
+     *
+     * This function gathers various wave-related metrics such as speed, start time, end time,
+     * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
+     *
+     */
+    suspend fun getAllNumbers(): WaveNumbers {
+        return WaveNumbers(
+            waveTimezone = try { getLiteralTimezone() } catch (e: Throwable) { "error" },
+            waveSpeed = try { getLiteralSpeed() } catch (e: Throwable) { "error" },
+            waveStartTime = try { getLiteralStartTime() } catch (e: Throwable) { "error" },
+            waveEndTime = try { getLiteralEndTime() } catch (e: Throwable) { "error" },
+            waveTotalTime = try { getLiteralTotalTime() } catch (e: Throwable) { "error" },
+            waveProgression = try { getLiteralProgression() } catch (e: Throwable) { "error" }
+        )
+    }
+
+    // ---------------------------
+
+    /**
+     * Calculates the end time of the event based on its start time, bounding box, and speed.
+     *
+     * This function determines the end time of the event by performing the following steps:
+     * 1. Retrieves the start date and time of the event in the local time zone.
+     * 2. Obtains the bounding box of the event area.
+     * 3. Calculates the average latitude of the bounding box.
+     * 4. Computes the distance across the bounding box at the average latitude.
+     * 5. Calculates the duration of the event based on the distance and the event's speed.
+     * 6. Adds the duration to the start time to get the end time.
+     *
+     */
+    suspend fun getEndTime(): Instant {
+        val startDateTime = event.getStartDateTime()
+        val duration = getWaveDuration() + getWarmingDuration()
+        return startDateTime.plus(duration)
+     }
+
+     fun isWarmingEnded(): Boolean {
+        TODO("Not yet implemented")
+     }
+
+    /**
+     * Calculates the literal progression of the event as a percentage.
+     *
+     * This function determines the progression of the event based on its current state and elapsed time.
+     * If the event is done, it returns "100%". If the event is not running, it returns "0%".
+     * Otherwise, it calculates the elapsed time since the event started and expresses it as a percentage
+     * of the total event duration.
+     *
+     */
+    suspend fun getProgression(): Double {
+        return when {
+            event.isDone() -> 100.0
+            !event.isRunning() -> 0.0
+            else -> {
+                val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
+                        event.getStartDateTime().epochSeconds
+                val totalTime = getWaveDuration().inWholeSeconds
+                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
+            }
+        }
+    }
 
     // ---------------------------
 
@@ -207,10 +326,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      *
      */
     suspend fun getLiteralEndTime(): String {
-        val endDateTime = getEndTime()
-        val hour = endDateTime.hour.toString().padStart(2, '0')
-        val minute = endDateTime.minute.toString().padStart(2, '0')
-        return "$hour:$minute"
+        return cachedLiteralEndTime ?: getEndTime().let { instant ->
+            IClock.instantToLiteral(instant, event.getTZ())
+        }.also { cachedLiteralEndTime = it }
     }
 
     /**
@@ -221,7 +339,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      *
      */
     suspend fun getLiteralTotalTime(): String {
-        return "${getTotalTime().inWholeMinutes} min"
+        return "${getWaveDuration().inWholeMinutes} min"
     }
 
     /**
@@ -230,28 +348,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     suspend fun getLiteralProgression(): String {
         return "${getProgression()}%"
     }
-
-    //---------------------------
-
-    /**
-     * Retrieves all wave-related numbers for the event.
-     *
-     * This function gathers various wave-related metrics such as speed, start time, end time,
-     * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
-     *
-     */
-    suspend fun getAllNumbers(): WaveNumbers {
-        return WaveNumbers(
-            waveTimezone = getLiteralTimezone(),
-            waveSpeed = getLiteralSpeed(),
-            waveStartTime = getLiteralStartTime(),
-            waveEndTime = getLiteralEndTime(),
-            waveTotalTime = getLiteralTotalTime(),
-            waveProgression = getLiteralProgression()
-        )
-    }
-
-    // ---------------------------
 
     /**
      * Retrieves the literal speed of the event in meters per second.
@@ -270,10 +366,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      *
      */
     fun getLiteralStartTime(): String {
-        return cachedLiteralStartTime ?: event.getStartDateTime().let { localDateTime ->
-            val hour = localDateTime.hour.toString().padStart(2, '0')
-            val minute = localDateTime.minute.toString().padStart(2, '0')
-            "$hour:$minute"
+        return cachedLiteralStartTime ?: event.getStartDateTime().let { instant ->
+            IClock.instantToLiteral(instant, event.getTZ())
         }.also { cachedLiteralStartTime = it }
     }
 
@@ -302,11 +396,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 speed <= 0 || speed >= 20 ->
                     add("Speed must be greater than 0 and less than 20")
 
-                direction != "west" && direction != "east" ->
-                    add("Direction must be either 'west' or 'east'")
-
-                else -> { }
+                else -> warming.validationErrors()?.let { addAll(it) }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wave: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
 
 }

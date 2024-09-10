@@ -30,12 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
 
     @Composable
-    override fun Screen(modifier: Modifier, event: WWWEvent) {
+    override fun Screen(modifier: Modifier, event: IWWWEvent) {
         Box(modifier = modifier.fillMaxWidth()) {
             EventMap(event, mapConfig = EventMap.EventMapConfig(
                 initialCameraPosition = EventMap.MapCameraPosition.WINDOW

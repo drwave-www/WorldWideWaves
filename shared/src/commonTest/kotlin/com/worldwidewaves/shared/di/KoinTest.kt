@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.di
 
 /*
  * Copyright 2024 DrWave
@@ -6,7 +6,7 @@ package com.worldwidewaves.shared
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
  * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
  * community, and shared human experience by leveraging real-time coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,21 +20,32 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import kotlinx.cinterop.ExperimentalForeignApi
-import platform.Foundation.NSDocumentDirectory
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSURL
-import platform.Foundation.NSUserDomainMask
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.data.createDataStore
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import org.koin.test.check.checkModules
+import kotlin.test.Test
 
-@OptIn(ExperimentalForeignApi::class)
-actual fun keyValueStorePath(): String {
-    val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
-        directory = NSDocumentDirectory,
-        inDomain = NSUserDomainMask,
-        appropriateForURL = null,
-        create = false,
-        error = null,
-    )
+class KoinTest : KoinTest {
 
-    return requireNotNull(documentDirectory).path + "/$dataStoreFileName"
+    class MockWWWPlatform : WWWPlatform {
+        override val name: String = "MockPlatform"
+        override fun getContext(): Any = "MockContext"
+    }
+
+    // ---------------------------
+
+    @Test
+    fun `check MVP hierarchy`() {
+        val testPlatformModule = module {
+            single<WWWPlatform> { MockWWWPlatform() }
+            single { createDataStore { "/fake/path" } }
+        }
+
+        checkModules {
+            modules(sharedModule() + testPlatformModule)
+        }
+    }
+
 }

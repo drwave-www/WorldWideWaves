@@ -38,12 +38,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
@@ -56,8 +52,9 @@ import com.worldwidewaves.shared.generated.resources.drwave_instagram
 import com.worldwidewaves.shared.generated.resources.drwave_instagram_url
 import com.worldwidewaves.shared.generated.resources.infos_core
 import com.worldwidewaves.shared.generated.resources.instagram_icon
-import com.worldwidewaves.theme.displayFontFamily
-import com.worldwidewaves.theme.extraFontFamily
+import com.worldwidewaves.theme.commonJustifiedTextStyle
+import com.worldwidewaves.theme.commonTextStyle
+import com.worldwidewaves.theme.extraBoldTextStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -91,9 +88,7 @@ class AboutInfoScreen : TabScreen {
     private fun MainInfo() {
         Text(
             text = stringResource(ShRes.string.infos_core),
-            style = TextStyle(textAlign = TextAlign.Justify),
-            fontSize = DIM_INFO_TEXT_FONTSIZE.sp,
-            fontFamily = displayFontFamily
+            style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
         )
     }
 
@@ -107,9 +102,7 @@ class AboutInfoScreen : TabScreen {
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(ShRes.string.drwave),
-                fontSize = DIM_INFO_DRWAVE_FONTSIZE.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = extraFontFamily
+                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
             Row {
                 Image(
@@ -128,9 +121,9 @@ class AboutInfoScreen : TabScreen {
                             }
                         }),
                     text = stringResource(ShRes.string.drwave_instagram),
-                    fontSize = DIM_INFO_DRWAVE_INSTA_FONTSIZE.sp,
-                    fontFamily = displayFontFamily,
-                    textDecoration = TextDecoration.Underline
+                    style = commonTextStyle(DIM_INFO_DRWAVE_INSTA_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline
+                    )
                 )
             }
         }

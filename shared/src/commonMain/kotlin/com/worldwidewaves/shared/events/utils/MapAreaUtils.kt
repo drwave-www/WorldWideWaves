@@ -20,272 +20,283 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.SplitPolygonResult.ResultPosition.LEFT
-import com.worldwidewaves.shared.events.utils.SplitPolygonResult.ResultPosition.RIGHT
+import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.ResultPosition.LEFT
+import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.ResultPosition.RIGHT
+import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 // ----------------------------------------------------------------------------
 
-data class Position(val lat: Double, val lng: Double)
+object PolygonUtils {
 
-typealias Polygon = List<Position>
+    /**
+     * Determines if a point is inside a polygon.
+     *
+     * This function implements a ray casting algorithm to determine if a given point(`tap`) lies
+     * inside a polygon.
+     *
+     * It's based on the algorithm described in
+     * [https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart](https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart).
+     *
+     */
+    fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
+        if (polygon.isEmpty()) return false
+        var (bx, by) = polygon.last()!!.let { it.lat - tap.lat to it.lng - tap.lng }
+        var depth = 0
 
-data class Segment(val start: Position, val end: Position)
+        for (point in polygon) {
+            val (ax, ay) = bx to by
+            bx = point.lat - tap.lat
+            by = point.lng - tap.lng
 
-/**
- * Represents a bounding box defined by its southwest and northeast corners.
- *
- */
-data class BoundingBox(
-    val sw: Position,
-    val ne: Position
-) {
-    constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
-        sw = Position(swLat, swLng),
-        ne = Position(neLat, neLng)
-    )
+            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
 
-    val minLatitude: Double get() = sw.lat
-    val maxLatitude: Double get() = ne.lat
-    val minLongitude: Double get() = sw.lng
-    val maxLongitude: Double get() = ne.lng
-}
+            val lx = ax - ay * (bx - ax) / (by - ay)
+            if (lx == 0.0) return true
+            if (lx > 0) depth++
+        }
 
-// ----------------------------------------------------------------------------
-
-/**
- * Determines if a point is inside a polygon.
- *
- * This function implements a ray casting algorithm to determine if a given point(`tap`) lies
- * inside a polygon.
- *
- * It's based on the algorithm described in
- * [https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart](https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart).
- *
- */
-fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
-    var (bx, by) = polygon.last().let { it.lat - tap.lat to it.lng - tap.lng }
-    var depth = 0
-
-    for (i in polygon.indices) {
-        val (ax, ay) = bx to by
-        bx = polygon[i].lat - tap.lat
-        by = polygon[i].lng - tap.lng
-
-        if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
-
-        val lx = ax - ay * (bx - ax) / (by - ay)
-        if (lx == 0.0) return true
-        if (lx > 0) depth++
+        return (depth and 1) == 1
     }
 
-    return (depth and 1) == 1
-}
-
-/**
- * Determines if a point is inside any of the given polygons.
- */
-fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean {
-    return polygons.any { isPointInPolygon(tap, it) }
-}
+    /**
+     * Determines if a point is inside any of the given polygons.
+     */
+    fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean {
+        return polygons.any { isPointInPolygon(tap, it) }
+    }
 
 // ----------------------------------------------------------------------------
 
-/**
- * Calculates the bounding box of a polygon.
- *
- * This function takes a polygon represented as a list of [Position]objects and returns a
- * [BoundingBox] object that encompasses the entire polygon.
- *
- * It throws an [IllegalArgumentException] if the input polygon is empty.
- *
- */
+    /**
+     * Calculates the bounding box of a polygon.
+     *
+     * This function takes a polygon represented as a list of [Position]objects and returns a
+     * [BoundingBox] object that encompasses the entire polygon.
+     *
+     * It throws an [IllegalArgumentException] if the input polygon is empty.
+     *
+     */
 
-data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+    data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
-fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
-    if (polygons.isEmpty() || polygons.flatten().isEmpty())
-        throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
+    fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
+        if (polygons.isEmpty() || polygons.all { it.isEmpty() })
+            throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
-    val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
-        Quadruple(
-            Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
-            Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY
-        )
-    ) { (minLat, minLon, maxLat, maxLon), pos ->
-        Quadruple(
-            minOf(minLat, pos.lat), minOf(minLon, pos.lng),
-            maxOf(maxLat, pos.lat), maxOf(maxLon, pos.lng)
+        val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
+            Quadruple(
+                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY
+            )
+        ) { (minLat, minLon, maxLat, maxLon), pos ->
+            Quadruple(
+                minOf(minLat, pos.lat), minOf(minLon, pos.lng),
+                maxOf(maxLat, pos.lat), maxOf(maxLon, pos.lng)
+            )
+        }
+
+        return BoundingBox(
+            sw = Position(minLatitude, minLongitude),
+            ne = Position(maxLatitude, maxLongitude)
         )
     }
 
-    return BoundingBox(
-        sw = Position(minLatitude, minLongitude),
-        ne = Position(maxLatitude, maxLongitude)
-    )
-}
-
-fun polygonBbox(polygon: Polygon): BoundingBox {
-    return polygonsBbox(listOf(polygon))
-}
+    fun polygonBbox(polygon: Polygon): BoundingBox {
+        return polygonsBbox(listOf(polygon))
+    }
 
 // ----------------------------------------------------------------------------
 
-/**
- * Data class representing the result of splitting a polygon into two parts.
- *
- */
-data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
-    enum class ResultPosition { LEFT, RIGHT }
-    companion object {
-        fun fromPolygon(polygon: Polygon, resultPosition: ResultPosition = RIGHT): SplitPolygonResult {
-            return if (polygon.size > 1) {
-                when (resultPosition) {
-                    LEFT -> SplitPolygonResult(listOf(polygon), emptyList())
-                    RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon))
-                }
-            } else empty()
+    /**
+     * Data class representing the result of splitting a polygon into two parts.
+     *
+     */
+    data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
+        enum class ResultPosition { LEFT, RIGHT }
+        companion object {
+            fun fromPolygon(
+                polygon: Polygon,
+                resultPosition: ResultPosition = RIGHT
+            ): SplitPolygonResult {
+                return if (polygon.size > 1) {
+                    when (resultPosition) {
+                        LEFT -> SplitPolygonResult(listOf(polygon), emptyList())
+                        RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon))
+                    }
+                } else empty()
+            }
+            fun empty() = SplitPolygonResult(emptyList(), emptyList())
         }
-        fun empty() = SplitPolygonResult(emptyList(), emptyList())
     }
-}
 
-/**
- * Splits a polygon by a given longitude.
- *
- * This function takes a polygon represented as a list of [Position] objects and a longitude value
- * (`longitudeToCut`) as input. It splits the polygon into two parts: the left part containing
- * points with longitudes less than or equal to `longitudeToCut`, and the right part containing
- * points with longitudes greater than or equal to `longitudeToCut`.*
- *
- * If the `longitudeToCut` is completely outside the bounds of the polygon, the entire polygon is
- * returned either on the left or right side, depending on whether the cut is to the east or west
- * of the polygon.
- *
- * The function handles cases where the polygon intersects the cut line by calculating intersection
- * points and adding them to both the left and right sides.
- *
- */
-fun splitPolygonByLongitude(polygon: List<Position>, longitudeToCut: Double): SplitPolygonResult {
-    val leftSide = mutableListOf<Position>()
-    val rightSide = mutableListOf<Position>()
+    /**
+     * Splits a polygon by a given longitude.
+     *
+     * This function takes a polygon represented as a list of [Position] objects and a longitude value
+     * (`longitudeToCut`) as input. It splits the polygon into two parts: the left part containing
+     * points with longitudes less than or equal to `longitudeToCut`, and the right part containing
+     * points with longitudes greater than or equal to `longitudeToCut`.*
+     *
+     * If the `longitudeToCut` is completely outside the bounds of the polygon, the entire polygon is
+     * returned either on the left or right side, depending on whether the cut is to the east or west
+     * of the polygon.
+     *
+     * The function handles cases where the polygon intersects the cut line by calculating intersection
+     * points and adding them to both the left and right sides.
+     *
+     */
+    fun splitPolygonByLongitude(
+        polygon: Polygon,
+        longitudeToCut: Double
+    ): SplitPolygonResult {
+        val cutId = Random.nextInt(1, Int.MAX_VALUE)
+        val leftSide = LeftCutPolygon(cutId)
+        val rightSide = RightCutPolygon(cutId)
 
-    val minLongitude = polygon.minOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
-    val maxLongitude = polygon.maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
+        val minLongitude = polygon.minOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
+        val maxLongitude = polygon.maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
 
-    return when {
-        longitudeToCut > maxLongitude -> SplitPolygonResult.fromPolygon(polygon, LEFT)
-        longitudeToCut < minLongitude -> SplitPolygonResult.fromPolygon(polygon, RIGHT)
-        else -> {
-            for (i in polygon.indices) {
-                val point = polygon[i]
-                val nextPoint = polygon[(i + 1) % polygon.size]
+        return when {
+            longitudeToCut > maxLongitude ->
+                SplitPolygonResult.fromPolygon(LeftCutPolygon.convert(polygon, cutId), LEFT)
+            longitudeToCut < minLongitude ->
+                SplitPolygonResult.fromPolygon(RightCutPolygon.convert(polygon, cutId), RIGHT)
+            else -> {
+                // Separate the polygon into two parts based on the cut longitude
+                for (point in polygon) {
+                    val nextPoint = point.next ?: polygon.first()!!
 
-                val intersectionLatitude = point.lat + (nextPoint.lat - point.lat) *
-                        (longitudeToCut - point.lng) / (nextPoint.lng - point.lng)
-                val intersection = Position(intersectionLatitude, longitudeToCut)
+                    val intersectionLatitude = point.lat + (nextPoint.lat - point.lat) *
+                            (longitudeToCut - point.lng) / (nextPoint.lng - point.lng)
+                    val intersection = Position(intersectionLatitude, longitudeToCut)
 
-                if (point.lng <= longitudeToCut) leftSide.add(point)
-                if (point.lng >= longitudeToCut) rightSide.add(point)
+                    if (point.lng <= longitudeToCut) leftSide.add(point)
+                    if (point.lng >= longitudeToCut) rightSide.add(point)
 
-                if ((point.lng < longitudeToCut && nextPoint.lng > longitudeToCut) ||
-                    (point.lng > longitudeToCut && nextPoint.lng < longitudeToCut)) {
-                    leftSide.add(intersection)
-                    rightSide.add(intersection)
+                    when { // If required cut the polygon at the intersection point
+                           // and add the cut point on both sides
+                        point.lng < longitudeToCut && nextPoint.lng > longitudeToCut ->
+                            CutPosition(intersection, cutLeft = point, cutRight = nextPoint)
+                        point.lng > longitudeToCut && nextPoint.lng < longitudeToCut ->
+                            CutPosition(intersection, cutLeft = nextPoint, cutRight = point)
+                        else -> null
+                    }?.let {
+                        leftSide.add(it)
+                        rightSide.add(it)
+                    }
+                }
+
+                // Close the polygons if they are not already closed
+                if (leftSide.isNotEmpty() && leftSide.first() != leftSide.last())
+                    leftSide.add(leftSide.first()!!)
+                if (rightSide.isNotEmpty() && rightSide.first() != rightSide.last())
+                    rightSide.add(rightSide.first()!!)
+
+                // Group the points into ring polygons
+                val leftPolygons = groupIntoRingPolygons(leftSide).filter { it.size > 1 }
+                val rightPolygons = groupIntoRingPolygons(rightSide).filter { it.size > 1 }
+
+                SplitPolygonResult(leftPolygons, rightPolygons)
+            }
+        }
+    }
+
+    /**
+     * Groups a list of positions into ring polygons.
+     *
+     * This function takes a list of positions representing a polygon and splits it into multiple ring polygons.
+     * A ring polygon is a closed loop of positions where the first and last positions are the same.
+     *
+     */
+    private fun groupIntoRingPolygons(polygon: Polygon): List<Polygon> {
+
+        // Polygon cut type conservation
+        val polygons: MutableList<Polygon> = polygon.createList()
+
+        // Polygon cut type conservation
+        val currentPolygon : Polygon = polygon.createNew()
+
+        for (point in polygon) {
+            if ((point.id != polygon.first()!!.id) && point == polygon.last()!!)
+                break // Do not take the last point
+            currentPolygon.add(point)
+
+            if (currentPolygon.size > 1) {
+                val shouldSplit = polygon.any { compPoint ->
+                    val nextCompPoint = compPoint.next ?: polygon.first()!!
+                    val segment = Segment(compPoint, nextCompPoint)
+                    point.id != compPoint.id && point.id != nextCompPoint.id && // FIXME check
+                            isPointOnLineSegment(point, segment) &&
+                            (point.id != nextCompPoint.id && point != compPoint)
+                }
+                if (shouldSplit) {
+                    if (point != currentPolygon.first()!!)
+                        currentPolygon.add(currentPolygon.first()!!)
+                    polygons.add(currentPolygon.copy())
+                    currentPolygon.clear()
+                    currentPolygon.add(point)
+                    continue
                 }
             }
 
-            if (leftSide.isNotEmpty() && leftSide.first() != leftSide.last()) leftSide.add(leftSide.first())
-            if (rightSide.isNotEmpty() && rightSide.first() != rightSide.last()) rightSide.add(rightSide.first())
-
-            val leftPolygons = groupIntoRingPolygons(leftSide).filter { it.size > 1 }
-            val rightPolygons = groupIntoRingPolygons(rightSide).filter { it.size > 1 }
-
-            SplitPolygonResult(leftPolygons, rightPolygons)
-        }
-    }
-}
-
-/**
- * Groups a list of positions into ring polygons.
- *
- * This function takes a list of positions representing a polygon and splits it into multiple ring polygons.
- * A ring polygon is a closed loop of positions where the first and last positions are the same.
- *
- */
-private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
-    val polygons = mutableListOf<Polygon>()
-    val currentPolygon = mutableListOf<Position>()
-
-    for (i in polygon.indices) {
-        val point = polygon[i]
-        if (i > 0 && point == polygon.last()) break
-        currentPolygon.add(point)
-
-        if (currentPolygon.size > 1) {
-            val shouldSplit = polygon.indices.any { j ->
-                val segment = Segment(polygon[j], polygon[(j + 1) % polygon.size])
-                i != j && i != (j + 1) % polygon.size &&
-                        isPointOnLineSegment(point, segment) &&
-                        (i != j + 1 && point != polygon[j])
-            }
-            if (shouldSplit) {
-                if (point != currentPolygon.first()) currentPolygon.add(currentPolygon.first())
-                polygons.add(currentPolygon.toList())
+            if (currentPolygon.size > 1 && point == currentPolygon.first()) {
+                polygons.add(currentPolygon.copy())
                 currentPolygon.clear()
-                currentPolygon.add(point)
-                continue
             }
         }
 
-        if (currentPolygon.size > 1 && point == currentPolygon.first()) {
-            polygons.add(currentPolygon.toList())
-            currentPolygon.clear()
+        // Close the last polygon if it is not already closed
+        if (currentPolygon.isNotEmpty() && currentPolygon.first() != currentPolygon.last()) {
+            currentPolygon.add(currentPolygon.first()!!)
+            polygons.add(currentPolygon)
+        }
+
+        return polygons.filter { // Filter out invalid polygons (lines and dots)
+            it.size >= 3 && !(it.all { p -> p.lat == it.first()!!.lat } || it.all { p -> p.lng == it.first()!!.lng })
         }
     }
 
-    if (currentPolygon.isNotEmpty() && currentPolygon.first() != currentPolygon.last()) {
-        currentPolygon.add(currentPolygon.first())
-        polygons.add(currentPolygon)
+    /**
+     * Checks if a given point lies on a line segment.
+     *
+     * This function determines if a point is on a line segment by calculating the cross product
+     * of the vectors formed by the segment's endpoints and the point. If the cross product is
+     * close to zero (within a small tolerance), the point is considered to be on the line segment.
+     * Additionally, the function checks if the point's coordinates are within the bounds of the
+     * segment's endpoints.
+     *
+     */
+    private const val EPSILON =
+        1e-10 // A small tolerance value used to account for floating-point precision errors.
+
+    fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
+        val crossProduct = (segment.end.lat - segment.start.lat) * (point.lng - segment.start.lng) -
+                (segment.end.lng - segment.start.lng) * (point.lat - segment.start.lat)
+        return abs(crossProduct) < EPSILON &&
+                point.lat in min(segment.start.lat, segment.end.lat)..max(
+            segment.start.lat,
+            segment.end.lat
+        ) && point.lng in min(segment.start.lng, segment.end.lng)..max(
+            segment.start.lng,
+            segment.end.lng
+        )
     }
-
-    return polygons.filter {
-        it.size >= 3 && !(it.all { p -> p.lat == it[0].lat } || it.all { p -> p.lng == it[0].lng })
-    }
-}
-
-/**
- * Checks if a given point lies on a line segment.
- *
- * This function determines if a point is on a line segment by calculating the cross product
- * of the vectors formed by the segment's endpoints and the point. If the cross product is
- * close to zero (within a small tolerance), the point is considered to be on the line segment.
- * Additionally, the function checks if the point's coordinates are within the bounds of the
- * segment's endpoints.
- *
- */
-private const val EPSILON = 1e-10 // A small tolerance value used to account for floating-point precision errors.
-
-fun isPointOnLineSegment(point: Position, segment: Segment): Boolean {
-    val crossProduct = (segment.end.lat - segment.start.lat) * (point.lng - segment.start.lng) -
-            (segment.end.lng - segment.start.lng) * (point.lat - segment.start.lat)
-    return abs(crossProduct) < EPSILON &&
-            point.lat in min(segment.start.lat, segment.end.lat)..max(segment.start.lat, segment.end.lat) &&
-            point.lng in min(segment.start.lng, segment.end.lng)..max(segment.start.lng, segment.end.lng)
-}
 
 // ----------------------------------------------------------------------------
 
-/**
- * Converts a list of polygons into a GeoJSON string.
- *
- */
-fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
-    val features = polygons.map { polygon ->
-        val coordinates = polygon.map { listOf(it.lng, it.lat) }
-        """
+    /**
+     * Converts a list of polygons into a GeoJSON string.
+     *
+     */
+    fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
+        val features = polygons.map { polygon ->
+            val coordinates = polygon.map { listOf(it.lng, it.lat) }
+            """
         {
             "type": "Feature",
             "geometry": {
@@ -294,11 +305,34 @@ fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
             }
         }
         """.trimIndent()
-    }
-    return """
+        }
+        return """
     {
         "type": "FeatureCollection",
         "features": [${features.joinToString(",")}]
     }
     """.trimIndent()
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+object GeoUtils {
+
+    /**
+     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
+     *
+     * @param lon1 The first longitude in degrees.
+     * @param lon2 The second longitude in degrees.
+     * @param lat The latitude in degrees.
+     * @return The distance between the two longitudes at the given latitude in meters.
+     */
+    fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
+        val earthRadius = 6371000.0 // Earth radius in meters
+        val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
+        val latRad = lat * (PI / 180) // Convert degrees to radians
+        val distance = earthRadius * dLon * cos(latRad)
+        return abs(distance)
+    }
+
 }

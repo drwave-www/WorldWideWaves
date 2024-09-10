@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.data
 
 /*
  * Copyright 2024 DrWave
@@ -20,20 +20,21 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import android.content.Context
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSURL
+import platform.Foundation.NSUserDomainMask
 
-/**
- * Retrieves the file path for the key-value store.
- *
- * This function constructs the file path for the key-value store by accessing the application's
- * files directory and appending the specified folder and file name for the data store.
- *
- * @return The absolute path of the key-value store file as a String.
- */
+@OptIn(ExperimentalForeignApi::class)
 actual fun keyValueStorePath(): String {
-    return (getPlatform().getContext() as Context)
-        .filesDir
-        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
-        .absolutePath
+    val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
+        directory = NSDocumentDirectory,
+        inDomain = NSUserDomainMask,
+        appropriateForURL = null,
+        create = false,
+        error = null,
+    )
+
+    return requireNotNull(documentDirectory).path + "/$dataStoreFileName"
 }

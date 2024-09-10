@@ -13,16 +13,16 @@
     "instagramHashtag": "#waveparis",
     "wavedef": {
       "linear": {
-        "direction": "west",
-        "speed": 5
+        "direction": "WEST",
+        "speed": 5,
+        "warming": {
+          "type": "LONGITUDE_CUT",
+          "longitude": 2.39492
+        }
       }
     },
     "area": {
-      "osmAdminid": 71525,
-      "warming": {
-        "type": "longitude-cut",
-        "longitude": 2.39492
-      }
+      "osmAdminid": 71525
     },
     "map": {
       "maxZoom": 18,
@@ -37,26 +37,26 @@
     "country": "brazil",
     "community": "europe",
     "timeZone": "America/Sao_Paulo",
-    "date": "2024-03-15",
-    "startHour": "18:00",
+    "date": "2024-03-19",
+    "startHour": "12:00",
     "description": "Join the wave in Rio de Janeiro, where the rhythm of Copacabana meets the majesty of Christ the Redeemer",
     "instagramAccount": "worldwidewaves.rio",
     "instagramHashtag": "#waverio",
     "wavedef": {
       "deep": {
         "speed": 5,
-        "direction": "west"
+        "direction": "WEST",
+        "warming": {
+          "type": "LONGITUDE_CUT",
+          "longitude": -43.28212428287723
+        }
       }
     },
     "area": {
-      "osmAdminid": 2697338,
-      "warming": {
-        "type": "longitude-cut",
-        "longitude": -43.28212428287723
-      }
+      "osmAdminid": 2697338
     },
     "map": {
-      "maxZoom": 14,
+      "maxZoom": 18,
       "language": "pt",
       "zone": "south-america/brazil/sudeste"
     }
@@ -67,7 +67,7 @@
     "location": "United States",
     "community": "usa",
     "timeZone": "America/New_York",
-    "date": "2024-04-22",
+    "date": "2024-04-18",
     "startHour": "12:30",
     "description": "Feel the wave across the United States, from the bustling streets of New York to the sunny beaches of California",
     "instagramAccount": "worldwidewaves.usa",
@@ -75,19 +75,19 @@
     "wavedef": {
       "linearSplit": {
         "speed": 5,
-        "direction": "west",
-        "nbSplits":  50
+        "direction": "WEST",
+        "nbSplits":  50,
+        "warming": {
+          "type": "METERS",
+          "meters": 300
+        }
       }
     },
     "area": {
-      "osmAdminid": 9331155,
-      "warming": {
-        "type": "longitude-percent",
-        "longitude": 5
-      }
+      "osmAdminid": 9331155
     },
     "map": {
-      "maxZoom": 7,
+      "maxZoom": 18,
       "language": "en",
       "zone": "north-america/us"
     }
@@ -105,20 +105,16 @@
     "wavedef": {
       "linearSplit": {
         "speed": 5,
-        "direction": "west",
+        "direction": "WEST",
         "nbSplits":  500,
         "warming": {
-          "type": "longitude-percent",
-          "longitude": 5
+          "type": "METERS",
+          "meters": 500
         }
       }
     },
     "area": {
-      "osmAdminid": 0,
-      "warming": {
-        "type": "longitude-percent",
-        "longitude": 5
-      }
+      "osmAdminid": 0
     },
     "map": {
       "maxZoom": 5,

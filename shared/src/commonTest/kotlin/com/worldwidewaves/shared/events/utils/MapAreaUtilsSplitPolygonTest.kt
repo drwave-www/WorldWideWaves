@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitPolygonByLongitude
 import io.github.aakira.napier.Napier
 import kotlin.math.PI
 import kotlin.math.cos
@@ -28,11 +29,11 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestSplitPolygon {
+class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 2.0, lng = 2.0),
@@ -43,14 +44,14 @@ class AreaUtilsTestSplitPolygon {
 
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
-        val expectedLeftSide = listOf(
+        val expectedLeftSide = polygonOf(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 2.0, lng = 1.0),
             Position(lat = 2.0, lng = 0.0),
             Position(lat = 0.0, lng = 0.0)
         )
-        val expectedRightSide = listOf(
+        val expectedRightSide = polygonOf(
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 2.0, lng = 2.0),
@@ -58,13 +59,15 @@ class AreaUtilsTestSplitPolygon {
             Position(lat = 0.0, lng = 1.0)
         )
 
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
         assertTrue(result.right.size == 1 && areRingPolygonsEqual(result.right[0], expectedRightSide), "Expected right side of the split polygon to match")
     }
 
     @Test
     fun testSplitPolygonByLongitudeWithVertexOnCut() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 1.0, lng = 1.0),
@@ -75,7 +78,7 @@ class AreaUtilsTestSplitPolygon {
 
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
-        val expectedLeftSide = listOf(
+        val expectedLeftSide = polygonOf(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 1.0, lng = 1.0),
@@ -83,13 +86,15 @@ class AreaUtilsTestSplitPolygon {
             Position(lat = 0.0, lng = 0.0)
         )
 
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
         assertTrue(result.right.isEmpty(), "Expected right side of the split polygon to be empty")
     }
 
     @Test
     fun testSplitPolygonByLongitudeWithDegenerateShape() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(lat = 1.0, lng = 0.0),
             Position(lat = 1.0, lng = 1.0),
             Position(lat = 1.0, lng = 2.0),
@@ -100,13 +105,15 @@ class AreaUtilsTestSplitPolygon {
 
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
         assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
     }
 
     @Test
     fun testSplitPolygonByLongitude_SinglePointPolygon() {
-        val polygon = listOf(Position(0.0, 0.0))
+        val polygon = polygonOf(Position(0.0, 0.0))
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
         assertEquals(emptyList(), result.left)
@@ -115,15 +122,17 @@ class AreaUtilsTestSplitPolygon {
 
     @Test
     fun testSplitPolygonByLongitude_TwoPointPolygon() {
-        val polygon = listOf(Position(0.0, 0.0), Position(0.0, 1.0))
+        val polygon = polygonOf(Position(0.0, 0.0), Position(0.0, 1.0))
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
 
     @Test
-    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = listOf(
+    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = polygonOf(
         Position(0.0, 1.0),
         Position(1.0, 1.0),
         Position(2.0, 1.0),
@@ -131,47 +140,15 @@ class AreaUtilsTestSplitPolygon {
     )
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
 
     @Test
-    fun testSplitPolygonByLongitude_MultiplePolygonsLeft() {
-        // This scenario is not possible with a single longitude cut,
-        // but the structure supports it for more general polygon splitting.
-        val polygon = listOf(
-            Position(0.0, 0.0),
-            Position(0.0, 2.0),
-            Position(2.0, 2.0),
-            Position(2.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertEquals(1, result.left.size)
-        assertEquals(1, result.right.size)
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_MultiplePolygonsRight() {
-        // This scenario is not possible with a single longitude cut,
-        // but the structure supports it for more general polygon splitting.
-        val polygon = listOf(
-            Position(0.0, 0.0),
-            Position(0.0, 2.0),
-            Position(2.0, 2.0),
-            Position(2.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertEquals(1, result.left.size)
-        assertEquals(1, result.right.size)
-    }
-
-    @Test
     fun testSplitPolygonByLongitude_ComplexShape1() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 3.0),
             Position(1.0, 2.0),
@@ -181,13 +158,15 @@ class AreaUtilsTestSplitPolygon {
         )
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
 
     @Test
     fun testSplitPolygonByLongitude_ComplexShape2() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(1.0, 1.0),
             Position(2.0, 0.0),
@@ -198,13 +177,15 @@ class AreaUtilsTestSplitPolygon {
         )
         val longitudeToCut = 1.5
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
 
     @Test
     fun testSplitPolygonByLongitude_LongitudeOutsidePolygon() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -213,22 +194,25 @@ class AreaUtilsTestSplitPolygon {
         )
         val longitudeToCut = 2.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertEquals(listOf(polygon), result.left)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(areRingPolygonsEqual(polygon, result.left.first()))
         assertEquals(emptyList(), result.right)
     }
 
     @Test
     fun testSplitPolygonByLongitude_EmptyPolygon() {
-        val polygon = emptyList<Position>()
+        val polygon = Polygon()
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
 
     @Test
     fun testSplitLargePolygonWithConcaveSections() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 5.0),
             Position(2.0, 3.0),
@@ -243,13 +227,15 @@ class AreaUtilsTestSplitPolygon {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
 
     @Test
     fun testSplitPolygonWithZigzagPattern() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
@@ -262,7 +248,7 @@ class AreaUtilsTestSplitPolygon {
         val longitudeToCut = 1.5
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
-        val expectedLeftSide = listOf(
+        val expectedLeftSide = polygonOf(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.5),
             Position(lat = 0.5, lng = 1.5),
@@ -273,13 +259,13 @@ class AreaUtilsTestSplitPolygon {
             Position(lat = 0.0, lng = 0.0)
         )
 
-        val expectedRightSide1 = listOf(
+        val expectedRightSide1 = polygonOf(
             Position(lat = 0.0, lng = 1.5),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 0.5, lng = 1.5),
             Position(lat = 0.0, lng = 1.5)
         )
-        val expectedRightSide2 = listOf(
+        val expectedRightSide2 = polygonOf(
             Position(lat = 1.0, lng = 1.5),
             Position(lat = 1.0, lng = 3.0),
             Position(lat = 2.0, lng = 2.0),
@@ -289,6 +275,8 @@ class AreaUtilsTestSplitPolygon {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
@@ -296,7 +284,7 @@ class AreaUtilsTestSplitPolygon {
 
     @Test
     fun testSplitPolygonWithSpiralShape() {
-        val polygon = mutableListOf(Position(0.0, 0.0))
+        val polygon = Polygon(Position(0.0, 0.0))
         var angle = 0.0
         val radius = 1.0
         val numPoints = 36
@@ -306,20 +294,22 @@ class AreaUtilsTestSplitPolygon {
             val y = radius * sin(angle)
             polygon.add(Position(x, y))
         }
-        polygon.add(Position(0.0, 0.0)) // Close thepolygon
+        polygon.add(Position(0.0, 0.0)) // Close the polygon
 
         val longitudeToCut = 0.5
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
 
     @Test
     fun testSplitPolygonWithMultipleIntersections() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 4.0),
             Position(1.0, 3.0),
@@ -335,13 +325,15 @@ class AreaUtilsTestSplitPolygon {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
 
     @Test
     fun testSplitConcavePolygon_MultipleRightRings() {
-        val polygon = listOf(
+        val polygon = polygonOf(
         Position(0.0, 0.0),
         Position(0.0, 2.0),
         Position(1.0, 1.0),
@@ -352,7 +344,7 @@ class AreaUtilsTestSplitPolygon {
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
-        val expectedLeftSide = listOf(
+        val expectedLeftSide = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -360,19 +352,21 @@ class AreaUtilsTestSplitPolygon {
             Position(2.0, 0.0),
             Position(0.0, 0.0)
         )
-        val expectedRightSide1 = listOf(
+        val expectedRightSide1 = polygonOf(
             Position(0.0, 1.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
             Position(0.0, 1.0) // Closed ring polygon
         )
-        val expectedRightSide2 = listOf(
+        val expectedRightSide2 = polygonOf(
             Position(1.0, 1.0),
             Position(2.0, 2.0),
             Position(2.0, 1.0),
             Position(1.0, 1.0) // Closed ring polygon
         )
 
+        assertTrue(result.left.all { it is LeftCutPolygon})
+        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
@@ -395,11 +389,13 @@ class AreaUtilsTestSplitPolygon {
         val normalizedPolygon2 = normalizePolygon(cleanedPolygon2)
 
         // Check if all points match
-        for (i in normalizedPolygon1.indices) {
-            if (normalizedPolygon1[i] != normalizedPolygon2[i]) {
-                Napier.d("Polygons are not equal: mismatch at index $i. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2")
+        var point2 = normalizedPolygon2.first()
+        for (point in normalizedPolygon1) {
+            if (point != point2) {
+                Napier.d("Polygons are not equal: mismatch at index ${point.id}. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2")
                 return false
             }
+            point2 = point2.next
         }
 
         return true
@@ -410,10 +406,9 @@ class AreaUtilsTestSplitPolygon {
 
         // Find the smallest point lexicographically to use as the starting point
         val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng })) ?: return polygon
-        val startIndex = polygon.indexOf(minPoint)
 
         // Rotate the polygon to start from the smallest point
-        return (polygon.subList(startIndex, polygon.size) + polygon.subList(0, startIndex))
+        return (polygon.subList(minPoint, polygon.last()!!.id) + polygon.subList(polygon.last()!!, minPoint.id))
     }
 
     private fun removeRepeatingPoint(polygon: Polygon): Polygon {

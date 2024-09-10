@@ -1,9 +1,14 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
+import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 /*
  * Copyright 2024 DrWave
@@ -33,7 +38,7 @@ class WWWEventTest {
         val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
 
         // WHEN
-        val result = event.getStartDateTime()
+        val result = event.getStartDateTime().toLocalDateTime(TimeZone.of("Pacific/Auckland"))
 
         // THEN
         assertEquals(LocalDateTime(2024, 3, 15, 18, 0), result)
@@ -42,13 +47,260 @@ class WWWEventTest {
     @Test
     fun testGetStartDateSimpleAsLocal_InvalidDate() {
         // GIVEN
-        val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "invalid-date", startHour = "18:00")
+        val event = buildEmptyEvent(
+            timeZone = "Pacific/Auckland",
+            date = "invalid-date",
+            startHour = "18:00"
+        )
+
+        // WHEN & THEN
+        assertFailsWith<IllegalStateException> {
+            event.getStartDateTime()
+        }
+    }
+
+    @Test
+    fun testGetLiteralStartDateSimple_ValidDate() {
+        // GIVEN
+        val event =
+            buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-03-15", startHour = "18:00")
 
         // WHEN
-        val result = event.getStartDateTime()
+        val result = event.getLiteralStartDateSimple()
 
         // THEN
-        assertEquals(LocalDateTime(0, 1, 1, 0, 0), result)
+        assertEquals("15/03", result)
+    }
+
+    @Test
+    fun testGetLiteralStartDateSimple_InvalidDate() {
+        // GIVEN
+        val event = buildEmptyEvent(
+            timeZone = "Pacific/Auckland",
+            date = "invalid-date",
+            startHour = "18:00"
+        )
+
+        // WHEN
+        val result = event.getLiteralStartDateSimple()
+
+        // THEN
+        assertEquals("error", result)
+    }
+
+    @Test
+    fun testGetTZ() {
+        // GIVEN
+        val event = buildEmptyEvent(timeZone = "Pacific/Auckland")
+
+        // WHEN
+        val result = event.getTZ()
+
+        // THEN
+        assertEquals(TimeZone.of("Pacific/Auckland"), result)
+    }
+
+    @Test
+    fun testGetTZ_InvalidTimeZone() {
+        // GIVEN
+        val event = buildEmptyEvent(timeZone = "Invalid/TimeZone")
+
+        // WHEN & THEN
+        assertFailsWith<IllegalTimeZoneException> {
+            event.getTZ()
+        }
+    }
+
+    @Test
+    fun testGetLiteralStartDateSimple_InvalidTimeZone() {
+        // GIVEN
+        val event = buildEmptyEvent(timeZone = "Invalid/TimeZone", date = "2024-03-15", startHour = "18:00")
+
+        // WHEN
+        val result = event.getLiteralStartDateSimple()
+
+        // THEN
+        assertEquals("error", result)
+    }
+
+    @Test
+    fun testValidationErrors_EmptyID() {
+        // GIVEN
+        val event = buildEmptyEvent(id = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("ID is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidID() {
+        // GIVEN
+        val event = buildEmptyEvent(id = "InvalidID")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("ID must be lowercase with only simple letters or underscores") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyType() {
+        // GIVEN
+        val event = buildEmptyEvent(type = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Type is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidType() {
+        // GIVEN
+        val event = buildEmptyEvent(type = "invalid")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Type must be either 'city', 'country', or 'world'") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyLocation() {
+        // GIVEN
+        val event = buildEmptyEvent(location = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Location is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyCountryForCityType() {
+        // GIVEN
+        val event = buildEmptyEvent(type = "city", country = null)
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Country must be specified for type 'city'") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyTimeZone() {
+        // GIVEN
+        val event = buildEmptyEvent(timeZone = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Time zone is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidDateFormat() {
+        // GIVEN
+        val event = buildEmptyEvent(date = "invalid-date")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Date format is invalid or date is not valid") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidStartHourFormat() {
+        // GIVEN
+        val event = buildEmptyEvent(startHour = "invalid-time")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Start hour format is invalid or time is not valid") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyDescription() {
+        // GIVEN
+        val event = buildEmptyEvent(description = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Description is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyInstagramAccount() {
+        // GIVEN
+        val event = buildEmptyEvent(instagramAccount = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Instagram account is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidInstagramAccount() {
+        // GIVEN
+        val event = buildEmptyEvent(instagramAccount = "Invalid@Account")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Instagram account is invalid") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyInstagramHashtag() {
+        // GIVEN
+        val event = buildEmptyEvent(instagramHashtag = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Instagram hashtag is empty") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidInstagramHashtag() {
+        // GIVEN
+        val event = buildEmptyEvent(instagramHashtag = "InvalidHashtag")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Instagram hashtag is invalid") })
+    }
+
+    @Test
+    fun testValidationErrors_InvalidTimeZone() {
+        // GIVEN
+        val event = buildEmptyEvent(timeZone = "Invalid/TimeZone")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Time zone is invalid") })
     }
 
 }
@@ -56,15 +308,17 @@ class WWWEventTest {
 // ============================
 
 fun buildEmptyEvent(
-    id: String = "",
-    type: String = "",
-    location: String = "",
-    timeZone: String = "",
-    date: String = "",
-    startHour: String = "",
-    description: String = "",
-    instagramAccount: String = "",
-    instagramHashtag: String = "",
+    id: String = "test",
+    type: String = "city",
+    location: String = "somewhere",
+    country: String? = "xx",
+    community: String? = null,
+    timeZone: String = "Europe/London",
+    date: String = "2024-03-15",
+    startHour: String = "18:00",
+    description: String = "some event",
+    instagramAccount: String = "user",
+    instagramHashtag: String = "#hashtag",
     wavedef: WWWWaveDefinition = WWWWaveDefinition(),
     osmAdminid: Int = 0,
     maxzoom: Double = 0.0,
@@ -75,6 +329,8 @@ fun buildEmptyEvent(
         id = id,
         type = type,
         location = location,
+        country = country,
+        community = community,
         timeZone = timeZone,
         date = date,
         startHour = startHour,
@@ -82,7 +338,7 @@ fun buildEmptyEvent(
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
-        area = WWWEventArea(osmAdminid, warming = WWWEventArea.Warming(type = "")),
+        area = WWWEventArea(osmAdminid),
         map = WWWEventMap(maxzoom, language, zone)
     )
 }

@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonBbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -25,11 +27,11 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestBoundingBox {
+class MapAreaUtilsBoundingBoxTest {
 
     @Test
     fun testSimplePolygon() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -43,7 +45,7 @@ class AreaUtilsTestBoundingBox {
 
     @Test
     fun testBadPolygon() {
-        val polygon : Polygon = emptyList()
+        val polygon = Polygon()
         assertFailsWith<IllegalArgumentException> {
             polygonBbox(polygon)
         }
@@ -51,7 +53,7 @@ class AreaUtilsTestBoundingBox {
 
     @Test
     fun testComplexPolygon() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
@@ -66,7 +68,7 @@ class AreaUtilsTestBoundingBox {
 
     @Test
     fun testPointOnEdge() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -79,14 +81,14 @@ class AreaUtilsTestBoundingBox {
 
     @Test
     fun testPolygonWithHole() {
-        val outerPolygon = listOf(
+        val outerPolygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 3.0),
             Position(3.0, 3.0),
             Position(3.0, 0.0),
             Position(0.0, 0.0)
         )
-        val innerPolygon = listOf(
+        val innerPolygon = polygonOf(
             Position(1.0, 1.0),
             Position(1.0, 2.0),
             Position(2.0, 2.0),
@@ -101,7 +103,7 @@ class AreaUtilsTestBoundingBox {
 
     @Test
     fun testDegeneratePolygon() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(1.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 1.0)

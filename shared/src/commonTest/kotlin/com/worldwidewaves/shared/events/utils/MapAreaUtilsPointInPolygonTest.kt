@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -24,7 +25,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsTestPointInPolygon {
+class MapAreaUtilsPointInPolygonTest {
 
     /**
      * Test points inside and outside a simple square polygon
@@ -61,7 +62,7 @@ class AreaUtilsTestPointInPolygon {
      */
     @Test
     fun testIsPointInSimplePolygon() {
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -123,7 +124,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testIsPointOutsideSimplePolygon() {
         val point = Position(1.5, 0.5)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0), Position(1.0, 0.0),
@@ -167,7 +168,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testIsPointInConcavePolygon() {
         val point = Position(0.5, 0.5)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(0.5, 0.5),
@@ -182,7 +183,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testIsPointOutsideConcavePolygon() {
         val point = Position(0.2, 0.8)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(0.5, 0.5),
@@ -198,7 +199,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testPointOnVertex() {
         val point = Position(0.0, 0.0)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -211,7 +212,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testPointOnHorizontalEdge() {
         val point = Position(0.5, 0.0)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -224,7 +225,7 @@ class AreaUtilsTestPointInPolygon {
     @Test
     fun testPointOnVerticalEdge() {
         val point = Position(0.0, 0.5)
-        val polygon = listOf(
+        val polygon = polygonOf(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),

@@ -32,7 +32,9 @@ mkdir -p ./data
 [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
 
 # Download osmconvert to extract BBOX from OSM areas
-[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert
+[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert && (
+  cd openmaptiles-tools && make
+)
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
@@ -42,6 +44,8 @@ mkdir -p ./data
 if [ ! -z "$1" ]; then
   if $(exists $1); then
     EVENTS=$1
+    rm -f data/.env-$1
+    rm -f data/$1.yaml
   else
     echo "Unexistent event $1"
     exit 1

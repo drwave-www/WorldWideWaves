@@ -20,43 +20,37 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.LocalDateTime
+import com.worldwidewaves.shared.events.utils.Polygon
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 // ---------------------------
 
 @Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
-    override val direction: String,
+    override val direction: Direction,
+    override val warming: WWWEventWaveWarming,
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
 
+    override suspend fun getWarmingPolygons(): List<Polygon> {
+        return emptyList()
+    }
+
     // ---------------------------
 
-    override suspend fun getObservationInterval(): Long {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getEndTime(): LocalDateTime {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getTotalTime(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getProgression(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isWarmingEnded(): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun getWaveDuration(): Duration {
+        return 2.hours // TODO
     }
 
     override suspend fun hasUserBeenHit(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun timeBeforeHit(): Duration? {
         TODO("Not yet implemented")
     }
 
@@ -75,7 +69,7 @@ data class WWWEventWaveLinearSplit(
 
                 else -> { }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "wavelinearsplit: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveLinearSplit::class.simpleName}: $it" }
     }
 
 }

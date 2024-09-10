@@ -21,17 +21,16 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.events.utils.ICoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.isPointInPolygon
-import com.worldwidewaves.shared.events.utils.isPointInPolygons
-import com.worldwidewaves.shared.events.utils.polygonsBbox
-import com.worldwidewaves.shared.events.utils.splitPolygonByLongitude
+import com.worldwidewaves.shared.events.utils.toPolygon
 import com.worldwidewaves.shared.getMapFileAbsolutePath
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.double
@@ -44,14 +43,11 @@ import org.koin.core.component.inject
 
 @Serializable
 data class WWWEventArea(
-
-    val osmAdminid: Int,
-    val warming: Warming
-
+    val osmAdminid: Int
 ) : KoinComponent, DataValidator {
 
-    private var _event: WWWEvent? = null
-    private var event: WWWEvent
+    private var _event: IWWWEvent? = null
+    private var event: IWWWEvent
         get() = _event ?: throw IllegalStateException("Event not set")
         set(value) {
             _event = value
@@ -60,32 +56,11 @@ data class WWWEventArea(
     // ---------------------------
 
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
-    private val coroutineScopeProvider: ICoroutineScopeProvider by inject()
+    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val areaPolygon: MutableList<Polygon> = mutableListOf()
-    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
+    @Transient private val cachedAreaPolygons: MutableList<Polygon> = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
-
-    // ---------------------------
-
-    @Serializable
-    data class Warming(
-        val type: String,
-        val longitude: Double? = null,
-    ) : DataValidator {
-        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
-            when {
-                type == "longitude-cut" && longitude == null ->
-                    add("Longitude must not be null for type 'longitude-cut'")
-
-                type == "longitude-cut" && (longitude!! < -180 || longitude > 180) ->
-                    add("Longitude must be between -180 and 180")
-
-                else -> {}
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "warming: $it" }
-    }
 
     // ---------------------------
 
@@ -101,7 +76,6 @@ data class WWWEventArea(
      * This function attempts to get the absolute path of the GeoJSON file associated with the event.
      * It uses the event's ID to locate the file within the cache directory.
      *
-     * @return The absolute path of the GeoJSON file as a String, or `null` if the file is not found.
      */
     internal suspend fun getGeoJsonFilePath(): String? =
         getMapFileAbsolutePath(event.id, "geojson")
@@ -114,8 +88,6 @@ data class WWWEventArea(
      * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
      * to determine if the specified position lies within the polygon.
      *
-     * @param position The position to check.
-     * @return `true` if the position is within the polygon, `false` otherwise.
      */
     suspend fun isPositionWithin(position: Position): Boolean =
         getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
@@ -129,8 +101,6 @@ data class WWWEventArea(
      * If the bounding box has been previously calculated and cached, it returns the cached value.
      * Otherwise, it calculates the bounding box, caches it, and then returns it.
      *
-     * @return A [BoundingBox] object representing the bounding box of the polygon.
-     * @throws IllegalStateException if the polygon is empty.
      */
     suspend fun getBoundingBox(): BoundingBox =
         cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
@@ -145,7 +115,6 @@ data class WWWEventArea(
      * of the northeast and southwest corners of the bounding box. If the center has been previously
      * calculated and cached, it returns the cached value.
      *
-     * @return The center position of the event area as a [Position] object.
      */
     suspend fun getCenter(): Position =
         cachedCenter ?: getBoundingBox().let { bbox ->
@@ -163,10 +132,9 @@ data class WWWEventArea(
      * This function fetches the polygon data from the `geoJsonDataProvider` if the `areaPolygon` is empty.
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
-     * @return A `Polygon` object representing the event area.
      */
-    private suspend fun getPolygons(): List<Polygon> {
-        if (areaPolygon.isEmpty()) {
+     suspend fun getPolygons(): List<Polygon> {
+        if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
@@ -179,7 +147,7 @@ data class WWWEventArea(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
                                 )
-                            }.apply { areaPolygon.add(this) }
+                            }.toPolygon.apply { cachedAreaPolygons.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
                             multiPolygon.jsonArray.flatMap { ring ->
@@ -188,51 +156,17 @@ data class WWWEventArea(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
-                                }.apply { areaPolygon.add(this) }
+                                }.toPolygon.apply { cachedAreaPolygons.add(this) }
                             }
                         }
-                        else -> { Napier.e("${event.id}: Unsupported GeoJSON type: $type") }
+                        else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
                     }
                 } ?: run {
-                    Napier.e("${event.id}: Error loading geojson data for event")
+                    Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
         }
-        return areaPolygon
-    }
-
-    // ---------------------------
-
-    /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-
-     */
-    suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
-    }
-
-    /**
-     * Retrieves the warming polygons for the event area.
-     *
-     * This function returns a list of polygons representing the warming zones for the event area.
-     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
-     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
-     *
-     */
-    suspend fun getWarmingPolygons(): List<Polygon> {
-        if (cachedWarmingPolygons == null) {
-            cachedWarmingPolygons = when (warming.type) {
-                "longitude-cut" -> event.area.getPolygons().flatMap { polygon ->
-                    splitPolygonByLongitude(polygon, warming.longitude!!).right
-                }
-                else -> emptyList()
-            }
-        }
-        return cachedWarmingPolygons!!
+        return cachedAreaPolygons
     }
 
     // ---------------------------
@@ -243,8 +177,8 @@ data class WWWEventArea(
                 osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
                     add("OSM admin ID must be greater than 0 if it's not the world event")
 
-                else -> warming.validationErrors()?.let { addAll(it) }
+                else -> { /* No validation errors */ }
             }
-        }.takeIf { it.isNotEmpty() }?.map { "area: $it" }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
 }

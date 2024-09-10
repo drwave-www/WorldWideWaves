@@ -20,16 +20,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
@@ -44,15 +47,17 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
 import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.wave_now
-import com.worldwidewaves.theme.displayFontFamily
-import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.theme.commonBoldStyle
+import com.worldwidewaves.theme.commonTextStyle
+import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,9 +82,20 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 @Composable
-fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isSoon() || event.isRunning()) {
-        val (backgroundColor, textId) = if (event.isSoon()) {
+fun EventOverlaySoonOrRunning(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    var isSoon by remember { mutableStateOf(false) }
+    var isRunning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isSoon = event.isSoon()
+            isRunning = event.isRunning()
+        }
+    }
+
+    if (isSoon || isRunning) {
+        val (backgroundColor, textId) = if (isSoon) {
             MaterialTheme.colorScheme.secondary to Res.string.event_soon
         } else {
             MaterialTheme.colorScheme.tertiary to Res.string.event_running
@@ -99,21 +115,26 @@ fun EventOverlaySoonOrRunning(event: WWWEvent, modifier: Modifier = Modifier) {
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = TextStyle(
-                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                        fontSize = DIM_COMMON_SOONRUNNING_FONTSIZE.sp
-                    )
+                    style = commonTextStyle(DIM_COMMON_SOONRUNNING_FONTSIZE)
                 )
             }
         }
     }
 }
-
 // ----------------------------
 
 @Composable
-fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
-    if (event.isDone()) {
+fun EventOverlayDone(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    var isDone by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        scope.launch {
+            isDone = event.isDone()
+        }
+    }
+
+    if (isDone) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(
                 color = Color.run { White.copy(alpha = 0.5f) },
@@ -131,7 +152,7 @@ fun EventOverlayDone(event: WWWEvent, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
+fun ButtonWave(event: IWWWEvent, modifier: Modifier = Modifier) {
     // val context = LocalContext.current
 
     Surface(
@@ -148,11 +169,9 @@ fun ButtonWave(event: WWWEvent, modifier: Modifier = Modifier) {
                 .fillMaxSize()
                 .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(Res.string.wave_now).uppercase(),
-            color = quinaryLight,
-            fontSize = DIM_EVENT_WAVEBUTTON_FONTSIZE.sp,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Black,
-            fontFamily = displayFontFamily
+            style = quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
+                textAlign = TextAlign.Center
+            )
         )
     }
 }
@@ -186,15 +205,13 @@ fun WWWSocialNetworks(
                     }
                 }),
                 text = instagramAccount,
-                fontSize = DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE.sp,
-                fontWeight = FontWeight.Black,
-                fontFamily = displayFontFamily,
-                textDecoration = TextDecoration.Underline
+                style = commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
+                    textDecoration = TextDecoration.Underline
+                )
             )
             Text(
                 text = instagramHashtag,
-                fontSize = DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE.sp,
-                fontFamily = displayFontFamily
+                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE)
             )
         }
     }

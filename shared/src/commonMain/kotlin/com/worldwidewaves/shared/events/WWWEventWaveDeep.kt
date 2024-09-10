@@ -20,40 +20,34 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.LocalDateTime
+import com.worldwidewaves.shared.events.utils.Polygon
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 
 // ---------------------------
 
 @Serializable
 data class WWWEventWaveDeep(
     override val speed: Double,
-    override val direction: String
+    override val direction: Direction,
+    override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getObservationInterval(): Long {
-        TODO("Not yet implemented")
+    override suspend fun getWarmingPolygons(): List<Polygon> {
+        return emptyList()
     }
 
-    override suspend fun getEndTime(): LocalDateTime {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getTotalTime(): Duration {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getProgression(): Double {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun isWarmingEnded(): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun getWaveDuration(): Duration {
+        return 2.hours // TODO
     }
 
     override suspend fun hasUserBeenHit(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun timeBeforeHit(): Duration? {
         TODO("Not yet implemented")
     }
 
@@ -65,7 +59,7 @@ data class WWWEventWaveDeep(
 
         // TODO
 
-        return errors.takeIf { it.isNotEmpty() }?.map { "wavedeep: $it" }
+        return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveDeep::class.simpleName}: $it" }
     }
 
 }

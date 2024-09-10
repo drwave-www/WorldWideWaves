@@ -22,7 +22,7 @@ package com.worldwidewaves.models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,46 +41,41 @@ import kotlinx.coroutines.launch
  */
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
-    private var originalEvents: List<WWWEvent> = emptyList()
+    private var originalEvents: List<IWWWEvent> = emptyList()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
 
-    private val _events = MutableStateFlow<List<WWWEvent>>(emptyList())
-    val events: StateFlow<List<WWWEvent>> = _events.asStateFlow()
+    private val _events = MutableStateFlow<List<IWWWEvent>>(emptyList())
+    val events: StateFlow<List<IWWWEvent>> = _events.asStateFlow()
+
+    private val loadingError = MutableStateFlow(false)
+    val hasLoadingError: StateFlow<Boolean> = loadingError.asStateFlow()
 
     init {
-        loadEvents()
+        loadEvents {
+            loadingError.value = true
+        }
     }
 
     // ---------------------------
 
-    private fun loadEvents() {
-        viewModelScope.launch(Dispatchers.IO) {
-            wwwEvents.eventsFlow.collect { eventsList ->
-                originalEvents = eventsList
-                _events.value = eventsList
-                _hasFavorites.value = eventsList.any { it.favorite }
+    private fun loadEvents(onLoadingError: ((Exception) -> Unit)? = null) =
+        wwwEvents.loadEvents(onLoadingError = onLoadingError).also {
+            viewModelScope.launch(Dispatchers.IO) {
+                wwwEvents.flow().collect { eventsList ->
+                    val sortedEvents = eventsList.sortedBy { it.getStartDateTime() }
+                    originalEvents = sortedEvents
+                    _events.value = sortedEvents
+                    _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
+                }
             }
         }
-    }
 
     // ---------------------------
 
-    fun filterFavoriteEvents() {
-        _events.value = originalEvents.filter { it.favorite }
-    }
-
-    fun filterAllEvents() {
-        _events.value = originalEvents
-    }
-
-    fun filterEvents(starredSelected: Boolean) {
-        if (starredSelected) {
-            filterFavoriteEvents()
-        } else {
-            filterAllEvents()
-        }
+    fun filterEvents(onlyFavorites: Boolean) {
+        _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
     }
 
 }

@@ -21,20 +21,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
-import com.worldwidewaves.shared.events.WWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
-import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.theme.primaryColoredTextStyle
+import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
@@ -73,7 +72,7 @@ abstract class AbstractEventBackActivity(
 
         setStatusBarColor(window)
 
-        var selectedEvent by mutableStateOf<WWWEvent?>(null)
+        var selectedEvent by mutableStateOf<IWWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")
 
         if (eventId != null) {
@@ -89,8 +88,8 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    private fun loadEvent(eventId: String, onEventLoaded: (WWWEvent?) -> Unit) {
-        wwwEvents.onEventLoaded {
+    private fun loadEvent(eventId: String, onEventLoaded: (IWWWEvent?) -> Unit) {
+        wwwEvents.addOnEventsLoadedListener {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
             }
@@ -100,7 +99,7 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    private fun BackwardScreen(event: WWWEvent?) {
+    private fun BackwardScreen(event: IWWWEvent?) {
         val scrollState = rememberScrollState()
 
         if (event != null) {
@@ -123,18 +122,14 @@ abstract class AbstractEventBackActivity(
                                 .align(Alignment.BottomStart)
                                 .clickable(onClick = { finish() }),
                             text = "< " + stringResource(ShRes.string.back),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontSize = DIM_BACK_FONTSIZE.sp,
+                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
                         )
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = event.location.uppercase(),
-                            color = quinaryLight,
-                            fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = DIM_BACK_EVENT_LOCATION_FONTSIZE.sp,
+                            style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
+                                textAlign = TextAlign.Center
+                            )
                         )
                     }
                 }
@@ -150,9 +145,7 @@ abstract class AbstractEventBackActivity(
         } else { // Error, should not occur
             Text(
                 text = "Event not found",
-                color = MaterialTheme.colorScheme.primary,
-                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
-                fontSize = 16.sp,
+                style = primaryColoredTextStyle()
             )
         }
     }
@@ -160,6 +153,6 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    abstract fun Screen(modifier: Modifier, event: WWWEvent)
+    abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 
 }

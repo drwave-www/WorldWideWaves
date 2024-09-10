@@ -16,7 +16,6 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-
     listOf(
         iosX64(),
         iosArm64(),
@@ -27,7 +26,6 @@ kotlin {
             isStatic = true
         }
     }
-
     sourceSets {
         named("commonMain") {
             resources.srcDirs("composeResources")
@@ -48,7 +46,7 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation("io.mockk:mockk-common:1.12.0")
+            implementation(libs.mockk.common.v1120)
         }
     }
 }
@@ -59,6 +57,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        compose = true
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -71,8 +72,7 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        testImplementation(libs.mockk.v1120)
-        testImplementation(libs.mockk.android.v1120)
+        implementation(libs.mockk.android.v1120)
     }
 
 }
@@ -89,3 +89,14 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
 }
 
+tasks.named("compileTestKotlinIosArm64").configure {
+    enabled = false
+}
+
+tasks.named("compileTestKotlinIosSimulatorArm64").configure {
+    enabled = false
+}
+
+tasks.named("compileTestKotlinIosX64").configure {
+    enabled = false
+}

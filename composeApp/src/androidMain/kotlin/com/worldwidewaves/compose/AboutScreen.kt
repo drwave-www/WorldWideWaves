@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
@@ -54,6 +53,7 @@ import com.worldwidewaves.shared.generated.resources.tab_infos_name
 import com.worldwidewaves.shared.generated.resources.www_hashtag
 import com.worldwidewaves.shared.generated.resources.www_instagram
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.theme.commonTextStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -106,10 +106,10 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
             }
             Text(
                 text = stringResource(tabInfo[tabIndex]).uppercase(),
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
-                fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
-                fontSize = DIM_INT_TABBAR_ITEM_FONTSIZE.sp
+                style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
+                )
             )
         }
     }
