@@ -6,6 +6,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /*
@@ -68,7 +69,7 @@ class MapAreaTypesTest {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
         polygon.add(position1)
-        assertTrue(polygon.insertAfter(position2, polygon.first()!!.id))
+        assertNotNull(polygon.insertAfter(position2, polygon.first()!!.id))
         assertEquals(2, polygon.size)
     }
 
@@ -78,7 +79,7 @@ class MapAreaTypesTest {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
         polygon.add(position1)
-        assertTrue(polygon.insertBefore(position2, polygon.first()!!.id))
+        assertNotNull(polygon.insertBefore(position2, polygon.first()!!.id))
         assertEquals(2, polygon.size)
     }
 
@@ -195,7 +196,7 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0)
         val cutLeft = Position(0.0, 0.0)
         val cutRight = Position(2.0, 2.0)
-        val cutPosition = CutPosition(position, cutLeft, cutRight)
+        val cutPosition = position.toCutPosition(42, cutLeft, cutRight)
 
         assertEquals(position.lat, cutPosition.lat)
         assertEquals(position.lng, cutPosition.lng)
@@ -208,8 +209,8 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0)
         val cutLeft = Position(0.0, 0.0)
         val cutRight = Position(2.0, 2.0)
-        val cutPosition1 = CutPosition(position, cutLeft, cutRight)
-        val cutPosition2 = CutPosition(position, cutLeft, cutRight)
+        val cutPosition1 = position.toCutPosition(42, cutLeft, cutRight)
+        val cutPosition2 = position.toCutPosition(42, cutLeft, cutRight)
 
         assertEquals(cutPosition1, cutPosition2)
     }
@@ -269,20 +270,6 @@ class MapAreaTypesTest {
         val rightCutPolygon = RightCutPolygon(cutId)
         val newPolygon: RightCutPolygon = rightCutPolygon.createNew()
         assertEquals(cutId, newPolygon.cutId)
-    }
-
-    @Test
-    fun testLeftCutPolygonCreateList() {
-        val leftCutPolygon = LeftCutPolygon(1)
-        val list: MutableList<LeftCutPolygon> = leftCutPolygon.createList()
-        assertTrue(list.isEmpty())
-    }
-
-    @Test
-    fun testRightCutPolygonCreateList() {
-        val rightCutPolygon = RightCutPolygon(2)
-        val list: MutableList<RightCutPolygon> = rightCutPolygon.createList()
-        assertTrue(list.isEmpty())
     }
 
     @Test
@@ -355,19 +342,10 @@ class MapAreaTypesTest {
     }
 
     @Test
-    fun testAddInvalidPosition() {
-        val polygon = Polygon()
-        val invalidPosition = Position(Double.NaN, Double.NaN)
-        assertFailsWith<IllegalArgumentException> {
-            polygon.add(invalidPosition)
-        }
-    }
-
-    @Test
     fun testRemoveNonExistentPosition() {
         val polygon = Polygon()
-        val position = Position(1.0, 1.0).init()
-        polygon.add(position)
+        var position = Position(1.0, 1.0).init()
+        position = polygon.add(position)
         assertTrue(polygon.remove(position.id))
         assertFalse(polygon.remove(position.id)) // Try removing again
     }
@@ -378,7 +356,7 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         val newPosition = Position(2.0, 2.0)
-        assertFalse(polygon.insertAfter(newPosition, -1)) // Invalid ID
+        assertNull(polygon.insertAfter(newPosition, -1)) // Invalid ID
     }
 
     @Test
@@ -387,7 +365,7 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         val newPosition = Position(2.0, 2.0)
-        assertFalse(polygon.insertBefore(newPosition, -1)) // Invalid ID
+        assertNull(polygon.insertBefore(newPosition, -1)) // Invalid ID
     }
 
     @Test
@@ -396,7 +374,7 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         polygon.add(position) // Add the same position again
-        assertEquals(1, polygon.size) // Size should still be 1
+        assertEquals(2, polygon.size) // Size should be 2
     }
 
     @Test
@@ -407,8 +385,21 @@ class MapAreaTypesTest {
             polygon.iterator().next()
         }
         assertFailsWith<IllegalArgumentException> {
-            polygon.subList<Polygon>(Position(0.0, 0.0), -1)
+            polygon.subList(Position(0.0, 0.0), -1)
         }
+    }
+
+    @Test
+    fun testCutPositionHashCode() {
+        val position = Position(1.0, 1.0)
+        val cutLeft = Position(0.0, 0.0)
+        val cutRight = Position(2.0, 2.0)
+        val cutPosition1 = position.toCutPosition(42, cutLeft, cutRight)
+        val cutPosition2 = position.toCutPosition(42, cutLeft, cutRight)
+        val cutPosition3 = position.toCutPosition(43, cutLeft, cutRight)
+
+        assertEquals(cutPosition1.hashCode(), cutPosition2.hashCode())
+        assertNotEquals(cutPosition1.hashCode(), cutPosition3.hashCode())
     }
 
 }

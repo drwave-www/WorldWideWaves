@@ -134,6 +134,7 @@ object PolygonUtils {
             }
             fun empty() = SplitPolygonResult(emptyList(), emptyList())
         }
+        fun polygons() = left + right
     }
 
     /**
@@ -186,9 +187,9 @@ object PolygonUtils {
                     when { // If required cut the polygon at the intersection point
                            // and add the cut point on both sides
                         point.lng < longitudeToCut && nextPoint.lng > longitudeToCut ->
-                            CutPosition(intersection, cutLeft = point, cutRight = nextPoint)
+                            intersection.toCutPosition(cutId = cutId, cutLeft = point, cutRight = nextPoint)
                         point.lng > longitudeToCut && nextPoint.lng < longitudeToCut ->
-                            CutPosition(intersection, cutLeft = nextPoint, cutRight = point)
+                            intersection.toCutPosition(cutId = cutId, cutLeft = nextPoint, cutRight = point)
                         else -> null
                     }?.let {
                         leftSide.add(it)
@@ -220,10 +221,10 @@ object PolygonUtils {
      */
     private fun <T : CutPolygon> groupIntoRingPolygons(polygon: T): List<T> {
         // Polygon cut type conservation
-        val polygons: MutableList<CutPolygon> = polygon.createList()
+        val polygons: MutableList<Polygon> = mutableListOf()
 
         // Polygon cut type conservation
-        val currentPolygon  = polygon.createNew<T>()
+        val currentPolygon  = polygon.createNew()
 
         for (point in polygon) {
             if ((point.id != polygon.first()!!.id) && point == polygon.last()!!)

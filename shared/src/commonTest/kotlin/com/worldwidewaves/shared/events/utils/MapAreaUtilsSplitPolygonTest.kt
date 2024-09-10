@@ -320,7 +320,8 @@ class MapAreaUtilsSplitPolygonTest {
         Position(1.0, 1.0),
         Position(2.0, 2.0),
         Position(2.0, 0.0),
-        Position(0.0, 0.0))
+        Position(0.0, 0.0)
+        )
 
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
@@ -388,7 +389,7 @@ class MapAreaUtilsSplitPolygonTest {
 
         // Rotate the polygon to start from the smallest point
         return (
-                polygon.subList<T>(minPoint, polygon.last()!!.id) +
+                polygon.subList(minPoint, polygon.last()!!.id) +
                         polygon.subList(polygon.last()!!, minPoint.id)
                 )
     }

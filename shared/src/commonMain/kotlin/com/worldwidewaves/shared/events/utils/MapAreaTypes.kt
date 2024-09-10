@@ -20,6 +20,8 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
+
 data class Segment(val start: Position, val end: Position)
 
 // ----------------------------------------------------------------------------
@@ -30,48 +32,54 @@ data class Segment(val start: Position, val end: Position)
  */
 open class Position(val lat: Double, val lng: Double, internal var next: Position? = null) {
     var id: Int = -1
-        private set // Cannot be set outside of the class
+        internal set // Cannot be set outside of the class
         get() { // Cannot be read before begin initialized (added to a Polygon)
             if (field == -1) throw IllegalStateException("ID has not been initialized")
             return field
         }
 
-    internal fun init() = apply { id = nextId++ } // Can only be initialized from internal context
-
     open operator fun component1() = lat
     open operator fun component2() = lng
 
     companion object {
-        private var nextId = 42
+        internal var nextId = 42
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Position) return false
-        return lat == other.lat && lng == other.lng
-    }
+    fun toCutPosition(cutId: Int, cutLeft: Position, cutRight: Position) =
+        CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 
+    internal open fun xfer() = Position(lat, lng).init()
+
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
+
 }
 
+internal fun <T : Position> T.init(): T = apply { id = nextId++ } // Can only be initialized from internal context
+
 class CutPosition( // A position that has been cut
-    position: Position,
+    lat: Double,
+    lng: Double,
+    val cutId: Int,
     val cutLeft: Position,
     val cutRight: Position
-) : Position(position.lat, position.lng)
+) : Position(lat, lng) {
+    override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is Position && super.equals(other) && if (other is CutPosition) cutId == other.cutId else true)
+    override fun hashCode(): Int = 31 * super.hashCode() + cutId.hashCode()
+}
 
 // ----------------------------------------------------------------------------
 
 abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of a polygon after cut
-    abstract override fun <T: Polygon> createNew(): T
-    abstract override fun <T: Polygon> createList(): MutableList<T>
+    abstract override fun createNew() : CutPolygon
 }
 
 class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon after cut
-    @Suppress("UNCHECKED_CAST")
-    override fun <T: Polygon> createNew() = LeftCutPolygon(cutId) as T
-    override fun <T: Polygon> createList(): MutableList<T> = mutableListOf()
+    override fun createNew() = LeftCutPolygon(cutId)
     companion object {
         fun convert(polygon: Polygon, cutId: Int): LeftCutPolygon = LeftCutPolygon(cutId).apply {
             head = polygon.head
@@ -83,9 +91,7 @@ class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon
 }
 
 class RightCutPolygon(cutId: Int) : CutPolygon(cutId) { // Right part of a polygon after cut
-    @Suppress("UNCHECKED_CAST")
-    override fun <T: Polygon> createNew() = RightCutPolygon(cutId) as T
-    override fun <T: Polygon> createList(): MutableList<T> = mutableListOf()
+    override fun createNew() = RightCutPolygon(cutId)
     companion object {
         fun convert(polygon: Polygon, cutId: Int): RightCutPolygon = RightCutPolygon(cutId).apply {
             head = polygon.head
@@ -111,9 +117,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    @Suppress("UNCHECKED_CAST")
-    open fun <T: Polygon> createNew(): T = Polygon() as T // Ensure the right type is created
-    open fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
+    open fun createNew() = Polygon() // Ensure the right type is created
 
     // --------------------------------
 
@@ -121,8 +125,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    fun add(position: Position) {
-        val addPosition = Position(position.lat, position.lng).init()
+    fun add(position: Position) : Position {
+        val addPosition = position.xfer()
 
         positionsIndex[addPosition.id] = addPosition
         if (addPosition is CutPosition) {
@@ -134,6 +138,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
             tail?.next = addPosition
         }
         tail = addPosition
+        return addPosition
     }
 
     fun remove(id: Int): Boolean {
@@ -158,9 +163,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         return false // Position not found
     }
 
-    fun insertAfter(newPosition: Position, id: Int): Boolean {
-        val current = positionsIndex[id] ?: return false
-        val addPosition = Position(newPosition.lat, newPosition.lng).init()
+    fun insertAfter(newPosition: Position, id: Int): Position? {
+        val current = positionsIndex[id] ?: return null
+        val addPosition = newPosition.xfer()
 
         addPosition.next = current.next
         current.next = addPosition
@@ -169,12 +174,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         if (addPosition is CutPosition) {
             cutPositions.add(addPosition)
         }
-        return true
+        return addPosition
     }
 
-    fun insertBefore(newPosition: Position, id1: Int): Boolean {
-        val current = positionsIndex[id1] ?: return false
-        val addPosition = Position(newPosition.lat, newPosition.lng).init()
+    fun insertBefore(newPosition: Position, id1: Int): Position? {
+        val current = positionsIndex[id1] ?: return null
+        val addPosition = newPosition.xfer()
 
         addPosition.next = current
         if (current == head) {
@@ -188,13 +193,14 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         if (addPosition is CutPosition) {
             cutPositions.add(addPosition)
         }
-        return true
+        return addPosition
     }
 
     // --------------------------------
 
-    fun <T : Polygon> subList(start: Position, lastId: Int): T = createNew<T>().apply {
-        if (this@Polygon.isEmpty()) return this
+    fun subList(start: Position, lastId: Int) = createNew().apply {
+        if (this@Polygon.isEmpty())
+            throw IllegalArgumentException("Polygon subList: 'start' cannot be found in an empty polygon")
 
         var current = start
         do {
@@ -205,7 +211,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         } while (current.id != lastId)
     }
 
-    fun <T: Polygon> dropLast(n: Int = 1): T = createNew<T>().apply {
+    fun dropLast(n: Int = 1): Polygon = createNew().apply {
         val newSize = (this@Polygon.size - n).coerceAtLeast(0)
         var current = this@Polygon.head
         repeat(newSize) {
@@ -216,7 +222,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    operator fun <T: Polygon> plus(other: T): T = createNew<T>().apply {
+    operator fun plus(other: Polygon) = createNew().apply {
         this@Polygon.forEach { add(it) }
         other.forEach { add(it) }
     }
@@ -247,7 +253,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    open fun <T: Polygon> copy(): T = createNew<T>().apply {
+    open fun copy() = createNew().apply {
         this@Polygon.forEach { add(it) }
     }
 
@@ -306,6 +312,5 @@ data class BoundingBox(
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is BoundingBox && sw == other.sw && ne == other.ne)
-
     override fun hashCode(): Int = 31 * sw.hashCode() + ne.hashCode()
 }
