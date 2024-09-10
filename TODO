@@ -2,6 +2,7 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
+   - revoir insertAfter et before pour prendre en compte l'index, autres ? 
     - demander d'activer le GPS sur rentrée dans l'app et veille + sur clic position lorsqu'elle sera là
     - code header on 80 cols
     - show some map elements on min zoom
