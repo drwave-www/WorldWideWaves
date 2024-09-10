@@ -162,8 +162,10 @@ object PolygonUtils {
         val maxLongitude = polygon.maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
 
         return when {
-            longitudeToCut > maxLongitude -> SplitPolygonResult.fromPolygon(polygon, LEFT)
-            longitudeToCut < minLongitude -> SplitPolygonResult.fromPolygon(polygon, RIGHT)
+            longitudeToCut > maxLongitude ->
+                SplitPolygonResult.fromPolygon(LeftCutPolygon.convert(polygon, cutId), LEFT)
+            longitudeToCut < minLongitude ->
+                SplitPolygonResult.fromPolygon(RightCutPolygon.convert(polygon, cutId), RIGHT)
             else -> {
                 // Separate the polygon into two parts based on the cut longitude
                 for (point in polygon) {
@@ -220,7 +222,8 @@ object PolygonUtils {
         val currentPolygon : Polygon = polygon.createNew()
 
         for (point in polygon) {
-            if ((point.id != polygon.first()!!.id) && point == polygon.last()!!) break
+            if ((point.id != polygon.first()!!.id) && point == polygon.last()!!)
+                break // Do not take the last point
             currentPolygon.add(point)
 
             if (currentPolygon.size > 1) {

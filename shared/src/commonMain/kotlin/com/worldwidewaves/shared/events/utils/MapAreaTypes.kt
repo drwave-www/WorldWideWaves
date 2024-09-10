@@ -24,20 +24,25 @@ data class Segment(val start: Position, val end: Position)
 
 // ----------------------------------------------------------------------------
 
-open class Position(val lat: Double, val lng: Double, var next: Position? = null) {
+/**
+ * Represents a geographic position with latitude and longitude coordinates.
+ *
+ */
+open class Position(val lat: Double, val lng: Double, internal var next: Position? = null) {
     var id: Int = -1
-        get() {
+        private set // Cannot be set outside of the class
+        get() { // Cannot be read before begin initialized (added to a Polygon)
             if (field == -1) throw IllegalStateException("ID has not been initialized")
             return field
         }
 
-    internal fun init() = apply { id = nextId++ }
+    internal fun init() = apply { id = nextId++ } // Can only be initialized from internal context
 
     open operator fun component1() = lat
     open operator fun component2() = lng
 
     companion object {
-        internal var nextId = 42
+        private var nextId = 42
     }
 
     override fun equals(other: Any?): Boolean {
@@ -64,23 +69,39 @@ abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of a polygon aft
 }
 
 class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon after cut
-    override fun createNew(): CutPolygon = LeftCutPolygon(cutId)
+    override fun createNew(): LeftCutPolygon = LeftCutPolygon(cutId)
     override fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
+    companion object {
+        fun convert(polygon: Polygon, cutId: Int): LeftCutPolygon = LeftCutPolygon(cutId).apply {
+            head = polygon.head
+            tail = polygon.tail
+            positionsIndex.putAll(polygon.positionsIndex)
+            cutPositions.addAll(polygon.cutPositions)
+        }
+    }
 }
 
 class RightCutPolygon(cutId: Int) : CutPolygon(cutId) { // Right part of a polygon after cut
-    override fun createNew(): CutPolygon = RightCutPolygon(cutId)
+    override fun createNew(): RightCutPolygon = RightCutPolygon(cutId)
     override fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
+    companion object {
+        fun convert(polygon: Polygon, cutId: Int): RightCutPolygon = RightCutPolygon(cutId).apply {
+            head = polygon.head
+            tail = polygon.tail
+            positionsIndex.putAll(polygon.positionsIndex)
+            cutPositions.addAll(polygon.cutPositions)
+        }
+    }
 }
 
 // ------------------------------------
 
 open class Polygon(position: Position? = null) : Iterable<Position> {
 
-    private var head: Position? = null
-    private var tail: Position? = null
-    private val cutPositions = mutableListOf<CutPosition>()
-    private val positionsIndex = mutableMapOf<Int, Position>()
+    internal var head: Position? = null
+    internal var tail: Position? = null
+    internal val cutPositions = mutableListOf<CutPosition>()
+    internal val positionsIndex = mutableMapOf<Int, Position>()
 
     // --------------------------------
 
@@ -113,20 +134,25 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
     }
 
     fun remove(id: Int): Boolean {
-        val position = positionsIndex.remove(id) ?: return false
-        if (position is CutPosition) {
-            cutPositions.remove(position)
+        val positionToRemove = positionsIndex.remove(id) ?: return false
+        if (positionToRemove is CutPosition) {
+            cutPositions.remove(positionToRemove)
         }
 
-        head = if (position == head) position.next else {
-            val previous = positionsIndex.values.find { it.next?.id == id }
-            previous?.next = position.next
-            head
+        if (positionToRemove == head) {
+            head = positionToRemove.next
+            if (head == null) tail = null
+            return true
         }
 
-        tail = positionsIndex.values.find { it.next?.id == position.id }?.apply { next = null }
+        positionsIndex.values.find { it.next == positionToRemove }?.apply {
+            next = positionToRemove.next
+            if (positionToRemove == tail)
+                tail = this
+            return true
+        }
 
-        return true
+        return false // Position not found
     }
 
     fun insertAfter(newPosition: Position, id: Int): Boolean {
