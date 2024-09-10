@@ -247,13 +247,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 fun polygonOf(vararg positions: Position): Polygon = Polygon().apply { positions.forEach { add(it) } }
 
 val List<Position>.toPolygon: Polygon
-    get() {
-        val polygon = Polygon()
-        for (element in this) {
-            polygon.add(element)
-        }
-        return polygon
-    }
+    get() = Polygon().apply { this@toPolygon.forEach { add(it) } }
 
 // ----------------------------------------------------------------------------
 
