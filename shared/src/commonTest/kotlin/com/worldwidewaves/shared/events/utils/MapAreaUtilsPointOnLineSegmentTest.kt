@@ -25,7 +25,7 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class AreaUtilsPointOnLineSegmentTest {
+class MapAreaUtilsPointOnLineSegmentTest {
 
     @Test
     fun pointOnHorizontalSegment() {

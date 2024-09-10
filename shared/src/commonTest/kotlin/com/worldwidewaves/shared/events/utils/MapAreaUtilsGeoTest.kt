@@ -1,4 +1,4 @@
 package com.worldwidewaves.shared.events.utils
 
-class AreaUtilsGeoTest {
+class MapAreaUtilsGeoTest {
 }

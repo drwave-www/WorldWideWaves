@@ -27,33 +27,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
-
-// ----------------------------------------------------------------------------
-
-data class Position(val lat: Double, val lng: Double)
-
-typealias Polygon = List<Position>
-
-data class Segment(val start: Position, val end: Position)
-
-/**
- * Represents a bounding box defined by its southwest and northeast corners.
- *
- */
-data class BoundingBox(
-    val sw: Position,
-    val ne: Position
-) {
-    constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
-        sw = Position(swLat, swLng),
-        ne = Position(neLat, neLng)
-    )
-
-    val minLatitude: Double get() = sw.lat
-    val maxLatitude: Double get() = ne.lat
-    val minLongitude: Double get() = sw.lng
-    val maxLongitude: Double get() = ne.lng
-}
+import kotlin.random.Random
 
 // ----------------------------------------------------------------------------
 
@@ -70,13 +44,14 @@ object PolygonUtils {
      *
      */
     fun isPointInPolygon(tap: Position, polygon: Polygon): Boolean {
-        var (bx, by) = polygon.last().let { it.lat - tap.lat to it.lng - tap.lng }
+        if (polygon.isEmpty()) return false
+        var (bx, by) = polygon.last()!!.let { it.lat - tap.lat to it.lng - tap.lng }
         var depth = 0
 
-        for (i in polygon.indices) {
+        for (point in polygon) {
             val (ax, ay) = bx to by
-            bx = polygon[i].lat - tap.lat
-            by = polygon[i].lng - tap.lng
+            bx = point.lat - tap.lat
+            by = point.lng - tap.lng
 
             if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
 
@@ -110,7 +85,7 @@ object PolygonUtils {
     data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
     fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
-        if (polygons.isEmpty() || polygons.flatten().isEmpty())
+        if (polygons.isEmpty() || polygons.all { it.isEmpty() })
             throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
         val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
@@ -155,7 +130,6 @@ object PolygonUtils {
                     }
                 } else empty()
             }
-
             fun empty() = SplitPolygonResult(emptyList(), emptyList())
         }
     }
@@ -177,11 +151,12 @@ object PolygonUtils {
      *
      */
     fun splitPolygonByLongitude(
-        polygon: List<Position>,
+        polygon: Polygon,
         longitudeToCut: Double
     ): SplitPolygonResult {
-        val leftSide = mutableListOf<Position>()
-        val rightSide = mutableListOf<Position>()
+        val cutId = Random.nextInt(1, Int.MAX_VALUE)
+        val leftSide = LeftCutPolygon(cutId)
+        val rightSide = RightCutPolygon(cutId)
 
         val minLongitude = polygon.minOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
         val maxLongitude = polygon.maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
@@ -190,9 +165,9 @@ object PolygonUtils {
             longitudeToCut > maxLongitude -> SplitPolygonResult.fromPolygon(polygon, LEFT)
             longitudeToCut < minLongitude -> SplitPolygonResult.fromPolygon(polygon, RIGHT)
             else -> {
-                for (i in polygon.indices) {
-                    val point = polygon[i]
-                    val nextPoint = polygon[(i + 1) % polygon.size]
+                // Separate the polygon into two parts based on the cut longitude
+                for (point in polygon) {
+                    val nextPoint = point.next ?: polygon.first()!!
 
                     val intersectionLatitude = point.lat + (nextPoint.lat - point.lat) *
                             (longitudeToCut - point.lng) / (nextPoint.lng - point.lng)
@@ -201,21 +176,26 @@ object PolygonUtils {
                     if (point.lng <= longitudeToCut) leftSide.add(point)
                     if (point.lng >= longitudeToCut) rightSide.add(point)
 
-                    if ((point.lng < longitudeToCut && nextPoint.lng > longitudeToCut) ||
-                        (point.lng > longitudeToCut && nextPoint.lng < longitudeToCut)
-                    ) {
-                        leftSide.add(intersection)
-                        rightSide.add(intersection)
+                    when { // If required cut the polygon at the intersection point
+                           // and add the cut point on both sides
+                        point.lng < longitudeToCut && nextPoint.lng > longitudeToCut ->
+                            CutPosition(intersection, cutLeft = point, cutRight = nextPoint)
+                        point.lng > longitudeToCut && nextPoint.lng < longitudeToCut ->
+                            CutPosition(intersection, cutLeft = nextPoint, cutRight = point)
+                        else -> null
+                    }?.let {
+                        leftSide.add(it)
+                        rightSide.add(it)
                     }
                 }
 
-                if (leftSide.isNotEmpty() && leftSide.first() != leftSide.last()) leftSide.add(
-                    leftSide.first()
-                )
-                if (rightSide.isNotEmpty() && rightSide.first() != rightSide.last()) rightSide.add(
-                    rightSide.first()
-                )
+                // Close the polygons if they are not already closed
+                if (leftSide.isNotEmpty() && leftSide.first() != leftSide.last())
+                    leftSide.add(leftSide.first()!!)
+                if (rightSide.isNotEmpty() && rightSide.first() != rightSide.last())
+                    rightSide.add(rightSide.first()!!)
 
+                // Group the points into ring polygons
                 val leftPolygons = groupIntoRingPolygons(leftSide).filter { it.size > 1 }
                 val rightPolygons = groupIntoRingPolygons(rightSide).filter { it.size > 1 }
 
@@ -231,25 +211,30 @@ object PolygonUtils {
      * A ring polygon is a closed loop of positions where the first and last positions are the same.
      *
      */
-    private fun groupIntoRingPolygons(polygon: List<Position>): List<Polygon> {
-        val polygons = mutableListOf<Polygon>()
-        val currentPolygon = mutableListOf<Position>()
+    private fun groupIntoRingPolygons(polygon: Polygon): List<Polygon> {
 
-        for (i in polygon.indices) {
-            val point = polygon[i]
-            if (i > 0 && point == polygon.last()) break
+        // Polygon cut type conservation
+        val polygons: MutableList<Polygon> = polygon.createList()
+
+        // Polygon cut type conservation
+        val currentPolygon : Polygon = polygon.createNew()
+
+        for (point in polygon) {
+            if ((point.id != polygon.first()!!.id) && point == polygon.last()!!) break
             currentPolygon.add(point)
 
             if (currentPolygon.size > 1) {
-                val shouldSplit = polygon.indices.any { j ->
-                    val segment = Segment(polygon[j], polygon[(j + 1) % polygon.size])
-                    i != j && i != (j + 1) % polygon.size &&
+                val shouldSplit = polygon.any { compPoint ->
+                    val nextCompPoint = compPoint.next ?: polygon.first()!!
+                    val segment = Segment(compPoint, nextCompPoint)
+                    point.id != compPoint.id && point.id != nextCompPoint.id && // FIXME check
                             isPointOnLineSegment(point, segment) &&
-                            (i != j + 1 && point != polygon[j])
+                            (point.id != nextCompPoint.id && point != compPoint)
                 }
                 if (shouldSplit) {
-                    if (point != currentPolygon.first()) currentPolygon.add(currentPolygon.first())
-                    polygons.add(currentPolygon.toList())
+                    if (point != currentPolygon.first()!!)
+                        currentPolygon.add(currentPolygon.first()!!)
+                    polygons.add(currentPolygon.copy())
                     currentPolygon.clear()
                     currentPolygon.add(point)
                     continue
@@ -257,18 +242,19 @@ object PolygonUtils {
             }
 
             if (currentPolygon.size > 1 && point == currentPolygon.first()) {
-                polygons.add(currentPolygon.toList())
+                polygons.add(currentPolygon.copy())
                 currentPolygon.clear()
             }
         }
 
+        // Close the last polygon if it is not already closed
         if (currentPolygon.isNotEmpty() && currentPolygon.first() != currentPolygon.last()) {
-            currentPolygon.add(currentPolygon.first())
+            currentPolygon.add(currentPolygon.first()!!)
             polygons.add(currentPolygon)
         }
 
-        return polygons.filter {
-            it.size >= 3 && !(it.all { p -> p.lat == it[0].lat } || it.all { p -> p.lng == it[0].lng })
+        return polygons.filter { // Filter out invalid polygons (lines and dots)
+            it.size >= 3 && !(it.all { p -> p.lat == it.first()!!.lat } || it.all { p -> p.lng == it.first()!!.lng })
         }
     }
 
@@ -292,8 +278,7 @@ object PolygonUtils {
                 point.lat in min(segment.start.lat, segment.end.lat)..max(
             segment.start.lat,
             segment.end.lat
-        ) &&
-                point.lng in min(segment.start.lng, segment.end.lng)..max(
+        ) && point.lng in min(segment.start.lng, segment.end.lng)..max(
             segment.start.lng,
             segment.end.lng
         )

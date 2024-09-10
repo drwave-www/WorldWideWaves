@@ -4,6 +4,7 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Antilog
@@ -31,7 +32,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 /*
@@ -97,7 +97,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testGetWarmingPolygons() = runTest {
         // WHEN
-        val polygon = listOf<Position>()
+        val polygon = Polygon()
         mockkObject(PolygonUtils)
         coEvery { event.area.getPolygons() } returns listOf(polygon)
         val splitResult = PolygonUtils.SplitPolygonResult(emptyList(), listOf(polygon))
@@ -133,8 +133,9 @@ class WWWEventWaveLinearTest : KoinTest {
         coVerify { event.area.getBoundingBox() }
     }
 
-    @Test
-    fun testHasUserBeenHit() = runTest {
+    @Test fun testHasUserBeenHit_isWithin() = testHasUserBeenHit(isWithin = true)
+    @Test fun testHasUserBeenHit_isNotWithin() = testHasUserBeenHit(isWithin = false)
+    private fun testHasUserBeenHit(isWithin : Boolean = true) = runTest {
         // GIVEN
         val userPosition = Position(1.0, 25.0)
         val bbox = mockk<BoundingBox>()
@@ -142,13 +143,14 @@ class WWWEventWaveLinearTest : KoinTest {
         coEvery { event.area.getBoundingBox() } returns bbox
         every { bbox.minLongitude } returns 20.0
         coEvery { wave.currentWaveLongitude(bbox) } returns 30.0
+        coEvery { event.area.isPositionWithin(userPosition) } returns isWithin
 
         // WHEN
         val result = wave.hasUserBeenHit()
         testScheduler.advanceUntilIdle()
 
         // THEN
-        assertTrue(result)
+        assertEquals(isWithin, result)
         coVerify { wave.getUserPosition() }
     }
 
@@ -174,7 +176,7 @@ class WWWEventWaveLinearTest : KoinTest {
     }
 
     @Test
-    fun testCurrentWaveLongitude_WestDirection() {
+    fun testCurrentWaveLongitude_WestDirection_isUserWithin() {
         // GIVEN
         wave = wave.copy(direction = WWWEventWave.Direction.WEST).setRelatedEvent(event)
         val bbox = BoundingBox(
@@ -194,6 +196,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val expectedLongitude = 30.0 - (10.0 * 600 / calculateDistance(20.0, 30.0, 12.5)) * 10.0
         assertEquals(expectedLongitude, result, 0.0001)
     }
+
 
     @Test
     fun testTimeBeforeHit_UserPositionAvailable() = runTest {

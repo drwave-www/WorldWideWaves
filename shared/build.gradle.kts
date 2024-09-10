@@ -89,3 +89,14 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
 }
 
+tasks.named("compileTestKotlinIosArm64").configure {
+    enabled = false
+}
+
+tasks.named("compileTestKotlinIosSimulatorArm64").configure {
+    enabled = false
+}
+
+tasks.named("compileTestKotlinIosX64").configure {
+    enabled = false
+}

@@ -95,7 +95,9 @@ data class WWWEventWaveLinear(
         val userPosition = getUserPosition() ?: return false
         val bbox = event.area.getBoundingBox()
         val waveCurrentLongitude = currentWaveLongitude(bbox)
-        return userPosition.lng in bbox.minLongitude..waveCurrentLongitude
+        return if (userPosition.lng in bbox.minLongitude..waveCurrentLongitude)
+            event.area.isPositionWithin(userPosition)
+        else false
     }
 
     override suspend fun timeBeforeHit(): Duration? {

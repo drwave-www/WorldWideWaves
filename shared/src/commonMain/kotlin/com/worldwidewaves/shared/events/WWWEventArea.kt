@@ -29,6 +29,7 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.toPolygon
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -57,7 +58,7 @@ data class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val cachedAreaPolygon: MutableList<Polygon> = mutableListOf()
+    @Transient private val cachedAreaPolygons: MutableList<Polygon> = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
 
@@ -133,7 +134,7 @@ data class WWWEventArea(
      *
      */
      suspend fun getPolygons(): List<Polygon> {
-        if (cachedAreaPolygon.isEmpty()) {
+        if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
@@ -146,7 +147,7 @@ data class WWWEventArea(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
                                 )
-                            }.apply { cachedAreaPolygon.add(this) }
+                            }.toPolygon.apply { cachedAreaPolygons.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
                             multiPolygon.jsonArray.flatMap { ring ->
@@ -155,7 +156,7 @@ data class WWWEventArea(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
                                     )
-                                }.apply { cachedAreaPolygon.add(this) }
+                                }.toPolygon.apply { cachedAreaPolygons.add(this) }
                             }
                         }
                         else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
@@ -165,7 +166,7 @@ data class WWWEventArea(
                 }
             }
         }
-        return cachedAreaPolygon
+        return cachedAreaPolygons
     }
 
     // ---------------------------
