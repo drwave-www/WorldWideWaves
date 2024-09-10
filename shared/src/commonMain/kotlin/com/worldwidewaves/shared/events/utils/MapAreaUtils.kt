@@ -53,10 +53,12 @@ object PolygonUtils {
             bx = point.lat - tap.lat
             by = point.lng - tap.lng
 
-            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) continue
+            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0))
+                continue
 
             val lx = ax - ay * (bx - ax) / (by - ay)
-            if (lx == 0.0) return true
+            if (lx == 0.0)
+                return true
             if (lx > 0) depth++
         }
 
@@ -106,9 +108,7 @@ object PolygonUtils {
         )
     }
 
-    fun polygonBbox(polygon: Polygon): BoundingBox {
-        return polygonsBbox(listOf(polygon))
-    }
+    fun polygonBbox(polygon: Polygon): BoundingBox = polygonsBbox(listOf(polygon))
 
 // ----------------------------------------------------------------------------
 
@@ -116,17 +116,19 @@ object PolygonUtils {
      * Data class representing the result of splitting a polygon into two parts.
      *
      */
-    data class SplitPolygonResult(val left: List<Polygon>, val right: List<Polygon>) {
+    data class SplitPolygonResult(val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
         enum class ResultPosition { LEFT, RIGHT }
         companion object {
             fun fromPolygon(
-                polygon: Polygon,
+                polygon: CutPolygon,
                 resultPosition: ResultPosition = RIGHT
             ): SplitPolygonResult {
+                if (resultPosition == LEFT && polygon !is LeftCutPolygon || resultPosition == RIGHT && polygon !is RightCutPolygon)
+                    throw IllegalArgumentException("Invalid polygon type for result position")
                 return if (polygon.size > 1) {
                     when (resultPosition) {
-                        LEFT -> SplitPolygonResult(listOf(polygon), emptyList())
-                        RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon))
+                        LEFT -> SplitPolygonResult(listOf(polygon as LeftCutPolygon), emptyList())
+                        RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon as RightCutPolygon))
                     }
                 } else empty()
             }
@@ -171,9 +173,12 @@ object PolygonUtils {
                 for (point in polygon) {
                     val nextPoint = point.next ?: polygon.first()!!
 
-                    val intersectionLatitude = point.lat + (nextPoint.lat - point.lat) *
-                            (longitudeToCut - point.lng) / (nextPoint.lng - point.lng)
-                    val intersection = Position(intersectionLatitude, longitudeToCut)
+                    val intersection = Position(point.lat +
+                            (nextPoint.lat - point.lat) *
+                            (longitudeToCut - point.lng) /
+                            (nextPoint.lng - point.lng),
+                        longitudeToCut
+                    )
 
                     if (point.lng <= longitudeToCut) leftSide.add(point)
                     if (point.lng >= longitudeToCut) rightSide.add(point)
@@ -213,13 +218,12 @@ object PolygonUtils {
      * A ring polygon is a closed loop of positions where the first and last positions are the same.
      *
      */
-    private fun groupIntoRingPolygons(polygon: Polygon): List<Polygon> {
+    private fun <T : CutPolygon> groupIntoRingPolygons(polygon: T): List<T> {
+        // Polygon cut type conservation
+        val polygons: MutableList<CutPolygon> = polygon.createList()
 
         // Polygon cut type conservation
-        val polygons: MutableList<Polygon> = polygon.createList()
-
-        // Polygon cut type conservation
-        val currentPolygon : Polygon = polygon.createNew()
+        val currentPolygon  = polygon.createNew<T>()
 
         for (point in polygon) {
             if ((point.id != polygon.first()!!.id) && point == polygon.last()!!)
@@ -256,7 +260,8 @@ object PolygonUtils {
             polygons.add(currentPolygon)
         }
 
-        return polygons.filter { // Filter out invalid polygons (lines and dots)
+        @Suppress("UNCHECKED_CAST")
+        return (polygons as List<T>).filter { // Filter out invalid polygons (lines and dots)
             it.size >= 3 && !(it.all { p -> p.lat == it.first()!!.lat } || it.all { p -> p.lng == it.first()!!.lng })
         }
     }

@@ -4,9 +4,9 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.RightCutPolygon
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -97,7 +97,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testGetWarmingPolygons() = runTest {
         // WHEN
-        val polygon = Polygon()
+        val polygon = RightCutPolygon(42)
         mockkObject(PolygonUtils)
         coEvery { event.area.getPolygons() } returns listOf(polygon)
         val splitResult = PolygonUtils.SplitPolygonResult(emptyList(), listOf(polygon))

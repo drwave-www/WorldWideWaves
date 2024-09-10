@@ -52,7 +52,7 @@ open class Position(val lat: Double, val lng: Double, internal var next: Positio
     }
 
     override fun toString(): String = "($lat, $lng)"
-    override fun hashCode(): Int = id.hashCode()
+    override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
 }
 
 class CutPosition( // A position that has been cut
@@ -64,13 +64,14 @@ class CutPosition( // A position that has been cut
 // ----------------------------------------------------------------------------
 
 abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of a polygon after cut
-    abstract override fun createNew(): CutPolygon
-    abstract override fun <T : Polygon> createList(): MutableList<T>
+    abstract override fun <T: Polygon> createNew(): T
+    abstract override fun <T: Polygon> createList(): MutableList<T>
 }
 
 class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon after cut
-    override fun createNew(): LeftCutPolygon = LeftCutPolygon(cutId)
-    override fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
+    @Suppress("UNCHECKED_CAST")
+    override fun <T: Polygon> createNew() = LeftCutPolygon(cutId) as T
+    override fun <T: Polygon> createList(): MutableList<T> = mutableListOf()
     companion object {
         fun convert(polygon: Polygon, cutId: Int): LeftCutPolygon = LeftCutPolygon(cutId).apply {
             head = polygon.head
@@ -82,8 +83,9 @@ class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon
 }
 
 class RightCutPolygon(cutId: Int) : CutPolygon(cutId) { // Right part of a polygon after cut
-    override fun createNew(): RightCutPolygon = RightCutPolygon(cutId)
-    override fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
+    @Suppress("UNCHECKED_CAST")
+    override fun <T: Polygon> createNew() = RightCutPolygon(cutId) as T
+    override fun <T: Polygon> createList(): MutableList<T> = mutableListOf()
     companion object {
         fun convert(polygon: Polygon, cutId: Int): RightCutPolygon = RightCutPolygon(cutId).apply {
             head = polygon.head
@@ -109,7 +111,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    open fun createNew(): Polygon = Polygon() // Ensure the right type is created
+    @Suppress("UNCHECKED_CAST")
+    open fun <T: Polygon> createNew(): T = Polygon() as T // Ensure the right type is created
     open fun <T : Polygon> createList(): MutableList<T> = mutableListOf()
 
     // --------------------------------
@@ -190,7 +193,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    fun subList(start: Position, lastId: Int): Polygon = createNew().apply {
+    fun <T : Polygon> subList(start: Position, lastId: Int): T = createNew<T>().apply {
         if (this@Polygon.isEmpty()) return this
 
         var current = start
@@ -202,7 +205,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         } while (current.id != lastId)
     }
 
-    fun dropLast(n: Int = 1): Polygon = createNew().apply {
+    fun <T: Polygon> dropLast(n: Int = 1): T = createNew<T>().apply {
         val newSize = (this@Polygon.size - n).coerceAtLeast(0)
         var current = this@Polygon.head
         repeat(newSize) {
@@ -213,7 +216,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    operator fun plus(other: Polygon): Polygon = createNew().apply {
+    operator fun <T: Polygon> plus(other: T): T = createNew<T>().apply {
         this@Polygon.forEach { add(it) }
         other.forEach { add(it) }
     }
@@ -244,7 +247,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     // --------------------------------
 
-    open fun copy(): Polygon = createNew().apply {
+    open fun <T: Polygon> copy(): T = createNew<T>().apply {
         this@Polygon.forEach { add(it) }
     }
 
@@ -272,8 +275,14 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
 fun polygonOf(vararg positions: Position): Polygon = Polygon().apply { positions.forEach { add(it) } }
 
-val List<Position>.toPolygon: Polygon
+val List<Position>.toPolygon : Polygon
     get() = Polygon().apply { this@toPolygon.forEach { add(it) } }
+
+val List<Position>.toLeftPolygon: (Int) -> LeftCutPolygon
+    get() = { cutId -> LeftCutPolygon(cutId).apply { this@toLeftPolygon.forEach { add(it) } } }
+
+val List<Position>.toRightPolygon: (Int) -> RightCutPolygon
+    get() = { cutId -> RightCutPolygon(cutId).apply { this@toRightPolygon.forEach { add(it) } } }
 
 // ----------------------------------------------------------------------------
 

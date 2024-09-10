@@ -59,8 +59,6 @@ class MapAreaUtilsSplitPolygonTest {
             Position(lat = 0.0, lng = 1.0)
         )
 
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
         assertTrue(result.right.size == 1 && areRingPolygonsEqual(result.right[0], expectedRightSide), "Expected right side of the split polygon to match")
     }
@@ -86,8 +84,6 @@ class MapAreaUtilsSplitPolygonTest {
             Position(lat = 0.0, lng = 0.0)
         )
 
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
         assertTrue(result.right.isEmpty(), "Expected right side of the split polygon to be empty")
     }
@@ -105,8 +101,6 @@ class MapAreaUtilsSplitPolygonTest {
 
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
 
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
         assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
     }
@@ -125,8 +119,7 @@ class MapAreaUtilsSplitPolygonTest {
         val polygon = polygonOf(Position(0.0, 0.0), Position(0.0, 1.0))
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
+
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
@@ -140,8 +133,7 @@ class MapAreaUtilsSplitPolygonTest {
     )
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
+
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
@@ -158,8 +150,7 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
+
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
@@ -177,8 +168,7 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 1.5
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
+
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
@@ -194,7 +184,7 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 2.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
+
         assertTrue(areRingPolygonsEqual(polygon, result.left.first()))
         assertEquals(emptyList(), result.right)
     }
@@ -204,8 +194,7 @@ class MapAreaUtilsSplitPolygonTest {
         val polygon = Polygon()
         val longitudeToCut = 1.0
         val result = splitPolygonByLongitude(polygon, longitudeToCut)
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
+
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
@@ -227,8 +216,6 @@ class MapAreaUtilsSplitPolygonTest {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
@@ -275,8 +262,6 @@ class MapAreaUtilsSplitPolygonTest {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
@@ -301,8 +286,6 @@ class MapAreaUtilsSplitPolygonTest {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
@@ -325,8 +308,6 @@ class MapAreaUtilsSplitPolygonTest {
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
     }
@@ -365,8 +346,6 @@ class MapAreaUtilsSplitPolygonTest {
             Position(1.0, 1.0) // Closed ring polygon
         )
 
-        assertTrue(result.left.all { it is LeftCutPolygon})
-        assertTrue(result.right.all { it is RightCutPolygon})
         assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
         assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
@@ -401,14 +380,17 @@ class MapAreaUtilsSplitPolygonTest {
         return true
     }
 
-    private fun normalizePolygon(polygon: Polygon): Polygon {
+    private fun <T: Polygon> normalizePolygon(polygon: T): Polygon {
         if (polygon.isEmpty()) return polygon
 
         // Find the smallest point lexicographically to use as the starting point
         val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng })) ?: return polygon
 
         // Rotate the polygon to start from the smallest point
-        return (polygon.subList(minPoint, polygon.last()!!.id) + polygon.subList(polygon.last()!!, minPoint.id))
+        return (
+                polygon.subList<T>(minPoint, polygon.last()!!.id) +
+                        polygon.subList(polygon.last()!!, minPoint.id)
+                )
     }
 
     private fun removeRepeatingPoint(polygon: Polygon): Polygon {
