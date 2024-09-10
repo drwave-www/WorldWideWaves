@@ -3,6 +3,7 @@ package com.worldwidewaves.shared.events.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -351,6 +352,63 @@ class MapAreaTypesTest {
         val bbox3 = BoundingBox(0.0, 0.0, 2.0, 2.0)
         assertEquals(bbox1.hashCode(), bbox2.hashCode())
         assertNotEquals(bbox1.hashCode(), bbox3.hashCode())
+    }
+
+    @Test
+    fun testAddInvalidPosition() {
+        val polygon = Polygon()
+        val invalidPosition = Position(Double.NaN, Double.NaN)
+        assertFailsWith<IllegalArgumentException> {
+            polygon.add(invalidPosition)
+        }
+    }
+
+    @Test
+    fun testRemoveNonExistentPosition() {
+        val polygon = Polygon()
+        val position = Position(1.0, 1.0).init()
+        polygon.add(position)
+        assertTrue(polygon.remove(position.id))
+        assertFalse(polygon.remove(position.id)) // Try removing again
+    }
+
+    @Test
+    fun testInsertAfterNonExistentPosition() {
+        val polygon = Polygon()
+        val position = Position(1.0, 1.0).init()
+        polygon.add(position)
+        val newPosition = Position(2.0, 2.0)
+        assertFalse(polygon.insertAfter(newPosition, -1)) // Invalid ID
+    }
+
+    @Test
+    fun testInsertBeforeNonExistentPosition() {
+        val polygon = Polygon()
+        val position = Position(1.0, 1.0).init()
+        polygon.add(position)
+        val newPosition = Position(2.0, 2.0)
+        assertFalse(polygon.insertBefore(newPosition, -1)) // Invalid ID
+    }
+
+    @Test
+    fun testAddDuplicatePositions() {
+        val polygon = Polygon()
+        val position = Position(1.0, 1.0).init()
+        polygon.add(position)
+        polygon.add(position) // Add the same position again
+        assertEquals(1, polygon.size) // Size should still be 1
+    }
+
+    @Test
+    fun testEmptyPolygonOperations() {
+        val polygon = Polygon()
+        assertTrue(polygon.isEmpty())
+        assertFailsWith<NoSuchElementException> {
+            polygon.iterator().next()
+        }
+        assertFailsWith<IllegalArgumentException> {
+            polygon.subList<Polygon>(Position(0.0, 0.0), -1)
+        }
     }
 
 }
