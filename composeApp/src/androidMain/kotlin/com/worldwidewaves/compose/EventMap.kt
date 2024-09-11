@@ -52,7 +52,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.PolygonUtils
+import com.worldwidewaves.shared.events.utils.PolygonUtils.Quadruple
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
@@ -246,7 +246,7 @@ class EventMap(
         coroutineScope.launch {
             val bbox = event.area.getBoundingBox()
 
-            // Maximize the view to the map
+            // Maximize the view to the map // FIXME: move to shared
             val (sw, ne) = bbox
             val eventMapWidth = ne.lng - sw.lng
             val eventMapHeight = ne.lat - sw.lat
@@ -260,10 +260,10 @@ class EventMap(
             // depending on whether the event map is wider or taller than the MapLibre component.
             val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
                 val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-                PolygonUtils.Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+                Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
             } else {
                 val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-                PolygonUtils.Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+                Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
             }
 
             val bounds = LatLngBounds.Builder()
@@ -306,7 +306,7 @@ class EventMap(
         map: MapLibreMap,
         coroutineScope: CoroutineScope
     ) {
-        val viewBounds = map.projection.visibleRegion.latLngBounds
+        val viewBounds = map.projection.visibleRegion.latLngBounds // FIXME: move to shared
         val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
         val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
 
