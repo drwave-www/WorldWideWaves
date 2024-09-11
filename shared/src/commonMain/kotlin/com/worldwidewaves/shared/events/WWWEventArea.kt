@@ -28,8 +28,8 @@ import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.toPolygon
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

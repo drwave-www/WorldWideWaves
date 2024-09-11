@@ -22,15 +22,17 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
-data class Segment(val start: Position, val end: Position)
-
 // ----------------------------------------------------------------------------
+
+data class Segment(val start: Position, val end: Position)
 
 /**
  * Represents a geographic position with latitude and longitude coordinates.
  *
  */
-open class Position(val lat: Double, val lng: Double, internal var next: Position? = null) {
+open class Position(val lat: Double, val lng: Double,
+                    internal var prev: Position? = null,
+                    internal var next: Position? = null) {
     var id: Int = -1
         internal set // Cannot be set outside of the class
         get() { // Cannot be read before begin initialized (added to a Polygon)
@@ -54,7 +56,6 @@ open class Position(val lat: Double, val lng: Double, internal var next: Positio
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
-
 }
 
 internal fun <T : Position> T.init(): T = apply { id = nextId++ } // Can only be initialized from internal context
@@ -70,36 +71,6 @@ class CutPosition( // A position that has been cut
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && super.equals(other) && if (other is CutPosition) cutId == other.cutId else true)
     override fun hashCode(): Int = 31 * super.hashCode() + cutId.hashCode()
-}
-
-// ----------------------------------------------------------------------------
-
-abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of a polygon after cut
-    abstract override fun createNew() : CutPolygon
-}
-
-class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon after cut
-    override fun createNew() = LeftCutPolygon(cutId)
-    companion object {
-        fun convert(polygon: Polygon, cutId: Int): LeftCutPolygon = LeftCutPolygon(cutId).apply {
-            head = polygon.head
-            tail = polygon.tail
-            positionsIndex.putAll(polygon.positionsIndex)
-            cutPositions.addAll(polygon.cutPositions)
-        }
-    }
-}
-
-class RightCutPolygon(cutId: Int) : CutPolygon(cutId) { // Right part of a polygon after cut
-    override fun createNew() = RightCutPolygon(cutId)
-    companion object {
-        fun convert(polygon: Polygon, cutId: Int): RightCutPolygon = RightCutPolygon(cutId).apply {
-            head = polygon.head
-            tail = polygon.tail
-            positionsIndex.putAll(polygon.positionsIndex)
-            cutPositions.addAll(polygon.cutPositions)
-        }
-    }
 }
 
 // ------------------------------------
@@ -119,6 +90,11 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     open fun createNew() = Polygon() // Ensure the right type is created
 
+    companion object {
+        fun fromPositions(vararg positions: Position): Polygon =
+            Polygon().apply { positions.forEach { add(it) } }
+    }
+
     // --------------------------------
 
     fun getCutPositions(): List<CutPosition> = cutPositions
@@ -129,34 +105,33 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
         val addPosition = position.xfer()
 
         positionsIndex[addPosition.id] = addPosition
-        if (addPosition is CutPosition) {
-            cutPositions.add(addPosition)
-        }
+        if (addPosition is CutPosition) cutPositions.add(addPosition)
+
         if (head == null) {
             head = addPosition
         } else {
+            addPosition.prev = tail
             tail?.next = addPosition
         }
+
         tail = addPosition
         return addPosition
     }
 
     fun remove(id: Int): Boolean {
         val positionToRemove = positionsIndex.remove(id) ?: return false
-        if (positionToRemove is CutPosition) {
-            cutPositions.remove(positionToRemove)
-        }
+        if (positionToRemove is CutPosition) cutPositions.remove(positionToRemove)
 
         if (positionToRemove == head) {
             head = positionToRemove.next
-            if (head == null) tail = null
+            if (head == null) tail = null else head!!.prev = null
             return true
         }
 
         positionsIndex.values.find { it.next == positionToRemove }?.apply {
             next = positionToRemove.next
-            if (positionToRemove == tail)
-                tail = this
+            next?.prev = this
+            if (positionToRemove == tail) tail = this
             return true
         }
 
@@ -165,34 +140,35 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
     fun insertAfter(newPosition: Position, id: Int): Position? {
         val current = positionsIndex[id] ?: return null
-        val addPosition = newPosition.xfer()
-
-        addPosition.next = current.next
-        current.next = addPosition
+        val addPosition = newPosition.xfer().apply {
+            next = current.next
+            prev = current
+            current.next = this
+            next?.prev = this
+        }
 
         positionsIndex[addPosition.id] = addPosition
-        if (addPosition is CutPosition) {
-            cutPositions.add(addPosition)
-        }
+        if (addPosition is CutPosition) cutPositions.add(addPosition)
+        if (current == tail) tail = addPosition
+
         return addPosition
     }
 
     fun insertBefore(newPosition: Position, id1: Int): Position? {
         val current = positionsIndex[id1] ?: return null
-        val addPosition = newPosition.xfer()
-
-        addPosition.next = current
-        if (current == head) {
-            head = addPosition
-        } else {
-            val previous = positionsIndex.values.find { it.next?.id == id1 }
-            previous?.next = addPosition
+        val addPosition = newPosition.xfer().apply {
+            next = current
+            prev = current.prev
+            current.prev = this
+            if (current == head)
+                head = this
+            else
+                prev?.next = this
         }
 
         positionsIndex[addPosition.id] = addPosition
-        if (addPosition is CutPosition) {
-            cutPositions.add(addPosition)
-        }
+        if (addPosition is CutPosition) cutPositions.add(addPosition)
+
         return addPosition
     }
 
@@ -275,20 +251,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
     fun isNotEmpty(): Boolean = positionsIndex.isNotEmpty()
     fun isNotCutEmpty(): Boolean = cutPositions.isNotEmpty()
     fun getPosition(id: Int): Position? = positionsIndex[id]
+
 }
-
-// ----------------------------------------------------------------------------
-
-fun polygonOf(vararg positions: Position): Polygon = Polygon().apply { positions.forEach { add(it) } }
-
-val List<Position>.toPolygon : Polygon
-    get() = Polygon().apply { this@toPolygon.forEach { add(it) } }
-
-val List<Position>.toLeftPolygon: (Int) -> LeftCutPolygon
-    get() = { cutId -> LeftCutPolygon(cutId).apply { this@toLeftPolygon.forEach { add(it) } } }
-
-val List<Position>.toRightPolygon: (Int) -> RightCutPolygon
-    get() = { cutId -> RightCutPolygon(cutId).apply { this@toRightPolygon.forEach { add(it) } } }
 
 // ----------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.splitPolygonByLongitude
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
@@ -59,7 +59,7 @@ data class WWWEventWaveLinear(
         if (cachedWarmingPolygons == null) {
             cachedWarmingPolygons = when (warming.type) {
                 LONGITUDE_CUT -> event.area.getPolygons().flatMap { polygon ->
-                    splitPolygonByLongitude(polygon, warming.longitude!!).right
+                    polygon.splitByLongitude(warming.longitude!!).right
                 }
                 else -> emptyList()
             }

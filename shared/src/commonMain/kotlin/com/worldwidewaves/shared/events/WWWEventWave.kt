@@ -8,7 +8,7 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.delay
@@ -162,7 +162,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
      */
     suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { isPointInPolygon(position, it) }
+        return getWarmingPolygons().any { it.containsPosition(position) }
     }
 
     /**

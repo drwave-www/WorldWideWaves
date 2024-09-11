@@ -1,6 +1,6 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.splitPolygonByLongitude
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import io.github.aakira.napier.Napier
 import kotlin.math.PI
 import kotlin.math.cos
@@ -29,11 +29,11 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class MapAreaUtilsSplitPolygonTest {
+class PolygonUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 2.0, lng = 2.0),
@@ -42,16 +42,16 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 1.0
 
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
-        val expectedLeftSide = polygonOf(
+        val expectedLeftSide = Polygon.fromPositions(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 2.0, lng = 1.0),
             Position(lat = 2.0, lng = 0.0),
             Position(lat = 0.0, lng = 0.0)
         )
-        val expectedRightSide = polygonOf(
+        val expectedRightSide = Polygon.fromPositions(
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 2.0, lng = 2.0),
@@ -65,7 +65,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitudeWithVertexOnCut() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 1.0, lng = 1.0),
@@ -74,9 +74,9 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 1.0
 
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
-        val expectedLeftSide = polygonOf(
+        val expectedLeftSide = Polygon.fromPositions(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.0),
             Position(lat = 1.0, lng = 1.0),
@@ -90,7 +90,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitudeWithDegenerateShape() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(lat = 1.0, lng = 0.0),
             Position(lat = 1.0, lng = 1.0),
             Position(lat = 1.0, lng = 2.0),
@@ -99,7 +99,7 @@ class MapAreaUtilsSplitPolygonTest {
         )
         val longitudeToCut = 1.0
 
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
         assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
@@ -107,32 +107,32 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude_SinglePointPolygon() {
-        val polygon = polygonOf(Position(0.0, 0.0))
+        val polygon = Polygon.fromPositions(Position(0.0, 0.0))
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
 
     @Test
     fun testSplitPolygonByLongitude_TwoPointPolygon() {
-        val polygon = polygonOf(Position(0.0, 0.0), Position(0.0, 1.0))
+        val polygon = Polygon.fromPositions(Position(0.0, 0.0), Position(0.0, 1.0))
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
     }
 
     @Test
-    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = polygonOf(
+    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = Polygon.fromPositions(
         Position(0.0, 1.0),
         Position(1.0, 1.0),
         Position(2.0, 1.0),
         Position(0.0, 1.0)
     )
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
@@ -140,7 +140,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude_ComplexShape1() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 3.0),
             Position(1.0, 2.0),
@@ -149,7 +149,7 @@ class MapAreaUtilsSplitPolygonTest {
             Position(0.0, 0.0)
         )
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
@@ -157,7 +157,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude_ComplexShape2() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(1.0, 1.0),
             Position(2.0, 0.0),
@@ -167,7 +167,7 @@ class MapAreaUtilsSplitPolygonTest {
             Position(0.0, 0.0)
         )
         val longitudeToCut = 1.5
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(result.left.all { it.first() == it.last() })
         assertTrue(result.right.all { it.first() == it.last() })
@@ -175,7 +175,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude_LongitudeOutsidePolygon() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -183,7 +183,7 @@ class MapAreaUtilsSplitPolygonTest {
             Position(0.0, 0.0)
         )
         val longitudeToCut = 2.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(areRingPolygonsEqual(polygon, result.left.first()))
         assertEquals(emptyList(), result.right)
@@ -193,7 +193,7 @@ class MapAreaUtilsSplitPolygonTest {
     fun testSplitPolygonByLongitude_EmptyPolygon() {
         val polygon = Polygon()
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertEquals(emptyList(), result.left)
         assertEquals(emptyList(), result.right)
@@ -201,7 +201,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitLargePolygonWithConcaveSections() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 5.0),
             Position(2.0, 3.0),
@@ -212,7 +212,7 @@ class MapAreaUtilsSplitPolygonTest {
             Position(0.0, 0.0)
         )
         val longitudeToCut = 2.5
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
@@ -222,7 +222,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonWithZigzagPattern() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
@@ -233,9 +233,9 @@ class MapAreaUtilsSplitPolygonTest {
         )
 
         val longitudeToCut = 1.5
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
-        val expectedLeftSide = polygonOf(
+        val expectedLeftSide = Polygon.fromPositions(
             Position(lat = 0.0, lng = 0.0),
             Position(lat = 0.0, lng = 1.5),
             Position(lat = 0.5, lng = 1.5),
@@ -246,13 +246,13 @@ class MapAreaUtilsSplitPolygonTest {
             Position(lat = 0.0, lng = 0.0)
         )
 
-        val expectedRightSide1 = polygonOf(
+        val expectedRightSide1 = Polygon.fromPositions(
             Position(lat = 0.0, lng = 1.5),
             Position(lat = 0.0, lng = 2.0),
             Position(lat = 0.5, lng = 1.5),
             Position(lat = 0.0, lng = 1.5)
         )
-        val expectedRightSide2 = polygonOf(
+        val expectedRightSide2 = Polygon.fromPositions(
             Position(lat = 1.0, lng = 1.5),
             Position(lat = 1.0, lng = 3.0),
             Position(lat = 2.0, lng = 2.0),
@@ -282,7 +282,7 @@ class MapAreaUtilsSplitPolygonTest {
         polygon.add(Position(0.0, 0.0)) // Close the polygon
 
         val longitudeToCut = 0.5
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
@@ -292,7 +292,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonWithMultipleIntersections() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 4.0),
             Position(1.0, 3.0),
@@ -304,7 +304,7 @@ class MapAreaUtilsSplitPolygonTest {
             Position(0.0, 0.0)
         )
         val longitudeToCut = 2.5
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
         assertTrue(result.left.isNotEmpty())
         assertTrue(result.right.isNotEmpty())
@@ -314,7 +314,7 @@ class MapAreaUtilsSplitPolygonTest {
 
     @Test
     fun testSplitConcavePolygon_MultipleRightRings() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
         Position(0.0, 0.0),
         Position(0.0, 2.0),
         Position(1.0, 1.0),
@@ -324,9 +324,9 @@ class MapAreaUtilsSplitPolygonTest {
         )
 
         val longitudeToCut = 1.0
-        val result = splitPolygonByLongitude(polygon, longitudeToCut)
+        val result = polygon.splitByLongitude(longitudeToCut)
 
-        val expectedLeftSide = polygonOf(
+        val expectedLeftSide = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -334,13 +334,13 @@ class MapAreaUtilsSplitPolygonTest {
             Position(2.0, 0.0),
             Position(0.0, 0.0)
         )
-        val expectedRightSide1 = polygonOf(
+        val expectedRightSide1 = Polygon.fromPositions(
             Position(0.0, 1.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
             Position(0.0, 1.0) // Closed ring polygon
         )
-        val expectedRightSide2 = polygonOf(
+        val expectedRightSide2 = Polygon.fromPositions(
             Position(1.0, 1.0),
             Position(2.0, 2.0),
             Position(2.0, 1.0),

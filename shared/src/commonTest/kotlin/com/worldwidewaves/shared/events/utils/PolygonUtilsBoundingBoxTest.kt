@@ -1,12 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonBbox
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -27,11 +20,18 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class MapAreaUtilsBoundingBoxTest {
+import com.worldwidewaves.shared.events.utils.PolygonUtils.bbox
+import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+
+class PolygonUtilsBoundingBoxTest {
 
     @Test
     fun testSimplePolygon() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -39,7 +39,7 @@ class MapAreaUtilsBoundingBoxTest {
             Position(0.0, 0.0)
         )
         val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
@@ -47,13 +47,13 @@ class MapAreaUtilsBoundingBoxTest {
     fun testBadPolygon() {
         val polygon = Polygon()
         assertFailsWith<IllegalArgumentException> {
-            polygonBbox(polygon)
+            polygon.bbox()
         }
     }
 
     @Test
     fun testComplexPolygon() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 2.0),
             Position(1.0, 1.0),
@@ -62,13 +62,13 @@ class MapAreaUtilsBoundingBoxTest {
             Position(0.0, 0.0)
         )
         val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
     @Test
     fun testPointOnEdge() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 1.0),
             Position(1.0, 1.0),
@@ -76,19 +76,19 @@ class MapAreaUtilsBoundingBoxTest {
             Position(0.0, 0.0)
         )
         val pointOnEdge = Position(0.5, 0.0)
-        assertTrue(isPointInPolygon(pointOnEdge, polygon))
+        assertTrue(polygon.containsPosition(pointOnEdge))
     }
 
     @Test
     fun testPolygonWithHole() {
-        val outerPolygon = polygonOf(
+        val outerPolygon = Polygon.fromPositions(
             Position(0.0, 0.0),
             Position(0.0, 3.0),
             Position(3.0, 3.0),
             Position(3.0, 0.0),
             Position(0.0, 0.0)
         )
-        val innerPolygon = polygonOf(
+        val innerPolygon = Polygon.fromPositions(
             Position(1.0, 1.0),
             Position(1.0, 2.0),
             Position(2.0, 2.0),
@@ -97,19 +97,19 @@ class MapAreaUtilsBoundingBoxTest {
         )
         val combinedPolygon = outerPolygon + innerPolygon
         val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
-        val actualBbox = polygonBbox(combinedPolygon)
+        val actualBbox = combinedPolygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 
     @Test
     fun testDegeneratePolygon() {
-        val polygon = polygonOf(
+        val polygon = Polygon.fromPositions(
             Position(1.0, 1.0),
             Position(1.0, 1.0),
             Position(1.0, 1.0)
         )
         val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
-        val actualBbox = polygonBbox(polygon)
+        val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
     }
 

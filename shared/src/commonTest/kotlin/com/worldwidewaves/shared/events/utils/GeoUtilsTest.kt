@@ -1,10 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointOnLineSegment
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -25,7 +20,12 @@ import kotlin.test.assertTrue
  * limitations under the License.
  */
 
-class MapAreaUtilsPointOnLineSegmentTest {
+import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnLineSegment
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+class GeoUtilsTest {
 
     @Test
     fun pointOnHorizontalSegment() {

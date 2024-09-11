@@ -5,8 +5,9 @@ import com.worldwidewaves.shared.events.utils.GeoUtils
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.PolygonUtils
+import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.RightCutPolygon
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -101,7 +102,7 @@ class WWWEventWaveLinearTest : KoinTest {
         mockkObject(PolygonUtils)
         coEvery { event.area.getPolygons() } returns listOf(polygon)
         val splitResult = PolygonUtils.SplitPolygonResult(emptyList(), listOf(polygon))
-        every { PolygonUtils.splitPolygonByLongitude(polygon, 30.0) } returns splitResult
+        every { polygon.splitByLongitude(30.0) } returns splitResult
 
         // WHEN
         val result = wave.getWarmingPolygons()

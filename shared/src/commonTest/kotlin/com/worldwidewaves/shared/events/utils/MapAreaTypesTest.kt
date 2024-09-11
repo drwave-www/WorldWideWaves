@@ -1,5 +1,12 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeftPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toRight
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toRightPolygon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -279,7 +286,7 @@ class MapAreaTypesTest {
             add(Position(2.0, 2.0))
         }
         val cutId = 1
-        val leftCutPolygon = LeftCutPolygon.convert(polygon, cutId)
+        val leftCutPolygon = polygon.toLeft(cutId)
         assertEquals(cutId, leftCutPolygon.cutId)
         assertEquals(polygon.size, leftCutPolygon.size)
     }
@@ -291,7 +298,7 @@ class MapAreaTypesTest {
             add(Position(2.0, 2.0))
         }
         val cutId = 2
-        val rightCutPolygon = RightCutPolygon.convert(polygon, cutId)
+        val rightCutPolygon = polygon.toRight(cutId)
         assertEquals(cutId, rightCutPolygon.cutId)
         assertEquals(polygon.size, rightCutPolygon.size)
     }
