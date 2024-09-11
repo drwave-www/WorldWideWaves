@@ -50,7 +50,7 @@ open class Position(val lat: Double, val lng: Double,
     fun toCutPosition(cutId: Int, cutLeft: Position, cutRight: Position) =
         CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 
-    internal open fun xfer() = Position(lat, lng).init()
+    internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && lat == other.lat && lng == other.lng)
@@ -67,6 +67,10 @@ class CutPosition( // A position that has been cut
     val cutLeft: Position,
     val cutRight: Position
 ) : Position(lat, lng) {
+
+    // Id which can be shared/compared between the two cut positions
+    val pairId: Double = (cutId + cutLeft.id + cutRight.id).toDouble()
+
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && super.equals(other) && if (other is CutPosition) cutId == other.cutId else true)
