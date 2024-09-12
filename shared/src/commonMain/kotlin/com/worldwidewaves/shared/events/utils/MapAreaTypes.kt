@@ -25,8 +25,6 @@ import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
 
-data class Segment(val start: Position, val end: Position)
-
 /**
  * Represents a geographic position with latitude and longitude coordinates.
  *
@@ -59,6 +57,8 @@ open class Position(val lat: Double, val lng: Double,
 
 internal fun <T : Position> T.init(): T = apply { id = nextId++ } // Can only be initialized from internal context
 
+// ------------------
+
 class CutPosition( // A position that has been cut
     lat: Double, lng: Double,
     val cutId: Int, val cutLeft: Position, val cutRight: Position
@@ -72,6 +72,13 @@ class CutPosition( // A position that has been cut
         this === other || (other is Position && super.equals(other) && if (other is CutPosition) cutId == other.cutId else true)
     override fun hashCode(): Int = 31 * super.hashCode() + cutId.hashCode()
 }
+
+// ------------------------------------
+
+/**
+ * Represents a segment defined by its start and end positions.
+ */
+data class Segment(val start: Position, val end: Position)
 
 // ------------------------------------
 

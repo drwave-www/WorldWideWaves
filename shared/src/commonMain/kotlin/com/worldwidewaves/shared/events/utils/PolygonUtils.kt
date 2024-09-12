@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnLineSegment
+import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.Companion.fromSinglePolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.LeftOrRight.LEFT
 import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.LeftOrRight.RIGHT
 import kotlin.random.Random
@@ -65,6 +66,21 @@ object PolygonUtils {
         }
     }
 
+    /**
+     * Calculates the intersection of the segment with a given longitude
+     * and returns a CutPosition if the segment intersects the longitude.
+     */
+    private fun Segment.intersectWithLng(cutId: Int, lng: Double): CutPosition? {
+        val lat = start.lat + (end.lat - start.lat) * (lng - start.lng) / (end.lng - start.lng)
+        return when {
+            start.lng < lng && end.lng > lng ->
+                CutPosition(lat, lng, cutId = cutId, cutLeft = start, cutRight = end)
+            start.lng > lng && end.lng < lng ->
+                CutPosition(lat, lng, cutId = cutId, cutLeft = end, cutRight = start)
+            else -> null
+        }
+    }
+
     // ------------------------------------------------------------------------
 
     val List<Position>.toPolygon : Polygon
@@ -90,6 +106,14 @@ object PolygonUtils {
         tail = polygon.tail
         positionsIndex.putAll(polygon.positionsIndex)
         cutPositions.addAll(polygon.cutPositions)
+        return this as T
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T: Polygon> Polygon.close() : T {
+        if (isNotEmpty() && first() != last()) {
+            add(first()!!)
+        }
         return this as T
     }
 
@@ -157,49 +181,28 @@ object PolygonUtils {
         val maxLongitude = maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
 
         return when {
-            longitudeToCut > maxLongitude ->
-                SplitPolygonResult.fromSinglePolygon(this, cutId, LEFT)
-            longitudeToCut < minLongitude ->
-                SplitPolygonResult.fromSinglePolygon(this, cutId, RIGHT)
+            longitudeToCut > maxLongitude -> fromSinglePolygon(this, cutId, LEFT)
+            longitudeToCut < minLongitude -> fromSinglePolygon(this, cutId, RIGHT)
             else -> {
+
                 // Separate the polygon into two parts based on the cut longitude
                 for (point in this) {
                     val nextPoint = point.next ?: first()!!
 
-                    val intersection = Position(point.lat +
-                            (nextPoint.lat - point.lat) *
-                            (longitudeToCut - point.lng) /
-                            (nextPoint.lng - point.lng),
-                        longitudeToCut
-                    )
-
                     if (point.lng <= longitudeToCut) leftSide.add(point)
                     if (point.lng >= longitudeToCut) rightSide.add(point)
 
-                    when { // If required cut the polygon at the intersection point
-                        // and add the cut point on both sides
-                        point.lng < longitudeToCut && nextPoint.lng > longitudeToCut ->
-                            intersection.toCutPosition(cutId = cutId, cutLeft = point, cutRight = nextPoint)
-                        point.lng > longitudeToCut && nextPoint.lng < longitudeToCut ->
-                            intersection.toCutPosition(cutId = cutId, cutLeft = nextPoint, cutRight = point)
-                        else -> null
-                    }?.let {
+                    Segment(point, nextPoint).intersectWithLng(cutId, longitudeToCut)?.let {
                         leftSide.add(it)
                         rightSide.add(it)
                     }
                 }
 
-                // Close the polygons if they are not already closed
-                if (leftSide.isNotEmpty() && leftSide.first() != leftSide.last())
-                    leftSide.add(leftSide.first()!!)
-                if (rightSide.isNotEmpty() && rightSide.first() != rightSide.last())
-                    rightSide.add(rightSide.first()!!)
-
-                // Group the points into ring polygons
-                val leftPolygons = groupIntoRingPolygons(leftSide).filter { it.size > 1 }
-                val rightPolygons = groupIntoRingPolygons(rightSide).filter { it.size > 1 }
-
-                SplitPolygonResult(leftPolygons, rightPolygons)
+                // Close the polygons and group the points into ring polygons
+                SplitPolygonResult(
+                    groupIntoRings(leftSide.close()),
+                    groupIntoRings(rightSide.close())
+                )
             }
         }
     }
@@ -253,7 +256,7 @@ object PolygonUtils {
      * A ring polygon is a closed loop of positions where the first and last positions are the same.
      *
      */
-    private fun <T : CutPolygon> groupIntoRingPolygons(polygon: T): List<T> {
+    private fun <T : CutPolygon> groupIntoRings(polygon: T): List<T> {
         // Polygon cut type conservation
         val polygons: MutableList<Polygon> = mutableListOf()
 
@@ -288,11 +291,9 @@ object PolygonUtils {
             }
         }
 
-        // Close the last polygon if it is not already closed
-        if (currentPolygon.isNotEmpty() && currentPolygon.first() != currentPolygon.last()) {
-            currentPolygon.add(currentPolygon.first()!!)
-            polygons.add(currentPolygon)
-        }
+        // Add the last polygon if relevant while closing it if required
+        if (currentPolygon.isNotEmpty())
+            polygons.add(currentPolygon.close())
 
         @Suppress("UNCHECKED_CAST")
         return (polygons as List<T>).filter { // Filter out invalid polygons (lines and dots)
