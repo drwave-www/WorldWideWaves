@@ -68,8 +68,8 @@ class CutPosition( // A position that has been cut
     val cutRight: Position
 ) : Position(lat, lng) {
 
-    // Id which can be shared/compared between the two cut positions
-    val pairId: Double = (cutId + cutLeft.id + cutRight.id).toDouble()
+    // Id which is shared/can be compared between the two cut positions
+    val pairId: Double by lazy { (cutId + cutLeft.id + cutRight.id).toDouble() }
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
     override fun equals(other: Any?): Boolean =
@@ -118,8 +118,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
             tail?.next = addPosition
         }
 
-        tail = addPosition
-        return addPosition
+        return addPosition.apply { tail = this }
     }
 
     fun remove(id: Int): Boolean {
