@@ -2,7 +2,6 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - demander d'activer le GPS sur rentrée dans l'app et veille + sur clic position lorsqu'elle sera là
     - show some map elements on min zoom
         + styling script : jq => every minzoom < 10 = 3
     - manage with translations
@@ -12,7 +11,6 @@ Next:
 
 - Wave linear
     - wave progression
-        - ajouter a la wave un timeRemainingBeforeHit()
         - add a layer on the map
         - add a progress bar on the map
 

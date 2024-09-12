@@ -28,6 +28,10 @@
     <string name="geoloc_warm_in">YOUR ARE IN the area and will warm!</string>
     <string name="geoloc_desc">FAQ</string>
 
+    <string name="ask_gps_enable">Your GPS seems to be disabled, do you want to enable it?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="be_waved">be waved!</string>
     <string name="wave_speed">Wave speed</string>
     <string name="wave_start_time">Start time</string>

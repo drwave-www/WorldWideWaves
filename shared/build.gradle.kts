@@ -61,6 +61,15 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources.excludes.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "/META-INF/{AL2.0,LGPL2.1}"
+            )
+        )
+    }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }

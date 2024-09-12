@@ -58,6 +58,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
+import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,6 +113,7 @@ class EventMap(
 
         // Request GPS location Android permissions
         hasLocationPermission = requestLocationPermission()
+        if (hasLocationPermission) CheckGPSEnable()
 
         // Setup Map Style and properties, initialize the map view
         LaunchedEffect(Unit) {
