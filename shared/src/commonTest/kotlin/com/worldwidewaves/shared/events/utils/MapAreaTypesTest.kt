@@ -19,9 +19,10 @@ import kotlin.test.assertTrue
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,6 +408,107 @@ class MapAreaTypesTest {
 
         assertEquals(cutPosition1.hashCode(), cutPosition2.hashCode())
         assertNotEquals(cutPosition1.hashCode(), cutPosition3.hashCode())
+    }
+
+    @Test
+    fun testLoopIterator() {
+        val position1 = Position(1.0, 1.0)
+        val position2 = Position(2.0, 2.0)
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+        }
+        val iterator = polygon.loopIterator()
+        assertTrue(iterator.hasNext())
+        assertEquals(position1, iterator.next())
+        assertTrue(iterator.hasNext())
+        assertEquals(position2, iterator.next())
+        assertTrue(iterator.hasNext())
+        assertEquals(position1, iterator.next()) // Loops back to the start
+    }
+
+    @Test
+    fun testCutIterator() {
+        val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
+        val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
+        val polygon = Polygon().apply {
+            add(cutPosition1)
+            add(cutPosition2)
+        }
+        val iterator = polygon.cutIterator()
+        assertTrue(iterator.hasNext())
+        assertEquals(cutPosition1, iterator.next())
+        assertTrue(iterator.hasNext())
+        assertEquals(cutPosition2, iterator.next())
+    }
+
+    @Test
+    fun testFirst() {
+        val position = Position(1.0, 1.0)
+        val polygon = Polygon().apply { add(position) }
+        assertEquals(position, polygon.first())
+    }
+
+    @Test
+    fun testLast() {
+        val position = Position(1.0, 1.0)
+        val polygon = Polygon().apply { add(position) }
+        assertEquals(position, polygon.last())
+    }
+
+    @Test
+    fun testSize() {
+        val position1 = Position(1.0, 1.0)
+        val position2 = Position(2.0, 2.0)
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+        }
+        assertEquals(2, polygon.size)
+    }
+
+    @Test
+    fun testCutSize() {
+        val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
+        val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
+        val polygon = Polygon().apply {
+            add(cutPosition1)
+            add(cutPosition2)
+        }
+        assertEquals(2, polygon.cutSize)
+    }
+
+    @Test
+    fun testIsEmpty() {
+        val polygon = Polygon()
+        assertTrue(polygon.isEmpty())
+    }
+
+    @Test
+    fun testIsCutEmpty() {
+        val polygon = Polygon()
+        assertTrue(polygon.isCutEmpty())
+    }
+
+    @Test
+    fun testIsNotEmpty() {
+        val position = Position(1.0, 1.0)
+        val polygon = Polygon().apply { add(position) }
+        assertTrue(polygon.isNotEmpty())
+    }
+
+    @Test
+    fun testIsNotCutEmpty() {
+        val cutPosition = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
+        val polygon = Polygon().apply { add(cutPosition) }
+        assertTrue(polygon.isNotCutEmpty())
+    }
+
+    @Test
+    fun testGetPosition() {
+        var position = Position(1.0, 1.0).init()
+        val polygon = Polygon().apply { position = add(position) }
+        assertEquals(position, polygon.getPosition(position.id))
     }
 
 }
