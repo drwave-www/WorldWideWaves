@@ -1,15 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import kotlinx.datetime.IllegalTimeZoneException
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -30,6 +20,16 @@ import kotlin.test.assertTrue
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
+import kotlinx.datetime.IllegalTimeZoneException
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class WWWEventTest {
 

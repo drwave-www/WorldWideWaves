@@ -1,21 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeftPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toRight
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toRightPolygon
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -36,6 +20,22 @@ import kotlin.test.assertTrue
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeftPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toRight
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toRightPolygon
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class MapAreaTypesTest {
 

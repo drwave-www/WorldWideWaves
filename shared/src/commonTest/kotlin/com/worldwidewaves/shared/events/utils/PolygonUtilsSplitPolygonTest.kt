@@ -1,14 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
-import io.github.aakira.napier.Napier
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -29,6 +20,15 @@ import kotlin.test.assertTrue
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
+import io.github.aakira.napier.Napier
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class PolygonUtilsSplitPolygonTest {
 
@@ -386,7 +386,8 @@ class PolygonUtilsSplitPolygonTest {
         if (polygon.isEmpty()) return polygon
 
         // Find the smallest point lexicographically to use as the starting point
-        val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng })) ?: return polygon
+        val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng }))
+            ?: return polygon
 
         // Rotate the polygon to start from the smallest point
         return (
@@ -397,7 +398,7 @@ class PolygonUtilsSplitPolygonTest {
 
     private fun removeRepeatingPoint(polygon: Polygon): Polygon {
         if (polygon.size > 1 && polygon.first() == polygon.last()) {
-            return polygon.dropLast(1)
+            return polygon.dropLast()
         }
         return polygon
     }

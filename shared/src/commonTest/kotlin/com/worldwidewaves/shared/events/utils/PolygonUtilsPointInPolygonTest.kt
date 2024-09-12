@@ -1,10 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
@@ -25,6 +20,11 @@ import kotlin.test.assertTrue
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class PolygonUtilsPointInPolygonTest {
 
