@@ -78,19 +78,11 @@ object PolygonUtils {
 
     // ------------------------------------------------------------------------
 
-    fun Polygon.toLeft(cutId: Int) = LeftCutPolygon(cutId).apply {
-        head = this@toLeft.head
-        tail = this@toLeft.tail
-        positionsIndex.putAll(this@toLeft.positionsIndex)
-        cutPositions.addAll(this@toLeft.cutPositions)
-    }
+    fun Polygon.toLeft(cutId: Int) =
+        LeftCutPolygon(cutId).convertFrom<LeftCutPolygon>(this)
 
-    fun Polygon.toRight(cutId: Int) = RightCutPolygon(cutId).apply {
-        head = this@toRight.head
-        tail = this@toRight.tail
-        positionsIndex.putAll(this@toRight.positionsIndex)
-        cutPositions.addAll(this@toRight.cutPositions)
-    }
+    fun Polygon.toRight(cutId: Int) =
+        RightCutPolygon(cutId).convertFrom<RightCutPolygon>(this)
 
     // ------------------------------------------------------------------------
 
@@ -267,7 +259,7 @@ object PolygonUtils {
             if (currentPolygon.size > 1) {
                 val shouldSplit = polygon.any { compPoint ->
                     val nextCompPoint = compPoint.next ?: polygon.first()!!
-                    point.id != compPoint.id && point.id != nextCompPoint.id && // FIXME check
+                    point.id != compPoint.id && point.id != nextCompPoint.id &&
                             isPointOnLineSegment(point, Segment(compPoint, nextCompPoint)) &&
                             (point.id != nextCompPoint.id && point != compPoint)
                 }
@@ -309,21 +301,21 @@ object PolygonUtils {
         val features = polygons.map { polygon ->
             val coordinates = polygon.map { listOf(it.lng, it.lat) }
             """
-        {
-            "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [${coordinates}]
-            }
-        }
-        """.trimIndent()
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [${coordinates}]
+                    }
+                }
+            """.trimIndent()
         }
         return """
-    {
-        "type": "FeatureCollection",
-        "features": [${features.joinToString(",")}]
-    }
-    """.trimIndent()
+            {
+                "type": "FeatureCollection",
+                "features": [${features.joinToString(",")}]
+            }
+        """.trimIndent()
     }
 
 }

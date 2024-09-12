@@ -60,11 +60,8 @@ open class Position(val lat: Double, val lng: Double,
 internal fun <T : Position> T.init(): T = apply { id = nextId++ } // Can only be initialized from internal context
 
 class CutPosition( // A position that has been cut
-    lat: Double,
-    lng: Double,
-    val cutId: Int,
-    val cutLeft: Position,
-    val cutRight: Position
+    lat: Double, lng: Double,
+    val cutId: Int, val cutLeft: Position, val cutRight: Position
 ) : Position(lat, lng) {
 
     // Id which is shared/can be compared between the two cut positions
@@ -254,6 +251,15 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
     fun isNotCutEmpty(): Boolean = cutPositions.isNotEmpty()
     fun getPosition(id: Int): Position? = positionsIndex[id]
 
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T: Polygon> Polygon.convertFrom(polygon: Polygon) : T {
+    head = polygon.head
+    tail = polygon.tail
+    positionsIndex.putAll(polygon.positionsIndex)
+    cutPositions.addAll(polygon.cutPositions)
+    return this as T
 }
 
 // ----------------------------------------------------------------------------
