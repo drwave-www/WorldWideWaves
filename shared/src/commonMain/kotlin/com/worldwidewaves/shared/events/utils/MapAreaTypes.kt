@@ -34,9 +34,12 @@ data class Segment(val start: Position, val end: Position)
 open class Position(val lat: Double, val lng: Double,
                     internal var prev: Position? = null,
                     internal var next: Position? = null) {
+
+    companion object { internal var nextId = 42 }
+
     var id: Int = -1
-        internal set // Cannot be set outside of the class
-        get() { // Cannot be read before begin initialized (added to a Polygon)
+        internal set // Cannot be set outside of the module
+        get() { // Cannot be read before being initialized (added to a Polygon)
             if (field == -1) throw IllegalStateException("ID has not been initialized")
             return field
         }
@@ -44,15 +47,10 @@ open class Position(val lat: Double, val lng: Double,
     open operator fun component1() = lat
     open operator fun component2() = lng
 
-    companion object {
-        internal var nextId = 42
-    }
-
     fun toCutPosition(cutId: Int, cutLeft: Position, cutRight: Position) =
         CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 
     internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
-
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
