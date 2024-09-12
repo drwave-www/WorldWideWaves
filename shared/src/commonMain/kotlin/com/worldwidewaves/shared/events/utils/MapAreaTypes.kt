@@ -78,7 +78,22 @@ class CutPosition( // A position that has been cut
 /**
  * Represents a segment defined by its start and end positions.
  */
-data class Segment(val start: Position, val end: Position)
+data class Segment(val start: Position, val end: Position) {
+    /**
+     * Calculates the intersection of the segment with a given longitude
+     * and returns a CutPosition if the segment intersects the longitude.
+     */
+    fun intersectWithLng(cutId: Int, cutLng: Double): CutPosition? {
+        val lat = start.lat + (end.lat - start.lat) * (cutLng - start.lng) / (end.lng - start.lng)
+        return when {
+            start.lng < cutLng && end.lng > cutLng ->
+                CutPosition(lat, cutLng, cutId = cutId, cutLeft = start, cutRight = end)
+            start.lng > cutLng && end.lng < cutLng ->
+                CutPosition(lat, cutLng, cutId = cutId, cutLeft = end, cutRight = start)
+            else -> null
+        }
+    }
+}
 
 // ------------------------------------
 

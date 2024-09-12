@@ -31,7 +31,7 @@ import kotlin.random.Random
 
 object PolygonUtils {
 
-    data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+    data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
     // ------------------------------------------------------------------------
 
@@ -63,21 +63,6 @@ object PolygonUtils {
             }
 
             fun empty() = SplitPolygonResult(emptyList(), emptyList())
-        }
-    }
-
-    /**
-     * Calculates the intersection of the segment with a given longitude
-     * and returns a CutPosition if the segment intersects the longitude.
-     */
-    private fun Segment.intersectWithLng(cutId: Int, lng: Double): CutPosition? {
-        val lat = start.lat + (end.lat - start.lat) * (lng - start.lng) / (end.lng - start.lng)
-        return when {
-            start.lng < lng && end.lng > lng ->
-                CutPosition(lat, lng, cutId = cutId, cutLeft = start, cutRight = end)
-            start.lng > lng && end.lng < lng ->
-                CutPosition(lat, lng, cutId = cutId, cutLeft = end, cutRight = start)
-            else -> null
         }
     }
 
@@ -187,7 +172,7 @@ object PolygonUtils {
 
                 // Separate the polygon into two parts based on the cut longitude
                 for (point in this) {
-                    val nextPoint = point.next ?: first()!!
+                    val nextPoint = point.next ?: first()!! // Loop on next
 
                     if (point.lng <= longitudeToCut) leftSide.add(point)
                     if (point.lng >= longitudeToCut) rightSide.add(point)
@@ -229,21 +214,21 @@ object PolygonUtils {
         if (polygons.isEmpty() || polygons.all { it.isEmpty() })
             throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
-        val (minLatitude, minLongitude, maxLatitude, maxLongitude) = polygons.flatten().fold(
-            Quadruple(
+        val (minLat, minLng, maxLat, maxLng) = polygons.flatten().fold(
+            Quad(
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY
             )
         ) { (minLat, minLon, maxLat, maxLon), pos ->
-            Quadruple(
+            Quad(
                 minOf(minLat, pos.lat), minOf(minLon, pos.lng),
                 maxOf(maxLat, pos.lat), maxOf(maxLon, pos.lng)
             )
         }
 
         return BoundingBox(
-            sw = Position(minLatitude, minLongitude),
-            ne = Position(maxLatitude, maxLongitude)
+            sw = Position(minLat, minLng),
+            ne = Position(maxLat, maxLng)
         )
     }
 
@@ -257,11 +242,8 @@ object PolygonUtils {
      *
      */
     private fun <T : CutPolygon> groupIntoRings(polygon: T): List<T> {
-        // Polygon cut type conservation
         val polygons: MutableList<Polygon> = mutableListOf()
-
-        // Polygon cut type conservation
-        val currentPolygon  = polygon.createNew()
+        val currentPolygon  = polygon.createNew() // Polygon cut type conservation
 
         for (point in polygon) {
             if ((point.id != polygon.first()!!.id) && point == polygon.last()!!)
@@ -275,7 +257,7 @@ object PolygonUtils {
                             isPointOnLineSegment(point, Segment(compPoint, nextCompPoint)) &&
                             (point.id != nextCompPoint.id && point != compPoint)
                 }
-                if (shouldSplit) {
+                if (shouldSplit) { // Close the current polygon and add it to the rings list
                     if (point != currentPolygon.first()!!)
                         currentPolygon.add(currentPolygon.first()!!)
                     polygons.add(currentPolygon.copy())
@@ -296,7 +278,7 @@ object PolygonUtils {
             polygons.add(currentPolygon.close())
 
         @Suppress("UNCHECKED_CAST")
-        return (polygons as List<T>).filter { // Filter out invalid polygons (lines and dots)
+        return (polygons as List<T>).filter { // In case, filter out invalid polygons (lines and dots)
             it.size >= 3 && !(it.all { p -> p.lat == it.first()!!.lat } || it.all { p -> p.lng == it.first()!!.lng })
         }
     }

@@ -53,7 +53,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.PolygonUtils.Quadruple
+import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
@@ -263,10 +263,10 @@ class EventMap(
             // depending on whether the event map is wider or taller than the MapLibre component.
             val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
                 val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-                Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+                Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
             } else {
                 val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-                Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+                Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
             }
 
             val bounds = LatLngBounds.Builder()
