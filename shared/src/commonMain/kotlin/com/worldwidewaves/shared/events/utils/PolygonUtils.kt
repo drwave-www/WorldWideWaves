@@ -84,6 +84,15 @@ object PolygonUtils {
     fun Polygon.toRight(cutId: Int) =
         RightCutPolygon(cutId).convertFrom<RightCutPolygon>(this)
 
+    @Suppress("UNCHECKED_CAST")
+    private fun <T: Polygon> Polygon.convertFrom(polygon: Polygon) : T {
+        head = polygon.head
+        tail = polygon.tail
+        positionsIndex.putAll(polygon.positionsIndex)
+        cutPositions.addAll(polygon.cutPositions)
+        return this as T
+    }
+
     // ------------------------------------------------------------------------
 
     /**

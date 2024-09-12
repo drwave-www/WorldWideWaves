@@ -253,15 +253,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> {
 
 }
 
-@Suppress("UNCHECKED_CAST")
-fun <T: Polygon> Polygon.convertFrom(polygon: Polygon) : T {
-    head = polygon.head
-    tail = polygon.tail
-    positionsIndex.putAll(polygon.positionsIndex)
-    cutPositions.addAll(polygon.cutPositions)
-    return this as T
-}
-
 // ----------------------------------------------------------------------------
 
 /**
