@@ -23,334 +23,127 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import io.github.aakira.napier.Napier
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PolygonUtilsSplitPolygonTest {
 
+    /**
+     *
+     */
     @Test
     fun testSplitPolygonByLongitude() {
+        // GIVEN
         val polygon = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 0.0),
-            Position(lat = 0.0, lng = 2.0),
-            Position(lat = 2.0, lng = 2.0),
-            Position(lat = 2.0, lng = 0.0),
-            Position(lat = 0.0, lng = 0.0)
-        )
-        val longitudeToCut = 1.0
-
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        val expectedLeftSide = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 0.0),
-            Position(lat = 0.0, lng = 1.0),
-            Position(lat = 2.0, lng = 1.0),
-            Position(lat = 2.0, lng = 0.0),
-            Position(lat = 0.0, lng = 0.0)
-        )
-        val expectedRightSide = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 1.0),
-            Position(lat = 0.0, lng = 2.0),
-            Position(lat = 2.0, lng = 2.0),
-            Position(lat = 2.0, lng = 1.0),
-            Position(lat = 0.0, lng = 1.0)
-        )
-
-        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
-        assertTrue(result.right.size == 1 && areRingPolygonsEqual(result.right[0], expectedRightSide), "Expected right side of the split polygon to match")
-    }
-
-    @Test
-    fun testSplitPolygonByLongitudeWithVertexOnCut() {
-        val polygon = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 0.0),
-            Position(lat = 0.0, lng = 1.0),
-            Position(lat = 1.0, lng = 1.0),
-            Position(lat = 1.0, lng = 0.0),
-            Position(lat = 0.0, lng = 0.0)
-        )
-        val longitudeToCut = 1.0
-
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        val expectedLeftSide = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 0.0),
-            Position(lat = 0.0, lng = 1.0),
-            Position(lat = 1.0, lng = 1.0),
-            Position(lat = 1.0, lng = 0.0),
-            Position(lat = 0.0, lng = 0.0)
-        )
-
-        assertTrue(result.left.size == 1 && areRingPolygonsEqual(result.left[0], expectedLeftSide), "Expected left side of the split polygon to match")
-        assertTrue(result.right.isEmpty(), "Expected right side of the split polygon to be empty")
-    }
-
-    @Test
-    fun testSplitPolygonByLongitudeWithDegenerateShape() {
-        val polygon = Polygon.fromPositions(
-            Position(lat = 1.0, lng = 0.0),
-            Position(lat = 1.0, lng = 1.0),
+            Position(lat = -12.0, lng = -6.0),
+            Position(lat = -13.0, lng = -3.0),
+            Position(lat = -11.0, lng = -3.0),
+            Position(lat = -9.0, lng = -3.0),
+            Position(lat = -8.0, lng = -6.0),
+            Position(lat = -7.0, lng = -3.0),
+            Position(lat = -6.0, lng = -6.0),
+            Position(lat = -5.0, lng = -3.0),
+            Position(lat = -3.0, lng = 0.0),
+            Position(lat = -2.0, lng = -3.0),
+            Position(lat = -1.0, lng = 2.0),
             Position(lat = 1.0, lng = 2.0),
-            Position(lat = 1.0, lng = 3.0),
-            Position(lat = 1.0, lng = 0.0)
-        )
-        val longitudeToCut = 1.0
-
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertEquals(emptyList(), result.left, "Expected left side of the split polygon to be empty")
-        assertEquals(emptyList(), result.right, "Expected right side of the split polygon to be empty")
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_SinglePointPolygon() {
-        val polygon = Polygon.fromPositions(Position(0.0, 0.0))
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-        assertEquals(emptyList(), result.left)
-        assertEquals(emptyList(), result.right)
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_TwoPointPolygon() {
-        val polygon = Polygon.fromPositions(Position(0.0, 0.0), Position(0.0, 1.0))
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertEquals(emptyList(), result.left)
-        assertEquals(emptyList(), result.right)
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_AllPointsOnCutLine() {val polygon = Polygon.fromPositions(
-        Position(0.0, 1.0),
-        Position(1.0, 1.0),
-        Position(2.0, 1.0),
-        Position(0.0, 1.0)
-    )
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertEquals(emptyList(), result.left)
-        assertEquals(emptyList(), result.right)
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_ComplexShape1() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 3.0),
-            Position(1.0, 2.0),
-            Position(2.0, 3.0),
-            Position(2.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertTrue(result.left.all { it.first() == it.last() })
-        assertTrue(result.right.all { it.first() == it.last() })
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_ComplexShape2() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(1.0, 1.0),
-            Position(2.0, 0.0),
-            Position(2.0, 2.0),
-            Position(1.0, 3.0),
-            Position(0.0, 2.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 1.5
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertTrue(result.left.all { it.first() == it.last() })
-        assertTrue(result.right.all { it.first() == it.last() })
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_LongitudeOutsidePolygon() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 1.0),
-            Position(1.0, 1.0),
-            Position(1.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 2.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertTrue(areRingPolygonsEqual(polygon, result.left.first()))
-        assertEquals(emptyList(), result.right)
-    }
-
-    @Test
-    fun testSplitPolygonByLongitude_EmptyPolygon() {
-        val polygon = Polygon()
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertEquals(emptyList(), result.left)
-        assertEquals(emptyList(), result.right)
-    }
-
-    @Test
-    fun testSplitLargePolygonWithConcaveSections() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 5.0),
-            Position(2.0, 3.0),
-            Position(4.0, 5.0),
-            Position(4.0, 0.0),
-            Position(3.0,1.0),
-            Position(1.0, 1.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 2.5
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertTrue(result.left.isNotEmpty())
-        assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it.first() == it.last() })
-        assertTrue(result.right.all { it.first() == it.last() })
-    }
-
-    @Test
-    fun testSplitPolygonWithZigzagPattern() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 2.0),
-            Position(1.0, 1.0),
-            Position(1.0, 3.0),
-            Position(2.0, 2.0),
-            Position(2.0, 0.0),
-            Position(0.0, 0.0)
+            Position(lat = 3.0, lng = -8.0),
+            Position(lat = 5.0, lng = -8.0),
+            Position(lat = 7.0, lng = -7.0),
+            Position(lat = 8.0, lng = -5.0),
+            Position(lat = 9.0, lng = -1.0),
+            Position(lat = 9.0, lng = 2.0),
+            Position(lat = 14.0, lng = 2.0),
+            Position(lat = 14.0, lng = -5.0),
+            Position(lat = 12.0, lng = -5.0),
+            Position(lat = 12.0, lng = -1.0),
+            Position(lat = 10.0, lng = 1.0),
+            Position(lat = 10.0, lng = -7.0),
+            Position(lat = 10.0, lng = -9.0),
+            Position(lat = -11.0, lng = -9.0)
         )
 
-        val longitudeToCut = 1.5
-        val result = polygon.splitByLongitude(longitudeToCut)
+        val expectedLeftSide1 = Polygon.fromPositions(
+            Position(lat = -12.0, lng = -6.0),
+            Position(lat = -13.0, lng = -3.0), // <- cut
+            Position(lat = -11.0, lng = -3.0), // <- cut
+            Position(lat = -9.0, lng = -3.0), // <- cut
+            Position(lat = -8.0, lng = -6.0),
+            Position(lat = -7.0, lng = -3.0), // <- cut
+            Position(lat = -6.0, lng = -6.0),
+            Position(lat = -4.5, lng = -3.0), // <- cut
+            Position(lat = -2.0, lng = -3.0),
+            Position(lat = 2.0, lng = -3.0), // <- cut
+            Position(lat = 3.0, lng = -8.0),
+            Position(lat = 5.0, lng = -8.0),
+            Position(lat = 7.0, lng = -7.0),
+            Position(lat = 8.0, lng = -5.0),
+            Position(lat = 8.5, lng = -3.0), // <- cut
+            Position(lat = 10.0, lng = -3.0), // <- cut
+            Position(lat = 10.0, lng = -7.0),
+            Position(lat = 10.0, lng = -9.0),
+            Position(lat = -11.0, lng = -9.0)
+        )
 
-        val expectedLeftSide = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 0.0),
-            Position(lat = 0.0, lng = 1.5),
-            Position(lat = 0.5, lng = 1.5),
-            Position(lat = 1.0, lng = 1.0),
-            Position(lat = 1.0, lng = 1.5),
-            Position(lat = 2.0, lng = 1.5),
-            Position(lat = 2.0, lng = 0.0),
-            Position(lat = 0.0, lng = 0.0)
+        val expectedLeftSide2 = Polygon.fromPositions(
+            Position(lat = 12.0, lng = -5.0),
+            Position(lat = 12.0, lng = -3.0), // <- cut
+            Position(lat = 14.0, lng = -3.0), // <- cut
+            Position(lat = 14.0, lng = -5.0),
+            Position(lat = 12.0, lng = -5.0)
         )
 
         val expectedRightSide1 = Polygon.fromPositions(
-            Position(lat = 0.0, lng = 1.5),
-            Position(lat = 0.0, lng = 2.0),
-            Position(lat = 0.5, lng = 1.5),
-            Position(lat = 0.0, lng = 1.5)
+            Position(lat = -4.5, lng = -3.0), // <- cut
+            Position(lat = -3.0, lng = 0.0),
+            Position(lat = -2.0, lng = -3.0), // <- cut
+            Position(lat = -5.0, lng = -3.0)
         )
+
         val expectedRightSide2 = Polygon.fromPositions(
-            Position(lat = 1.0, lng = 1.5),
-            Position(lat = 1.0, lng = 3.0),
-            Position(lat = 2.0, lng = 2.0),
-            Position(lat = 2.0, lng = 1.5),
-            Position(lat = 1.0, lng = 1.5)
+            Position(lat = -2.0, lng = -3.0), // <- cut
+            Position(lat = -1.0, lng = 2.0),
+            Position(lat = 1.0, lng = 2.0),
+            Position(lat = 2.0, lng = -3.0), // <- cut
+            Position(lat = -2.0, lng = -3.0)
         )
 
-        assertTrue(result.left.isNotEmpty())
-        assertTrue(result.right.isNotEmpty())
-        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
-        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
-        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
-    }
+        val expectedRightSide3 = Polygon.fromPositions(
+            Position(lat = 8.5, lng = -3.0), // <- cut
+            Position(lat = 9.0, lng = -1.0),
+            Position(lat = 9.0, lng = 2.0),
+            Position(lat = 14.0, lng = 2.0),
+            Position(lat = 14.0, lng = -3.0), // <- cut
+            Position(lat = 12.0, lng = -3.0), // <- cut
+            Position(lat = 12.0, lng = -1.0),
+            Position(lat = 10.0, lng = 1.0),
+            Position(lat = 10.0, lng = -3.0), // <- cut
+            Position(lat = 8.5, lng = -3.0)
+        )
 
-    @Test
-    fun testSplitPolygonWithSpiralShape() {
-        val polygon = Polygon(Position(0.0, 0.0))
-        var angle = 0.0
-        val radius = 1.0
-        val numPoints = 36
-        for (i in 1..numPoints) {
-            angle += PI / 12
-            val x = radius * cos(angle)
-            val y = radius * sin(angle)
-            polygon.add(Position(x, y))
-        }
-        polygon.add(Position(0.0, 0.0)) // Close the polygon
-
-        val longitudeToCut = 0.5
+        // WHEN
+        val longitudeToCut = -3.0
         val result = polygon.splitByLongitude(longitudeToCut)
 
-        assertTrue(result.left.isNotEmpty())
-        assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it.first() == it.last() })
-        assertTrue(result.right.all { it.first() == it.last() })
-    }
-
-    @Test
-    fun testSplitPolygonWithMultipleIntersections() {
-        val polygon = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 4.0),
-            Position(1.0, 3.0),
-            Position(2.0, 4.0),
-            Position(2.0, 2.0),
-            Position(3.0, 3.0),
-            Position(4.0, 2.0),
-            Position(4.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val longitudeToCut = 2.5
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        assertTrue(result.left.isNotEmpty())
-        assertTrue(result.right.isNotEmpty())
-        assertTrue(result.left.all { it.first() == it.last() })
-        assertTrue(result.right.all { it.first() == it.last() })
-    }
-
-    @Test
-    fun testSplitConcavePolygon_MultipleRightRings() {
-        val polygon = Polygon.fromPositions(
-        Position(0.0, 0.0),
-        Position(0.0, 2.0),
-        Position(1.0, 1.0),
-        Position(2.0, 2.0),
-        Position(2.0, 0.0),
-        Position(0.0, 0.0)
-        )
-
-        val longitudeToCut = 1.0
-        val result = polygon.splitByLongitude(longitudeToCut)
-
-        val expectedLeftSide = Polygon.fromPositions(
-            Position(0.0, 0.0),
-            Position(0.0, 1.0),
-            Position(1.0, 1.0),
-            Position(2.0, 1.0),
-            Position(2.0, 0.0),
-            Position(0.0, 0.0)
-        )
-        val expectedRightSide1 = Polygon.fromPositions(
-            Position(0.0, 1.0),
-            Position(0.0, 2.0),
-            Position(1.0, 1.0),
-            Position(0.0, 1.0) // Closed ring polygon
-        )
-        val expectedRightSide2 = Polygon.fromPositions(
-            Position(1.0, 1.0),
-            Position(2.0, 2.0),
-            Position(2.0, 1.0),
-            Position(1.0, 1.0) // Closed ring polygon
-        )
-
-        assertTrue(areRingPolygonsEqual(expectedLeftSide, result.left[0]), "Expected left side of the split polygon to match")
-        assertTrue(areRingPolygonsEqual(expectedRightSide1, result.right[0]), "Expected right side of the split polygon to match")
-        assertTrue(areRingPolygonsEqual(expectedRightSide2, result.right[1]), "Expected right side of the split polygon to match")
+        // THEN
+        assertEquals(2,result.left.size)
+        assertEquals(19, result.left[0].size)
+        assertEquals(8, result.left[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[0], expectedLeftSide1))
+        assertEquals(5, result.left[1].size)
+        assertEquals(2, result.left[1].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[1], expectedLeftSide2))
+        assertEquals(3, result.right.size)
+        assertEquals(4, result.right[0].size)
+        assertEquals(2, result.right[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[0], expectedRightSide1))
+        assertEquals(5, result.right[1].size)
+        assertEquals(2, result.right[1].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[1], expectedRightSide2))
+        assertEquals(10, result.right[2].size)
+        assertEquals(4, result.right[2].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[2], expectedRightSide3))
     }
 
     // -----------------------

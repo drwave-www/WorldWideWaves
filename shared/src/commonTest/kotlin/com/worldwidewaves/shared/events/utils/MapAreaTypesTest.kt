@@ -511,4 +511,132 @@ class MapAreaTypesTest {
         assertEquals(position, polygon.getPosition(position.id))
     }
 
+    @Test
+    fun testSegmentIntersection() {
+        val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
+        val cutPosition = segment.intersectWithLng(1, 1.0)
+        assertNotNull(cutPosition)
+        assertEquals(1.0, cutPosition.lat)
+        assertEquals(1.0, cutPosition.lng)
+        assertEquals(1, cutPosition.cutId)
+
+        // Test no intersection
+        val noIntersectSegment = Segment(Position(0.0, 0.0), Position(2.0, 0.0))
+        assertNull(noIntersectSegment.intersectWithLng(1, 1.0))
+    }
+
+    @Test
+    fun testPolygonIteratorEdgeCases() {
+        val emptyPolygon = Polygon()
+        val emptyIterator = emptyPolygon.iterator()
+        assertFalse(emptyIterator.hasNext())
+        assertFailsWith<NoSuchElementException> { emptyIterator.next() }
+
+        val singleElementPolygon = Polygon()
+        singleElementPolygon.add(Position(1.0, 1.0))
+        val singleIterator = singleElementPolygon.iterator()
+        assertTrue(singleIterator.hasNext())
+        assertNotNull(singleIterator.next())
+        assertFalse(singleIterator.hasNext())
+    }
+
+    @Test
+    fun testPolygonLoopIterator() {
+        val polygon = Polygon()
+        polygon.add(Position(1.0, 1.0))
+        polygon.add(Position(2.0, 2.0))
+        polygon.add(Position(3.0, 3.0))
+
+        val loopIterator = polygon.loopIterator()
+        repeat(6) { // Test two full loops
+            assertTrue(loopIterator.hasNext())
+            assertNotNull(loopIterator.next())
+        }
+    }
+
+    @Test
+    fun testPolygonSubListEdgeCases() {
+        val polygon = Polygon()
+        val pos1 = polygon.add(Position(1.0, 1.0))
+        val pos2 = polygon.add(Position(2.0, 2.0))
+        val pos3 = polygon.add(Position(3.0, 3.0))
+
+        // Test subList with start and end being the same
+        val singleElementSubList = polygon.subList(pos1, pos1.id)
+        assertEquals(1, singleElementSubList.size)
+
+        // Test subList with full polygon (last one is excluded)
+        val fullSubList = polygon.subList(pos1, pos3.id)
+        assertEquals(2, fullSubList.size)
+
+        // Test invalid subList (non-existent lastId)
+        assertFailsWith<IllegalArgumentException> {
+            polygon.subList(pos1, -1)
+        }
+
+        // Test subList with empty polygon
+        val emptyPolygon = Polygon()
+        assertFailsWith<IllegalArgumentException> {
+            emptyPolygon.subList(pos1, pos1.id)
+        }
+
+        // Test subList where 'last' cannot be found (cyclic case)
+        val cyclicPolygon = Polygon()
+        val cyclicPos = cyclicPolygon.add(Position(1.0, 1.0))
+        cyclicPos.next = cyclicPos // Create a cycle
+        assertFailsWith<IllegalArgumentException> {
+            cyclicPolygon.subList(cyclicPos, -1) // Any non-existing ID to force full loop
+        }
+    }
+
+    @Test
+    fun testCutPositionPairId() {
+        val polygon = Polygon()
+        val cutLeft = polygon.add(Position(0.0, 0.0))
+        val cutRight = polygon.add(Position(2.0, 2.0))
+        val cutPos1 = polygon.add(Position(1.0, 1.0).toCutPosition(1, cutLeft, cutRight)) as CutPosition
+        val cutPos2 = polygon.add(Position(1.0, 1.0).toCutPosition(1, cutLeft, cutRight)) as CutPosition
+        val cutPos3 = polygon.add(Position(1.5, 1.5).toCutPosition(2, cutLeft, cutRight)) as CutPosition
+
+        assertEquals(cutPos1.pairId, cutPos2.pairId)
+        assertNotEquals(cutPos1.pairId, cutPos3.pairId)
+    }
+
+    @Test
+    fun testBoundingBoxCreationAndMethods() {
+        val bbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(0.0, bbox.minLatitude)
+        assertEquals(2.0, bbox.maxLatitude)
+        assertEquals(0.0, bbox.minLongitude)
+        assertEquals(2.0, bbox.maxLongitude)
+
+        // Test equality
+        val sameBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(bbox, sameBbox)
+        assertNotEquals(bbox, BoundingBox(0.0, 0.0, 3.0, 3.0))
+
+        // Test hashCode
+        assertEquals(bbox.hashCode(), sameBbox.hashCode())
+    }
+
+    @Test
+    fun testPolygonOperationsWithCutPositions() {
+        val polygon = Polygon()
+        val cutLeft = Position(0.0, 0.0)
+        val cutRight = Position(2.0, 2.0)
+        val cutPos1 = polygon.add(Position(1.0, 1.0).toCutPosition(1, cutLeft, cutRight))
+        val cutPos2 = polygon.add(Position(1.5, 1.5).toCutPosition(2, cutLeft, cutRight))
+
+        assertEquals(2, polygon.size)
+        assertEquals(2, polygon.cutSize)
+
+        assertTrue(polygon.remove(cutPos1.id))
+        assertEquals(1, polygon.size)
+        assertEquals(1, polygon.cutSize)
+
+        val cutIterator = polygon.cutIterator()
+        assertTrue(cutIterator.hasNext())
+        assertEquals(cutPos2, cutIterator.next())
+    }
+
 }

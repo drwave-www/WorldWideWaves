@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
+import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -234,6 +235,29 @@ class PolygonUtilsPointInPolygonTest {
             Position(0.0, 0.0)
         )
         assertTrue(polygon.containsPosition(point)) // Consider a point on an edge as inside
+    }
+
+    @Test
+    fun testIsPointInPolygons() {
+        val polygon1 = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(2.0, 0.0),
+            Position(2.0, 2.0),
+            Position(0.0, 2.0)
+        )
+        val polygon2 = Polygon.fromPositions(
+            Position(3.0, 3.0),
+            Position(5.0, 3.0),
+            Position(5.0, 5.0),
+            Position(3.0, 5.0)
+        )
+
+        val polygons = listOf(polygon1, polygon2)
+
+        assertTrue(isPointInPolygons(Position(1.0, 1.0), polygons))
+        assertTrue(isPointInPolygons(Position(4.0, 4.0), polygons))
+        assertFalse(isPointInPolygons(Position(2.5, 2.5), polygons))
+        assertFalse(isPointInPolygons(Position(6.0, 6.0), polygons))
     }
 
 }

@@ -173,7 +173,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * It then checks if this duration is greater than the predefined observation delay.
      *
      */
-    fun isNearTheEvent(): Boolean {
+    fun isNearTheEvent(): Boolean { // FIXME: quite duplicate with event.isSoon() !? Should be in event ?
         val now: Instant = clock.now()
         val eventStartTime: Instant = event.getStartDateTime()
         val durationUntilEvent: Duration = eventStartTime - now

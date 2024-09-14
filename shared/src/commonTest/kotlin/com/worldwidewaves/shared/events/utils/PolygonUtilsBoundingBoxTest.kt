@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.events.utils.PolygonUtils.bbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
+import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -112,6 +113,34 @@ class PolygonUtilsBoundingBoxTest {
         val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
         val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testPolygonsBbox() {
+        val polygon1 = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(2.0, 0.0),
+            Position(2.0, 2.0),
+            Position(0.0, 2.0)
+        )
+        val polygon2 = Polygon.fromPositions(
+            Position(1.0, 1.0),
+            Position(3.0, 1.0),
+            Position(3.0, 3.0),
+            Position(1.0, 3.0)
+        )
+
+        val bbox = polygonsBbox(listOf(polygon1, polygon2))
+
+        assertEquals(0.0, bbox.sw.lat)
+        assertEquals(0.0, bbox.sw.lng)
+        assertEquals(3.0, bbox.ne.lat)
+        assertEquals(3.0, bbox.ne.lng)
+
+        // Test with empty list
+        assertFailsWith<IllegalArgumentException> {
+            polygonsBbox(emptyList())
+        }
     }
 
 }

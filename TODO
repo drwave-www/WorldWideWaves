@@ -2,6 +2,7 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
+    - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom
         + styling script : jq => every minzoom < 10 = 3
     - manage with translations
