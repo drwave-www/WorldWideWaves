@@ -118,7 +118,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     internal var head: Position? = null
     internal var tail: Position? = null
-    internal val cutPositions = mutableListOf<CutPosition>()
+    internal val cutPositions = mutableSetOf<CutPosition>()
     internal val positionsIndex = mutableMapOf<Int, Position>()
 
     // --------------------------------
@@ -136,7 +136,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
-    fun getCutPositions(): List<CutPosition> = cutPositions
+    fun getCutPositions(): Set<CutPosition> = cutPositions
 
     // --------------------------------
 
@@ -187,6 +187,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // --------------------------------
 
     fun add(position: Position) : Position {
+        if (tail != null && position == tail)
+            return tail!!
         val addPosition = position.xfer()
 
         indexNewPosition(addPosition)
@@ -326,7 +328,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // --------------------------------
 
     interface LoopIterator<T> : Iterator<T> {
-        fun viewNext(): T
+        fun viewCurrent(): T
     }
 
     override fun iterator(): Iterator<Position> = object : Iterator<Position> {
@@ -342,7 +344,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     fun loopIterator(): LoopIterator<Position> = object : LoopIterator<Position> {
         private var current = head
         override fun hasNext(): Boolean = head != null
-        override fun viewNext(): Position = current?.next ?: head ?: throw NoSuchElementException()
+        override fun viewCurrent(): Position = current ?: head ?: throw NoSuchElementException()
         override fun next(): Position {
             val result = current ?: throw NoSuchElementException()
             current = current?.next ?: head
@@ -363,7 +365,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     fun reverseLoopIterator(): LoopIterator<Position> = object : LoopIterator<Position> {
         private var current = tail
         override fun hasNext(): Boolean = tail != null
-        override fun viewNext(): Position = current?.prev ?: tail ?: throw NoSuchElementException()
+        override fun viewCurrent(): Position = current ?: tail ?: throw NoSuchElementException()
         override fun next(): Position {
             val result = current ?: throw NoSuchElementException()
             current = current?.prev ?: tail

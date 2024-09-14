@@ -172,8 +172,8 @@ object PolygonUtils {
             lngToCut < minLongitude -> fromSinglePolygon(this, cutId, RIGHT)
             else -> { // Separate the polygon into two parts based on the cut longitude
 
-                val iterator = if (isClockwise()) loopIterator() else reverseLoopIterator()
-                var stopPoint = if (isClockwise()) last()!! else first()!! // Security stop
+                val iterator = if (isClockwise()) reverseLoopIterator() else loopIterator()
+                var stopPoint = if (isClockwise()) first()!! else last()!! // Security stop
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Clockwise loop
@@ -181,7 +181,7 @@ object PolygonUtils {
                     if (point.id == stopPoint.id) break // Stop at the starting point
 
                     if (prev != null && point == prev) continue // Skip identical points
-                    val nextPoint = iterator.viewNext()
+                    val nextPoint = iterator.viewCurrent()
 
                     // Calculate the intersection point with the cut longitude
                     val intersection = Segment(point, nextPoint).intersectWithLng(cutId, lngToCut)
@@ -222,10 +222,10 @@ object PolygonUtils {
                 // Add the last polygons, completing them, to the left and/or right side
                 if (leftSide.size > 1) leftSide.add(currentLeft.apply {
                     add(stopPoint.toPointCut(cutId))
-                })
+                }.copy() as LeftCutPolygon)
                 if (rightSide.size > 1) rightSide.add(currentRight.apply {
                     add(stopPoint.toPointCut(cutId))
-                })
+                }.copy() as RightCutPolygon)
 
                 // Close the polygons and group the points into ring polygons
                 return SplitPolygonResult(
@@ -249,7 +249,7 @@ object PolygonUtils {
         var current: T = initPolygon.clear() as T
 
         for (polyLine in polyLines) {
-            if (current.isEmpty() || current.last()!!.lng <= polyLine.first()!!.lng) {
+            if (current.isEmpty() || (current.last()!!.lat <= polyLine.first()!!.lat && polyLine.first()!!.lat < current.first()!!.lat)) {
                 current.addAll(polyLine)
             } else {
                 result.add(current.close().copy() as T)
@@ -265,12 +265,12 @@ object PolygonUtils {
     }
 
     private fun <T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
-        if (polygon.size > 2) {
-            val lastPoint = polygon.last()!!
-            @Suppress("UNCHECKED_CAST")
-            polygonList.add(polygon.copy() as T)
-            polygon.clear().add(lastPoint)
-        }
+         val lastPoint = polygon.last()
+         if (polygon.size > 2) {
+             @Suppress("UNCHECKED_CAST")
+             polygonList.add(polygon.copy() as T)
+         }
+         polygon.clear().add(lastPoint!!)
     }
 
     // ------------------------------------------------------------------------

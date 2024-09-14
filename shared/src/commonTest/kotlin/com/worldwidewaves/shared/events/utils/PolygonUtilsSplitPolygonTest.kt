@@ -67,13 +67,11 @@ class PolygonUtilsSplitPolygonTest {
         val expectedLeftSide1 = Polygon.fromPositions(
             Position(lat = -12.0, lng = -6.0),
             Position(lat = -13.0, lng = -3.0), // <- cut
-            Position(lat = -11.0, lng = -3.0), // <- cut
             Position(lat = -9.0, lng = -3.0), // <- cut
             Position(lat = -8.0, lng = -6.0),
             Position(lat = -7.0, lng = -3.0), // <- cut
             Position(lat = -6.0, lng = -6.0),
-            Position(lat = -4.5, lng = -3.0), // <- cut
-            Position(lat = -2.0, lng = -3.0),
+            Position(lat = -5.0, lng = -3.0), // <- cut
             Position(lat = 2.0, lng = -3.0), // <- cut
             Position(lat = 3.0, lng = -8.0),
             Position(lat = 5.0, lng = -8.0),
@@ -83,7 +81,8 @@ class PolygonUtilsSplitPolygonTest {
             Position(lat = 10.0, lng = -3.0), // <- cut
             Position(lat = 10.0, lng = -7.0),
             Position(lat = 10.0, lng = -9.0),
-            Position(lat = -11.0, lng = -9.0)
+            Position(lat = -11.0, lng = -9.0),
+            Position(lat = -12.0, lng = -6.0)
         )
 
         val expectedLeftSide2 = Polygon.fromPositions(
@@ -95,7 +94,7 @@ class PolygonUtilsSplitPolygonTest {
         )
 
         val expectedRightSide1 = Polygon.fromPositions(
-            Position(lat = -4.5, lng = -3.0), // <- cut
+            Position(lat = -5.0, lng = -3.0), // <- cut
             Position(lat = -3.0, lng = 0.0),
             Position(lat = -2.0, lng = -3.0), // <- cut
             Position(lat = -5.0, lng = -3.0)
@@ -128,12 +127,13 @@ class PolygonUtilsSplitPolygonTest {
 
         // THEN
         assertEquals(2,result.left.size)
-        assertEquals(19, result.left[0].size)
-        assertEquals(8, result.left[0].cutPositions.size)
+        assertEquals(18, result.left[0].size)
+        assertEquals(7, result.left[0].cutPositions.size)
         assertTrue(areRingPolygonsEqual(result.left[0], expectedLeftSide1))
         assertEquals(5, result.left[1].size)
         assertEquals(2, result.left[1].cutPositions.size)
         assertTrue(areRingPolygonsEqual(result.left[1], expectedLeftSide2))
+
         assertEquals(3, result.right.size)
         assertEquals(4, result.right[0].size)
         assertEquals(2, result.right[0].cutPositions.size)
