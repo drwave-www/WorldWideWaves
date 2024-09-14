@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.bbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import kotlin.test.Test

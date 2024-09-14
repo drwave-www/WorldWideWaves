@@ -23,6 +23,8 @@ package com.worldwidewaves.shared.events.utils
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
+import kotlin.Double.Companion.NEGATIVE_INFINITY
+import kotlin.Double.Companion.POSITIVE_INFINITY
 
 // ----------------------------------------------------------------------------
 
@@ -186,6 +188,61 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
+    private var minLat: Double = POSITIVE_INFINITY
+    private var minLng: Double = POSITIVE_INFINITY
+    private var maxLat: Double = NEGATIVE_INFINITY
+    private var maxLng: Double = NEGATIVE_INFINITY
+    private var boundingBoxValid: Boolean = false
+
+    fun bbox(): BoundingBox {
+        if (isEmpty()) throw IllegalArgumentException("Polygon bbox: cannot compute bounding box of an empty polygon")
+        if (!boundingBoxValid) {
+            updateBoundingBox()
+        }
+        return BoundingBox(
+            sw = Position(minLat, minLng),
+            ne = Position(maxLat, maxLng)
+        )
+    }
+
+    private fun updateBoundingBox() {
+        if (isEmpty() || !boundingBoxValid) {
+            minLat = POSITIVE_INFINITY
+            minLng = POSITIVE_INFINITY
+            maxLat = NEGATIVE_INFINITY
+            maxLng = NEGATIVE_INFINITY
+            boundingBoxValid = true
+            return
+        }
+
+        forEach { position ->
+            updateBoundingBoxForPosition(position)
+        }
+
+        boundingBoxValid = true
+    }
+
+    private fun updateBoundingBoxForPosition(position: Position) {
+        if (size == 1) {
+            head?.let { firstPoint ->
+                minLat = firstPoint.lat
+                minLng = firstPoint.lng
+                maxLat = firstPoint.lat
+                maxLng = firstPoint.lng
+                boundingBoxValid = true
+            }
+            boundingBoxValid = true
+        }
+        if (boundingBoxValid) {
+            minLat = minOf(minLat, position.lat)
+            minLng = minOf(minLng, position.lng)
+            maxLat = maxOf(maxLat, position.lat)
+            maxLng = maxOf(maxLng, position.lng)
+        }
+    }
+
+    // --------------------------------
+
     fun add(position: Position) : Position {
         if (tail != null && position == tail)
             return tail!!
@@ -200,6 +257,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             tail?.next = addPosition
         }
 
+        updateBoundingBoxForPosition(addPosition)
         updateAreaAndDirection(tail, addPosition)
         return addPosition.apply { tail = this }
     }
@@ -230,6 +288,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             }
         }
 
+        boundingBoxValid = false  // Invalidate the bounding box
         return true
     }
 
@@ -245,6 +304,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         indexNewPosition(addPosition)
         if (current == tail) tail = addPosition
 
+        updateBoundingBoxForPosition(addPosition)
         updateAreaAndDirection(current, addPosition)
         updateAreaAndDirection(addPosition, addPosition.next)
         return addPosition
@@ -263,6 +323,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
 
         indexNewPosition(addPosition)
+        updateBoundingBoxForPosition(addPosition)
         updateAreaAndDirection(addPosition, current)
         updateAreaAndDirection(addPosition.prev, addPosition)
         return addPosition
@@ -394,6 +455,11 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         tail = null
         area = 0.0
         isClockwise = true
+        minLat = POSITIVE_INFINITY
+        minLng = POSITIVE_INFINITY
+        maxLat = NEGATIVE_INFINITY
+        maxLng = NEGATIVE_INFINITY
+        boundingBoxValid = true
         return this
     }
 

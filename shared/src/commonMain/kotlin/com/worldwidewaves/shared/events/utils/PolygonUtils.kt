@@ -102,11 +102,6 @@ object PolygonUtils {
     // ------------------------------------------------------------------------
 
     /**
-     * Calculates the bounding box of a polygon.
-     */
-    fun Polygon.bbox(): BoundingBox = polygonsBbox(listOf(this))
-
-    /**
      * Determines if a point is inside a polygon.
      *
      * This function implements a ray casting algorithm to determine if a given point(`tap`) lies
@@ -154,7 +149,7 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement move = deepCopy + clean
+    fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement move = deepCopy + clean AND -180/180 longitude cut
         this.close() // Ensure the polygon is closed
         if (isEmpty() || size < 4) return SplitPolygonResult.empty()
 
@@ -249,7 +244,11 @@ object PolygonUtils {
         var current: T = initPolygon.clear() as T
 
         for (polyLine in polyLines) {
-            if (current.isEmpty() || (current.last()!!.lat <= polyLine.first()!!.lat && polyLine.first()!!.lat < current.first()!!.lat)) {
+            val firstNextLat = polyLine.first()!!.lat
+            val lastLat by lazy { current.last()!!.lat }
+            val firstCurrentLat by lazy { current.first()!!.lat }
+            if (current.isEmpty() || firstNextLat in minOf(lastLat, firstCurrentLat)..maxOf(lastLat, firstCurrentLat)) {
+                // Here we accept to have self-intersecting polygons on longitude cut
                 current.addAll(polyLine)
             } else {
                 result.add(current.close().copy() as T)
@@ -295,15 +294,16 @@ object PolygonUtils {
         if (polygons.isEmpty() || polygons.all { it.isEmpty() })
             throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
 
-        val (minLat, minLng, maxLat, maxLng) = polygons.flatten().fold(
+        val (minLat, minLng, maxLat, maxLng) = polygons.fold(
             Quad(
                 Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY
             )
-        ) { (minLat, minLon, maxLat, maxLon), pos ->
+        ) { (minLat, minLng, maxLat, maxLng), polygon ->
+            val bbox = polygon.bbox()
             Quad(
-                minOf(minLat, pos.lat), minOf(minLon, pos.lng),
-                maxOf(maxLat, pos.lat), maxOf(maxLon, pos.lng)
+                minOf(minLat, bbox.sw.lat), minOf(minLng, bbox.sw.lng),
+                maxOf(maxLat, bbox.ne.lat), maxOf(maxLng, bbox.ne.lng)
             )
         }
 

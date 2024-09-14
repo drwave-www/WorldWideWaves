@@ -93,22 +93,17 @@ class PolygonUtilsSplitPolygonTest {
             Position(lat = 12.0, lng = -5.0)
         )
 
-        val expectedRightSide1 = Polygon.fromPositions(
+        val expectedRightSide1 = Polygon.fromPositions( // We accept self-intersecting polygons
             Position(lat = -5.0, lng = -3.0), // <- cut
             Position(lat = -3.0, lng = 0.0),
-            Position(lat = -2.0, lng = -3.0), // <- cut
-            Position(lat = -5.0, lng = -3.0)
-        )
-
-        val expectedRightSide2 = Polygon.fromPositions(
             Position(lat = -2.0, lng = -3.0), // <- cut
             Position(lat = -1.0, lng = 2.0),
             Position(lat = 1.0, lng = 2.0),
             Position(lat = 2.0, lng = -3.0), // <- cut
-            Position(lat = -2.0, lng = -3.0)
+            Position(lat = -5.0, lng = -3.0)
         )
 
-        val expectedRightSide3 = Polygon.fromPositions(
+        val expectedRightSide2 = Polygon.fromPositions(
             Position(lat = 8.5, lng = -3.0), // <- cut
             Position(lat = 9.0, lng = -1.0),
             Position(lat = 9.0, lng = 2.0),
@@ -134,16 +129,13 @@ class PolygonUtilsSplitPolygonTest {
         assertEquals(2, result.left[1].cutPositions.size)
         assertTrue(areRingPolygonsEqual(result.left[1], expectedLeftSide2))
 
-        assertEquals(3, result.right.size)
-        assertEquals(4, result.right[0].size)
-        assertEquals(2, result.right[0].cutPositions.size)
+        assertEquals(2, result.right.size)
+        assertEquals(7, result.right[0].size)
+        assertEquals(3, result.right[0].cutPositions.size)
         assertTrue(areRingPolygonsEqual(result.right[0], expectedRightSide1))
-        assertEquals(5, result.right[1].size)
-        assertEquals(2, result.right[1].cutPositions.size)
+        assertEquals(10, result.right[1].size)
+        assertEquals(4, result.right[1].cutPositions.size)
         assertTrue(areRingPolygonsEqual(result.right[1], expectedRightSide2))
-        assertEquals(10, result.right[2].size)
-        assertEquals(4, result.right[2].cutPositions.size)
-        assertTrue(areRingPolygonsEqual(result.right[2], expectedRightSide3))
     }
 
     // -----------------------
