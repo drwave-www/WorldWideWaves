@@ -79,32 +79,10 @@ object PolygonUtils {
     // ------------------------------------------------------------------------
 
     fun Polygon.toLeft(cutId: Int) =
-        LeftCutPolygon(cutId).convertFrom(this)
+        LeftCutPolygon(cutId).xferFrom(this)
 
     fun Polygon.toRight(cutId: Int) =
-        RightCutPolygon(cutId).convertFrom(this)
-
-    private fun <T: Polygon> T.convertFrom(polygon: Polygon) : T {
-        head = polygon.head
-        tail = polygon.tail
-        positionsIndex.putAll(polygon.positionsIndex)
-        cutPositions.addAll(polygon.cutPositions)
-        return this
-    }
-
-    private fun <T: Polygon> T.close() : T {
-        if (isNotEmpty() && first() != last()) {
-            add(first()!!)
-        }
-        return this
-    }
-
-    private fun <T: Polygon> T.removeLast() : T {
-        if (isNotEmpty()) {
-            remove(last()!!.id)
-        }
-        return this
-    }
+        RightCutPolygon(cutId).xferFrom(this)
 
     // ------------------------------------------------------------------------
 
@@ -156,8 +134,8 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement move = deepCopy + clean AND -180/180 longitude cut
-        this.close().removeLast() // Ensure the polygon is closed
+    fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement -180/180 longitude cut
+        this.close().pop() // Ensure the polygon is closed and remove the last point
         if (isEmpty() || size < 4) return SplitPolygonResult.empty()
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
@@ -227,10 +205,10 @@ object PolygonUtils {
                 // Add the last polygons, completing them, to the left and/or right side
                 if (leftSide.size > 1) leftSide.add(currentLeft.apply {
                     add(stopPoint.toPointCut(cutId))
-                }.copy() as LeftCutPolygon)
+                }.move())
                 if (rightSide.size > 1) rightSide.add(currentRight.apply {
                     add(stopPoint.toPointCut(cutId))
-                }.copy() as RightCutPolygon)
+                }.move())
 
                 // Close the polygons and group the points into ring polygons
                 return SplitPolygonResult(
@@ -241,17 +219,17 @@ object PolygonUtils {
         }
     }
 
-    private fun <T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
+    private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
         return side.asSequence()
             .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng
             .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } }
             .let { reconstructPolygons(it.toList(), initPolygon) }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <T : CutPolygon> reconstructPolygons(polyLines: List<T>, initPolygon: T): List<T> {
+    private inline fun <reified T : CutPolygon> reconstructPolygons(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
-        var current: T = initPolygon.clear() as T
+        initPolygon.clear()
+        var current: T = initPolygon
 
         for (polyLine in polyLines) {
             val firstNextLat = polyLine.first()!!.lat
@@ -261,23 +239,23 @@ object PolygonUtils {
                 // Here we accept to have self-intersecting polygons on longitude cut
                 current.addAll(polyLine)
             } else {
-                result.add(current.close().copy() as T)
-                current = (initPolygon.clear() as T).apply { addAll(polyLine) }
+                result.add(current.close().move())
+                initPolygon.clear().addAll(polyLine)
+                current = initPolygon
             }
         }
 
         if (current.isNotEmpty()) {
-            result.add(current.close().copy() as T)
+            result.add(current.close().move())
         }
 
         return result
     }
 
-    private fun <T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
+    private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
          val lastPoint = polygon.last()
          if (polygon.size > 2) {
-             @Suppress("UNCHECKED_CAST")
-             polygonList.add(polygon.copy() as T)
+             polygonList.add(polygon.move())
          }
          polygon.clear().add(lastPoint!!)
     }

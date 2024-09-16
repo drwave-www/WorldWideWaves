@@ -337,7 +337,7 @@ class PolygonUtilsSplitPolygonTest {
 
     private fun removeRepeatingPoint(polygon: Polygon): Polygon {
         if (polygon.size > 1 && polygon.first() == polygon.last()) {
-            return polygon.dropLast()
+            return polygon.withoutLast()
         }
         return polygon
     }

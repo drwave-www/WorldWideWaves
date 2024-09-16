@@ -113,7 +113,7 @@ class MapAreaTypesTest {
             add(position1)
             add(position2)
         }
-        val newPolygon: Polygon = polygon.dropLast()
+        val newPolygon: Polygon = polygon.withoutLast()
         assertEquals(1, newPolygon.size)
     }
 
@@ -131,7 +131,7 @@ class MapAreaTypesTest {
     fun testCopy() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
-        val copiedPolygon: Polygon = polygon.copy()
+        val copiedPolygon: Polygon = polygon.move()
         assertEquals(1, copiedPolygon.size)
         assertNotNull(copiedPolygon.first())
     }

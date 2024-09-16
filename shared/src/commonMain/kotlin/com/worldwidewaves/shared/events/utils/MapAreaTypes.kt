@@ -140,7 +140,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun getCutPositions(): Set<CutPosition> = cutPositions
 
-    // --------------------------------
+    // -- index helpers ---------------
 
     private fun indexNewPosition(newPosition: Position) {
         positionsIndex[newPosition.id] = newPosition
@@ -153,7 +153,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return positionToRemove
     }
 
-    // --------------------------------
+    // -- Direction logic -------------
 
     private var isClockwise: Boolean = true
     private var area: Double = 0.0
@@ -186,7 +186,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
     }
 
-    // --------------------------------
+    // -- Bounding Box logic ----------
 
     private var minLat: Double = POSITIVE_INFINITY
     private var minLng: Double = POSITIVE_INFINITY
@@ -241,7 +241,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
     }
 
-    // --------------------------------
+    // -- Add/Remove positions --------
 
     fun add(position: Position) : Position {
         if (tail != null && position == tail)
@@ -329,36 +329,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return addPosition
     }
 
-    // --------------------------------
-
-    fun subList(start: Position, lastId: Int) = createNew().apply {
-        if (this@Polygon.isEmpty())
-            throw IllegalArgumentException("Polygon subList: 'start' cannot be found in an empty polygon")
-
-        if (!this@Polygon.positionsIndex.containsKey(lastId))
-            throw IllegalArgumentException("Polygon subList: 'lastId' cannot be found in the polygon")
-
-        if (start.id == lastId) add(start).also { return@apply } // start == end
-        
-        var current = start
-        do {
-            add(current)
-            current = current.next ?: this@Polygon.first()!!
-            if (current.id == start.id) // Extra safety check
-                throw IllegalArgumentException("Polygon subList: 'last' cannot be found in the polygon")
-        } while (current.id != lastId)
-    }
-
-    fun dropLast(n: Int = 1): Polygon = createNew().apply {
-        val newSize = (this@Polygon.size - n).coerceAtLeast(0)
-        var current = this@Polygon.head
-        repeat(newSize) {
-            add(current!!)
-            current = current!!.next
-        }
-    }
-
-    fun deletePointsUpTo(pointId: Int): Boolean {
+    fun removePointsUpTo(pointId: Int): Boolean {
         // Check if the polygon is empty or if the toCut id doesn't exist
         if (isEmpty() || !positionsIndex.containsKey(pointId)) return false
 
@@ -379,14 +350,13 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return true
     }
 
-    // --------------------------------
-
-    operator fun plus(other: Polygon) = createNew().apply {
-        this@Polygon.forEach { add(it) }
-        other.forEach { add(it) }
+    fun pop(): Position? {
+        val last = tail ?: return null
+        remove(last.id)
+        return last
     }
 
-    // --------------------------------
+    // -- Iterators -------------------
 
     interface LoopIterator<T> : Iterator<T> {
         fun viewCurrent(): T
@@ -438,16 +408,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
-    open fun copy() = createNew().apply {
-        this@Polygon.forEach { add(it) }
-    }
-
-    fun pop(): Position? {
-        val last = tail ?: return null
-        remove(last.id)
-        return last
-    }
-
     fun clear(): Polygon {
         positionsIndex.clear()
         cutPositions.clear()
@@ -487,6 +447,58 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return "Polygon(size=$size$closedStatus$cutIdStatus, points=[$pointsDisplay])"
     }
 
+}
+
+// -- Additional type preservation Polygon methods ----------
+
+fun <T: Polygon> T.subList(start: Position, lastId: Int) = createNew().apply {
+    if (this@subList.isEmpty())
+        throw IllegalArgumentException("Polygon subList: 'start' cannot be found in an empty polygon")
+
+    if (!this@subList.positionsIndex.containsKey(lastId))
+        throw IllegalArgumentException("Polygon subList: 'lastId' cannot be found in the polygon")
+
+    if (start.id == lastId) add(start).also { return@apply } // start == end
+
+    var current = start
+    do {
+        add(current)
+        current = current.next ?: this@subList.first()!!
+        if (current.id == start.id) // Extra safety check
+            throw IllegalArgumentException("Polygon subList: 'last' cannot be found in the polygon")
+    } while (current.id != lastId)
+}
+
+operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
+    this@plus.forEach { add(it) }
+    other.forEach { add(it) }
+}
+
+fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
+    val newSize = (this@withoutLast.size - n).coerceAtLeast(0)
+    var current = this@withoutLast.head
+    repeat(newSize) {
+        add(current!!)
+        current = current!!.next
+    }
+}
+
+inline fun <reified T: Polygon> T.move() : T = createNew().xferFrom(this) as T
+
+fun <T: Polygon> T.xferFrom(polygon: Polygon) : T {
+    head = polygon.head
+    tail = polygon.tail
+    positionsIndex.putAll(polygon.positionsIndex)
+    cutPositions.addAll(polygon.cutPositions)
+    polygon.clear()
+    return this
+}
+
+fun <T: Polygon> T.close() : T {
+    if (isNotEmpty() && first() != last()) {
+        add(first()!!)
+    }
+    return this
 }
 
 // ----------------------------------------------------------------------------

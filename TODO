@@ -2,6 +2,7 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
+    - terminate last tests on polygon + implement -180/180 cut
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom
