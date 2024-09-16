@@ -272,13 +272,13 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         updateAreaAndDirection(positionToRemove.prev, positionToRemove, true)
         updateAreaAndDirection(positionToRemove, positionToRemove.next, true)
 
-        when (positionToRemove) {
-            head -> {
+        when (positionToRemove.id) {
+            head?.id -> {
                 head = positionToRemove.next
                 head?.prev = null
                 if (head == null) tail = null
             }
-            tail -> {
+            tail?.id -> {
                 tail = positionToRemove.prev
                 tail?.next = null
             }

@@ -99,6 +99,13 @@ object PolygonUtils {
         return this
     }
 
+    private fun <T: Polygon> T.removeLast() : T {
+        if (isNotEmpty()) {
+            remove(last()!!.id)
+        }
+        return this
+    }
+
     // ------------------------------------------------------------------------
 
     /**
@@ -150,7 +157,7 @@ object PolygonUtils {
      *
      */
     fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement move = deepCopy + clean AND -180/180 longitude cut
-        this.close() // Ensure the polygon is closed
+        this.close().removeLast() // Ensure the polygon is closed
         if (isEmpty() || size < 4) return SplitPolygonResult.empty()
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
@@ -173,10 +180,10 @@ object PolygonUtils {
 
                 while (iterator.hasNext()) { // Clockwise loop
                     val point = iterator.next()
-                    if (point.id == stopPoint.id) break // Stop at the starting point
+                    //if (point.id == stopPoint.id) break // Stop at the starting point
 
-                    if (prev != null && point == prev) continue // Skip identical points
                     val nextPoint = iterator.viewCurrent()
+                    if (prev != null && point == prev) continue // Skip identical points
 
                     // Calculate the intersection point with the cut longitude
                     val intersection = Segment(point, nextPoint).intersectWithLng(cutId, lngToCut)
@@ -199,6 +206,7 @@ object PolygonUtils {
                             addPolygonPartIfNeeded(currentLeft, leftSide)
                             addPolygonPartIfNeeded(currentRight, rightSide)
                         }
+
                     }
 
                     // Really start to compute from here : start iteration on a CutPosition
@@ -207,8 +215,10 @@ object PolygonUtils {
                         computeSplitForCurrentPoint()
                     } else if (currentLeft.isNotEmpty() || currentRight.isNotEmpty()) {
                         computeSplitForCurrentPoint()
+                        if (point.id == stopPoint.id) break
                     } else {
                         /* loop until we find a CutPosition */
+                        if (point.id == stopPoint.id) break
                     }
 
                     prev = point
@@ -233,7 +243,7 @@ object PolygonUtils {
 
     private fun <T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
         return side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.size == 2 }
+            .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng
             .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } }
             .let { reconstructPolygons(it.toList(), initPolygon) }
     }
