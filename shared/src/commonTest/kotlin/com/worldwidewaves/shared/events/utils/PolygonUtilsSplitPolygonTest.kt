@@ -249,15 +249,51 @@ class PolygonUtilsSplitPolygonTest {
             Position(lat = -2.0, lng = 3.0),
             Position(lat = 2.0, lng = 3.0),
             Position(lat = 2.0, lng = -2.0),
-            Position(lat = -1.0, lng = -2.0)
+            Position(lat = -1.0, lng = -2.0),
+            Position(lat = -1.0, lng = 1.0)
+        )
+
+        val longitudeToCut = 2.0
+
+        val expectedLeftSide1 = Polygon.fromPositions(
+            Position(lat = 3.0, lng = 2.0), // <- cut
+            Position(lat = 3.0, lng = -3.0),
+            Position(lat = -2.0, lng = -3.0),
+            Position(lat = -2.0, lng = 2.0), // <- cut
+            Position(lat = 1.0, lng = 2.0), // <- cut
+            Position(lat = 1.0, lng = -1.0),
+            Position(lat = 0.0, lng = -1.0),
+            Position(lat = 0.0, lng = 1.0),
+            Position(lat = -1.0, lng = 1.0),
+            Position(lat = -1.0, lng = -2.0),
+            Position(lat = 2.0, lng = -2.0),
+            Position(lat = 2.0, lng = 2.0), // <- cut
+            Position(lat = 3.0, lng = 2.0)
+        )
+
+        val expectedRightSide1 = Polygon.fromPositions( // We accept self-intersecting polygons
+            Position(lat = 2.0, lng = 2.0), // <- cut
+            Position(lat = 2.0, lng = 3.0),
+            Position(lat = -2.0, lng = 3.0),
+            Position(lat = -2.0, lng = 4.0),
+            Position(lat = 3.0, lng = 4.0),
+            Position(lat = 3.0, lng = 2.0), // <- cut
+            Position(lat = 2.0, lng = 2.0)
         )
 
         // WHEN
-        val longitudeToCut = 2.0
         val result = polygon.splitByLongitude(longitudeToCut)
 
         // THEN
+        assertEquals(1,result.left.size)
+        assertEquals(13, result.left[0].size)
+        assertEquals(4, result.left[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[0], expectedLeftSide1))
 
+        assertEquals(1, result.right.size)
+        assertEquals(7, result.right[0].size)
+        assertEquals(2, result.right[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[0], expectedRightSide1))
     }
 
     @Test
@@ -284,15 +320,92 @@ class PolygonUtilsSplitPolygonTest {
             Position(lat = 2.0, lng = -1.0),
         )
 
-        // WHEN
         val longitudeToCut = 0.5
+
+        val expectedLeftSide1 = Polygon.fromPositions(
+            Position(lat = 6.0, lng = 0.5), // <- cut
+            Position(lat = 6.0, lng = -3.0), // <- cut
+            Position(lat = -1.0, lng = -3.0),
+            Position(lat = -1.0, lng = 0.5),
+            Position(lat = 0.0, lng = 0.5), // <- cut
+            Position(lat = 0.0, lng = -2.0), // <- cut
+            Position(lat = 5.0, lng = -2.0),
+            Position(lat = 5.0, lng = 0.5),
+            Position(lat = 6.0, lng = 0.5)
+        )
+
+        val expectedLeftSide2 = Polygon.fromPositions(
+            Position(lat = 4.0, lng = 0.5), // <- cut
+            Position(lat = 4.0, lng = 0.0), // <- cut
+            Position(lat = 3.0, lng = -1.0),
+            Position(lat = 2.0, lng = -1.0),
+            Position(lat = 1.25, lng = 0.5), // <- cut
+            Position(lat = 2.0, lng = 0.5), // <- cut
+            Position(lat = 2.0, lng = 0.0),
+            Position(lat = 3.0, lng = 0.0),
+            Position(lat = 3.0, lng = 0.5),
+            Position(lat = 4.0, lng = 0.5)
+        )
+
+        val expectedRightSide1 = Polygon.fromPositions( // We accept self-intersecting polygons
+            Position(lat = -1.0, lng = 0.5), // <- cut
+            Position(lat = -1.0, lng = 5.0),
+            Position(lat = 0.0, lng = 5.0),
+            Position(lat = 0.0, lng = 0.5), // <- cut
+            Position(lat = -1.0, lng = 0.5)
+        )
+
+        val expectedRightSide2 = Polygon.fromPositions(
+            Position(lat = 1.25, lng = 0.5), // <- cut
+            Position(lat = 1.0, lng = 1.0),
+            Position(lat = 1.0, lng = 5.0),
+            Position(lat = 6.0, lng = 5.0), // <- cut
+            Position(lat = 6.0, lng = 0.5), // <- cut
+            Position(lat = 5.0, lng = 0.5),
+            Position(lat = 5.0, lng = 4.0),
+            Position(lat = 2.0, lng = 4.0), // <- cut
+            Position(lat = 2.0, lng = 0.5),
+            Position(lat = 1.25, lng = 0.5)
+        )
+
+        val expectedRightSide3 = Polygon.fromPositions( // We accept self-intersecting polygons
+            Position(lat = 3.0, lng = 0.5), // <- cut
+            Position(lat = 3.0, lng = 3.0),
+            Position(lat = 4.0, lng = 3.0),
+            Position(lat = 4.0, lng = 0.5), // <- cut
+            Position(lat = 3.0, lng = 0.5)
+        )
+
+        // WHEN
         val result = polygon.splitByLongitude(longitudeToCut)
 
         // THEN
+        assertEquals(2,result.left.size)
 
+        assertEquals(9, result.left[0].size)
+        assertEquals(4, result.left[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[0], expectedLeftSide1))
+
+        assertEquals(10, result.left[1].size)
+        assertEquals(4, result.left[1].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[1], expectedLeftSide2))
+
+        assertEquals(3, result.right.size)
+
+        assertEquals(5, result.right[0].size)
+        assertEquals(2, result.right[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[0], expectedRightSide1))
+
+        assertEquals(10, result.right[1].size)
+        assertEquals(4, result.right[1].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[1], expectedRightSide2))
+
+        assertEquals(5, result.right[2].size)
+        assertEquals(2, result.right[2].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[2], expectedRightSide3))
     }
 
-    // -----------------------
+    // ------------------------------------------------------------------------
 
     private fun areRingPolygonsEqual(polygon1: Polygon, polygon2: Polygon): Boolean {
         if (polygon1.size != polygon2.size) {

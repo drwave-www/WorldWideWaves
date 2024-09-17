@@ -32,7 +32,7 @@ import kotlin.Double.Companion.POSITIVE_INFINITY
  * Represents a geographic position with latitude and longitude coordinates.
  *
  */
-open class Position(val lat: Double, val lng: Double,
+open class Position(val lat: Double, val lng: Double, // Element of the double LL Polygon
                     internal var prev: Position? = null,
                     internal var next: Position? = null) {
 
