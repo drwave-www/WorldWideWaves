@@ -180,7 +180,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             updateAreaAndDirection(current, current.next)
             current = current.next
         }
-        // Close the polygon
+        // Close the polygon direction calculation
         if (head != null && tail != null) {
             updateAreaAndDirection(tail, head)
         }
@@ -231,7 +231,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
                 maxLng = firstPoint.lng
                 boundingBoxValid = true
             }
-            boundingBoxValid = true
         }
         if (boundingBoxValid) {
             minLat = minOf(minLat, position.lat)
@@ -245,9 +244,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun add(position: Position) : Position {
         if (tail != null && position == tail)
-            return tail!!
-        val addPosition = position.xfer()
+            return tail!! // skip us time
 
+        val addPosition = position.xfer()
         indexNewPosition(addPosition)
 
         if (head == null) {
@@ -288,7 +287,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             }
         }
 
-        boundingBoxValid = false  // Invalidate the bounding box
+        boundingBoxValid = false  // Invalidate the bounding box, no way to optimize this
         return true
     }
 
@@ -329,7 +328,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return addPosition
     }
 
-    fun removePointsUpTo(pointId: Int): Boolean {
+    fun removePositionsUpTo(pointId: Int): Boolean {
         // Check if the polygon is empty or if the toCut id doesn't exist
         if (isEmpty() || !positionsIndex.containsKey(pointId)) return false
 
@@ -469,11 +468,6 @@ fun <T: Polygon> T.subList(start: Position, lastId: Int) = createNew().apply {
     } while (current.id != lastId)
 }
 
-operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
-    this@plus.forEach { add(it) }
-    other.forEach { add(it) }
-}
-
 fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
     val newSize = (this@withoutLast.size - n).coerceAtLeast(0)
     var current = this@withoutLast.head
@@ -484,6 +478,12 @@ fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
 }
 
 inline fun <reified T: Polygon> T.move() : T = createNew().xferFrom(this) as T
+
+
+operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
+    this@plus.forEach { add(it) }
+    other.forEach { add(it) }
+}
 
 fun <T: Polygon> T.xferFrom(polygon: Polygon) : T {
     head = polygon.head

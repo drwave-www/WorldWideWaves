@@ -110,8 +110,7 @@ object PolygonUtils {
                 continue
 
             val lx = ax - ay * (bx - ax) / (by - ay)
-            if (lx == 0.0)
-                return true
+            if (lx == 0.0) return true
             if (lx > 0) depth++
         }
 
@@ -210,7 +209,7 @@ object PolygonUtils {
                     add(stopPoint.toPointCut(cutId))
                 }.move())
 
-                // Close the polygons and group the points into ring polygons
+                // Group the poly-lines into ring polygons
                 return SplitPolygonResult(
                     reconstructSide(leftSide, currentLeft),
                     reconstructSide(rightSide, currentRight)
@@ -219,9 +218,17 @@ object PolygonUtils {
         }
     }
 
+    private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
+        val lastPoint = polygon.last()
+        if (polygon.size > 2) {
+            polygonList.add(polygon.move())
+        }
+        polygon.clear().add(lastPoint!!)
+    }
+
     private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
         return side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng
+            .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
             .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } }
             .let { reconstructPolygons(it.toList(), initPolygon) }
     }
@@ -250,14 +257,6 @@ object PolygonUtils {
         }
 
         return result
-    }
-
-    private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
-         val lastPoint = polygon.last()
-         if (polygon.size > 2) {
-             polygonList.add(polygon.move())
-         }
-         polygon.clear().add(lastPoint!!)
     }
 
     // ------------------------------------------------------------------------
