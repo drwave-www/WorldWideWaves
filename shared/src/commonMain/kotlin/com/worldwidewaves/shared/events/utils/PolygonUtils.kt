@@ -21,9 +21,9 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.Companion.fromSinglePolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.LeftOrRight.LEFT
-import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitPolygonResult.LeftOrRight.RIGHT
+import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.Companion.fromSinglePolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.LEFT
+import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.RIGHT
 import kotlin.random.Random
 
 // ----------------------------------------------------------------------------
@@ -32,9 +32,9 @@ object PolygonUtils {
 
     data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
-    // ------------------------------------------------------------------------
+    // -- Add-on structures and methods for Polygon ---------------------------
 
-    abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of a polygon after cut
+    abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of an initial polygon after cut
         abstract override fun createNew() : CutPolygon
     }
 
@@ -46,22 +46,22 @@ object PolygonUtils {
         override fun createNew(): RightCutPolygon = RightCutPolygon(cutId)
     }
 
-    data class SplitPolygonResult(val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
+    data class PolygonSplitResult(val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
         enum class LeftOrRight { LEFT, RIGHT }
         companion object {
 
             fun fromSinglePolygon(
                 polygon: Polygon, cutId: Int, leftOrRight: LeftOrRight = RIGHT
-            ): SplitPolygonResult {
+            ): PolygonSplitResult {
                 return if (polygon.size > 1) {
                     when (leftOrRight) {
-                        LEFT -> SplitPolygonResult(listOf(polygon.toLeft(cutId)), emptyList())
-                        RIGHT -> SplitPolygonResult(emptyList(), listOf(polygon.toRight(cutId)))
+                        LEFT -> PolygonSplitResult(listOf(polygon.toLeft(cutId)), emptyList())
+                        RIGHT -> PolygonSplitResult(emptyList(), listOf(polygon.toRight(cutId)))
                     }
                 } else empty()
             }
 
-            fun empty() = SplitPolygonResult(emptyList(), emptyList())
+            fun empty() = PolygonSplitResult(emptyList(), emptyList())
         }
     }
 
@@ -89,11 +89,11 @@ object PolygonUtils {
     /**
      * Determines if a point is inside a polygon.
      *
-     * This function implements a ray casting algorithm to determine if a given point(`tap`) lies
+     * This function implements a ray-casting algorithm to determine if a given point(`tap`) lies
      * inside a polygon.
      *
-     * It's based on the algorithm described in
-     * [https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart](https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart).
+     * It's based on the algorithm available at
+     * https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
      *
      */
     fun Polygon.containsPosition(tap: Position): Boolean {
@@ -133,9 +133,9 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(lngToCut: Double): SplitPolygonResult { // FIXME: implement -180/180 longitude cut
+    fun Polygon.splitByLongitude(lngToCut: Double): PolygonSplitResult { // FIXME: implement -180/180 longitude cut
         this.close().pop() // Ensure the polygon is closed and remove the last point
-        if (isEmpty() || size < 4) return SplitPolygonResult.empty()
+        if (isEmpty() || size < 4) return PolygonSplitResult.empty()
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
         val leftSide =  mutableListOf<LeftCutPolygon>()
@@ -143,8 +143,8 @@ object PolygonUtils {
         val currentLeft = LeftCutPolygon(cutId)
         val currentRight = RightCutPolygon(cutId)
 
-        val minLongitude = minOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
-        val maxLongitude = maxOfOrNull { it.lng } ?: return SplitPolygonResult.empty()
+        val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
+        val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
 
         return when {
             lngToCut > maxLongitude -> fromSinglePolygon(this, cutId, LEFT)
@@ -210,7 +210,7 @@ object PolygonUtils {
                 }.move())
 
                 // Group the poly-lines into ring polygons
-                return SplitPolygonResult(
+                return PolygonSplitResult(
                     reconstructSide(leftSide, currentLeft),
                     reconstructSide(rightSide, currentRight)
                 )
