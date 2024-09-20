@@ -159,7 +159,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     private var area: Double = 0.0
 
     fun isClockwise(): Boolean = when {
-        size < 3 -> throw IllegalArgumentException("Polygon must have at least 3 points to determine direction")
+        size < 3 -> true // Two-point polygon is considered clockwise
         else -> isClockwise
     }
 

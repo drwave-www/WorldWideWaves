@@ -27,10 +27,12 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.events.utils.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.jvm.JvmOverloads
@@ -46,6 +48,7 @@ class WWWEvents : KoinComponent {
 
     // ---------------------------
 
+    private var currentLoadJob: Job? = null
     private var eventsLoaded: Boolean = false
     private var loadingError: Exception? = null
     private val validationErrors = mutableListOf<Pair<IWWWEvent, List<String>>>()
@@ -73,35 +76,44 @@ class WWWEvents : KoinComponent {
         onTermination?.let { addOnTerminationListener(it) }
 
         if (!eventsLoaded) {
-            loadEventsJob()
+            currentLoadJob?.cancel() // Cancel any ongoing load job
+            currentLoadJob = loadEventsJob()
         }
+    }
+
+    fun cancelLoading() {
+        currentLoadJob?.cancel()
+        currentLoadJob = null
     }
 
     /**
      * Launches a coroutine to load events from the configuration provider.
      * The coroutine runs on the IO dispatcher.
      */
-    private fun loadEventsJob() = coroutineScopeProvider.scopeIO.launch {
+    private fun loadEventsJob() = coroutineScopeProvider.launchIO {
         try {
             val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
             val events = eventsDecoder.decodeFromJson(eventsJsonString)
             val validatedEvents = confValidationErrors(events)
 
-            validatedEvents.filterValues { it?.isEmpty() == false } // Log validation errors
-                .onEach { (event, errors) ->
-                    validationErrors.add(event to errors!!)
-                }
+            validatedEvents.filterValues { it?.isNotEmpty() == true } // Log validation errors
                 .forEach { (event, errors) ->
                     Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
                     errors?.forEach { errorMessage ->
                         Log.e(::WWWEvents.name, errorMessage)
                     }
+                    validationErrors.add(event to errors!!)
                 }
 
             // Filter out invalid events
-            _eventsFlow.value = validatedEvents.filterValues { it.isNullOrEmpty() }
+            val validEvents = validatedEvents.filterValues { it.isNullOrEmpty() }
                 .keys.onEach { initFavoriteEvent.call(it) } // Initialize favorite status
                 .toList()
+
+            // Update the _eventsFlow in the main dispatcher to ensure thread safety
+            withContext(Dispatchers.Main) {
+                _eventsFlow.value = validEvents
+            }
 
             // The events have been loaded, so we can now call any pending callbacks
             onEventsLoaded()

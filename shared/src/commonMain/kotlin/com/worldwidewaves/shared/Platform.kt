@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared
 
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import kotlinx.datetime.LocalDateTime
 
 /*
@@ -31,6 +32,12 @@ interface WWWPlatform {
 }
 
 expect fun getPlatform(): WWWPlatform
+
+class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvider) {
+    fun onAppShutdown() {
+        coroutineScopeProvider.cancelAllCoroutines()
+    }
+}
 
 // ---------------------------
 

@@ -26,13 +26,16 @@ import androidx.work.Configuration
 import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.sharedModule
 import org.koin.android.ext.android.getKoin
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class MainApplication : Application(), Configuration.Provider {
+    private val wwwShutdownHandler: WWWShutdownHandler by inject()
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -51,5 +54,10 @@ class MainApplication : Application(), Configuration.Provider {
         // Initialize the WWW platform
         val platform = getKoin().get<WWWPlatform>() as AndroidPlatform
         platform.initialize(this)
+    }
+
+    override fun onTerminate() {
+        wwwShutdownHandler.onAppShutdown()
+        super.onTerminate()
     }
 }

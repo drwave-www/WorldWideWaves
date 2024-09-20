@@ -10,9 +10,16 @@ import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.WaveObservation
 import com.worldwidewaves.shared.getLocalDatetime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
@@ -75,7 +82,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     @Transient private var _event: IWWWEvent? = null
 
-    @Transient private var observationStarted = false
+    @Transient private var observationJob: Job? = null
     @Transient private var lastObservedStatus: IWWWEvent.Status? = null
     @Transient private var lastObservedProgression: Double? = null
 
@@ -132,17 +139,15 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * then calls `observeWave` to begin periodic checks.
      */
     private fun startObservation() {
-        if (!observationStarted) {
-            observationStarted = true
-
-            coroutineScopeProvider.scopeIO.launch {
+        if (observationJob == null) {
+            observationJob = coroutineScopeProvider.launchIO {
                 lastObservedStatus = event.getStatus()
 
                 try {
                     lastObservedProgression = getProgression()
                 } catch (e: Throwable) {
                     Log.e(
-                        tag = "WWWEventWave",
+                        tag = WWWEventWave::class.simpleName!!,
                         message = "Error initializing last observed progression: $e"
                     )
                 }
@@ -186,27 +191,23 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * Launches a coroutine to periodically check the wave's status and progression.
      * If changes are detected, the corresponding change handlers are invoked.
      */
-    private fun observeWave() {
-        coroutineScopeProvider.scopeIO.launch {
-            while (!event.isDone()) {
-                try {
-                    getProgression().takeIf { it != lastObservedProgression }?.also {
-                        lastObservedProgression = it
-                        onWaveProgressionChanged(it)
-                    }
-                    event.getStatus().takeIf { it != lastObservedStatus }?.also {
-                        lastObservedStatus = it
-                        onWaveStatusChanged(it)
-                    }
-
-                    delay(getObservationInterval())
-
-                } catch (e: Throwable) {
-                    Log.e(::observeWave.name, "Error observing wave changes: $e")
-                }
+    private fun observeWave() = flow {
+        while (!event.isDone()) {
+            emit(WaveObservation(getProgression(), event.getStatus()))
+            delay(getObservationInterval())
+        }
+    }.flowOn(Dispatchers.IO)
+        .catch { e -> Log.e("observeWave", "Error observing wave changes: $e") }
+        .onEach { (progression, status) ->
+            if (progression != lastObservedProgression) {
+                lastObservedProgression = progression
+                onWaveProgressionChanged(progression)
+            }
+            if (status != lastObservedStatus) {
+                lastObservedStatus = status
+                onWaveStatusChanged(status)
             }
         }
-    }
 
     suspend fun getObservationInterval(): Long {
         val now = clock.now()

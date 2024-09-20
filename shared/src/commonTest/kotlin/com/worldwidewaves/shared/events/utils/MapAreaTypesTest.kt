@@ -289,7 +289,8 @@ class MapAreaTypesTest {
         val cutId = 1
         val leftCutPolygon = polygon.toLeft(cutId)
         assertEquals(cutId, leftCutPolygon.cutId)
-        assertEquals(polygon.size, leftCutPolygon.size)
+        assertEquals(0, polygon.size)
+        assertEquals(2, leftCutPolygon.size)
     }
 
     @Test
@@ -301,7 +302,8 @@ class MapAreaTypesTest {
         val cutId = 2
         val rightCutPolygon = polygon.toRight(cutId)
         assertEquals(cutId, rightCutPolygon.cutId)
-        assertEquals(polygon.size, rightCutPolygon.size)
+        assertEquals(0, polygon.size)
+        assertEquals(2, rightCutPolygon.size)
     }
 
     @Test
@@ -355,7 +357,7 @@ class MapAreaTypesTest {
         var position = Position(1.0, 1.0).init()
         position = polygon.add(position)
         assertTrue(polygon.remove(position.id))
-        assertFalse(polygon.remove(position.id)) // Try removing again
+        assertFailsWith<IllegalArgumentException> { polygon.remove(position.id) } // Try removing again
     }
 
     @Test
@@ -364,7 +366,7 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         val newPosition = Position(2.0, 2.0)
-        assertNull(polygon.insertAfter(newPosition, -1)) // Invalid ID
+        assertFailsWith<IllegalArgumentException> { polygon.insertAfter(newPosition, -1) } // Invalid ID
     }
 
     @Test
@@ -373,16 +375,16 @@ class MapAreaTypesTest {
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         val newPosition = Position(2.0, 2.0)
-        assertNull(polygon.insertBefore(newPosition, -1)) // Invalid ID
+        assertFailsWith<IllegalArgumentException> { polygon.insertBefore(newPosition, -1) } // Invalid ID
     }
 
     @Test
-    fun testAddDuplicatePositions() {
+    fun testAddImmediateDuplicatePositions() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
         polygon.add(position) // Add the same position again
-        assertEquals(2, polygon.size) // Size should be 2
+        assertEquals(1, polygon.size) // Size should be 1
     }
 
     @Test

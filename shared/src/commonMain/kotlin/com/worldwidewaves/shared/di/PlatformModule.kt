@@ -21,10 +21,9 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.getPlatform
 import org.koin.dsl.module
 
 val platformModule = module {
-    single<WWWPlatform> { getPlatform() }
+    single { getPlatform() }
 }

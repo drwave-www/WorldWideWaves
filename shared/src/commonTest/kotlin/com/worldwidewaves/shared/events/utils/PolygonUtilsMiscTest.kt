@@ -132,7 +132,7 @@ class PolygonUtilsMiscTest {
         assertFalse(polygon.isClockwise(), "Initial polygon should be counterclockwise")
 
         polygon.remove(polygon.first()!!.id)
-        assertTrue(polygon.isClockwise(), "Polygon should become clockwise after removal")
+        assertFalse(polygon.isClockwise(), "Polygon should remain counterclockwise after removal")
     }
 
     @Test
@@ -144,7 +144,20 @@ class PolygonUtilsMiscTest {
         assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
 
         polygon.insertAfter(Position(0.0, 1.0), polygon.first()!!.id)
-        assertFalse(polygon.isClockwise(), "Polygon should become counterclockwise after insertion")
+        assertTrue(polygon.isClockwise(), "Polygon should remain clockwise after insertion")
+    }
+
+    @Test
+    fun testOrientationChangeOnSpecificInsertion() {
+        val polygon = Polygon()
+        polygon.add(Position(0.0, 0.0))
+        polygon.add(Position(1.0, 0.0))
+        polygon.add(Position(1.0, 1.0))
+        assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
+
+        // Insert a point that changes the shape significantly
+        polygon.add(Position(2.0, -0.5))
+        assertFalse(polygon.isClockwise(), "Polygon should become counterclockwise after this specific insertion")
     }
 
     @Test

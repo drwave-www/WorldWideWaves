@@ -31,6 +31,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -71,27 +74,40 @@ class SystemClock : IClock {
 
 // ---------------------------
 
+data class WaveObservation(
+    val progression: Double,
+    val status: IWWWEvent.Status
+)
+
 interface CoroutineScopeProvider {
-    val scopeIO: CoroutineScope
-    val scopeDefault: CoroutineScope
     suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T
+    fun launchIO(block: suspend CoroutineScope.() -> Unit): Job
+    fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job
+    fun cancelAllCoroutines()
 }
 
 class DefaultCoroutineScopeProvider(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : CoroutineScopeProvider {
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.Default)
 
-    override val scopeIO: CoroutineScope = CoroutineScope(ioDispatcher)
-    override val scopeDefault: CoroutineScope = CoroutineScope(defaultDispatcher)
+    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+        scope.launch(ioDispatcher, block = block)
 
-    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(ioDispatcher, block)
-    }
+    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job =
+        scope.launch(defaultDispatcher, block = block)
 
-    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(defaultDispatcher, block)
+    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(ioDispatcher) { scope.block() }
+
+    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(defaultDispatcher) { scope.block() }
+
+    override fun cancelAllCoroutines() {
+        job.cancel()
     }
 }
 

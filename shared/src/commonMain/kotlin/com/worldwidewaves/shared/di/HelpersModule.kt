@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultEventsConfigurationProvider
@@ -37,6 +38,7 @@ import org.koin.dsl.module
 
 val helpersModule = module {
     single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
+    factory { WWWShutdownHandler(get()) }
     single<IClock> { SystemClock() }
     single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }
     single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
