@@ -3,6 +3,7 @@ package com.worldwidewaves.shared.events
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
@@ -10,7 +11,6 @@ import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.WaveObservation
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -28,6 +28,7 @@ import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -65,12 +66,17 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val waveProgression: String
     )
 
+    data class WaveObservation(
+        val progression: Double,
+        val status: IWWWEvent.Status
+    )
+
     // ---------------------------
 
     enum class Direction { WEST, EAST }
 
     abstract val speed: Double // m/s
-    abstract val direction: Direction
+    abstract val direction: Direction // E/W
     abstract val warming: WWWEventWaveWarming
 
     // ---------------------------
@@ -81,6 +87,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     // ---------------------------
 
     @Transient private var _event: IWWWEvent? = null
+    @Transient private var _bbox: BoundingBox? = null
 
     @Transient private var observationJob: Job? = null
     @Transient private var lastObservedStatus: IWWWEvent.Status? = null
@@ -101,8 +108,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     // ---------------------------
 
     abstract suspend fun getWarmingPolygons(): List<Polygon>
+    abstract suspend fun getWavePolygons(): List<Polygon>
     abstract suspend fun getWaveDuration(): Duration
-    abstract suspend fun hasUserBeenHit(): Boolean
+    abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun timeBeforeHit(): Duration?
 
     // ---------------------------
@@ -112,6 +120,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             Log.e(::event.name, "Event not set")
             throw IllegalStateException("Event not set")
         }
+
+    protected suspend fun getBbox(): BoundingBox =
+        _bbox ?: event.area.getBoundingBox().also { _bbox = it }
 
     @Suppress("UNCHECKED_CAST")
     fun <T : WWWEventWave> setRelatedEvent(event: IWWWEvent): T {
@@ -209,17 +220,29 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             }
         }
 
+    /**
+     * Calculates the observation interval for the wave event.
+     *
+     * This function determines the appropriate interval for observing the wave event based on the
+     * current time, the event start time, and the time before the user is hit by the wave.
+     *
+     */
     suspend fun getObservationInterval(): Long {
         val now = clock.now()
         val eventStartTime = event.getStartDateTime()
-        val durationUntilEvent = eventStartTime - now
+        val timeBeforeEvent = eventStartTime - now
+        val timeBeforeHit = timeBeforeHit() ?: 1.days
 
-        return when {
-            durationUntilEvent > 1.hours + 5.minutes -> 1.hours.inWholeMilliseconds
-            durationUntilEvent > 5.minutes + 30.seconds -> 5.minutes.inWholeMilliseconds
-            durationUntilEvent > 35.seconds -> 1.seconds.inWholeMilliseconds
-            event.isRunning() -> 500L else -> 500L
+        val interval =  when {
+            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
+            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
+            timeBeforeEvent > 35.seconds -> 1.seconds
+            event.isRunning() -> 500L
+            timeBeforeHit < 5.seconds -> 100L
+            else -> 1.days
         }
+
+        return if (interval is Duration) interval.inWholeMilliseconds else interval as Long
     }
 
     // ---------------------------
@@ -327,6 +350,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * caches the result, and then returns it.
      *
      */
+    @VisibleForTesting
     suspend fun getLiteralEndTime(): String {
         return cachedLiteralEndTime ?: getEndTime().let { instant ->
             IClock.instantToLiteral(instant, event.getTZ())

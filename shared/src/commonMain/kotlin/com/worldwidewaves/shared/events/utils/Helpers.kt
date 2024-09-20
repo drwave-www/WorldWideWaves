@@ -74,11 +74,6 @@ class SystemClock : IClock {
 
 // ---------------------------
 
-data class WaveObservation(
-    val progression: Double,
-    val status: IWWWEvent.Status
-)
-
 interface CoroutineScopeProvider {
     suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T

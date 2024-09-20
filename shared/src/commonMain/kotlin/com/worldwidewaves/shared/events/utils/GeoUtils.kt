@@ -33,6 +33,22 @@ object GeoUtils {
 
     private const val EPSILON = 1e-10 // A small tolerance value for double precision errors
 
+    const val MIN_PERCEPTIBLE_DIFFERENCE = 10.0 // 10 meters - perceptible speed difference
+    const val EARTH_RADIUS = 6371000.0 // Radius of the Earth in meters
+
+    // Extension function to convert degrees to radians
+    fun Double.toRadians(): Double = this * (PI / 180)
+
+    /**
+     * Normalizes a longitude to the range [-180, 180].
+     */
+    fun normalizeLongitude(lon: Double): Double {
+        var normalizedLon = lon % 360
+        if (normalizedLon > 180) normalizedLon -= 360
+        if (normalizedLon < -180) normalizedLon += 360
+        return normalizedLon
+    }
+
     /**
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *

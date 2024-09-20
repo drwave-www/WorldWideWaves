@@ -60,12 +60,13 @@ class WWWEventWaveTest : KoinTest {
         )}
 
         wave = object : WWWEventWave() {
-            override val speed: Double = 0.0
+            override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
             override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = METERS)
             override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
+            override suspend fun getWavePolygons(): List<Polygon> = emptyList()
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
-            override suspend fun hasUserBeenHit(): Boolean = false
+            override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
         }.setRelatedEvent(event)
     }

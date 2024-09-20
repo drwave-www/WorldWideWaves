@@ -40,11 +40,15 @@ data class WWWEventWaveDeep(
         return emptyList()
     }
 
+    override suspend fun getWavePolygons(): List<Polygon> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getWaveDuration(): Duration {
         return 2.hours // TODO
     }
 
-    override suspend fun hasUserBeenHit(): Boolean {
+    override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
         TODO("Not yet implemented")
     }
 
