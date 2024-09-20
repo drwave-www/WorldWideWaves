@@ -28,6 +28,7 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
+import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
@@ -114,8 +115,8 @@ data class WWWEventWaveLinear(
     override suspend fun getWaveDuration(): Duration {
         return cachedTotalTime ?: run {
             val bbox = getBbox()
-            val latitude = (bbox.maxLatitude + bbox.minLatitude) / 2
-            val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
+            val longestLat = longestLatitudeToTraverse()
+            val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
             val durationInSeconds = maxEastWestDistance / speed
             durationInSeconds.toDuration(DurationUnit.SECONDS)
                 .also { cachedTotalTime = it }
@@ -177,11 +178,11 @@ data class WWWEventWaveLinear(
         val (sw, ne) = getBbox()
         val latLonBands = mutableListOf<LatLonBand>()
 
-        // Calculate the middle latitude of the bounding box
-        val middleLat = (sw.lat + ne.lat) / 2.0
+        // Calculate the latitude within of the bounding box that is closest to the equator
+        val longestLat = longestLatitudeToTraverse()
 
         // Calculate the longitude band width at the middle latitude
-        val lonBandWidthAtMiddle = calculateLonBandWidthAtMiddleLatitude(middleLat, refreshDuration)
+        val lonBandWidthAtMiddle = calculateLonBandWidthAtMiddleLatitude(longestLat, refreshDuration)
 
         // Security: Set a minimum and maximum band width to prevent excessive band creation
         val minBandWidth = 0.001
@@ -259,11 +260,19 @@ data class WWWEventWaveLinear(
         // Calculate the longitudinal distance at this latitude
         val lonDistanceAtThisLat = EARTH_RADIUS * cos(latitudeInRadians) * lonBandWidthAtEquator * (PI / 180)
 
-        // Find how many degrees of latitude are required for a perceptible 10 meter difference in longitude width
+        // Find how many degrees of latitude are required for a perceptible difference in longitude width
         val perceptibleLatDifference = MIN_PERCEPTIBLE_DIFFERENCE / lonDistanceAtThisLat
 
         // Return the latitude band width in degrees
         return perceptibleLatDifference
+    }
+
+    /*
+     * Calculate the latitude within of the bounding box that is closest to the equator
+     */
+    suspend fun longestLatitudeToTraverse() : Double {
+        val (sw, ne) = getBbox()
+        return 0.0.coerceIn(sw.lat.toRadians(), ne.lat.toRadians()).toDegrees()
     }
 
     // ---------------------------

@@ -38,6 +38,7 @@ object GeoUtils {
 
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
+    fun Double.toDegrees(): Double = this * 180.0 / PI
 
     /**
      * Normalizes a longitude to the range [-180, 180].

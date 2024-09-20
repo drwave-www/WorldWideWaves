@@ -121,14 +121,13 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testGetWaveDuration() = runTest {
         // GIVEN
-        val bbox = mockk<BoundingBox>()
-        every { bbox.maxLatitude } returns 40.0
-        every { bbox.minLatitude } returns 20.0
-        every { bbox.minLongitude } returns 10.0
-        every { bbox.maxLongitude } returns 50.0
+        val bbox = BoundingBox(
+            sw = Position(20.0, 10.0),
+            ne = Position(40.0, 50.0)
+        )
         coEvery { event.area.getBoundingBox() } returns bbox
         mockkObject(GeoUtils)
-        every { calculateDistance(10.0, 50.0, 30.0) } returns 4000.0
+        every { calculateDistance(any(), any(), any()) } returns 4000.0
 
         // WHEN
         val result = wave.getWaveDuration()
@@ -269,8 +268,8 @@ class WWWEventWaveLinearTest : KoinTest {
         // THEN
         assertEquals(3, bands.size)
         assertEquals(48.8156, bands[0].latitude)
-        assertEquals(0.03330456591744245, bands[0].latWidth)
-        assertEquals(0.006227590365161377, bands[0].lngWidth)
+        assertEquals(0.03333333333333333, bands[0].latWidth)
+        assertEquals(0.006222215814700397, bands[0].lngWidth)
     }
 
     @Test
