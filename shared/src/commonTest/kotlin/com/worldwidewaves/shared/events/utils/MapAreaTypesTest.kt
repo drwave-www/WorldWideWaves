@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.ComposedLongitude.Direction
 import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
@@ -560,7 +561,7 @@ class MapAreaTypesTest {
     fun testPolygonSubListEdgeCases() {
         val polygon = Polygon()
         val pos1 = polygon.add(Position(1.0, 1.0))
-        val pos2 = polygon.add(Position(2.0, 2.0))
+        polygon.add(Position(2.0, 2.0))
         val pos3 = polygon.add(Position(3.0, 3.0))
 
         // Test subList with start and end being the same
@@ -639,6 +640,195 @@ class MapAreaTypesTest {
         val cutIterator = polygon.cutIterator()
         assertTrue(cutIterator.hasNext())
         assertEquals(cutPos2, cutIterator.next())
+    }
+
+    @Test
+    fun testPolygonBoundingBoxSinglePosition() {
+        val polygon = Polygon(Position(1.0, 1.0))
+        val bbox = polygon.bbox()
+        assertEquals(Position(1.0, 1.0), bbox.sw)
+        assertEquals(Position(1.0, 1.0), bbox.ne)
+    }
+
+    @Test
+    fun testPolygonBoundingBoxMultiplePositions() {
+        val polygon = Polygon()
+        polygon.add(Position(1.0, 1.0))
+        polygon.add(Position(2.0, 2.0))
+        val bbox = polygon.bbox()
+        assertEquals(Position(1.0, 1.0), bbox.sw)
+        assertEquals(Position(2.0, 2.0), bbox.ne)
+    }
+
+    @Test
+    fun testPolygonAreaAndDirectionSinglePosition() {
+        val polygon = Polygon(Position(1.0, 1.0))
+        assertTrue(polygon.isClockwise())
+    }
+
+    @Test
+    fun testPolygonAreaAndDirectionMultiplePositions() {
+        val polygon = Polygon()
+        polygon.add(Position(1.0, 1.0))
+        polygon.add(Position(2.0, 2.0))
+        polygon.add(Position(3.0, 1.0))
+        polygon.forceDirectionComputation()
+        assertFalse(polygon.isClockwise())
+    }
+
+    @Test
+    fun testPolygonAddToEmpty() {
+        val polygon = Polygon()
+        polygon.add(Position(1.0, 1.0))
+        assertEquals(1, polygon.size)
+    }
+
+    @Test
+    fun testPolygonInsertAfter() {
+        val polygon = Polygon()
+        val pos1 = polygon.add(Position(1.0, 1.0))
+        val pos2 = polygon.insertAfter(Position(2.0, 2.0), pos1.id)
+        assertEquals(pos2, pos1.next)
+    }
+
+    @Test
+    fun testPolygonInsertBefore() {
+        val polygon = Polygon()
+        val pos1 = polygon.add(Position(1.0, 1.0))
+        val pos2 = polygon.insertBefore(Position(0.0, 0.0), pos1.id)
+        assertEquals(pos2, pos1.prev)
+    }
+
+    // ---------------------------
+
+    @Test
+    fun testComposedLongitudeAdd() {
+        val composedLongitude = ComposedLongitude()
+        val position = Position(1.0, 1.0)
+        composedLongitude.add(position)
+        assertEquals(1, composedLongitude.getPositions().size)
+        assertEquals(position.normalized(), composedLongitude.getPositions().first())
+    }
+
+    @Test
+    fun testComposedLongitudeAddAll() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
+        composedLongitude.addAll(positions)
+        assertEquals(2, composedLongitude.getPositions().size)
+        assertEquals(positions.map { it.normalized() }, composedLongitude.getPositions())
+    }
+
+    @Test
+    fun testComposedLongitudeIsPointOnLine() {
+        val composedLongitude = ComposedLongitude()
+        val position1 = Position(1.0, 1.0)
+        val position2 = Position(2.0, 2.0)
+        composedLongitude.add(position1)
+        composedLongitude.add(position2)
+        assertTrue(composedLongitude.isPointOnLine(Position(1.5, 1.5)))
+        assertFalse(composedLongitude.isPointOnLine(Position(3.0, 3.0)))
+    }
+
+    @Test
+    fun testComposedLongitudeIntersectWithSegment() {
+        val composedLongitude = ComposedLongitude()
+        val position1 = Position(1.0, 1.0)
+        val position2 = Position(2.0, 2.0)
+        composedLongitude.add(position1)
+        composedLongitude.add(position2)
+        val segment = Segment(Position(0.0, 3.0), Position(3.0, 0.0))
+        val cutPosition = composedLongitude.intersectWithSegment(1, segment)
+        assertNotNull(cutPosition)
+        assertEquals(1.5, cutPosition.lat)
+        assertEquals(1.5, cutPosition.lng)
+        assertEquals(1, cutPosition.cutId)
+    }
+
+    @Test
+    fun testComposedLongitudeIsValidArc() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(3.0, 3.0))
+        composedLongitude.addAll(positions)
+        assertTrue(composedLongitude.isValidArc())
+        composedLongitude.add(Position(4.0, 1.0))
+        assertTrue(composedLongitude.isValidArc())
+        assertFailsWith<IllegalArgumentException> { composedLongitude.add(Position(5.0, 3.0)) }
+    }
+
+    @Test
+    fun testComposedLongitudeSortPositions() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(2.0, 2.0), Position(1.0, 1.0))
+        composedLongitude.addAll(positions)
+        assertEquals(listOf(Position(2.0, 2.0), Position(1.0, 1.0)), composedLongitude.getPositions())
+        assertEquals(Direction.SOUTH, composedLongitude.direction)
+    }
+
+    @Test
+    fun testComposedLongitudeSortPositions2() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
+        composedLongitude.addAll(positions)
+        assertEquals(listOf(Position(1.0, 1.0), Position(2.0, 2.0)), composedLongitude.getPositions())
+        assertEquals(Direction.NORTH, composedLongitude.direction)
+    }
+
+    @Test
+    fun testComposedLongitudeIterator() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
+        composedLongitude.addAll(positions)
+        val iterator = composedLongitude.iterator()
+        assertTrue(iterator.hasNext())
+        assertEquals(Position(1.0, 1.0), iterator.next())
+        assertTrue(iterator.hasNext())
+        assertEquals(Position(2.0, 2.0), iterator.next())
+        assertFalse(iterator.hasNext())
+    }
+
+    @Test
+    fun testComposedLongitudeReverseIterator() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
+        composedLongitude.addAll(positions)
+        val reverseIterator = composedLongitude.reverseIterator()
+        assertTrue(reverseIterator.hasNext())
+        assertEquals(Position(2.0, 2.0), reverseIterator.next())
+        assertTrue(reverseIterator.hasNext())
+        assertEquals(Position(1.0, 1.0), reverseIterator.next())
+        assertFalse(reverseIterator.hasNext())
+    }
+
+    @Test
+    fun testComposedLongitudeIsValidArcWithTwoPositions() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
+        composedLongitude.addAll(positions)
+        assertTrue(composedLongitude.isValidArc())
+    }
+
+    @Test
+    fun testComposedLongitudeIsValidArcWithSameLongitude() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(1.0, 1.0), Position(2.0, 1.0), Position(3.0, 1.0))
+        composedLongitude.addAll(positions)
+        assertTrue(composedLongitude.isValidArc())
+    }
+
+    @Test
+    fun testComposedLongitudeIteratorEmpty() {
+        val composedLongitude = ComposedLongitude()
+        val iterator = composedLongitude.iterator()
+        assertFalse(iterator.hasNext())
+    }
+
+    @Test
+    fun testComposedLongitudeDirectionChange() {
+        val composedLongitude = ComposedLongitude()
+        val positions = listOf(Position(2.0, 2.0), Position(1.0, 1.0))
+        composedLongitude.addAll(positions)
+        assertEquals(Direction.SOUTH, composedLongitude.direction)
     }
 
 }

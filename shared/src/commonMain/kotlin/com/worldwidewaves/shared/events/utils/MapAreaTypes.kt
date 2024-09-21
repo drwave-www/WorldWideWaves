@@ -22,9 +22,15 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
+import com.worldwidewaves.shared.events.utils.GeoUtils.isLongitudeEqual
+import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
+import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
+import kotlin.math.abs
+import kotlin.math.sign
 
 // ----------------------------------------------------------------------------
 
@@ -54,14 +60,21 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
     fun toPointCut(cutId: Int) =
         CutPosition(lat, lng, cutId, this, this).init()
 
+    fun copy(lat: Double? = null, lng: Double? = null): Position {
+        return Position(lat ?: this.lat, lng ?: this.lng)
+    }
+
     internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
 
     internal open fun detached() = Position(lat, lng)
+
+    fun normalized() = Position(lat,normalizeLongitude(lng))
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
+
 }
 
 // Can only be initialized from internal context
@@ -95,23 +108,80 @@ class CutPosition( // A position that has been cut
  * Represents a segment defined by its start and end positions.
  */
 data class Segment(val start: Position, val end: Position) {
+
+    fun normalized(): Segment = Segment(start.normalized(), end.normalized())
+
     /**
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
      */
     fun intersectWithLng(cutId: Int, cutLng: Double): CutPosition? {
-        val lat = start.lat + (end.lat - start.lat) * (cutLng - start.lng) / (end.lng - start.lng)
+        val normalizedCutLng = normalizeLongitude(cutLng)
+        val normalizedStartLng = normalizeLongitude(start.lng)
+        val normalizedEndLng = normalizeLongitude(end.lng)
+
+        // Calculate the latitude of intersection
+        val latDiff = end.lat - start.lat
+        val lngDiff = normalizeLongitude(normalizedEndLng - normalizedStartLng)
+
+        // Check for vertical line - No unique intersection for a vertical line
+        if (abs(lngDiff) < EPSILON) return null
+
+        val t = normalizeLongitude(normalizedCutLng - normalizedStartLng) / lngDiff
+        val lat = start.lat + t * latDiff
+
+        // Check if the intersection point is on the segment
+        if (t < 0 || t > 1) return null
+
+        // Determine the direction and create the CutPosition
         return when {
-            start.lng == cutLng && end.lng == cutLng -> null // No intersection
-            start.lng < cutLng && end.lng > cutLng ->
-                CutPosition(lat, cutLng, cutId = cutId,
-                    cutLeft = start.detached(), cutRight = end.detached()) // Detach left and right
-            start.lng > cutLng && end.lng < cutLng ->
-                CutPosition(lat, cutLng, cutId = cutId,
-                    cutLeft = end.detached(), cutRight = start.detached()) // Detach left and right
+            normalizedStartLng == normalizedCutLng && normalizedEndLng == normalizedCutLng ->
+                null // No intersection for a vertical line
+            normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 ->
+                // Moving eastward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
+                    cutLeft = start.detached(), cutRight = end.detached()
+                )
+            else ->
+                // Moving westward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
+                    cutLeft = end.detached(), cutRight = start.detached()
+                )
+        }
+    }
+
+    /**
+     * Calculates the intersection of the segment with a given other segment
+     * and returns a CutPosition if the segments intersects.
+     */
+    fun intersectWithSegment(cutId: Int, other: Segment): CutPosition? {
+        val (x1, y1) = start.lng to start.lat
+        val (x2, y2) = end.lng to end.lat
+        val (x3, y3) = other.start.lng to other.start.lat
+        val (x4, y4) = other.end.lng to other.end.lat
+
+        val denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+        if (abs(denominator) < 1e-9) return null // Lines are parallel
+
+        val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
+        val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
+
+        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // Intersection point is outside of both line segments
+
+        val x = normalizeLongitude(x1 + ua * (x2 - x1))
+        val y = y1 + ua * (y2 - y1)
+        val intersect = Position(x, y)
+
+        return when {
+            isPointOnSegment(intersect, this) && isPointOnSegment(intersect, other) ->
+                CutPosition(lat = y, lng = x, cutId = cutId,
+                    cutLeft = if (x1 < x2) start.detached() else end.detached(),
+                    cutRight = if (x1 < x2) end.detached() else start.detached()
+                )
             else -> null
         }
     }
+
 }
 
 // ------------------------------------
@@ -122,6 +192,15 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     internal var tail: Position? = null
     internal val cutPositions = mutableSetOf<CutPosition>()
     internal val positionsIndex = mutableMapOf<Int, Position>()
+
+    private var isClockwise: Boolean = true
+    private var area: Double = 0.0
+
+    private var minLat: Double = POSITIVE_INFINITY
+    private var minLng: Double = POSITIVE_INFINITY
+    private var maxLat: Double = NEGATIVE_INFINITY
+    private var maxLng: Double = NEGATIVE_INFINITY
+    private var boundingBoxValid: Boolean = false
 
     // --------------------------------
 
@@ -155,9 +234,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // -- Direction logic -------------
 
-    private var isClockwise: Boolean = true
-    private var area: Double = 0.0
-
     fun isClockwise(): Boolean = when {
         size < 3 -> true // Two-point polygon is considered clockwise
         else -> isClockwise
@@ -188,12 +264,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // -- Bounding Box logic ----------
 
-    private var minLat: Double = POSITIVE_INFINITY
-    private var minLng: Double = POSITIVE_INFINITY
-    private var maxLat: Double = NEGATIVE_INFINITY
-    private var maxLng: Double = NEGATIVE_INFINITY
-    private var boundingBoxValid: Boolean = false
-
     fun bbox(): BoundingBox {
         if (isEmpty()) throw IllegalArgumentException("Polygon bbox: cannot compute bounding box of an empty polygon")
         if (!boundingBoxValid) {
@@ -212,7 +282,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             maxLat = NEGATIVE_INFINITY
             maxLng = NEGATIVE_INFINITY
             boundingBoxValid = true
-            return
+            if (isEmpty()) return
         }
 
         forEach { position ->
@@ -499,6 +569,96 @@ fun <T: Polygon> T.close() : T {
         add(first()!!)
     }
     return this
+}
+
+// ----------------------------------------------------------------------------
+
+open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
+
+    private val positions = mutableListOf<Position>()
+    var direction: Direction = Direction.NORTH
+        private set
+
+    enum class Direction { NORTH, SOUTH }
+
+    init {
+        position?.let { add(it) }
+    }
+
+    fun add(position: Position) {
+        val normalizedPosition = position.copy(lng = normalizeLongitude(position.lng))
+        val tempPositions = positions.toMutableList()
+        tempPositions.add(normalizedPosition)
+
+        if (isValidArc(tempPositions)) {
+            positions.add(normalizedPosition)
+            sortPositions()
+        } else throw IllegalArgumentException("Invalid arc")
+    }
+
+    fun addAll(newPositions: Collection<Position>) {
+        val normalizedNewPositions = newPositions.map { it.copy(lng = normalizeLongitude(it.lng)) }
+        val tempPositions = positions.toMutableList()
+        tempPositions.addAll(normalizedNewPositions)
+
+        if (isValidArc(tempPositions)) {
+            positions.addAll(normalizedNewPositions)
+            sortPositions()
+        } else throw IllegalArgumentException("Invalid arc")
+    }
+
+    fun isPointOnLine(point: Position): Boolean {
+        val normalizedPoint = point.copy(lng = normalizeLongitude(point.lng))
+        if (positions.isEmpty()) return false
+        if (positions.size == 1) return isLongitudeEqual(normalizedPoint.lng, positions.first().lng)
+        return positions.zipWithNext { start, end ->
+            Segment(start, end)
+        }.any { segment ->
+            isPointOnSegment(normalizedPoint, segment)
+        }
+    }
+
+    fun intersectWithSegment(cutId: Int, segment: Segment): CutPosition? {
+        val normalizedSegment = Segment(
+            segment.start.copy(lng = normalizeLongitude(segment.start.lng)),
+            segment.end.copy(lng = normalizeLongitude(segment.end.lng))
+        )
+
+        if (positions.isEmpty()) return null
+        if (positions.size == 1) return normalizedSegment.intersectWithLng(cutId, positions.first().lng)
+
+        return positions.zipWithNext { start, end ->
+            Segment(start, end)
+        }.firstNotNullOfOrNull { lineSegment ->
+            lineSegment.intersectWithSegment(cutId, normalizedSegment)
+        }
+    }
+
+    fun isValidArc(positions: List<Position> = this.positions): Boolean {
+        if (positions.size <= 2) return true
+        val normalizedPositions = positions.map { it.normalized() }
+        val differences = normalizedPositions.zipWithNext { a, b -> normalizeLongitude(b.lng - a.lng) }
+        val signs = differences.map { it.sign }
+        val changes = signs.zipWithNext { a, b -> a != b }.count { it }
+        val distinctSigns = signs.distinct().size
+        return changes <= 1 && distinctSigns <= 2
+    }
+
+    private fun sortPositions() {
+        val southToNorth = positions.sortedBy { it.lat }
+        direction = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
+            Direction.NORTH
+        } else {
+            Direction.SOUTH
+        }
+        positions.clear()
+        positions.addAll(if (direction == Direction.NORTH) southToNorth else southToNorth.reversed())
+    }
+
+
+    fun getPositions(): List<Position> = positions.toList()
+    override fun iterator(): Iterator<Position> = positions.iterator()
+    fun reverseIterator(): Iterator<Position> = positions.asReversed().iterator()
 }
 
 // ----------------------------------------------------------------------------

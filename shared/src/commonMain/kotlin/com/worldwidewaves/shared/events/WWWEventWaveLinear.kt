@@ -55,14 +55,17 @@ data class WWWEventWaveLinear(
     // Data class to hold latitude and longitude band information
     data class LatLonBand(val latitude: Double, val latWidth: Double, val lngWidth: Double)
 
+    @Transient private var lastBandLongitude: Double? = null
+    @Transient private val lastBandPolygons = mutableListOf<Polygon>()
     @Transient private var cachedBands: Map<Double, LatLonBand>? = null
+
     @Transient private var cachedTotalTime: Duration? = null
     @Transient private var cachedWarmingPolygons: List<Polygon>? = null
     @Transient private var cachedWavePolygons: List<Polygon>? = null
 
     // ---------------------------
 
-    suspend fun bands(): Map<Double, LatLonBand> {
+    private suspend fun bands(): Map<Double, LatLonBand> {
         if (cachedBands == null) {
             val refreshDuration = WAVE_LINEAR_METERS_REFRESH / speed
             cachedBands = calculateWaveBands(refreshDuration.seconds).associateBy { it.latitude }
@@ -97,11 +100,14 @@ data class WWWEventWaveLinear(
     override suspend fun getWavePolygons(): List<Polygon> {
         if (cachedWavePolygons == null) {
             cachedWavePolygons = null
-            // TODO: - get the longitude diff since last one (should be given)
+            // TODO: - get the longitude diff since last one
             //       - decide of the polygon needs to be completed or not
             //       - create the polygon from scratch or from the previous one
             //           --> first split then replace the longitude line by the one coming from bands if more than one
             //           --> do it for each polygon, deciding if the bands stuff must be done for each one or not
+            val bands = bands()
+            val areaPolygons = event.area.getPolygons()
+
         }
         return cachedWavePolygons!!
     }
@@ -275,7 +281,7 @@ data class WWWEventWaveLinear(
     /*
      * Calculate the latitude within of the bounding box that is closest to the equator
      */
-    suspend fun longestLatitudeToTraverse() : Double {
+    private suspend fun longestLatitudeToTraverse() : Double {
         val (sw, ne) = getBbox()
         return 0.0.coerceIn(sw.lat.toRadians(), ne.lat.toRadians()).toDegrees()
     }
