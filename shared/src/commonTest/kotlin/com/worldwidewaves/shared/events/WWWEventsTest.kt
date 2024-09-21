@@ -77,19 +77,16 @@ class WWWEventsTest : KoinTest {
 
     // ----------------------------
 
-    init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         startKoin { mockedKoinDeclaration() }
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

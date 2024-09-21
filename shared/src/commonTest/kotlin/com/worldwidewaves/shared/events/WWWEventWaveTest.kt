@@ -21,10 +21,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Polygon
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -51,13 +53,17 @@ class WWWEventWaveTest : KoinTest {
     @BeforeTest
     fun setUp() {
 
-        debugBuild()
-
         startKoin { modules(
             module {
                 single { clock }
             }
         )}
+
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
 
         wave = object : WWWEventWave() {
             override val speed: Double = 10.0

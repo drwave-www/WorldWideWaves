@@ -97,6 +97,11 @@ data class WWWEventWaveLinear(
     override suspend fun getWavePolygons(): List<Polygon> {
         if (cachedWavePolygons == null) {
             cachedWavePolygons = null
+            // TODO: - get the longitude diff since last one (should be given)
+            //       - decide of the polygon needs to be completed or not
+            //       - create the polygon from scratch or from the previous one
+            //           --> first split then replace the longitude line by the one coming from bands if more than one
+            //           --> do it for each polygon, deciding if the bands stuff must be done for each one or not
         }
         return cachedWavePolygons!!
     }
