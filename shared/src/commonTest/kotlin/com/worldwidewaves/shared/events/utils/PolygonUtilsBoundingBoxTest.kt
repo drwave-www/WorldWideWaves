@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class PolygonUtilsBoundingBoxTest {
@@ -65,6 +66,70 @@ class PolygonUtilsBoundingBoxTest {
         val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
         val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
+    }
+
+    @Test
+    fun testBoundingBoxInitialization() {
+        val sw = Position(0.0, 0.0)
+        val ne = Position(1.0, 1.0)
+        val bbox = BoundingBox(sw, ne)
+        assertEquals(sw, bbox.sw)
+        assertEquals(ne, bbox.ne)
+    }
+
+    @Test
+    fun testBoundingBoxInitializationWithCoordinates() {
+        val bbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        assertEquals(0.0, bbox.sw.lat)
+        assertEquals(0.0, bbox.sw.lng)
+        assertEquals(1.0, bbox.ne.lat)
+        assertEquals(1.0, bbox.ne.lng)
+    }
+
+
+
+    @Test
+    fun testBoundingBoxProperties() {
+        val bbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        assertEquals(0.0, bbox.minLatitude)
+        assertEquals(1.0, bbox.maxLatitude)
+        assertEquals(0.0, bbox.minLongitude)
+        assertEquals(1.0, bbox.maxLongitude)
+    }
+
+    @Test
+    fun testBoundingBoxEquals() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox3 = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(bbox1, bbox2)
+        assertNotEquals(bbox1, bbox3)
+    }
+
+    @Test
+    fun testBoundingBoxHashCode() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox3 = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(bbox1.hashCode(), bbox2.hashCode())
+        assertNotEquals(bbox1.hashCode(), bbox3.hashCode())
+    }
+
+    @Test
+    fun testBoundingBoxCreationAndMethods() {
+        val bbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(0.0, bbox.minLatitude)
+        assertEquals(2.0, bbox.maxLatitude)
+        assertEquals(0.0, bbox.minLongitude)
+        assertEquals(2.0, bbox.maxLongitude)
+
+        // Test equality
+        val sameBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertEquals(bbox, sameBbox)
+        assertNotEquals(bbox, BoundingBox(0.0, 0.0, 3.0, 3.0))
+
+        // Test hashCode
+        assertEquals(bbox.hashCode(), sameBbox.hashCode())
     }
 
     @Test
