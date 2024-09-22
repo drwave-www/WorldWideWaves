@@ -2,7 +2,8 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - implement -180/180 cut + consideration on wave polygons generation too
+    - -180/180 : remove everything and just throw exception if the bbox of the area cut this line
+    - Split types of MapAreaTypes in different files
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom

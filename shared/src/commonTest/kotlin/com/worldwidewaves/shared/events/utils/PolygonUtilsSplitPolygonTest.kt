@@ -405,6 +405,57 @@ class PolygonUtilsSplitPolygonTest {
         assertTrue(areRingPolygonsEqual(result.right[2], expectedRightSide3))
     }
 
+    @Test
+    fun testSplitPolygonByLongitude5() {
+        // GIVEN
+        val polygon = Polygon.fromPositions(
+            Position(lat = -2.0, lng = -2.0),
+            Position(lat = -2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 2.0),
+            Position(lat = 2.0, lng = -2.0)
+        )
+
+        val longitudeToCut = ComposedLongitude.fromPositions(
+            Position(lat = -3.0, lng = -1.0),
+            Position(lat = 1.0, lng = -1.0),
+            Position(lat = 3.0, lng = 1.0)
+        )
+
+        val expectedLeftSide1 = Polygon.fromPositions(
+            Position(lat = -2.0, lng = -2.0),
+            Position(lat = -2.0, lng = -1.0), // <- cut
+            Position(lat = 1.0, lng = -1.0), // <- cut
+            Position(lat = 2.0, lng = 0.0), // <- cut
+            Position(lat = 2.0, lng = -2.0),
+            Position(lat = -2.0, lng = -2.0)
+        )
+
+        val expectedRightSide1 = Polygon.fromPositions( // We accept self-intersecting polygons
+            Position(lat = -2.0, lng = -1.0), // <- cut
+            Position(lat = -2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 2.0),
+            Position(lat = 2.0, lng = 0.0), // <- cut
+            Position(lat = 1.0, lng = -1.0), // <- cut
+            Position(lat = -2.0, lng = -1.0)
+        )
+
+        // WHEN
+        val result = polygon.splitByLongitude(longitudeToCut)
+
+        // THEN
+        assertEquals(1,result.left.size)
+
+        assertEquals(6, result.left[0].size)
+        assertEquals(3, result.left[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.left[0], expectedLeftSide1))
+
+        assertEquals(1, result.right.size)
+
+        assertEquals(6, result.right[0].size)
+        assertEquals(3, result.right[0].cutPositions.size)
+        assertTrue(areRingPolygonsEqual(result.right[0], expectedRightSide1))
+    }
+
     // ------------------------------------------------------------------------
 
     private fun areRingPolygonsEqual(polygon1: Polygon, polygon2: Polygon): Boolean {

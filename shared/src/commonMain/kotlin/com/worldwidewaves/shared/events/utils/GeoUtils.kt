@@ -31,7 +31,7 @@ import kotlin.math.min
 
 object GeoUtils {
 
-    const val EPSILON = 1e-10 // A small tolerance value for double precision errors
+    const val EPSILON = 1e-9 // A small tolerance value for double precision errors
 
     const val MIN_PERCEPTIBLE_DIFFERENCE = 10.0 // 10 meters - perceptible speed difference
     const val EARTH_RADIUS = 6371000.0 // Radius of the Earth in meters
@@ -39,6 +39,10 @@ object GeoUtils {
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
     fun Double.toDegrees(): Double = this * 180.0 / PI
+
+    data class Vector2D(val x: Double, val y: Double) {
+        fun cross(other: Vector2D): Double = this.x * other.y - this.y * other.x
+    }
 
     /**
      * Normalizes a longitude to the range [-180, 180].
@@ -48,6 +52,13 @@ object GeoUtils {
         if (normalizedLon > 180) normalizedLon -= 360
         if (normalizedLon < -180) normalizedLon += 360
         return normalizedLon
+    }
+
+    fun normalizedLongitudeDifference(lng1: Double, lng2: Double): Double {
+        var diff = normalizeLongitude(lng1) - normalizeLongitude(lng2)
+        if (diff > 180) diff -= 360
+        if (diff <= -180) diff += 360
+        return diff
     }
 
     fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean {

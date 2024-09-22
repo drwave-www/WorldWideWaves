@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.ComposedLongitude.Side
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.Companion.fromSinglePolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.LEFT
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.RIGHT
@@ -133,7 +134,10 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(lngToCut: Double): PolygonSplitResult { // FIXME: implement -180/180 longitude cut
+    fun Polygon.splitByLongitude(longitude: Double): PolygonSplitResult =
+        splitByLongitude(ComposedLongitude.fromLongitude(longitude))
+
+    fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult { // FIXME: implement -180/180 longitude cut
         this.close().pop() // Ensure the polygon is closed and remove the last point
         if (isEmpty() || size < 4) return PolygonSplitResult.empty()
 
@@ -146,9 +150,11 @@ object PolygonUtils {
         val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
         val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
 
+        val lngBbox = lngToCut.bbox()
+
         return when {
-            lngToCut > maxLongitude -> fromSinglePolygon(this, cutId, LEFT)
-            lngToCut < minLongitude -> fromSinglePolygon(this, cutId, RIGHT)
+            lngBbox.maxLongitude > maxLongitude -> fromSinglePolygon(this, cutId, LEFT)
+            lngBbox.minLongitude < minLongitude -> fromSinglePolygon(this, cutId, RIGHT)
             else -> { // Separate the polygon into two parts based on the cut longitude
 
                 val iterator = if (isClockwise()) reverseLoopIterator() else loopIterator()
@@ -157,19 +163,19 @@ object PolygonUtils {
 
                 while (iterator.hasNext()) { // Clockwise loop
                     val point = iterator.next()
-                    //if (point.id == stopPoint.id) break // Stop at the starting point
 
                     val nextPoint = iterator.viewCurrent()
                     if (prev != null && point == prev) continue // Skip identical points
 
                     // Calculate the intersection point with the cut longitude
-                    val intersection = Segment(point, nextPoint).intersectWithLng(cutId, lngToCut)
+                    val isOnLng = lngToCut.isPointOnLine(point)
+                    val intersection = lngToCut.intersectWithSegment(cutId, Segment(point, nextPoint))
 
                     fun computeSplitForCurrentPoint() {
                         // Add point to left and/or right side
-                        val cutPosition = if (point.lng == lngToCut) point.toPointCut(cutId) else point
-                        if (point.lng <= lngToCut) currentLeft.add(cutPosition)
-                        if (point.lng >= lngToCut) currentRight.add(cutPosition)
+                        val cutPosition = if (isOnLng == Side.ON) point.toPointCut(cutId) else point
+                        if (isOnLng == Side.WEST) currentLeft.add(cutPosition)
+                        if (isOnLng == Side.EAST) currentRight.add(cutPosition)
 
                         // Check if the segment intersects the cut lng and add the intersection point
                         intersection?.let {
@@ -179,15 +185,14 @@ object PolygonUtils {
 
                         // When we encounter a second cut point, we record the current polygon
                         // and start a new one from the last point
-                        if (point.lng == lngToCut || intersection != null) {
+                        if (isOnLng == Side.ON || intersection != null) {
                             addPolygonPartIfNeeded(currentLeft, leftSide)
                             addPolygonPartIfNeeded(currentRight, rightSide)
                         }
-
                     }
 
                     // Really start to compute from here : start iteration on a CutPosition
-                    if ((point.lng == lngToCut || intersection != null) && currentLeft.isEmpty() && currentRight.isEmpty()) {
+                    if ((isOnLng == Side.ON || intersection != null) && currentLeft.isEmpty() && currentRight.isEmpty()) {
                         stopPoint = point // Mark the real loop stop
                         computeSplitForCurrentPoint()
                     } else if (currentLeft.isNotEmpty() || currentRight.isNotEmpty()) {

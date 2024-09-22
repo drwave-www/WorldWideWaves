@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.ComposedLongitude.Direction
+import com.worldwidewaves.shared.events.utils.ComposedLongitude.Side
 import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
@@ -726,8 +727,17 @@ class MapAreaTypesTest {
         val position2 = Position(2.0, 2.0)
         composedLongitude.add(position1)
         composedLongitude.add(position2)
-        assertTrue(composedLongitude.isPointOnLine(Position(1.5, 1.5)))
-        assertFalse(composedLongitude.isPointOnLine(Position(3.0, 3.0)))
+        assertEquals(Side.ON, composedLongitude.isPointOnLine(Position(1.5, 1.5)))
+        assertEquals(Side.EAST, composedLongitude.isPointOnLine(Position(3.0, 3.0)))
+        assertEquals(Side.WEST, composedLongitude.isPointOnLine(Position(2.0, -1.0)))
+    }
+
+    @Test
+    fun testComposedLongitudeIsPointOnLine2() {
+        val composedLongitude = ComposedLongitude.fromLongitude(-3.0)
+        assertEquals(Side.ON, composedLongitude.isPointOnLine(Position(1.5, -3.0)))
+        assertEquals(Side.EAST, composedLongitude.isPointOnLine(Position(3.0, 3.0)))
+        assertEquals(Side.WEST, composedLongitude.isPointOnLine(Position(2.0, -6.0)))
     }
 
     @Test
@@ -743,6 +753,20 @@ class MapAreaTypesTest {
         assertEquals(1.5, cutPosition.lat)
         assertEquals(1.5, cutPosition.lng)
         assertEquals(1, cutPosition.cutId)
+    }
+
+    @Test
+    fun testComposedLongitudeIntersectWithSegment2() {
+        val composedLongitude = ComposedLongitude.fromPositions(
+            Position(lat = -3.0, lng = -1.0),
+            Position(lat = 1.0, lng = -1.0),
+            Position(lat = 3.0, lng = 1.0)
+        )
+        val segment = Segment(Position(-2.0, -2.0), Position(-2.0, 2.0))
+        val cutPosition = composedLongitude.intersectWithSegment(1, segment)
+        assertNotNull(cutPosition)
+        assertEquals(-2.0, cutPosition.lat)
+        assertEquals(-1.0, cutPosition.lng)
     }
 
     @Test

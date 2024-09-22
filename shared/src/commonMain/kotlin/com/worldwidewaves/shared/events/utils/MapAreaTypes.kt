@@ -23,9 +23,11 @@ package com.worldwidewaves.shared.events.utils
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
+import com.worldwidewaves.shared.events.utils.GeoUtils.Vector2D
 import com.worldwidewaves.shared.events.utils.GeoUtils.isLongitudeEqual
 import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
+import com.worldwidewaves.shared.events.utils.GeoUtils.normalizedLongitudeDifference
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -161,25 +163,23 @@ data class Segment(val start: Position, val end: Position) {
         val (x4, y4) = other.end.lng to other.end.lat
 
         val denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
-        if (abs(denominator) < 1e-9) return null // Lines are parallel
+        if (abs(denominator) < EPSILON) return null // Lines are parallel
 
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
 
         if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // Intersection point is outside of both line segments
 
-        val x = normalizeLongitude(x1 + ua * (x2 - x1))
+        val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
-        val intersect = Position(x, y)
 
-        return when {
-            isPointOnSegment(intersect, this) && isPointOnSegment(intersect, other) ->
-                CutPosition(lat = y, lng = x, cutId = cutId,
-                    cutLeft = if (x1 < x2) start.detached() else end.detached(),
-                    cutRight = if (x1 < x2) end.detached() else start.detached()
-                )
-            else -> null
-        }
+        return CutPosition(
+            lat = y,
+            lng = x,
+            cutId = cutId,
+            cutLeft = if (x1 < x2) start.detached() else end.detached(),
+            cutRight = if (x1 < x2) end.detached() else start.detached()
+        )
     }
 
 }
@@ -576,13 +576,21 @@ fun <T: Polygon> T.close() : T {
 open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     private val positions = mutableListOf<Position>()
+    private var bbox: BoundingBox? = null
     var direction: Direction = Direction.NORTH
         private set
 
     enum class Direction { NORTH, SOUTH }
+    enum class Side { EAST, WEST, ON }
 
     init {
         position?.let { add(it) }
+    }
+
+    companion object {
+        fun fromPositions(vararg positions: Position): ComposedLongitude =
+            ComposedLongitude().apply { addAll(positions.toList()) }
+        fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
     }
 
     fun add(position: Position) {
@@ -592,6 +600,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
         if (isValidArc(tempPositions)) {
             positions.add(normalizedPosition)
+            updateBoundingBox(listOf(normalizedPosition))
             sortPositions()
         } else throw IllegalArgumentException("Invalid arc")
     }
@@ -603,34 +612,59 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
         if (isValidArc(tempPositions)) {
             positions.addAll(normalizedNewPositions)
+            updateBoundingBox(normalizedNewPositions)
             sortPositions()
         } else throw IllegalArgumentException("Invalid arc")
     }
 
-    fun isPointOnLine(point: Position): Boolean {
+    fun isPointOnLine(point: Position): Side {
         val normalizedPoint = point.copy(lng = normalizeLongitude(point.lng))
-        if (positions.isEmpty()) return false
-        if (positions.size == 1) return isLongitudeEqual(normalizedPoint.lng, positions.first().lng)
-        return positions.zipWithNext { start, end ->
-            Segment(start, end)
-        }.any { segment ->
-            isPointOnSegment(normalizedPoint, segment)
+
+        if (positions.isEmpty()) return Side.EAST // Arbitrary choice when empty
+
+        // Handle vertical line (single longitude) case
+        if (positions.size == 1 || positions.all { isLongitudeEqual(it.lng, positions.first().lng) }) {
+            val lineLng = normalizeLongitude(positions.first().lng)
+            return when {
+                isLongitudeEqual(normalizedPoint.lng, lineLng) -> Side.ON
+                normalizedLongitudeDifference(normalizedPoint.lng, lineLng) > 0 -> Side.EAST
+                else -> Side.WEST
+            }
         }
+
+        for (i in 0 until positions.size - 1) {
+            val start = positions[i]
+            val end = positions[i + 1]
+            val segment = Segment(start, end)
+
+            if (isPointOnSegment(normalizedPoint, segment)) return Side.ON
+
+            // Calculate vectors
+            val lineVector = Vector2D(end.lng - start.lng, end.lat - start.lat)
+            val pointVector = Vector2D(normalizedPoint.lng - start.lng, normalizedPoint.lat - start.lat)
+
+            // Calculate cross product
+            val crossProduct = lineVector.cross(pointVector)
+
+            if (abs(crossProduct) > EPSILON) {
+                return if (crossProduct < 0) Side.EAST else Side.WEST
+            }
+        }
+
+        // If we've reached here, the point is not on the line and we couldn't determine the side
+        // This could happen if the point is exactly on a vertical extension of the line
+        // We'll make an arbitrary choice to return EAST in this case
+        return Side.EAST
     }
 
     fun intersectWithSegment(cutId: Int, segment: Segment): CutPosition? {
-        val normalizedSegment = Segment(
-            segment.start.copy(lng = normalizeLongitude(segment.start.lng)),
-            segment.end.copy(lng = normalizeLongitude(segment.end.lng))
-        )
-
         if (positions.isEmpty()) return null
-        if (positions.size == 1) return normalizedSegment.intersectWithLng(cutId, positions.first().lng)
+        if (positions.size == 1) return segment.intersectWithLng(cutId, positions.first().lng)
 
         return positions.zipWithNext { start, end ->
             Segment(start, end)
         }.firstNotNullOfOrNull { lineSegment ->
-            lineSegment.intersectWithSegment(cutId, normalizedSegment)
+            lineSegment.intersectWithSegment(cutId, segment)
         }
     }
 
@@ -655,6 +689,30 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         positions.addAll(if (direction == Direction.NORTH) southToNorth else southToNorth.reversed())
     }
 
+    fun bbox(): BoundingBox {
+        return bbox ?: BoundingBox(
+            swLat = positions.minOfOrNull { it.lat } ?: 0.0,
+            swLng = positions.minOfOrNull { it.lng } ?: 0.0,
+            neLat = positions.maxOfOrNull { it.lat } ?: 0.0,
+            neLng = positions.maxOfOrNull { it.lng } ?: 0.0
+        ).also { bbox = it }
+    }
+
+    private fun updateBoundingBox(newPositions: List<Position>) {
+        bbox = bbox?.let { current ->
+            BoundingBox(
+                swLat = minOf(current.minLatitude, newPositions.minOf { it.lat }),
+                swLng = minOf(current.minLongitude, newPositions.minOf { it.lng }),
+                neLat = maxOf(current.maxLatitude, newPositions.maxOf { it.lat }),
+                neLng = maxOf(current.maxLongitude, newPositions.maxOf { it.lng })
+            )
+        } ?: BoundingBox(
+            swLat = newPositions.minOf { it.lat },
+            swLng = newPositions.minOf { it.lng },
+            neLat = newPositions.maxOf { it.lat },
+            neLng = newPositions.maxOf { it.lng }
+        )
+    }
 
     fun getPositions(): List<Position> = positions.toList()
     override fun iterator(): Iterator<Position> = positions.iterator()
