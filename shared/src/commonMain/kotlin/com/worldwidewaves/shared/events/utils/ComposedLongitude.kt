@@ -37,8 +37,16 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     var direction: Direction = Direction.NORTH
         private set
 
+    // --- Nested classes and enums
+
     enum class Direction { NORTH, SOUTH }
-    enum class Side { EAST, WEST, ON }
+    enum class Side { EAST, WEST, ON ;
+        fun isOn(): Boolean = this == ON
+        fun isEast(): Boolean = this == EAST
+        fun isWest(): Boolean = this == WEST
+    }
+
+    // ------------------------
 
     init { position?.let { add(it) } }
 
@@ -47,6 +55,8 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             ComposedLongitude().apply { addAll(positions.toList()) }
         fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
     }
+
+    // --- Public methods -----
 
     fun add(position: Position) {
         val normalizedPosition = position.copy(lng = normalizeLongitude(position.lng))
@@ -136,6 +146,22 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return changes <= 1 && distinctSigns <= 2
     }
 
+    fun bbox(): BoundingBox {
+        return bbox ?: BoundingBox(
+            swLat = positions.minOfOrNull { it.lat } ?: 0.0,
+            swLng = positions.minOfOrNull { it.lng } ?: 0.0,
+            neLat = positions.maxOfOrNull { it.lat } ?: 0.0,
+            neLng = positions.maxOfOrNull { it.lng } ?: 0.0
+        ).also { bbox = it }
+    }
+
+    // -------------------------
+
+    fun size() = positions.size
+    fun getPositions(): List<Position> = positions.toList()
+    override fun iterator(): Iterator<Position> = positions.iterator()
+    fun reverseIterator(): Iterator<Position> = positions.asReversed().iterator()
+
     private fun sortPositions() {
         val southToNorth = positions.sortedBy { it.lat }
         direction = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
@@ -147,16 +173,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         positions.addAll(if (direction == Direction.NORTH) southToNorth else southToNorth.reversed())
     }
 
-    fun bbox(): BoundingBox {
-        return bbox ?: BoundingBox(
-            swLat = positions.minOfOrNull { it.lat } ?: 0.0,
-            swLng = positions.minOfOrNull { it.lng } ?: 0.0,
-            neLat = positions.maxOfOrNull { it.lat } ?: 0.0,
-            neLng = positions.maxOfOrNull { it.lng } ?: 0.0
-        ).also { bbox = it }
-    }
-
-    fun size() = positions.size
+    // -------------------------
 
     private fun updateBoundingBox(newPositions: List<Position>) {
         bbox = bbox?.let { current ->
@@ -174,7 +191,5 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         )
     }
 
-    fun getPositions(): List<Position> = positions.toList()
-    override fun iterator(): Iterator<Position> = positions.iterator()
-    fun reverseIterator(): Iterator<Position> = positions.asReversed().iterator()
+
 }

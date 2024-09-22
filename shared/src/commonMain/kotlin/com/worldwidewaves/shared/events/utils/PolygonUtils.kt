@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.ComposedLongitude.Side
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.Companion.fromSinglePolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.LEFT
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.RIGHT
@@ -121,7 +120,7 @@ object PolygonUtils {
     /**
      * Splits a polygon by a given longitude.
      *
-     * This function takes a polygon represented as a list of [Position] objects and a longitude value
+     * This function takes a polygon represented as a list of [Position] objects and a composed longitude
      * (`longitudeToCut`) as input. It splits the polygon into two parts: the left part containing
      * points with longitudes less than or equal to `longitudeToCut`, and the right part containing
      * points with longitudes greater than or equal to `longitudeToCut`.*
@@ -134,10 +133,10 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(longitude: Double): PolygonSplitResult =
-        splitByLongitude(ComposedLongitude.fromLongitude(longitude))
+    fun Polygon.splitByLongitude(lngToCut: Double): PolygonSplitResult =
+        splitByLongitude(ComposedLongitude.fromLongitude(lngToCut))
 
-    fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult { // FIXME: implement -180/180 longitude cut
+    fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
         if (isEmpty() || size < 4) return PolygonSplitResult.empty()
 
@@ -161,11 +160,11 @@ object PolygonUtils {
                 var stopPoint = if (isClockwise()) first()!! else last()!! // Security stop
                 var prev : Position? = null
 
-                while (iterator.hasNext()) { // Clockwise loop
+                while (iterator.hasNext()) { // Anti-Clockwise loop
                     val point = iterator.next()
 
                     val nextPoint = iterator.viewCurrent()
-                    if (prev != null && point == prev) continue // Skip identical points
+                    prev?.let { if (point == it) return@let }
 
                     // Calculate the intersection point with the cut longitude
                     val isOnLng = lngToCut.isPointOnLine(point)
@@ -173,9 +172,11 @@ object PolygonUtils {
 
                     fun computeSplitForCurrentPoint() {
                         // Add point to left and/or right side
-                        val cutPosition = if (isOnLng == Side.ON) point.toPointCut(cutId) else point
-                        if (isOnLng == Side.WEST) currentLeft.add(cutPosition)
-                        if (isOnLng == Side.EAST) currentRight.add(cutPosition)
+                        val cutPosition = if (isOnLng.isOn()) point.toPointCut(cutId) else point
+                        when {
+                            isOnLng.isWest() -> currentLeft.add(cutPosition)
+                            isOnLng.isEast() -> currentRight.add(cutPosition)
+                        }
 
                         // Check if the segment intersects the cut lng and add the intersection point
                         intersection?.let {
@@ -183,23 +184,22 @@ object PolygonUtils {
                             currentRight.add(it)
                         }
 
-                        // When we encounter a second cut point, we record the current polygon
+                        // When we encounter a second cut point, we record the current poly-line
                         // and start a new one from the last point
-                        if (isOnLng == Side.ON || intersection != null) {
+                        if (isOnLng.isOn() || intersection != null) {
                             addPolygonPartIfNeeded(currentLeft, leftSide)
                             addPolygonPartIfNeeded(currentRight, rightSide)
                         }
                     }
 
-                    // Really start to compute from here : start iteration on a CutPosition
-                    if ((isOnLng == Side.ON || intersection != null) && currentLeft.isEmpty() && currentRight.isEmpty()) {
-                        stopPoint = point // Mark the real loop stop
-                        computeSplitForCurrentPoint()
-                    } else if (currentLeft.isNotEmpty() || currentRight.isNotEmpty()) {
-                        computeSplitForCurrentPoint()
-                        if (point.id == stopPoint.id) break
+                    // Really start to compute from here (start iteration on a CutPosition)
+                    if (currentLeft.isEmpty() && currentRight.isEmpty()) {
+                        if (isOnLng.isOn() || intersection != null) {
+                            stopPoint = point // Mark the real loop stop
+                            computeSplitForCurrentPoint()
+                        } else { /* Continue to iterate until we reach a CutPosition */ }
                     } else {
-                        /* loop until we find a CutPosition */
+                        computeSplitForCurrentPoint()
                         if (point.id == stopPoint.id) break
                     }
 
@@ -223,21 +223,30 @@ object PolygonUtils {
         }
     }
 
+    /**
+     * Completes the longitude points for a list of polygons.
+     *
+     * This function takes a `ComposedLongitude` object and a list of polygons, and ensures that the
+     * polygons have the necessary points along the longitude. If the `ComposedLongitude` object has
+     * more than one position, it inserts new points between the minimum and maximum cut positions
+     * of each polygon.
+     *
+     */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
         lngToCut: ComposedLongitude,
         polygons: List<T>
     ): List<T> =
-        if (lngToCut.size() > 1) {
+        if (lngToCut.size() > 1) { // Nothing to complete on straight longitude
             polygons.map { polygon ->
                 val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
                 if (cutPositions.size < 2) return@map polygon
 
-                val minCut = cutPositions.minByOrNull { it.lat }
+                val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cut
                 val maxCut = cutPositions.maxByOrNull { it.lat }
 
                 if (minCut != null && maxCut != null) {
                     val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
-                    if (newPositions.isNotEmpty()) {
+                    if (newPositions.isNotEmpty()) { // If there are some longitude points in between
                         var currentPosition = if (polygon is LeftCutPolygon) minCut else maxCut
                         for (newPosition in newPositions) {
                             val cutPosition = newPosition.toPointCut(polygon.cutId)
@@ -250,7 +259,15 @@ object PolygonUtils {
             }
         } else polygons
 
+    /**
+     * Adds a polygon part to the list if needed and prepare for next iteration.
+     *
+     * This function checks if the given polygon has more than two points. If it does, it moves
+     * the polygon to the provided list and then clears the polygon, adding back the last point.
+     *
+     */
     private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
+        if (polygon.isEmpty()) return
         val lastPoint = polygon.last()
         if (polygon.size > 2) {
             polygonList.add(polygon.move())
@@ -258,13 +275,30 @@ object PolygonUtils {
         polygon.clear().add(lastPoint!!)
     }
 
+    /**
+     * Reconstructs the side polygons from the given list of polylines.
+     *
+     * This function reconstructs poly-lines into polygons.
+     * Each polyline should cut the longitude twice and have more than two points.
+     *
+     */
     private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
         return side.asSequence()
             .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
-            .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } }
+            .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
             .let { reconstructPolygons(it.toList(), initPolygon) }
     }
 
+    /**
+     * Reconstructs polygons from a list of poly-lines.
+     *
+     * This function takes a list of poly-lines and an initial polygon, and reconstructs them into
+     * a list of polygons. It handles self-intersecting polygons on longitude cuts by adding
+     * poly-lines to the current polygon if they intersect with the current polygon's latitude range.
+     * If they do not intersect, the current polygon is closed moved to the result list,
+     * and a new polygon is started.
+     *
+     */
     private inline fun <reified T : CutPolygon> reconstructPolygons(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
@@ -297,9 +331,8 @@ object PolygonUtils {
     /**
      * Determines if a point is inside any of the given polygons.
      */
-    fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean {
-        return polygons.any { it.containsPosition(tap) }
-    }
+    fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean =
+        polygons.any { it.containsPosition(tap) }
 
     /**
      * Calculates the bounding box of a multi-polygon.
@@ -361,5 +394,3 @@ object PolygonUtils {
     }
 
 }
-
-
