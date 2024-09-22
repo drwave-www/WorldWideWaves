@@ -214,14 +214,41 @@ object PolygonUtils {
                     add(stopPoint.toPointCut(cutId))
                 }.move())
 
-                // Group the poly-lines into ring polygons
+                // Group the poly-lines into ring polygons and add the ComposedLongitude positions
                 return PolygonSplitResult(
-                    reconstructSide(leftSide, currentLeft),
-                    reconstructSide(rightSide, currentRight)
+                    completeLongitudePoints(lngToCut, reconstructSide(leftSide, currentLeft)),
+                    completeLongitudePoints(lngToCut, reconstructSide(rightSide, currentRight))
                 )
             }
         }
     }
+
+    private inline fun <reified T : CutPolygon> completeLongitudePoints(
+        lngToCut: ComposedLongitude,
+        polygons: List<T>
+    ): List<T> =
+        if (lngToCut.size() > 1) {
+            polygons.map { polygon ->
+                val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
+                if (cutPositions.size < 2) return@map polygon
+
+                val minCut = cutPositions.minByOrNull { it.lat }
+                val maxCut = cutPositions.maxByOrNull { it.lat }
+
+                if (minCut != null && maxCut != null) {
+                    val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
+                    if (newPositions.isNotEmpty()) {
+                        var currentPosition = if (polygon is LeftCutPolygon) minCut else maxCut
+                        for (newPosition in newPositions) {
+                            val cutPosition = newPosition.toPointCut(polygon.cutId)
+                            polygon.insertAfter(cutPosition, currentPosition.id)
+                            currentPosition = cutPosition
+                        }
+                    }
+                }
+                polygon
+            }
+        } else polygons
 
     private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
         val lastPoint = polygon.last()

@@ -25,10 +25,7 @@ package com.worldwidewaves.shared.events.utils
  * Represents a bounding box defined by its southwest and northeast corners.
  *
  */
-data class BoundingBox(
-    val sw: Position,
-    val ne: Position
-) {
+data class BoundingBox(val sw: Position, val ne: Position) {
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(swLat, swLng).init(),
         ne = Position(neLat, neLng).init()
@@ -41,5 +38,6 @@ data class BoundingBox(
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is BoundingBox && sw == other.sw && ne == other.ne)
+
     override fun hashCode(): Int = 31 * sw.hashCode() + ne.hashCode()
 }

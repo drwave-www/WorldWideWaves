@@ -40,9 +40,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     enum class Direction { NORTH, SOUTH }
     enum class Side { EAST, WEST, ON }
 
-    init {
-        position?.let { add(it) }
-    }
+    init { position?.let { add(it) } }
 
     companion object {
         fun fromPositions(vararg positions: Position): ComposedLongitude =
@@ -125,6 +123,9 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         }
     }
 
+    fun positionsBetween(minLat: Double, maxLat: Double): List<Position> =
+         positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
+
     fun isValidArc(positions: List<Position> = this.positions): Boolean {
         if (positions.size <= 2) return true
         val normalizedPositions = positions.map { it.normalized() }
@@ -154,6 +155,8 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             neLng = positions.maxOfOrNull { it.lng } ?: 0.0
         ).also { bbox = it }
     }
+
+    fun size() = positions.size
 
     private fun updateBoundingBox(newPositions: List<Position>) {
         bbox = bbox?.let { current ->
