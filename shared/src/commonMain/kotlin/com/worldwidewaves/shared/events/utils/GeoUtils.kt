@@ -27,8 +27,6 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
 
-// ----------------------------------------------------------------------------
-
 object GeoUtils {
 
     const val EPSILON = 1e-9 // A small tolerance value for double precision errors
@@ -44,9 +42,8 @@ object GeoUtils {
         fun cross(other: Vector2D): Double = this.x * other.y - this.y * other.x
     }
 
-    /**
-     * Normalizes a longitude to the range [-180, 180].
-     */
+    // ----------------------------------------------------------------------------
+
     fun normalizeLongitude(lon: Double): Double {
         var normalizedLon = lon % 360
         if (normalizedLon > 180) normalizedLon -= 360
@@ -61,9 +58,10 @@ object GeoUtils {
         return diff
     }
 
-    fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean {
-        return abs(normalizeLongitude(lng1 - lng2)) < EPSILON
-    }
+    // ----------------------------------------------------------------------------
+
+    fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean =
+        abs(normalizeLongitude(lng1 - lng2)) < EPSILON
 
     fun isLongitudeInRange(lng: Double, start: Double, end: Double): Boolean {
         val normalizedLng = normalizeLongitude(lng)
@@ -79,9 +77,10 @@ object GeoUtils {
         }
     }
 
-    fun isLatitudeInRange(lat: Double, start: Double, end: Double): Boolean {
-        return lat in min(start, end)..max(start, end)
-    }
+    fun isLatitudeInRange(lat: Double, start: Double, end: Double): Boolean =
+        lat in min(start, end)..max(start, end)
+
+    // ----------------------------------------------------------------------------
 
     /**
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
@@ -94,8 +93,7 @@ object GeoUtils {
     fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
         val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
         val latRad = lat * (PI / 180) // Convert degrees to radians
-        val distance = EARTH_RADIUS * dLon * cos(latRad)
-        return abs(distance)
+        return abs(EARTH_RADIUS * dLon * cos(latRad))
     }
 
     /**
@@ -119,14 +117,13 @@ object GeoUtils {
         val dLng = normalizeLongitude(endLng - startLng)
 
         // Handle special cases: horizontal and vertical segments
-        if (abs(dLat) < EPSILON) {  // Horizontal segment
+        if (abs(dLat) < EPSILON)  // Horizontal segment
             return abs(point.lat - segment.start.lat) < EPSILON &&
                     isLongitudeInRange(pointLng, startLng, endLng)
-        }
-        if (abs(dLng) < EPSILON) {  // Vertical segment
+
+        if (abs(dLng) < EPSILON)  // Vertical segment
             return isLongitudeEqual(pointLng, startLng) &&
                     point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
-        }
 
         // Calculate the parametric value t for the point
         val tLat = (point.lat - segment.start.lat) / dLat

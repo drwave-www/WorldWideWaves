@@ -142,26 +142,25 @@ class WWWEventMap(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
-                    this.add("Map Maxzoom must be a positive double less than 20")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
+                this.add("Map Maxzoom must be a positive double less than 20")
 
-                language.isEmpty() ->
-                    this.add("Map language is empty")
+            language.isEmpty() ->
+                this.add("Map language is empty")
 
-                !language.matches(Regex("^[a-z]{2,3}$")) ->
-                    this.add("Map language must be a valid ISO-639 code")
+            !language.matches(Regex("^[a-z]{2,3}$")) ->
+                this.add("Map language must be a valid ISO-639 code")
 
-                zone.isEmpty() ->
-                    this.add("Map Osmarea is empty")
+            zone.isEmpty() ->
+                this.add("Map Osmarea is empty")
 
-                !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
-                    this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
+            !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
+                this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
 
-                else -> { }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
+            else -> { }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
 
 }

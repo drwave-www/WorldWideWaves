@@ -26,7 +26,9 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PolygonUtilsBoundingBoxTest {
@@ -205,6 +207,111 @@ class PolygonUtilsBoundingBoxTest {
         assertFailsWith<IllegalArgumentException> {
             polygonsBbox(emptyList())
         }
+    }
+
+    @Test
+    fun `constructor should create valid bounding box`() {
+        val bbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        assertEquals(0.0, bbox.minLatitude)
+        assertEquals(0.0, bbox.minLongitude)
+        assertEquals(1.0, bbox.maxLatitude)
+        assertEquals(1.0, bbox.maxLongitude)
+    }
+
+    @Test
+    fun `constructor should handle inverted coordinates`() {
+        val bbox = BoundingBox(1.0, 1.0, 0.0, 0.0)
+        assertEquals(0.0, bbox.minLatitude)
+        assertEquals(0.0, bbox.minLongitude)
+        assertEquals(1.0, bbox.maxLatitude)
+        assertEquals(1.0, bbox.maxLongitude)
+        assertEquals(1.0, bbox.height)
+        assertEquals(1.0, bbox.width)
+        assertFalse(bbox.crossesAntimeridian)
+    }
+
+    @Test
+    fun `width and height should be calculated correctly`() {
+        val bbox = BoundingBox(0.0, 0.0, 1.0, 2.0)
+        assertEquals(1.0, bbox.height)
+        assertEquals(2.0, bbox.width)
+    }
+
+    @Test
+    fun `contains should return true for point inside bounding box`() {
+        val bbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertTrue(bbox.contains(Position(1.0, 1.0)))
+    }
+
+    @Test
+    fun `contains should return false for point outside bounding box`() {
+        val bbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertFalse(bbox.contains(Position(3.0, 3.0)))
+    }
+
+    @Test
+    fun `intersects should return true for overlapping bounding boxes`() {
+        val bbox1 = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        val bbox2 = BoundingBox(1.0, 1.0, 3.0, 3.0)
+        assertTrue(bbox1.intersects(bbox2))
+    }
+
+    @Test
+    fun `intersects should return false for non-overlapping bounding boxes`() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(2.0, 2.0, 3.0, 3.0)
+        assertFalse(bbox1.intersects(bbox2))
+    }
+
+    @Test
+    fun `expand should create larger bounding box`() {
+        val original = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val expanded = original.expand(2.0)
+        assertEquals(-0.5, expanded.minLatitude)
+        assertEquals(-0.5, expanded.minLongitude)
+        assertEquals(1.5, expanded.maxLatitude)
+        assertEquals(1.5, expanded.maxLongitude)
+    }
+
+    @Test
+    fun `fromPositions should create correct bounding box`() {
+        val positions = listOf(
+            Position(0.0, 0.0),
+            Position(1.0, 1.0),
+            Position(-1.0, -1.0)
+        )
+        val bbox = BoundingBox.fromPositions(positions)
+        assertEquals(-1.0, bbox?.minLatitude)
+        assertEquals(-1.0, bbox?.minLongitude)
+        assertEquals(1.0, bbox?.maxLatitude)
+        assertEquals(1.0, bbox?.maxLongitude)
+    }
+
+    @Test
+    fun `fromPositions should return null for empty list`() {
+        val bbox = BoundingBox.fromPositions(emptyList())
+        assertNull(bbox)
+    }
+
+    @Test
+    fun `equals should return true for identical bounding boxes`() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        assertEquals(bbox1, bbox2)
+    }
+
+    @Test
+    fun `equals should return false for different bounding boxes`() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(0.0, 0.0, 2.0, 2.0)
+        assertNotEquals(bbox1, bbox2)
+    }
+
+    @Test
+    fun `hashCode should be the same for identical bounding boxes`() {
+        val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        val bbox2 = BoundingBox(0.0, 0.0, 1.0, 1.0)
+        assertEquals(bbox1.hashCode(), bbox2.hashCode())
     }
 
 }

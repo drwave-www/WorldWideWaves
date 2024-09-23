@@ -21,10 +21,8 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
-import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 import kotlin.math.abs
 
 /**
@@ -94,10 +92,7 @@ data class Segment(val start: Position, val end: Position) {
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
 
-        return CutPosition(
-            lat = y,
-            lng = x,
-            cutId = cutId,
+        return CutPosition(lat = y, lng = x, cutId = cutId,
             cutLeft = if (x1 < x2) start.detached() else end.detached(),
             cutRight = if (x1 < x2) end.detached() else start.detached()
         )

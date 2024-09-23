@@ -283,16 +283,14 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
      *
      */
-    suspend fun getAllNumbers(): WaveNumbers {
-        return WaveNumbers(
-            waveTimezone = try { getLiteralTimezone() } catch (e: Throwable) { "error" },
-            waveSpeed = try { getLiteralSpeed() } catch (e: Throwable) { "error" },
-            waveStartTime = try { getLiteralStartTime() } catch (e: Throwable) { "error" },
-            waveEndTime = try { getLiteralEndTime() } catch (e: Throwable) { "error" },
-            waveTotalTime = try { getLiteralTotalTime() } catch (e: Throwable) { "error" },
-            waveProgression = try { getLiteralProgression() } catch (e: Throwable) { "error" }
-        )
-    }
+    suspend fun getAllNumbers(): WaveNumbers = WaveNumbers(
+        waveTimezone = try { getLiteralTimezone() } catch (e: Throwable) { "error" },
+        waveSpeed = try { getLiteralSpeed() } catch (e: Throwable) { "error" },
+        waveStartTime = try { getLiteralStartTime() } catch (e: Throwable) { "error" },
+        waveEndTime = try { getLiteralEndTime() } catch (e: Throwable) { "error" },
+        waveTotalTime = try { getLiteralTotalTime() } catch (e: Throwable) { "error" },
+        waveProgression = try { getLiteralProgression() } catch (e: Throwable) { "error" }
+    )
 
     // ---------------------------
 
@@ -327,16 +325,14 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * of the total event duration.
      *
      */
-    suspend fun getProgression(): Double {
-        return when {
-            event.isDone() -> 100.0
-            !event.isRunning() -> 0.0
-            else -> {
-                val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
-                        event.getStartDateTime().epochSeconds
-                val totalTime = getWaveDuration().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
-            }
+    suspend fun getProgression(): Double = when {
+        event.isDone() -> 100.0
+        !event.isRunning() -> 0.0
+        else -> {
+            val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
+                    event.getStartDateTime().epochSeconds
+            val totalTime = getWaveDuration().inWholeSeconds
+            (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
         }
     }
 
@@ -351,11 +347,10 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      *
      */
     @VisibleForTesting
-    suspend fun getLiteralEndTime(): String {
-        return cachedLiteralEndTime ?: getEndTime().let { instant ->
+    suspend fun getLiteralEndTime(): String =
+        cachedLiteralEndTime ?: getEndTime().let { instant ->
             IClock.instantToLiteral(instant, event.getTZ())
         }.also { cachedLiteralEndTime = it }
-    }
 
     /**
      * Retrieves the total time of the wave event in a human-readable format.
@@ -364,16 +359,12 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * in the format of "X min", where X is the total time in whole minutes.
      *
      */
-    suspend fun getLiteralTotalTime(): String {
-        return "${getWaveDuration().inWholeMinutes} min"
-    }
+    suspend fun getLiteralTotalTime(): String = "${getWaveDuration().inWholeMinutes} min"
 
     /**
      * Retrieves the literal progression of the event as a percentage string.
      */
-    suspend fun getLiteralProgression(): String {
-        return "${getProgression()}%"
-    }
+    suspend fun getLiteralProgression(): String = "${getProgression()}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.
@@ -391,11 +382,10 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
      *
      */
-    fun getLiteralStartTime(): String {
-        return cachedLiteralStartTime ?: event.getStartDateTime().let { instant ->
+    fun getLiteralStartTime(): String =
+        cachedLiteralStartTime ?: event.getStartDateTime().let { instant ->
             IClock.instantToLiteral(instant, event.getTZ())
         }.also { cachedLiteralStartTime = it }
-    }
 
     /**
      * Retrieves the event's time zone offset in the form "UTC+x".
@@ -416,14 +406,13 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                speed <= 0 || speed >= 20 ->
-                    add("Speed must be greater than 0 and less than 20")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            speed <= 0 || speed >= 20 ->
+                add("Speed must be greater than 0 and less than 20")
 
-                else -> warming.validationErrors()?.let { addAll(it) }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
+            else -> warming.validationErrors()?.let { addAll(it) }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
 
 }

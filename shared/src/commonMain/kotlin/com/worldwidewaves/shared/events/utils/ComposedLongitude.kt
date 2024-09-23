@@ -165,7 +165,6 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     // -------------------------
 
-
     private fun sortPositions() {
         val southToNorth = positions.sortedBy { it.lat }
         direction = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
@@ -183,6 +182,5 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         neLat = maxOf(neLat, newPositions.maxOf { it.lat })
         neLng = maxOf(neLng, newPositions.maxOf { it.lng })
     }
-
 
 }

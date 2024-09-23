@@ -24,27 +24,21 @@ package com.worldwidewaves.shared.events.utils
 import io.github.aakira.napier.Napier
 
 object Log {
-    fun v(tag: String, message: String, throwable: Throwable? = null) {
+    fun v(tag: String, message: String, throwable: Throwable? = null) =
         Napier.v(tag = tag, message = message, throwable = throwable)
-    }
 
-    fun d(tag: String, message: String, throwable: Throwable? = null) {
+    fun d(tag: String, message: String, throwable: Throwable? = null) =
         Napier.d(tag = tag, message = message, throwable = throwable)
-    }
 
-    fun i(tag: String, message: String, throwable: Throwable? = null) {
+    fun i(tag: String, message: String, throwable: Throwable? = null) =
         Napier.i(tag = tag, message = message, throwable = throwable)
-    }
 
-    fun w(tag: String, message: String, throwable: Throwable? = null) {
+    fun w(tag: String, message: String, throwable: Throwable? = null) =
         Napier.w(tag = tag, message = message, throwable = throwable)
-    }
 
-    fun e(tag: String, message: String, throwable: Throwable? = null) {
+    fun e(tag: String, message: String, throwable: Throwable? = null) =
         Napier.e(tag = tag, message = message, throwable = throwable)
-    }
 
-    fun wtf(tag: String, message: String, throwable: Throwable? = null) {
+    fun wtf(tag: String, message: String, throwable: Throwable? = null) =
         Napier.wtf(tag = tag, message = message, throwable = throwable)
-    }
 }

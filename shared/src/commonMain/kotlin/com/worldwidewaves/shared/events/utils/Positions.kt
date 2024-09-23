@@ -35,8 +35,6 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
                     internal var prev: Position? = null,
                     internal var next: Position? = null) {
 
-    companion object { internal var nextId = 42 }
-
     var id: Int = -1
         internal set // Cannot be set outside of the module
         get() { // Cannot be read before being initialized (added to a Polygon)
@@ -44,8 +42,16 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
             return field
         }
 
+    // ------------------------
+
+    companion object { internal var nextId = 42 }
+
+    // ------------------------
+
     open operator fun component1() = lat
     open operator fun component2() = lng
+
+    // ------------------------
 
     fun toCutPosition(cutId: Int, cutLeft: Position, cutRight: Position) =
         CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
@@ -57,17 +63,18 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
         return Position(lat ?: this.lat, lng ?: this.lng)
     }
 
+    // ------------------------
+
     internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
-
     internal open fun detached() = Position(lat, lng)
-
     fun normalized() = Position(lat,normalizeLongitude(lng))
+
+    // ------------------------
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
-
 }
 
 // Can only be initialized from internal context

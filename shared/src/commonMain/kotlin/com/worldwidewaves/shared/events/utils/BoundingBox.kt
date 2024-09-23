@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
+
 /*
  * Copyright 2024 DrWave
  *
@@ -27,14 +29,75 @@ package com.worldwidewaves.shared.events.utils
  */
 data class BoundingBox(val sw: Position, val ne: Position) {
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
-        sw = Position(swLat, swLng).init(),
-        ne = Position(neLat, neLng).init()
+        sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
+        ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init()
     )
+
+    // --- Companion object
+
+
+    companion object {
+        fun fromPositions(positions: List<Position>): BoundingBox? {
+            if (positions.isEmpty()) return null
+            val minLat = positions.minOf { it.lat }
+            val maxLat = positions.maxOf { it.lat }
+            val lngs = positions.map { it.lng }
+            val (swLng, neLng) = if (lngs.max() - lngs.min() > 180) {
+                lngs.max() to lngs.min()
+            } else {
+                lngs.min() to lngs.max()
+            }
+            return BoundingBox(minLat, swLng, maxLat, neLng)
+        }
+    }
+
+    // --- Properties
 
     val minLatitude: Double get() = sw.lat
     val maxLatitude: Double get() = ne.lat
     val minLongitude: Double get() = sw.lng
     val maxLongitude: Double get() = ne.lng
+
+    val width: Double get() =
+        if (ne.lng >= sw.lng) ne.lng - sw.lng
+        else 360 - sw.lng + ne.lng
+
+    val height: Double get() = ne.lat - sw.lat
+
+    val crossesAntimeridian: Boolean get() = ne.lng < sw.lng
+
+    // --- Public methods
+
+
+    fun contains(position: Position): Boolean {
+        val lat = position.lat
+        val lng = position.lng
+        return lat in minLatitude..maxLatitude &&
+                if (crossesAntimeridian) lng >= minLongitude || lng <= maxLongitude
+                else lng in minLongitude..maxLongitude
+    }
+
+
+    fun intersects(other: BoundingBox): Boolean {
+        val latOverlap = !(other.maxLatitude < minLatitude || other.minLatitude > maxLatitude)
+        val lngOverlap = if (crossesAntimeridian || other.crossesAntimeridian) {
+            !(other.minLongitude > maxLongitude && other.maxLongitude < minLongitude)
+        } else {
+            !(other.maxLongitude < minLongitude || other.minLongitude > maxLongitude)
+        }
+        return latOverlap && lngOverlap
+    }
+
+    fun expand(factor: Double): BoundingBox {
+        val latDelta = height * (factor - 1) / 2
+        val lngDelta = width * (factor - 1) / 2
+        return BoundingBox(
+            sw = Position(minLatitude - latDelta, normalizeLongitude(minLongitude - lngDelta)),
+            ne = Position(maxLatitude + latDelta, normalizeLongitude(maxLongitude + lngDelta))
+        )
+    }
+
+    // --- Overrides
 
     override fun equals(other: Any?): Boolean =
         this === other || (other is BoundingBox && sw == other.sw && ne == other.ne)

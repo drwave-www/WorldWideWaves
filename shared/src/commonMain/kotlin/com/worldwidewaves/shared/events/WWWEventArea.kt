@@ -172,14 +172,13 @@ data class WWWEventArea(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
-                    add("OSM admin ID must be greater than 0 if it's not the world event")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
+                add("OSM admin ID must be greater than 0 if it's not the world event")
 
-                else -> { /* No validation errors */ }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
+            else -> { /* No validation errors */ }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
 }

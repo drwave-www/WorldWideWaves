@@ -64,6 +64,7 @@ interface IClock {
         }
     }
 }
+
 class SystemClock : IClock {
     override fun now(): Instant {
         val instant = Instant.parse("2024-03-19T13:00:00Z")
@@ -116,12 +117,11 @@ class DefaultEventsConfigurationProvider(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoEventsConfiguration(): String {
-        return coroutineScopeProvider.withIOContext {
+    override suspend fun geoEventsConfiguration(): String =
+        coroutineScopeProvider.withIOContext {
             Log.i(::geoEventsConfiguration.name, "Loading events configuration from $FS_EVENTS_CONF")
             Res.readBytes(FS_EVENTS_CONF).decodeToString()
         }
-    }
 }
 
 // ---------------------------
@@ -132,8 +132,8 @@ interface GeoJsonDataProvider {
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
-        return try {
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? =
+        try {
             val geojsonData = withContext(Dispatchers.IO) {
                 Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
                 Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
@@ -143,7 +143,6 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
             Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId", throwable = e)
             null
         }
-    }
 }
 
 // ---------------------------
@@ -162,13 +161,11 @@ class DefaultEventsDecoder : EventsDecoder {
 interface MapDataProvider {
     suspend fun geoMapStyleData(): String
 }
-
 class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoMapStyleData(): String {
-        return withContext(Dispatchers.IO) {
+    override suspend fun geoMapStyleData(): String =
+        withContext(Dispatchers.IO) {
             Log.i(::geoMapStyleData.name,"Loading map style data from $FS_MAPS_STYLE")
             Res.readBytes(FS_MAPS_STYLE).decodeToString()
         }
-    }
 }

@@ -223,10 +223,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
             next = current
             prev = current.prev
             current.prev = this
-            if (current == head)
-                head = this
-            else
-                prev?.next = this
+
+            if (current == head) head = this
+            else prev?.next = this
         }
 
         indexNewPosition(addPosition)
@@ -386,7 +385,6 @@ fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
 }
 
 inline fun <reified T: Polygon> T.move() : T = createNew().xferFrom(this) as T
-
 
 operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
     this@plus.forEach { add(it) }
