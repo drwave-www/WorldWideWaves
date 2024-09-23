@@ -109,7 +109,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { polygon.splitByLongitude(30.0) } returns splitResult
 
         // WHEN
-        val result = wave.getWarmingPolygons()
+        val result = wave.warming.area.getPolygons()
 
         // THEN
         assertEquals(listOf(polygon), result)

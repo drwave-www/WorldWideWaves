@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.Polygon
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
@@ -36,11 +35,7 @@ data class WWWEventWaveDeep(
     override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getWarmingPolygons(): List<Polygon> {
-        return emptyList()
-    }
-
-    override suspend fun getWavePolygons(): List<Polygon> {
+    override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons {
         TODO("Not yet implemented")
     }
 

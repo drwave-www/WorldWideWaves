@@ -23,14 +23,12 @@ package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
-import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
+import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
@@ -51,54 +49,27 @@ data class WWWEventWaveLinear(
     override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
-    // Data class to hold latitude and longitude band information
     data class LatLonBand(val latitude: Double, val latWidth: Double, val lngWidth: Double)
 
-    @Transient private var lastBandLongitude: Double? = null
-    @Transient private val lastBandPolygons = mutableListOf<Polygon>()
     @Transient private var cachedBands: Map<Double, LatLonBand>? = null
-
     @Transient private var cachedTotalTime: Duration? = null
-    @Transient private var cachedWarmingPolygons: List<Polygon>? = null
-    @Transient private var cachedWavePolygons: List<Polygon>? = null
 
     // ---------------------------
 
     private suspend fun bands(): Map<Double, LatLonBand> {
         if (cachedBands == null) {
             val refreshDuration = WAVE_LINEAR_METERS_REFRESH / speed
-            cachedBands = calculateWaveBands(refreshDuration.seconds).associateBy { it.latitude }
+            val bands = calculateWaveBands(refreshDuration.seconds).associateBy { it.latitude }
+            require(bands.isNotEmpty()) { "Bands must not be empty" }
+            cachedBands = bands
         }
         return cachedBands!!
     }
 
     // ---------------------------
 
-    /**
-     * Retrieves the warming polygons for the event area.
-     *
-     * This function returns a list of polygons representing the warming zones for the event area.
-     * If the warming polygons are already cached, it returns the cached value. Otherwise, it splits
-     * the event area polygon by the warming zone longitude and caches the resulting right-side polygons.
-     *
-     */
-    override suspend fun getWarmingPolygons(): List<Polygon> {
-        if (cachedWarmingPolygons == null) {
-            cachedWarmingPolygons = when (warming.type) {
-                LONGITUDE_CUT -> event.area.getPolygons().flatMap { polygon ->
-                    polygon.splitByLongitude(warming.longitude!!).right
-                }
-                else -> emptyList()
-            }
-        }
-        return cachedWarmingPolygons!!
-    }
+    override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons {
 
-    // ---------------------------
-
-    override suspend fun getWavePolygons(): List<Polygon> {
-        if (cachedWavePolygons == null) {
-            cachedWavePolygons = null
             // TODO: - get the longitude diff since last one
             //       - decide of the polygon needs to be completed or not
             //       - create the polygon from scratch or from the previous one
@@ -106,9 +77,32 @@ data class WWWEventWaveLinear(
             //           --> do it for each polygon, deciding if the bands stuff must be done for each one or not
             val bands = bands()
             val areaPolygons = event.area.getPolygons()
+            val composedLongitude = currentComposedLongitude()
 
+        return WavePolygons(0.0, emptyList(), emptyList())
+    }
+
+    /**
+     * Calculates the current composed longitude positions for the wave.
+     *
+     * This function computes a list of positions representing the current wave's longitude
+     * at various latitude bands within the bounding box. It divides the bounding box into
+     * latitude bands and calculates the longitude for each band based on the current wave
+     * position.
+     *
+     */
+    private suspend fun currentComposedLongitude(): List<Position> {
+        val bbox = getBbox()
+        val bands = bands()
+
+        val bandHeight = bbox.height / bands.size
+        val startLat = bbox.sw.lat
+
+        return List(bands.size) { index ->
+            val bandLat = startLat + (index + 0.5) * bandHeight
+            val bandLng = currentWaveLongitude(bandLat)
+            Position(bandLat, bandLng)
         }
-        return cachedWavePolygons!!
     }
 
     // ---------------------------

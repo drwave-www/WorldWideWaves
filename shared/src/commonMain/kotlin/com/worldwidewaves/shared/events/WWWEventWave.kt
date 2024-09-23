@@ -9,7 +9,6 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +70,12 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val status: IWWWEvent.Status
     )
 
+    data class WavePolygons(
+        val referenceLongitude: Double,
+        val traversedPolygons: List<Polygon>,
+        val remainingPolygons: List<Polygon>
+    )
+
     // ---------------------------
 
     enum class Direction { WEST, EAST }
@@ -107,8 +112,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun getWarmingPolygons(): List<Polygon>
-    abstract suspend fun getWavePolygons(): List<Polygon>
+    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun timeBeforeHit(): Duration?
@@ -124,6 +128,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     @Suppress("UNCHECKED_CAST")
     fun <T : WWWEventWave> setRelatedEvent(event: IWWWEvent): T {
         this._event = event
+        warming.setRelatedEvent(event)
         return this as T
     }
 
@@ -165,18 +170,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 }
             }
         }
-    }
-
-    /**
-     * Checks if a given position is within any of the warming polygons.
-     *
-     * This function retrieves the warming polygons and checks if the specified position
-     * is within any of these polygons using the `isPointInPolygon` function.
-     *
-
-     */
-    suspend fun isPositionWithinWarming(position: Position): Boolean {
-        return getWarmingPolygons().any { it.containsPosition(position) }
     }
 
     /**

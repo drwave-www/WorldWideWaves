@@ -21,9 +21,8 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Polygon
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -68,9 +67,8 @@ class WWWEventWaveTest : KoinTest {
         wave = object : WWWEventWave() {
             override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
-            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = METERS)
-            override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
-            override suspend fun getWavePolygons(): List<Polygon> = emptyList()
+            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = LONGITUDE_CUT, longitude = 0.0)
+            override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons = WavePolygons(0.0, emptyList(), emptyList())
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
