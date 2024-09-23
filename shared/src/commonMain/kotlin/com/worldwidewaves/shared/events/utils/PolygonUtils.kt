@@ -97,7 +97,7 @@ object PolygonUtils {
      *
      */
     fun Polygon.containsPosition(tap: Position): Boolean {
-        if (isEmpty()) return false
+        require (isNotEmpty()) { return false }
         var (bx, by) = last()!!.let { it.lat - tap.lat to it.lng - tap.lng }
         var depth = 0
 
@@ -106,8 +106,9 @@ object PolygonUtils {
             bx = point.lat - tap.lat
             by = point.lng - tap.lng
 
-            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0))
+            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
                 continue
+            }
 
             val lx = ax - ay * (bx - ax) / (by - ay)
             if (lx == 0.0) return true
@@ -120,12 +121,12 @@ object PolygonUtils {
     /**
      * Splits a polygon by a given longitude.
      *
-     * This function takes a polygon represented as a list of [Position] objects and a composed longitude
-     * (`longitudeToCut`) as input. It splits the polygon into two parts: the left part containing
-     * points with longitudes less than or equal to `longitudeToCut`, and the right part containing
-     * points with longitudes greater than or equal to `longitudeToCut`.*
+     * This function takes a polygon represented as a list of \[Position\] objects and a composed longitude
+     * (\`longitudeToCut\`) as input. It splits the polygon into two parts: the left part containing
+     * points with longitudes less than or equal to \`longitudeToCut\`, and the right part containing
+     * points with longitudes greater than or equal to \`longitudeToCut\`.
      *
-     * If the `longitudeToCut` is completely outside the bounds of the polygon, the entire polygon is
+     * If the \`longitudeToCut\` is completely outside the bounds of the polygon, the entire polygon is
      * returned either on the left or right side, depending on whether the cut is to the east or west
      * of the polygon.
      *
@@ -138,7 +139,7 @@ object PolygonUtils {
 
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
-        if (isEmpty() || size < 4) return PolygonSplitResult.empty()
+        require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty() }
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
         val leftSide =  mutableListOf<LeftCutPolygon>()
@@ -210,6 +211,7 @@ object PolygonUtils {
                 if (leftSide.size > 1) leftSide.add(currentLeft.apply {
                     add(stopPoint.toPointCut(cutId))
                 }.move())
+
                 if (rightSide.size > 1) rightSide.add(currentRight.apply {
                     add(stopPoint.toPointCut(cutId))
                 }.move())
@@ -281,12 +283,11 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> {
-        return side.asSequence()
+    private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> =
+        side.asSequence()
             .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
             .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
             .let { reconstructPolygons(it.toList(), initPolygon) }
-    }
 
     /**
      * Reconstructs polygons from a list of poly-lines.
@@ -343,8 +344,9 @@ object PolygonUtils {
      *
      */
     fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
-        if (polygons.isEmpty() || polygons.all { it.isEmpty() })
-            throw IllegalArgumentException("Event area cannot be empty, cannot determine bounding box")
+        require(polygons.isNotEmpty() && polygons.all { it.isNotEmpty() }) {
+            "Event area cannot be empty, cannot determine bounding box"
+        }
 
         val (minLat, minLng, maxLat, maxLng) = polygons.fold(
             Quad(

@@ -93,8 +93,9 @@ data class WWWEvent(
 
     @Transient private var _wave: WWWEventWave? = null
     override val wave: WWWEventWave
-        get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
-        ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
+        get() = _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
+            "$id: No valid wave definition found"
+        }.apply {
             setRelatedEvent<WWWEventWave>(this@WWWEvent)
             _wave = this
         }

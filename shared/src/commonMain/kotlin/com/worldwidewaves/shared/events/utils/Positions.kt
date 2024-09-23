@@ -81,8 +81,7 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
 @VisibleForTesting
 internal fun <T : Position> T.init(): T = apply {
     id = nextId++
-    if (id == Int.MAX_VALUE) 
-        throw IllegalStateException("Reached maximum capacity for Polygon positions") 
+    require(id != Int.MAX_VALUE) { "Reached maximum capacity for Polygon positions" }
 }
 
 // ------------------

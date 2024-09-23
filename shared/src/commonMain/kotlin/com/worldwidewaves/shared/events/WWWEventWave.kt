@@ -116,10 +116,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     // ---------------------------
 
     protected val event: IWWWEvent
-        get() = this._event ?: run {
-            Log.e(::event.name, "Event not set")
-            throw IllegalStateException("Event not set")
-        }
+        get() = requireNotNull(this._event) { "Event not set" }
 
     protected suspend fun getBbox(): BoundingBox =
         _bbox ?: event.area.getBoundingBox().also { _bbox = it }
@@ -283,14 +280,19 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
      *
      */
-    suspend fun getAllNumbers(): WaveNumbers = WaveNumbers(
-        waveTimezone = try { getLiteralTimezone() } catch (e: Throwable) { "error" },
-        waveSpeed = try { getLiteralSpeed() } catch (e: Throwable) { "error" },
-        waveStartTime = try { getLiteralStartTime() } catch (e: Throwable) { "error" },
-        waveEndTime = try { getLiteralEndTime() } catch (e: Throwable) { "error" },
-        waveTotalTime = try { getLiteralTotalTime() } catch (e: Throwable) { "error" },
-        waveProgression = try { getLiteralProgression() } catch (e: Throwable) { "error" }
-    )
+    suspend fun getAllNumbers(): WaveNumbers {
+        suspend fun safeCall(block: suspend () -> String): String =
+            try { block() } catch (e: Throwable) { "error" }
+
+        return WaveNumbers(
+            waveTimezone = safeCall { getLiteralTimezone() },
+            waveSpeed = safeCall { getLiteralSpeed() },
+            waveStartTime = safeCall { getLiteralStartTime() },
+            waveEndTime = safeCall { getLiteralEndTime() },
+            waveTotalTime = safeCall { getLiteralTotalTime() },
+            waveProgression = safeCall { getLiteralProgression() }
+        )
+    }
 
     // ---------------------------
 
@@ -306,11 +308,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * 6. Adds the duration to the start time to get the end time.
      *
      */
-    suspend fun getEndTime(): Instant {
-        val startDateTime = event.getStartDateTime()
-        val duration = getWaveDuration() + getWarmingDuration()
-        return startDateTime.plus(duration)
-     }
+    suspend fun getEndTime(): Instant =
+        event.getStartDateTime().plus(getWaveDuration() + getWarmingDuration())
 
      fun isWarmingEnded(): Boolean {
         TODO("Not yet implemented")

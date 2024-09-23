@@ -53,7 +53,7 @@ class WWWEventMap(
 
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
-        get() = _event ?: throw IllegalStateException("Event not set")
+        get() = requireNotNull(_event) { "Event not set" }
         set(value) {
             _event = value
         }

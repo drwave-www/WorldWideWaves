@@ -65,7 +65,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     private fun removePositionFromIndex(id: Int) : Position {
-        val positionToRemove = positionsIndex.remove(id) ?: throw IllegalArgumentException("Position with id $id not found")
+        val positionToRemove = requireNotNull(positionsIndex.remove(id)) { "Position with id $id not found" }
         if (positionToRemove is CutPosition) cutPositions.remove(positionToRemove)
         return positionToRemove
     }
@@ -78,7 +78,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     private fun updateAreaAndDirection(p1: Position?, p2: Position?, isRemoving: Boolean = false) {
-        if (p1 == null || p2 == null) return
+        require(p1 != null && p2 != null) { return }
 
         val signedArea = (p2.lng - p1.lng) * (p2.lat + p1.lat)
         area += if (isRemoving) -signedArea else signedArea
@@ -103,7 +103,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Bounding Box logic ----------
 
     fun bbox(): BoundingBox {
-        if (isEmpty()) throw IllegalArgumentException("Polygon bbox: cannot compute bounding box of an empty polygon")
+        require(!isEmpty()) { "Polygon bbox: cannot compute bounding box of an empty polygon" }
         if (!boundingBoxValid) {
             updateBoundingBox()
         }
@@ -151,8 +151,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Add/Remove positions --------
 
     fun add(position: Position) : Position {
-        if (tail != null && position == tail)
+        if (tail != null && position == tail) {
             return tail!! // skip us time
+        }
 
         val addPosition = position.xfer()
         indexNewPosition(addPosition)
@@ -169,9 +170,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return addPosition.apply { tail = this }
     }
 
-    fun addAll(polygon: Polygon) {
-        polygon.forEach { add(it) }
-    }
+    fun addAll(polygon: Polygon) = polygon.forEach { add(it) }
 
     fun remove(id: Int): Boolean {
         val positionToRemove = removePositionFromIndex(id)
@@ -200,7 +199,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun insertAfter(newPosition: Position, id: Int): Position {
-        val current = positionsIndex[id] ?: throw IllegalArgumentException("Position with id $id not found")
+        val current = requireNotNull(positionsIndex[id]) { "Position with id $id not found" }
         val addPosition = newPosition.xfer().apply {
             next = current.next
             prev = current
@@ -209,7 +208,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
 
         indexNewPosition(addPosition)
-        if (current == tail) tail = addPosition
+        if (current == tail) {
+            tail = addPosition
+        }
 
         updateBoundingBoxForPosition(addPosition)
         updateAreaAndDirection(current, addPosition)
@@ -218,7 +219,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun insertBefore(newPosition: Position, id: Int): Position {
-        val current = positionsIndex[id] ?: throw IllegalArgumentException("Position with id $id not found")
+        val current = requireNotNull(positionsIndex[id]) { "Position with id $id not found" }
         val addPosition = newPosition.xfer().apply {
             next = current
             prev = current.prev
@@ -237,10 +238,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun removePositionsUpTo(pointId: Int): Boolean {
         // Check if the polygon is empty or if the toCut id doesn't exist
-        if (isEmpty() || !positionsIndex.containsKey(pointId)) return false
+        require(isNotEmpty() && positionsIndex.containsKey(pointId)) { return false }
 
         // If toCut is the head, nothing to delete
-        if (head?.id == pointId) return true
+        if (head?.id == pointId) {
+            return true
+        }
 
         var current = head
         while (current != null && current.id != pointId) {
@@ -257,7 +260,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun pop(): Position? {
-        val last = tail ?: return null
+        val last = requireNotNull(tail) { return null }
         remove(last.id)
         return last
     }
@@ -272,7 +275,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         private var current = head
         override fun hasNext(): Boolean = current != null
         override fun next(): Position {
-            val result = current ?: throw NoSuchElementException()
+            val result = requireNotNull(current) { throw NoSuchElementException() }
             current = current?.next
             return result
         }
@@ -281,9 +284,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     fun loopIterator(): LoopIterator<Position> = object : LoopIterator<Position> {
         private var current = head
         override fun hasNext(): Boolean = head != null
-        override fun viewCurrent(): Position = current ?: head ?: throw NoSuchElementException()
+        override fun viewCurrent(): Position = requireNotNull(current ?: head) { NoSuchElementException() }
         override fun next(): Position {
-            val result = current ?: throw NoSuchElementException()
+            val result = requireNotNull(current) { throw NoSuchElementException() }
             current = current?.next ?: head
             return result
         }
@@ -293,7 +296,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         private var current = tail
         override fun hasNext(): Boolean = current != null
         override fun next(): Position {
-            val result = current ?: throw NoSuchElementException()
+            val result = requireNotNull(current) { throw NoSuchElementException() }
             current = current?.prev
             return result
         }
@@ -302,9 +305,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     fun reverseLoopIterator(): LoopIterator<Position> = object : LoopIterator<Position> {
         private var current = tail
         override fun hasNext(): Boolean = tail != null
-        override fun viewCurrent(): Position = current ?: tail ?: throw NoSuchElementException()
+        override fun viewCurrent(): Position = requireNotNull(current ?: tail) { throw NoSuchElementException() }
         override fun next(): Position {
-            val result = current ?: throw NoSuchElementException()
+            val result = requireNotNull(current) { throw NoSuchElementException() }
             current = current?.prev ?: tail
             return result
         }
@@ -358,11 +361,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 // -- Additional type preservation Polygon methods ----------
 
 fun <T: Polygon> T.subList(start: Position, lastId: Int) = createNew().apply {
-    if (this@subList.isEmpty())
-        throw IllegalArgumentException("Polygon subList: 'start' cannot be found in an empty polygon")
-
-    if (!this@subList.positionsIndex.containsKey(lastId))
-        throw IllegalArgumentException("Polygon subList: 'lastId' cannot be found in the polygon")
+    require(!this@subList.isEmpty()) { "Polygon subList: 'start' cannot be found in an empty polygon" }
+    require(this@subList.positionsIndex.containsKey(lastId)) { "Polygon subList: 'lastId' cannot be found in the polygon" }
 
     if (start.id == lastId) add(start).also { return@apply } // start == end
 
@@ -370,8 +370,7 @@ fun <T: Polygon> T.subList(start: Position, lastId: Int) = createNew().apply {
     do {
         add(current)
         current = current.next ?: this@subList.first()!!
-        if (current.id == start.id) // Extra safety check
-            throw IllegalArgumentException("Polygon subList: 'last' cannot be found in the polygon")
+        require(current.id != start.id) { "Polygon subList: 'last' cannot be found in the polygon" }
     } while (current.id != lastId)
 }
 
