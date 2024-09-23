@@ -1,6 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
+import kotlin.math.abs
 
 /*
  * Copyright 2024 DrWave
@@ -68,6 +69,11 @@ data class BoundingBox(val sw: Position, val ne: Position) {
 
     // --- Public methods
 
+    fun latitudeOfWidestPart(): Double = when {
+        sw.lat <= 0 && ne.lat >= 0 -> 0.0 // Box crosses the equator
+        abs(sw.lat) < abs(ne.lat) -> sw.lat // Southern latitude is closer to equator
+        else -> ne.lat // Northern latitude is closer to equator
+    }
 
     fun contains(position: Position): Boolean {
         val lat = position.lat

@@ -44,7 +44,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
@@ -101,7 +100,7 @@ class WWWEventWaveLinearTest : KoinTest {
     // ---------------------------
 
     @Test
-    fun testGetWarmingPolygons() = runTest {
+    fun testGetWarmingPolygons() = runBlocking{
         // WHEN
         val polygon = RightCutPolygon(42)
         mockkObject(PolygonUtils)
@@ -111,7 +110,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // WHEN
         val result = wave.getWarmingPolygons()
-        testScheduler.advanceUntilIdle()
 
         // THEN
         assertEquals(listOf(polygon), result)
@@ -119,7 +117,7 @@ class WWWEventWaveLinearTest : KoinTest {
     }
 
     @Test
-    fun testGetWaveDuration() = runTest {
+    fun testGetWaveDuration() = runBlocking {
         // GIVEN
         val bbox = BoundingBox(
             sw = Position(20.0, 10.0),
@@ -131,7 +129,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // WHEN
         val result = wave.getWaveDuration()
-        testScheduler.advanceUntilIdle()
 
         // THEN
         assertEquals(400.seconds, result)
@@ -140,7 +137,7 @@ class WWWEventWaveLinearTest : KoinTest {
 
     @Test fun testHasUserBeenHit_isWithin() = testHasUserBeenHit(isWithin = true)
     @Test fun testHasUserBeenHit_isNotWithin() = testHasUserBeenHit(isWithin = false)
-    private fun testHasUserBeenHit(isWithin : Boolean = true) = runTest {
+    private fun testHasUserBeenHit(isWithin : Boolean = true) = runBlocking {
         // GIVEN
         val userPosition = Position(1.0, 25.0)
         val bbox = mockk<BoundingBox>()
@@ -158,7 +155,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // WHEN
         val result = wave.hasUserBeenHitInCurrentPosition()
-        testScheduler.advanceUntilIdle()
 
         // THEN
         assertEquals(isWithin, result)
@@ -213,7 +209,7 @@ class WWWEventWaveLinearTest : KoinTest {
 
 
     @Test
-    fun testTimeBeforeHit_UserPositionAvailable() = runTest {
+    fun testTimeBeforeHit_UserPositionAvailable() = runBlocking {
         // GIVEN
         val bbox = BoundingBox(
             sw = Position(10.0, 20.0),
@@ -231,7 +227,6 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // WHEN
         val result = wave.timeBeforeHit()
-        testScheduler.advanceUntilIdle()
 
         // THEN
         val waveCurrentLongitude = wave.currentWaveLongitude(12.5)
@@ -241,13 +236,12 @@ class WWWEventWaveLinearTest : KoinTest {
     }
 
     @Test
-    fun testTimeBeforeHit_UserPositionNull() = runTest {
+    fun testTimeBeforeHit_UserPositionNull() = runBlocking {
         // GIVEN
         every { wave.getUserPosition() } returns null
 
         // WHEN
         val result = wave.timeBeforeHit()
-        testScheduler.advanceUntilIdle()
 
         // THEN
         assertNull(result)
@@ -297,6 +291,66 @@ class WWWEventWaveLinearTest : KoinTest {
 
         // THEN
         assertEquals(expectedWidth, adjustedWidth)
+    }
+
+    @Test
+    fun `latitudeOfWidestPart returns 0 when bounding box crosses equator`() {
+        val bbox = BoundingBox(-30.0, -10.0, 30.0, 10.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart returns southern latitude when it's closer to equator`() {
+        val bbox = BoundingBox(10.0, -10.0, 20.0, 10.0)
+        assertEquals(10.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart returns northern latitude when it's closer to equator`() {
+        val bbox = BoundingBox(-20.0, -10.0, -10.0, 10.0)
+        assertEquals(-10.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart returns 0 when bounding box is symmetric around equator`() {
+        val bbox = BoundingBox(-10.0, -10.0, 10.0, 10.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles bounding box entirely in northern hemisphere`() {
+        val bbox = BoundingBox(30.0, -10.0, 60.0, 10.0)
+        assertEquals(30.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles bounding box entirely in southern hemisphere`() {
+        val bbox = BoundingBox(-60.0, -10.0, -30.0, 10.0)
+        assertEquals(-30.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles bounding box at poles`() {
+        val bbox = BoundingBox(-90.0, -180.0, 90.0, 180.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles single-point bounding box`() {
+        val bbox = BoundingBox(45.0, 45.0, 45.0, 45.0)
+        assertEquals(45.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles bounding box touching equator from south`() {
+        val bbox = BoundingBox(-30.0, -10.0, 0.0, 10.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart handles bounding box touching equator from north`() {
+        val bbox = BoundingBox(0.0, -10.0, 30.0, 10.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
     }
 
     @Test

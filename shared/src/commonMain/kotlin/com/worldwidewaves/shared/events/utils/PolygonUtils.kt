@@ -235,29 +235,28 @@ object PolygonUtils {
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
         lngToCut: ComposedLongitude,
         polygons: List<T>
-    ): List<T> =
-        if (lngToCut.size() > 1) { // Nothing to complete on straight longitude
-            polygons.map { polygon ->
-                val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
-                if (cutPositions.size < 2) return@map polygon
+    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude
+        polygons.map { polygon ->
+            val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
+            if (cutPositions.size < 2) return@map polygon
 
-                val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cut
-                val maxCut = cutPositions.maxByOrNull { it.lat }
+            val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cut
+            val maxCut = cutPositions.maxByOrNull { it.lat }
 
-                if (minCut != null && maxCut != null) {
-                    val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
-                    if (newPositions.isNotEmpty()) { // If there are some longitude points in between
-                        var currentPosition = if (polygon is LeftCutPolygon) minCut else maxCut
-                        for (newPosition in newPositions) {
-                            val cutPosition = newPosition.toPointCut(polygon.cutId)
-                            polygon.insertAfter(cutPosition, currentPosition.id)
-                            currentPosition = cutPosition
-                        }
+            if (minCut != null && maxCut != null) {
+                val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
+                if (newPositions.isNotEmpty()) { // If there are some longitude points in between
+                    var currentPosition = if (polygon is LeftCutPolygon) minCut else maxCut
+                    for (newPosition in newPositions) {
+                        val cutPosition = newPosition.toPointCut(polygon.cutId)
+                        polygon.insertAfter(cutPosition, currentPosition.id)
+                        currentPosition = cutPosition
                     }
                 }
-                polygon
             }
-        } else polygons
+            polygon
+        }
+    } else polygons
 
     /**
      * Adds a polygon part to the list if needed and prepare for next iteration.
