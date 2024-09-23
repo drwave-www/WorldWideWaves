@@ -46,7 +46,7 @@ object PolygonUtils {
         override fun createNew(): RightCutPolygon = RightCutPolygon(cutId)
     }
 
-    data class PolygonSplitResult(val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
+    data class PolygonSplitResult(val cutId: Int, val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
         enum class LeftOrRight { LEFT, RIGHT }
         companion object {
 
@@ -55,13 +55,13 @@ object PolygonUtils {
             ): PolygonSplitResult {
                 return if (polygon.size > 1) {
                     when (leftOrRight) {
-                        LEFT -> PolygonSplitResult(listOf(polygon.toLeft(cutId)), emptyList())
-                        RIGHT -> PolygonSplitResult(emptyList(), listOf(polygon.toRight(cutId)))
+                        LEFT -> PolygonSplitResult(cutId, listOf(polygon.toLeft(cutId)), emptyList())
+                        RIGHT -> PolygonSplitResult(cutId, emptyList(), listOf(polygon.toRight(cutId)))
                     }
-                } else empty()
+                } else empty(cutId)
             }
 
-            fun empty() = PolygonSplitResult(emptyList(), emptyList())
+            fun empty(cutId: Int) = PolygonSplitResult(cutId, emptyList(), emptyList())
         }
     }
 
@@ -139,16 +139,18 @@ object PolygonUtils {
 
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
-        require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty() }
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
+
+        require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty(cutId) }
+
         val leftSide =  mutableListOf<LeftCutPolygon>()
         val rightSide = mutableListOf<RightCutPolygon>()
         val currentLeft = LeftCutPolygon(cutId)
         val currentRight = RightCutPolygon(cutId)
 
-        val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
-        val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty()
+        val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId)
+        val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId)
 
         val lngBbox = lngToCut.bbox()
 
@@ -217,7 +219,7 @@ object PolygonUtils {
                 }.move())
 
                 // Group the poly-lines into ring polygons and add the ComposedLongitude positions
-                return PolygonSplitResult(
+                return PolygonSplitResult(cutId,
                     completeLongitudePoints(lngToCut, reconstructSide(leftSide, currentLeft)),
                     completeLongitudePoints(lngToCut, reconstructSide(rightSide, currentRight))
                 )
@@ -324,6 +326,12 @@ object PolygonUtils {
         }
 
         return result
+    }
+
+    // ------------------------------------------------------------------------
+
+    fun recomposeCutPolygons(polygons: List<List<Polygon>>): List<Polygon> {
+        return emptyList() // TODO
     }
 
     // ------------------------------------------------------------------------

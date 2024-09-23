@@ -35,7 +35,10 @@ data class WWWEventWaveDeep(
     override val warming: WWWEventWaveWarming
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons {
+    override suspend fun getWavePolygons(
+        lastWaveState: WavePolygons?,
+        mode: WaveMode
+    ): WavePolygons {
         TODO("Not yet implemented")
     }
 

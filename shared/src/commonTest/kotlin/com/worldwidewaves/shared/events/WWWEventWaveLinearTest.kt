@@ -105,7 +105,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val polygon = RightCutPolygon(42)
         mockkObject(PolygonUtils)
         coEvery { event.area.getPolygons() } returns listOf(polygon)
-        val splitResult = PolygonUtils.PolygonSplitResult(emptyList(), listOf(polygon))
+        val splitResult = PolygonUtils.PolygonSplitResult(0, emptyList(), listOf(polygon))
         every { polygon.splitByLongitude(30.0) } returns splitResult
 
         // WHEN

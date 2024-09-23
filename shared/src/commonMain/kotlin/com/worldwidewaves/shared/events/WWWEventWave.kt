@@ -56,6 +56,9 @@ import kotlin.time.Duration.Companion.seconds
 @Serializable
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
+    enum class Direction { WEST, EAST }
+    enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
+
     data class WaveNumbers(
         val waveTimezone: String,
         val waveSpeed: String,
@@ -71,14 +74,14 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     )
 
     data class WavePolygons(
+        val timestamp: Instant,
         val referenceLongitude: Double,
-        val traversedPolygons: List<Polygon>,
-        val remainingPolygons: List<Polygon>
+        val traversedPolygons: Map<Int, List<Polygon>>, // Maps of cutId to list of polygons
+        val remainingPolygons: Map<Int, List<Polygon>>,
+        val addedTraversedPolygons: Map<Int, List<Polygon>>? = null
     )
 
     // ---------------------------
-
-    enum class Direction { WEST, EAST }
 
     abstract val speed: Double // m/s
     abstract val direction: Direction // E/W
@@ -112,7 +115,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons
+    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun timeBeforeHit(): Duration?
@@ -122,7 +125,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     protected val event: IWWWEvent
         get() = requireNotNull(this._event) { "Event not set" }
 
-    protected suspend fun getBbox(): BoundingBox =
+    protected suspend fun bbox(): BoundingBox =
         _bbox ?: event.area.getBoundingBox().also { _bbox = it }
 
     @Suppress("UNCHECKED_CAST")

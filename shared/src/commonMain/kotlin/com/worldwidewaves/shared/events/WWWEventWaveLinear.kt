@@ -23,11 +23,17 @@ package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
+import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
+import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -68,18 +74,83 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons {
+    override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons {
+        require(event.isRunning()) { "Event must be running to request teh wave polygons" }
+        // TODO: - get the longitude diff since last one
+        //       - decide of the polygon needs to be completed or not
+        //       - create the polygon from scratch or from the previous one
+        //           --> first split then replace the longitude line by the one coming from bands if more than one
+        //           --> do it for each polygon, deciding if the bands stuff must be done for each one or not
+        val bbox = bbox()
+        val areaPolygons = event.area.getPolygons()
+        val referenceLongitude = currentWaveLongitude(bbox.latitudeOfWidestPart())
+        val composedLongitude = currentComposedLongitude(referenceLongitude, lastWaveState?.referenceLongitude)
 
-            // TODO: - get the longitude diff since last one
-            //       - decide of the polygon needs to be completed or not
-            //       - create the polygon from scratch or from the previous one
-            //           --> first split then replace the longitude line by the one coming from bands if more than one
-            //           --> do it for each polygon, deciding if the bands stuff must be done for each one or not
-            val bands = bands()
-            val areaPolygons = event.area.getPolygons()
-            val composedLongitude = currentComposedLongitude()
+        // FIXME: Decide if we change something depending on elapsed time or not (store in WavePolygons)
 
-        return WavePolygons(0.0, emptyList(), emptyList())
+        val traversedPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
+        val remainingPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
+        val addedTraversedPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
+
+        if (lastWaveState == null) {
+            val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
+            traversedPolygons.putAll(traversed)
+            remainingPolygons.putAll(remaining)
+        } else {
+            lastWaveState.remainingPolygons.forEach { (cutId, polygons) ->
+                val (newTraversed, remaining) = splitAreaToWave(polygons, composedLongitude)
+                when(mode) {
+                    WaveMode.ADD -> { // Add
+                        remainingPolygons.putAll(remaining)
+                        traversedPolygons.putAll(lastWaveState.traversedPolygons)
+                        traversedPolygons.putAll(newTraversed)
+                        addedTraversedPolygons.putAll(newTraversed)
+                    }
+                    WaveMode.RECOMPOSE -> {
+                        remainingPolygons.putAll(remaining)
+                        traversedPolygons.putAll(
+                            recomposeCutPolygons(
+                                lastWaveState.traversedPolygons.values +  newTraversed.values
+                            ).groupBy { (it as CutPolygon).cutId }
+                        )
+                    }
+                }
+            }
+        }
+
+        return WavePolygons(
+            clock.now(),
+            referenceLongitude,
+            traversedPolygons,
+            remainingPolygons,
+            if (addedTraversedPolygons.isEmpty()) null else addedTraversedPolygons
+        )
+    }
+
+    /**
+     * Splits the area polygons along a composed longitude and categorizes them based on wave direction.
+     *
+     * The function considers the wave direction (EAST or WEST) to determine which side of the split
+     * represents the traversed area and which represents the remaining area.
+     */
+    private fun splitAreaToWave(
+        areaPolygons: List<Polygon>,
+        composedLongitude: ComposedLongitude
+    ) : Pair<Map<Int, List<Polygon>>, Map<Int, List<Polygon>>> {
+        val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
+
+        fun mapNonEmptyPolygons(selector: (PolygonSplitResult) -> List<Polygon>): Map<Int, List<Polygon>> =
+            splitResults.mapNotNull { result ->
+                val polygons = selector(result)
+                if (polygons.isNotEmpty()) result.cutId to polygons else null
+            }.toMap()
+
+        val (traversed, remaining) = when (direction) {
+            Direction.WEST -> Pair(PolygonSplitResult::right, PolygonSplitResult::left)
+            Direction.EAST -> Pair(PolygonSplitResult::left, PolygonSplitResult::right)
+        }
+
+        return Pair(mapNonEmptyPolygons(traversed), mapNonEmptyPolygons(remaining))
     }
 
     /**
@@ -91,18 +162,24 @@ data class WWWEventWaveLinear(
      * position.
      *
      */
-    private suspend fun currentComposedLongitude(): List<Position> {
-        val bbox = getBbox()
+    private suspend fun currentComposedLongitude(
+        currentReferenceLongitude: Double,
+        previousReferenceLongitude: Double?
+    ): ComposedLongitude {
+        val bbox = bbox()
         val bands = bands()
+        val latitudeOfReference = bbox.latitudeOfWidestPart()
+
+        // FIXME: use bands delta instead of currentWaveLongitude in the loops below
 
         val bandHeight = bbox.height / bands.size
         val startLat = bbox.sw.lat
 
-        return List(bands.size) { index ->
+        return ComposedLongitude.fromPositions(List(bands.size) { index ->
             val bandLat = startLat + (index + 0.5) * bandHeight
             val bandLng = currentWaveLongitude(bandLat)
             Position(bandLat, bandLng)
-        }
+        })
     }
 
     // ---------------------------
@@ -117,7 +194,7 @@ data class WWWEventWaveLinear(
      *
      */
     override suspend fun getWaveDuration(): Duration = cachedTotalTime ?: run {
-        val bbox = getBbox()
+        val bbox = bbox()
         val longestLat = bbox.latitudeOfWidestPart()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
         val durationInSeconds = maxEastWestDistance / speed
@@ -129,7 +206,7 @@ data class WWWEventWaveLinear(
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
         val userPosition = getUserPosition() ?: return false
-        val bbox = getBbox()
+        val bbox = bbox()
         val waveCurrentLongitude = currentWaveLongitude(userPosition.lat)
         return if (userPosition.lng in bbox.minLongitude..waveCurrentLongitude)
             event.area.isPositionWithin(userPosition) // Take now into consideration the terrain
@@ -148,7 +225,7 @@ data class WWWEventWaveLinear(
     }
 
     suspend fun currentWaveLongitude(latitude: Double): Double {
-        val bbox = getBbox()
+        val bbox = bbox()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
         val distanceTraveled = speed * (clock.now() - event.getStartDateTime()).inWholeSeconds
 
@@ -177,7 +254,7 @@ data class WWWEventWaveLinear(
      *   adjusting the band widths accordingly.
      */
     suspend fun calculateWaveBands(refreshDuration : Duration = 1.seconds): List<LatLonBand> {
-        val bbox = getBbox()
+        val bbox = bbox()
         val (sw, ne) = bbox
         val latLonBands = mutableListOf<LatLonBand>()
 

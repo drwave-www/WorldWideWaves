@@ -68,7 +68,9 @@ class WWWEventWaveTest : KoinTest {
             override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
             override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = LONGITUDE_CUT, longitude = 0.0)
-            override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons = WavePolygons(0.0, emptyList(), emptyList())
+            override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons = WavePolygons(
+                clock.now(), 0.0, emptyMap(), emptyMap()
+            )
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE

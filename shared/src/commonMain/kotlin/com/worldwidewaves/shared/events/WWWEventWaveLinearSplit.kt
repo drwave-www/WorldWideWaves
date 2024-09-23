@@ -36,7 +36,10 @@ data class WWWEventWaveLinearSplit(
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getWavePolygons(lastWaveState: WavePolygons?): WavePolygons {
+    override suspend fun getWavePolygons(
+        lastWaveState: WavePolygons?,
+        mode: WaveMode
+    ): WavePolygons {
         TODO("Not yet implemented")
     }
 

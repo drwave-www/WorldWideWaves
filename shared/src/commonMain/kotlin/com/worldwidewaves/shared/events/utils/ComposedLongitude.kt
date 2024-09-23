@@ -58,6 +58,8 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     companion object {
         fun fromPositions(vararg positions: Position): ComposedLongitude =
             ComposedLongitude().apply { addAll(positions.toList()) }
+        fun fromPositions(positions: List<Position>): ComposedLongitude =
+            ComposedLongitude().apply { addAll(positions.toList()) }
         fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
     }
 
