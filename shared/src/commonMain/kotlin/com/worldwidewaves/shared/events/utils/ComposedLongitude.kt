@@ -33,7 +33,12 @@ import kotlin.math.sign
 open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     private val positions = mutableListOf<Position>()
-    private var bbox: BoundingBox? = null
+
+    private var swLat: Double = Double.POSITIVE_INFINITY
+    private var swLng: Double = Double.POSITIVE_INFINITY
+    private var neLat: Double = Double.NEGATIVE_INFINITY
+    private var neLng: Double = Double.NEGATIVE_INFINITY
+
     var direction: Direction = Direction.NORTH
         private set
 
@@ -146,14 +151,10 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return changes <= 1 && distinctSigns <= 2
     }
 
-    fun bbox(): BoundingBox {
-        return bbox ?: BoundingBox(
-            swLat = positions.minOfOrNull { it.lat } ?: 0.0,
-            swLng = positions.minOfOrNull { it.lng } ?: 0.0,
-            neLat = positions.maxOfOrNull { it.lat } ?: 0.0,
-            neLng = positions.maxOfOrNull { it.lng } ?: 0.0
-        ).also { bbox = it }
-    }
+    fun bbox(): BoundingBox = BoundingBox(
+        sw = Position(swLat, swLng),
+        ne = Position(neLat, neLng)
+    )
 
     // -------------------------
 
@@ -161,6 +162,9 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     fun getPositions(): List<Position> = positions.toList()
     override fun iterator(): Iterator<Position> = positions.iterator()
     fun reverseIterator(): Iterator<Position> = positions.asReversed().iterator()
+
+    // -------------------------
+
 
     private fun sortPositions() {
         val southToNorth = positions.sortedBy { it.lat }
@@ -173,22 +177,11 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         positions.addAll(if (direction == Direction.NORTH) southToNorth else southToNorth.reversed())
     }
 
-    // -------------------------
-
     private fun updateBoundingBox(newPositions: List<Position>) {
-        bbox = bbox?.let { current ->
-            BoundingBox(
-                swLat = minOf(current.minLatitude, newPositions.minOf { it.lat }),
-                swLng = minOf(current.minLongitude, newPositions.minOf { it.lng }),
-                neLat = maxOf(current.maxLatitude, newPositions.maxOf { it.lat }),
-                neLng = maxOf(current.maxLongitude, newPositions.maxOf { it.lng })
-            )
-        } ?: BoundingBox(
-            swLat = newPositions.minOf { it.lat },
-            swLng = newPositions.minOf { it.lng },
-            neLat = newPositions.maxOf { it.lat },
-            neLng = newPositions.maxOf { it.lng }
-        )
+        swLat = minOf(swLat, newPositions.minOf { it.lat })
+        swLng = minOf(swLng, newPositions.minOf { it.lng })
+        neLat = maxOf(neLat, newPositions.maxOf { it.lat })
+        neLng = maxOf(neLng, newPositions.maxOf { it.lng })
     }
 
 
