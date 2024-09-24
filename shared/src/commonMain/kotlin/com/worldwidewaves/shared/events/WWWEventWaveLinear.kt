@@ -23,13 +23,14 @@ package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
-import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
@@ -87,9 +88,9 @@ data class WWWEventWaveLinear(
 
         // FIXME: Decide if we change something depending on elapsed time or not (store in WavePolygons)
 
-        val traversedPolygons : MutableList<Polygon> = mutableListOf()
-        val remainingPolygons : MutableList<Polygon> = mutableListOf()
-        val addedTraversedPolygons : MutableList<Polygon> = mutableListOf()
+        val traversedPolygons : MutableArea = mutableListOf()
+        val remainingPolygons : MutableArea = mutableListOf()
+        val addedTraversedPolygons : MutableArea = mutableListOf()
 
         if (lastWaveState == null) {
             val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
@@ -98,13 +99,13 @@ data class WWWEventWaveLinear(
         } else {
             val (newTraversed, remaining) = splitAreaToWave(lastWaveState.remainingPolygons, composedLongitude)
             when(mode) {
-                WaveMode.ADD -> { // Add
+                WaveMode.ADD -> { // Add new traversed polygons without reconstruction
                     remainingPolygons.addAll(remaining)
                     traversedPolygons.addAll(lastWaveState.traversedPolygons)
                     traversedPolygons.addAll(newTraversed)
                     addedTraversedPolygons.addAll(newTraversed)
                 }
-                WaveMode.RECOMPOSE -> {
+                WaveMode.RECOMPOSE -> { // Recompose the remaining polygons on CutPositions
                     remainingPolygons.addAll(remaining)
                     traversedPolygons.addAll(
                         recomposeCutPolygons(
@@ -131,16 +132,13 @@ data class WWWEventWaveLinear(
      * represents the traversed area and which represents the remaining area.
      */
     private fun splitAreaToWave(
-        areaPolygons: List<Polygon>,
+        areaPolygons: Area,
         composedLongitude: ComposedLongitude
-    ) : Pair<List<Polygon>, List<Polygon>> {
+    ) : Pair<Area, Area> {
         val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
 
-        fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> List<Polygon>) =
-            splitResults.mapNotNull { result ->
-                val polygons = selector(result)
-                polygons.ifEmpty { null }
-            }.flatten()
+        fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
+            splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()
 
         val (traversed, remaining) = when (direction) {
             Direction.WEST -> Pair(PolygonSplitResult::right, PolygonSplitResult::left)

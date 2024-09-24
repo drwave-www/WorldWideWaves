@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 
 class WWWEventWaveWarmingAreaLongitudeCut(
@@ -29,11 +29,11 @@ class WWWEventWaveWarmingAreaLongitudeCut(
     val longitude: Double
 ) : WWWEventWaveWarmingArea() {
 
-    private var cachedWarmingPolygons: List<Polygon>? = null
+    private var cachedWarmingPolygons: Area? = null
 
     // ---------------------------
 
-    override suspend fun getPolygons(): List<Polygon> =
+    override suspend fun getPolygons(): Area =
         cachedWarmingPolygons ?: event.area.getPolygons().flatMap { polygon ->
             polygon.splitByLongitude(longitude).right
         }.also { cachedWarmingPolygons = it }

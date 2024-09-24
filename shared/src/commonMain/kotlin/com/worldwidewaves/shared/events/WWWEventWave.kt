@@ -3,12 +3,12 @@ package com.worldwidewaves.shared.events
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getLocalDatetime
 import kotlinx.coroutines.Dispatchers
@@ -76,9 +76,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     data class WavePolygons(
         val timestamp: Instant,
         val referenceLongitude: Double,
-        val traversedPolygons: List<Polygon>, // Maps of cutId to list of polygons
-        val remainingPolygons: List<Polygon>,
-        val addedTraversedPolygons: List<Polygon>? = null
+        val traversedPolygons: Area, // Maps of cutId to list of polygons
+        val remainingPolygons: Area,
+        val addedTraversedPolygons: Area? = null
     )
 
     // ---------------------------

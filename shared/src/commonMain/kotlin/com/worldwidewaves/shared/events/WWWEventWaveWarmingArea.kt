@@ -21,13 +21,13 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 
 abstract class WWWEventWaveWarmingArea {
 
-    abstract suspend fun getPolygons(): List<Polygon>
+    abstract suspend fun getPolygons(): Area
 
     suspend fun isPositionWithin(position: Position): Boolean {
         return getPolygons().any { it.containsPosition(position) }

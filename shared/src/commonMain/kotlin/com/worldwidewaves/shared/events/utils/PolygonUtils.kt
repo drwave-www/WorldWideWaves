@@ -330,7 +330,7 @@ object PolygonUtils {
 
     // ------------------------------------------------------------------------
 
-    fun recomposeCutPolygons(polygons: List<Polygon>): List<Polygon> {
+    fun recomposeCutPolygons(polygons: Area): Area {
         return emptyList() // TODO
     }
 
@@ -339,7 +339,7 @@ object PolygonUtils {
     /**
      * Determines if a point is inside any of the given polygons.
      */
-    fun isPointInPolygons(tap: Position, polygons: List<Polygon>): Boolean =
+    fun isPointInPolygons(tap: Position, polygons: Area): Boolean =
         polygons.any { it.containsPosition(tap) }
 
     /**
@@ -351,7 +351,7 @@ object PolygonUtils {
      * It throws an [IllegalArgumentException] if the input polygon is empty.
      *
      */
-    fun polygonsBbox(polygons: List<Polygon>): BoundingBox {
+    fun polygonsBbox(polygons: Area): BoundingBox {
         require(polygons.isNotEmpty() && polygons.all { it.isNotEmpty() }) {
             "Event area cannot be empty, cannot determine bounding box"
         }
@@ -381,7 +381,7 @@ object PolygonUtils {
      * Converts a list of polygons into a GeoJSON string.
      *
      */
-    fun convertPolygonsToGeoJson(polygons: List<Polygon>): String {
+    fun convertPolygonsToGeoJson(polygons: Area): String {
         val features = polygons.map { polygon ->
             val coordinates = polygon.map { listOf(it.lng, it.lat) }
             """

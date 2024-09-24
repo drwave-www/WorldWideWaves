@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Area
 
 class WWWEventWaveWarmingAreaMeters(
     val event: IWWWEvent,
@@ -30,6 +30,6 @@ class WWWEventWaveWarmingAreaMeters(
 
     // ---------------------------
 
-    override suspend fun getPolygons(): List<Polygon> = emptyList()
+    override suspend fun getPolygons(): Area = emptyList()
 
 }

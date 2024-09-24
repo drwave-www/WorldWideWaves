@@ -21,8 +21,12 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
+
+typealias Area = List<Polygon>
+typealias MutableArea = MutableList<Polygon>
 
 open class Polygon(position: Position? = null) : Iterable<Position> { // Not thread-safe
 
@@ -351,7 +355,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         val pointsString = take(maxPointsToShow).joinToString(", ") { "(${it.lat}, ${it.lng})" }
         val pointsDisplay = if (size > maxPointsToShow) "$pointsString, ..." else pointsString
         val closedStatus = if (isNotEmpty()) ", closed=${first() == last()}" else ""
-        val cutIdStatus = if (this is PolygonUtils.CutPolygon) ", cutId=$cutId" else ""
+        val cutIdStatus = if (this is CutPolygon) ", cutId=$cutId" else ""
 
         return "Polygon(size=$size$closedStatus$cutIdStatus, points=[$pointsDisplay])"
     }
