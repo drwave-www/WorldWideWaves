@@ -330,7 +330,7 @@ object PolygonUtils {
 
     // ------------------------------------------------------------------------
 
-    fun recomposeCutPolygons(polygons: List<List<Polygon>>): List<Polygon> {
+    fun recomposeCutPolygons(polygons: List<Polygon>): List<Polygon> {
         return emptyList() // TODO
     }
 

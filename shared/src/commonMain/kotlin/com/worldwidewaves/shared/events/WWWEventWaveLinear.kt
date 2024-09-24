@@ -30,7 +30,6 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
@@ -88,32 +87,30 @@ data class WWWEventWaveLinear(
 
         // FIXME: Decide if we change something depending on elapsed time or not (store in WavePolygons)
 
-        val traversedPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
-        val remainingPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
-        val addedTraversedPolygons : MutableMap<Int, List<Polygon>> = mutableMapOf()
+        val traversedPolygons : MutableList<Polygon> = mutableListOf()
+        val remainingPolygons : MutableList<Polygon> = mutableListOf()
+        val addedTraversedPolygons : MutableList<Polygon> = mutableListOf()
 
         if (lastWaveState == null) {
             val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
-            traversedPolygons.putAll(traversed)
-            remainingPolygons.putAll(remaining)
+            traversedPolygons.addAll(traversed)
+            remainingPolygons.addAll(remaining)
         } else {
-            lastWaveState.remainingPolygons.forEach { (cutId, polygons) ->
-                val (newTraversed, remaining) = splitAreaToWave(polygons, composedLongitude)
-                when(mode) {
-                    WaveMode.ADD -> { // Add
-                        remainingPolygons.putAll(remaining)
-                        traversedPolygons.putAll(lastWaveState.traversedPolygons)
-                        traversedPolygons.putAll(newTraversed)
-                        addedTraversedPolygons.putAll(newTraversed)
-                    }
-                    WaveMode.RECOMPOSE -> {
-                        remainingPolygons.putAll(remaining)
-                        traversedPolygons.putAll(
-                            recomposeCutPolygons(
-                                lastWaveState.traversedPolygons.values +  newTraversed.values
-                            ).groupBy { (it as CutPolygon).cutId }
+            val (newTraversed, remaining) = splitAreaToWave(lastWaveState.remainingPolygons, composedLongitude)
+            when(mode) {
+                WaveMode.ADD -> { // Add
+                    remainingPolygons.addAll(remaining)
+                    traversedPolygons.addAll(lastWaveState.traversedPolygons)
+                    traversedPolygons.addAll(newTraversed)
+                    addedTraversedPolygons.addAll(newTraversed)
+                }
+                WaveMode.RECOMPOSE -> {
+                    remainingPolygons.addAll(remaining)
+                    traversedPolygons.addAll(
+                        recomposeCutPolygons(
+                            lastWaveState.traversedPolygons +  newTraversed
                         )
-                    }
+                    )
                 }
             }
         }
@@ -123,7 +120,7 @@ data class WWWEventWaveLinear(
             referenceLongitude,
             traversedPolygons,
             remainingPolygons,
-            if (addedTraversedPolygons.isEmpty()) null else addedTraversedPolygons
+            addedTraversedPolygons.ifEmpty { null }
         )
     }
 
@@ -136,21 +133,21 @@ data class WWWEventWaveLinear(
     private fun splitAreaToWave(
         areaPolygons: List<Polygon>,
         composedLongitude: ComposedLongitude
-    ) : Pair<Map<Int, List<Polygon>>, Map<Int, List<Polygon>>> {
+    ) : Pair<List<Polygon>, List<Polygon>> {
         val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
 
-        fun mapNonEmptyPolygons(selector: (PolygonSplitResult) -> List<Polygon>): Map<Int, List<Polygon>> =
+        fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> List<Polygon>) =
             splitResults.mapNotNull { result ->
                 val polygons = selector(result)
-                if (polygons.isNotEmpty()) result.cutId to polygons else null
-            }.toMap()
+                polygons.ifEmpty { null }
+            }.flatten()
 
         val (traversed, remaining) = when (direction) {
             Direction.WEST -> Pair(PolygonSplitResult::right, PolygonSplitResult::left)
             Direction.EAST -> Pair(PolygonSplitResult::left, PolygonSplitResult::right)
         }
 
-        return Pair(mapNonEmptyPolygons(traversed), mapNonEmptyPolygons(remaining))
+        return Pair(flattenNonEmptyPolygons(traversed), flattenNonEmptyPolygons(remaining))
     }
 
     /**
