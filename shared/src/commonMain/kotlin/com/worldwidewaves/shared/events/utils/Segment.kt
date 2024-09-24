@@ -61,12 +61,12 @@ data class Segment(val start: Position, val end: Position) {
             normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 ->
                 // Moving eastward
                 CutPosition(lat = lat, lng = cutLng, cutId = cutId,
-                    cutLeft = start.detached(), cutRight = end.detached()
+                    cutLeft = start, cutRight = end
                 )
             else ->
                 // Moving westward
                 CutPosition(lat = lat, lng = cutLng, cutId = cutId,
-                    cutLeft = end.detached(), cutRight = start.detached()
+                    cutLeft = end, cutRight = start
                 )
         }
     }
@@ -93,8 +93,8 @@ data class Segment(val start: Position, val end: Position) {
         val y = y1 + ua * (y2 - y1)
 
         return CutPosition(lat = y, lng = x, cutId = cutId,
-            cutLeft = if (x1 < x2) start.detached() else end.detached(),
-            cutRight = if (x1 < x2) end.detached() else start.detached()
+            cutLeft = if (x1 < x2) start else end,
+            cutRight = if (x1 < x2) end else start
         )
     }
 

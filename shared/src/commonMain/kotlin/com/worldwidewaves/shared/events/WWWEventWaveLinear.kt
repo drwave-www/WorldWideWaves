@@ -86,7 +86,8 @@ data class WWWEventWaveLinear(
         val referenceLongitude = currentWaveLongitude(bbox.latitudeOfWidestPart())
         val composedLongitude = currentComposedLongitude(referenceLongitude, lastWaveState?.referenceLongitude)
 
-        // FIXME: Decide if we change something depending on elapsed time or not (store in WavePolygons)
+        // FIXME: Decide if we return new polygons depending on elapsed time or not (store in WavePolygons)
+        // FIXME: somewhere : changed mode to recompose if we reach a certain amount of polygons (?)
 
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
@@ -135,6 +136,7 @@ data class WWWEventWaveLinear(
         areaPolygons: Area,
         composedLongitude: ComposedLongitude
     ) : Pair<Area, Area> {
+        if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
         val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
 
         fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =

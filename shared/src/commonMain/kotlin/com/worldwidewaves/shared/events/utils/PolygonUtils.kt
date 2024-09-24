@@ -140,7 +140,8 @@ object PolygonUtils {
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
 
-        val cutId = Random.nextInt(1, Int.MAX_VALUE)
+        // Perpetuate the cutId from the initial polygon if any or generate a new one
+        val cutId = (this as? CutPolygon)?.cutId ?: Random.nextInt(1, Int.MAX_VALUE)
 
         require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty(cutId) }
 
@@ -331,7 +332,51 @@ object PolygonUtils {
     // ------------------------------------------------------------------------
 
     fun recomposeCutPolygons(polygons: Area): Area {
-        return emptyList() // TODO
+        val recomposedPolygons = mutableListOf<Polygon>()
+
+        polygons
+            .filterIsInstance<CutPolygon>() // Should always be the case
+            .groupBy { it.cutId } // Identify parts coming from the same original polygon
+            .forEach { (_, cutPolygons) ->
+                if (cutPolygons.size == 1) { // There's no point to recompose a single part
+                    recomposedPolygons.add(cutPolygons.first()) // Just add it to the area
+                } else {
+
+                    val cutPositionsBytCutId = polygons
+                        .flatMap { p -> p.cutPositions.map { cp -> Pair(cp.pairId, cp)  } }
+                        .groupBy({ it.first }, { it.second }) // group by pairId
+                        .filter { it.value.size == 2 } // only keep cutPositions of cut segments
+
+                    val recomposedPolygon = Polygon()
+
+                    // Start recomposition from the lowest latitude and longitude CutPosition
+                    cutPositionsBytCutId.values.flatten()
+                        .minWithOrNull(compareBy({ it.lat }, { it.lng }))
+                        .apply {
+                            fun traverse(current: Position, previous: Position? = null) {
+                                if (current == this && previous != null) return // Stop traversal
+
+                                if (previous != null && current is CutPosition && current.cutLeft != current.cutRight) {
+                                    when {
+                                        (previous == current.cutLeft) -> recomposedPolygon.add(current.cutRight)
+                                        (previous == current.cutRight) -> recomposedPolygon.add(current.cutLeft)
+                                        else -> throw IllegalStateException("Invalid cut position")
+                                    }
+                                } else {
+                                    recomposedPolygon.add(current)
+                                    current.next?.let { traverse(it, current) }
+                                }
+
+                            }
+                            this?.let { traverse(it) }
+                        }
+
+                    if (recomposedPolygon.isNotEmpty())
+                        recomposedPolygons.add(recomposedPolygon)
+                }
+            }
+
+        return recomposedPolygons
     }
 
     // ------------------------------------------------------------------------
