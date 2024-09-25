@@ -30,6 +30,11 @@ import kotlin.math.abs
  */
 data class Segment(val start: Position, val end: Position) {
 
+    init {
+        start.init()
+        end.init()
+    }
+
     fun normalized(): Segment = Segment(start.normalized(), end.normalized())
 
     /**
@@ -58,16 +63,10 @@ data class Segment(val start: Position, val end: Position) {
         return when {
             normalizedStartLng == normalizedCutLng && normalizedEndLng == normalizedCutLng ->
                 null // No intersection for a vertical line
-            normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 ->
-                // Moving eastward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
-                    cutLeft = start, cutRight = end
-                )
-            else ->
-                // Moving westward
-                CutPosition(lat = lat, lng = cutLng, cutId = cutId,
-                    cutLeft = end, cutRight = start
-                )
+            normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 -> // Moving eastward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = start, cutRight = end)
+            else -> // Moving westward
+                CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = end, cutRight = start)
         }
     }
 

@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.PolygonUtilsTestCases.TestCasePolygon
 import io.github.aakira.napier.Antilog
@@ -45,12 +46,13 @@ class PolygonUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude() = runTest {
-        PolygonUtilsTestCases.testCases.forEachIndexed { idx, testCase ->
-            testSplitPolygonCase(idx, testCase)
+        PolygonUtilsTestCases.testCases/*.filterIndexed { idx, _ -> idx == 4 }*/.forEachIndexed { idx, testCase ->
+            val result = testSplitPolygonCase(idx, testCase)
+            testRecomposePolygonCase(idx, testCase, result)
         }
     }
 
-    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon) {
+    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.PolygonSplitResult {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {
@@ -71,6 +73,19 @@ class PolygonUtilsSplitPolygonTest {
                 assertTrue(areRingPolygonsEqual(expectedPolygon.polygon, result[index]))
             }
         }
+
+        return result
+    }
+
+    private fun testRecomposePolygonCase(idx: Int, testCase: TestCasePolygon, result: PolygonUtils.PolygonSplitResult) {
+        Napier.i("==> Testing recompose of polygon testcase $idx")
+
+        val recomposedPolygons = recomposeCutPolygons(result.left + result.right)
+
+        assertEquals(1, recomposedPolygons.size)
+        assertEquals(0, recomposedPolygons[0].cutPositions.size)
+        assertEquals(testCase.recomposedPolygon.size, recomposedPolygons[0].size)
+        assertTrue(areRingPolygonsEqual(testCase.recomposedPolygon, recomposedPolygons[0]))
     }
 
     // ------------------------------------------------------------------------
@@ -82,7 +97,11 @@ class PolygonUtilsSplitPolygonTest {
         }
 
         // Remove the repeating point from the end of each polygon
-        val cleanedPolygon1 = removeRepeatingPoint(polygon1)
+        val cleanedPolygon1 = if (polygon1.isClockwise() != polygon2.isClockwise()) {
+            removeRepeatingPoint(polygon1.inverted())
+        } else {
+            removeRepeatingPoint(polygon1)
+        }
         val cleanedPolygon2 = removeRepeatingPoint(polygon2)
 
         // Normalize both polygons to start from the same point
@@ -110,10 +129,13 @@ class PolygonUtilsSplitPolygonTest {
             ?: return polygon
 
         // Rotate the polygon to start from the smallest point
-        return (
-                polygon.subList(minPoint, polygon.last()!!.id) +
-                        polygon.subList(polygon.last()!!, minPoint.id)
-                )
+        return if (polygon.last() == minPoint) {
+            polygon.subList(polygon.last()!!, polygon.last()!!.id) +
+                    polygon.subList(polygon.first()!!, polygon.last()!!.id)
+        } else {
+            polygon.subList(minPoint, polygon.last()!!.id) +
+                    polygon.subList(polygon.last()!!, minPoint.id)
+        }
     }
 
     private fun removeRepeatingPoint(polygon: Polygon): Polygon {

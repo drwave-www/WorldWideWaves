@@ -31,7 +31,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class PolygonUtilsBoundingBoxTest {
+class BoundingBoxTest {
 
     @Test
     fun testSimplePolygon() {

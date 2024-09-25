@@ -38,7 +38,8 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
     var id: Int = -1
         internal set // Cannot be set outside of the module
         get() { // Cannot be read before being initialized (added to a Polygon)
-            if (field == -1) throw IllegalStateException("ID has not been initialized")
+            if (field == -1)
+                throw IllegalStateException("ID has not been initialized")
             return field
         }
 
@@ -92,7 +93,12 @@ class CutPosition( // A position that has been cut
 ) : Position(lat, lng) {
 
     // Id which is shared/can be compared between the two cut positions
-    val pairId: Double by lazy { (cutId + cutLeft.id + cutRight.id).toDouble() }
+    val pairId: Double by lazy { (cutId + listOf(cutLeft.id, cutRight.id).sorted().let { (first, second) ->
+        ((first shl 4) + (second shr 5)).toDouble()
+    }) }
+
+    val isPointCut by lazy { cutLeft == cutRight }
+    val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 

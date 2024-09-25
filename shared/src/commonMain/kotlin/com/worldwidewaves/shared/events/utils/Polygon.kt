@@ -76,9 +76,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // -- Direction logic -------------
 
-    fun isClockwise(): Boolean = when {
-        size < 3 -> true // Two-point polygon is considered clockwise
-        else -> isClockwise
+    fun isClockwise(): Boolean {
+        forceDirectionComputation()
+        return when {
+            size < 3 -> true // Two-point polygon is considered clockwise
+            else -> isClockwise
+        }
     }
 
     private fun updateAreaAndDirection(p1: Position?, p2: Position?, isRemoving: Boolean = false) {
@@ -319,7 +322,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun cutIterator() = cutPositions.iterator()
 
-    // --------------------------------
+    // -------------------------------
 
     fun clear(): Polygon {
         positionsIndex.clear()
@@ -340,6 +343,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun first(): Position? = head
     fun last(): Position? = tail
+    fun search(current: Position): Position? = this.find { it == current }
     val size: Int get() = positionsIndex.size
     val cutSize: Int get() = cutPositions.size
     fun isEmpty(): Boolean = positionsIndex.isEmpty()
@@ -387,6 +391,10 @@ fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
     }
 }
 
+fun <T: Polygon> T.inverted(): Polygon = createNew().apply {
+    this@inverted.reverseIterator().forEach { add(it) }
+}
+
 inline fun <reified T: Polygon> T.move() : T = createNew().xferFrom(this) as T
 
 operator fun <T: Polygon> T.plus(other: Polygon) = createNew().apply {
@@ -405,7 +413,7 @@ fun <T: Polygon> T.xferFrom(polygon: Polygon) : T {
 
 fun <T: Polygon> T.close() : T {
     if (isNotEmpty() && first() != last()) {
-        add(first()!!)
+        add(first()!!.detached())
     }
     return this
 }

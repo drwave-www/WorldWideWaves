@@ -33,7 +33,8 @@ object PolygonUtilsTestCases {
         val composedLongitudeToCut: ComposedLongitude? = null,
         val polygon: Polygon,
         val leftExpected: List<ExpectedPolygon>,
-        val rightExpected: List<ExpectedPolygon>
+        val rightExpected: List<ExpectedPolygon>,
+        val recomposedPolygon: Polygon
     )
 
     // --- Polygons -----------------------------------------------------------
@@ -121,12 +122,12 @@ object PolygonUtilsTestCases {
             leftExpected = listOf(
                 ExpectedPolygon(7, Polygon.fromPositions(
                     Position(lat = -12.0, lng = -6.0),
-                    Position(lat = -13.0, lng = -3.0), // <- cut
-                    Position(lat = -9.0, lng = -3.0), // <- cut
+                    Position(lat = -13.0, lng = -3.0), // <- cut point
+                    Position(lat = -9.0, lng = -3.0), // <- cut point
                     Position(lat = -8.0, lng = -6.0),
-                    Position(lat = -7.0, lng = -3.0), // <- cut
+                    Position(lat = -7.0, lng = -3.0), // <- cut point
                     Position(lat = -6.0, lng = -6.0),
-                    Position(lat = -5.0, lng = -3.0), // <- cut
+                    Position(lat = -5.0, lng = -3.0), // <- cut point
                     Position(lat = 2.0, lng = -3.0), // <- cut
                     Position(lat = 3.0, lng = -8.0),
                     Position(lat = 5.0, lng = -8.0),
@@ -149,9 +150,9 @@ object PolygonUtilsTestCases {
             ),
             rightExpected = listOf(
                 ExpectedPolygon(3, Polygon.fromPositions( // We accept self-intersecting polygons
-                    Position(lat = -5.0, lng = -3.0), // <- cut
+                    Position(lat = -5.0, lng = -3.0), // <- cut point
                     Position(lat = -3.0, lng = 0.0),
-                    Position(lat = -2.0, lng = -3.0), // <- cut
+                    Position(lat = -2.0, lng = -3.0), // <- cut point
                     Position(lat = -1.0, lng = 2.0),
                     Position(lat = 1.0, lng = 2.0),
                     Position(lat = 2.0, lng = -3.0), // <- cut
@@ -169,6 +170,34 @@ object PolygonUtilsTestCases {
                     Position(lat = 10.0, lng = -3.0), // <- cut
                     Position(lat = 8.5, lng = -3.0)
                 ))
+            ), recomposedPolygon = Polygon.fromPositions(
+                Position(lat = -12.0, lng = -6.0),
+                Position(lat = -13.0, lng = -3.0),
+                // Position(lat = -11.0, lng = -3.0), // Deleted as useless by split algo
+                Position(lat = -9.0, lng = -3.0),
+                Position(lat = -8.0, lng = -6.0),
+                Position(lat = -7.0, lng = -3.0),
+                Position(lat = -6.0, lng = -6.0),
+                Position(lat = -5.0, lng = -3.0),
+                Position(lat = -3.0, lng = 0.0),
+                Position(lat = -2.0, lng = -3.0),
+                Position(lat = -1.0, lng = 2.0),
+                Position(lat = 1.0, lng = 2.0),
+                Position(lat = 3.0, lng = -8.0),
+                Position(lat = 5.0, lng = -8.0),
+                Position(lat = 7.0, lng = -7.0),
+                Position(lat = 8.0, lng = -5.0),
+                Position(lat = 9.0, lng = -1.0),
+                Position(lat = 9.0, lng = 2.0),
+                Position(lat = 14.0, lng = 2.0),
+                Position(lat = 14.0, lng = -5.0),
+                Position(lat = 12.0, lng = -5.0),
+                Position(lat = 12.0, lng = -1.0),
+                Position(lat = 10.0, lng = 1.0),
+                Position(lat = 10.0, lng = -7.0),
+                Position(lat = 10.0, lng = -9.0),
+                Position(lat = -11.0, lng = -9.0),
+                Position(lat = -12.0, lng = -6.0)
             )
         ),
 
@@ -218,7 +247,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 3.0, lng = -0.5), // <- cut
                     Position(lat = 2.0, lng = -0.5)
                 ))
-            )
+            ),
+            recomposedPolygon = polygon2.close()
         ),
 
         // ------------------------
@@ -253,7 +283,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 3.0, lng = 2.0), // <- cut
                     Position(lat = 2.0, lng = 2.0)
                 ))
-            )
+            ),
+            recomposedPolygon = polygon2.close()
         ),
 
         // ------------------------
@@ -313,7 +344,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 4.0, lng = 0.5), // <- cut
                     Position(lat = 3.0, lng = 0.5)
                 ))
-            )
+            ),
+            recomposedPolygon = polygon3
         ),
 
         // ------------------------
@@ -326,25 +358,26 @@ object PolygonUtilsTestCases {
             ),
             polygon = polygon4,
             leftExpected = listOf(
-                ExpectedPolygon(3, Polygon.fromPositions(
+                ExpectedPolygon(2, Polygon.fromPositions(
                     Position(lat = -2.0, lng = -2.0),
                     Position(lat = -2.0, lng = -1.0), // <- cut
-                    Position(lat = 1.0, lng = -1.0), // <- cut
+                    Position(lat = 1.0, lng = -1.0),
                     Position(lat = 2.0, lng = 0.0), // <- cut
                     Position(lat = 2.0, lng = -2.0),
                     Position(lat = -2.0, lng = -2.0)
                 ))
             ),
             rightExpected = listOf(
-                ExpectedPolygon(3, Polygon.fromPositions( // We accept self-intersecting polygons
+                ExpectedPolygon(2, Polygon.fromPositions( // We accept self-intersecting polygons
                     Position(lat = -2.0, lng = -1.0), // <- cut
                     Position(lat = -2.0, lng = 2.0),
                     Position(lat = 2.0, lng = 2.0),
                     Position(lat = 2.0, lng = 0.0), // <- cut
-                    Position(lat = 1.0, lng = -1.0), // <- cut
+                    Position(lat = 1.0, lng = -1.0),
                     Position(lat = -2.0, lng = -1.0)
                 ))
-            )
+            ),
+            recomposedPolygon = polygon4.close()
         )
     )
 
