@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events.utils
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +31,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -60,6 +64,7 @@ interface IClock {
         }
     }
 }
+
 class SystemClock : IClock {
     override fun now(): Instant {
         val instant = Instant.parse("2024-03-19T13:00:00Z")
@@ -71,26 +76,34 @@ class SystemClock : IClock {
 // ---------------------------
 
 interface CoroutineScopeProvider {
-    val scopeIO: CoroutineScope
-    val scopeDefault: CoroutineScope
     suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T
+    fun launchIO(block: suspend CoroutineScope.() -> Unit): Job
+    fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job
+    fun cancelAllCoroutines()
 }
 
 class DefaultCoroutineScopeProvider(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : CoroutineScopeProvider {
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.Default)
 
-    override val scopeIO: CoroutineScope = CoroutineScope(ioDispatcher)
-    override val scopeDefault: CoroutineScope = CoroutineScope(defaultDispatcher)
+    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+        scope.launch(ioDispatcher, block = block)
 
-    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(ioDispatcher, block)
-    }
+    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job =
+        scope.launch(defaultDispatcher, block = block)
 
-    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T {
-        return withContext(defaultDispatcher, block)
+    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(ioDispatcher) { scope.block() }
+
+    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
+        withContext(defaultDispatcher) { scope.block() }
+
+    override fun cancelAllCoroutines() {
+        job.cancel()
     }
 }
 
@@ -104,12 +117,11 @@ class DefaultEventsConfigurationProvider(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoEventsConfiguration(): String {
-        return coroutineScopeProvider.withIOContext {
+    override suspend fun geoEventsConfiguration(): String =
+        coroutineScopeProvider.withIOContext {
             Log.i(::geoEventsConfiguration.name, "Loading events configuration from $FS_EVENTS_CONF")
             Res.readBytes(FS_EVENTS_CONF).decodeToString()
         }
-    }
 }
 
 // ---------------------------
@@ -120,8 +132,8 @@ interface GeoJsonDataProvider {
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
-        return try {
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? =
+        try {
             val geojsonData = withContext(Dispatchers.IO) {
                 Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
                 Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
@@ -131,7 +143,6 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
             Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId", throwable = e)
             null
         }
-    }
 }
 
 // ---------------------------
@@ -150,13 +161,11 @@ class DefaultEventsDecoder : EventsDecoder {
 interface MapDataProvider {
     suspend fun geoMapStyleData(): String
 }
-
 class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
-    override suspend fun geoMapStyleData(): String {
-        return withContext(Dispatchers.IO) {
+    override suspend fun geoMapStyleData(): String =
+        withContext(Dispatchers.IO) {
             Log.i(::geoMapStyleData.name,"Loading map style data from $FS_MAPS_STYLE")
             Res.readBytes(FS_MAPS_STYLE).decodeToString()
         }
-    }
 }

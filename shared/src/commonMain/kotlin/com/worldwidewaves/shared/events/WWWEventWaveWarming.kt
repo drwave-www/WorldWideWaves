@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@ import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
 import com.worldwidewaves.shared.events.utils.DataValidator
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class WWWEventWaveWarming(
@@ -33,6 +35,32 @@ data class WWWEventWaveWarming(
 ) : DataValidator {
 
     enum class Type { LONGITUDE_CUT, METERS }
+
+    @Transient private var _event: IWWWEvent? = null
+    @Transient private var _warmingArea: WWWEventWaveWarmingArea? = null
+
+    // ------------------------
+
+    private val event: IWWWEvent
+        get() = requireNotNull(this._event) { "Event not set" }
+
+    val area: WWWEventWaveWarmingArea
+        get() = requireNotNull(this._warmingArea) { "Area not set" }
+
+    fun setRelatedEvent(event: IWWWEvent): WWWEventWaveWarming {
+        this._event = event
+
+        _warmingArea = when(type) {
+            LONGITUDE_CUT -> WWWEventWaveWarmingAreaLongitudeCut(event, requireNotNull(longitude) {
+                "Longitude must not be null for type 'LONGITUDE_CUT'" })
+            METERS -> WWWEventWaveWarmingAreaMeters(event, requireNotNull(meters) {
+                "Meters must not be null for type 'METERS'" })
+        }
+
+        return this
+    }
+
+    // --- DataValidator implementation
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
         when {

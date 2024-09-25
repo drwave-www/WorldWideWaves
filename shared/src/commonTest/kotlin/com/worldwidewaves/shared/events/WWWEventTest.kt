@@ -1,21 +1,12 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import kotlinx.datetime.IllegalTimeZoneException
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
-
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +20,16 @@ import kotlin.test.assertTrue
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
+import kotlinx.datetime.IllegalTimeZoneException
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class WWWEventTest {
 

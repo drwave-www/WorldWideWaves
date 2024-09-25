@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +53,7 @@ class WWWEventMap(
 
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
-        get() = _event ?: throw IllegalStateException("Event not set")
+        get() = requireNotNull(_event) { "Event not set" }
         set(value) {
             _event = value
         }
@@ -91,7 +92,7 @@ class WWWEventMap(
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
         val warmingGeoJsonFilePath = cacheStringToFile(
             "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.wave.getWarmingPolygons())
+            convertPolygonsToGeoJson(event.wave.warming.area.getPolygons())
         ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
@@ -141,26 +142,25 @@ class WWWEventMap(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
-                    this.add("Map Maxzoom must be a positive double less than 20")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
+                this.add("Map Maxzoom must be a positive double less than 20")
 
-                language.isEmpty() ->
-                    this.add("Map language is empty")
+            language.isEmpty() ->
+                this.add("Map language is empty")
 
-                !language.matches(Regex("^[a-z]{2,3}$")) ->
-                    this.add("Map language must be a valid ISO-639 code")
+            !language.matches(Regex("^[a-z]{2,3}$")) ->
+                this.add("Map language must be a valid ISO-639 code")
 
-                zone.isEmpty() ->
-                    this.add("Map Osmarea is empty")
+            zone.isEmpty() ->
+                this.add("Map Osmarea is empty")
 
-                !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
-                    this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
+            !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
+                this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
 
-                else -> { }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
+            else -> { }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
 
 }

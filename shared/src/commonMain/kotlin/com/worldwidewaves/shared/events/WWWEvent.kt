@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +93,9 @@ data class WWWEvent(
 
     @Transient private var _wave: WWWEventWave? = null
     override val wave: WWWEventWave
-        get() = _wave ?: (wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit
-        ?: throw IllegalStateException("$id: No valid wave definition found")).apply {
+        get() = _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
+            "$id: No valid wave definition found"
+        }.apply {
             setRelatedEvent<WWWEventWave>(this@WWWEvent)
             _wave = this
         }
@@ -179,59 +181,58 @@ data class WWWEvent(
     /**
      * This function checks the event for various validation criteria.
      */
-    override fun validationErrors() : List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                id.isEmpty() ->
-                    this.add("ID is empty")
+    override fun validationErrors() : List<String>? = mutableListOf<String>().apply {
+        when {
+            id.isEmpty() ->
+                this.add("ID is empty")
 
-                !id.matches(Regex("^[a-z_]+$")) ->
-                    this.add("ID must be lowercase with only simple letters or underscores")
+            !id.matches(Regex("^[a-z_]+$")) ->
+                this.add("ID must be lowercase with only simple letters or underscores")
 
-                type.isEmpty() ->
-                    this.add("Type is empty")
+            type.isEmpty() ->
+                this.add("Type is empty")
 
-                type !in listOf("city", "country", "world") ->
-                    this.add("Type must be either 'city', 'country', or 'world'")
+            type !in listOf("city", "country", "world") ->
+                this.add("Type must be either 'city', 'country', or 'world'")
 
-                location.isEmpty() ->
-                    this.add("Location is empty")
+            location.isEmpty() ->
+                this.add("Location is empty")
 
-                type == "city" && country.isNullOrEmpty() ->
-                    this.add("Country must be specified for type 'city'")
+            type == "city" && country.isNullOrEmpty() ->
+                this.add("Country must be specified for type 'city'")
 
-                timeZone.isEmpty() ->
-                    this.add("Time zone is empty")
+            timeZone.isEmpty() ->
+                this.add("Time zone is empty")
 
-                !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
-                    this.add("Date format is invalid or date is not valid")
+            !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
+                this.add("Date format is invalid or date is not valid")
 
-                !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
-                    this.add("Start hour format is invalid or time is not valid")
+            !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
+                this.add("Start hour format is invalid or time is not valid")
 
-                description.isEmpty() ->
-                    this.add("Description is empty")
+            description.isEmpty() ->
+                this.add("Description is empty")
 
-                instagramAccount.isEmpty() ->
-                    this.add("Instagram account is empty")
+            instagramAccount.isEmpty() ->
+                this.add("Instagram account is empty")
 
-                !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
-                    this.add("Instagram account is invalid")
+            !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
+                this.add("Instagram account is invalid")
 
-                instagramHashtag.isEmpty() ->
-                    this.add("Instagram hashtag is empty")
+            instagramHashtag.isEmpty() ->
+                this.add("Instagram hashtag is empty")
 
-                !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
-                    this.add("Instagram hashtag is invalid")
+            !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
+                this.add("Instagram hashtag is invalid")
 
-                runCatching { TimeZone.of(timeZone) }.isFailure ->
-                    this.add("Time zone is invalid")
+            runCatching { TimeZone.of(timeZone) }.isFailure ->
+                this.add("Time zone is invalid")
 
-                else -> wavedef.validationErrors()?.let { addAll(it) }
-                    .also { area.validationErrors()?.let { addAll(it) } }
-                    .also { map.validationErrors()?.let { addAll(it) } }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
+            else -> wavedef.validationErrors()?.let { addAll(it) }
+                .also { area.validationErrors()?.let { addAll(it) } }
+                .also { map.validationErrors()?.let { addAll(it) } }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
 
 }
 

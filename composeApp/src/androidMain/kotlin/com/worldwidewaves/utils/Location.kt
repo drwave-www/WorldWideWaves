@@ -3,9 +3,10 @@ package com.worldwidewaves.utils
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,12 @@ package com.worldwidewaves.utils
  */
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -32,6 +38,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
+import com.worldwidewaves.shared.generated.resources.ask_gps_enable
+import com.worldwidewaves.shared.generated.resources.no
+import com.worldwidewaves.shared.generated.resources.yes
+import org.jetbrains.compose.resources.stringResource
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @Composable
 fun requestLocationPermission(): Boolean {
@@ -67,4 +79,22 @@ fun requestLocationPermission(): Boolean {
     }
 
     return permissionGranted
+}
+
+@Composable
+fun CheckGPSEnable() {
+    val context = LocalContext.current
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    if (requestLocationPermission() && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        AlertDialog.Builder(context)
+            .setMessage(stringResource(ShRes.string.ask_gps_enable))
+            .setCancelable(false)
+            .setPositiveButton(stringResource(ShRes.string.yes)) { _, _ ->
+                startActivity(context, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
+            }
+            .setNegativeButton(stringResource(ShRes.string.no)) { dialog, _ -> dialog.cancel() }
+            .create()
+            .show()
+    }
 }

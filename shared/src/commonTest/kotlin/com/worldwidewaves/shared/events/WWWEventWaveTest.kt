@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +21,11 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.debugBuild
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.METERS
+import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Polygon
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -50,21 +52,27 @@ class WWWEventWaveTest : KoinTest {
     @BeforeTest
     fun setUp() {
 
-        debugBuild()
-
         startKoin { modules(
             module {
                 single { clock }
             }
         )}
 
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
+
         wave = object : WWWEventWave() {
-            override val speed: Double = 0.0
+            override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
-            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = METERS)
-            override suspend fun getWarmingPolygons(): List<Polygon> = emptyList()
+            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = LONGITUDE_CUT, longitude = 0.0)
+            override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons = WavePolygons(
+                clock.now(), 0.0, emptyList(), emptyList()
+            )
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
-            override suspend fun hasUserBeenHit(): Boolean = false
+            override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
         }.setRelatedEvent(event)
     }

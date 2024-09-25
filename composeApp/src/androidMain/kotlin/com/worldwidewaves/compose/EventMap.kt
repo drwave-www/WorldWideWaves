@@ -3,9 +3,10 @@ package com.worldwidewaves.compose
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +53,12 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.PolygonUtils
+import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
+import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -111,6 +113,7 @@ class EventMap(
 
         // Request GPS location Android permissions
         hasLocationPermission = requestLocationPermission()
+        if (hasLocationPermission) CheckGPSEnable()
 
         // Setup Map Style and properties, initialize the map view
         LaunchedEffect(Unit) {
@@ -246,7 +249,7 @@ class EventMap(
         coroutineScope.launch {
             val bbox = event.area.getBoundingBox()
 
-            // Maximize the view to the map
+            // Maximize the view to the map // FIXME: move to shared
             val (sw, ne) = bbox
             val eventMapWidth = ne.lng - sw.lng
             val eventMapHeight = ne.lat - sw.lat
@@ -260,10 +263,10 @@ class EventMap(
             // depending on whether the event map is wider or taller than the MapLibre component.
             val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > mapLibreAspectRatio) {
                 val lngDiff = eventMapHeight * mapLibreAspectRatio / 2
-                PolygonUtils.Quadruple(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+                Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
             } else {
                 val latDiff = eventMapWidth / mapLibreAspectRatio / 2
-                PolygonUtils.Quadruple(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+                Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
             }
 
             val bounds = LatLngBounds.Builder()
@@ -306,7 +309,7 @@ class EventMap(
         map: MapLibreMap,
         coroutineScope: CoroutineScope
     ) {
-        val viewBounds = map.projection.visibleRegion.latLngBounds
+        val viewBounds = map.projection.visibleRegion.latLngBounds // FIXME: move to shared
         val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
         val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
 

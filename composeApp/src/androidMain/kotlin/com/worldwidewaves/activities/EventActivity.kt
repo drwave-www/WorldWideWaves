@@ -3,9 +3,10 @@ package com.worldwidewaves.activities
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +120,6 @@ class EventActivity : AbstractEventBackActivity() {
         var geolocText by remember { mutableStateOf(ShRes.string.geoloc_undone) }
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
-
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
@@ -164,7 +164,7 @@ private fun updateGeolocText(
         coroutineScope.launch {
             val currentPosition = Position(newLocation.latitude, newLocation.longitude)
             val newGeolocText = when {
-                event.wave.isPositionWithinWarming(currentPosition) -> ShRes.string.geoloc_warm_in
+                event.wave.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
                 event.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
                 else -> ShRes.string.geoloc_yourenotin
             }

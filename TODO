@@ -2,8 +2,10 @@
 Next:
 
 - ======== Bugs/Issues/Refactorings =========
-    - demander d'activer le GPS sur rentrée dans l'app et veille + sur clic position lorsqu'elle sera là
-    - code header on 80 cols
+    - -180/180 : test d'un split polygon sur la ligne de changement de date
+    - correct Polygon.isClockwise() without requiring a force update
+    - put a timer on GPS activation  requests
+    - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom
         + styling script : jq => every minzoom < 10 = 3
     - manage with translations
@@ -13,7 +15,6 @@ Next:
 
 - Wave linear
     - wave progression
-        - ajouter a la wave un timeRemainingBeforeHit()
         - add a layer on the map
         - add a progress bar on the map
 

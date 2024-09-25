@@ -3,9 +3,10 @@ package com.worldwidewaves.shared.events
 /*
  * Copyright 2024 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries,
- * culminating in a global wave. The project aims to transcend physical and cultural boundaries, fostering unity,
- * community, and shared human experience by leveraging real-time coordination and location-based services.
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +21,17 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
+import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.toPolygon
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -58,7 +60,7 @@ data class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val cachedAreaPolygons: MutableList<Polygon> = mutableListOf()
+    @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
 
@@ -133,7 +135,7 @@ data class WWWEventArea(
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
      *
      */
-     suspend fun getPolygons(): List<Polygon> {
+     suspend fun getPolygons(): Area {
         if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
@@ -171,14 +173,13 @@ data class WWWEventArea(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>()
-        .apply {
-            when {
-                osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
-                    add("OSM admin ID must be greater than 0 if it's not the world event")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
+                add("OSM admin ID must be greater than 0 if it's not the world event")
 
-                else -> { /* No validation errors */ }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
+            else -> { /* No validation errors */ }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
 }
