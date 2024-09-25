@@ -23,7 +23,8 @@ package com.worldwidewaves.shared.events.utils
 
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
-import com.worldwidewaves.shared.events.utils.PolygonUtilsTestCases.TestCasePolygon
+import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases
+import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases.TestCasePolygon
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier

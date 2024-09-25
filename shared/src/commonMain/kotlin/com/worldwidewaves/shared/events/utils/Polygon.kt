@@ -77,7 +77,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Direction logic -------------
 
     fun isClockwise(): Boolean {
-        forceDirectionComputation()
+        forceDirectionComputation() // FIXME: there is an issue in maintenance somewhere
         return when {
             size < 3 -> true // Two-point polygon is considered clockwise
             else -> isClockwise

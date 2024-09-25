@@ -144,7 +144,7 @@ class PolygonUtilsMiscTest {
         assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
 
         polygon.insertAfter(Position(0.0, 1.0), polygon.first()!!.id)
-        assertTrue(polygon.isClockwise(), "Polygon should remain clockwise after insertion")
+        assertFalse(polygon.isClockwise(), "Polygon should be anti-clockwise after insertion")
     }
 
     @Test

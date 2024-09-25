@@ -3,7 +3,7 @@ Next:
 
 - ======== Bugs/Issues/Refactorings =========
     - -180/180 : test d'un split polygon sur la ligne de changement de date
-    - reorganize tests and ensure everything is well tested, object by object
+    - correct Polygon.isClockwise() without requiring a force update
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom

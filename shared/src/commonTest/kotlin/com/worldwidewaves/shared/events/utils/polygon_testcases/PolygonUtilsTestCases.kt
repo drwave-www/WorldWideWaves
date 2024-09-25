@@ -1,4 +1,9 @@
-package com.worldwidewaves.shared.events.utils
+package com.worldwidewaves.shared.events.utils.polygon_testcases
+
+import com.worldwidewaves.shared.events.utils.ComposedLongitude
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.close
 
 /*
  * Copyright 2024 DrWave
@@ -139,14 +144,16 @@ object PolygonUtilsTestCases {
                     Position(lat = 10.0, lng = -9.0),
                     Position(lat = -11.0, lng = -9.0),
                     Position(lat = -12.0, lng = -6.0)
-                )),
+                )
+                ),
                 ExpectedPolygon(2, Polygon.fromPositions(
                     Position(lat = 12.0, lng = -5.0),
                     Position(lat = 12.0, lng = -3.0), // <- cut
                     Position(lat = 14.0, lng = -3.0), // <- cut
                     Position(lat = 14.0, lng = -5.0),
                     Position(lat = 12.0, lng = -5.0)
-                ))
+                )
+                )
             ),
             rightExpected = listOf(
                 ExpectedPolygon(3, Polygon.fromPositions( // We accept self-intersecting polygons
@@ -157,7 +164,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 1.0, lng = 2.0),
                     Position(lat = 2.0, lng = -3.0), // <- cut
                     Position(lat = -5.0, lng = -3.0)
-                )),
+                )
+                ),
                 ExpectedPolygon(4, Polygon.fromPositions(
                     Position(lat = 8.5, lng = -3.0), // <- cut
                     Position(lat = 9.0, lng = -1.0),
@@ -169,7 +177,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 10.0, lng = 1.0),
                     Position(lat = 10.0, lng = -3.0), // <- cut
                     Position(lat = 8.5, lng = -3.0)
-                ))
+                )
+                )
             ), recomposedPolygon = Polygon.fromPositions(
                 Position(lat = -12.0, lng = -6.0),
                 Position(lat = -13.0, lng = -3.0),
@@ -217,14 +226,16 @@ object PolygonUtilsTestCases {
                     Position(lat = 2.0, lng = -2.0),
                     Position(lat = 2.0, lng = -0.5), // <- cut
                     Position(lat = 3.0, lng = -0.5)
-                )),
+                )
+                ),
                 ExpectedPolygon(2, Polygon.fromPositions(
                     Position(lat = 1.0, lng = -0.5), // <- cut
                     Position(lat = 1.0, lng = -1.0),
                     Position(lat = 0.0, lng = -1.0),
                     Position(lat = 0.0, lng = -0.5), // <- cut
                     Position(lat = 1.0, lng = -0.5)
-                ))
+                )
+                )
             ),
             rightExpected = listOf(
                 ExpectedPolygon(4, Polygon.fromPositions( // We accept self-intersecting polygons
@@ -237,7 +248,8 @@ object PolygonUtilsTestCases {
                     Position(lat = -1.0, lng = 1.0),
                     Position(lat = -1.0, lng = -0.5), // <- cut
                     Position(lat = -2.0, lng = -0.5)
-                )),
+                )
+                ),
                 ExpectedPolygon(2, Polygon.fromPositions(
                     Position(lat = 2.0, lng = -0.5), // <- cut
                     Position(lat = 2.0, lng = 3.0),
@@ -246,7 +258,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 3.0, lng = 4.0),
                     Position(lat = 3.0, lng = -0.5), // <- cut
                     Position(lat = 2.0, lng = -0.5)
-                ))
+                )
+                )
             ),
             recomposedPolygon = polygon2.close()
         ),
@@ -271,7 +284,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 2.0, lng = -2.0),
                     Position(lat = 2.0, lng = 2.0), // <- cut
                     Position(lat = 3.0, lng = 2.0)
-                ))
+                )
+                )
             ),
             rightExpected = listOf(
                 ExpectedPolygon(2, Polygon.fromPositions( // We accept self-intersecting polygons
@@ -282,7 +296,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 3.0, lng = 4.0),
                     Position(lat = 3.0, lng = 2.0), // <- cut
                     Position(lat = 2.0, lng = 2.0)
-                ))
+                )
+                )
             ),
             recomposedPolygon = polygon2.close()
         ),
@@ -303,7 +318,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 5.0, lng = -2.0),
                     Position(lat = 5.0, lng = 0.5),
                     Position(lat = 6.0, lng = 0.5)
-                )),
+                )
+                ),
                 ExpectedPolygon(4, Polygon.fromPositions(
                     Position(lat = 4.0, lng = 0.5), // <- cut
                     Position(lat = 4.0, lng = 0.0), // <- cut
@@ -315,7 +331,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 3.0, lng = 0.0),
                     Position(lat = 3.0, lng = 0.5),
                     Position(lat = 4.0, lng = 0.5)
-                ))
+                )
+                )
             ),
             rightExpected = listOf(
                 ExpectedPolygon(2, Polygon.fromPositions( // We accept self-intersecting polygons
@@ -324,7 +341,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 0.0, lng = 5.0),
                     Position(lat = 0.0, lng = 0.5), // <- cut
                     Position(lat = -1.0, lng = 0.5)
-                )),
+                )
+                ),
                 ExpectedPolygon(4, Polygon.fromPositions(
                     Position(lat = 1.25, lng = 0.5), // <- cut
                     Position(lat = 1.0, lng = 1.0),
@@ -343,7 +361,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 4.0, lng = 3.0),
                     Position(lat = 4.0, lng = 0.5), // <- cut
                     Position(lat = 3.0, lng = 0.5)
-                ))
+                )
+                )
             ),
             recomposedPolygon = polygon3
         ),
@@ -365,7 +384,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 2.0, lng = 0.0), // <- cut
                     Position(lat = 2.0, lng = -2.0),
                     Position(lat = -2.0, lng = -2.0)
-                ))
+                )
+                )
             ),
             rightExpected = listOf(
                 ExpectedPolygon(2, Polygon.fromPositions( // We accept self-intersecting polygons
@@ -375,7 +395,8 @@ object PolygonUtilsTestCases {
                     Position(lat = 2.0, lng = 0.0), // <- cut
                     Position(lat = 1.0, lng = -1.0),
                     Position(lat = -2.0, lng = -1.0)
-                ))
+                )
+                )
             ),
             recomposedPolygon = polygon4.close()
         )
