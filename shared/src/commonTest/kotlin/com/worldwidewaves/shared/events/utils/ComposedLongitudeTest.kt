@@ -38,7 +38,7 @@ class ComposedLongitudeTest {
         val position = Position(1.0, 1.0)
         composedLongitude.add(position)
         assertEquals(1, composedLongitude.getPositions().size)
-        assertEquals(position.normalized(), composedLongitude.getPositions().first())
+        assertEquals(position, composedLongitude.getPositions().first())
     }
 
     @Test
@@ -47,7 +47,7 @@ class ComposedLongitudeTest {
         val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
         composedLongitude.addAll(positions)
         assertEquals(2, composedLongitude.getPositions().size)
-        assertEquals(positions.map { it.normalized() }, composedLongitude.getPositions())
+        assertEquals(positions.map { it }, composedLongitude.getPositions())
     }
 
     @Test

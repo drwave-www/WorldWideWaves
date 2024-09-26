@@ -47,7 +47,7 @@ class PolygonUtilsSplitPolygonTest {
 
     @Test
     fun testSplitPolygonByLongitude() = runTest {
-        PolygonUtilsTestCases.testCases/*.filterIndexed { idx, _ -> idx == 4 }*/.forEachIndexed { idx, testCase ->
+        PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 4 }.forEachIndexed { idx, testCase ->
             val result = testSplitPolygonCase(idx, testCase)
             testRecomposePolygonCase(idx, testCase, result)
         }

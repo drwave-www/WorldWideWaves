@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
@@ -36,7 +37,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     internal val positionsIndex = mutableMapOf<Int, Position>()
 
     private var isClockwise: Boolean = true
-    private var area: Double = 0.0
+
+    @VisibleForTesting
+    var area: Double = 0.0
 
     private var minLat: Double = POSITIVE_INFINITY
     private var minLng: Double = POSITIVE_INFINITY
@@ -80,7 +83,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         val retClockwise = when {
             size < 3 -> true // Two-point polygon is considered clockwise
             else -> area + (head!!.lng - tail!!.lng) * (head!!.lat + tail!!.lat) > 0 // Ensure closing
-
         }
         return retClockwise
     }

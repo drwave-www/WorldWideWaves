@@ -25,8 +25,6 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
 import com.worldwidewaves.shared.events.utils.GeoUtils.Vector2D
 import com.worldwidewaves.shared.events.utils.GeoUtils.isLongitudeEqual
 import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizedLongitudeDifference
 import kotlin.math.abs
 import kotlin.math.sign
 
@@ -66,40 +64,36 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     // --- Public methods -----
 
     fun add(position: Position) {
-        val normalizedPosition = position.copy(lng = normalizeLongitude(position.lng))
         val tempPositions = positions.toMutableList()
-        tempPositions.add(normalizedPosition)
+        tempPositions.add(position)
 
         if (isValidArc(tempPositions)) {
-            positions.add(normalizedPosition)
-            updateBoundingBox(listOf(normalizedPosition))
+            positions.add(position)
+            updateBoundingBox(listOf(position))
             sortPositions()
         } else throw IllegalArgumentException("Invalid arc")
     }
 
-    fun addAll(newPositions: Collection<Position>) {
-        val normalizedNewPositions = newPositions.map { it.copy(lng = normalizeLongitude(it.lng)) }
+    fun addAll(newPositions: List<Position>) {
         val tempPositions = positions.toMutableList()
-        tempPositions.addAll(normalizedNewPositions)
+        tempPositions.addAll(newPositions)
 
         if (isValidArc(tempPositions)) {
-            positions.addAll(normalizedNewPositions)
-            updateBoundingBox(normalizedNewPositions)
+            positions.addAll(newPositions)
+            updateBoundingBox(newPositions)
             sortPositions()
         } else throw IllegalArgumentException("Invalid arc")
     }
 
     fun isPointOnLine(point: Position): Side {
-        val normalizedPoint = point.copy(lng = normalizeLongitude(point.lng))
-
         if (positions.isEmpty()) return Side.EAST // Arbitrary choice when empty
 
         // Handle vertical line (single longitude) case
         if (positions.size == 1 || positions.all { isLongitudeEqual(it.lng, positions.first().lng) }) {
-            val lineLng = normalizeLongitude(positions.first().lng)
+            val lineLng = positions.first().lng
             return when {
-                isLongitudeEqual(normalizedPoint.lng, lineLng) -> Side.ON
-                normalizedLongitudeDifference(normalizedPoint.lng, lineLng) > 0 -> Side.EAST
+                isLongitudeEqual(point.lng, lineLng) -> Side.ON
+                point.lng - lineLng > 0 -> Side.EAST
                 else -> Side.WEST
             }
         }
@@ -109,11 +103,11 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             val end = positions[i + 1]
             val segment = Segment(start, end)
 
-            if (isPointOnSegment(normalizedPoint, segment)) return Side.ON
+            if (isPointOnSegment(point, segment)) return Side.ON
 
             // Calculate vectors
             val lineVector = Vector2D(end.lng - start.lng, end.lat - start.lat)
-            val pointVector = Vector2D(normalizedPoint.lng - start.lng, normalizedPoint.lat - start.lat)
+            val pointVector = Vector2D(point.lng - start.lng, point.lat - start.lat)
 
             // Calculate cross product
             val crossProduct = lineVector.cross(pointVector)
@@ -145,8 +139,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     fun isValidArc(positions: List<Position> = this.positions): Boolean {
         if (positions.size <= 2) return true
-        val normalizedPositions = positions.map { it.normalized() }
-        val differences = normalizedPositions.zipWithNext { a, b -> normalizeLongitude(b.lng - a.lng) }
+        val differences = positions.zipWithNext { a, b -> b.lng - a.lng }
         val signs = differences.map { it.sign }
         val changes = signs.zipWithNext { a, b -> a != b }.count { it }
         val distinctSigns = signs.distinct().size

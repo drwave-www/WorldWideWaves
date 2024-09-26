@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import kotlin.math.abs
 
 /**
@@ -35,25 +34,19 @@ data class Segment(val start: Position, val end: Position) {
         end.init()
     }
 
-    fun normalized(): Segment = Segment(start.normalized(), end.normalized())
-
     /**
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
      */
     fun intersectWithLng(cutId: Int, cutLng: Double): CutPosition? {
-        val normalizedCutLng = normalizeLongitude(cutLng)
-        val normalizedStartLng = normalizeLongitude(start.lng)
-        val normalizedEndLng = normalizeLongitude(end.lng)
-
         // Calculate the latitude of intersection
         val latDiff = end.lat - start.lat
-        val lngDiff = normalizeLongitude(normalizedEndLng - normalizedStartLng)
+        val lngDiff = end.lng - start.lng
 
         // Check for vertical line - No unique intersection for a vertical line
         if (abs(lngDiff) < EPSILON) return null
 
-        val t = normalizeLongitude(normalizedCutLng - normalizedStartLng) / lngDiff
+        val t = (cutLng - start.lng) / lngDiff
         val lat = start.lat + t * latDiff
 
         // Check if the intersection point is on the segment
@@ -61,9 +54,9 @@ data class Segment(val start: Position, val end: Position) {
 
         // Determine the direction and create the CutPosition
         return when {
-            normalizedStartLng == normalizedCutLng && normalizedEndLng == normalizedCutLng ->
+            start.lng == cutLng && end.lng == cutLng ->
                 null // No intersection for a vertical line
-            normalizeLongitude(normalizedEndLng - normalizedStartLng) > 0 -> // Moving eastward
+            (end.lng - start.lng) > 0 -> // Moving eastward
                 CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = start, cutRight = end)
             else -> // Moving westward
                 CutPosition(lat = lat, lng = cutLng, cutId = cutId, cutLeft = end, cutRight = start)

@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
@@ -68,7 +67,6 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
 
     internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
     internal open fun detached() = Position(lat, lng)
-    fun normalized() = Position(lat,normalizeLongitude(lng))
 
     // ------------------------
 

@@ -28,7 +28,6 @@ import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
@@ -277,7 +276,7 @@ data class WWWEventWaveLinear(
             val adjustedLonWidth = adjustLongitudeWidthAtLatitude(currentLat, lonBandWidthAtMiddle)
 
             // Ensure longitude stays within the bbox bounds, handling the -180/180 wrap-around
-            val actualLonWidth = min(adjustedLonWidth, normalizeLongitude(ne.lng) - normalizeLongitude(sw.lng))
+            val actualLonWidth = min(adjustedLonWidth, ne.lng - sw.lng)
 
             // Add the latitude and longitude band for the current latitude
             latLonBands.add(LatLonBand(currentLat, optimalLatBandWidth, actualLonWidth))
