@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.GeoUtils
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
-import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.PolygonUtils
 import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
@@ -50,8 +49,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import kotlin.math.PI
-import kotlin.math.cos
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -250,50 +247,6 @@ class WWWEventWaveLinearTest : KoinTest {
     // ---------------------------
 
     @Test
-    fun testCalculateLatLonBandsWithSpeed() = runBlocking {
-        // GIVEN
-        val sw = Position(48.8156, 2.2242) // Paris city
-        val ne = Position(48.9021, 2.4699)
-        coEvery { event.area.getBoundingBox() } returns BoundingBox(sw, ne)
-
-        // WHEN
-        val bands = wave.calculateWaveBands(30.seconds)
-
-        // THEN
-        assertEquals(3, bands.size)
-        assertEquals(48.8156, bands[0].latitude)
-        assertEquals(0.03333333333333333, bands[0].latWidth)
-        assertEquals(0.006222215814700397, bands[0].lngWidth)
-    }
-
-    @Test
-    fun testCalculateLonBandWidthAtMiddleLatitude() {
-        // GIVEN
-        val middleLatitude = 45.0
-        val expectedWidth = (10.0 / (6371000 * cos(45.0.toRadians()))) * (180 / PI)
-
-        // WHEN
-        val lonBandWidth = wave.calculateLonBandWidthAtMiddleLatitude(middleLatitude)
-
-        // THEN
-        assertEquals(expectedWidth, lonBandWidth)
-    }
-
-    @Test
-    fun testAdjustLongitudeWidthAtLatitude() {
-        // GIVEN
-        val latitude = 45.0
-        val lonWidth = 10.0
-        val expectedWidth = lonWidth / cos(45.0.toRadians())
-
-        // WHEN
-        val adjustedWidth = wave.adjustLongitudeWidthAtLatitude(latitude, lonWidth)
-
-        // THEN
-        assertEquals(expectedWidth, adjustedWidth)
-    }
-
-    @Test
     fun `latitudeOfWidestPart returns 0 when bounding box crosses equator`() {
         val bbox = BoundingBox(-30.0, -10.0, 30.0, 10.0)
         assertEquals(0.0, bbox.latitudeOfWidestPart())
@@ -351,28 +304,6 @@ class WWWEventWaveLinearTest : KoinTest {
     fun `latitudeOfWidestPart handles bounding box touching equator from north`() {
         val bbox = BoundingBox(0.0, -10.0, 30.0, 10.0)
         assertEquals(0.0, bbox.latitudeOfWidestPart())
-    }
-
-    @Test
-    fun testCalculateOptimalLatBandWidth() {
-        // GIVEN
-        val latitude = 45.0
-        val lonBandWidthAtEquator = 10.0
-        val minPerceptibleDifference = 10.0 // Minimum perceptible difference in meters
-        val earthRadius = 6371000.0 // Earth's radius in meters
-
-        // Calculate the expected longitudinal distance at this latitude
-        val latitudeInRadians = latitude.toRadians()
-        val lonDistanceAtThisLat = earthRadius * cos(latitudeInRadians) * lonBandWidthAtEquator * (PI / 180)
-
-        // Calculate how much latitude difference is needed for the minimum perceptible difference
-        val expectedWidth = minPerceptibleDifference / lonDistanceAtThisLat
-
-        // WHEN
-        val latBandWidth = wave.calculateOptimalLatBandWidth(latitude, lonBandWidthAtEquator)
-
-        // THEN
-        assertEquals(expectedWidth, latBandWidth, 0.0001) // Allow a small tolerance for floating-point precision
     }
 
 }

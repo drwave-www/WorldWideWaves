@@ -1,8 +1,13 @@
 
 Next:
+- move code of bandes to EarthAdaptedSpeedLongitude
+- fix currentComposedLongitude
+- test wavelinear
+- add simulation button on event screen
+- polygon to maplibre
+- wave connection !!
 
 - ======== Bugs/Issues/Refactorings =========
-    - -180/180 : test d'un split polygon sur la ligne de changement de date
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom

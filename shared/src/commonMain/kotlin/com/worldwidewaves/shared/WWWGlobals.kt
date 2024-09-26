@@ -54,7 +54,7 @@ class WWWGlobals {
         // -- Wave Constants --
         val WAVE_OBSERVE_DELAY = 2.hours // hours
         val WAVE_WARMING_DURATION = 3.minutes
-        val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
+        const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
 
         // -- UI Constants --
 

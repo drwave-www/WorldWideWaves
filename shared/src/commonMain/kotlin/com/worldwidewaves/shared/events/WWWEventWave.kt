@@ -75,7 +75,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     data class WavePolygons(
         val timestamp: Instant,
-        val referenceLongitude: Double,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
         val remainingPolygons: Area,
         val addedTraversedPolygons: Area? = null

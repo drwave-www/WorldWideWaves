@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.ComposedLongitude.Direction
+import com.worldwidewaves.shared.events.utils.ComposedLongitude.Orientation
 import com.worldwidewaves.shared.events.utils.ComposedLongitude.Side
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -116,7 +116,7 @@ class ComposedLongitudeTest {
         val positions = listOf(Position(2.0, 2.0), Position(1.0, 1.0))
         composedLongitude.addAll(positions)
         assertEquals(listOf(Position(2.0, 2.0), Position(1.0, 1.0)), composedLongitude.getPositions())
-        assertEquals(Direction.SOUTH, composedLongitude.direction)
+        assertEquals(Orientation.SOUTH, composedLongitude.orientation)
     }
 
     @Test
@@ -125,7 +125,7 @@ class ComposedLongitudeTest {
         val positions = listOf(Position(1.0, 1.0), Position(2.0, 2.0))
         composedLongitude.addAll(positions)
         assertEquals(listOf(Position(1.0, 1.0), Position(2.0, 2.0)), composedLongitude.getPositions())
-        assertEquals(Direction.NORTH, composedLongitude.direction)
+        assertEquals(Orientation.NORTH, composedLongitude.orientation)
     }
 
     @Test
@@ -182,7 +182,7 @@ class ComposedLongitudeTest {
         val composedLongitude = ComposedLongitude()
         val positions = listOf(Position(2.0, 2.0), Position(1.0, 1.0))
         composedLongitude.addAll(positions)
-        assertEquals(Direction.SOUTH, composedLongitude.direction)
+        assertEquals(Orientation.SOUTH, composedLongitude.orientation)
     }
 
 }

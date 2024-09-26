@@ -37,12 +37,12 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     private var neLat: Double = Double.NEGATIVE_INFINITY
     private var neLng: Double = Double.NEGATIVE_INFINITY
 
-    var direction: Direction = Direction.NORTH
+    var orientation: Orientation = Orientation.NORTH
         private set
 
     // --- Nested classes and enums
 
-    enum class Direction { NORTH, SOUTH }
+    enum class Orientation { NORTH, SOUTH }
     enum class Side { EAST, WEST, ON ;
         fun isOn(): Boolean = this == ON
         fun isEast(): Boolean = this == EAST
@@ -84,6 +84,15 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             sortPositions()
         } else throw IllegalArgumentException("Invalid arc")
     }
+
+    fun clear() : ComposedLongitude {
+        positions.clear()
+        resetBoundingBox()
+        orientation = Orientation.NORTH
+        return this
+    }
+
+    // ------------------------------------------------------------------------
 
     fun isPointOnLine(point: Position): Side {
         if (positions.isEmpty()) return Side.EAST // Arbitrary choice when empty
@@ -162,13 +171,13 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     private fun sortPositions() {
         val southToNorth = positions.sortedBy { it.lat }
-        direction = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
-            Direction.NORTH
+        orientation = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
+            Orientation.NORTH
         } else {
-            Direction.SOUTH
+            Orientation.SOUTH
         }
         positions.clear()
-        positions.addAll(if (direction == Direction.NORTH) southToNorth else southToNorth.reversed())
+        positions.addAll(if (orientation == Orientation.NORTH) southToNorth else southToNorth.reversed())
     }
 
     private fun updateBoundingBox(newPositions: List<Position>) {
@@ -176,6 +185,13 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         swLng = minOf(swLng, newPositions.minOf { it.lng })
         neLat = maxOf(neLat, newPositions.maxOf { it.lat })
         neLng = maxOf(neLng, newPositions.maxOf { it.lng })
+    }
+
+    private fun resetBoundingBox() {
+        swLat = Double.POSITIVE_INFINITY
+        swLng = Double.POSITIVE_INFINITY
+        neLat = Double.NEGATIVE_INFINITY
+        neLng = Double.NEGATIVE_INFINITY
     }
 
 }

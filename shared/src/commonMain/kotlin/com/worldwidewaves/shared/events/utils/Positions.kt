@@ -95,7 +95,6 @@ class CutPosition( // A position that has been cut
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
 
-    val isPointCut by lazy { cutLeft == cutRight }
     val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()

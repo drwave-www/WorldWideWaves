@@ -240,7 +240,7 @@ object PolygonUtils {
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
         lngToCut: ComposedLongitude,
         polygons: List<T>
-    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude
+    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
         polygons.map { polygon ->
             val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
             if (cutPositions.size < 2) return@map polygon
@@ -279,7 +279,7 @@ object PolygonUtils {
     }
 
     /**
-     * Reconstructs the side polygons from the given list of polylines.
+     * Reconstructs the side polygons from the given list of poly-lines.
      *
      * This function reconstructs poly-lines into polygons.
      * Each polyline should cut the longitude twice and have more than two points.
@@ -289,7 +289,7 @@ object PolygonUtils {
         side.asSequence()
             .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
             .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
-            .let { reconstructPolygons(it.toList(), initPolygon) }
+            .let { connectPolylines(it.toList(), initPolygon) }
 
     /**
      * Reconstructs polygons from a list of poly-lines.
@@ -301,7 +301,7 @@ object PolygonUtils {
      * and a new polygon is started.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructPolygons(polyLines: List<T>, initPolygon: T): List<T> {
+    private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
         var current: T = initPolygon
@@ -365,17 +365,19 @@ object PolygonUtils {
                             fun addInRecomposedPolygon(position: Position) =
                                 recomposedPolygon.add(if (position is CutPosition) position.detached() else position)
 
+                            // Recompose polygon from multiple previously cut polygons traversing
+                            // the CutPosition pairs and then jumping from one polygon to another
                             fun traverse(current: Position, previous: Position? = null) {
                                 if (current == this && previous != null) return // Stop traversal, polygon is closed
                                 if (current is CutPosition && associatedCutPositions.containsKey(current.pairId)) {
                                     // We'll jump here from one polygon to another by their common CutPosition
                                     associatedCutPositions[current.pairId]?.let { positions ->
-                                        when {
+                                        when { // Identify the polygon behind the gate
                                             positions.first.first.id == current.id -> positions.second.second
                                             positions.second.first.id == current.id -> positions.first.second
                                             else -> throw IllegalStateException("Invalid pairId")
-                                        }.search(current)?.next?.let { // Identify the gate
-                                            if (current.isPointOnLine)
+                                        }.search(current)?.next?.let { // Connect with the same position
+                                            if (current.isPointOnLine) // Add the position if it was on the line
                                                 addInRecomposedPolygon(current)
                                             // next is safe as CutPolygons are created anti-clockwise
                                             traverse(it, current) // Jump

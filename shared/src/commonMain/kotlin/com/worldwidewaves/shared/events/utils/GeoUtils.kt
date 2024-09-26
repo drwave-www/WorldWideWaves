@@ -31,8 +31,31 @@ object GeoUtils {
 
     const val EPSILON = 1e-9 // A small tolerance value for double precision errors
 
+    /**
+     * The minimum perceptible difference in meters for calculating optimal latitude band widths.
+     *
+     * Value: 10.0 meters
+     *
+     * Rationale for this value:
+     * 1. Visual Perception: At common digital map zoom levels, 10 meters is generally visible
+     *    and distinguishable to the human eye.
+     *
+     * 2. GPS Accuracy: Exceeds typical consumer GPS accuracy (3-5 meters), avoiding false precision.
+     *
+     * 3. Map Scales: At a 1:25,000 scale (common for detailed topographic maps), 10 meters
+     *    corresponds to 0.4 mm, which is easily visible on physical maps.
+     *
+     * 4. Display Resolution: Visible on high-resolution displays (300-500 PPI) at reasonable zoom levels.
+     *
+     * 5. Performance: Provides a good balance between precision and computational efficiency
+     *    for latitude band calculations.
+     *
+     * 6. Versatility: Suitable for general-purpose mapping and navigation applications dealing
+     *    with global or regional scales.
+     *
+     */
     const val MIN_PERCEPTIBLE_DIFFERENCE = 10.0 // 10 meters - perceptible speed difference
-    const val EARTH_RADIUS = 6371000.0 // Radius of the Earth in meters
+    const val EARTH_RADIUS = 6378137.0 // WGS84 Ellipsoid: Semi-major axis (equatorial radius), in meters
 
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
@@ -65,10 +88,6 @@ object GeoUtils {
     /**
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
-     * @param lon1 The first longitude in degrees.
-     * @param lon2 The second longitude in degrees.
-     * @param lat The latitude in degrees.
-     * @return The distance between the two longitudes at the given latitude in meters.
      */
     fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
         val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
