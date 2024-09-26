@@ -77,11 +77,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Direction logic -------------
 
     fun isClockwise(): Boolean {
-        forceDirectionComputation() // FIXME: there is an issue in maintenance somewhere
-        return when {
+        val retClockwise = when {
             size < 3 -> true // Two-point polygon is considered clockwise
-            else -> isClockwise
+            else -> area + (head!!.lng - tail!!.lng) * (head!!.lat + tail!!.lat) > 0 // Ensure closing
+
         }
+        return retClockwise
     }
 
     private fun updateAreaAndDirection(p1: Position?, p2: Position?, isRemoving: Boolean = false) {
@@ -158,11 +159,11 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // -- Add/Remove positions --------
 
     fun add(position: Position) : Position {
-        if (tail != null && position == tail) {
-            return tail!! // skip us time
+        if (tail != null && position == tail) { // Do not add consecutive same point
+            return tail!!
         }
 
-        val addPosition = position.xfer()
+        val addPosition = position.xfer() // Disconnect the position from a possible other polygon
         indexNewPosition(addPosition)
 
         if (head == null) {
@@ -184,6 +185,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
         updateAreaAndDirection(positionToRemove.prev, positionToRemove, true)
         updateAreaAndDirection(positionToRemove, positionToRemove.next, true)
+        forceDirectionComputation()
 
         when (positionToRemove.id) {
             head?.id -> {
@@ -220,8 +222,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
 
         updateBoundingBoxForPosition(addPosition)
-        updateAreaAndDirection(current, addPosition)
-        updateAreaAndDirection(addPosition, addPosition.next)
+        forceDirectionComputation()
         return addPosition
     }
 
@@ -238,13 +239,12 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
         indexNewPosition(addPosition)
         updateBoundingBoxForPosition(addPosition)
-        updateAreaAndDirection(addPosition, current)
-        updateAreaAndDirection(addPosition.prev, addPosition)
+        forceDirectionComputation()
         return addPosition
     }
 
     fun removePositionsUpTo(pointId: Int): Boolean {
-        // Check if the polygon is empty or if the toCut id doesn't exist
+        // Check if the polygon is empty or if the position id doesn't exist
         require(isNotEmpty() && positionsIndex.containsKey(pointId)) { return false }
 
         // If toCut is the head, nothing to delete
@@ -263,6 +263,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         head = current
         head?.prev = null
 
+        updateBoundingBox()
+        forceDirectionComputation()
         return true
     }
 
@@ -341,6 +343,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
+    fun isClosed(): Boolean = isEmpty() || first() == last()
     fun first(): Position? = head
     fun last(): Position? = tail
     fun search(current: Position): Position? = this.find { it == current }
