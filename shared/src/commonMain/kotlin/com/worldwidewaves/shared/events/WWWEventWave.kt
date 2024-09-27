@@ -114,7 +114,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons
+    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons?
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun timeBeforeHit(): Duration?
@@ -125,7 +125,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         get() = requireNotNull(this._event) { "Event not set" }
 
     protected suspend fun bbox(): BoundingBox =
-        _bbox ?: event.area.getBoundingBox().also { _bbox = it }
+        _bbox ?: event.area.bbox().also { _bbox = it }
 
     @Suppress("UNCHECKED_CAST")
     fun <T : WWWEventWave> setRelatedEvent(event: IWWWEvent): T {

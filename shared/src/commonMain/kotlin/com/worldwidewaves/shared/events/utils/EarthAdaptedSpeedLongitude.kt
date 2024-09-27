@@ -5,9 +5,9 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
-import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_DIFFERENCE
+import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
+import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -85,7 +85,9 @@ class EarthAdaptedSpeedLongitude(
     private fun initialized() : EarthAdaptedSpeedLongitude {
         if (size() == 1) {
             val referenceLng = first().lng
-            clear().also { bands().forEach { (lat, _) -> add(Position(lat, referenceLng)) } }
+            clear().also {
+                bands().forEach { (lat, _) -> add(Position(lat, referenceLng)) }
+            }
         }
         return this
     }
@@ -117,10 +119,9 @@ class EarthAdaptedSpeedLongitude(
         if (elapsedTime <= Duration.ZERO) return initialized()
 
         // Calculate number of complete refresh windows, capped at max value to prevent overflow
-        val maxWindows = (360.0 / (bandDuration.inWholeMilliseconds / 1000)).toLong() // Max windows for full Earth revolution
-        val numberOfWindows = min(ceil(
-            elapsedTime.inWholeSeconds.toDouble() /
-                    (bandDuration.inWholeMilliseconds / 1000)).toLong(), maxWindows)
+        val numberOfWindows = ceil(
+            elapsedTime.inWholeMilliseconds.toDouble() / bandDuration.inWholeMilliseconds.toDouble()
+        ).toLong()
 
         val bands = bands()
         return fromPositions(bands.map { (bandLatitude, band) ->
@@ -171,6 +172,10 @@ class EarthAdaptedSpeedLongitude(
         // Calculate the longitude band width at the middle latitude
         val lonBandWidthAtMiddle = calculateLonBandWidthAtMiddleLatitude(longestLat)
 
+        latLonBands.add(LatLonBand(-89.9, 0.0, // Lower latitude band
+            adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtMiddle))
+        )
+
         var currentLat = sw.lat
         while (currentLat < ne.lat - EPSILON && latLonBands.size < maxBands) {
             // Calculate the optimal latitude band width at the current latitude
@@ -192,6 +197,10 @@ class EarthAdaptedSpeedLongitude(
             currentLat += optimalLatBandWidth
         }
 
+        latLonBands.add(LatLonBand(89.9, 0.0, // Higher latitude band
+            adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtMiddle))
+        )
+
         return latLonBands
     }
 
@@ -212,7 +221,7 @@ class EarthAdaptedSpeedLongitude(
     fun calculateLonBandWidthAtMiddleLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
         val distanceCovered = speed * bandDuration.inWholeMilliseconds / 1000
-        return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))) * (180 / PI) // Convert radians to degrees
+        return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
     }
 
     // ---------------------------
@@ -231,10 +240,10 @@ class EarthAdaptedSpeedLongitude(
         val latitudeInRadians = latitude.toRadians()
 
         // Calculate the longitudinal distance at this latitude
-        val lonDistanceAtThisLat = EARTH_RADIUS * cos(latitudeInRadians) * lonBandWidthAtEquator * (PI / 180)
+        val lonDistanceAtThisLat = (EARTH_RADIUS * cos(latitudeInRadians) * lonBandWidthAtEquator).toDegrees()
 
         // Find how many degrees of latitude are required for a perceptible difference in longitude width
-        val perceptibleLatDifference = MIN_PERCEPTIBLE_DIFFERENCE / lonDistanceAtThisLat
+        val perceptibleLatDifference = MIN_PERCEPTIBLE_SPEED_DIFFERENCE / lonDistanceAtThisLat
 
         // Return the latitude band width in degrees
         return perceptibleLatDifference

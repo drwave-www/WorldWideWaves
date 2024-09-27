@@ -143,15 +143,15 @@ object PolygonUtils {
         // Perpetuate the cutId from the initial polygon if any or generate a new one
         val cutId = (this as? CutPolygon)?.cutId ?: Random.nextInt(1, Int.MAX_VALUE)
 
-        require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty(cutId).also { close() } }
+        require(isNotEmpty() && size >= 3) { return PolygonSplitResult.empty(cutId).also { close() } }
 
         val leftSide =  mutableListOf<LeftCutPolygon>()
         val rightSide = mutableListOf<RightCutPolygon>()
         val currentLeft = LeftCutPolygon(cutId)
         val currentRight = RightCutPolygon(cutId)
 
-        val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId).also { close() }
-        val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId).also { close() }
+        val minLongitude = bbox().minLongitude
+        val maxLongitude = bbox().maxLongitude
 
         val lngBbox = lngToCut.bbox()
 
@@ -165,7 +165,7 @@ object PolygonUtils {
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Anti-Clockwise loop
-                    val point = iterator.next()
+                    var point = iterator.next()
 
                     val nextPoint = iterator.viewCurrent()
                     prev?.let { if (point == it) return@let }
@@ -221,8 +221,8 @@ object PolygonUtils {
 
                 // Group the poly-lines into ring polygons and add the ComposedLongitude positions
                 return PolygonSplitResult(cutId,
-                    completeLongitudePoints(lngToCut, reconstructSide(leftSide, currentLeft)),
-                    completeLongitudePoints(lngToCut, reconstructSide(rightSide, currentRight))
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, leftSide, currentLeft)),
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, rightSide, currentRight))
                 ).also { close() }
             }
         }
@@ -238,11 +238,12 @@ object PolygonUtils {
      *
      */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
+        cutId: Int,
         lngToCut: ComposedLongitude,
         polygons: List<T>
     ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
         polygons.map { polygon ->
-            val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
+            val cutPositions = polygon.getCutPositions().filter { cutId == cutId }.sortedBy { it.lat }
             if (cutPositions.size < 2) return@map polygon
 
             val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cuts
@@ -253,8 +254,7 @@ object PolygonUtils {
                 if (newPositions.isNotEmpty()) { // If there are some longitude points in between
                     var currentPosition : Position = if (polygon is LeftCutPolygon) minCut else maxCut
                     for (newPosition in newPositions) {
-                        polygon.insertAfter(newPosition, currentPosition.id)
-                        currentPosition = newPosition
+                        currentPosition = polygon.insertAfter(newPosition, currentPosition.id)
                     }
                 }
             }
@@ -285,11 +285,12 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> =
+    private inline fun <reified T : CutPolygon> reconstructSide(cutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
-            .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
+            .filter { it.size > 2 && it.cutPositions.filter { it.cutId == cutId }.size == 2 } // Each polyline should cut the lng twice
+            .sortedBy { it.cutPositions.filter { cutId == cutId }.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
             .let { connectPolylines(it.toList(), initPolygon) }
+
 
     /**
      * Reconstructs polygons from a list of poly-lines.

@@ -136,7 +136,7 @@ class WWWEventMap(
      *
      */
     suspend fun isPositionWithin(position: Position): Boolean =
-        with(event.area.getBoundingBox()) {
+        with(event.area.bbox()) {
             position.lat in sw.lat..ne.lat && position.lng in sw.lng..ne.lng
         }
 

@@ -247,7 +247,7 @@ class EventMap(
         onCameraPositionSet: (() -> Unit)?
     ) {
         coroutineScope.launch {
-            val bbox = event.area.getBoundingBox()
+            val bbox = event.area.bbox()
 
             // Maximize the view to the map // FIXME: move to shared
             val (sw, ne) = bbox
@@ -317,7 +317,7 @@ class EventMap(
             dimPosition = Position(dimLat, dimLng)
 
             coroutineScope.launch {
-                val mapBounds = event.area.getBoundingBox()
+                val mapBounds = event.area.bbox()
                 val bounds = LatLngBounds.Builder()
                     .include(LatLng(mapBounds.sw.lat + dimLat, mapBounds.sw.lng + dimLng))
                     .include(LatLng(mapBounds.ne.lat - dimLat, mapBounds.ne.lng - dimLng))
@@ -339,7 +339,7 @@ class EventMap(
     ) = coroutineScope.launch {
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(
-                event.area.getBoundingBox().toLatLngBounds(), 0
+                event.area.bbox().toLatLngBounds(), 0
             ),
             object : CancelableCallback {
                 override fun onFinish() { onCameraPositionSet?.invoke() }

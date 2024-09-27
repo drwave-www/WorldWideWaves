@@ -58,6 +58,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     companion object {
         fun fromPositions(vararg positions: Position): Polygon =
             Polygon().apply { positions.forEach { add(it) } }
+        fun fromPositions(positions: List<Position>): Polygon =
+            Polygon().apply { positions.forEach { add(it) } }
     }
 
     // --------------------------------
@@ -210,7 +212,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun insertAfter(newPosition: Position, id: Int): Position {
-        val current = requireNotNull(positionsIndex[id]) { "Position with id $id not found" }
+        val current = requireNotNull(positionsIndex[id]) {
+            "Position with id $id not found"
+        }
         val addPosition = newPosition.xfer().apply {
             next = current.next
             prev = current

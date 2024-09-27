@@ -74,6 +74,7 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
+
 }
 
 // Can only be initialized from internal context
@@ -94,6 +95,12 @@ class CutPosition( // A position that has been cut
     val pairId: Double by lazy { (cutId + listOf(cutLeft.id, cutRight.id).sorted().let { (first, second) ->
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
+
+    fun uncut(): Position = Position(lat, lng).apply {
+        id = this@CutPosition.id
+        prev = this@CutPosition.prev
+        next = this@CutPosition.next
+    }
 
     val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 

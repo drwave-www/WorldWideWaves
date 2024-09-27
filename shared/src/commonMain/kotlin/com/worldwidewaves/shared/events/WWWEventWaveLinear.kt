@@ -51,12 +51,13 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons {
+    override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
         require(event.isRunning()) { "Event must be running to request teh wave polygons" }
+        require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
         val composedLongitude = // Compose an earth-aware speed longitude with bands for the wave
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
-            .withProgression(clock.now() - (lastWaveState?.timestamp ?: clock.now()))
+            .withProgression(clock.now() - event.getStartDateTime())
 
         val areaPolygons = event.area.getPolygons()
         val traversedPolygons : MutableArea = mutableListOf()
@@ -87,12 +88,12 @@ data class WWWEventWaveLinear(
             }
         }
 
-        return WavePolygons(
+        return if (traversedPolygons.isNotEmpty() || remainingPolygons.isNotEmpty()) WavePolygons(
             clock.now(),
             traversedPolygons,
             remainingPolygons,
             addedTraversedPolygons.ifEmpty { null }
-        )
+        ) else null
     }
 
     /**
