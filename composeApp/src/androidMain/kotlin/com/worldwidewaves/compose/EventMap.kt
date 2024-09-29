@@ -52,6 +52,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
@@ -59,6 +60,7 @@ import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.toLatLngBounds
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.CheckGPSEnable
+import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +75,7 @@ import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineCallback
+import org.maplibre.android.location.engine.LocationEngineProxy
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.modes.CameraMode
@@ -86,6 +89,7 @@ import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
+    private val platform: WWWPlatform?,
     private val event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
@@ -417,7 +421,10 @@ class EventMap(
                     .foregroundTintColor(Color.BLACK)
                     .build()
             )
-            .useDefaultLocationEngine(true)
+            .useDefaultLocationEngine(false)
+            .locationEngine(LocationEngineProxy( // Manage with location simulation
+                WWWSimulationEnabledLocationEngine(context, platform)
+            ))
             .locationEngineRequest(buildLocationEngineRequest())
             .build()
     }

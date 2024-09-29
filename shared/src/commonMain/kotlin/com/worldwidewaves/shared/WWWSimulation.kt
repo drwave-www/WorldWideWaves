@@ -1,4 +1,8 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.shared
+
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /*
  * Copyright 2024 DrWave
@@ -21,32 +25,8 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.data.createDataStore
-import org.koin.dsl.module
-import org.koin.test.KoinTest
-import org.koin.test.check.checkModules
-import kotlin.test.Test
-
-class KoinTest : KoinTest {
-
-    class MockWWWPlatform : WWWPlatform() {
-        override val name: String = "MockPlatform"
-        override fun getContext(): Any = "MockContext"
-    }
-
-    // ---------------------------
-
-    @Test
-    fun `check MVP hierarchy`() {
-        val testPlatformModule = module {
-            single<WWWPlatform> { MockWWWPlatform() }
-            single { createDataStore { "/fake/path" } }
-        }
-
-        checkModules {
-            modules(sharedModule() + testPlatformModule)
-        }
-    }
-
+class WWWSimulation(private val startDateTime: Instant, private val userPosition: Position) {
+    private val realStartDate = Clock.System.now()
+    fun now() = startDateTime + (Clock.System.now() - realStartDate)
+    fun getUserPosition() = userPosition
 }

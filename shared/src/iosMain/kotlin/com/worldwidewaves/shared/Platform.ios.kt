@@ -36,7 +36,7 @@ import platform.UIKit.UIDevice
 
 // TODO : Check https://skie.touchlab.co/
 
-class IOSPlatform : WWWPlatform {
+class IOSPlatform : WWWPlatform() {
     override val name: String =
         UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
 

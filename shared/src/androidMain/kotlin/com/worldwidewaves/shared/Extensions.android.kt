@@ -21,7 +21,10 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import android.location.Location
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Instant
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 
@@ -37,3 +40,12 @@ fun BoundingBox.toLatLngBounds(): LatLngBounds = LatLngBounds.Builder()
         .include(LatLng(this.sw.lat, this.sw.lng)) // Southwest corner
         .include(LatLng(this.ne.lat, this.ne.lng)) // Northeast corner
         .build()
+
+fun Position.toLocation(now: Instant): Location {
+        val location = Location("custom_provider")
+        location.latitude = this.lat
+        location.longitude = this.lng
+        location.altitude = 0.0
+        location.time = now.toEpochMilliseconds()
+        return location
+}

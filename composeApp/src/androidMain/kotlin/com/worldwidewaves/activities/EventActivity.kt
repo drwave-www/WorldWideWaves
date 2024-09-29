@@ -132,7 +132,7 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            EventMap(event,
+            EventMap(platform, event,
                 onLocationUpdate = { newLocation ->
                     updateGeolocText(event,
                         newLocation, lastKnownLocation,

@@ -3,6 +3,7 @@ package com.worldwidewaves.shared.events
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
@@ -10,7 +11,7 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.getLocalDatetime
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -18,14 +19,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import kotlinx.datetime.offsetAt
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -139,7 +142,17 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     }
 
     @VisibleForTesting
-    fun getUserPosition(): Position? = positionRequester?.invoke()
+    fun getUserPosition(): Position? {
+        var platform : WWWPlatform? = null
+        try { platform = get() } catch (e: Exception) {
+            Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
+        }
+        return if (platform?.isUnderSimulation() == true) {
+            platform.getSimulation()!!.getUserPosition()
+        } else {
+            positionRequester?.invoke()
+        }
+    }
 
     // ---------------------------
 
@@ -168,7 +181,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 }
 
                 if (event.isRunning() || (event.isSoon() && isNearTheEvent())) {
-                    observeWave()
+                    observeWave().launchIn(coroutineScopeProvider.scopeDefault())
                 }
             }
         }
@@ -323,8 +336,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         event.isDone() -> 100.0
         !event.isRunning() -> 0.0
         else -> {
-            val elapsedTime = getLocalDatetime().toInstant(event.getTZ()).epochSeconds -
-                    event.getStartDateTime().epochSeconds
+            val elapsedTime = clock.now().epochSeconds - event.getStartDateTime().epochSeconds
             val totalTime = getWaveDuration().inWholeSeconds
             (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
         }
@@ -358,7 +370,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     /**
      * Retrieves the literal progression of the event as a percentage string.
      */
-    suspend fun getLiteralProgression(): String = "${getProgression()}%"
+    suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.
