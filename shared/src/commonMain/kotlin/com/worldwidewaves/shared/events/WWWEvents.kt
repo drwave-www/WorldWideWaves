@@ -153,12 +153,15 @@ class WWWEvents : KoinComponent {
     }
 
     fun addOnEventsLoadedListener(callback: () -> Unit) {
-        if (eventsLoaded) callback() else pendingLoadedCallbacks.add(callback)
+        if (eventsLoaded) callback()
+        else if (!pendingLoadedCallbacks.contains(callback))
+            pendingLoadedCallbacks.add(callback)
     }
 
     fun addOnEventsErrorListener(callback: (Exception) -> Unit){
         if (loadingError != null) callback(loadingError!!)
-        else pendingErrorCallbacks.add(callback)
+        else if (!pendingErrorCallbacks.contains(callback))
+            pendingErrorCallbacks.add(callback)
     }
 
     fun addOnTerminationListener(callback: (Exception?) -> Unit) {

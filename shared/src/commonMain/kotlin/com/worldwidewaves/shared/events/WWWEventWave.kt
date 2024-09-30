@@ -29,6 +29,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.math.roundToInt
+import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -69,23 +70,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val waveEndTime: String = "..",
         val waveTotalTime: String = "..",
         val waveProgression: String = ".."
-    ) {
-//        fun copy(
-//            waveTimezone: String? = null,
-//            waveSpeed: String? = null,
-//            waveStartTime: String? = null,
-//            waveEndTime: String? = null,
-//            waveTotalTime: String? = null,
-//            waveProgression: String? = null
-//        )  = WaveNumbersLiterals(
-//            waveTimezone = waveTimezone ?: this.waveTimezone,
-//            waveSpeed = waveSpeed ?: this.waveSpeed,
-//            waveStartTime = waveStartTime ?: this.waveStartTime,
-//            waveEndTime = waveEndTime ?: this.waveEndTime,
-//            waveTotalTime = waveTotalTime ?: this.waveTotalTime,
-//            waveProgression = waveProgression ?: this.waveProgression
-//        )
-    }
+    )
 
     data class WavePolygons(
         val timestamp: Instant,
@@ -115,6 +100,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     @Transient private var _event: IWWWEvent? = null
     @Transient private var _bbox: BoundingBox? = null
 
+    @Transient private var isObserving: Boolean = false
     @Transient private var observationJob: Job? = null
     @Transient private var lastObservedStatus: IWWWEvent.Status? = null
     @Transient private var lastObservedProgression: Double? = null
@@ -125,11 +111,12 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    @Transient private val waveStatusChangedListeners = mutableListOf<(IWWWEvent.Status) -> Unit>()
-    @Transient private val waveProgressionChangedListeners = mutableListOf<(Double) -> Unit>()
-    @Transient private val waveWarmingEndedListeners = mutableListOf<() -> Unit>()
-    @Transient private val waveUserIsGoingToBeHitListeners = mutableListOf<() -> Unit>()
-    @Transient private val waveUserHasBeenHitListeners = mutableListOf<() -> Unit>()
+    @Transient private val waveStatusChangedListeners = mutableMapOf<Int, (IWWWEvent.Status) -> Unit>()
+    @Transient private val waveProgressionChangedListeners = mutableMapOf<Int, (Double) -> Unit>()
+
+    @Transient private val waveWarmingEndedListeners = mutableMapOf<Int, () -> Unit>()
+    @Transient private val waveUserIsGoingToBeHitListeners = mutableMapOf<Int, () -> Unit>()
+    @Transient private val waveUserHasBeenHitListeners = mutableMapOf<Int, () -> Unit>()
 
     // ---------------------------
 
@@ -184,7 +171,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     private fun startObservation() {
         if (observationJob == null) {
-            coroutineScopeProvider.launchIO {
+            coroutineScopeProvider.launchDefault {
                 lastObservedStatus = event.getStatus()
 
                 try {
@@ -206,6 +193,20 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     fun stopObservation() {
         observationJob?.cancel()
         observationJob = null
+        isObserving = false
+    }
+
+    fun stopListeners(vararg listenerKeys: Int) =stopListeners(listenerKeys.toList())
+    fun stopListeners(listenerKeys: List<Int>) {
+        listenerKeys.forEach { key ->
+            listOf(
+                waveStatusChangedListeners,
+                waveProgressionChangedListeners,
+                waveWarmingEndedListeners,
+                waveUserIsGoingToBeHitListeners,
+                waveUserHasBeenHitListeners
+            ).firstOrNull { it.remove(key) != null }
+        }
     }
 
     /**
@@ -229,13 +230,18 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * If changes are detected, the corresponding change handlers are invoked.
      */
     private fun observeWave() = flow {
-        while (!event.isDone()) {
+        isObserving = true
+        while (isObserving && !event.isDone()) {
             emit(WaveObservation(getProgression(), event.getStatus()))
             delay(getObservationInterval())
         }
     }.flowOn(Dispatchers.IO)
         .catch { e -> Log.e("observeWave", "Error observing wave changes: $e") }
         .onEach { (progression, status) ->
+            if (waveStatusChangedListeners.isEmpty() && waveProgressionChangedListeners.isEmpty()) {
+                stopObservation()
+                return@onEach
+            }
             if (progression != lastObservedProgression) {
                 lastObservedProgression = progression
                 onWaveProgressionChanged(progression)
@@ -273,32 +279,71 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    fun addOnWaveStatusChangedListener(listener: (IWWWEvent.Status) -> Unit) = apply {
-        waveStatusChangedListeners.add(listener)
-    }.also { startObservation() }
+    private fun generateKey(prefix: Int): Int {
+        val randomPart = Random.nextInt(1000000)
+        return "$prefix$randomPart".toInt()
+    }
 
-    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit) = apply {
-        waveProgressionChangedListeners.add(listener)
-    }.also { startObservation() }
+    fun addOnWaveStatusChangedListener(listener: (IWWWEvent.Status) -> Unit): Int {
+        val key = generateKey(1)
+        if (!waveStatusChangedListeners.containsValue(listener)) {
+            waveStatusChangedListeners[key] = listener
+        }
+        startObservation()
+        return key
+    }
 
-    fun addOnWaveWarmingEndedListener(listener: () -> Unit) = apply {
-        waveWarmingEndedListeners.add(listener)
-    }.also { startObservation() }
+    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int {
+        val key = generateKey(2)
+        if (!waveProgressionChangedListeners.containsValue(listener)) {
+            waveProgressionChangedListeners[key] = listener
+        }
+        startObservation()
+        return key
+    }
 
-    fun addOnWaveUserIsGoingToBeHitListener(listener: () -> Unit) = apply {
-        waveUserIsGoingToBeHitListeners.add(listener)
-    }.also { startObservation() }
+    fun addOnWaveWarmingEndedListener(listener: () -> Unit): Int {
+        val key = generateKey(3)
+        if (!waveWarmingEndedListeners.containsValue(listener)) {
+            waveWarmingEndedListeners[key] = listener
+        }
+        startObservation()
+        return key
+    }
 
-    fun addOnWaveUserUserHasBeenHitListener(listener: () -> Unit) = apply {
-        waveUserHasBeenHitListeners.add(listener)
-    }.also { startObservation() }
+    fun addOnWaveUserIsGoingToBeHitListener(listener: () -> Unit): Int {
+        val key = generateKey(4)
+        if (!waveUserIsGoingToBeHitListeners.containsValue(listener)) {
+            waveUserIsGoingToBeHitListeners[key] = listener
+        }
+        startObservation()
+        return key
+    }
 
-    private fun onWaveStatusChanged(status: IWWWEvent.Status) = waveStatusChangedListeners.forEach { it(status) }
-    private fun onWaveProgressionChanged(progression: Double) = waveProgressionChangedListeners.forEach { it(progression) }
+    fun addOnWaveUserUserHasBeenHitListener(listener: () -> Unit): Int {
+        val key = generateKey(4)
+        if (!waveUserHasBeenHitListeners.containsValue(listener)) {
+            waveUserHasBeenHitListeners[key] = listener
+        }
+        startObservation()
+        return key
+    }
 
-    protected fun onWaveWarmingEnded() = waveWarmingEndedListeners.forEach { it() }
-    protected fun onWaveUserIsGoingToBeHit() = waveUserIsGoingToBeHitListeners.forEach { it() }
-    protected fun onWaveUserUserHasBeenHit() = waveUserHasBeenHitListeners.forEach { it() }
+    private fun onWaveStatusChanged(status: IWWWEvent.Status) = waveStatusChangedListeners.values.forEach {
+        try { it(status) } catch (e: Exception) {
+            Napier.e("onWaveStatusChanged: Error invoking listener: $e")
+        }
+    }
+    private fun onWaveProgressionChanged(progression: Double) = waveProgressionChangedListeners.values.forEach {
+        try { it(progression) } catch (e: Exception) {
+            Napier.e("onWaveStatusChanged: Error invoking listener: $e")
+        }
+    }
+
+    // FIXME: to be called
+    protected fun onWaveWarmingEnded() = waveWarmingEndedListeners.values.forEach { it() }
+    protected fun onWaveUserIsGoingToBeHit() = waveUserIsGoingToBeHitListeners.values.forEach { it() }
+    protected fun onWaveUserUserHasBeenHit() = waveUserHasBeenHitListeners.values.forEach { it() }
 
     // ---------------------------
 

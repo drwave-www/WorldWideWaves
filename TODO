@@ -1,93 +1,11 @@
 
 Next:
-- move observer in onStart/onStop
-- change overlays (and others) on end of wave/status change
-
-check :
-
-class WaveActivity : AppCompatActivity() {
-    private val viewModel: WaveViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wave)
-
-        // Set up UI components
-        setupUI()
-
-        // Observe ViewModel state
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.waveState.collect { state ->
-                    updateUI(state)
-                }
-            }
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.startObservation()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        viewModel.stopObservation()
-    }
-
-    private fun setupUI() {
-        // Initialize your UI components here
-    }
-
-    private fun updateUI(state: WaveState) {
-        // Update your UI based on the wave state
-        // For example:
-        // progressBar.progress = state.waveProgression
-        // statusTextView.text = state.waveStatus.toString()
-    }
-}
-
-class WaveViewModel : ViewModel() {
-    private val _waveState = MutableStateFlow(WaveState())
-    val waveState: StateFlow<WaveState> = _waveState.asStateFlow()
-
-    private var observeJob: Job? = null
-
-    fun startObservation() {
-        if (observeJob == null) {
-            observeJob = viewModelScope.launch {
-                observeWave().collect { observation ->
-                    _waveState.update { currentState ->
-                        currentState.copy(
-                            waveProgression = observation.progression,
-                            waveStatus = observation.status
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun stopObservation() {
-        observeJob?.cancel()
-        observeJob = null
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        stopObservation()
-    }
-
-    // ... other ViewModel methods
-}
-
-data class WaveState(
-    val waveProgression: Float = 0f,
-    val waveStatus: WaveStatus = WaveStatus.IDLE
-)
-
-
-- do it too for the events list screen
+- Urgent:
+    - verifier qu'un listener wave n'a pas deja ete ajoute
+    - terminer l'observation si plus de listeners
+    - trouver un moyen smart de retirer les listeners l'on sport de l'ecran
+- add wave observation to the EventsViewModel
+- connect WaveViewModel to the EventFullMapActivity
 - polygon to maplibre
 - wave connection !!
 

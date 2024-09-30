@@ -30,6 +30,7 @@ import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +42,10 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class WaveViewModel : ViewModel() {
 
     private var event : IWWWEvent? = null
+    private var observationStarted = false
+
+    private var progressionListenerKey: Int? = null
+    private var statusListenerKey: Int? = null
 
     private val _waveNumbers = MutableStateFlow<WaveNumbersLiterals?>(null)
     val waveNumbers: StateFlow<WaveNumbersLiterals?> = _waveNumbers.asStateFlow()
@@ -54,43 +59,56 @@ class WaveViewModel : ViewModel() {
     // ----------------------------
 
     fun startObservation(event : IWWWEvent) {
-        this.event = event
-        event.wave.addOnWaveProgressionChangedListener {
-            viewModelScope.launch {
-                if (_waveNumbers.value == null) {
-                    _waveNumbers.value = event.wave.getAllNumbers()
-                } else {
-                    _waveNumbers.value = waveNumbers.value?.copy(
-                        waveProgression = event.wave.getLiteralProgression()
-                    )
+        if (!observationStarted) {
+            this.event = event
+            progressionListenerKey = event.wave.addOnWaveProgressionChangedListener {
+                viewModelScope.launch(Dispatchers.Default) {
+                    if (_waveNumbers.value == null) {
+                        _waveNumbers.value = event.wave.getAllNumbers()
+                    } else {
+                        _waveNumbers.value = waveNumbers.value?.copy(
+                            waveProgression = event.wave.getLiteralProgression()
+                        )
+                    }
                 }
             }
-        }
-        event.wave.addOnWaveStatusChangedListener {
-            viewModelScope.launch {
-                _eventState.value = event.getStatus()
+            statusListenerKey = event.wave.addOnWaveStatusChangedListener {
+                viewModelScope.launch(Dispatchers.Default) {
+                    _eventState.value = event.getStatus()
+                }
             }
+            observationStarted = true
         }
     }
 
     fun stopObservation() {
-        event?.wave?.stopObservation()
+        if (observationStarted) {
+            event?.wave?.stopListeners(listOfNotNull(
+                progressionListenerKey,
+                statusListenerKey
+            ))
+            observationStarted = false
+        }
     }
 
+    // ----------------------------
+
     fun updateGeolocText(newLocation: LatLng) {
-            viewModelScope.launch {
-                val currentEvent = event
-                if (currentEvent != null) {
-                    val currentPosition = Position(newLocation.latitude, newLocation.longitude)
-                    val newGeolocText = when {
-                        currentEvent.wave.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
-                        currentEvent.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
-                        else -> ShRes.string.geoloc_yourenotin
-                    }
-                    _geolocText.value = newGeolocText
+        viewModelScope.launch(Dispatchers.IO) {
+            val currentEvent = event
+            if (currentEvent != null) {
+                val currentPosition = Position(newLocation.latitude, newLocation.longitude)
+                val newGeolocText = when {
+                    currentEvent.wave.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
+                    currentEvent.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
+                    else -> ShRes.string.geoloc_yourenotin
                 }
+                _geolocText.value = newGeolocText
             }
+        }
     }
+
+    // ----------------------------
 
     override fun onCleared() {
         super.onCleared()
