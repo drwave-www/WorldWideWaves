@@ -62,25 +62,41 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     enum class Direction { WEST, EAST }
     enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
 
-    data class WaveNumbers(
-        val waveTimezone: String,
-        val waveSpeed: String,
-        val waveStartTime: String,
-        val waveEndTime: String,
-        val waveTotalTime: String,
-        val waveProgression: String
-    )
-
-    data class WaveObservation(
-        val progression: Double,
-        val status: IWWWEvent.Status
-    )
+    data class WaveNumbersLiterals(
+        val waveTimezone: String = "",
+        val waveSpeed: String = "..",
+        val waveStartTime: String = "..",
+        val waveEndTime: String = "..",
+        val waveTotalTime: String = "..",
+        val waveProgression: String = ".."
+    ) {
+//        fun copy(
+//            waveTimezone: String? = null,
+//            waveSpeed: String? = null,
+//            waveStartTime: String? = null,
+//            waveEndTime: String? = null,
+//            waveTotalTime: String? = null,
+//            waveProgression: String? = null
+//        )  = WaveNumbersLiterals(
+//            waveTimezone = waveTimezone ?: this.waveTimezone,
+//            waveSpeed = waveSpeed ?: this.waveSpeed,
+//            waveStartTime = waveStartTime ?: this.waveStartTime,
+//            waveEndTime = waveEndTime ?: this.waveEndTime,
+//            waveTotalTime = waveTotalTime ?: this.waveTotalTime,
+//            waveProgression = waveProgression ?: this.waveProgression
+//        )
+    }
 
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
         val remainingPolygons: Area,
         val addedTraversedPolygons: Area? = null
+    )
+
+    private data class WaveObservation(
+        val progression: Double,
+        val status: IWWWEvent.Status
     )
 
     // ---------------------------
@@ -168,7 +184,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     private fun startObservation() {
         if (observationJob == null) {
-            observationJob = coroutineScopeProvider.launchIO {
+            coroutineScopeProvider.launchIO {
                 lastObservedStatus = event.getStatus()
 
                 try {
@@ -181,10 +197,15 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 }
 
                 if (event.isRunning() || (event.isSoon() && isNearTheEvent())) {
-                    observeWave().launchIn(coroutineScopeProvider.scopeDefault())
+                    observationJob = observeWave().launchIn(coroutineScopeProvider.scopeDefault())
                 }
             }
         }
+    }
+
+    fun stopObservation() {
+        observationJob?.cancel()
+        observationJob = null
     }
 
     /**
@@ -288,11 +309,11 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * total time, and progression. It constructs a `WaveNumbers` object containing these metrics.
      *
      */
-    suspend fun getAllNumbers(): WaveNumbers {
+    suspend fun getAllNumbers(): WaveNumbersLiterals {
         suspend fun safeCall(block: suspend () -> String): String =
             try { block() } catch (e: Throwable) { "error" }
 
-        return WaveNumbers(
+        return WaveNumbersLiterals(
             waveTimezone = safeCall { getLiteralTimezone() },
             waveSpeed = safeCall { getLiteralSpeed() },
             waveStartTime = safeCall { getLiteralStartTime() },

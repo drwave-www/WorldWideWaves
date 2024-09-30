@@ -68,7 +68,6 @@ abstract class AbstractEventBackActivity(
 ) : MainActivity() {
 
     private val wwwEvents: WWWEvents by inject()
-
     var platform : WWWPlatform? = null
 
     // ----------------------------

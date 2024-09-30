@@ -30,12 +30,14 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -103,8 +105,11 @@ class DefaultCoroutineScopeProvider(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : CoroutineScopeProvider {
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(job + Dispatchers.Default)
+    private val supervisorJob = SupervisorJob()
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Napier.e("CoroutineExceptionHandler got $exception")
+    }
+    private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
 
     override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
         scope.launch(ioDispatcher, block = block)
@@ -112,18 +117,18 @@ class DefaultCoroutineScopeProvider(
     override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job =
         scope.launch(defaultDispatcher, block = block)
 
-    override fun scopeIO(): CoroutineScope = CoroutineScope(Job() + ioDispatcher)
+    override fun scopeIO(): CoroutineScope = scope + ioDispatcher
 
-    override fun scopeDefault(): CoroutineScope  = CoroutineScope(Job() + defaultDispatcher)
+    override fun scopeDefault(): CoroutineScope  = scope + defaultDispatcher
 
     override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(ioDispatcher) { scope.block() }
+        withContext(ioDispatcher) { block() }
 
     override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(defaultDispatcher) { scope.block() }
+        withContext(defaultDispatcher) { block() }
 
     override fun cancelAllCoroutines() {
-        job.cancel()
+        supervisorJob.cancel()
     }
 }
 

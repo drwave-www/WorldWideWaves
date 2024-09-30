@@ -83,6 +83,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
 import com.worldwidewaves.shared.generated.resources.events_empty
@@ -96,6 +97,8 @@ import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -130,7 +133,7 @@ class EventsListScreen(
 
         EventsList(
             modifier, events,
-            onAllEventsCLicked = { if (starredSelected) toggleStarredSelection() },
+            onAllEventsClicked = { if (starredSelected) toggleStarredSelection() },
             onFavoriteEventsClicked = { if (!starredSelected) toggleStarredSelection() }
         )
     }
@@ -146,7 +149,7 @@ class EventsListScreen(
     private fun EventsList(
         modifier: Modifier,
         events: List<IWWWEvent>,
-        onAllEventsCLicked: () -> Unit,
+        onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit
     ) {
         Column(
@@ -154,7 +157,7 @@ class EventsListScreen(
                 .fillMaxHeight()
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            FavoritesSelector(onAllEventsCLicked, onFavoriteEventsClicked)
+            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked)
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
             Events(viewModel, events, modifier = Modifier.weight(1f))
         }
@@ -284,7 +287,20 @@ class EventsListScreen(
         event: IWWWEvent,
         modifier: Modifier = Modifier
     ) {
+        var eventStatus by remember { mutableStateOf(IWWWEvent.Status.UNDEFINED) }
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
+
+        LaunchedEffect(event) {
+            while (isActive) {
+                try {
+                    eventStatus = event.getStatus()
+                } catch (e: Exception) {
+                    Log.e("EventScreen", "Error fetching event status: ${e.message}")
+                    eventStatus = IWWWEvent.Status.UNDEFINED
+                }
+                delay(30000) // 30s refresh - FIXME : use WaveViewModel ?
+            }
+        }
 
         Box(modifier = heightModifier) {
 
@@ -299,8 +315,8 @@ class EventsListScreen(
             }
 
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
-            EventOverlaySoonOrRunning(event)
-            EventOverlayDone(event)
+            EventOverlaySoonOrRunning(eventStatus)
+            EventOverlayDone(eventStatus)
             EventOverlayFavorite(viewModel, event)
         }
     }

@@ -53,7 +53,7 @@ interface IWWWEvent : DataValidator {
 
     // ---------------------------
 
-    enum class Status { DONE, NEXT, SOON, RUNNING }
+    enum class Status { UNDEFINED, DONE, NEXT, SOON, RUNNING }
 
     // ---------------------------
 
