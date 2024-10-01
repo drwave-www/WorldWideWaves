@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,9 +77,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 
 @Composable
-fun EventOverlaySoonOrRunning(eventStatus: Status, modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-
+fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
         val (backgroundColor, textId) = if (eventStatus == Status.SOON) {
             MaterialTheme.colorScheme.secondary to Res.string.event_soon
@@ -111,7 +108,7 @@ fun EventOverlaySoonOrRunning(eventStatus: Status, modifier: Modifier = Modifier
 // ----------------------------
 
 @Composable
-fun EventOverlayDone(eventStatus: Status, modifier: Modifier = Modifier) {
+fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.DONE) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(

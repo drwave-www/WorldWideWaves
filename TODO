@@ -1,7 +1,7 @@
 
 Next:
-- add wave observation to the EventsViewModel
-- connect WaveViewModel to the EventFullMapActivity
+- re-read / check code of wave monitoring / check thread safety / listeners
+- add tests
 - In WWWEventWave, call :
         onWaveWarmingEnded()
         onWaveUserIsGoingToBeHit()

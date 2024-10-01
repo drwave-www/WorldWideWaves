@@ -231,8 +231,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     private fun observeWave() = flow {
         isObserving = true
-        while (isObserving && !event.isDone()) {
+        while (isObserving) {
             emit(WaveObservation(getProgression(), event.getStatus()))
+            if (event.isDone()) break
             delay(getObservationInterval())
         }
     }.flowOn(Dispatchers.IO)

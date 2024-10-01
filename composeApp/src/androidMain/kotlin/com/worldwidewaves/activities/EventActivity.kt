@@ -137,7 +137,7 @@ class EventActivity : AbstractEventBackActivity() {
             EventMap(platform, event,
                 onLocationUpdate = { newLocation ->
                     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateGeolocText(newLocation)
+                        waveViewModel.updateGeolocationText(newLocation)
                         lastKnownLocation = newLocation
                     }
                 },
@@ -153,10 +153,6 @@ class EventActivity : AbstractEventBackActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        waveViewModel.stopObservation()
-    }
 }
 
 // ----------------------------

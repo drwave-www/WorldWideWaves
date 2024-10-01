@@ -24,12 +24,16 @@ package com.worldwidewaves.models
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * ViewModel for managing event data.
@@ -43,6 +47,10 @@ import kotlinx.coroutines.launch
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private var originalEvents: List<IWWWEvent> = emptyList()
+    private var observationStarted = false
+
+    private val statusListenerKeysMutex = Mutex()
+    private var statusListenerKeys = mutableMapOf<Int, WWWEventWave>()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
@@ -52,6 +60,9 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private val loadingError = MutableStateFlow(false)
     val hasLoadingError: StateFlow<Boolean> = loadingError.asStateFlow()
+
+    private val _eventState = ConcurrentHashMap<String, MutableStateFlow<IWWWEvent.Status>>()
+    val eventStatus: Map<String, StateFlow<IWWWEvent.Status>> get() = _eventState
 
     init {
         loadEvents {
@@ -63,12 +74,13 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private fun loadEvents(onLoadingError: ((Exception) -> Unit)? = null) =
         wwwEvents.loadEvents(onLoadingError = onLoadingError).also {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Default) {
                 wwwEvents.flow().collect { eventsList ->
                     val sortedEvents = eventsList.sortedBy { it.getStartDateTime() }
                     originalEvents = sortedEvents
                     _events.value = sortedEvents
                     _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
+                    startObservation()
                 }
             }
         }
@@ -77,6 +89,55 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     fun filterEvents(onlyFavorites: Boolean) {
         _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
+    }
+
+    // ---------------------------
+
+    private suspend fun updateEventStatus(event: IWWWEvent) {
+        val newStatus = event.getStatus()
+        _eventState[event.id]?.emit(newStatus)
+    }
+
+    private fun startObservation() {
+        if (!observationStarted) {
+            originalEvents.forEach { event ->
+                viewModelScope.launch(Dispatchers.Default) {
+                    val initialStatus = event.getStatus()
+                    _eventState.getOrPut(event.id) { MutableStateFlow(initialStatus) }
+                        .emit(initialStatus)
+
+                    val key = event.wave.addOnWaveStatusChangedListener {
+                        viewModelScope.launch(Dispatchers.Default) {
+                            updateEventStatus(event)
+                        }
+                    }
+                    statusListenerKeysMutex.withLock {
+                        statusListenerKeys[key] = event.wave
+                    }
+                }
+            }
+            observationStarted = true
+        }
+    }
+
+    private suspend fun stopObservation() {
+        if (observationStarted) {
+            statusListenerKeysMutex.withLock {
+                statusListenerKeys.forEach { (key, wave) ->
+                    wave.stopListeners(key)
+                }
+            }
+            observationStarted = false
+        }
+    }
+
+    // ----------------------------
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch(Dispatchers.Default) {
+            stopObservation()
+        }
     }
 
 }

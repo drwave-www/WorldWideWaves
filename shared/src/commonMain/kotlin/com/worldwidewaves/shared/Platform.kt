@@ -37,7 +37,7 @@ abstract class WWWPlatform {
         val instant = Instant.parse("2024-03-15T17:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
         val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
-        setSimulation(WWWSimulation(now, Position(lat = 48.8566, lng = 2.3522))) // Center of Paris
+        setSimulation(WWWSimulation(now, Position(lat = 48.8566, lng = 2.3522), 50)) // Center of Paris
     }
 
     private var _simulation : WWWSimulation? = null

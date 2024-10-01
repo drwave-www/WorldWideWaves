@@ -61,20 +61,24 @@ class WaveViewModel : ViewModel() {
     fun startObservation(event : IWWWEvent) {
         if (!observationStarted) {
             this.event = event
-            progressionListenerKey = event.wave.addOnWaveProgressionChangedListener {
-                viewModelScope.launch(Dispatchers.Default) {
-                    if (_waveNumbers.value == null) {
-                        _waveNumbers.value = event.wave.getAllNumbers()
-                    } else {
-                        _waveNumbers.value = waveNumbers.value?.copy(
-                            waveProgression = event.wave.getLiteralProgression()
-                        )
+            viewModelScope.launch(Dispatchers.Default) {
+                _waveNumbers.value = event.wave.getAllNumbers()
+                _eventState.value = event.getStatus()
+                progressionListenerKey = event.wave.addOnWaveProgressionChangedListener {
+                    viewModelScope.launch(Dispatchers.Default) {
+                        if (_waveNumbers.value == null) {
+                            _waveNumbers.value = event.wave.getAllNumbers()
+                        } else {
+                            _waveNumbers.value = waveNumbers.value?.copy(
+                                waveProgression = event.wave.getLiteralProgression()
+                            )
+                        }
                     }
                 }
-            }
-            statusListenerKey = event.wave.addOnWaveStatusChangedListener {
-                viewModelScope.launch(Dispatchers.Default) {
-                    _eventState.value = event.getStatus()
+                statusListenerKey = event.wave.addOnWaveStatusChangedListener {
+                    viewModelScope.launch(Dispatchers.Default) {
+                        _eventState.value = event.getStatus()
+                    }
                 }
             }
             observationStarted = true
@@ -93,17 +97,17 @@ class WaveViewModel : ViewModel() {
 
     // ----------------------------
 
-    fun updateGeolocText(newLocation: LatLng) {
+    fun updateGeolocationText(newLocation: LatLng) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentEvent = event
             if (currentEvent != null) {
                 val currentPosition = Position(newLocation.latitude, newLocation.longitude)
-                val newGeolocText = when {
+                val newText = when {
                     currentEvent.wave.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
                     currentEvent.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
                     else -> ShRes.string.geoloc_yourenotin
                 }
-                _geolocText.value = newGeolocText
+                _geolocText.value = newText
             }
         }
     }

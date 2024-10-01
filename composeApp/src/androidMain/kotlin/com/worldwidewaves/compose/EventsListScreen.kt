@@ -51,7 +51,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -83,7 +85,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
 import com.worldwidewaves.shared.generated.resources.events_empty
@@ -97,8 +98,6 @@ import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -287,19 +286,9 @@ class EventsListScreen(
         event: IWWWEvent,
         modifier: Modifier = Modifier
     ) {
-        var eventStatus by remember { mutableStateOf(IWWWEvent.Status.UNDEFINED) }
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
-
-        LaunchedEffect(event) {
-            while (isActive) {
-                try {
-                    eventStatus = event.getStatus()
-                } catch (e: Exception) {
-                    Log.e("EventScreen", "Error fetching event status: ${e.message}")
-                    eventStatus = IWWWEvent.Status.UNDEFINED
-                }
-                delay(30000) // 30s refresh - FIXME : use WaveViewModel ?
-            }
+        val eventStatus by produceState(initialValue = IWWWEvent.Status.UNDEFINED, key1 = event.id) {
+            viewModel.eventStatus[event.id]?.collect { value = it } ?: run { value = IWWWEvent.Status.UNDEFINED }
         }
 
         Box(modifier = heightModifier) {
@@ -315,8 +304,10 @@ class EventsListScreen(
             }
 
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
-            EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDone(eventStatus)
+            key(eventStatus) {
+                EventOverlaySoonOrRunning(eventStatus)
+                EventOverlayDone(eventStatus)
+            }
             EventOverlayFavorite(viewModel, event)
         }
     }
