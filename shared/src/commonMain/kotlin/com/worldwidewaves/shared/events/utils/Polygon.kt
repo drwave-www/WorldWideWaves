@@ -74,7 +74,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     private fun removePositionFromIndex(id: Int) : Position {
-        val positionToRemove = requireNotNull(positionsIndex.remove(id)) { "Position with id $id not found" }
+        val positionToRemove = requireNotNull(positionsIndex.remove(id)) {
+            "Position with id $id not found"
+        }
         if (positionToRemove is CutPosition) cutPositions.remove(positionToRemove)
         return positionToRemove
     }
@@ -364,7 +366,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     // --------------------------------
 
     override fun toString(): String {
-        val maxPointsToShow = 30
+        val maxPointsToShow = 75
         val pointsString = take(maxPointsToShow).joinToString(", ") { "(${it.lat}, ${it.lng})" }
         val pointsDisplay = if (size > maxPointsToShow) "$pointsString, ..." else pointsString
         val closedStatus = if (isNotEmpty()) ", closed=${first() == last()}" else ""

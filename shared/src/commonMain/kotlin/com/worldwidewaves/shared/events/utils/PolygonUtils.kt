@@ -140,8 +140,7 @@ object PolygonUtils {
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
 
-        // Perpetuate the cutId from the initial polygon if any or generate a new one
-        val cutId = (this as? CutPolygon)?.cutId ?: Random.nextInt(1, Int.MAX_VALUE)
+        val cutId = Random.nextInt(1, Int.MAX_VALUE)
 
         require(isNotEmpty() && size >= 3) { return PolygonSplitResult.empty(cutId).also { close() } }
 
@@ -212,11 +211,15 @@ object PolygonUtils {
 
                 // Add the last polygons, completing them, to the left and/or right side
                 if (leftSide.size > 1) leftSide.add(currentLeft.apply {
-                    add(stopPoint.toPointCut(cutId))
+                    if (currentLeft.cutPositions.size == 1)
+                        add(stopPoint.toPointCut(cutId))
+                    else add(stopPoint)
                 }.move())
 
                 if (rightSide.size > 1) rightSide.add(currentRight.apply {
-                    add(stopPoint.toPointCut(cutId))
+                    if (currentRight.cutPositions.size == 1)
+                        add(stopPoint.toPointCut(cutId))
+                    else add(stopPoint)
                 }.move())
 
                 // Group the poly-lines into ring polygons and add the ComposedLongitude positions
@@ -238,12 +241,12 @@ object PolygonUtils {
      *
      */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
-        cutId: Int,
+        propCutId: Int,
         lngToCut: ComposedLongitude,
         polygons: List<T>
     ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
         polygons.map { polygon ->
-            val cutPositions = polygon.getCutPositions().filter { cutId == cutId }.sortedBy { it.lat }
+            val cutPositions = polygon.getCutPositions().filter { it.cutId == propCutId }.sortedBy { it.lat }
             if (cutPositions.size < 2) return@map polygon
 
             val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cuts
@@ -285,10 +288,10 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructSide(cutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
+    private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.filter { it.cutId == cutId }.size == 2 } // Each polyline should cut the lng twice
-            .sortedBy { it.cutPositions.filter { cutId == cutId }.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
+            .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
+            .sortedBy { it.cutPositions.filter { it2 -> it2.cutId == propCutId }.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
             .let { connectPolylines(it.toList(), initPolygon) }
 
 
@@ -370,13 +373,16 @@ object PolygonUtils {
                             // the CutPosition pairs and then jumping from one polygon to another
                             fun traverse(current: Position, previous: Position? = null) {
                                 if (current == this && previous != null) return // Stop traversal, polygon is closed
+
                                 if (current is CutPosition && associatedCutPositions.containsKey(current.pairId)) {
+
                                     // We'll jump here from one polygon to another by their common CutPosition
                                     associatedCutPositions[current.pairId]?.let { positions ->
                                         when { // Identify the polygon behind the gate
                                             positions.first.first.id == current.id -> positions.second.second
                                             positions.second.first.id == current.id -> positions.first.second
                                             else -> throw IllegalStateException("Invalid pairId")
+
                                         }.search(current)?.next?.let { // Connect with the same position
                                             if (current.isPointOnLine) // Add the position if it was on the line
                                                 addInRecomposedPolygon(current)

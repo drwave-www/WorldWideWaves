@@ -51,7 +51,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -68,7 +67,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.models.EventsViewModel
+import com.worldwidewaves.viewmodels.EventsViewModel
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -304,10 +303,8 @@ class EventsListScreen(
             }
 
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
-            key(eventStatus) {
-                EventOverlaySoonOrRunning(eventStatus)
-                EventOverlayDone(eventStatus)
-            }
+            EventOverlaySoonOrRunning(eventStatus)
+            EventOverlayDone(eventStatus)
             EventOverlayFavorite(viewModel, event)
         }
     }

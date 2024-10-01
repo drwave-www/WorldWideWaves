@@ -37,6 +37,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -93,15 +94,14 @@ class WWWEventWaveLinearTest : KoinTest {
 
         waveLinear = WWWEventWaveLinear(
             speed = 100.0, // m/s
-            direction = WWWEventWave.Direction.EAST,
-            warming = mockWarming
+            direction = WWWEventWave.Direction.EAST
         )
         every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
         every { mockEvent.area } returns mockArea
         coEvery { mockEvent.isRunning() } returns true
-        coEvery { mockEvent.getStartDateTime() } returns mockk()
+        coEvery { mockEvent.getWaveStartDateTime() } returns mockk()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -130,6 +130,7 @@ class WWWEventWaveLinearTest : KoinTest {
         // THEN
         assertEquals(40.seconds, result)
         coVerify { mockEvent.area.bbox() }
+        unmockkObject(GeoUtils)
     }
 
     @Test fun testHasUserBeenHit_isWithin() = testHasUserBeenHit(isWithin = true)
@@ -145,7 +146,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val startTime = Instant.parse("2024-01-01T00:00:00Z")
         val currentTime = startTime + 30.minutes
         every { mockClock.now() } returns currentTime
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
 
         coEvery { mockArea.bbox() } returns bbox
         coEvery { mockArea.isPositionWithin(userPosition) } returns isWithin
@@ -168,7 +169,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val currentTime = startTime + 10.minutes
 
         every { mockClock.now() } returns currentTime
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
         coEvery { mockEvent.area.bbox() } returns bbox
 
         // WHEN
@@ -194,7 +195,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val currentTime = startTime + 10.minutes
 
         every { mockClock.now() } returns currentTime
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
         coEvery { mockEvent.area.bbox() } returns bbox
         coEvery { mockEvent.area.isPositionWithin(any()) } returns true
 
@@ -221,7 +222,7 @@ class WWWEventWaveLinearTest : KoinTest {
         val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
 
         every { mockClock.now() } returns currentTime
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
         coEvery { mockEvent.area.bbox() } returns bbox
         waveLinear.setPositionRequester { userPosition }
         coEvery { mockEvent.area.isPositionWithin(userPosition) } returns true
@@ -317,7 +318,8 @@ class WWWEventWaveLinearTest : KoinTest {
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
 
         coEvery { mockArea.getPolygons() } returns mockPolygons
         coEvery { mockArea.bbox() } returns mockBoundingBox
@@ -337,7 +339,8 @@ class WWWEventWaveLinearTest : KoinTest {
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
         coEvery { mockArea.getPolygons() } returns mockPolygons
         coEvery { mockArea.bbox() } returns mockBoundingBox
         every { mockClock.now() } returns startTime + 1.hours
@@ -362,7 +365,8 @@ class WWWEventWaveLinearTest : KoinTest {
             remainingPolygons = mockPolygons
         )
 
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
 
         coEvery { mockArea.getPolygons() } returns mockPolygons
         coEvery { mockArea.bbox() } returns mockBoundingBox
@@ -405,7 +409,8 @@ class WWWEventWaveLinearTest : KoinTest {
         coEvery { mockArea.getPolygons() } returns mockPolygons
         coEvery { mockArea.bbox() } returns mockBoundingBox
         every { mockClock.now() } returns startTime + 4.hours
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
 
         // WHEN
         val result = waveLinear.getWavePolygons(lastWaveState, WWWEventWave.WaveMode.RECOMPOSE)
@@ -422,7 +427,8 @@ class WWWEventWaveLinearTest : KoinTest {
         val mockBoundingBox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
 
         coEvery { mockArea.getPolygons() } returns emptyList()
         coEvery { mockArea.bbox() } returns mockBoundingBox
@@ -451,8 +457,7 @@ class WWWEventWaveLinearTest : KoinTest {
         // GIVEN
         waveLinear = WWWEventWaveLinear(
             speed = 100.0,
-            direction = WWWEventWave.Direction.WEST,
-            warming = mockWarming
+            direction = WWWEventWave.Direction.WEST
         )
         every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
@@ -464,7 +469,8 @@ class WWWEventWaveLinearTest : KoinTest {
         coEvery { mockArea.bbox() } returns mockBoundingBox
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
         every { mockClock.now() } returns startTime + 4.hours
-        every { mockEvent.getStartDateTime() } returns startTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        every { mockEvent.isWarmingEnded() } returns true
 
         // WHEN
         val result = waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
@@ -473,5 +479,8 @@ class WWWEventWaveLinearTest : KoinTest {
         assertNotNull(result)
         assertTrue(result.traversedPolygons.isNotEmpty() || result.remainingPolygons.isNotEmpty())
     }
+
+
+
 
 }

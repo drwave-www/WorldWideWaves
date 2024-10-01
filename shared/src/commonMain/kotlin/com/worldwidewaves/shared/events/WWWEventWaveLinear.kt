@@ -34,30 +34,30 @@ import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
-import kotlin.time.toDuration
 
 // ---------------------------
 
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: Direction,
-    override val warming: WWWEventWaveWarming
+    override val direction: Direction
 ) : KoinComponent, WWWEventWave() {
 
     @Transient private var cachedLongitude: EarthAdaptedSpeedLongitude? = null
-    @Transient private var cachedTotalTime: Duration? = null
+    @Transient private var cachedWaveDuration: Duration? = null
 
     // ---------------------------
 
     override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
-        require(event.isRunning()) { "Event must be running to request teh wave polygons" }
+        require(event.isRunning()) { "Event must be running to request the wave polygons" }
         require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
+        if (!event.isWarmingEnded()) return null
+
+        val elapsedTime = clock.now() - event.getWaveStartDateTime()
         val composedLongitude = // Compose an earth-aware speed longitude with bands for the wave
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
-            .withProgression(clock.now() - event.getStartDateTime())
+            .withProgression(elapsedTime)
 
         val areaPolygons = event.area.getPolygons()
         val traversedPolygons : MutableArea = mutableListOf()
@@ -131,13 +131,12 @@ data class WWWEventWaveLinear(
      * The calculated duration is then cached for future use.
      *
      */
-    override suspend fun getWaveDuration(): Duration = cachedTotalTime ?: run {
+    override suspend fun getWaveDuration(): Duration = cachedWaveDuration ?: run {
         val bbox = bbox()
         val longestLat = bbox.latitudeOfWidestPart()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
         val durationInSeconds = maxEastWestDistance / speed
-        durationInSeconds.toDuration(DurationUnit.SECONDS)
-            .also { cachedTotalTime = it }
+        durationInSeconds.seconds.also { cachedWaveDuration = it }
     }
 
     // ---------------------------
@@ -165,7 +164,7 @@ data class WWWEventWaveLinear(
     suspend fun currentWaveLongitude(latitude: Double): Double {
         val bbox = bbox()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
-        val distanceTraveled = speed * (clock.now() - event.getStartDateTime()).inWholeSeconds
+        val distanceTraveled = speed * (clock.now() - event.getWaveStartDateTime()).inWholeSeconds
 
         val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (bbox.maxLongitude - bbox.minLongitude)
         return if (direction == Direction.WEST) {

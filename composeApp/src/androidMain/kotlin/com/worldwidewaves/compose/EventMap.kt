@@ -29,6 +29,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
@@ -84,6 +85,12 @@ import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Polygon
 import java.io.File
 import kotlin.math.abs
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -103,12 +110,17 @@ class EventMap(
 
     enum class MapCameraPosition { WINDOW, BOUNDS, DEFAULT_CENTER }
 
+    private var mapViewState: MapView? = null
+
     // -------------------------
 
     @Composable
     fun Screen(modifier: Modifier) {
         val context = LocalContext.current
         val mapView = rememberMapViewWithLifecycle()
+
+        // Store mapView in shared state
+        mapViewState = mapView
 
         var mapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
@@ -173,6 +185,44 @@ class EventMap(
                 factory = { mapView },
                 modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
             )
+        }
+    }
+
+    // -- Wave polygons -------------------------------------------------------
+
+    fun updateWavePolygons(context: Context, wavePolygons: List<Polygon>, clearPolygons: Boolean) {
+        (context as? AppCompatActivity)?.runOnUiThread {
+            mapViewState?.getMapAsync { map ->
+                map.getStyle { style ->
+                    val sourceId = "wave-polygons-source"
+                    val layerId = "wave-polygons-layer"
+
+                    if (clearPolygons) {
+                        style.removeLayer(layerId)
+                        style.removeSource(sourceId)
+                    }
+
+                    // Create or update the source with new polygons
+                    val geoJsonSource = style.getSourceAs(sourceId) ?: GeoJsonSource(sourceId)
+                    geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(wavePolygons.map {
+                        Feature.fromGeometry(
+                            it
+                        )
+                    }))
+                    if (style.getSource(sourceId) == null) {
+                        style.addSource(geoJsonSource)
+                    }
+
+                    // Create or update the layer
+                    if (style.getLayer(layerId) == null) {
+                        val fillLayer = FillLayer(layerId, sourceId).withProperties(
+                            PropertyFactory.fillColor(Color.parseColor("#D33682")),
+                            PropertyFactory.fillOpacity(0.5f)
+                        )
+                        style.addLayer(fillLayer)
+                    }
+                }
+            }
         }
     }
 

@@ -1,16 +1,20 @@
 
 Next:
-- re-read / check code of wave monitoring / check thread safety / listeners
-- add tests
-- In WWWEventWave, call :
-        onWaveWarmingEnded()
-        onWaveUserIsGoingToBeHit()
-        onWaveUserUserHasBeenHit()
-- polygon to maplibre
-- wave connection !!
+- 1: resoudre le pb de difference de vitesse entre la wave et la progression
+- 2: tester RECOMPOSE sur une liste de polygons splittes (faire deux splits et recomposer)
+- 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
+      --> Faire une fonction de telemetrie
+- add tests for all missing functions
+- Add a full test for event behavior AND wave progression using listeners
+- wave mechanics : wire in event screen :
+    - wave starting, warming area blinks, warming choreography
+    - wave is coming, prepare yourself, mains levees, ...
+    - addOnWaveWarmingEndedListener
+    - addOnWaveUserIsGoingToBeHitListener
+    - addOnWaveUserUserHasBeenHitListener
 
 - ======== Bugs/Issues/Refactorings =========
-    - verifier la bonne prise en compte des heures, j'ai un doute..
+    - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation  requests
     - perf: create the longitude-cut geojson at build phase not runtime
     - show some map elements on min zoom
@@ -19,11 +23,6 @@ Next:
     - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
-
-- Wave linear
-    - wave progression
-        - add a layer on the map
-        - add a progress bar on the map
 
 - Wave simulator
     - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')

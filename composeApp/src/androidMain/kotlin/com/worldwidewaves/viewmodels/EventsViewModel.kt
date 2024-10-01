@@ -1,4 +1,4 @@
-package com.worldwidewaves.models
+package com.worldwidewaves.viewmodels
 
 /*
  * Copyright 2024 DrWave
@@ -21,6 +21,7 @@ package com.worldwidewaves.models
  * limitations under the License.
  */
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * ViewModel for managing event data.
@@ -46,11 +48,14 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
+    private val originalEventsMutex = Mutex()
     private var originalEvents: List<IWWWEvent> = emptyList()
-    private var observationStarted = false
+
+    private val observationStartedMutex = Mutex()
+    private var observationStarted = AtomicBoolean(false)
 
     private val statusListenerKeysMutex = Mutex()
-    private var statusListenerKeys = mutableMapOf<Int, WWWEventWave>()
+    private var statusListenerKeys = mutableMapOf<Int, IWWWEvent>()
 
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
@@ -65,7 +70,8 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     val eventStatus: Map<String, StateFlow<IWWWEvent.Status>> get() = _eventState
 
     init {
-        loadEvents {
+        loadEvents { exception -> // Error management
+            Log.e(EventsViewModel::class.simpleName, "Error loading events", exception)
             loadingError.value = true
         }
     }
@@ -77,7 +83,9 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
             viewModelScope.launch(Dispatchers.Default) {
                 wwwEvents.flow().collect { eventsList ->
                     val sortedEvents = eventsList.sortedBy { it.getStartDateTime() }
-                    originalEvents = sortedEvents
+                    originalEventsMutex.withLock {
+                        originalEvents = sortedEvents
+                    }
                     _events.value = sortedEvents
                     _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
                     startObservation()
@@ -88,7 +96,11 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     // ---------------------------
 
     fun filterEvents(onlyFavorites: Boolean) {
-        _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
+        viewModelScope.launch(Dispatchers.Default) {
+            originalEventsMutex.withLock {
+                _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
+            }
+        }
     }
 
     // ---------------------------
@@ -99,35 +111,38 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     }
 
     private fun startObservation() {
-        if (!observationStarted) {
-            originalEvents.forEach { event ->
-                viewModelScope.launch(Dispatchers.Default) {
-                    val initialStatus = event.getStatus()
-                    _eventState.getOrPut(event.id) { MutableStateFlow(initialStatus) }
-                        .emit(initialStatus)
-
-                    val key = event.wave.addOnWaveStatusChangedListener {
+        viewModelScope.launch(Dispatchers.Default) {
+            observationStartedMutex.withLock {
+                if (observationStarted.compareAndSet(false, true)) {
+                    originalEvents.forEach { event ->
                         viewModelScope.launch(Dispatchers.Default) {
-                            updateEventStatus(event)
+                            val initialStatus = event.getStatus()
+                            _eventState.getOrPut(event.id) { MutableStateFlow(initialStatus) }
+                                .emit(initialStatus)
+
+                            val key = event.addOnStatusChangedListener {
+                                viewModelScope.launch(Dispatchers.Default) {
+                                    updateEventStatus(event)
+                                }
+                            }
+                            statusListenerKeysMutex.withLock {
+                                statusListenerKeys[key] = event
+                            }
                         }
-                    }
-                    statusListenerKeysMutex.withLock {
-                        statusListenerKeys[key] = event.wave
                     }
                 }
             }
-            observationStarted = true
         }
     }
 
     private suspend fun stopObservation() {
-        if (observationStarted) {
+        if (observationStarted.compareAndSet(true, false)) {
             statusListenerKeysMutex.withLock {
-                statusListenerKeys.forEach { (key, wave) ->
-                    wave.stopListeners(key)
+                statusListenerKeys.forEach { (key, event) ->
+                    event.stopListeners(key)
                 }
+                statusListenerKeys.clear()
             }
-            observationStarted = false
         }
     }
 

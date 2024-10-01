@@ -63,7 +63,7 @@ import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
-import com.worldwidewaves.models.WaveViewModel
+import com.worldwidewaves.viewmodels.WaveViewModel
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
@@ -120,11 +120,27 @@ class EventActivity : AbstractEventBackActivity() {
         val eventStatus by waveViewModel.eventStatus.collectAsState()
         val geolocText by waveViewModel.geolocText.collectAsState()
 
-        waveViewModel.startObservation(event)
-
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
+
+        val eventMap = EventMap(platform, event,
+            onLocationUpdate = { newLocation ->
+                if (lastKnownLocation == null || lastKnownLocation != newLocation) {
+                    waveViewModel.updateGeolocationText(newLocation)
+                    lastKnownLocation = newLocation
+                }
+            },
+            onMapClick = { _, _ ->
+                context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
+                    putExtra("eventId", event.id)
+                })
+            }
+        )
+
+        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+            eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
+        }
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -134,19 +150,7 @@ class EventActivity : AbstractEventBackActivity() {
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
-            EventMap(platform, event,
-                onLocationUpdate = { newLocation ->
-                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateGeolocationText(newLocation)
-                        lastKnownLocation = newLocation
-                    }
-                },
-                onMapClick = { _, _ ->
-                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
-                        putExtra("eventId", event.id)
-                    })
-                }
-            ).Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
+            eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
             GeolocalizeMe(geolocText)
             EventNumbers(waveNumbers)
             WWWEventSocialNetworks(event)

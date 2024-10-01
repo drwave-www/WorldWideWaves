@@ -5,7 +5,7 @@ import com.worldwidewaves.compose.AboutInfoScreen
 import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
-import com.worldwidewaves.models.EventsViewModel
+import com.worldwidewaves.viewmodels.EventsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 

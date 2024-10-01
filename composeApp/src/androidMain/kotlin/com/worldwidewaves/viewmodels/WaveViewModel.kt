@@ -1,4 +1,4 @@
-package com.worldwidewaves.models
+package com.worldwidewaves.viewmodels
 
 /*
  * Copyright 2024 DrWave
@@ -21,15 +21,19 @@ package com.worldwidewaves.models
  * limitations under the License.
  */
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
-import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.WWWEventWave.WavePolygons
 import com.worldwidewaves.shared.generated.resources.geoloc_undone
 import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
+import com.worldwidewaves.shared.toMapLibrePolygon
+import com.worldwidewaves.shared.toPosition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,12 +41,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.geojson.Polygon
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class WaveViewModel : ViewModel() {
 
+    companion object {
+        private const val MAX_POLY_RECOMPOSE = 100
+    }
+
     private var event : IWWWEvent? = null
-    private var observationStarted = false
+    @Volatile private var observationStarted = false
 
     private var progressionListenerKey: Int? = null
     private var statusListenerKey: Int? = null
@@ -56,26 +65,34 @@ class WaveViewModel : ViewModel() {
     private val _geolocText = MutableStateFlow(ShRes.string.geoloc_undone)
     val geolocText: StateFlow<StringResource> = _geolocText.asStateFlow()
 
+    private var lastWaveState : WavePolygons? = null
+
+    var clearPolygonsBeforeAdd = false
+
     // ----------------------------
 
-    fun startObservation(event : IWWWEvent) {
+    fun startObservation(
+        event: IWWWEvent,
+        polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit
+    ) {
         if (!observationStarted) {
             this.event = event
             viewModelScope.launch(Dispatchers.Default) {
-                _waveNumbers.value = event.wave.getAllNumbers()
+                _waveNumbers.value = event.getAllNumbers()
                 _eventState.value = event.getStatus()
-                progressionListenerKey = event.wave.addOnWaveProgressionChangedListener {
+                progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
                         if (_waveNumbers.value == null) {
-                            _waveNumbers.value = event.wave.getAllNumbers()
+                            _waveNumbers.value = event.getAllNumbers()
                         } else {
                             _waveNumbers.value = waveNumbers.value?.copy(
                                 waveProgression = event.wave.getLiteralProgression()
                             )
                         }
+                        updateWavePolygons(polygonsHandler)
                     }
                 }
-                statusListenerKey = event.wave.addOnWaveStatusChangedListener {
+                statusListenerKey = event.addOnStatusChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
                         _eventState.value = event.getStatus()
                     }
@@ -85,29 +102,81 @@ class WaveViewModel : ViewModel() {
         }
     }
 
-    fun stopObservation() {
+    private fun stopObservation() {
         if (observationStarted) {
-            event?.wave?.stopListeners(listOfNotNull(
-                progressionListenerKey,
-                statusListenerKey
-            ))
+            event?.stopListeners(
+                listOfNotNull(
+                    progressionListenerKey,
+                    statusListenerKey
+                )
+            )
             observationStarted = false
+            progressionListenerKey = null
+            statusListenerKey = null
         }
     }
 
     // ----------------------------
 
+    /**
+     * Updates the geolocation text based on the new location provided.
+     */
     fun updateGeolocationText(newLocation: LatLng) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentEvent = event
             if (currentEvent != null) {
-                val currentPosition = Position(newLocation.latitude, newLocation.longitude)
+                val currentPosition = newLocation.toPosition()
                 val newText = when {
-                    currentEvent.wave.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
+                    currentEvent.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
                     currentEvent.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
                     else -> ShRes.string.geoloc_yourenotin
                 }
                 _geolocText.value = newText
+            }
+        }
+    }
+
+    // ----------------------------
+
+    /**
+     * Updates the wave polygons based on the current wave state.
+     *
+     * This function determines the mode (ADD or RECOMPOSE) based on the number of polygons
+     * and updates the `lastWaveState` with the new wave polygons. It then converts the polygons
+     * to MapLibre polygons and updates the state flows.
+     *
+     */
+    private suspend fun updateWavePolygons(polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit) {
+        event?.let { event ->
+            if (event.isRunning()) try {
+
+                // FIXME: find the right perf
+
+                val currentNbOfPolygons = lastWaveState?.traversedPolygons?.size ?: 0
+//                val mode = WaveMode.ADD.takeIf { currentNbOfPolygons <= MAX_POLY_RECOMPOSE }
+//                    ?: WaveMode.RECOMPOSE
+                val mode = WaveMode.RECOMPOSE
+
+                //Log.i(WaveViewModel::class.simpleName, "updateWavePolygons: mode=$mode")
+                // lastWaveState = event.wave.getWavePolygons(lastWaveState, mode)
+                lastWaveState = event.wave.getWavePolygons(lastWaveState, mode)
+
+                val polygons =  lastWaveState?.traversedPolygons
+                   // lastWaveState?.traversedPolygons.takeIf { mode == WaveMode.RECOMPOSE }
+                   //     ?: lastWaveState?.addedTraversedPolygons
+
+                Log.v(WaveViewModel::class.simpleName,
+                    "Traversed: ${lastWaveState?.traversedPolygons?.flatten()?.size} (${lastWaveState?.traversedPolygons?.size}), "
+                            + "Remaining: ${lastWaveState?.remainingPolygons?.flatten()?.size} (${lastWaveState?.remainingPolygons?.size}) "
+                            + "Added: ${lastWaveState?.addedTraversedPolygons?.flatten()?.size}")
+                val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
+
+                viewModelScope.launch(Dispatchers.Main) {
+                    polygonsHandler(newPolygons, mode != WaveMode.ADD)
+                }
+
+            } catch (e: Exception) {
+                Log.e(WaveViewModel::class.simpleName, "updateWavePolygons: ${e.message}")
             }
         }
     }

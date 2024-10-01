@@ -112,7 +112,11 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             val end = positions[i + 1]
             val segment = Segment(start, end)
 
-            if (isPointOnSegment(point, segment)) return Side.ON
+            if (isPointOnSegment(point, segment))
+                return Side.ON
+
+            if (point.lat < minOf(start.lat, end.lat) || point.lat > maxOf(start.lat, end.lat))
+                continue
 
             // Calculate vectors
             val lineVector = Vector2D(end.lng - start.lng, end.lat - start.lat)

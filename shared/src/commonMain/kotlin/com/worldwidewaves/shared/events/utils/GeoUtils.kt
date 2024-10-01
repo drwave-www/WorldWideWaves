@@ -73,6 +73,13 @@ object GeoUtils {
     }
 
     /**
+     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
+     *
+     */
+    fun calculateDistance(lonWidth: Double, lat: Double): Double =
+        calculateDistance(0.0, lonWidth, lat)
+
+    /**
      * Checks if a given point lies on a line segment.
      *
      * This function determines if a point is on a line segment by calculating the cross product

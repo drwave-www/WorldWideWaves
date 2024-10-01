@@ -65,7 +65,7 @@ class EarthAdaptedSpeedLongitude(
     /*
      * The duration of a single band refresh window in seconds.
      */
-    private val bandDuration : Duration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
+    private val bandStepDuration : Duration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
 
     /*
      * The starting longitude of the wave, based on the direction.
@@ -118,9 +118,9 @@ class EarthAdaptedSpeedLongitude(
         require(elapsedTime >= Duration.ZERO) { "Elapsed time must be non-negative" }
         if (elapsedTime <= Duration.ZERO) return initialized()
 
-        // Calculate number of complete refresh windows, capped at max value to prevent overflow
+        // Calculate number of complete refresh windows
         val numberOfWindows = ceil(
-            elapsedTime.inWholeMilliseconds.toDouble() / bandDuration.inWholeMilliseconds.toDouble()
+            elapsedTime.inWholeMilliseconds.toDouble() / bandStepDuration.inWholeMilliseconds.toDouble()
         ).toLong()
 
         val bands = bands()
@@ -136,7 +136,8 @@ class EarthAdaptedSpeedLongitude(
 
     // ------------------------
 
-    private fun bands(): Map<Double, LatLonBand> {
+    @VisibleForTesting
+    fun bands(): Map<Double, LatLonBand> {
         if (cachedBands == null) {
             val bands = calculateWaveBands().associateBy { it.latitude }
             require(bands.isNotEmpty()) { "Bands must not be empty" }
@@ -170,22 +171,22 @@ class EarthAdaptedSpeedLongitude(
         val longestLat = coveredArea.latitudeOfWidestPart()
 
         // Calculate the longitude band width at the middle latitude
-        val lonBandWidthAtMiddle = calculateLonBandWidthAtMiddleLatitude(longestLat)
+        val lonBandWidthAtLongest = calculateLonBandWidthAtLatitude(longestLat)
 
         latLonBands.add(LatLonBand(-89.9, 0.0, // Lower latitude band
-            adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtMiddle))
+            adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest))
         )
 
         var currentLat = sw.lat
         while (currentLat < ne.lat - EPSILON && latLonBands.size < maxBands) {
             // Calculate the optimal latitude band width at the current latitude
-            var optimalLatBandWidth = calculateOptimalLatBandWidth(currentLat, lonBandWidthAtMiddle)
+            var optimalLatBandWidth = calculateOptimalLatBandWidth(currentLat, lonBandWidthAtLongest)
 
             // Ensure the band width is not smaller than the minimum
             optimalLatBandWidth = maxOf(optimalLatBandWidth, minBandWidth)
 
             // Calculate the adjusted longitude width at the current latitude
-            val adjustedLonWidth = adjustLongitudeWidthAtLatitude(currentLat, lonBandWidthAtMiddle)
+            val adjustedLonWidth = adjustLongitudeWidthAtLatitude(currentLat, lonBandWidthAtLongest)
 
             // Ensure longitude stays within the bbox bounds
             val actualLonWidth = min(adjustedLonWidth, ne.lng - sw.lng)
@@ -198,7 +199,7 @@ class EarthAdaptedSpeedLongitude(
         }
 
         latLonBands.add(LatLonBand(89.9, 0.0, // Higher latitude band
-            adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtMiddle))
+            adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtLongest))
         )
 
         return latLonBands
@@ -218,9 +219,9 @@ class EarthAdaptedSpeedLongitude(
      * - The result is the longitude band width at that specific latitude.
      */
     @VisibleForTesting
-    fun calculateLonBandWidthAtMiddleLatitude(latitude: Double): Double {
+    fun calculateLonBandWidthAtLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
-        val distanceCovered = speed * bandDuration.inWholeMilliseconds / 1000
+        val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / 1000
         return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
     }
 
@@ -261,9 +262,9 @@ class EarthAdaptedSpeedLongitude(
      * - The formula is: adjustedLonWidth = lonWidth / cos(latitude)
      */
     @VisibleForTesting
-    fun adjustLongitudeWidthAtLatitude(latitude: Double, lonWidth: Double) : Double {
+    fun adjustLongitudeWidthAtLatitude(latitude: Double, lonWidthAtTheLongest: Double) : Double {
         require(abs(latitude) < 90) // Prevent division by zero
-        return lonWidth / cos(latitude.toRadians())
+        return lonWidthAtTheLongest / cos(latitude.toRadians())
     }
 
 }
