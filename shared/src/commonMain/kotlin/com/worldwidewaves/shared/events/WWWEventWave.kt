@@ -242,11 +242,11 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
                 stopObservation()
                 return@onEach
             }
-            if (progression != lastObservedProgression) {
+            if (waveProgressionChangedListeners.isNotEmpty() && progression != lastObservedProgression) {
                 lastObservedProgression = progression
                 onWaveProgressionChanged(progression)
             }
-            if (status != lastObservedStatus) {
+            if (waveStatusChangedListeners.isNotEmpty() && status != lastObservedStatus) {
                 lastObservedStatus = status
                 onWaveStatusChanged(status)
             }
@@ -328,6 +328,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         startObservation()
         return key
     }
+
+    // --------
 
     private fun onWaveStatusChanged(status: IWWWEvent.Status) = waveStatusChangedListeners.values.forEach {
         try { it(status) } catch (e: Exception) {

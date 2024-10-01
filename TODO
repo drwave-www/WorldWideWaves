@@ -1,11 +1,11 @@
 
 Next:
-- Urgent:
-    - verifier qu'un listener wave n'a pas deja ete ajoute
-    - terminer l'observation si plus de listeners
-    - trouver un moyen smart de retirer les listeners l'on sport de l'ecran
 - add wave observation to the EventsViewModel
 - connect WaveViewModel to the EventFullMapActivity
+- In WWWEventWave, call :
+        onWaveWarmingEnded()
+        onWaveUserIsGoingToBeHit()
+        onWaveUserUserHasBeenHit()
 - polygon to maplibre
 - wave connection !!
 
