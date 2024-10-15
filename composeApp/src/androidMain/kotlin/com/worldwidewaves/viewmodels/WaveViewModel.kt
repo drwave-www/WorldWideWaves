@@ -148,27 +148,13 @@ class WaveViewModel : ViewModel() {
      */
     private suspend fun updateWavePolygons(polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit) {
         event?.let { event ->
-            if (event.isRunning()) try {
+            if (event.isRunning()) try { // FIXME: right setup vs perf to be found
+                val mode = WaveMode.ADD
 
-                // FIXME: find the right perf
-
-                val currentNbOfPolygons = lastWaveState?.traversedPolygons?.size ?: 0
-//                val mode = WaveMode.ADD.takeIf { currentNbOfPolygons <= MAX_POLY_RECOMPOSE }
-//                    ?: WaveMode.RECOMPOSE
-                val mode = WaveMode.RECOMPOSE
-
-                //Log.i(WaveViewModel::class.simpleName, "updateWavePolygons: mode=$mode")
                 // lastWaveState = event.wave.getWavePolygons(lastWaveState, mode)
-                lastWaveState = event.wave.getWavePolygons(lastWaveState, mode)
+                lastWaveState = event.wave.getWavePolygons(null, mode)
 
                 val polygons =  lastWaveState?.traversedPolygons
-                   // lastWaveState?.traversedPolygons.takeIf { mode == WaveMode.RECOMPOSE }
-                   //     ?: lastWaveState?.addedTraversedPolygons
-
-                Log.v(WaveViewModel::class.simpleName,
-                    "Traversed: ${lastWaveState?.traversedPolygons?.flatten()?.size} (${lastWaveState?.traversedPolygons?.size}), "
-                            + "Remaining: ${lastWaveState?.remainingPolygons?.flatten()?.size} (${lastWaveState?.remainingPolygons?.size}) "
-                            + "Added: ${lastWaveState?.addedTraversedPolygons?.flatten()?.size}")
                 val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
 
                 viewModelScope.launch(Dispatchers.Main) {

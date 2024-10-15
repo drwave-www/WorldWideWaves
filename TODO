@@ -1,9 +1,10 @@
 
 Next:
 - 1: resoudre le pb de difference de vitesse entre la wave et la progression
-- 2: tester RECOMPOSE sur une liste de polygons splittes (faire deux splits et recomposer)
-- 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
-      --> Faire une fonction de telemetrie
+                - POSTPONE: use split systematique pour le moment, to be DEBUGGED (maplibre) + perf stats
+                - 2: tester RECOMPOSE sur une liste de polygons splittes (faire deux splits et recomposer)
+                - 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
+                      --> Faire une fonction de telemetrie
 - add tests for all missing functions
 - Add a full test for event behavior AND wave progression using listeners
 - wave mechanics : wire in event screen :

@@ -197,29 +197,46 @@ class EventMap(
                     val sourceId = "wave-polygons-source"
                     val layerId = "wave-polygons-layer"
 
-                    if (clearPolygons) {
-                        style.removeLayer(layerId)
-                        style.removeSource(sourceId)
-                    }
+                    try {
+                        if (clearPolygons) {
+                            style.removeLayer(layerId)
+                            style.removeSource(sourceId)
+                        }
 
-                    // Create or update the source with new polygons
-                    val geoJsonSource = style.getSourceAs(sourceId) ?: GeoJsonSource(sourceId)
-                    geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(wavePolygons.map {
-                        Feature.fromGeometry(
-                            it
-                        )
-                    }))
-                    if (style.getSource(sourceId) == null) {
-                        style.addSource(geoJsonSource)
-                    }
+                        // Create or update the source with new polygons
+                        val geoJsonSource = style.getSourceAs(sourceId) ?: GeoJsonSource(sourceId)
 
-                    // Create or update the layer
-                    if (style.getLayer(layerId) == null) {
-                        val fillLayer = FillLayer(layerId, sourceId).withProperties(
-                            PropertyFactory.fillColor(Color.parseColor("#D33682")),
-                            PropertyFactory.fillOpacity(0.5f)
-                        )
-                        style.addLayer(fillLayer)
+                        geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(wavePolygons.map {
+                            Feature.fromGeometry(it)
+                        }))
+                        if (style.getSource(sourceId) == null) {
+                            style.addSource(geoJsonSource)
+                        }
+
+//                        if (clearPolygons) {
+//                            style.removeLayer(layerId)
+//                            style.removeSource(sourceId)
+//                        } else {
+//                            // If not clearing, add new polygons to existing ones
+//                            val existingFeatures = geoJsonSource.querySourceFeatures(null).mapNotNull { it.geometry() as? Polygon }
+//                            val combinedPolygons = existingFeatures + wavePolygons
+//                            geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(combinedPolygons.map { Feature.fromGeometry(it) }))
+//                        }
+
+                        if (style.getSource(sourceId) == null) {
+                            style.addSource(geoJsonSource)
+                        }
+
+                        // Create or update the layer
+                        if (style.getLayer(layerId) == null) {
+                            val fillLayer = FillLayer(layerId, sourceId).withProperties(
+                                PropertyFactory.fillColor(Color.parseColor("#D33682")),
+                                PropertyFactory.fillOpacity(0.5f)
+                            )
+                            style.addLayer(fillLayer)
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MapUpdate", "Error updating wave polygons", e)
                     }
                 }
             }

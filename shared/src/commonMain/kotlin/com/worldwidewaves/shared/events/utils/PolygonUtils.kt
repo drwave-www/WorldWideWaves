@@ -210,17 +210,15 @@ object PolygonUtils {
                 }
 
                 // Add the last polygons, completing them, to the left and/or right side
-                if (leftSide.size > 1) leftSide.add(currentLeft.apply {
-                    if (currentLeft.cutPositions.size == 1)
-                        add(stopPoint.toPointCut(cutId))
-                    else add(stopPoint)
-                }.move())
+                if (leftSide.size > 1) {
+                    currentLeft.add(if (currentLeft.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    leftSide.add(currentLeft.move())
+                }
 
-                if (rightSide.size > 1) rightSide.add(currentRight.apply {
-                    if (currentRight.cutPositions.size == 1)
-                        add(stopPoint.toPointCut(cutId))
-                    else add(stopPoint)
-                }.move())
+                if (rightSide.size > 1) {
+                    currentRight.add(if (currentRight.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    rightSide.add(currentRight.move())
+                }
 
                 // Group the poly-lines into ring polygons and add the ComposedLongitude positions
                 return PolygonSplitResult(cutId,
