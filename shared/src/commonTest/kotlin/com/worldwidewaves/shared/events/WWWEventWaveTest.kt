@@ -21,60 +21,50 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type.LONGITUDE_CUT
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlin.time.Duration
 
 class WWWEventWaveTest : KoinTest {
 
-    private var clock = mockk<IClock>()
-    private var event = mockk<IWWWEvent>(relaxed = true)
+    private var mockClock = mockk<IClock>()
+    private var mockEvent = mockk<IWWWEvent>(relaxed = true)
     private lateinit var wave: WWWEventWave
 
     // ---------------------------
 
-    @BeforeTest
-    fun setUp() {
-
-        startKoin { modules(
-            module {
-                single { clock }
-            }
-        )}
-
+    init {
         Napier.base(object : Antilog() {
             override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
                 println(message)
             }
         })
+    }
+
+    @BeforeTest
+    fun setUp() {
+
+        startKoin { modules(module { single { mockClock } }) }
 
         wave = object : WWWEventWave() {
             override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
-            override val warming: WWWEventWaveWarming = WWWEventWaveWarming(type = LONGITUDE_CUT, longitude = 0.0)
             override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons = WavePolygons(
-                clock.now(), 0.0, emptyList(), emptyList()
+                clock.now(), emptyList(), emptyList()
             )
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
-        }.setRelatedEvent(event)
+        }.setRelatedEvent(mockEvent)
     }
 
     @AfterTest
@@ -83,45 +73,5 @@ class WWWEventWaveTest : KoinTest {
     }
 
     // ---------------------------
-
-    @Test
-    fun testIsNearTheEvent() {
-
-        // GIVEN --------------------------------
-        val now = Instant.parse("2023-12-31T13:15:00+02:00") // Close from the event
-        val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
-
-        every { clock.now() } returns now
-        every { event.getStartDateTime() } returns eventStartTime
-
-        // WHEN ---------------------------------
-        val result = wave.isNearTheEvent()
-
-        // THEN ---------------------------------
-        assertTrue(result)
-
-        verify { clock.now() }
-        verify { event.getStartDateTime() }
-    }
-
-    @Test
-    fun testIsNearTheEvent_Fails() {
-
-        // GIVEN --------------------------------
-        val now = Instant.parse("2023-01-01T00:00:00+01:00") // Far from the event
-        val eventStartTime = Instant.parse("2024-01-01T01:00:00+12:45")
-
-        every { clock.now() } returns now
-        every { event.getStartDateTime() } returns eventStartTime
-
-        // WHEN ---------------------------------
-        val result = wave.isNearTheEvent()
-
-        // THEN ---------------------------------
-        assertFalse(result) // Assert that it's NOT near the event
-
-        verify { clock.now() }
-        verify { event.getStartDateTime() }
-    }
 
 }

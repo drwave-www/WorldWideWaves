@@ -104,7 +104,7 @@ data class WWWEventArea(
      * Otherwise, it calculates the bounding box, caches it, and then returns it.
      *
      */
-    suspend fun getBoundingBox(): BoundingBox =
+    suspend fun bbox(): BoundingBox =
         cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
@@ -119,7 +119,7 @@ data class WWWEventArea(
      *
      */
     suspend fun getCenter(): Position =
-        cachedCenter ?: getBoundingBox().let { bbox ->
+        cachedCenter ?: bbox().let { bbox ->
             Position(
                 lat = (bbox.ne.lat + bbox.sw.lat) / 2,
                 lng = (bbox.ne.lng + bbox.sw.lng) / 2

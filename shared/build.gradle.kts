@@ -82,6 +82,7 @@ android {
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
         implementation(libs.mockk.android.v1120)
+        implementation(libs.maplibre.android)
     }
 
 }

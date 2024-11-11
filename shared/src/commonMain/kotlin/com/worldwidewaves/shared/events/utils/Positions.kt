@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.events.utils.GeoUtils.normalizeLongitude
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
@@ -68,7 +67,6 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
 
     internal open fun xfer() = Position(lat, lng).init() // Polygon detach / reattach
     internal open fun detached() = Position(lat, lng)
-    fun normalized() = Position(lat,normalizeLongitude(lng))
 
     // ------------------------
 
@@ -76,6 +74,7 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
         this === other || (other is Position && lat == other.lat && lng == other.lng)
     override fun toString(): String = "($lat, $lng)"
     override fun hashCode(): Int = 31 * lat.hashCode() + lng.hashCode()
+
 }
 
 // Can only be initialized from internal context
@@ -97,7 +96,12 @@ class CutPosition( // A position that has been cut
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
 
-    val isPointCut by lazy { cutLeft == cutRight }
+    fun uncut(): Position = Position(lat, lng).apply {
+        id = this@CutPosition.id
+        prev = this@CutPosition.prev
+        next = this@CutPosition.next
+    }
+
     val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()

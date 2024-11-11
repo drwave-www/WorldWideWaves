@@ -227,7 +227,6 @@ class BoundingBoxTest {
         assertEquals(1.0, bbox.maxLongitude)
         assertEquals(1.0, bbox.height)
         assertEquals(1.0, bbox.width)
-        assertFalse(bbox.crossesAntimeridian)
     }
 
     @Test
@@ -312,6 +311,48 @@ class BoundingBoxTest {
         val bbox1 = BoundingBox(0.0, 0.0, 1.0, 1.0)
         val bbox2 = BoundingBox(0.0, 0.0, 1.0, 1.0)
         assertEquals(bbox1.hashCode(), bbox2.hashCode())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart should return 0_0 when box crosses the equator`() {
+        val bbox = BoundingBox(-1.0, 0.0, 1.0, 1.0)
+        assertEquals(0.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart should return southern latitude when it is closer to equator`() {
+        val bbox = BoundingBox(-1.0, 0.0, -2.0, 1.0)
+        assertEquals(-1.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart should return northern latitude when it is closer to equator`() {
+        val bbox = BoundingBox(-3.0, 0.0, -1.0, 1.0)
+        assertEquals(-1.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart should return northern latitude when box is entirely in northern hemisphere`() {
+        val bbox = BoundingBox(1.0, 0.0, 3.0, 1.0)
+        assertEquals(1.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `latitudeOfWidestPart should return southern latitude when box is entirely in southern hemisphere`() {
+        val bbox = BoundingBox(-3.0, 0.0, -1.0, 1.0)
+        assertEquals(-1.0, bbox.latitudeOfWidestPart())
+    }
+
+    @Test
+    fun `width should return correct value when bounding box does not cross antimeridian`() {
+        val bbox = BoundingBox(0.0, 0.0, 1.0, 2.0)
+        assertEquals(2.0, bbox.width)
+    }
+
+    @Test
+    fun `height should return correct value`() {
+        val bbox = BoundingBox(0.0, 0.0, 2.0, 1.0)
+        assertEquals(2.0, bbox.height)
     }
 
 }

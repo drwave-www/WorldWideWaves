@@ -32,7 +32,6 @@ import kotlin.time.Duration.Companion.hours
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: Direction,
-    override val warming: WWWEventWaveWarming,
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
 

@@ -31,8 +31,8 @@ object GeoUtils {
 
     const val EPSILON = 1e-9 // A small tolerance value for double precision errors
 
-    const val MIN_PERCEPTIBLE_DIFFERENCE = 10.0 // 10 meters - perceptible speed difference
-    const val EARTH_RADIUS = 6371000.0 // Radius of the Earth in meters
+    const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0 // Adjustment variable to manage the nb of wave splits
+    const val EARTH_RADIUS = 6378137.0 // WGS84 Ellipsoid: Semi-major axis (equatorial radius), in meters
 
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
@@ -44,36 +44,16 @@ object GeoUtils {
 
     // ----------------------------------------------------------------------------
 
-    fun normalizeLongitude(lon: Double): Double {
-        var normalizedLon = lon % 360
-        if (normalizedLon > 180) normalizedLon -= 360
-        if (normalizedLon < -180) normalizedLon += 360
-        return normalizedLon
-    }
-
-    fun normalizedLongitudeDifference(lng1: Double, lng2: Double): Double {
-        var diff = normalizeLongitude(lng1) - normalizeLongitude(lng2)
-        if (diff > 180) diff -= 360
-        if (diff <= -180) diff += 360
-        return diff
-    }
-
-    // ----------------------------------------------------------------------------
-
     fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean =
-        abs(normalizeLongitude(lng1 - lng2)) < EPSILON
+        abs(lng1 - lng2) < EPSILON
 
     fun isLongitudeInRange(lng: Double, start: Double, end: Double): Boolean {
-        val normalizedLng = normalizeLongitude(lng)
-        val normalizedStart = normalizeLongitude(start)
-        val normalizedEnd = normalizeLongitude(end)
-
-        return if (normalizedStart <= normalizedEnd) {
+        return if (start <= end) {
             // The range doesn't cross the date line
-            normalizedLng in normalizedStart..normalizedEnd
+            lng in start..end
         } else {
             // The range crosses the date line
-            normalizedLng >= normalizedStart || normalizedLng <= normalizedEnd
+            lng >= start || lng <= end
         }
     }
 
@@ -85,16 +65,19 @@ object GeoUtils {
     /**
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
-     * @param lon1 The first longitude in degrees.
-     * @param lon2 The second longitude in degrees.
-     * @param lat The latitude in degrees.
-     * @return The distance between the two longitudes at the given latitude in meters.
      */
     fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
         val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
         val latRad = lat * (PI / 180) // Convert degrees to radians
         return abs(EARTH_RADIUS * dLon * cos(latRad))
     }
+
+    /**
+     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
+     *
+     */
+    fun calculateDistance(lonWidth: Double, lat: Double): Double =
+        calculateDistance(0.0, lonWidth, lat)
 
     /**
      * Checks if a given point lies on a line segment.
@@ -107,27 +90,22 @@ object GeoUtils {
      *
      */
     fun isPointOnSegment(point: Position, segment: Segment): Boolean {
-        // Normalize longitudes
-        val startLng = normalizeLongitude(segment.start.lng)
-        val endLng = normalizeLongitude(segment.end.lng)
-        val pointLng = normalizeLongitude(point.lng)
-
         // Calculate the differences
         val dLat = segment.end.lat - segment.start.lat
-        val dLng = normalizeLongitude(endLng - startLng)
+        val dLng = segment.end.lng - segment.start.lng
 
         // Handle special cases: horizontal and vertical segments
         if (abs(dLat) < EPSILON)  // Horizontal segment
             return abs(point.lat - segment.start.lat) < EPSILON &&
-                    isLongitudeInRange(pointLng, startLng, endLng)
+                    isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
 
         if (abs(dLng) < EPSILON)  // Vertical segment
-            return isLongitudeEqual(pointLng, startLng) &&
+            return isLongitudeEqual(point.lng, segment.start.lng) &&
                     point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
 
         // Calculate the parametric value t for the point
         val tLat = (point.lat - segment.start.lat) / dLat
-        val tLng = normalizeLongitude(pointLng - startLng) / dLng
+        val tLng = (point.lng - segment.start.lng) / dLng
 
         // Check if t values are the same and within the range [0, 1]
         return abs(tLat - tLng) < EPSILON && tLat in 0.0..1.0

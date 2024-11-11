@@ -140,18 +140,17 @@ object PolygonUtils {
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
 
-        // Perpetuate the cutId from the initial polygon if any or generate a new one
-        val cutId = (this as? CutPolygon)?.cutId ?: Random.nextInt(1, Int.MAX_VALUE)
+        val cutId = Random.nextInt(1, Int.MAX_VALUE)
 
-        require(isNotEmpty() && size >= 4) { return PolygonSplitResult.empty(cutId).also { close() } }
+        require(isNotEmpty() && size >= 3) { return PolygonSplitResult.empty(cutId).also { close() } }
 
         val leftSide =  mutableListOf<LeftCutPolygon>()
         val rightSide = mutableListOf<RightCutPolygon>()
         val currentLeft = LeftCutPolygon(cutId)
         val currentRight = RightCutPolygon(cutId)
 
-        val minLongitude = minOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId).also { close() }
-        val maxLongitude = maxOfOrNull { it.lng } ?: return PolygonSplitResult.empty(cutId).also { close() }
+        val minLongitude = bbox().minLongitude
+        val maxLongitude = bbox().maxLongitude
 
         val lngBbox = lngToCut.bbox()
 
@@ -165,7 +164,7 @@ object PolygonUtils {
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Anti-Clockwise loop
-                    val point = iterator.next()
+                    var point = iterator.next()
 
                     val nextPoint = iterator.viewCurrent()
                     prev?.let { if (point == it) return@let }
@@ -211,18 +210,20 @@ object PolygonUtils {
                 }
 
                 // Add the last polygons, completing them, to the left and/or right side
-                if (leftSide.size > 1) leftSide.add(currentLeft.apply {
-                    add(stopPoint.toPointCut(cutId))
-                }.move())
+                if (leftSide.size > 1) {
+                    currentLeft.add(if (currentLeft.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    leftSide.add(currentLeft.move())
+                }
 
-                if (rightSide.size > 1) rightSide.add(currentRight.apply {
-                    add(stopPoint.toPointCut(cutId))
-                }.move())
+                if (rightSide.size > 1) {
+                    currentRight.add(if (currentRight.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    rightSide.add(currentRight.move())
+                }
 
                 // Group the poly-lines into ring polygons and add the ComposedLongitude positions
                 return PolygonSplitResult(cutId,
-                    completeLongitudePoints(lngToCut, reconstructSide(leftSide, currentLeft)),
-                    completeLongitudePoints(lngToCut, reconstructSide(rightSide, currentRight))
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, leftSide, currentLeft)),
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, rightSide, currentRight))
                 ).also { close() }
             }
         }
@@ -238,11 +239,12 @@ object PolygonUtils {
      *
      */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
+        propCutId: Int,
         lngToCut: ComposedLongitude,
         polygons: List<T>
-    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude
+    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
         polygons.map { polygon ->
-            val cutPositions = polygon.getCutPositions().sortedBy { it.lat }
+            val cutPositions = polygon.getCutPositions().filter { it.cutId == propCutId }.sortedBy { it.lat }
             if (cutPositions.size < 2) return@map polygon
 
             val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cuts
@@ -253,8 +255,7 @@ object PolygonUtils {
                 if (newPositions.isNotEmpty()) { // If there are some longitude points in between
                     var currentPosition : Position = if (polygon is LeftCutPolygon) minCut else maxCut
                     for (newPosition in newPositions) {
-                        polygon.insertAfter(newPosition, currentPosition.id)
-                        currentPosition = newPosition
+                        currentPosition = polygon.insertAfter(newPosition, currentPosition.id)
                     }
                 }
             }
@@ -279,17 +280,18 @@ object PolygonUtils {
     }
 
     /**
-     * Reconstructs the side polygons from the given list of polylines.
+     * Reconstructs the side polygons from the given list of poly-lines.
      *
      * This function reconstructs poly-lines into polygons.
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructSide(side: MutableList<T>, initPolygon: T): List<T> =
+    private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.size == 2 } // Each polyline should cut the lng twice
-            .sortedBy { it.cutPositions.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
-            .let { reconstructPolygons(it.toList(), initPolygon) }
+            .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
+            .sortedBy { it.cutPositions.filter { it2 -> it2.cutId == propCutId }.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
+            .let { connectPolylines(it.toList(), initPolygon) }
+
 
     /**
      * Reconstructs polygons from a list of poly-lines.
@@ -301,7 +303,7 @@ object PolygonUtils {
      * and a new polygon is started.
      *
      */
-    private inline fun <reified T : CutPolygon> reconstructPolygons(polyLines: List<T>, initPolygon: T): List<T> {
+    private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
         var current: T = initPolygon
@@ -365,17 +367,22 @@ object PolygonUtils {
                             fun addInRecomposedPolygon(position: Position) =
                                 recomposedPolygon.add(if (position is CutPosition) position.detached() else position)
 
+                            // Recompose polygon from multiple previously cut polygons traversing
+                            // the CutPosition pairs and then jumping from one polygon to another
                             fun traverse(current: Position, previous: Position? = null) {
                                 if (current == this && previous != null) return // Stop traversal, polygon is closed
+
                                 if (current is CutPosition && associatedCutPositions.containsKey(current.pairId)) {
+
                                     // We'll jump here from one polygon to another by their common CutPosition
                                     associatedCutPositions[current.pairId]?.let { positions ->
-                                        when {
+                                        when { // Identify the polygon behind the gate
                                             positions.first.first.id == current.id -> positions.second.second
                                             positions.second.first.id == current.id -> positions.first.second
                                             else -> throw IllegalStateException("Invalid pairId")
-                                        }.search(current)?.next?.let { // Identify the gate
-                                            if (current.isPointOnLine)
+
+                                        }.search(current)?.next?.let { // Connect with the same position
+                                            if (current.isPointOnLine) // Add the position if it was on the line
                                                 addInRecomposedPolygon(current)
                                             // next is safe as CutPolygons are created anti-clockwise
                                             traverse(it, current) // Jump

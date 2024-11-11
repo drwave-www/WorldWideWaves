@@ -1,0 +1,311 @@
+package com.worldwidewaves.shared.events.utils
+
+/*
+ * Copyright 2024 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventArea
+import com.worldwidewaves.shared.events.WWWEventWave.Direction
+import com.worldwidewaves.shared.events.WWWEventWaveLinear
+import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
+import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Instant
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+
+class EarthAdaptedSpeedLongitudeTest {
+
+    private val dispatcher = StandardTestDispatcher() // Create dispatcher instance
+
+    private val epsilonFine = 1e-6 // For floating-point comparisons
+    private val epsilonMedium = 1e-3
+    private val epsilonLarge = 0.01
+    private val epsilonHuge = 5.0
+
+    private var mockClock = mockk<IClock>()
+
+    init {
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        startKoin { modules(module { single { mockClock } }) }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @AfterTest
+    fun tearDown() {
+        stopKoin()
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `test withProgression - no elapsed time`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val progressed = longitude.withProgression(Duration.ZERO)
+
+        assertTrue(progressed.size() > 1)
+        progressed.drop(1).dropLast(1).forEach {
+            assertTrue(it.lng in 0.0..10.0)
+            assertTrue(it.lat in 0.0..10.0)
+        }
+    }
+
+    @Test
+    fun `test withProgression - positive elapsed time`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val progressed = longitude.withProgression(1.hours)
+
+        assertTrue(progressed.size() > 1)
+        progressed.drop(1).dropLast(1).forEach {
+            assertTrue(it.lng > 0.0)
+            assertTrue(it.lat in 0.0..10.0)
+        }
+    }
+
+    @Test
+    fun `test withProgression - bands check`() = runTest {
+        // GIVEN
+        val bbox = BoundingBox(
+            sw = Position(-10.0, -10.0),
+            ne = Position(10.0, 10.0)
+        )
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val distanceAtEquator = calculateDistance(-10.0, 10.0, 0.0)
+        val timeToFull : Duration = (distanceAtEquator / speed).seconds
+        val nbWindows1 = ceil(distanceAtEquator / WAVE_LINEAR_METERS_REFRESH)
+        val nbWindows2 = ceil(
+            timeToFull.inWholeMilliseconds.toDouble() /
+                    (WAVE_LINEAR_METERS_REFRESH / speed).seconds.inWholeMilliseconds.toDouble()
+        )
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val bands = longitude.bands()
+
+        // WHEN
+        val progressed = longitude.withProgression(timeToFull)
+        val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
+        val bandClosestToZero = bands.minBy { abs(it.key) }
+        val addedStepDistance = calculateDistance(nbWindows1 * bandClosestToZero.value.lngWidth, 0.0)
+
+        // THEN
+        assertEquals(10.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 10")
+        assertEquals(nbWindows1, nbWindows2, epsilonFine, "Calculation of nb windows should be consistent")
+        assertEquals(distanceAtEquator, addedStepDistance, epsilonHuge, "Stepped distance should equal to traversed distance")
+    }
+
+    @Test
+    fun `test withProgression - compare with WaveDuration`() = runTest {
+        // GIVEN
+        val bbox = BoundingBox(
+            sw = Position(-10.0, -10.0),
+            ne = Position(10.0, 10.0)
+        )
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val halfDistanceAtEquator = calculateDistance(-10.0, 10.0, 0.0) / 2
+        val timeTo50percent : Duration = (halfDistanceAtEquator / speed).seconds
+
+        val startTime = Instant.parse("2024-01-01T00:00:00Z")
+        val currentTime = startTime + timeTo50percent
+
+        val mockEvent = mockk<IWWWEvent>(relaxed = true)
+        val mockArea = mockk<WWWEventArea>()
+
+        val waveLinear = WWWEventWaveLinear(
+            speed = speed,
+            direction = direction
+        )
+
+        every { mockClock.now() } returns currentTime
+        every { mockEvent.getWaveStartDateTime() } returns startTime
+        coEvery { mockEvent.isRunning() } returns true
+        coEvery { mockEvent.isWarmingEnded() } returns true
+        every { mockEvent.area } returns mockArea
+        coEvery { mockEvent.area.bbox() } returns bbox
+
+        waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+
+        // WHEN
+        val waveDuration = waveLinear.getWaveDuration()
+        val progression = waveLinear.getProgression()
+        val progressed = longitude.withProgression(timeTo50percent)
+
+        val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
+
+        // THEN
+        assertEquals(
+            (timeTo50percent * 2).toDouble(DurationUnit.MILLISECONDS),
+            waveDuration.toDouble(DurationUnit.MILLISECONDS),
+            epsilonFine,
+            "Wave duration should be twice half the way"
+        )
+        assertEquals(50.0, progression, epsilonLarge, "progression should be half the way")
+        assertEquals(0.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 0")
+    }
+
+    @Test
+    fun `test withProgression - direction West`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.WEST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val progressed = longitude.withProgression(1.hours)
+
+        assertTrue(progressed.size() > 1)
+        progressed.drop(1).dropLast(1).forEach {
+            assertTrue(it.lng < 10.0)
+            assertTrue(it.lat in 0.0..10.0)
+        }
+    }
+
+    @Test
+    fun `test calculateLonBandWidthAtMiddleLatitude`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val width = longitude.calculateLonBandWidthAtLatitude(0.0)
+
+        // Expected width at equator: (100 * bandDuration.inWholeMilliseconds / 1000) / (EARTH_RADIUS * 1) * (180 / PI)
+        val bandDuration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
+        val expected = (speed * bandDuration.inWholeMilliseconds / 1000) / EARTH_RADIUS * (180 / PI)
+
+        assertEquals(expected, width, epsilonFine)
+    }
+
+    @Test
+    fun `test calculateOptimalLatBandWidth`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val width = longitude.calculateOptimalLatBandWidth(45.0, 1.0)
+
+        assertTrue(width > 0)
+    }
+
+    @Test
+    fun `test adjustLongitudeWidthAtLatitude`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val adjustedWidth = longitude.adjustLongitudeWidthAtLatitude(45.0, 1.0)
+
+        assertTrue(adjustedWidth > 1.0)
+    }
+
+    @Test
+    fun `test calculateWaveBands`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val bands = longitude.calculateWaveBands()
+
+        assertTrue(bands.isNotEmpty())
+        bands.drop(1).dropLast(1).forEach { // FIXME: remove first and last before testing
+            assertTrue(it.latitude in 0.0..10.0)
+            assertTrue(it.latWidth > 0)
+            assertTrue(it.lngWidth > 0)
+        }
+    }
+
+    @Test
+    fun `test invalid speed`() {
+        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val speed = -100.0 // Invalid negative speed
+        val direction = Direction.EAST
+
+        assertFailsWith<IllegalArgumentException> {
+            EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        }
+    }
+
+    @Test
+    fun `test progression near poles`() {
+        val bbox = BoundingBox(Position(85.0, 0.0), Position(90.0, 10.0))
+        val speed = 100.0 // m/s
+        val direction = Direction.EAST
+
+        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+        val progressed = longitude.withProgression(1.hours)
+
+        assertTrue(progressed.size() > 1)
+        progressed.drop(1).dropLast(1).forEach {
+            assertTrue(it.lng > 0.0)
+            assertTrue(it.lat in 85.0..90.0)
+        }
+    }
+}

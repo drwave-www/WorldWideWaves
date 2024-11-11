@@ -136,15 +136,41 @@ class PolygonUtilsMiscTest {
     }
 
     @Test
-    fun testClockwiseDirectionChangeOnInsertion() {
+    fun testClockwiseDirectionDoNotChangeOnInsertion() {
         val polygon = Polygon()
         polygon.add(Position(0.0, 0.0))
         polygon.add(Position(1.0, 0.0))
         polygon.add(Position(1.0, 1.0))
         assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
 
-        polygon.insertAfter(Position(0.0, 1.0), polygon.first()!!.id)
-        assertFalse(polygon.isClockwise(), "Polygon should be anti-clockwise after insertion")
+        polygon.insertAfter(Position(0.0, 1.0), polygon.last()!!.id)
+        assertTrue(polygon.isClockwise(), "Polygon should be clockwise after insertion")
+    }
+
+    @Test
+    fun testClockwiseDirectionDoNotChangeOnInsertionAfterClosed() {
+        val polygon = Polygon()
+        polygon.add(Position(0.0, 0.0))
+        polygon.add(Position(1.0, 0.0))
+        val insertPosition = polygon.add(Position(1.0, 1.0))
+        polygon.close()
+        assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
+
+        polygon.insertAfter(Position(0.0, 1.0), insertPosition.id)
+        assertTrue(polygon.isClockwise(), "Polygon should be clockwise after insertion")
+    }
+
+    @Test
+    fun testClockwiseDirectionDoNotChangeOnInsertionBeforeClosed() {
+        val polygon = Polygon()
+        val insertPosition = polygon.add(Position(0.0, 0.0))
+        polygon.add(Position(1.0, 0.0))
+        polygon.add(Position(1.0, 1.0))
+        polygon.close()
+        assertTrue(polygon.isClockwise(), "Initial polygon should be clockwise")
+
+        polygon.insertBefore(Position(0.0, 1.0), insertPosition.id)
+        assertTrue(polygon.isClockwise(), "Polygon should be clockwise after insertion")
     }
 
     @Test

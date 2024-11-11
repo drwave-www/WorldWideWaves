@@ -1,13 +1,8 @@
-package com.worldwidewaves.di
+package com.worldwidewaves.shared
 
-import com.worldwidewaves.compose.AboutFaqScreen
-import com.worldwidewaves.compose.AboutInfoScreen
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsListScreen
-import com.worldwidewaves.compose.SettingsScreen
-import com.worldwidewaves.viewmodels.EventsViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.dsl.module
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /*
  * Copyright 2024 DrWave
@@ -16,7 +11,7 @@ import org.koin.dsl.module
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,13 +25,11 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val androidModule = module {
-    single { EventsListScreen(viewModel = get(), setEventFavorite = get()) }
-    viewModel { EventsViewModel(wwwEvents = get()) }
-
-    single { SettingsScreen() }
-    single { AboutScreen(get(), get()) }
-    single { AboutInfoScreen() }
-    single { AboutFaqScreen() }
-
+class WWWSimulation(private val startDateTime: Instant, private val userPosition: Position, private val speed : Int = 1) {
+    init {
+        require(speed in 1..500) { "Speed must be between 1 and 1000" }
+    }
+    private val realStartDate = Clock.System.now()
+    fun now() = startDateTime + (Clock.System.now() - realStartDate) * speed
+    fun getUserPosition() = userPosition
 }
