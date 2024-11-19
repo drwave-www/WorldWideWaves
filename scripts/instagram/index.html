@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+    <style>
+        .carousel img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+    <script>
+        // Reusable API call function
+        function apiCall(endpoint, method, body = {}, onSuccess = () => {}, onError = () => {}) {
+            fetch(endpoint, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body),
+            })
+                .then(response => response.json())
+                .then(onSuccess)
+                .catch(onError);
+        }
+
+        function generateImages(language) {
+            const spinner = document.getElementById(`spinner-${language}`);
+            spinner.style.display = 'block';
+
+            const imageContainer = document.getElementById(`carousel-${language}`);
+            imageContainer.innerHTML = ''; // Clear existing images
+
+            const hashtagInput = document.getElementById(`hashtags-${language}`);
+            hashtagInput.value = ""
+
+            apiCall(
+                '/generate',
+                'POST',
+                {language: language},
+                (data) => {
+                    spinner.style.display = 'none';
+
+                    // Check if data is a simple text containing 'error'
+                    if (typeof data === 'string' && data.toLowerCase().includes('error')) {
+                        spinner.innerText = data; // Display the error message at the spinner position
+                        spinner.style.display = 'block'; // Ensure it's visible
+                        return;
+                    }
+
+                    // Process images
+                    imageContainer.innerHTML = ''; // Clear existing images
+                    data.images.forEach(([index, imagePath]) => {
+                        const img = document.createElement('img');
+                        img.src = imagePath;
+                        img.width = 300; // Numerical value for width
+                        img.height = 300; // Numerical value for height
+                        img.alt = `Image ${index}`;
+                        if (index === 4 || index === 5) {
+                            img.style.display = 'none'; // Inline style to hide the image
+                        }
+                        imageContainer.appendChild(img);
+                    });
+
+                    // Update hashtags
+                    hashtagInput.value = data.json_data.hashtags.join(' '); // Set hashtags as a space-separated string
+
+                    // Attach data for cover shuffle
+                    const shuffleButton = document.querySelector(`#shuffle-image-${language}`);
+                    shuffleButton.onclick = () => shuffleImage(language, data.json_data.author, data.json_data.name);
+
+                    // Attach data for instagram posting
+                    const postButton = document.querySelector(`#post-${language}`);
+                    postButton.onclick = () => postToInstagram(language, data.json_data.author, data.json_data.name);
+                },
+                (error) => {
+                    spinner.style.display = 'none';
+                    console.error('Error generating images:', error);
+                }
+            );
+        }
+
+
+        // Function to shuffle the cover image
+        function shuffleImage(language, author, title) {
+            apiCall(
+                '/cover',
+                'POST',
+                {author: author, title: title},
+                (data) => {
+                    const carousel = document.getElementById(`carousel-${language}`);
+                    const coverImage = carousel.querySelector('img:nth-child(3)');
+                    if (coverImage) {
+                        coverImage.src = data;
+                    }
+                },
+                (error) => console.error('Error shuffling image:', error)
+            );
+        }
+
+        // Function to post images to Instagram
+        function postToInstagram(language, author, title) {
+            const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
+            const images = Array.from(carouselImages).map(img => {
+                const url = new URL(img.src);
+                return url.pathname.substring(1); // Extract only the path part
+            });
+
+            const hashtags = document.getElementById(`hashtags-${language}`).value.split(" ");
+
+            // Collect selected accounts
+            const selectedAccounts = Array.from(document.querySelectorAll(`.account-checkbox-${language}:checked`))
+                .map(checkbox => checkbox.value);
+
+            if (selectedAccounts.length === 0) {
+                alert("Please select at least one account.");
+                return;
+            }
+
+            const body = {
+                language: language,
+                title: "'" + title + "' de " + author,
+                images: images,
+                hashtags: hashtags,
+                accounts: selectedAccounts
+            };
+
+            apiCall('/post', 'POST', body,
+                (response) => {
+                    alert(`Instagram post successfully posted to the selected accounts.`);
+                    console.log(response);
+                },
+                (error) => console.error('Error posting to Instagram:', error)
+            );
+        }
+
+        // Load initial images for all languages on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const languages = {{ languages | safe }};
+
+            Object.keys(languages).forEach(language => {
+                generateImages(language);
+
+                // Populate accounts
+                const accountsContainer = document.getElementById(`accounts-${language}`);
+                languages[language].accounts.forEach(account => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = account;
+                    checkbox.className = `account-checkbox-${language}`;
+                    checkbox.checked = true;
+
+                    const label = document.createElement('label');
+                    label.textContent = ` ${account}`;
+                    label.style.marginRight = "10px";
+
+                    const wrapper = document.createElement('div');
+                    wrapper.style.display = 'inline-block';
+                    wrapper.style.marginRight = '10px';
+                    wrapper.appendChild(checkbox);
+                    wrapper.appendChild(label);
+
+                    accountsContainer.appendChild(wrapper);
+                });
+            });
+        });
+    </script>
+</head>
+<body style="background-color:#011026;">
+<section class="section">
+    <div class="container">
+        <div align="center">
+            <img src="/static/www-logo.png" width="200" height="200"/>
+            <h1 class="title" style="color: white">WorldWideWaves - Instagram Post Generator</h1>
+        </div>
+        <br/>
+        {% for language in languages %}
+        <div class="box" style="margin-bottom: 30px;">
+            <h2 class="subtitle">{{ language }}</h2>
+            <div id="spinner-{{ language }}" style="display:none;">Loading...</div>
+            <div id="carousel-{{ language }}" align='center' class="carousel">
+                <!-- Images will be dynamically added here -->
+            </div>
+            <br/>
+            <label class="label">Hashtags</label>
+            <input class="input" type="text" id="hashtags-{{ language }}" value="">
+            <br/><br/>
+            <label class="label">Accounts</label>
+            <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
+                <!-- Accounts checkboxes will be added here -->
+            </div>
+            <div class="buttons">
+                <button class="button is-warning" id="shuffle-image-{{ language }}">Shuffle Cover</button>
+                <button class="button is-info" onclick="generateImages('{{ language }}')">Shuffle Extract</button>
+                <button class="button is-success" id="post-{{ language }}">Post to Instagram</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+</body>
+</html>
+

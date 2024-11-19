@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"  # Expose Flask app on internal port
+    volumes:
+      #- .:/app  # DEV: Mount current directory into the container
+      - ./logs:/app/logs
+      - static-data:/app/static  # Share static volume
+    environment:
+      FLASK_ENV: production
+      #command: flask run --host=0.0.0.0  # DEV: Run Flask for live reloading
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # Expose NGINX on port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Mount custom NGINX config
+      - static-data:/usr/share/nginx/html/static:ro  # Mount local static folder into NGINX
+      - ./static/www-logo.png:/usr/share/nginx/html/static/www-logo.png:ro  # Mount the logo file
+    restart: always
+
+volumes:
+  static-data:  # Define a named volume for static files

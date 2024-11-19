@@ -55,7 +55,7 @@ data class WWWEventWaveLinear(
         if (!event.isWarmingEnded()) return null
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
-        val composedLongitude = // Compose an earth-aware speed longitude with bands for the wave
+        val composedLongitude = // Compose an earth-aware speed longitude with bands
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
             .withProgression(elapsedTime)
 

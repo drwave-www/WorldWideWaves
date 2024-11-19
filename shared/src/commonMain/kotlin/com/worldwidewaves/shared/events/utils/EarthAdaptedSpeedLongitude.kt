@@ -8,6 +8,7 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
 import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
 import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
+import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -169,9 +170,11 @@ class EarthAdaptedSpeedLongitude(
 
         // Calculate the latitude within of the bounding box that is closest to the equator
         val longestLat = coveredArea.latitudeOfWidestPart()
+        Napier.v { "Latitude of the widest part of the bounding box: $longestLat" }
 
-        // Calculate the longitude band width at the middle latitude
+        // Calculate the longitude band width at the longest latitude
         val lonBandWidthAtLongest = calculateLonBandWidthAtLatitude(longestLat)
+        Napier.v { "Longitude band width at the middle latitude: $lonBandWidthAtLongest" }
 
         latLonBands.add(LatLonBand(-89.9, 0.0, // Lower latitude band
             adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest))
@@ -208,7 +211,7 @@ class EarthAdaptedSpeedLongitude(
     // ---------------------------
 
     /**
-     * Calculates the longitude band width traversed every second at the middle latitude
+     * Calculates the longitude band width traversed every bandStepDuration at the middle latitude
      * based on a given speed.
      *
      * Algorithm:
@@ -222,7 +225,9 @@ class EarthAdaptedSpeedLongitude(
     fun calculateLonBandWidthAtLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
         val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / 1000
+        Napier.v { "Distance covered by the wave in ${bandStepDuration}s at speed speed: $distanceCovered" }
         return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
+        // return (speed / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
     }
 
     // ---------------------------
