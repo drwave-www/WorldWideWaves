@@ -1,0 +1,49 @@
+
+- on format change, clean images and video
+- mettre plusieurs speakers par langue et tourner (random)
+- add son de fond depuis le debut
+- do not activate video button if no voice available
+- crontab de nettoyage des vieux fichiers d'output
+- outro video / originale + 2026 + logo
+- functions in utils to generate static common videos + cache (template/output/)
+- essayer d'ameliorer la synchro lecture / defilement : le son est tj plus rapide que le texte...
+- page des frames boot sans contour blanc : logo-empty.jpg
+- verifier la fermeture de toutes les ressources lors de la generation
+- faire une barre en haut avec des raccourcis vers chaque langue
+
+- post de la video sur instagram (post et reel)
+- post a reel at the same time of the post and the video (link to the post), as an option
+- post on tiktok
+- post on instagram
+
+- regenrater cover with url if specified
+- ajouter un champ texte deroulable de sel pour le prompt openAI
+- move test LibRQAM dans config
+- save json of posted data + images
+
+- les apostrophes ne sont pas bien gerees
+
+FEATURES:
+- zone libre avec une langue de ISO 639 (liste) et post sur un des accounts supportes (liste)
+- post avec un mot/texte ecrit en grand, traduit en plusieurs langues
+- refresh de token FB pas top
+
+----
+
+- accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
+- tiktok accounts
+- change emails for instagram accounts (?)
+- compte linkedin
+- compte facebook et y attacher les autres comptes ?
+
+- worldwidewaves.net page with instagram accounts + email form
+
+- FR: supprimer et reposter de zero les precedents posts
+
+----
+
+- ajout de son sur la video :
+    - test fairseq : https://docs.coqui.ai/en/dev/inference.html
+    - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
+    - voice cleaning from xtts : https://huggingface.co/spaces/coqui/xtts/blob/main/app.py
+    - doc XTTS : https://docs.coqui.ai/en/dev/models/xtts.html

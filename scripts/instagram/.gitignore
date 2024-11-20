@@ -1,0 +1,19 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+
+.keys
+.tokens
+old/
+config.yaml
+used_texts.json
+app/static/output/
+backup/
+bin/
+lib/
+pyvenv.cfg
+*.swp
+logs/
+app/__pycache__/
+__pycache__/
+./*.wav
+app/static/tts/*
+node_modules/

@@ -1,0 +1,124 @@
+#
+# Copyright 2024 DrWave
+#
+# WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+# countries, culminating in a global wave. The project aims to transcend physical and cultural
+# boundaries, fostering unity, community, and shared human experience by leveraging real-time
+# coordination and location-based services.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import openai
+import logging
+import json
+from app.config import Config
+from app.services.utils import get_used_texts
+
+openai.api_key = Config.OPENAI_API_KEY
+
+def get_openai_extract(language):
+    prompt = f"""
+    Generate a structured JSON with information about a major historical, literary, or philosophical text in the '{language}' language (ISO 639 code), adhering to the following constraints:
+
+    ### Context:
+    WorldWideWaves is a global movement celebrating unity through synchronized human waves across cities and countries.
+    This initiative inspires solidarity, community, and shared experiences through daily Instagram posts aligned with key themes.
+    WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause—connecting humanity in a celebration of unity and collective action.
+
+    ### Key Priorities:
+    1. Align with the following themes: {', '.join(Config.THEMES)}.
+    2. Ensure coherence and text continuity.
+    3. Exclude texts already used: {', '.join(get_used_texts(language))}.
+    4. Produce output in valid JSON format.
+
+    ### Constraints:
+    1. **Language**:
+       - The text must be in language '{language}'. Do not translate it; only use existing texts in this language.
+
+    2. **Excerpt**:
+       - It should be a real excerpt from the original text, not an interpretation or a description
+       - Choose from major literary texts, essays, interviews, or speeches.
+       - Be imaginative, try to shuffle a bit in order to not always have the same texts.
+       - Total length: 150–280 words, divided into two consecutive, logical parts:
+         - "page1": 50–140 words.
+         - "page2": 50–140 words.
+       - Content should be visually descriptive, thought-provoking, and aligned with the themes.
+       - Avoid quotation marks in the text.
+       - Avoi dusing markers to highlight bold parts, just set them in bold_parts as specified below
+
+    3. **Output Format**:
+       - Return only valid JSON with the following fields:
+         - "title": Name of the text or work.
+         - "author": Name of the author or creator.
+         - "page1": The first excerpt (50–140 words).
+         - "page2": The second excerpt (50–140 words).
+         - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
+         - "caption": Generate a list of relevant and engaging Instagram hashtags to be used as caption that maximize social engagement and reflect the excerpt themes and context, in language '{language}'
+         - "translated": The translated version of concatenated author, title, page1 and page2 in french separated by newlines
+    4. **Hashtags**:
+       - Include hashtags that maximize social engagement and reflect the text's themes and context.
+       - Do not propose more than 25 hashtags
+
+    5. **Error Handling**:
+       - If no suitable text is found, return: `{{"error": "No suitable text found"}}`.
+
+    ### Output:
+    Return only the structured JSON described above wih no additional text before or after.
+    """
+    logging.debug(f"PROMPT USED: '{prompt}'")
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}' and in english"},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1600,
+        temperature=0.7,
+    )
+    content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
+    content = content.replace("**", "").replace(" ", " ")
+    logging.debug(content)
+    json_data = json.loads(content)
+
+    caption = json_data.get("caption", [])
+    if isinstance(caption, str):
+        caption_list = caption.strip().split()
+    else:
+        caption_list = caption
+    json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + caption_list
+    json_data["caption"] = json_data["caption"][:30] # Instagram limit
+
+    return json_data
+
+
+def get_openai_hashtags(language, extract):
+    prompt = f"""
+    Generate in the '{language}' language (ISO 639 code) and in english a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
+    {extract}
+    Do not output anything else than the hastags without newlines, in one line to be used as an instagram caption.
+    Do not propose more than 25 hashtags.
+    """
+    logging.debug(f"PROMPT USED: '{prompt}'")
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=800,
+        temperature=0.7,
+    )
+    content = " ".join(Config.LANGUAGES[language]["fixed_hashtags"]) + " " + response['choices'][0]['message']['content']
+    logging.debug(content)
+    return content

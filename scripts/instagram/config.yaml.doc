@@ -1,0 +1,43 @@
+# Structure of the config.yaml file
+
+openai_api_key: "string"  # OpenAI API key for accessing OpenAI services.
+
+google_search_api_key: "string"  # Google Custom Search API key.
+google_cx: "string"  # Google Custom Search Engine ID.
+
+output_folder: "string"  # Path to the folder where generated outputs are saved.
+template_folder: "string"  # Path to the folder containing template files.
+used_texts_file: "string"  # Path to the JSON file tracking used texts.
+
+themes:  # A list of themes relevant to the project.
+  - "string"  # Example: "oppression"
+  - "string"  # Example: "dictatures"
+  - "string"  # Additional themes.
+
+instagram:  # Instagram-specific configuration.
+  app_id: "string"  # Instagram app ID.
+  app_secret: "string"  # Instagram app secret.
+
+languages:  # Dictionary of supported languages and their configurations.
+  en:  # Language code (e.g., "en" for English).
+    fixed_hashtags:  # A list of fixed hashtags for this language.
+      - "string"  # Example: "#worlwidewaves"
+      - "string"  # Example: "#worldwidewaves_all"
+    accounts:  # Dictionary of Instagram accounts for this language.
+      "@account_name":  # Account handle.
+        account_id: "string"  # Instagram account ID.
+        access_token: "string"  # Instagram access token.
+
+  fr:  # Another language configuration (e.g., "fr" for French).
+    fixed_hashtags:  # A list of fixed hashtags for French.
+      - "string"  # Example: "#worldwidewaves"
+      - "string"  # Example: "#worldwidewaves_fr"
+    accounts:  # Dictionary of Instagram accounts for French.
+      "@account_name":  # Account handle.
+        account_id: "string"  # Instagram account ID.
+        access_token: "string"  # Instagram access token.
+
+# Notes:
+# - Replace "string" with the actual value.
+# - Add or remove languages as needed by following the structure of the "languages" section.
+
