@@ -17,13 +17,18 @@ services:
     restart: always
 
   nginx:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx  # Use the custom Dockerfile for NGINX
     ports:
       - "80:80"  # Expose NGINX on port 80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Mount custom NGINX config
       - static-data:/usr/share/nginx/html/static:ro  # Mount local static folder into NGINX
       - ./static/www-logo.png:/usr/share/nginx/html/static/www-logo.png:ro  # Mount the logo file
+    environment:
+      - NGINX_USERNAME=admin      # Set default username for authentication
+      - NGINX_PASSWORD=insta42 # Set default password for authentication
     restart: always
 
 volumes:
