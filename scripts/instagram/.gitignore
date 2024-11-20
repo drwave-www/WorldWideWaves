@@ -4,7 +4,7 @@
 .tokens
 old/
 config.yaml
-static/output/
+app/static/output/
 backup/
 bin/
 lib/
