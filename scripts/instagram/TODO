@@ -1,16 +1,8 @@
-- revoir le prompt et les themes
-  - en anglais
-  - expliquer WWW
-  - separer proprement le prompt
-- mount le fichier used_texts et verifier qu'il est pris en compte
 - ajouter des langues et des pays, creer les comptes instagram associes
 - supprimer et reposter de zero les precedents posts
 
-PROD: 
-- verifier acces depuis un mobile
 
 FEATURES:
-- pouvoir fournir son propre prompt (partie)
 - video generation
-- post avec un mot ecrit en grand
+- post avec un mot ecrit en grand, traduit en plusieurs langues
 

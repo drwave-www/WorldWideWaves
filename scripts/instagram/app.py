@@ -291,54 +291,48 @@ def create_images(language, json_data):
 
 def get_openai_data(language):
     prompt = f"""
-    Génère un JSON structuré contenant des informations sur un grand texte historique, littéraire ou philosophique, en {language}, sur les thèmes suivants : {', '.join(THEMES)}. 
-    Les auteurs doivent être des personnes largement reconnues. Il s'agit d'identifier un livre, un essai ou une interview, d'en sélectionner un extrait significatif et représentatif de 100 à 300 mots, et de diviser ce texte en deux parties logiques et lisibles en vue d'être utilisées pour un post Instagram. Le texte doit être brut ou formaté uniquement comme contenu JSON.
+    Generate a structured JSON with information about a major historical, literary, or philosophical text in the {language} language (ISO 639 code), adhering to the following constraints:
 
-    Exclure les textes suivants, déjà utilisés : 
-    <liste>
-        {', '.join(get_used_texts(language))}.
-    </liste>
+    ### Context:
+    WorldWideWaves is a global movement celebrating unity through synchronized human waves across cities and countries.
+    This initiative inspires solidarity, community, and shared experiences through daily Instagram posts aligned with key themes.
+    WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause—connecting humanity in a celebration of unity and collective action.
 
-    L'extrait doit contenir entre 150 et 240 mots.
-    L'extrait doit etre dans la langue {language}, ne le traduit pas, utilise les textes que tu connais deja dans cette langue
-    Ne mets pas de guillamets dans l'extrait du texte que tu retournes
+    ### Key Priorities:
+    1. Align with the following themes: {', '.join(THEMES)}.
+    2. Ensure coherence and text continuity.
+    3. Exclude texts already used: {', '.join(get_used_texts(language))}.
+    4. Produce output in valid JSON format.
 
-    Le JSON doit inclure les champs suivants, un seul element est demande :
-    - "name": le nom du texte ou de l'œuvre.
-    - "author": le nom de l'auteur ou du créateur.
-    - "page1": un extrait significatif du texte (entre 50 et 120 mots), première partie.
-    - "page2": un extrait consécutif du texte après "page1" (entre 50 et 120 mots), seconde partie.
-    - “bold_parts”: une liste de bouts du texte a mettre en gras selon ta recommendation, pas plus de quelques mots (1-5) chaque
-    - “hashtags”: a list of instagram hashtags relevant to the extract"
+    ### Constraints:
+    1. **Language**:
+       - The text must be in {language}. Do not translate it; only use existing texts in this language.
 
-    L'extrait doit être inspirant et aligné avec les thèmes mentionnés. Assure-toi que les deux pages de l'extrait respectent les limites de mots et forment une continuité.
-    N'affiche rien d'autre que le json
-    """
+    2. **Excerpt**:
+       - Choose from major literary texts, essays, interviews, or speeches.
+       - Total length: 150–280 words, divided into two consecutive, logical parts:
+         - "page1": 50–140 words.
+         - "page2": 50–140 words.
+       - Content should be visually descriptive, thought-provoking, and aligned with the themes.
+       - Avoid quotation marks in the text.
 
-    prompt = f"""
-    Génère un JSON structuré avec des informations sur un grand texte historique, littéraire ou philosophique en langue {language}, en respectant les contraintes suivantes :
+    3. **Output Format**:
+       - Return only valid JSON with the following fields:
+         - "name": Name of the text or work.
+         - "author": Name of the author or creator.
+         - "page1": The first excerpt (50–140 words).
+         - "page2": The second excerpt (50–140 words).
+         - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
+         - "hashtags": A list of relevant and engaging Instagram hashtags.
 
-    0. **Context** : 
-    1. **Thèmes** : Le texte doit être aligné avec les thèmes suivants : {', '.join(THEMES)}.
-    2. **Langue** : Le texte doit être dans la langue {language}. Ne le traduis pas ; utilise uniquement des textes existants dans cette langue.
-    3. **Exclusion** : Ne sélectionne pas les textes déjà utilisés, listés ici : {', '.join(get_used_texts(language))}.
-    4. **Format** : Le texte doit être structuré uniquement en JSON brut, avec les champs suivants :
-       - "name" : le nom du texte ou de l'œuvre.
-       - "author" : le nom de l'auteur ou du créateur.
-       - "page1" : un extrait significatif (50 à 120 mots), première partie.
-       - "page2" : un extrait consécutif (50 à 120 mots), seconde partie.
-       - "bold_parts" : une liste de 1 à 5 bouts de texte à mettre en gras (chaque bout de quelques mots seulement, max 5).
-       - "hashtags" : une liste de hashtags pertinents pour Instagram, en rapport avec l'extrait.
-    5. **Extrait** : 
-       - La longueur totale doit être entre 150 et 240 mots.
-       - Divise l'extrait en deux parties logiques et cohérentes (page1 et page2).
-       - Le contenu doit être inspirant et aligné avec les thèmes.
-       - Évite d'utiliser des guillemets dans l'extrait.
-    6. **Hashtags** :
-       - Propose des hashtags pertinents et engageants, reflétant les thèmes et le contexte du texte.
-    7. Personalisation
+    4. **Hashtags**:
+       - Include hashtags that maximize social engagement and reflect the text's themes and context.
 
-    Ne retourne rien d'autre que le JSON brut respectant les contraintes ci-dessus.
+    5. **Error Handling**:
+       - If no suitable text is found, return: `{"error": "No suitable text found"}`.
+
+    ### Output:
+    Return only the structured JSON described above.
     """
 
     logging.debug(f"PROMPT USED: '{prompt}'")
@@ -352,7 +346,7 @@ def get_openai_data(language):
         temperature=0.7,
     )
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
-    logging.debug(content)
+    logging.info(content)
     json_data = json.loads(content)
     json_data["hashtags"] = config["languages"][language]["fixed_hashtags"] + json_data["hashtags"]
     return json_data
