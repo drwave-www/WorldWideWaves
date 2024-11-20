@@ -38,7 +38,7 @@ if not config:
 # Configuration
 OUTPUT_FOLDER = config["output_folder"]
 TEMPLATE_FOLDER = config["template_folder"]
-USED_TEXTS_FILE = config["used_texts_file"]
+USED_TEXTS_FILE = "used_texts.json"
 THEMES = config["themes"]
 LANGUAGES = config["languages"]
 INSTAGRAM = config["instagram"]

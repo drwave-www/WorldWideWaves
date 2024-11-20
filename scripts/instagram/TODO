@@ -2,11 +2,11 @@
   - en anglais
   - expliquer WWW
   - separer proprement le prompt
+- mount le fichier used_texts et verifier qu'il est pris en compte
 - ajouter des langues et des pays, creer les comptes instagram associes
 - supprimer et reposter de zero les precedents posts
 
 PROD: 
-- host on mglcel.fr and test instagram post fully (test access to statics before, change the url)
 - verifier acces depuis un mobile
 
 FEATURES:

@@ -79,7 +79,7 @@
                     postButton.onclick = () => postToInstagram(language, data.json_data.author, data.json_data.name);
                 },
                 (error) => {
-                    spinner.style.display = 'none';
+                    spinner.innerText = error
                     console.error('Error generating images:', error);
                 }
             );

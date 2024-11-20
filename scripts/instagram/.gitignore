@@ -3,7 +3,6 @@
 .keys
 .tokens
 old/
-used_texts.json
 config.yaml
 static/output/
 backup/
