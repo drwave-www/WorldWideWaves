@@ -329,7 +329,7 @@ def get_openai_data(language):
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
 
     5. **Error Handling**:
-       - If no suitable text is found, return: `{"error": "No suitable text found"}`.
+       - If no suitable text is found, return: `{{"error": "No suitable text found"}}`.
 
     ### Output:
     Return only the structured JSON described above.
