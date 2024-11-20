@@ -321,8 +321,7 @@ def get_openai_data(language):
     0. **Context** : 
     1. **Thèmes** : Le texte doit être aligné avec les thèmes suivants : {', '.join(THEMES)}.
     2. **Langue** : Le texte doit être dans la langue {language}. Ne le traduis pas ; utilise uniquement des textes existants dans cette langue.
-    3. **Exclusion** : Ne sélectionne pas les textes déjà utilisés, listés ici :
-       {', '.join(get_used_texts(language))}.
+    3. **Exclusion** : Ne sélectionne pas les textes déjà utilisés, listés ici : {', '.join(get_used_texts(language))}.
     4. **Format** : Le texte doit être structuré uniquement en JSON brut, avec les champs suivants :
        - "name" : le nom du texte ou de l'œuvre.
        - "author" : le nom de l'auteur ou du créateur.
@@ -417,7 +416,7 @@ def refresh_token(access_token, cache={}):
 def create_media_container(image_url, caption, is_carousel_item, ig_user_id, access_token):
     url = f"https://graph.instagram.com/{ig_user_id}/media"
     params = {
-        "image_url": "https://yt3.googleusercontent.com/ytc/AIdro_mLTDblxpvsGYwPDPS7iHxFXmgd1-HZdD8gXUu1H70=s900-c-k-c0x00ffffff-no-rj", #image_url,
+        "image_url": image_url,
         "caption": caption,
         "is_carousel_item": is_carousel_item,
         "access_token": access_token

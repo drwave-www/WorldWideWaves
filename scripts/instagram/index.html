@@ -106,10 +106,7 @@
         // Function to post images to Instagram
         function postToInstagram(language, author, title) {
             const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
-            const images = Array.from(carouselImages).map(img => {
-                const url = new URL(img.src);
-                return url.pathname.substring(1); // Extract only the path part
-            });
+            const images = Array.from(carouselImages).map(img => img.src);
 
             const hashtags = document.getElementById(`hashtags-${language}`).value.split(" ");
 
