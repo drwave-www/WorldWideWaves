@@ -20,7 +20,7 @@
 #
 
 from flask import Blueprint, request, jsonify
-from app.services.openai_service import get_openai_data
+from app.services.openai_service import get_openai_extract
 from app.services.image_service import create_images
 
 generate = Blueprint("generate", __name__)
@@ -29,10 +29,21 @@ generate = Blueprint("generate", __name__)
 def __generate():
     data = request.json
     language = data["language"]
+    article = data.get("article")
 
     try:
-        json_data = get_openai_data(language)
-        images = create_images(json_data)
-        return jsonify({"images": images, "json_data": json_data})
+        if not article:
+            article = get_openai_extract(language)
+            return_article = True
+        else:
+            return_article = False
+
+        images = create_images(article)
+        response = {"images": images}
+
+        if return_article:
+            response["article"] = article
+
+        return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

@@ -15,6 +15,181 @@
             font-weight: bold;          /* Make the text bold */
             font-size: 42px;            /* Set font size to 42px */
         }
+
+        .field textarea.textarea.bold_parts {
+            height: 100px; /* Set the fixed height */
+        }
+
+        .field textarea.textarea {
+            height: 60px !important; /* Force height to 60px */
+        }
+
+        .spinner{
+            position:relative;
+            width:204px;
+            height:25px;
+            margin:auto;
+        }
+
+        .spinningSquaresG{
+            position:absolute;
+            top:0;
+            background-color:rgb(1,16,38);
+            width:25px;
+            height:25px;
+            animation-name:bounce_spinningSquaresG;
+                -o-animation-name:bounce_spinningSquaresG;
+                -ms-animation-name:bounce_spinningSquaresG;
+                -webkit-animation-name:bounce_spinningSquaresG;
+                -moz-animation-name:bounce_spinningSquaresG;
+            animation-duration:0.905s;
+                -o-animation-duration:0.905s;
+                -ms-animation-duration:0.905s;
+                -webkit-animation-duration:0.905s;
+                -moz-animation-duration:0.905s;
+            animation-iteration-count:infinite;
+                -o-animation-iteration-count:infinite;
+                -ms-animation-iteration-count:infinite;
+                -webkit-animation-iteration-count:infinite;
+                -moz-animation-iteration-count:infinite;
+            animation-direction:normal;
+                -o-animation-direction:normal;
+                -ms-animation-direction:normal;
+                -webkit-animation-direction:normal;
+                -moz-animation-direction:normal;
+            transform:scale(.3);
+                -o-transform:scale(.3);
+                -ms-transform:scale(.3);
+                -webkit-transform:scale(.3);
+                -moz-transform:scale(.3);
+        }
+
+        #spinningSquaresG_1{
+            left:0;
+            animation-delay:0.366s;
+                -o-animation-delay:0.366s;
+                -ms-animation-delay:0.366s;
+                -webkit-animation-delay:0.366s;
+                -moz-animation-delay:0.366s;
+        }
+
+        #spinningSquaresG_2{
+            left:25px;
+            animation-delay:0.4525s;
+                -o-animation-delay:0.4525s;
+                -ms-animation-delay:0.4525s;
+                -webkit-animation-delay:0.4525s;
+                -moz-animation-delay:0.4525s;
+        }
+
+        #spinningSquaresG_3{
+            left:51px;
+            animation-delay:0.549s;
+                -o-animation-delay:0.549s;
+                -ms-animation-delay:0.549s;
+                -webkit-animation-delay:0.549s;
+                -moz-animation-delay:0.549s;
+        }
+
+        #spinningSquaresG_4{
+            left:76px;
+            animation-delay:0.6355s;
+                -o-animation-delay:0.6355s;
+                -ms-animation-delay:0.6355s;
+                -webkit-animation-delay:0.6355s;
+                -moz-animation-delay:0.6355s;
+        }
+
+        #spinningSquaresG_5{
+            left:102px;
+            animation-delay:0.732s;
+                -o-animation-delay:0.732s;
+                -ms-animation-delay:0.732s;
+                -webkit-animation-delay:0.732s;
+                -moz-animation-delay:0.732s;
+        }
+
+        #spinningSquaresG_6{
+            left:127px;
+            animation-delay:0.8185s;
+                -o-animation-delay:0.8185s;
+                -ms-animation-delay:0.8185s;
+                -webkit-animation-delay:0.8185s;
+                -moz-animation-delay:0.8185s;
+        }
+
+        #spinningSquaresG_7{
+            left:153px;
+            animation-delay:0.905s;
+                -o-animation-delay:0.905s;
+                -ms-animation-delay:0.905s;
+                -webkit-animation-delay:0.905s;
+                -moz-animation-delay:0.905s;
+        }
+
+        #spinningSquaresG_8{
+            left:178px;
+            animation-delay:1.0015s;
+                -o-animation-delay:1.0015s;
+                -ms-animation-delay:1.0015s;
+                -webkit-animation-delay:1.0015s;
+                -moz-animation-delay:1.0015s;
+        }
+
+        @keyframes bounce_spinningSquaresG{
+            0%{
+                transform:scale(1);
+                background-color:rgb(0,0,0);
+            }
+            100%{
+                transform:scale(.3) rotate(90deg);
+                background-color:rgb(255,255,255);
+            }
+        }
+
+        @-o-keyframes bounce_spinningSquaresG{
+            0%{
+                -o-transform:scale(1);
+                background-color:rgb(0,0,0);
+            }
+            100%{
+                -o-transform:scale(.3) rotate(90deg);
+                background-color:rgb(255,255,255);
+            }
+        }
+
+        @-ms-keyframes bounce_spinningSquaresG{
+            0%{
+                -ms-transform:scale(1);
+                background-color:rgb(0,0,0);
+            }
+            100%{
+                -ms-transform:scale(.3) rotate(90deg);
+                background-color:rgb(255,255,255);
+            }
+        }
+
+        @-webkit-keyframes bounce_spinningSquaresG{
+            0%{
+                -webkit-transform:scale(1);
+                background-color:rgb(0,0,0);
+            }
+            100%{
+                -webkit-transform:scale(.3) rotate(90deg);
+                background-color:rgb(255,255,255);
+            }
+        }
+
+        @-moz-keyframes bounce_spinningSquaresG{
+            0%{
+                -moz-transform:scale(1);
+                background-color:rgb(0,0,0);
+            }
+            100%{
+                -moz-transform:scale(.3) rotate(90deg);
+                background-color:rgb(255,255,255);
+            }
+        }
     </style>
     <script>
         // Reusable API call function
@@ -29,78 +204,204 @@
                 .catch(onError);
         }
 
-        function generateImages(language) {
+        function stopSpinner(language) {
+            const spinner = document.getElementById(`spinner-${language}`);
+            spinner.style.display = 'none';
+        }
+
+        function showSpinner(language) {
+            cleanError(language)
             const spinner = document.getElementById(`spinner-${language}`);
             spinner.style.display = 'block';
-            spinner.innerText = "Loading..."
+        }
 
+        function cleanError(language, error) {
+            const errField = document.getElementById(`error-${language}`);
+            errField.innerText = error; // Display the error message at the spinner position
+            errField.style.display = 'none'; // Ensure it's visible
+        }
+
+        function showError(language, error) {
+            stopSpinner(language)
+            const errField = document.getElementById(`error-${language}`);
+            errField.innerText = error; // Display the error message at the spinner position
+            errField.style.display = 'block'; // Ensure it's visible
+        }
+
+        function resetInputs(language) {
+            ["hashtags", "author", "title", "page1", "page2", "bold-parts"].forEach(field => {
+                const inputElement = document.getElementById(`${field}-${language}`);
+                if (inputElement) {
+                    inputElement.value = ""; // Reset the value
+                }
+            });
+        }
+
+        function setField(language, inputName, value) {
+            const inputElement = document.getElementById(`${inputName}-${language}`);
+            if (inputElement) {
+                inputElement.value = value; // Set the value
+            }
+        }
+
+        function getField(language, inputName) {
+            const inputElement = document.getElementById(`${inputName}-${language}`);
+            if (inputElement) {
+                return inputElement.value
+            }
+            return null;
+        }
+
+        function getLanguageFields(language) {
+            return {
+                language: language,
+                caption: getField(language, "hashtags"),
+                author: getField(language, "author"),
+                title: getField(language, "title"),
+                page1: getField(language, "page1"),
+                page2: getField(language, "page2"),
+                bold_parts: getField(language, "bold-parts")
+                    .split("\n")
+                    .map(tag => tag.trim())
+                    .filter(part => part !== ""),
+            }
+        }
+
+        function updateLanguageFields(language, data) {
+            setField(language, "hashtags", data.caption.join(' '))
+            setField(language, "author", data.author)
+            setField(language, "title", data.title)
+            setField(language, "page1", data.page1)
+            setField(language, "page2", data.page2)
+            setField(language, "bold-parts", data.bold_parts.join("\n"))
+        }
+
+        function clearImages(language) {
             const imageContainer = document.getElementById(`carousel-${language}`);
             imageContainer.innerHTML = ''; // Clear existing images
+        }
 
-            const hashtagInput = document.getElementById(`hashtags-${language}`);
-            hashtagInput.value = ""
+        function setImages(language, images) {
+            const imageContainer = document.getElementById(`carousel-${language}`);// Process images
+            imageContainer.innerHTML = ''; // Clear existing images
+            images.forEach(([index, imagePath]) => {
+                const img = document.createElement('img');
+                img.src = imagePath;
+                img.width = 300; // Numerical value for width
+                img.height = 300; // Numerical value for height
+                img.alt = `Image ${index}`;
+                if (index === 4 || index === 5) {
+                    img.style.display = 'none'; // Inline style to hide the image
+                }
+                imageContainer.appendChild(img);
+            });
+        }
 
-            apiCall(
-                '/generate',
-                'POST',
-                {language: language},
+        // --------------------------------------------------------------------
+
+        function generateExtract(language) {
+            showSpinner(language)
+            resetInputs(language)
+            clearImages(language)
+
+            apiCall('/extract', 'POST', {language: language},
                 (data) => {
-                    spinner.style.display = 'none';
-
-                    // Check if data is a simple text containing 'error'
                     if (typeof data === 'string' && data.toLowerCase().includes('error')) {
-                        spinner.innerText = data; // Display the error message at the spinner position
-                        spinner.style.display = 'block'; // Ensure it's visible
+                        showError(language, data)
                         return;
                     }
 
-                    // Process images
-                    imageContainer.innerHTML = ''; // Clear existing images
-                    data.images.forEach(([index, imagePath]) => {
-                        const img = document.createElement('img');
-                        img.src = imagePath;
-                        img.width = 300; // Numerical value for width
-                        img.height = 300; // Numerical value for height
-                        img.alt = `Image ${index}`;
-                        if (index === 4 || index === 5) {
-                            img.style.display = 'none'; // Inline style to hide the image
-                        }
-                        imageContainer.appendChild(img);
-                    });
-
-                    // Update hashtags
-                    hashtagInput.value = data.json_data.hashtags.join(' '); // Set hashtags as a space-separated string
-
-                    // Attach data for cover shuffle
-                    const shuffleButton = document.querySelector(`#shuffle-image-${language}`);
-                    shuffleButton.onclick = () => shuffleImage(language, data.json_data.author, data.json_data.name);
-
-                    // Attach data for instagram posting
-                    const postButton = document.querySelector(`#post-${language}`);
-                    postButton.onclick = () => postToInstagram(language, data.json_data.author, data.json_data.name);
+                    // Update data
+                    updateLanguageFields(language, data)
+                    stopSpinner(language)
                 },
                 (error) => {
-                    spinner.innerText = error
+                    showError(language, error)
                     console.error('Error generating images:', error);
                 }
             );
         }
 
+        function generateImages(language, generate_extract = false) {
+            showSpinner(language)
+            clearImages(language)
+
+            if (generate_extract)
+                resetInputs(language)
+
+            const article = getLanguageFields(language)
+            let data = { language: language }
+            if (article.author && article.title) {
+                data.article = article
+            }
+
+            apiCall('/generate', 'POST', data,
+                (data) => {
+                    if (typeof data === 'string' && data.toLowerCase().includes('error')) {
+                        showError(language, data)
+                        return;
+                    }
+
+                    if (data.images) {
+                        setImages(language, data.images)
+                    } else {
+                        showError(language, "Error: no images returned.")
+                        return;
+                    }
+
+                    // Update hashtags
+                    if (data.article) {
+                        updateLanguageFields(language, data.article)
+                    }
+
+                    stopSpinner(language)
+                },
+                (error) => {
+                    showError(language, error)
+                    console.error('Error generating images:', error);
+                }
+            );
+        }
 
         // Function to shuffle the cover image
-        function shuffleImage(language, author, title) {
-            apiCall(
-                '/cover',
-                'POST',
-                {author: author, title: title},
+        function shuffleImage(language) {
+            showSpinner(language)
+            apiCall('/cover', 'POST',
+                {author: getField(language, "author"), title: getField(language, "title")},
                 (data) => {
                     const carousel = document.getElementById(`carousel-${language}`);
                     const coverImage = carousel.querySelector('img:nth-child(3)');
                     if (coverImage) {
                         coverImage.src = data;
                     }
+                    stopSpinner(language)
                 },
-                (error) => console.error('Error shuffling image:', error)
+                (error) => {
+                    console.error('Error shuffling image:', error)
+                    showError(language, error)
+                }
+            );
+        }
+
+        // Function to get hashtags associated with the content
+        function generateHashtags(language) {
+            showSpinner(language)
+            setField(language, "hashtags", "")
+            apiCall('/hashtags', 'POST',
+                {
+                    language: language,
+                    extract: getField(language, "page1") + getField(language, "page2"),
+                },
+                (data) => {
+                    if (data.hashtags) {
+                        setField(language, "hashtags", data.hashtags)
+                    }
+                    stopSpinner(language)
+                },
+                (error) => {
+                    console.error('Error retrieving hashtags for this content:', error)
+                    showError(language, error)
+                }
             );
         }
 
@@ -109,60 +410,59 @@
             const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
             const images = Array.from(carouselImages).map(img => img.src);
 
-            const hashtags = document.getElementById(`hashtags-${language}`).value.split(" ");
-
             // Collect selected accounts
             const selectedAccounts = Array.from(document.querySelectorAll(`.account-checkbox-${language}:checked`))
-                .map(checkbox => checkbox.value);
+                .map(checkbox => checkbox.value)
 
             if (selectedAccounts.length === 0) {
                 alert("Please select at least one account.");
                 return;
             }
 
-            const body = {
-                language: language,
-                title: "'" + title + "' de " + author,
-                images: images,
-                hashtags: hashtags,
-                accounts: selectedAccounts
-            };
+            const data = getLanguageFields(language)
+            data.images = images
+            data.accounts = selectedAccounts
 
-            apiCall('/post', 'POST', body,
+            apiCall('/post', 'POST', data,
                 (response) => {
                     alert(`Instagram post successfully posted to the selected accounts.`);
                     console.log(response);
                 },
-                (error) => console.error('Error posting to Instagram:', error)
-            );
+                (error) => {
+                    showError(language, error)
+                    alert('Error posting to Instagram')
+                }
+            )
+        }
+
+        const languages = {{ languages | safe }}
+
+        function generateAllExtracts() {
+            Object.keys(languages).forEach(language => {
+                generateExtract(language)
+            })
+        }
+
+        function generateAllImages() {
+            Object.keys(languages).forEach(language => {
+                generateImages(language, true)
+            })
         }
 
         // Load initial images for all languages on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const languages = {{ languages | safe }};
-
             Object.keys(languages).forEach(language => {
-                generateImages(language);
+                // generateImages(language);
 
                 // Populate accounts
                 const accountsContainer = document.getElementById(`accounts-${language}`);
                 languages[language].accounts.forEach(account => {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.value = account;
-                    checkbox.className = `account-checkbox-${language}`;
-                    checkbox.checked = true;
-
-                    const label = document.createElement('label');
-                    label.textContent = ` ${account}`;
-                    label.style.marginRight = "10px";
-
                     const wrapper = document.createElement('div');
-                    wrapper.style.display = 'inline-block';
-                    wrapper.style.marginRight = '10px';
-                    wrapper.appendChild(checkbox);
-                    wrapper.appendChild(label);
-
+                    wrapper.className = 'account-wrapper';
+                    wrapper.innerHTML = `
+                        <input type="checkbox" value="${account}" class="account-checkbox-${language}" checked>
+                        <label style="margin-right: 10px;"> ${account}</label>
+                    `;
                     accountsContainer.appendChild(wrapper);
                 });
             });
@@ -172,32 +472,95 @@
 <body style="background-color:#011026;">
 <section class="section">
     <div class="container">
-        <div align="center">
+
+        <div style="text-align: center;">
             <img src="/static/www-logo.png" width="200" height="200"/>
-            <h1 class="title" style="color: white">WorldWideWaves - Instagram Post Generator</h1>
+            <h1 class="title" style="color: white">Instagram Post Generator</h1>
+
+            <div class="buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button class="button is-info" onclick="generateAllExtracts()">Generate all extracts</button>
+                <button class="button is-warning" onclick="generateAllImages()">Generate all images</button>
+            </div>
         </div>
+
         <br/>
+
         {% for language in languages %}
         <div class="box" style="margin-bottom: 30px;">
             <h2 class="subtitle">{{ language }}</h2>
-            <div id="spinner-{{ language }}" style="display:none;">Loading...</div>
+
+            <div id="spinner-{{ language }}" class="spinner" style="display:none;">
+                <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_3" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_4" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_5" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_6" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
+                <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
+            </div>
+            <div id="error-{{ language }}" style="display:none;"></div>
+
+            <br/><br/>
+
+            <div class="field is-grouped">
+                <div class="control" style="flex: 1; margin-right: 10px;">
+                    <label class="label">Author</label>
+                    <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
+                </div>
+                <div class="control" style="flex: 1; margin-right: 10px;">
+                    <label class="label">Title</label>
+                    <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
+                </div>
+                <div class="control buttons" style="flex: 0;">
+                    <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Page 1 Text</label>
+                <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
+            </div>
+
+            <div class="field">
+                <label class="label">Page 2 Text</label>
+                <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+            </div>
+
+            <div class="field">
+                <label class="label">Bold Parts</label>
+                <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
+            </div>
+
+            <label class="label">Caption</label>
+            <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
+                <div class="control" style="flex: 1; margin-right: 10px;">
+                    <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
+                </div>
+                <div class="control buttons" style="flex: 0;">
+                    <button class="button is-warning" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
+                </div>
+            </div>
+
+            <br/><br/>
+
             <div id="carousel-{{ language }}" align='center' class="carousel">
                 <!-- Images will be dynamically added here -->
             </div>
-            <br/>
-            <label class="label">Hashtags</label>
-            <input class="input" type="text" id="hashtags-{{ language }}" value="">
-            <br/><br/>
-            <label class="label">Accounts</label>
+
+            <label class="label">Publish on accounts : </label>
             <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
                 <!-- Accounts checkboxes will be added here -->
             </div>
+
             <div class="buttons">
-                <button class="button is-warning" id="shuffle-image-{{ language }}">Shuffle Cover</button>
-                <button class="button is-info" onclick="generateImages('{{ language }}')">Shuffle Extract</button>
-                <button class="button is-success" id="post-{{ language }}">Post to Instagram</button>
+                <button class="button is-warning" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
+                <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
+                <button class="button is-success" onclick="postToInstagram('{{ language }}')">Post to Instagram</button>
             </div>
+
         </div>
+
         {% endfor %}
     </div>
 </section>

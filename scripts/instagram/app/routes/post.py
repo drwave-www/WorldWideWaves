@@ -36,14 +36,14 @@ def __post():
         return jsonify({"error": "Missing required fields: language, title, images, hashtags, accounts"}), 400
 
     language = data["language"]
-    title = data["title"]
+    title = f"{data['title']} by {data['author']}"
     images = data["images"]
-    hashtags = data["hashtags"]
+    caption = data["caption"]
     accounts = data["accounts"]
 
     try:
         # Construct the caption
-        caption = " ".join(hashtags)
+        caption = " ".join(caption)
 
         # Iterate over each account
         results = {}

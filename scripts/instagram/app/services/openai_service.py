@@ -27,9 +27,9 @@ from app.services.utils import get_used_texts
 
 openai.api_key = Config.OPENAI_API_KEY
 
-def get_openai_data(language):
+def get_openai_extract(language):
     prompt = f"""
-    Generate a structured JSON with information about a major historical, literary, or philosophical text in the {language} language (ISO 639 code), adhering to the following constraints:
+    Generate a structured JSON with information about a major historical, literary, or philosophical text in the '{language}' language (ISO 639 code), adhering to the following constraints:
 
     ### Context:
     WorldWideWaves is a global movement celebrating unity through synchronized human waves across cities and countries.
@@ -44,7 +44,7 @@ def get_openai_data(language):
 
     ### Constraints:
     1. **Language**:
-       - The text must be in {language}. Do not translate it; only use existing texts in this language.
+       - The text must be in language '{language}'. Do not translate it; only use existing texts in this language.
 
     2. **Excerpt**:
        - Choose from major literary texts, essays, interviews, or speeches.
@@ -56,12 +56,12 @@ def get_openai_data(language):
 
     3. **Output Format**:
        - Return only valid JSON with the following fields:
-         - "name": Name of the text or work.
+         - "title": Name of the text or work.
          - "author": Name of the author or creator.
          - "page1": The first excerpt (50–140 words).
          - "page2": The second excerpt (50–140 words).
          - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
-         - "hashtags": A list of relevant and engaging Instagram hashtags.
+         - "caption": A list of relevant and engaging Instagram hashtags.
 
     4. **Hashtags**:
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
@@ -70,13 +70,13 @@ def get_openai_data(language):
        - If no suitable text is found, return: `{{"error": "No suitable text found"}}`.
 
     ### Output:
-    Return only the structured JSON described above.
+    Return only the structured JSON described above wih no additional text before or after.
     """
     logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "Tu es un assistant spécialisé en contenu inspirant pour des publications."},
+            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
             {"role": "user", "content": prompt}
         ],
         max_tokens=800,
@@ -85,5 +85,25 @@ def get_openai_data(language):
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
     logging.info(content)
     json_data = json.loads(content)
-    json_data["hashtags"] = Config.LANGUAGES[language]["fixed_hashtags"] + json_data["hashtags"]
+    json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + json_data["caption"]
     return json_data
+
+
+def get_openai_hashtags(language, extract):
+    prompt = f"""
+    Generate in the '{language}' language (ISO 639 code) a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
+    {extract}
+    """
+    logging.info(f"PROMPT USED: '{prompt}'")
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=800,
+        temperature=0.7,
+    )
+    content = " ".join(Config.LANGUAGES[language]["fixed_hashtags"]) + response['choices'][0]['message']['content']
+    logging.info(content)
+    return content

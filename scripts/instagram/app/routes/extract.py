@@ -20,7 +20,7 @@
 #
 
 from flask import Blueprint, request, jsonify
-from app.services.openai_service import get_openai_data
+from app.services.openai_service import get_openai_extract
 
 extract = Blueprint("extract", __name__)
 @extract.route("/extract", methods=["POST"])
@@ -29,7 +29,7 @@ def __extract():
     language = data["language"]
 
     try:
-        json_data = get_openai_data(language)
+        json_data = get_openai_extract(language)
         return jsonify(json_data)
     except Exception as e:
         return jsonify({"openai error": str(e)}), 500

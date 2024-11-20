@@ -19,35 +19,18 @@
 # limitations under the License.
 #
 
-import os
-import logging
-from flask import Flask
-from app.config import Config
+from flask import Blueprint, request, jsonify
+from app.services.openai_service import get_openai_hashtags
 
-from app.routes.health import health
-from app.routes.generate import generate
-from app.routes.cover import cover
-from app.routes.post import post
-from app.routes.extract import extract
-from app.routes.hashtags import hashtags
-from app.routes.index import index
+hashtags = Blueprint("hashtags", __name__)
+@hashtags.route("/hashtags", methods=["POST"])
+def __hashtags():
+    data = request.json
+    language = data["language"]
+    extract = data["extract"]
 
-logging.basicConfig(level=logging.INFO)
-
-template_dir = os.path.abspath('app/pages/')
-print(template_dir)
-
-def create_app():
-    web = Flask(__name__, template_folder=template_dir)
-    web.config.from_object(Config)
-
-    # Register routes
-    web.register_blueprint(index)
-    web.register_blueprint(health)
-    web.register_blueprint(generate)
-    web.register_blueprint(cover)
-    web.register_blueprint(post)
-    web.register_blueprint(extract)
-    web.register_blueprint(hashtags)
-
-    return web
+    try:
+        hashtag_list = get_openai_hashtags(language, extract)
+        return jsonify({ "hashtags": hashtag_list })
+    except Exception as e:
+        return jsonify({"openai error": str(e)}), 500

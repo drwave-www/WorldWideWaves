@@ -90,7 +90,8 @@ def create_images(json_data):
         image_paths.append((idx, page_path))
 
     # 2. Cover Image
-    cover_path = get_cover(json_data['author'], json_data['name'])
+    logging.info(f"Create cover image")
+    cover_path = get_cover(json_data['author'], json_data['title'])
     image_paths.append((3, cover_path))
 
     # 3. 2026 Page
