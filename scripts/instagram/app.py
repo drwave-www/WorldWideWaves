@@ -143,7 +143,6 @@ def get_cover(author, title):
 
 def draw_bounded_text(draw, idx, text, bold_parts):
     rect_x = (IMAGE_SIZE - TEXT_RECT_SIZE_W) // 2
-    rect_y = (IMAGE_SIZE - TEXT_RECT_SIZE_H) // 2
 
     # Load the text and fonts
     font_size = MAX_FONT_SIZE
@@ -184,7 +183,7 @@ def draw_bounded_text(draw, idx, text, bold_parts):
         raise ValueError("The text is too large to fit within the bounds.")
 
     # Calculate starting position to center the text within the rectangle
-    y = ((IMAGE_SIZE - total_height) // 2)
+    y = ((IMAGE_SIZE - total_height) // 2) - font.getbbox("Ay")[3] // 2
 
     # Draw each line of justified text
     for i, line in enumerate(lines):
