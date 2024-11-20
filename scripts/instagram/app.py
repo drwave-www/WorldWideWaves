@@ -55,20 +55,26 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 # Track used texts
 used_texts = {}
-if os.path.exists(USED_TEXTS_FILE):
-    with open(USED_TEXTS_FILE, "r") as f:
-        used_texts = json.load(f)
+def open_used_texts():
+    global used_texts
+    if os.path.exists(USED_TEXTS_FILE):
+        with open(USED_TEXTS_FILE, "r") as f:
+            used_texts = json.load(f)
+open_used_texts()
 
 def save_used_texts():
+    global used_texts
     with open(USED_TEXTS_FILE, "w") as f:
         json.dump(used_texts, f)
 
 def add_used_text(language, text):
+    global used_texts
     if language not in used_texts:
         used_texts[language] = []
     used_texts[language].append(text)
 
 def get_used_texts(language):
+    global used_texts
     return used_texts.get(language, [])
 
 def u_num():
@@ -96,6 +102,34 @@ def fetch_google_image(query):
 
 # -----------------------------------------------------------------------------
 
+def draw_bounded_title(draw, text, font, y_start):
+    # Split text into lines based on max width
+    words = text.split()
+    lines = []
+    current_line = ""
+    line_height = font.getbbox("Ay")[3] + 10
+
+    for word in words:
+        test_line = f"{current_line} {word}".strip()
+        line_width = font.getbbox(test_line)[2] - font.getbbox(test_line)[0]
+
+        if line_width <= TEXT_RECT_SIZE_W:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    if current_line:
+        lines.append(current_line)
+
+    # Draw each line, centered horizontally
+    for i, line in enumerate(lines):
+        bbox = font.getbbox(line)
+        line_width = bbox[2] - bbox[0]
+        x = (IMAGE_SIZE - line_width) // 2  # Center horizontally
+        y = y_start + i * line_height      # Increment vertically for each line
+        draw.text((x, y), line, fill="white", font=font)
+
 def get_cover(author, title):
     image_path=os.path.join(TEMPLATE_FOLDER, "1.jpg")
 
@@ -104,13 +138,10 @@ def get_cover(author, title):
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    font = ImageFont.truetype(FONT_BOLD, size=50)
-    bbox = font.getbbox(f"{title}")
-    draw.text(((IMAGE_SIZE - (bbox[2] - bbox[0])) // 2, 120), f"{title}", fill="white", font=font)
-    
-    bbox = font.getbbox(f"{author}")
-    draw.text(((IMAGE_SIZE - (bbox[2] - bbox[0])) // 2, 900), f"{author}", fill="white", font=font)
- 
+    font = ImageFont.truetype(FONT_BOLD, size=60)
+    draw_bounded_title(draw, title, font, y_start=120)
+    draw_bounded_title(draw, author, font, y_start=900)
+
     logging.info(f"Search for author image on Google")
     author_image_url = ""
     try:
@@ -334,8 +365,7 @@ def get_openai_data(language):
     ### Output:
     Return only the structured JSON described above.
     """
-
-    logging.debug(f"PROMPT USED: '{prompt}'")
+    logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[

@@ -32,6 +32,7 @@
         function generateImages(language) {
             const spinner = document.getElementById(`spinner-${language}`);
             spinner.style.display = 'block';
+            spinner.innerText = "Loading..."
 
             const imageContainer = document.getElementById(`carousel-${language}`);
             imageContainer.innerHTML = ''; // Clear existing images
