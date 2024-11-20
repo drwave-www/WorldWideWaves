@@ -10,7 +10,7 @@ services:
     volumes:
       #- .:/app  # DEV: Mount current directory into the container
       - ./logs:/app/logs
-      - static-data:/app/static  # Share static volume
+      - static-data:/app/app/static  # Share static volume
       - ./used_texts.json:/app/used_texts.json  # Already used texts
     environment:
       FLASK_ENV: production
