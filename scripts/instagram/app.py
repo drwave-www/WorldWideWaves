@@ -314,6 +314,34 @@ def get_openai_data(language):
     L'extrait doit être inspirant et aligné avec les thèmes mentionnés. Assure-toi que les deux pages de l'extrait respectent les limites de mots et forment une continuité.
     N'affiche rien d'autre que le json
     """
+
+    prompt = f"""
+    Génère un JSON structuré avec des informations sur un grand texte historique, littéraire ou philosophique en langue {language}, en respectant les contraintes suivantes :
+
+    0. **Context** : 
+    1. **Thèmes** : Le texte doit être aligné avec les thèmes suivants : {', '.join(THEMES)}.
+    2. **Langue** : Le texte doit être dans la langue {language}. Ne le traduis pas ; utilise uniquement des textes existants dans cette langue.
+    3. **Exclusion** : Ne sélectionne pas les textes déjà utilisés, listés ici :
+       {', '.join(get_used_texts(language))}.
+    4. **Format** : Le texte doit être structuré uniquement en JSON brut, avec les champs suivants :
+       - "name" : le nom du texte ou de l'œuvre.
+       - "author" : le nom de l'auteur ou du créateur.
+       - "page1" : un extrait significatif (50 à 120 mots), première partie.
+       - "page2" : un extrait consécutif (50 à 120 mots), seconde partie.
+       - "bold_parts" : une liste de 1 à 5 bouts de texte à mettre en gras (chaque bout de quelques mots seulement, max 5).
+       - "hashtags" : une liste de hashtags pertinents pour Instagram, en rapport avec l'extrait.
+    5. **Extrait** : 
+       - La longueur totale doit être entre 150 et 240 mots.
+       - Divise l'extrait en deux parties logiques et cohérentes (page1 et page2).
+       - Le contenu doit être inspirant et aligné avec les thèmes.
+       - Évite d'utiliser des guillemets dans l'extrait.
+    6. **Hashtags** :
+       - Propose des hashtags pertinents et engageants, reflétant les thèmes et le contexte du texte.
+    7. Personalisation
+
+    Ne retourne rien d'autre que le JSON brut respectant les contraintes ci-dessus.
+    """
+
     logging.debug(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
         model="gpt-4",
