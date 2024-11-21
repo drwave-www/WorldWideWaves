@@ -4,6 +4,10 @@
         .null { color: magenta; }
         .key { color: red; font-weight: bold; }
 
+        .button.is-danger {
+            font-weight: bold;
+        }
+
         .carousel img {
             max-width: 100%;
             height: auto;

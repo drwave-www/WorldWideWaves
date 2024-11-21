@@ -257,6 +257,11 @@
 
         // Function to post images to Instagram
         function postToInstagram(language, author, title) {
+            const userConfirmed = confirm(`Are you sure you want to post this to Instagram for the selected accounts?`);
+            if (!userConfirmed) {
+                return;
+            }
+
             showSpinner(language)
             const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
             const images = Array.from(carouselImages).map(img => img.src);
