@@ -44,10 +44,13 @@ def save_used_texts():
 
 def add_used_text(language, text):
     global used_texts
+    open_used_texts()
     if language not in used_texts:
         used_texts[language] = []
     used_texts[language].append(text)
+    save_used_texts()
 
 def get_used_texts(language):
     global used_texts
+    open_used_texts()
     return used_texts.get(language, [])

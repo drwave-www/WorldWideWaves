@@ -23,7 +23,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from app.config import Config
 from app.services.instagram_service import create_and_publish_carousel, refresh_token
-from app.services.utils import add_used_text, save_used_texts
+from app.services.utils import add_used_text
 
 post = Blueprint("post", __name__)
 
@@ -70,7 +70,6 @@ def __post():
 
         # Save used text
         add_used_text(language, title)
-        save_used_texts()
 
         return jsonify({"status": "complete", "results": results})
 
