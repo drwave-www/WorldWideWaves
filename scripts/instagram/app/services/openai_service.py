@@ -75,7 +75,7 @@ def get_openai_extract(language):
     """
     logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
             {"role": "user", "content": prompt}
@@ -97,7 +97,7 @@ def get_openai_hashtags(language, extract):
     """
     logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
             {"role": "user", "content": prompt}
