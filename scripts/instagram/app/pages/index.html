@@ -6,6 +6,13 @@
     <title>Instagram Post Generator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
     <style>
+
+        .string { color: green; }
+        .number { color: darkorange; }
+        .boolean { color: blue; }
+        .null { color: magenta; }
+        .key { color: red; font-weight: bold; }
+
         .carousel img {
             max-width: 100%;
             height: auto;
@@ -204,6 +211,24 @@
                 .catch(onError);
         }
 
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|\b\d+\b)/g, function (match) {
+                let cls = 'number';
+                if (/^"/.test(match)) {
+                    cls = /:$/.test(match) ? 'key' : 'string';
+                } else if (/true|false/.test(match)) {
+                    cls = 'boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'null';
+                }
+                return `<span class="${cls}">${match}</span>`;
+            });
+        }
+
         function stopSpinner(language) {
             const spinner = document.getElementById(`spinner-${language}`);
             spinner.style.display = 'none';
@@ -224,7 +249,8 @@
         function showError(language, error) {
             stopSpinner(language)
             const errField = document.getElementById(`error-${language}`);
-            errField.innerText = JSON.stringify(error, null, 2); // Display the error message at the spinner position
+            console.log(syntaxHighlight(error))
+            errField.innerHTML = syntaxHighlight(error); // Display the error message at the spinner position
             errField.style.display = 'block'; // Ensure it's visible
         }
 
@@ -507,7 +533,7 @@
                 <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
                 <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
             </div>
-            <div id="error-{{ language }}" style="display:none;"></div>
+            <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
 
             <br/><br/>
 
