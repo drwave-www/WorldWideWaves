@@ -74,7 +74,11 @@
         function setField(language, inputName, value) {
             const inputElement = document.getElementById(`${inputName}-${language}`);
             if (inputElement) {
-                inputElement.value = value; // Set the value
+                if (inputElement.tagName.toLowerCase() === 'div') {
+                    inputElement.textContent = value; // Set the text content for div
+                } else {
+                    inputElement.value = value; // Set the value for input-like elements
+                }
             }
         }
 
@@ -108,6 +112,10 @@
             setField(language, "page1", data.page1)
             setField(language, "page2", data.page2)
             setField(language, "bold-parts", data.bold_parts.join("\n"))
+            if (language != 'fr') {
+                setField(language, "translated", data.translated)
+                document.getElementById(`translated-${language}`).style.display = 'block';
+            }
         }
 
         function clearImages(language) {
@@ -389,6 +397,10 @@
             <div class="field">
                 <label class="label">Page 2 Text</label>
                 <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+            </div>
+
+            <div class="field">
+                <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
             </div>
 
             <div class="field">

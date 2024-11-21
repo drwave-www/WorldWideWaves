@@ -63,6 +63,7 @@ def get_openai_extract(language):
          - "page2": The second excerpt (50–140 words).
          - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
          - "caption": Generate in the a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the excerpt themes and context
+         - "translated": The translated version of concatenated page1 and page2 in french
 
     4. **Hashtags**:
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
@@ -94,6 +95,7 @@ def get_openai_hashtags(language, extract):
     prompt = f"""
     Generate in the '{language}' language (ISO 639 code) a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
     {extract}
+    Do not output anything else than the hastags without newlines, in one line to be used as an instagram caption
     """
     logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
