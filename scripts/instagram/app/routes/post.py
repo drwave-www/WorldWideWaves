@@ -59,6 +59,7 @@ def __post():
                 try:
                     response = create_and_publish_carousel(images, caption, account_id, access_token)
                     logging.info(f"Carousel Post ID: {response['id']}")
+                    results[account] = {"success": True}
                 except Exception as e:
                     logging.error(f"Failed to publish carousel: {e}")
                     results[account] = {"error": str(e)}
