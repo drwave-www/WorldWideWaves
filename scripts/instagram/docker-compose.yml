@@ -27,6 +27,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Mount custom NGINX config
       - static-data:/usr/share/nginx/html/static:ro  # Mount local static folder into NGINX
       - ./app/static/www-logo.png:/usr/share/nginx/html/static/www-logo.png:ro  # Mount the logo file
+      - ./app/static/css:/usr/share/nginx/html/static/css:ro  # Mount the css fodler
     environment:
       - NGINX_USERNAME=admin      # Set default username for authentication
       - NGINX_PASSWORD=insta42 # Set default password for authentication
