@@ -224,7 +224,7 @@
         function showError(language, error) {
             stopSpinner(language)
             const errField = document.getElementById(`error-${language}`);
-            errField.innerText = error; // Display the error message at the spinner position
+            errField.innerText = JSON.stringify(error, null, 2); // Display the error message at the spinner position
             errField.style.display = 'block'; // Ensure it's visible
         }
 
@@ -407,6 +407,7 @@
 
         // Function to post images to Instagram
         function postToInstagram(language, author, title) {
+            showSpinner(language)
             const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
             const images = Array.from(carouselImages).map(img => img.src);
 
@@ -425,12 +426,18 @@
 
             apiCall('/post', 'POST', data,
                 (response) => {
-                    alert(`Instagram post successfully posted to the selected accounts.`);
-                    console.log(response);
+                    if (response.status === "error") {
+                        showError(language, response)
+                        alert('Error posting to Instagram')
+                    } else {
+                        alert(`Instagram post successfully posted to the selected accounts.`);
+                        console.log(response);
+                        stopSpinner(language)
+                    }
                 },
                 (error) => {
                     showError(language, error)
-                    alert('Error posting to Instagram')
+                    alert('Error posting to Instagram: ', error)
                 }
             )
         }

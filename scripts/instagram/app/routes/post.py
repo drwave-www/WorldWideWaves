@@ -42,11 +42,9 @@ def __post():
     accounts = data["accounts"]
 
     try:
-        # Construct the caption
-        caption = " ".join(caption)
-
         # Iterate over each account
         results = {}
+        status = "complete"
         for account in accounts:
             try:
                 logging.info(f"Prepare to post on account {account}")
@@ -63,15 +61,17 @@ def __post():
                     logging.info(f"Carousel Post ID: {response['id']}")
                 except Exception as e:
                     logging.error(f"Failed to publish carousel: {e}")
+                    results[account] = {"error": str(e)}
+                    status = "error"
 
             except Exception as account_error:
                 logging.error(f"Error for account {account}: {account_error}")
                 results[account] = {"error": str(account_error)}
+                status = "error"
 
         # Save used text
         add_used_text(language, title)
-
-        return jsonify({"status": "complete", "results": results})
+        return jsonify({"status": status, "results": results}), (500 if (status == "error") else 200)
 
     except Exception as e:
         logging.error(f"Critical error: {e}")
