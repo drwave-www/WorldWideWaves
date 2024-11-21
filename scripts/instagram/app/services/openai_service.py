@@ -80,7 +80,7 @@ def get_openai_extract(language):
             {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=800,
+        max_tokens=1600,
         temperature=0.7,
     )
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
