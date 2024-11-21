@@ -48,6 +48,7 @@ def get_openai_extract(language):
 
     2. **Excerpt**:
        - Choose from major literary texts, essays, interviews, or speeches.
+       - Be imaginative, try to shuffle a bit in order to not always have the same texts.
        - Total length: 150–280 words, divided into two consecutive, logical parts:
          - "page1": 50–140 words.
          - "page2": 50–140 words.

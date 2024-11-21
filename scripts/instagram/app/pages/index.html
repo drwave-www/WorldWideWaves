@@ -452,7 +452,8 @@
         // Load initial images for all languages on page load
         document.addEventListener('DOMContentLoaded', () => {
             Object.keys(languages).forEach(language => {
-                // generateImages(language);
+                resetInputs(language)
+                clearImages(language)
 
                 // Populate accounts
                 const accountsContainer = document.getElementById(`accounts-${language}`);
@@ -512,8 +513,9 @@
                     <label class="label">Title</label>
                     <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
                 </div>
-                <div class="control buttons" style="flex: 0;">
+                <div class="control buttons" style="flex: 1;">
                     <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate</button>
+                    <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear</button>
                 </div>
             </div>
 
