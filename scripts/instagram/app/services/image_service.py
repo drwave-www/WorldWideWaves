@@ -36,9 +36,8 @@ def get_cover(author, title):
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    font = ImageFont.truetype(Config.FONT_BOLD, size=60)
-    draw_bounded_title(draw, title, font, y_start=120)
-    draw_bounded_title(draw, author, font, y_start=900)
+    draw_bounded_title(draw, title, Config.FONT_BOLD, y_start=120)
+    draw_bounded_title(draw, author, Config.FONT_BOLD, y_start=900)
 
     logging.info(f"Search for author image on Google")
     author_image_url = ""

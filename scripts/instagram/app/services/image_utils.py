@@ -26,33 +26,71 @@ from app.config import Config
 from PIL import ImageFont
 from app.services.utils import u_num
 
-def draw_bounded_title(draw, text, font, y_start):
-    # Split text into lines based on max width
+def split_text_into_lines(text, font, max_width):
     words = text.split()
     lines = []
     current_line = ""
-    line_height = font.getbbox("Ay")[3] + 10
 
     for word in words:
         test_line = f"{current_line} {word}".strip()
         line_width = font.getbbox(test_line)[2] - font.getbbox(test_line)[0]
 
-        if line_width <= Config.TEXT_RECT_SIZE_W:
+        if line_width <= max_width:
             current_line = test_line
         else:
-            lines.append(current_line)
+            if current_line:
+                lines.append(current_line)
             current_line = word
 
     if current_line:
         lines.append(current_line)
 
-    # Draw each line, centered horizontally
-    for i, line in enumerate(lines):
-        bbox = font.getbbox(line)
+    return lines
+
+def draw_bounded_title(draw, text, font_name, y_start):
+    initial_font_size = Config.MAX_FONT_SIZE
+    min_font_size = Config.MIN_FONT_SIZE
+    max_font_size = initial_font_size  # Start with the initial font size
+
+    max_width = Config.TEXT_RECT_SIZE_W  # Maximum allowed width for the text
+    max_lines = 2  # Limit the text to two lines
+
+    best_font_size = min_font_size
+    best_font = None
+    best_lines = []
+
+    # Use binary search to find the optimal font size
+    while min_font_size <= max_font_size:
+        font_size = (min_font_size + max_font_size) // 2
+        font = ImageFont.truetype(font_name, font_size)
+        lines = split_text_into_lines(text, font, max_width)
+        line_height = font.getbbox("Ay")[3] + 10
+        total_height = line_height * len(lines)
+
+        if len(lines) <= max_lines:
+            # Text fits within the constraints; try a larger font size
+            best_font_size = font_size
+            best_font = font
+            best_lines = lines
+            min_font_size = font_size + 1
+        else:
+            # Text doesn't fit; reduce the font size
+            max_font_size = font_size - 1
+
+    # If no suitable font size was found, use the minimum font size
+    if best_font is None:
+        best_font_size = min_font_size
+        best_font = ImageFont.truetype(font_name, best_font_size)
+        best_lines = split_text_into_lines(text, best_font, max_width)
+
+    # Draw the text on the image
+    line_height = best_font.getbbox("Ay")[3] + 10
+    for i, line in enumerate(best_lines):
+        bbox = best_font.getbbox(line)
         line_width = bbox[2] - bbox[0]
-        x = (Config.IMAGE_SIZE - line_width) // 2  # Center horizontally
-        y = y_start + i * line_height      # Increment vertically for each line
-        draw.text((x, y), line, fill="white", font=font)
+        x = (Config.IMAGE_SIZE - line_width) // 2  # Center the text horizontally
+        y = y_start + i * line_height  # Position the text vertically
+        draw.text((x, y), line, fill="white", font=best_font)
 
 def draw_bounded_text(draw, idx, text, bold_parts):
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
