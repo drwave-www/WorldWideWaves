@@ -227,10 +227,20 @@
         function generateHashtags(language) {
             showSpinner(language)
             setField(language, "hashtags", "")
+
+            const page1 = getField(language, "page1")
+            const page2 = getField(language, "page2")
+            const extract = page1 + page2
+
+            if (!extract.replace(/\s/g, '')) {
+                alert("The pages are empty. Please provide valid content.");
+                return;
+            }
+
             apiCall('/hashtags', 'POST',
                 {
                     language: language,
-                    extract: getField(language, "page1") + getField(language, "page2"),
+                    extract: extract,
                 },
                 (data) => {
                     if (data.hashtags) {
