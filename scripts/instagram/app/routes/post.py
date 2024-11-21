@@ -32,7 +32,7 @@ def __post():
     data = request.json
 
     # Validate input data
-    if not data or "language" not in data or "title" not in data or "images" not in data or "hashtags" not in data or "accounts" not in data:
+    if not data or "language" not in data or "title" not in data or "images" not in data or "caption" not in data or "accounts" not in data:
         return jsonify({"error": "Missing required fields: language, title, images, hashtags, accounts"}), 400
 
     language = data["language"]
