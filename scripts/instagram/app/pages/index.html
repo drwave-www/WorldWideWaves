@@ -199,11 +199,17 @@
 
         // Function to shuffle the cover image
         function shuffleImage(language) {
+            const carousel = document.getElementById(`carousel-${language}`);
+
+            if (!carousel || !carousel.children.length) {
+                alert(`No cover is has been yet generated.`);
+                return;
+            }
+
             showSpinner(language)
             apiCall('/cover', 'POST',
                 {author: getField(language, "author"), title: getField(language, "title")},
                 (data) => {
-                    const carousel = document.getElementById(`carousel-${language}`);
                     const coverImage = carousel.querySelector('img:nth-child(3)');
                     if (coverImage) {
                         coverImage.src = data;
@@ -397,10 +403,10 @@
             </div>
 
             <div class="buttons">
-                <button class="button is-warning" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
                 <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
-                <button class="button is-danger" onclick="generateImages('{{ language }}', true)">Generate Extract + Images</button>
-                <button class="button is-success" onclick="postToInstagram('{{ language }}')">Post to Instagram</button>
+                <button class="button is-success" onclick="generateImages('{{ language }}', true)">Generate Extract + Images</button>
+                <button class="button is-link" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
+                <button class="button is-danger" onclick="postToInstagram('{{ language }}')">Post to Instagram</button>
             </div>
 
         </div>
