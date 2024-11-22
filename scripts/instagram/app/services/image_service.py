@@ -29,7 +29,7 @@ from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
 def get_cover(author, title):
-    image_path = os.path.join(Config.TEMPLATE_FOLDER, "1.jpg")
+    image_path = os.path.join(Config.TEMPLATE_FOLDER, "3.jpg")
 
     logging.info(f"Open template {image_path}")
     cover_template = Image.open(image_path)

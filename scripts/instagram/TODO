@@ -1,5 +1,6 @@
-- ajouter des langues et des pays, creer les comptes instagram associes
-- supprimer et reposter de zero les precedents posts
+- adapt image generation for chinese and arabic
+- add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
+- FR: supprimer et reposter de zero les precedents posts
 
 FEATURES:
 - video generation
