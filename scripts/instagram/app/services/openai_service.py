@@ -63,7 +63,7 @@ def get_openai_extract(language):
          - "page1": The first excerpt (50–140 words).
          - "page2": The second excerpt (50–140 words).
          - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
-         - "caption": Generate in the a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the excerpt themes and context
+         - "caption": Generate in the a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the excerpt themes and context, in language '{language}'
          - "translated": The translated version of concatenated author, title, page1 and page2 in french separated by newlines
 
     4. **Hashtags**:
@@ -79,7 +79,7 @@ def get_openai_extract(language):
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}'"},
+            {"role": "system", "content": f"You are an assistant specialized in creating inspiring content for publications in language '{language}' and in english"},
             {"role": "user", "content": prompt}
         ],
         max_tokens=1600,
@@ -94,7 +94,7 @@ def get_openai_extract(language):
 
 def get_openai_hashtags(language, extract):
     prompt = f"""
-    Generate in the '{language}' language (ISO 639 code) a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
+    Generate in the '{language}' language (ISO 639 code) and in english a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
     {extract}
     Do not output anything else than the hastags without newlines, in one line to be used as an instagram caption
     """
