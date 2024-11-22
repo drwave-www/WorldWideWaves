@@ -63,7 +63,8 @@
         }
 
         function resetInputs(language) {
-            ["hashtags", "author", "title", "page1", "page2", "bold-parts"].forEach(field => {
+            document.getElementById(`translated-${language}`).style.display = 'block';
+            ["hashtags", "translated", "author", "title", "page1", "page2", "bold-parts"].forEach(field => {
                 const inputElement = document.getElementById(`${field}-${language}`);
                 if (inputElement) {
                     inputElement.value = ""; // Reset the value
