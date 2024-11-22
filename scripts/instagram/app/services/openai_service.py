@@ -88,7 +88,16 @@ def get_openai_extract(language):
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
     logging.info(content)
     json_data = json.loads(content)
+
     json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + json_data["caption"]
+
+    caption = json_data.get("caption", [])
+    if isinstance(caption, str):
+        caption_list = caption.strip().split()
+    else:
+        caption_list = caption
+    json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + caption_list
+
     return json_data
 
 

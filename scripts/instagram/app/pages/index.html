@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Instagram Post Generator</title>
+
     <link rel="stylesheet" href="/static/css/bulma.min.css">
     <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png">
     <link rel="manifest" href="/static/img/site.webmanifest">
+
     <script>
         // Reusable API call function
         function apiCall(endpoint, method, body = {}, onSuccess = () => {}, onError = () => {}) {
@@ -160,6 +165,7 @@
 
                     // Update data
                     updateLanguageFields(language, data)
+                    toggleFieldsOn(language)
                     stopSpinner(language)
                 },
                 (error) => {
@@ -324,6 +330,32 @@
             })
         }
 
+        function toggleFieldsSection(language, to_extend = undefined) {
+            const fieldsSection = document.getElementById(`fields-section-${language}`);
+            const toggleIcon = document.getElementById(`toggle-icon-${language}`);
+            const toggleButton = document.getElementById(`toggle-button-${language}`);
+
+            if ((to_extend !== undefined && to_extend === true) || (to_extend === undefined && (fieldsSection.style.display === 'none' || fieldsSection.style.display === ''))) {
+                fieldsSection.style.display = 'block';
+                toggleIcon.classList.remove('fa-angle-down');
+                toggleIcon.classList.add('fa-angle-up');
+                toggleButton.setAttribute('aria-expanded', 'true');
+            } else {
+                fieldsSection.style.display = 'none';
+                toggleIcon.classList.remove('fa-angle-up');
+                toggleIcon.classList.add('fa-angle-down');
+                toggleButton.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function toggleFieldsOn(language) {
+            toggleFieldsSection(language, true)
+        }
+
+        function toggleFieldsOff(language) {
+            toggleFieldsSection(language, false)
+        }
+
         // Load initial images for all languages on page load
         document.addEventListener('DOMContentLoaded', () => {
             Object.keys(languages).forEach(language => {
@@ -375,52 +407,62 @@
                 <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
                 <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
             </div>
+
             <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
 
-            <br/><br/>
-
-            <div class="field is-grouped">
-                <div class="control" style="flex: 1; margin-right: 10px;">
-                    <label class="label">Author</label>
-                    <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
-                </div>
-                <div class="control" style="flex: 1; margin-right: 10px;">
-                    <label class="label">Title</label>
-                    <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
-                </div>
-                <div class="control buttons" style="flex: 1;">
-                    <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate</button>
-                    <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear</button>
-                </div>
+            <div class="control buttons" style="flex: 1;">
+                <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
+                <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
             </div>
 
-            <div class="field">
-                <label class="label">Page 1 Text</label>
-                <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
-            </div>
+            <button class="button is-small is-light" id="toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
+                Content fields&nbsp;&nbsp;
+                <span class="icon">
+                    <i class="fas fa-angle-down" id="toggle-icon-{{ language }}"></i>
+                </span>
+            </button>
 
-            <div class="field">
-                <label class="label">Page 2 Text</label>
-                <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
-            </div>
-
-            <div class="field">
-                <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
-            </div>
-
-            <div class="field">
-                <label class="label">Bold Parts</label>
-                <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
-            </div>
-
-            <label class="label">Caption</label>
-            <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
-                <div class="control" style="flex: 1; margin-right: 10px;">
-                    <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
+            <div id="fields-section-{{ language }}" style="display: none;">
+                <div class="field is-grouped">
+                    <div class="control" style="flex: 1; margin-right: 10px;">
+                        <label class="label">Author</label>
+                        <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
+                    </div>
+                    <div class="control" style="flex: 1; margin-right: 10px;">
+                        <label class="label">Title</label>
+                        <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
+                    </div>
                 </div>
-                <div class="control buttons" style="flex: 0;">
-                    <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
+
+                <div class="field">
+                    <label class="label">Page 1 Text</label>
+                    <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
                 </div>
+
+                <div class="field">
+                    <label class="label">Page 2 Text</label>
+                    <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+                </div>
+
+                <div class="field">
+                    <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Bold Parts</label>
+                    <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
+                </div>
+
+                <label class="label">Caption</label>
+                <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
+                    <div class="control" style="flex: 1; margin-right: 10px;">
+                        <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
+                    </div>
+                    <div class="control buttons" style="flex: 0;">
+                        <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
+                    </div>
+                </div>
+
             </div>
 
             <br/><br/>
