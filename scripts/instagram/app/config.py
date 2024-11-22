@@ -49,8 +49,8 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
-    FONT_NORMAL = "app/fonts/montserrat.ttf"
-    FONT_BOLD = "app/fonts/montserrat-bold.ttf"
+    FONT_NORMAL = "app/fonts/noto.ttf"
+    FONT_BOLD = "app/fonts/noto-bold.ttf"
     TEXT_RECT_SIZE_W = 900
     TEXT_RECT_SIZE_H = 800
     MIN_FONT_SIZE = 18

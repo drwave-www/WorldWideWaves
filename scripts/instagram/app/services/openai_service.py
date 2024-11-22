@@ -63,7 +63,7 @@ def get_openai_extract(language):
          - "page2": The second excerpt (50–140 words).
          - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
          - "caption": Generate in the a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the excerpt themes and context
-         - "translated": The translated version of concatenated page1 and page2 in french
+         - "translated": The translated version of concatenated author, title, page1 and page2 in french separated by newlines
 
     4. **Hashtags**:
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
