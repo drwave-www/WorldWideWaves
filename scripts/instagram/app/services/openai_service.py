@@ -65,7 +65,6 @@ def get_openai_extract(language):
          - "bold_parts": A list of 1–5 short phrases to emphasize (max 5 words each).
          - "caption": Generate a list of relevant and engaging Instagram hashtags to be used as caption that maximize social engagement and reflect the excerpt themes and context, in language '{language}'
          - "translated": The translated version of concatenated author, title, page1 and page2 in french separated by newlines
-
     4. **Hashtags**:
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
 
@@ -88,8 +87,6 @@ def get_openai_extract(language):
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
     logging.info(content)
     json_data = json.loads(content)
-
-    json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + json_data["caption"]
 
     caption = json_data.get("caption", [])
     if isinstance(caption, str):

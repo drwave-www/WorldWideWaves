@@ -47,7 +47,7 @@ def split_text_into_lines(text, font, max_width):
 
     return lines
 
-def draw_bounded_title(draw, text, font_name, y_start):
+def draw_bounded_title(language, draw, text, font_name, y_start):
     initial_font_size = Config.MAX_FONT_SIZE
     min_font_size = Config.MIN_FONT_SIZE
     max_font_size = initial_font_size  # Start with the initial font size
@@ -62,7 +62,7 @@ def draw_bounded_title(draw, text, font_name, y_start):
     # Use binary search to find the optimal font size
     while min_font_size <= max_font_size:
         font_size = (min_font_size + max_font_size) // 2
-        font = ImageFont.truetype(font_name, font_size)
+        font = font_name(language, font_size)
         lines = split_text_into_lines(text, font, max_width)
         line_height = font.getbbox("Ay")[3] + 10
         total_height = line_height * len(lines)
@@ -92,12 +92,12 @@ def draw_bounded_title(draw, text, font_name, y_start):
         y = y_start + i * line_height  # Position the text vertically
         draw.text((x, y), line, fill="white", font=best_font)
 
-def draw_bounded_text(draw, idx, text, bold_parts):
+def draw_bounded_text(language, draw, idx, text, bold_parts):
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
 
     # Load the text and fonts
     font_size = Config.MAX_FONT_SIZE
-    font = ImageFont.truetype(Config.FONT_NORMAL, size=font_size)
+    font = Config.normal_font(language, font_size)
 
     # Split text into parts, tagging bold sections
     styled_parts = []
@@ -107,19 +107,19 @@ def draw_bounded_text(draw, idx, text, bold_parts):
             # Split around the bold part
             before, bold, remaining_text = remaining_text.partition(bold_part)
             if before.strip():
-                styled_parts.append((before.strip(), Config.FONT_NORMAL))
+                styled_parts.append((before.strip(), Config.normal_font))
             if bold.strip():
-                styled_parts.append((bold.strip(), Config.FONT_BOLD))
+                styled_parts.append((bold.strip(), Config.bold_font))
     # Add any remaining text
     if remaining_text.strip():
-        styled_parts.append((remaining_text.strip(), Config.FONT_NORMAL))
+        styled_parts.append((remaining_text.strip(), Config.normal_font))
 
     # Adjust font size to fit within the rectangle
     total_height = 0
     lines = []
     while font_size >= Config.MIN_FONT_SIZE:
         # Simulate the layout with current font size
-        lines, total_height = layout_text(font_size, styled_parts)
+        lines, total_height = layout_text(language, font_size, styled_parts)
 
         # Check if the total height fits within the rectangle
         if total_height <= Config.TEXT_RECT_SIZE_H:
@@ -146,26 +146,26 @@ def draw_bounded_text(draw, idx, text, bold_parts):
     page_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_{idx}.jpg")
     return page_path
 
-def layout_text(font_size, styled_parts):
+def layout_text(language, font_size, styled_parts):
     lines = []
     current_line = []
     current_width = 0
     total_height = 0
 
-    current_font = ImageFont.truetype(Config.FONT_NORMAL, size=font_size)
+    current_font = Config.normal_font(language, font_size)
     for part, current_font in styled_parts:
-        current_font = ImageFont.truetype(current_font, size=font_size)
+        current_font = current_font(language, font_size)
         space_width = current_font.getbbox(" ")[2]
 
         # Tokenize words and handle punctuation
         words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
         for word in words:
             if word == ",":
-                current_width +=  current_font.getbbox(",")[2]
+                current_width += current_font.getbbox(",")[2]
                 current_line[-1][0] += ","  # Append comma to the previous word
                 continue
             elif word == ".":
-                current_width +=  current_font.getbbox(".")[2]
+                current_width += current_font.getbbox(".")[2]
                 current_line[-1][0] += "."  # Append period to the previous word
                 continue
             else:
@@ -189,6 +189,9 @@ def layout_text(font_size, styled_parts):
 
 
 def justify_line(draw, line, x, y, is_last_line=False):
+    if len(line) == 0:
+        return
+
     total_width = sum((font.getbbox(word)[2] for word, font in line))
     space_count = len(line) - 1
 

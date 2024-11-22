@@ -19,8 +19,10 @@
 # limitations under the License.
 #
 
+import os
 import yaml
 import logging
+from PIL import ImageFont
 
 class Config:
     @staticmethod
@@ -49,10 +51,36 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
-    FONT_NORMAL = "app/fonts/noto.ttf"
-    FONT_BOLD = "app/fonts/noto-bold.ttf"
     TEXT_RECT_SIZE_W = 900
     TEXT_RECT_SIZE_H = 800
     MIN_FONT_SIZE = 18
     MAX_FONT_SIZE = 58
     IMAGE_SIZE = 1080
+
+    TPL_FONT_NORMAL = "app/fonts/noto"
+    TPL_FONT_BOLD = "app/fonts/noto-bold"
+
+    font_cache = {}
+
+    @staticmethod
+    def get_font_file(base_font, language):
+        specific_font = f"{base_font}-{language}.ttf"
+        default_font = f"{base_font}.ttf"
+        return specific_font if os.path.exists(specific_font) else default_font
+
+    @staticmethod
+    def load_font(font_name, size):
+        cache_key = (font_name, size)
+        if cache_key not in Config.font_cache:
+            Config.font_cache[cache_key] = ImageFont.truetype(font_name, size=size)
+        return Config.font_cache[cache_key]
+
+    @staticmethod
+    def normal_font(language, size):
+        font_name = Config.get_font_file(Config.TPL_FONT_NORMAL, language)
+        return Config.load_font(font_name, size)
+
+    @staticmethod
+    def bold_font(language, size):
+        font_name = Config.get_font_file(Config.TPL_FONT_BOLD, language)
+        return Config.load_font(font_name, size)

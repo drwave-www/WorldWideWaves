@@ -38,7 +38,7 @@ def __generate():
         else:
             return_article = False
 
-        images = create_images(article)
+        images = create_images(language, article)
         response = {"images": images}
 
         if return_article:

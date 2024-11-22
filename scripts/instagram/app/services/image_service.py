@@ -28,7 +28,7 @@ from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
-def get_cover(author, title):
+def get_cover(language, author, title):
     image_path = os.path.join(Config.TEMPLATE_FOLDER, "3.jpg")
 
     logging.info(f"Open template {image_path}")
@@ -36,13 +36,13 @@ def get_cover(author, title):
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    draw_bounded_title(draw, title, Config.FONT_BOLD, y_start=120)
-    draw_bounded_title(draw, author, Config.FONT_BOLD, y_start=900)
+    draw_bounded_title(language, draw, title, Config.bold_font, y_start=120)
+    draw_bounded_title(language, draw, author, Config.bold_font, y_start=900)
 
     logging.info(f"Search for author image on Google")
     author_image_url = ""
     try:
-        author_image_url = fetch_google_image(f"portrait of {author} -site:gettyimages.*")
+        author_image_url = fetch_google_image(f"portrait of {author} ({title}) -site:gettyimages.*")
     except Exception as e:
         logging.error(f"Exception while fetching author image: {e}")
 
@@ -69,7 +69,7 @@ def get_cover(author, title):
 
 # -----------------------------------------------------------------------------
 
-def create_images(json_data):
+def create_images(language, json_data):
     image_paths = []
 
     # 1. Page 1 and 2
@@ -82,7 +82,7 @@ def create_images(json_data):
         draw = ImageDraw.Draw(text_template)
 
         logging.info(f"Draw the text")
-        page_path = draw_bounded_text(draw, idx, json_data[page_key], json_data["bold_parts"])
+        page_path = draw_bounded_text(language, draw, idx, json_data[page_key], json_data["bold_parts"])
 
         logging.info(f"Save image")
         text_template.save(page_path)
@@ -90,7 +90,7 @@ def create_images(json_data):
 
     # 2. Cover Image
     logging.info(f"Create cover image")
-    cover_path = get_cover(json_data['author'], json_data['title'])
+    cover_path = get_cover(language, json_data['author'], json_data['title'])
     image_paths.append((3, cover_path))
 
     # 3. 2026 Page

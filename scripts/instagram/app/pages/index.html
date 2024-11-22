@@ -179,8 +179,10 @@
             showSpinner(language)
             clearImages(language)
 
-            if (generate_extract)
+            if (generate_extract) {
                 resetInputs(language)
+                toggleFieldsOff(language)
+            }
 
             const article = getLanguageFields(language)
             let data = { language: language }
@@ -227,7 +229,7 @@
 
             showSpinner(language)
             apiCall('/cover', 'POST',
-                {author: getField(language, "author"), title: getField(language, "title")},
+                {language: language, author: getField(language, "author"), title: getField(language, "title")},
                 (data) => {
                     const coverImage = carousel.querySelector('img:nth-child(3)');
                     if (coverImage) {
@@ -423,6 +425,7 @@
             </button>
 
             <div id="fields-section-{{ language }}" style="display: none;">
+                <br/>
                 <div class="field is-grouped">
                     <div class="control" style="flex: 1; margin-right: 10px;">
                         <label class="label">Author</label>
@@ -478,7 +481,7 @@
 
             <div class="buttons">
                 <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
-                <button class="button is-success" onclick="generateImages('{{ language }}', true)">Generate Extract + Images</button>
+                <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
                 <button class="button is-link" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
                 <button class="button is-danger" onclick="postToInstagram('{{ language }}')">Post to Instagram</button>
             </div>

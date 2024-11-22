@@ -27,11 +27,12 @@ cover = Blueprint("cover", __name__)
 @cover.route("/cover", methods=["POST"])
 def __cover():
     data = request.json
+    language = data["language"]
     title = data["title"]
     author = data["author"]
 
     try:
-        json_data = get_cover(author, title)
+        json_data = get_cover(language, author, title)
         return jsonify(json_data)
     except Exception as e:
         return jsonify({"cover error": str(e)}), 500

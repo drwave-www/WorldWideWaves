@@ -1,5 +1,6 @@
 - adapt image generation for chinese and arabic
 - add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
+- list index out of range lors de certaines requetes ?
 - FR: supprimer et reposter de zero les precedents posts
 
 FEATURES:
