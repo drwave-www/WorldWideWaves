@@ -10,7 +10,6 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import io.github.aakira.napier.Napier
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -119,14 +118,14 @@ class EarthAdaptedSpeedLongitude(
         require(elapsedTime >= Duration.ZERO) { "Elapsed time must be non-negative" }
         if (elapsedTime <= Duration.ZERO) return initialized()
 
-        // Calculate number of complete refresh windows
-        val numberOfWindows = ceil(
-            elapsedTime.inWholeMilliseconds.toDouble() / bandStepDuration.inWholeMilliseconds.toDouble()
-        ).toLong()
+        // Calculate the total distance covered based on speed and elapsed time
+        val totalDistanceCovered = speed * elapsedTime.inWholeSeconds
 
         val bands = bands()
         return fromPositions(bands.map { (bandLatitude, band) ->
-            val longitudeChange = numberOfWindows * band.lngWidth
+            // Convert the total distance to longitude change at the current latitude
+            val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
+
             val newLatitude = min(90.0, max(-90.0, bandLatitude + band.latWidth / 2))
             Position(newLatitude, when (direction) {
                 Direction.EAST -> min(startLongitude + longitudeChange, coveredArea.maxLongitude)
@@ -134,6 +133,7 @@ class EarthAdaptedSpeedLongitude(
             })
         })
     }
+
 
     // ------------------------
 
