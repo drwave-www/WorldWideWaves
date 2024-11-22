@@ -47,6 +47,7 @@ def get_openai_extract(language):
        - The text must be in language '{language}'. Do not translate it; only use existing texts in this language.
 
     2. **Excerpt**:
+       - It should be a real excerpt from the original text, not an interpretation or a description
        - Choose from major literary texts, essays, interviews, or speeches.
        - Be imaginative, try to shuffle a bit in order to not always have the same texts.
        - Total length: 150–280 words, divided into two consecutive, logical parts:
