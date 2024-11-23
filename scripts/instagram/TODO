@@ -1,9 +1,13 @@
 - adapt image generation for chinese and arabic
 - add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
-- list index out of range lors de certaines requetes ?
+
+
+
 - FR: supprimer et reposter de zero les precedents posts
 
 FEATURES:
-- video generation
 - post avec un mot ecrit en grand, traduit en plusieurs langues
+- ajout de son sur la video :
+    - https://github.com/myshell-ai/MeloTTS pour english, spanish, french, chinese, japanese and korean
+
 
