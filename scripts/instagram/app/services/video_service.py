@@ -73,6 +73,7 @@ def display_static_page(video_writer, page_path, timeunit=1):
 def generate_video(language, page1, page2, bold_parts, cover_link):
     fourcc = cv2.VideoWriter_fourcc(*"H264")
     output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+    logging.info(f"Output file: {output_video}")
     video_writer = cv2.VideoWriter(output_video, fourcc, FPS, IMAGE_SIZE)
 
     # Logo frame
