@@ -679,7 +679,7 @@
                     </div>
 
                     <div class="buttons">
-                        <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
+                        <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation(); clearImages('{{ language }}');">
                             <option value="SQUARE">1:1</option>
                             <option value="RECT_POST">4:5 (POST)</option>
                             <option value="RECT_REEL">9:16 (REEL)</option>

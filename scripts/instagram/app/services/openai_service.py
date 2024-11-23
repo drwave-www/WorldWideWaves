@@ -55,7 +55,8 @@ def get_openai_extract(language):
          - "page2": 50–140 words.
        - Content should be visually descriptive, thought-provoking, and aligned with the themes.
        - Avoid quotation marks in the text.
-       - Avoi dusing markers to highlight bold parts, just set them in bold_parts as specified below
+       - The excerpt should reflect the submitted themes.
+       - Avoid dusing markers to highlight bold parts, just set them in bold_parts as specified below
 
     3. **Output Format**:
        - Return only valid JSON with the following fields:

@@ -21,8 +21,8 @@
 
 import os
 import yaml
-from PIL import ImageFont
 from TTS.api import TTS
+from PIL import ImageFont, features
 import logging
 
 logging.root.handlers = []
@@ -34,6 +34,8 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
 
 class Config:
 
@@ -79,8 +81,10 @@ class Config:
 
     VIDEO_USE_FINAL_FONT_SIZE = True  # If true, directly fit the text at the target size in the video
     VIDEO_FPS = 30
-    VIDEO_TEXT_END_TIME = 2 # 1s added
-    VIDEO_START_READ_AFTER = 3
+    VIDEO_TEXT_END_TIME = 1 # 1s added
+    VIDEO_START_READ_AFTER = 1
+    STATIC_PAGE_TIME = 2
+    RATE_TEXT_ADVANCE = 0.85
 
     TTS_ENGINE = None
 

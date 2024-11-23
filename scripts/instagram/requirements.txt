@@ -95,6 +95,7 @@ nltk==3.9.1
 num2words==0.5.13
 numba==0.60.0
 numpy==1.26.4
+ffmpeg-python
 openai==0.28.0
 opencv-python==4.10.0.84
 opencv-python-headless==4.10.0.84

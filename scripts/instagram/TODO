@@ -1,16 +1,14 @@
 
-- on format change, clean images and video
+- separer chaque audio en deux, tts, puis joindre
+- set debug on run and logging only if there is no WWW_PRODUCTION=1, to add in docker-compose
+- nettoyer les intro-*mp4 du site externe avec ffmpeg (regenerer la video I/O avec ffmpeg)
 - mettre plusieurs speakers par langue et tourner (random)
-- add son de fond depuis le debut
+
 - do not activate video button if no voice available
 - crontab de nettoyage des vieux fichiers d'output
-- outro video / originale + 2026 + logo
-- functions in utils to generate static common videos + cache (template/output/)
-- essayer d'ameliorer la synchro lecture / defilement : le son est tj plus rapide que le texte...
-- page des frames boot sans contour blanc : logo-empty.jpg
-- verifier la fermeture de toutes les ressources lors de la generation
-- faire une barre en haut avec des raccourcis vers chaque langue
 
+- review the logs of video gen
+- separer gen voix et gen video, utiliser l'audio gen sous forme de path pour la video
 - post de la video sur instagram (post et reel)
 - post a reel at the same time of the post and the video (link to the post), as an option
 - post on tiktok
@@ -20,6 +18,7 @@
 - ajouter un champ texte deroulable de sel pour le prompt openAI
 - move test LibRQAM dans config
 - save json of posted data + images
+- possibilite d'enregistrer sa propre voix pour page 1 et page 2 (nettoyer avec ffmpeg)
 
 - les apostrophes ne sont pas bien gerees
 
@@ -27,6 +26,7 @@ FEATURES:
 - zone libre avec une langue de ISO 639 (liste) et post sur un des accounts supportes (liste)
 - post avec un mot/texte ecrit en grand, traduit en plusieurs langues
 - refresh de token FB pas top
+- case a cocher pour ignorer les textes deja utilises dans le prompt
 
 ----
 
