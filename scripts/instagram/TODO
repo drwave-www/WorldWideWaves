@@ -20,7 +20,7 @@
 - adapt image generation for arabic
 - accounts: add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
 - refresh de token FB pas top
-- taille image de cover ne doit pas empieter sur le texte
+
 - afficher une mention en gros sur les images et/ou sur la video "POSTED" lorsqu'elle ont ete postees
 - les apostrophes ne sont pas gerees
 

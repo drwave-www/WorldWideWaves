@@ -36,8 +36,13 @@ def get_cover(language, author, title):
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    draw_bounded_title(language, draw, title, Config.bold_font, y_start=120)
-    draw_bounded_title(language, draw, author, Config.bold_font, y_start=900)
+    title_height = draw_bounded_title(language, draw, title, Config.bold_font, y_start=120)
+    author_height = draw_bounded_title(language, draw, author, Config.bold_font, y_start=900)
+
+    # Calculate the available vertical space between the titles
+    available_top = 120 + title_height  # Bottom of the first title
+    available_bottom = 900  # Y-position of the second title
+    available_height = available_bottom - available_top
 
     logging.info(f"Search for author image on Google")
     author_image_url = ""
@@ -54,11 +59,17 @@ def get_cover(language, author, title):
             author_image = Image.open(response.raw)
 
             logging.info(f"Open and resize it")
-            fixed_height = 560
+            fixed_height = min(560, available_height)
             aspect_ratio = author_image.width / author_image.height
             new_width = int(fixed_height * aspect_ratio)
             author_image = author_image.resize((new_width, fixed_height))
-            cover_template.paste(author_image, ((Config.IMAGE_SIZE - new_width) // 2, (Config.IMAGE_SIZE - fixed_height) // 2))
+
+            # Calculate x and y positions to paste the image
+            x = (Config.IMAGE_SIZE - new_width) // 2  # Center horizontally
+            available_middle = (available_top + available_bottom) // 2
+            y = available_middle - (fixed_height // 2)  # Center vertically in the available space
+
+            cover_template.paste(author_image, (x, y))
         else:
             logging.error("URL does not point to a valid image.")
 

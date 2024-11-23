@@ -85,6 +85,11 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
         y = y_start + i * line_height  # Position the text vertically
         draw.text((x, y), line, fill="white", font=best_font)
 
+    # Calculate total height of the drawn text
+    total_height = line_height * len(best_lines)
+    return total_height
+
+
 def draw_bounded_text(language, draw, text, bold_parts):
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
 
