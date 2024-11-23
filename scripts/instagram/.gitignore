@@ -13,4 +13,4 @@ pyvenv.cfg
 *.swp
 logs/
 app/__pycache__/
-
+__pycache__/
