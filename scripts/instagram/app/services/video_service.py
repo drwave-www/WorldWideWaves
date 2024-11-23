@@ -24,7 +24,7 @@ import os
 import cv2
 import numpy as np
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from app import Config
 from app.services.image_utils import draw_bounded_text
 from app.services.utils import u_num
@@ -53,7 +53,7 @@ def render_progressive_text(video_writer, language, text, bold_parts):
         draw = ImageDraw.Draw(pil_image)
         draw_bounded_text(language, draw, current_text, bold_parts)
 
-        # Convert PIL image back to OpenCV format
+        logging.info(f"Convert PIL image back to OpenCV format")
         cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         last_frame = cv_frame
         for _ in range(math.ceil(FPS * WORD_DISPLAY_TIME)):
@@ -78,17 +78,18 @@ def generate_video(language, page1, page2, bold_parts, cover_link):
     # Logo frame
     display_static_page(video_writer, Config.TEMPLATE_FOLDER + "/5.jpg")
 
-    # Create pages with progressive text rendering
+    logging.info(f"Create pages with progressive text rendering")
     render_progressive_text(video_writer, language, page1, bold_parts)
     render_progressive_text(video_writer, language, page2, bold_parts)
 
     display_static_page(video_writer, "app/" + cover_link)
 
-    # Display static pages
+    logging.info(f"Display static pages")
     for static_page in [ "4.jpg", "5.jpg" ]:
         static_page = os.path.join(Config.TEMPLATE_FOLDER, static_page)
         display_static_page(video_writer, static_page)
 
+    logging.info(f"Save and return video")
     video_writer.release()
     return output_video.replace("app/", "", 1)
 

@@ -95,15 +95,18 @@ def create_images(language, json_data):
     image_paths.append((3, cover_path))
 
     # 3. 2026 Page
+    logging.info(f"Static page 2026")
     year_path = os.path.join(Config.TEMPLATE_FOLDER, "4.jpg")
     final_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_4.jpg")
     Image.open(year_path).save(final_path)
     image_paths.append((4, final_path))
 
     # 4. Logo Page
+    logging.info(f"Static page logo")
     logo_path = os.path.join(Config.TEMPLATE_FOLDER, "5.jpg")
     final_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_5.jpg")
     Image.open(logo_path).save(final_path)
     image_paths.append((5, final_path))
 
+    logging.info(f"Return images")
     return [(idx, path.replace("app/", "", 1)) for idx, path in image_paths]
