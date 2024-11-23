@@ -19,12 +19,10 @@
 # limitations under the License.
 #
 
-import os
 import logging
 import re
 from app.config import Config
 from PIL import ImageFont
-from app.services.utils import u_num
 
 def split_text_into_lines(text, font, max_width):
     words = text.split()
@@ -55,7 +53,6 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
     max_width = Config.TEXT_RECT_SIZE_W  # Maximum allowed width for the text
     max_lines = 2  # Limit the text to two lines
 
-    best_font_size = min_font_size
     best_font = None
     best_lines = []
 
@@ -64,12 +61,9 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
         font_size = (min_font_size + max_font_size) // 2
         font = font_name(language, font_size)
         lines = split_text_into_lines(text, font, max_width)
-        line_height = font.getbbox("Ay")[3] + 10
-        total_height = line_height * len(lines)
 
         if len(lines) <= max_lines:
             # Text fits within the constraints; try a larger font size
-            best_font_size = font_size
             best_font = font
             best_lines = lines
             min_font_size = font_size + 1
@@ -79,8 +73,7 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
 
     # If no suitable font size was found, use the minimum font size
     if best_font is None:
-        best_font_size = min_font_size
-        best_font = ImageFont.truetype(font_name, best_font_size)
+        best_font = ImageFont.truetype(font_name, min_font_size)
         best_lines = split_text_into_lines(text, best_font, max_width)
 
     # Draw the text on the image
@@ -92,7 +85,7 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
         y = y_start + i * line_height  # Position the text vertically
         draw.text((x, y), line, fill="white", font=best_font)
 
-def draw_bounded_text(language, draw, idx, text, bold_parts):
+def draw_bounded_text(language, draw, text, bold_parts):
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
 
     # Load the text and fonts
@@ -134,17 +127,13 @@ def draw_bounded_text(language, draw, idx, text, bold_parts):
         raise ValueError("The text is too large to fit within the bounds.")
 
     # Calculate starting position to center the text within the rectangle
-    y = ((Config.IMAGE_SIZE - total_height) // 2) - font.getbbox("Ay")[3] // 2
+    y = ((Config.IMAGE_SIZE - total_height) // 2) - font.getbbox("Ay")[3]
 
     # Draw each line of justified text
     for i, line in enumerate(lines):
         x = rect_x
         justify_line(draw, line, x, y, is_last_line=(i == len(lines) - 1))
         y += font.getbbox("Ay")[3]  # Line height
-
-    # Save the image
-    page_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_{idx}.jpg")
-    return page_path
 
 def layout_text(language, font_size, styled_parts):
     lines = []

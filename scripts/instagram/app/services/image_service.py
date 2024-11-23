@@ -22,7 +22,7 @@
 import os
 import requests
 import logging
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from app.config import Config
 from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
@@ -82,9 +82,10 @@ def create_images(language, json_data):
         draw = ImageDraw.Draw(text_template)
 
         logging.info(f"Draw the text")
-        page_path = draw_bounded_text(language, draw, idx, json_data[page_key], json_data["bold_parts"])
+        draw_bounded_text(language, draw, json_data[page_key], json_data["bold_parts"])
 
         logging.info(f"Save image")
+        page_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_{idx}.jpg")
         text_template.save(page_path)
         image_paths.append((idx, page_path))
 

@@ -8,7 +8,9 @@
 
     <link rel="stylesheet" href="/static/css/bulma.min.css">
     <link rel="stylesheet" href="/static/css/app.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
 
     <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
@@ -72,7 +74,7 @@
         }
 
         function resetInputs(language) {
-            document.getElementById(`translated-${language}`).style.display = 'block';
+            document.getElementById(`translated-${language}`).style.display = 'none';
             ["hashtags", "translated", "author", "title", "page1", "page2", "bold-parts"].forEach(field => {
                 const inputElement = document.getElementById(`${field}-${language}`);
                 if (inputElement) {
@@ -131,6 +133,7 @@
         function clearImages(language) {
             const imageContainer = document.getElementById(`carousel-${language}`);
             imageContainer.innerHTML = ''; // Clear existing images
+            clearVideo(language)
         }
 
         function setImages(language, images) {
@@ -140,12 +143,45 @@
                 const img = document.createElement('img');
                 img.src = imagePath;
                 img.width = 300; // Numerical value for width
-                img.height = 260; // Numerical value for height
+                img.height = 300; // Numerical value for height
                 img.alt = `Image ${index}`;
                 if (index === 4 || index === 5) {
                     img.style.display = 'none'; // Inline style to hide the image
                 }
                 imageContainer.appendChild(img);
+            });
+        }
+
+        function updateMediaContainerClass() {
+            const videoContainer = document.querySelector('.video-container');
+            const mediaContainer = document.querySelector('.media-container');
+
+            if (videoContainer && window.getComputedStyle(videoContainer).display === 'none') {
+                mediaContainer.classList.add('no-video');
+            } else {
+                mediaContainer.classList.remove('no-video');
+            }
+        }
+
+        function clearVideo(language) {
+            const videoContainer = document.getElementById(`video-container-${language}`);
+            videoContainer.style.display = 'none';
+            updateMediaContainerClass();
+        }
+
+        function setVideo(language, video) {
+            const videoContainer = document.getElementById(`video-container-${language}`);// Process images
+            videoContainer.style.display = 'block';
+
+            const player = videojs(`video-${language}`, {
+                autoplay: true,
+                controls: true,
+                width: 300,
+                height: 300,
+                preload: 'auto'
+            });
+            player.src({
+              src: video
             });
         }
 
@@ -155,6 +191,7 @@
             showSpinner(language)
             resetInputs(language)
             clearImages(language)
+            clearVideo(language)
 
             apiCall('/extract', 'POST', {language: language},
                 (data) => {
@@ -218,10 +255,61 @@
             );
         }
 
+        function generateVideo(language) {
+
+            let cover_link = "";
+            const coverImage = document.querySelector(`#carousel-${language} img:nth-child(3)`);
+
+            if (coverImage) {
+                cover_link = new URL(coverImage.src).pathname
+            } else {
+                alert(`No cover has been generated yet.`);
+                return;
+            }
+
+            const article = getLanguageFields(language)
+            if (article.page1.trim() === '' || article.page2.trim() === '') {
+                alert(`No extract is available.`);
+                return;
+            }
+
+            let data = {
+                language: language,
+                page1: article["page1"],
+                page2: article["page2"],
+                bold_parts: article["bold_parts"],
+                cover_link: cover_link
+            }
+
+            showSpinner(language)
+            clearVideo(language)
+
+            apiCall('/video', 'POST', data,
+                (data) => {
+                    if (typeof data === 'string' && data.toLowerCase().includes('error')) {
+                        showError(language, data)
+                        return;
+                    }
+
+                    if (data.video) {
+                        setVideo(language, data.video)
+                    } else {
+                        showError(language, "Error: no video returned.")
+                        return;
+                    }
+
+                    stopSpinner(language)
+                },
+                (error) => {
+                    showError(language, error)
+                    console.error('Error generating video:', error);
+                }
+            );
+        }
+
         // Function to shuffle the cover image
         function shuffleImage(language) {
             const carousel = document.getElementById(`carousel-${language}`);
-
             if (!carousel || !carousel.children.length) {
                 alert(`No cover is has been yet generated.`);
                 return;
@@ -277,7 +365,7 @@
         }
 
         // Function to post images to Instagram
-        function postToInstagram(language, author, title) {
+        function postImageToInstagram(language, author, title) {
             const userConfirmed = confirm(`Are you sure you want to post this to Instagram for the selected accounts?`);
             if (!userConfirmed) {
                 return;
@@ -380,117 +468,129 @@
     </script>
 </head>
 <body style="background-color:#011026;">
-<section class="section">
-    <div class="container">
+    <section class="section">
+        <div class="container">
 
-        <div style="text-align: center;">
-            <img src="/static/img/www-logo.png" width="200" height="200"/>
-            <h1 class="title" style="color: white">Instagram Post Generator</h1>
+            <div style="text-align: center;">
+                <img src="/static/img/www-logo.png" width="200" height="200"/>
+                <h1 class="title" style="color: white">Instagram Post Generator</h1>
 
-            <div class="buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                <button class="button is-info" onclick="generateAllExtracts()">Generate all extracts</button>
-                <button class="button is-warning" onclick="generateAllImages()">Generate all images</button>
+                <div class="buttons" style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                    <button class="button is-info" onclick="generateAllExtracts()">Generate all extracts</button>
+                    <button class="button is-warning" onclick="generateAllImages()">Generate all images</button>
+                </div>
             </div>
+
+            <br/>
+
+            {% for language in languages %}
+            <div class="box" style="margin-bottom: 30px;">
+                <h2 class="subtitle">{{ language }}</h2>
+
+                <div id="spinner-{{ language }}" class="spinner" style="display:none;">
+                    <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_3" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_4" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_5" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_6" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
+                    <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
+                </div>
+
+                <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
+
+                <div class="control buttons" style="flex: 1;">
+                    <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
+                    <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
+                </div>
+
+                <button class="button is-small is-light" id="toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
+                    Content fields&nbsp;&nbsp;
+                    <span class="icon">
+                        <i class="fas fa-angle-down" id="toggle-icon-{{ language }}"></i>
+                    </span>
+                </button>
+
+                <div id="fields-section-{{ language }}" style="display: none;">
+                    <br/>
+                    <div class="field is-grouped">
+                        <div class="control" style="flex: 1; margin-right: 10px;">
+                            <label class="label">Author</label>
+                            <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
+                        </div>
+                        <div class="control" style="flex: 1; margin-right: 10px;">
+                            <label class="label">Title</label>
+                            <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Page 1 Text</label>
+                        <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Page 2 Text</label>
+                        <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">Bold Parts</label>
+                        <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
+                    </div>
+
+                    <label class="label">Caption</label>
+                    <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
+                        <div class="control" style="flex: 1; margin-right: 10px;">
+                            <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
+                        </div>
+                        <div class="control buttons" style="flex: 0;">
+                            <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <br/><br/>
+
+                <div class="media-container no-video">
+                    <div id="carousel-{{ language }}" class="carousel">
+                        <!-- Images will be dynamically added here -->
+                    </div>
+
+                    <div id="video-container-{{ language }}" class="video-container" style="display: none;">
+                        <video-js id="video-{{ language }}"></video-js>
+                    </div>
+                </div>
+
+                <label class="label">Publish on accounts : </label>
+                <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
+                    <!-- Accounts checkboxes will be added here -->
+                </div>
+
+                <div class="buttons">
+                    <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
+                    <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
+                    <button class="button is-link" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
+                    <button class="button is-info" onclick="generateVideo('{{ language }}')">Generate Video</button>
+                </div>
+                <div class="buttons">
+                    <button class="button is-danger" onclick="postImageToInstagram('{{ language }}')">Post Images to Instagram</button>
+                    <button class="button is-danger" onclick="postVideoToInstagram('{{ language }}')">Post Video to Instagram</button>
+                </div>
+
+            </div>
+
+            {% endfor %}
         </div>
+    </section>
 
-        <br/>
-
-        {% for language in languages %}
-        <div class="box" style="margin-bottom: 30px;">
-            <h2 class="subtitle">{{ language }}</h2>
-
-            <div id="spinner-{{ language }}" class="spinner" style="display:none;">
-                <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_3" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_4" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_5" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_6" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
-                <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
-            </div>
-
-            <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
-
-            <div class="control buttons" style="flex: 1;">
-                <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
-                <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
-            </div>
-
-            <button class="button is-small is-light" id="toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
-                Content fields&nbsp;&nbsp;
-                <span class="icon">
-                    <i class="fas fa-angle-down" id="toggle-icon-{{ language }}"></i>
-                </span>
-            </button>
-
-            <div id="fields-section-{{ language }}" style="display: none;">
-                <br/>
-                <div class="field is-grouped">
-                    <div class="control" style="flex: 1; margin-right: 10px;">
-                        <label class="label">Author</label>
-                        <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
-                    </div>
-                    <div class="control" style="flex: 1; margin-right: 10px;">
-                        <label class="label">Title</label>
-                        <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label class="label">Page 1 Text</label>
-                    <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
-                </div>
-
-                <div class="field">
-                    <label class="label">Page 2 Text</label>
-                    <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
-                </div>
-
-                <div class="field">
-                    <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
-                </div>
-
-                <div class="field">
-                    <label class="label">Bold Parts</label>
-                    <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
-                </div>
-
-                <label class="label">Caption</label>
-                <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
-                    <div class="control" style="flex: 1; margin-right: 10px;">
-                        <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
-                    </div>
-                    <div class="control buttons" style="flex: 0;">
-                        <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
-                    </div>
-                </div>
-
-            </div>
-
-            <br/><br/>
-
-            <div id="carousel-{{ language }}" align='center' class="carousel">
-                <!-- Images will be dynamically added here -->
-            </div>
-
-            <label class="label">Publish on accounts : </label>
-            <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
-                <!-- Accounts checkboxes will be added here -->
-            </div>
-
-            <div class="buttons">
-                <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
-                <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
-                <button class="button is-link" onclick="shuffleImage('{{ language }}')">Shuffle Cover</button>
-                <button class="button is-danger" onclick="postToInstagram('{{ language }}')">Post to Instagram</button>
-            </div>
-
-        </div>
-
-        {% endfor %}
-    </div>
-</section>
+    <script src="https://vjs.zencdn.net/8.16.1/video.min.js"></script>
 </body>
 </html>
 

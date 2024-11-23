@@ -31,6 +31,7 @@ from app.routes.post import post
 from app.routes.extract import extract
 from app.routes.hashtags import hashtags
 from app.routes.index import index
+from app.routes.video import video
 
 logging.basicConfig(level=logging.INFO)
 
@@ -49,5 +50,6 @@ def create_app():
     web.register_blueprint(post)
     web.register_blueprint(extract)
     web.register_blueprint(hashtags)
+    web.register_blueprint(video)
 
     return web

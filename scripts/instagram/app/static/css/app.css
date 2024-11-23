@@ -1,4 +1,4 @@
- .string { color: green; }
+        .string { color: green; }
         .number { color: darkorange; }
         .boolean { color: blue; }
         .null { color: magenta; }
@@ -8,10 +8,70 @@
             font-weight: bold;
         }
 
-        .carousel img {
-            max-width: 100%;
-            height: auto;
+        .media-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center; /* Default to center */
+            flex-wrap: wrap;
         }
+
+        .carousel {
+            flex: 3 1 0%; /* 75% width */
+            box-sizing: border-box;
+            margin-right: 10px;
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+        }
+
+        .carousel img {
+            /*max-width: 100%;*/
+            height: auto;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+
+        .video-container {
+            flex: 1 1 0%; /* 25% width */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* When video is hidden */
+        .media-container.no-video {
+            justify-content: center;
+        }
+
+        .media-container.no-video .carousel {
+            margin-right: 0;
+            flex: none;
+            /* width: 100%; */
+            justify-content: center; /* Center images inside carousel */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .media-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .carousel,
+            .video-container {
+                flex: none;
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .carousel img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
         .subtitle {
             text-transform: uppercase; /* Capitalize the text */
             font-weight: bold;          /* Make the text bold */
