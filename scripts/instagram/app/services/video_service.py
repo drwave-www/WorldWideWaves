@@ -48,12 +48,12 @@ def render_progressive_text(video_writer, language, text, bold_parts):
     for i in range(len(words) + 1):
         current_text = ' '.join(words[:i])
 
-        logging.info(f"Draw the text")
+        logging.debug(f"Draw the text")
         pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
         draw = ImageDraw.Draw(pil_image)
         draw_bounded_text(language, draw, current_text, bold_parts)
 
-        logging.info(f"Convert PIL image back to OpenCV format")
+        logging.debug(f"Convert PIL image back to OpenCV format")
         cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         last_frame = cv_frame
         for _ in range(math.ceil(FPS * WORD_DISPLAY_TIME)):
