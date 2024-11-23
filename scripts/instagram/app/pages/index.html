@@ -139,16 +139,23 @@
         function setImages(language, images) {
             const imageContainer = document.getElementById(`carousel-${language}`);// Process images
             imageContainer.innerHTML = ''; // Clear existing images
+
             images.forEach(([index, imagePath]) => {
+                const imgWrapper = document.createElement('div');
+                imgWrapper.classList.add('image-wrapper');
+
                 const img = document.createElement('img');
                 img.src = imagePath;
                 img.width = 300; // Numerical value for width
                 img.height = 300; // Numerical value for height
                 img.alt = `Image ${index}`;
+
                 if (index === 4 || index === 5) {
-                    img.style.display = 'none'; // Inline style to hide the image
+                    imgWrapper.style.display = 'none'; // Inline style to hide the image
                 }
-                imageContainer.appendChild(img);
+
+                imgWrapper.appendChild(img);
+                imageContainer.appendChild(imgWrapper);
             });
         }
 
@@ -182,6 +189,20 @@
             });
             player.src({
               src: video
+            });
+        }
+
+        function markPhotosAsPublished(language) {
+            const imageWrappers = document.querySelectorAll(`#carousel-${language} .image-wrapper`);
+            imageWrappers.forEach(wrapper => {
+                if (!wrapper.querySelector('.published-overlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.classList.add('published-overlay');
+                    overlay.innerText = 'PUBLISHED';
+
+                    // Append the overlay to the wrapper
+                    wrapper.appendChild(overlay);
+                }
             });
         }
 
@@ -396,12 +417,13 @@
                     } else {
                         console.log(response);
                         stopSpinner(language)
+                        markPhotosAsPublished(language)
                         alert(`Instagram post successfully posted to the selected accounts.`);
                     }
                 },
                 (error) => {
                     showError(language, error)
-                    alert('Error posting to Instagram: ', error)
+                    alert("Error posting to Instagram")
                 }
             )
         }
