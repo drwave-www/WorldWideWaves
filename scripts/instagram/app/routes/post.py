@@ -71,7 +71,8 @@ def __post():
                 status = "error"
 
         # Save used text
-        add_used_text(language, title)
+        if status != "error":
+            add_used_text(language, title)
         return jsonify({"status": status, "results": results}), (500 if (status == "error") else 200)
 
     except Exception as e:

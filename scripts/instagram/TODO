@@ -1,13 +1,31 @@
-- adapt image generation for chinese and arabic
-- add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
+- ajout de son sur la video :
+    - https://github.com/myshell-ai/MeloTTS pour english, spanish, french, chinese, japanese and korean
+        You can use moviepy library to do that. Behind the scenes, it uses ffmpeg to merge audio and video.
+
+        import moviepy.editor as mp
+
+        video_path = 'Path to video file'
+        audio_path = 'Path to audio file'
+        output_path = 'Path to output video+audio file'
+
+        video = mp.VideoFileClip(video_path)
+        audio = mp.AudioFileClip(audio_path)
+
+        video = video.set_audio(audio)
+
+        video.write_videofile(output_path)
 
 
+- post de la video sur instagram
+- adapt image generation for arabic
+- accounts: add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
+- refresh de token FB pas top
+- taille image de cover ne doit pas empieter sur le texte
+- afficher une mention en gros sur les images et/ou sur la video "POSTED" lorsqu'elle ont ete postees
+- les apostrophes ne sont pas gerees
 
 - FR: supprimer et reposter de zero les precedents posts
 
 FEATURES:
 - post avec un mot ecrit en grand, traduit en plusieurs langues
-- ajout de son sur la video :
-    - https://github.com/myshell-ai/MeloTTS pour english, spanish, french, chinese, japanese and korean
-
 

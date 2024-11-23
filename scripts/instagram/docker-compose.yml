@@ -12,6 +12,7 @@ services:
       - ./logs:/app/logs
       - static-data:/app/app/static  # Share static volume
       - ./used_texts.json:/app/used_texts.json  # Already used texts
+      - ./config.yaml:/app/config.yaml  # Configuration
     environment:
       FLASK_ENV: production
       #command: flask run --host=0.0.0.0  # DEV: Run Flask for live reloading

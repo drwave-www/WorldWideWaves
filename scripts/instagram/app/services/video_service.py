@@ -76,6 +76,9 @@ def generate_video(language, page1, page2, bold_parts, cover_link):
     logging.info(f"Output file: {output_video}")
     video_writer = cv2.VideoWriter(output_video, fourcc, FPS, IMAGE_SIZE)
 
+    if not video_writer.isOpened():
+        raise Exception("Failed to open VideoWriter")
+
     # Logo frame
     display_static_page(video_writer, Config.TEMPLATE_FOLDER + "/5.jpg")
 
