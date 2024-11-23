@@ -25,6 +25,9 @@ RUN apt-get install -y build-essential cmake git python3-dev python3-numpy \
     libpng-dev libjpeg-dev libopenexr-dev libtiff-dev libwebp-dev \
     libopencv-dev x264 libx264-dev libssl-dev ffmpeg
 RUN python -m pip install --no-binary opencv-python opencv-python
+
+RUN apt-get install -y espeak libespeak-dev
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # Copy application files

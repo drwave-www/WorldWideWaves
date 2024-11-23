@@ -132,7 +132,7 @@ def draw_bounded_text(language, draw, text, bold_parts):
         raise ValueError("The text is too large to fit within the bounds.")
 
     # Calculate starting position to center the text within the rectangle
-    y = ((Config.IMAGE_SIZE - total_height) // 2) - font.getbbox("Ay")[3]
+    y = ((Config.IMAGE_SIZE - total_height) // 2) - (font.getbbox("Ay")[3] // 2)
 
     # Draw each line of justified text
     for i, line in enumerate(lines):
