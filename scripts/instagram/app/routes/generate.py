@@ -19,6 +19,7 @@
 # limitations under the License.
 #
 
+import logging
 from flask import Blueprint, request, jsonify
 from app.services.openai_service import get_openai_extract
 from app.services.image_service import create_images
@@ -31,13 +32,26 @@ def __generate():
     language = data["language"]
     article = data.get("article")
 
-    try:
-        if not article:
-            article = get_openai_extract(language)
-            return_article = True
-        else:
-            return_article = False
+    max_retries = 2
 
+    return_article = False
+    for attempt in range(max_retries + 1):
+        try:
+            logging.info(f"Attempt {attempt + 1} to extract data for language: {language}")
+            if not article:
+                article = get_openai_extract(language)
+                return_article = True
+            else:
+                return_article = False
+        except Exception as e:
+            logging.error(f"Error on attempt {attempt + 1}: {e}")
+            if attempt < max_retries:
+                logging.info(f"Retrying...")
+            else:
+                logging.error("All retry attempts failed.")
+                return jsonify({"openai_error": str(e)}), 500
+
+    try:
         images = create_images(language, article)
         response = {"images": images}
 

@@ -1,3 +1,4 @@
+- retry two times on openai if error
 - ajout de son sur la video :
     - https://github.com/myshell-ai/MeloTTS pour english, spanish, french, chinese, japanese and korean
         You can use moviepy library to do that. Behind the scenes, it uses ffmpeg to merge audio and video.

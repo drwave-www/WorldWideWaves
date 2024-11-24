@@ -19,6 +19,7 @@
 # limitations under the License.
 #
 
+import logging
 from flask import Blueprint, request, jsonify
 from app.services.openai_service import get_openai_extract
 
@@ -28,8 +29,17 @@ def __extract():
     data = request.json
     language = data["language"]
 
-    try:
-        json_data = get_openai_extract(language)
-        return jsonify(json_data)
-    except Exception as e:
-        return jsonify({"openai error": str(e)}), 500
+    max_retries = 2  # Number of additional attempts
+
+    for attempt in range(max_retries + 1):
+        try:
+            logging.info(f"Attempt {attempt + 1} to extract data for language: {language}")
+            json_data = get_openai_extract(language)
+            return jsonify(json_data), 200
+        except Exception as e:
+            logging.error(f"Error on attempt {attempt + 1}: {e}")
+            if attempt < max_retries:
+                logging.info(f"Retrying...")
+            else:
+                logging.error("All retry attempts failed.")
+                return jsonify({"openai_error": str(e)}), 500

@@ -342,7 +342,7 @@
             apiCall('/cover', 'POST',
                 {language: language, author: getField(language, "author"), title: getField(language, "title")},
                 (data) => {
-                    const coverImage = carousel.querySelector('img:nth-child(3)');
+                    const coverImage = carousel.querySelector('div:nth-child(3) img');
                     if (coverImage) {
                         coverImage.src = data;
                     }
