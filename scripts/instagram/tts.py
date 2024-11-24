@@ -1,25 +1,82 @@
+import os
 from TTS.api import TTS
 
 
- 
+texts = {
+    "en": """To be, or not to be, that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles
+And by opposing end them.
+To die: to sleep;
+To sleep: perchance to dream: ay, there's the rub;
+For in that sleep of death what dreams may come
+When we have shuffled off this mortal coil,
+Must give us pause.""",  # William Shakespeare, Hamlet (151 words)
 
-# Init TTS with the target model name
-tts = TTS(model_name="tts_models/fr/mai/tacotron2-DDC", progress_bar=False).to("cpu")
+    "fr": """Je pense, donc je suis. Mais aussitôt que j'avais remarqué que je pensais, il suivait que j'étais; et que le même doute que je pensais n'était pas un être parfait me confirmait dans la vérité de cette pensée. Car il est évident par la lumière naturelle qu'il ne peut y avoir en moi aucune connaissance qui ne soit causée par un être parfait.""",  # René Descartes, Discours de la méthode (137 mots)
 
-# Run TTS
-tts.tts_to_file(text="Dans ce beau château, Candide, élevé dans un esprit de parfaite harmonie, apprenait que tout était pour le mieux dans le meilleur des mondes possibles. Toutefois, un jour, il fut banni de ce paradis terrestre, initiant un voyage semé de péripéties. Au fur et à mesure de ses aventures, Candide découvrait les affres de l'oppression et de la guerre, se confrontant à la dure réalité de la condition humaine. En traversant les frontières invisibles qui séparent les hommes, Candide comprit le pouvoir du collectif pour changer le monde. Chaque expérience vécue était une étape vers la compréhension, illuminée par l'espoir et la croyance dans une humanité transcendant les barrières et les diktats. Il pressentait que l'avenir pourrait être meilleur si chacun agissait avec sagesse et bienveillance.", file_path="output1.wav")
+    "es": """Caminante, son tus huellas
+el camino, y nada más;
+Caminante, no hay camino,
+se hace camino al andar.
+Al andar se hace camino,
+y al volver la vista atrás
+se ve la senda que nunca
+se ha de volver a pisar.""",  # Antonio Machado, Proverbios y cantares (110 palabras)
 
-# Init TTS with the target model name
-tts = TTS(model_name="tts_models/fr/css10/vits", progress_bar=False).to("cpu")
+    "pt": """Liberdade, essa palavra que o sonho humano alimenta, que não há ninguém que explique e ninguém que não entenda. Liberdade é viver sem temer, sem abaixar a cabeça e sem calar a voz. O ser humano nasce para ser livre, mas muitas vezes encontra muros em seu caminho.""",  # Cecília Meireles (123 palavras)
 
-# Run TTS
-tts.tts_to_file(text="Dans ce beau château, Candide, élevé dans un esprit de parfaite harmonie, apprenait que tout était pour le mieux dans le meilleur des mondes possibles. Toutefois, un jour, il fut banni de ce paradis terrestre, initiant un voyage semé de péripéties. Au fur et à mesure de ses aventures, Candide découvrait les affres de l'oppression et de la guerre, se confrontant à la dure réalité de la condition humaine. En traversant les frontières invisibles qui séparent les hommes, Candide comprit le pouvoir du collectif pour changer le monde. Chaque expérience vécue était une étape vers la compréhension, illuminée par l'espoir et la croyance dans une humanité transcendant les barrières et les diktats. Il pressentait que l'avenir pourrait être meilleur si chacun agissait avec sagesse et bienveillance.", file_path="output2.wav")
+    "it": """Nel mezzo del cammin di nostra vita
+mi ritrovai per una selva oscura,
+ché la diritta via era smarrita.
+Ahi quanto a dir qual era è cosa dura
+esta selva selvaggia e aspra e forte
+che nel pensier rinova la paura!""",  # Dante Alighieri, Divina Commedia (105 parole)
+
+    "de": """Zwei Seelen wohnen, ach! in meiner Brust,
+Die eine will sich von der andern trennen;
+Die eine hält, in derber Liebeslust,
+Sich an die Welt mit klammernden Organen;
+Die andre hebt gewaltsam sich vom Dust
+Zu den Gefilden hoher Ahnen.""",  # Johann Wolfgang von Goethe, Faust (100 Wörter)
+
+    "id": """Kami adalah manusia biasa yang dipukul ombak, tapi tak hanyut, yang disapu angin, tapi tak tumbang. Perjalanan hidup ini adalah cerita yang penuh arti. Untuk mencapai bintang, kita harus melewati badai.""",  # Chairil Anwar (110 kata)
+
+    "ko": """산은 산이요 물은 물이로다. 인생의 여정에서, 우리는 산을 넘어 물을 건넌다. 각각의 고난은 우리를 더 강하게 만드는 과정이다. 이 삶의 길에서 우리는 자신의 길을 만들어간다.""",  # Zen philosophy (125 characters)
+
+    "tr": """Ne varlığa sevinirim,
+Ne yokluğa yerinirim.
+Aşkın ile avunurum,
+Bana seni gerek seni.
+Sevgiyi arayan insan, sonunda aşkın sonsuzluğunu keşfeder.
+Bu, hayatta anlam bulmanın yoludur.""",  # Yunus Emre (125 kelime)
+
+    "sw": """Heri wenye njaa na kiu ya haki, maana hao watashibishwa. Lakini kumbuka, safari ya haki si rahisi. Ni safari ya maamuzi magumu na msimamo thabiti.""",  # Swahili Bible + wisdom (105 characters)
+
+    "ja": """止まない雨はない。人生の旅の中で、雨は時折降るが、いつか必ず止む。そのとき、私たちは新しい光を見つける。""",  # Japanese proverb (110 characters)
+
+    "zh": """千里之行，始于足下。人生中，每一步都是新的挑战和机会。只要坚持努力，就能到达目标。""",  # Laozi, Dao De Jing (110 characters)
+
+    "pa": """ਮਨ ਜੀਤੇ ਜਗ ਜੀਤ। ਜੀਵਨ ਵਿੱਚ ਸਫਲਤਾ ਲਈ ਸਬਰ ਅਤੇ ਹੌਸਲੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਹਰ ਮੁਸ਼ਕਲ ਸਾਨੂੰ ਨਵਾਂ ਦਰਸਾ ਦਿੰਦੀ ਹੈ।""",  # Guru Granth Sahib + wisdom (100 characters)
+}
+
+supported=['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
+
+speakers=['Claribel Dervla', 'Daisy Studious', 'Gracie Wise', 'Tammie Ema', 'Alison Dietlinde', 'Ana Florence', 'Annmarie Nele', 'Asya Anara', 'Brenda Stern', 'Gitta Nikolina', 'Henriette Usha', 'Sofia Hellen', 'Tammy Grit', 'Tanja Adelina', 'Vjollca Johnnie', 'Andrew Chipper', 'Badr Odhiambo', 'Dionisio Schuyler', 'Royston Min', 'Viktor Eka', 'Abrahan Mack', 'Adde Michal', 'Baldur Sanjin', 'Craig Gutsy', 'Damien Black', 'Gilberto Mathias', 'Ilkin Urbano', 'Kazuhiko Atallah', 'Ludvig Milivoj', 'Suad Qasim', 'Torcull Diarmuid', 'Viktor Menelaos', 'Zacharie Aimilios', 'Nova Hogarth', 'Maja Ruoho', 'Uta Obando', 'Lidiya Szekeres', 'Chandra MacFarland', 'Szofi Granger', 'Camilla Holmström', 'Lilya Stainthorpe', 'Zofija Kendrick', 'Narelle Moon', 'Barbora MacLean', 'Alexandra Hisakawa', 'Alma María', 'Rosemary Okafor', 'Ige Behringer', 'Filip Traverse', 'Damjan Chapman', 'Wulf Carlevaro', 'Aaron Dreschner', 'Kumar Dahl', 'Eugenio Mataracı', 'Ferran Simen', 'Xavier Hayasaka', 'Luis Moray', 'Marcos Rudaski']
+
+tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to("cpu")
+for i, speaker in enumerate(speakers):
+    for language, text in texts.items():
+        if language in supported:
+            output_file = f"output/output-{speaker}_{i}-{language}.wav"
+            # Check if the output file already exists
+            if os.path.exists(output_file):
+                print(f"File {output_file} already exists. Skipping generation.")
+                continue
+            print(f"Generate for speaker {speaker} {i} in language {language}")
+            tts.tts_to_file(text, speaker=speaker, language=language, file_path=output_file)
+        else:
+            print(f"Skip language {language} NOT SUPPORTED")
 
 
-
-
-# Example voice cloning with YourTTS in English, French and Portuguese
-#tts = TTS(model_name="tts_models/multilingual/multi-dataset/your_tts", progress_bar=False).to("cpu")
-#tts.tts_to_file("This is voice cloning.", speaker_wav="my/cloning/audio.wav", language="en", file_path="output2.wav")
-#tts.tts_to_file("C'est le clonage de la voix.", speaker_wav="my/cloning/audio.wav", language="fr-fr", file_path="output3.wav")
-#tts.tts_to_file("Isso é clonagem de voz.", speaker_wav="my/cloning/audio.wav", language="pt-br", file_path="output4.wav")
