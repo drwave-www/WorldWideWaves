@@ -33,16 +33,13 @@ def __generate():
     article = data.get("article")
 
     max_retries = 2
+    return_article = not article
 
-    return_article = False
     for attempt in range(max_retries + 1):
         try:
             logging.info(f"Attempt {attempt + 1} to extract data for language: {language}")
             if not article:
                 article = get_openai_extract(language)
-                return_article = True
-            else:
-                return_article = False
         except Exception as e:
             logging.error(f"Error on attempt {attempt + 1}: {e}")
             if attempt < max_retries:
