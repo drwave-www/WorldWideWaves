@@ -14,6 +14,9 @@ Next:
     - addOnWaveUserIsGoingToBeHitListener
     - addOnWaveUserUserHasBeenHitListener
 
+- ajouter le like automatique du post par tous les comptes
+- worldwidewaves.net page with instagram accounts
+
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation  requests

@@ -1,5 +1,5 @@
-- bug on shuffle cover
 - ajout de son sur la video :
+    - test fairseq : https://docs.coqui.ai/en/dev/inference.html
     - https://github.com/myshell-ai/MeloTTS pour english, spanish, french, chinese, japanese and korean
         You can use moviepy library to do that. Behind the scenes, it uses ffmpeg to merge audio and video.
 
@@ -15,11 +15,14 @@
         video = video.set_audio(audio)
 
         video.write_videofile(output_path)
-
+    - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
+    - corpus de voix : https://commonvoice.mozilla.org/en/datasets
+    - voice cleaning from xtts : https://huggingface.co/spaces/coqui/xtts/blob/main/app.py
+    - doc XTTS : https://docs.coqui.ai/en/dev/models/xtts.html
 
 - post de la video sur instagram
 - adapt image generation for arabic
-- accounts: add italian, german, indonesien, coreen, turc, pendjabi (Shahmukhi), swahili, japonais
+- accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
 - refresh de token FB pas top
 
 - afficher une mention en gros sur les images et/ou sur la video "POSTED" lorsqu'elle ont ete postees

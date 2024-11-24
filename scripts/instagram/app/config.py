@@ -63,6 +63,17 @@ class Config:
     font_cache = {}
 
     @staticmethod
+    def update_token(language, account):
+        Config.CONFIG["languages"][language]["accounts"][account]["access_token"] = account.access_token
+        try:
+            with open("config.yaml", "w") as f:
+                yaml.safe_dump(Config.CONFIG, f)
+            logging.info(f"Access token for account '{account}' in language '{language}' updated successfully.")
+        except Exception as e:
+            logging.error(f"Failed to update token: {e}")
+            raise
+
+    @staticmethod
     def get_font_file(base_font, language):
         specific_font = f"{base_font}-{language}.ttf"
         default_font = f"{base_font}.ttf"

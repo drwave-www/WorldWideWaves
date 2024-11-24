@@ -21,8 +21,7 @@
 
 import logging
 from flask import Blueprint, request, jsonify
-from app.config import Config
-from app.services.instagram_service import create_and_publish_carousel, refresh_token
+from app.services.instagram_service import create_and_publish_carousel
 from app.services.utils import add_used_text
 
 post = Blueprint("post", __name__)
@@ -48,16 +47,10 @@ def __post():
         for account in accounts:
             try:
                 logging.info(f"Prepare to post on account {account}")
-                account_id = Config.LANGUAGES[language]["accounts"][account]["account_id"]
-                access_token = Config.LANGUAGES[language]["accounts"][account]["access_token"]
-
-                # Refresh the token if needed
-                access_token = refresh_token(access_token)
-                Config.LANGUAGES[language]["accounts"][account]["access_token"] = access_token
 
                 # Publish the carousel for this account
                 try:
-                    response = create_and_publish_carousel(images, caption, account_id, access_token)
+                    response = create_and_publish_carousel(language, images, caption, account)
                     logging.info(f"Carousel Post ID: {response['id']}")
                     results[account] = {"success": True}
                 except Exception as e:
