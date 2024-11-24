@@ -239,8 +239,9 @@
 
             if (generate_extract) {
                 resetInputs(language)
-                toggleFieldsOff(language)
             }
+
+            toggleFieldsOff(language)
 
             const article = getLanguageFields(language)
             let data = { language: language }
@@ -304,6 +305,7 @@
 
             showSpinner(language)
             clearVideo(language)
+            toggleFieldsOff(language)
 
             apiCall('/video', 'POST', data,
                 (data) => {
@@ -392,6 +394,7 @@
                 return;
             }
 
+            toggleFieldsOff(language)
             showSpinner(language)
             const carouselImages = document.querySelectorAll(`#carousel-${language} img`);
             const images = Array.from(carouselImages).map(img => img.src);
