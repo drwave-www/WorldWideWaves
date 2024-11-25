@@ -53,7 +53,7 @@ class Config:
 
     TEXT_RECT_SIZE_W = 900
     TEXT_RECT_SIZE_H = 800
-    MIN_FONT_SIZE = 18
+    MIN_FONT_SIZE = 15
     MAX_FONT_SIZE = 58
     IMAGE_SIZE = 1080
 

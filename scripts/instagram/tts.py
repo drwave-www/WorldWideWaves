@@ -1,6 +1,8 @@
 import os
+import logging
+import yaml
 from TTS.api import TTS
-
+import wave
 
 texts = {
     "en": """To be, or not to be, that is the question:
@@ -59,24 +61,62 @@ Bu, hayatta anlam bulmanın yoludur.""",  # Yunus Emre (125 kelime)
     "zh": """千里之行，始于足下。人生中，每一步都是新的挑战和机会。只要坚持努力，就能到达目标。""",  # Laozi, Dao De Jing (110 characters)
 
     "pa": """ਮਨ ਜੀਤੇ ਜਗ ਜੀਤ। ਜੀਵਨ ਵਿੱਚ ਸਫਲਤਾ ਲਈ ਸਬਰ ਅਤੇ ਹੌਸਲੇ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਹਰ ਮੁਸ਼ਕਲ ਸਾਨੂੰ ਨਵਾਂ ਦਰਸਾ ਦਿੰਦੀ ਹੈ।""",  # Guru Granth Sahib + wisdom (100 characters)
+
+    "hi": """श्री गुरु चरन सरोज रज, निज मनु मुकुरु सुधारि।
+बरनऊं रघुबर बिमल जसु, जो दायकु फल चारि॥
+बुद्धिहीन तनु जानिके, सुमिरौं पवन-कुमार।
+बल बुधि विद्या देहु मोहिं, हरहु कलेस बिकार॥
+""",
+
+    "ar": """اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ"""
 }
 
 supported=['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
 
 speakers=['Claribel Dervla', 'Daisy Studious', 'Gracie Wise', 'Tammie Ema', 'Alison Dietlinde', 'Ana Florence', 'Annmarie Nele', 'Asya Anara', 'Brenda Stern', 'Gitta Nikolina', 'Henriette Usha', 'Sofia Hellen', 'Tammy Grit', 'Tanja Adelina', 'Vjollca Johnnie', 'Andrew Chipper', 'Badr Odhiambo', 'Dionisio Schuyler', 'Royston Min', 'Viktor Eka', 'Abrahan Mack', 'Adde Michal', 'Baldur Sanjin', 'Craig Gutsy', 'Damien Black', 'Gilberto Mathias', 'Ilkin Urbano', 'Kazuhiko Atallah', 'Ludvig Milivoj', 'Suad Qasim', 'Torcull Diarmuid', 'Viktor Menelaos', 'Zacharie Aimilios', 'Nova Hogarth', 'Maja Ruoho', 'Uta Obando', 'Lidiya Szekeres', 'Chandra MacFarland', 'Szofi Granger', 'Camilla Holmström', 'Lilya Stainthorpe', 'Zofija Kendrick', 'Narelle Moon', 'Barbora MacLean', 'Alexandra Hisakawa', 'Alma María', 'Rosemary Okafor', 'Ige Behringer', 'Filip Traverse', 'Damjan Chapman', 'Wulf Carlevaro', 'Aaron Dreschner', 'Kumar Dahl', 'Eugenio Mataracı', 'Ferran Simen', 'Xavier Hayasaka', 'Luis Moray', 'Marcos Rudaski']
 
+# Function to calculate the length of a .wav file
+def get_audio_length(audio_file_path):
+    with wave.open(audio_file_path, 'rb') as wav_file:
+        # Calculate the length in seconds
+        frames = wav_file.getnframes()
+        rate = wav_file.getframerate()
+        duration = frames / float(rate)
+    return duration
+
+def load_tts_config():
+    try:
+        with open("tts.yaml", "r") as f:
+            return yaml.safe_load(f)
+    except Exception as e:
+        logging.error(f"Error loading config: {e}")
+        return None
+
+VOICES = load_tts_config()
+
 tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to("cpu")
-for i, speaker in enumerate(speakers):
-    for language, text in texts.items():
-        if language in supported:
-            output_file = f"output/output-{speaker}_{i}-{language}.wav"
-            # Check if the output file already exists
-            if os.path.exists(output_file):
-                print(f"File {output_file} already exists. Skipping generation.")
-                continue
-            print(f"Generate for speaker {speaker} {i} in language {language}")
-            tts.tts_to_file(text, speaker=speaker, language=language, file_path=output_file)
+for language, text in texts.items():
+    text = text.replace(".", ";") # Workaround to not pronounce the dot
+    if language not in VOICES["languages"]:
+        print(f"Language '{language}' not supported.")
+        continue
+    print(f"Generate voice for language {language}")
+    if VOICES["languages"][language]["engine"] == "xtts":
+        speaker = VOICES["languages"][language]["default-voice"]
+        output_file = f"app/static/output/tts/xtts-{speaker}-{language}.wav"
+        print(f"Generate for speaker {speaker} in language {language}")
+        if len(text) >= VOICES["languages"][language]["char-limit"]:
+            logging.info("Text will not be split")
+            split_sentences = True
         else:
-            print(f"Skip language {language} NOT SUPPORTED")
+            logging.info("Text will be split")
+            split_sentences = False
+        code = VOICES["languages"][language].get("code", language)
+        tts.tts_to_file(text, split_sentences=split_sentences, speaker=speaker, language=code, file_path=output_file)
+
+        audio_length = get_audio_length(output_file)
+        print(f"Audio length: {audio_length:.2f} seconds")
+    else:
+        print(f"Skip language {language} NOT SUPPORTED")
 
 
