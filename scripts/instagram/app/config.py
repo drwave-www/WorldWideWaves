@@ -57,6 +57,11 @@ class Config:
     MAX_FONT_SIZE = 70
     IMAGE_SIZE = 1080
 
+    POS_TITLE_H_Y = 120
+    POS_AUTHOR_H_Y = 850
+    POS_TITLE_V_X = 200
+    POS_AUTHOR_V_X = 950
+
     TPL_FONT_NORMAL = "app/fonts/noto"
     TPL_FONT_BOLD = "app/fonts/noto-bold"
 
@@ -95,3 +100,29 @@ class Config:
     def bold_font(language, size):
         font_name = Config.get_font_file(Config.TPL_FONT_BOLD, language)
         return Config.load_font(font_name, size)
+
+    @classmethod
+    def get_layout(cls, language):
+        layout_parts = Config.LANGUAGES[language]["layout"].split('-')
+        orientation = layout_parts[0]
+        direction = layout_parts[1]
+        assert orientation in ("H", "V"), f"Invalid orientation '{orientation}'. Must be 'H' or 'V'."
+        assert direction in ("RL", "LR"), f"Invalid direction '{direction}'. Must be 'RL' or 'LR'."
+
+        if orientation == "V" and direction == "LR":
+            raise "layout V-LR is not supported"
+
+        return orientation, direction
+
+    @classmethod
+    def get_title_start(cls, title_type, orientation):
+        if orientation == "H":
+            if title_type == "title":
+                return Config.POS_TITLE_H_Y
+            else:  # 'author'
+                return Config.POS_AUTHOR_H_Y
+        else:  # 'V'
+            if title_type == "title":
+                return Config.POS_TITLE_V_X
+            else:  # 'author'
+                return Config.POS_AUTHOR_V_X

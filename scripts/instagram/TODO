@@ -1,7 +1,7 @@
-- texte vertical
-- cover verticale
 - arabe
 - les apostrophes ne sont pas bien gerees
+
+- remove previous japanese posts + clean used_texts
 
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html

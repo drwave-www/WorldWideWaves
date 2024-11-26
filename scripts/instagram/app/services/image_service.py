@@ -36,7 +36,8 @@ def get_cover(language, author, title, author_image_url = None):
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    title_height = draw_bounded_title(language, draw, title, Config.bold_font, y_start=120)
+    title_height = draw_bounded_title(language, "title", draw, title, Config.bold_font)
+    author_height = draw_bounded_title(language, "author", draw, author, Config.bold_font)
 
     # Calculate the available vertical space between the titles
     available_top = 120 + title_height  # Bottom of the first title

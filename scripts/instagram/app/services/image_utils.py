@@ -45,7 +45,7 @@ def split_text_into_lines(text, font, max_width):
 
     return lines
 
-def draw_bounded_title(language, draw, text, font_name, y_start):
+def draw_bounded_title(language, title_type, draw, text, font_name):
     min_font_size = Config.MIN_FONT_SIZE
     max_font_size = Config.MAX_FONT_SIZE
     initial_font_size = max_font_size # Start with the initial font size
@@ -55,6 +55,9 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
 
     best_font = initial_font_size
     best_lines = []
+
+    orientation, direction = Config.get_layout(language)
+    pos_start = Config.get_title_start(title_type, orientation)
 
     # Use binary search to find the optimal font size
     while min_font_size <= max_font_size:
@@ -80,18 +83,25 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
     line_height = best_font.getbbox("Ay")[3] + 10
     for i, line in enumerate(best_lines):
         bbox = best_font.getbbox(line)
+
         line_width = bbox[2] - bbox[0]
-        x = (Config.IMAGE_SIZE - line_width) // 2  # Center the text horizontally
-        y = y_start + i * line_height  # Position the text vertically
-        draw.text((x, y), line, fill="white", font=best_font)
+        if orientation == "H":
+            x = (Config.IMAGE_SIZE - line_width) // 2  # Center the text horizontally
+            y = pos_start + i * line_height  # Position the text vertically
+        else: # V
+            x = pos_start - i * line_height
+            y = (Config.IMAGE_SIZE - line_width) // 2  # Center the text vertically
+
+        write_pillow(draw, x, y, line, best_font, orientation, direction)
 
     # Calculate total height of the drawn text
     total_height = line_height * len(best_lines)
     return total_height
 
-
 def split_japanese_text_vertically(text):
-    pattern = re.compile(r'(.)([、。]*)')
+    text = text.replace('\n', '').replace('\r', '')
+    punctuation = '、。！？…「」（）【】『』・ー'
+    pattern = re.compile(r'(.)([' + re.escape(punctuation) + r']*)')
     split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
     return split_text
 
@@ -149,14 +159,8 @@ def layout_text(language, font_size, styled_parts, orientation):
 def draw_bounded_text(language, draw, text, bold_parts):
     logging.info(f"LibRAQM available : {features.check_feature(feature='raqm')}")
 
-    # Load layout
-    layout_parts = Config.LANGUAGES[language]["layout"].split('-')
-    orientation = layout_parts[0]
-    direction = layout_parts[1]
-    assert orientation in ("H", "V"), f"Invalid orientation '{orientation}'. Must be 'H' or 'V'."
-    assert direction in ("RL", "LR"), f"Invalid direction '{direction}'. Must be 'RL' or 'LR'."
-
-    # Load the text and fonts
+    # Config
+    orientation, direction = Config.get_layout(language)
     font_size = Config.MAX_FONT_SIZE
 
     # Split text into parts, tagging bold sections
@@ -232,14 +236,6 @@ def write_line(language, draw, line, x, y, orientation, direction, is_last_line=
     if len(line) == 0:
         return
 
-    anchor = "la"
-    pillow_direction = "ltr"
-    if orientation == "H" and direction == "RL":
-            pillow_direction = "rtl"
-    elif orientation == "V": #
-        pillow_direction = "ttb"
-        anchor = "rt"
-
     total_width = sum((font.getbbox(word)[2] for word, font in line))
     space_count = len(line) - 1
 
@@ -252,9 +248,20 @@ def write_line(language, draw, line, x, y, orientation, direction, is_last_line=
         space_width = 0
 
     for word, font in line:
-        draw.text((x, y), word, font=font, fill="white", anchor=anchor, direction=pillow_direction)
+        write_pillow(draw, x, y, word, font, orientation, direction)
         step = font.getbbox(word)[2] + space_width
         if direction == "LR":
             x += step
         else: # RL
             y += step
+
+def write_pillow(draw, x, y, line, font, orientation, direction):
+    anchor = "la"
+    pillow_direction = "ltr"
+    if orientation == "H" and direction == "RL":
+            pillow_direction = "rtl"
+    elif orientation == "V": #
+        pillow_direction = "ttb"
+        anchor = "rt"
+
+    draw.text((x, y), line, font=font, fill="white", anchor=anchor, direction=pillow_direction)
