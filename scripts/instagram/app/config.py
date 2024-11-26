@@ -51,10 +51,10 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
-    TEXT_RECT_SIZE_W = 900
-    TEXT_RECT_SIZE_H = 800
+    TEXT_RECT_SIZE_W = 850
+    TEXT_RECT_SIZE_H = 850
     MIN_FONT_SIZE = 15
-    MAX_FONT_SIZE = 58
+    MAX_FONT_SIZE = 70
     IMAGE_SIZE = 1080
 
     TPL_FONT_NORMAL = "app/fonts/noto"

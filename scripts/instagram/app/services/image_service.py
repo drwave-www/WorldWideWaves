@@ -28,7 +28,7 @@ from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
-def get_cover(language, author, title):
+def get_cover(language, author, title, author_image_url = None):
     image_path = os.path.join(Config.TEMPLATE_FOLDER, "3.jpg")
 
     logging.info(f"Open template {image_path}")
@@ -45,11 +45,11 @@ def get_cover(language, author, title):
     available_height = available_bottom - available_top
 
     logging.info(f"Search for author image on Google")
-    author_image_url = ""
-    try:
-        author_image_url = fetch_google_image(f"portrait of {author} ({title}) -site:gettyimages.*")
-    except Exception as e:
-        logging.error(f"Exception while fetching author image: {e}")
+    if not author_image_url:
+        try:
+            author_image_url = fetch_google_image(f"portrait of {author} ({title}) -site:gettyimages.*")
+        except Exception as e:
+            logging.error(f"Exception while fetching author image: {e}")
 
     logging.info(f"Image found: {author_image_url}")
     if author_image_url:
@@ -80,7 +80,7 @@ def get_cover(language, author, title):
 
 # -----------------------------------------------------------------------------
 
-def create_images(language, json_data):
+def create_images(language, json_data, cover_url = None):
     image_paths = []
 
     # 1. Page 1 and 2
@@ -92,6 +92,14 @@ def create_images(language, json_data):
         text_template = Image.open(img_path)
         draw = ImageDraw.Draw(text_template)
 
+        # Debug
+        rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
+        rect_y = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_H) // 2
+        draw.rectangle((
+            rect_x, rect_y,
+            rect_x + Config.TEXT_RECT_SIZE_W,
+            rect_y + Config.TEXT_RECT_SIZE_H), fill='green')
+
         logging.info(f"Draw the text")
         draw_bounded_text(language, draw, json_data[page_key], json_data["bold_parts"])
 
@@ -102,7 +110,7 @@ def create_images(language, json_data):
 
     # 2. Cover Image
     logging.info(f"Create cover image")
-    cover_path = get_cover(language, json_data['author'], json_data['title'])
+    cover_path = get_cover(language, json_data['author'], json_data['title'], cover_url)
     image_paths.append((3, cover_path))
 
     # 3. 2026 Page

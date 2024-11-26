@@ -114,6 +114,7 @@
                     .split("\n")
                     .map(tag => tag.trim())
                     .filter(part => part !== ""),
+                cover_url: getField(language, "cover-url")
             }
         }
 
@@ -580,6 +581,11 @@
                         <div class="control buttons" style="flex: 0;">
                             <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
                         </div>
+                    </div>
+
+                    <div class="field" style="flex: 1; margin-right: 10px;">
+                        <label class="label">Optional cover url to use (unless Google search)</label>
+                        <input class="input" type="text" id="cover-url-{{ language }}" placeholder="The url of an image to use for cover.." style="background-color: lightgreen;" value="">
                     </div>
 
                 </div>

@@ -31,6 +31,11 @@ def __generate():
     data = request.json
     language = data["language"]
     article = data.get("article")
+    cover_url = None
+
+    if article:
+        cover_url = article.get("cover_url")
+        cover_url = None if cover_url and cover_url.strip() == "" else cover_url
 
     max_retries = 2
     return_article = not article
@@ -49,7 +54,7 @@ def __generate():
                 return jsonify({"openai_error": str(e)}), 500
 
     try:
-        images = create_images(language, article)
+        images = create_images(language, article, cover_url)
         response = {"images": images}
 
         if return_article:

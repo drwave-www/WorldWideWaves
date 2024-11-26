@@ -46,14 +46,14 @@ def split_text_into_lines(text, font, max_width):
     return lines
 
 def draw_bounded_title(language, draw, text, font_name, y_start):
-    initial_font_size = Config.MAX_FONT_SIZE
     min_font_size = Config.MIN_FONT_SIZE
-    max_font_size = initial_font_size  # Start with the initial font size
+    max_font_size = Config.MAX_FONT_SIZE
+    initial_font_size = max_font_size # Start with the initial font size
 
     max_width = Config.TEXT_RECT_SIZE_W  # Maximum allowed width for the text
     max_lines = 2  # Limit the text to two lines
 
-    best_font = None
+    best_font = initial_font_size
     best_lines = []
 
     # Use binary search to find the optimal font size
@@ -89,13 +89,51 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
     total_height = line_height * len(best_lines)
     return total_height
 
+def layout_text(language, font_size, styled_parts):
+    lines = []
+    current_line = []
+    current_width = 0
+    total_height = 0
+
+    current_font = Config.normal_font(language, font_size)
+    bbox = current_font.getbbox("Ay")
+    line_height = bbox[3]# - bbox[1]
+    for part, current_font in styled_parts:
+        current_font = current_font(language, font_size)
+        space_width = current_font.getbbox(" ")[2]
+
+        # Tokenize words and handle punctuation
+        words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
+        for word in words:
+            if word in {",", "."}:
+                current_width += current_font.getbbox(".")[2]
+                if current_line:
+                    current_line[-1][0] += word  # Append punctuation to the previous word
+                continue
+            else:
+                word_width = current_font.getbbox(word)[2]
+
+            if current_width + word_width > Config.TEXT_RECT_SIZE_W:
+                # Finish the current line
+                lines.append(current_line)
+                total_height += line_height
+                current_line = []
+                current_width = 0
+
+            current_line.append([word, current_font])
+            current_width += word_width + space_width
+
+    if current_line:
+        lines.append(current_line)
+        total_height += line_height
+
+    return lines, line_height, total_height
 
 def draw_bounded_text(language, draw, text, bold_parts):
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
 
     # Load the text and fonts
     font_size = Config.MAX_FONT_SIZE
-    font = Config.normal_font(language, font_size)
 
     # Split text into parts, tagging bold sections
     styled_parts = []
@@ -108,6 +146,7 @@ def draw_bounded_text(language, draw, text, bold_parts):
                 styled_parts.append((before.strip(), Config.normal_font))
             if bold.strip():
                 styled_parts.append((bold.strip(), Config.bold_font))
+
     # Add any remaining text
     if remaining_text.strip():
         styled_parts.append((remaining_text.strip(), Config.normal_font))
@@ -115,16 +154,18 @@ def draw_bounded_text(language, draw, text, bold_parts):
     # Adjust font size to fit within the rectangle
     total_height = 0
     lines = []
+    line_height = 0
     while font_size >= Config.MIN_FONT_SIZE:
         # Simulate the layout with current font size
-        lines, total_height = layout_text(language, font_size, styled_parts)
+        lines, line_height, total_height = layout_text(language, font_size, styled_parts)
 
         # Check if the total height fits within the rectangle
         if total_height <= Config.TEXT_RECT_SIZE_H:
+            logging.info(f"Selected font size : {font_size} for height : {total_height}")
             break
 
         # Reduce the font size
-        logging.debug(f"Reduce the font size from {font_size} as total height is {total_height} vs {Config.TEXT_RECT_SIZE_H}")
+        logging.info(f"Reduce the font size from {font_size} as total height is {total_height} vs {Config.TEXT_RECT_SIZE_H}")
         font_size -= 1
 
     # If text doesn't fit, raise an error
@@ -132,55 +173,16 @@ def draw_bounded_text(language, draw, text, bold_parts):
         raise ValueError("The text is too large to fit within the bounds.")
 
     # Calculate starting position to center the text within the rectangle
-    y = ((Config.IMAGE_SIZE - total_height) // 2) - (font.getbbox("Ay")[3] // 2)
+    y = (Config.IMAGE_SIZE - total_height) // 2
+
+    draw.rectangle((rect_x, y, rect_x + Config.TEXT_RECT_SIZE_W, y + total_height), fill='gray')
 
     # Draw each line of justified text
     for i, line in enumerate(lines):
         x = rect_x
         justify_line(draw, line, x, y, is_last_line=(i == len(lines) - 1))
-        y += font.getbbox("Ay")[3]  # Line height
-
-def layout_text(language, font_size, styled_parts):
-    lines = []
-    current_line = []
-    current_width = 0
-    total_height = 0
-
-    current_font = Config.normal_font(language, font_size)
-    for part, current_font in styled_parts:
-        current_font = current_font(language, font_size)
-        space_width = current_font.getbbox(" ")[2]
-
-        # Tokenize words and handle punctuation
-        words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
-        for word in words:
-            if word == ",":
-                current_width += current_font.getbbox(",")[2]
-                current_line[-1][0] += ","  # Append comma to the previous word
-                continue
-            elif word == ".":
-                current_width += current_font.getbbox(".")[2]
-                current_line[-1][0] += "."  # Append period to the previous word
-                continue
-            else:
-                word_width = current_font.getbbox(word)[2]
-
-            if current_width + word_width > Config.TEXT_RECT_SIZE_W:
-                # Finish the current line
-                lines.append(current_line)
-                total_height += current_font.getbbox("Ay")[3]
-                current_line = []
-                current_width = 0
-
-            current_line.append([word, current_font])
-            current_width += word_width + space_width
-
-    if current_line:
-        lines.append(current_line)
-        total_height += current_font.getbbox("Ay")[3]
-
-    return lines, total_height
-
+        draw.rectangle((x, y, x + Config.TEXT_RECT_SIZE_W, y + line_height), outline='yellow')
+        y += line_height
 
 def justify_line(draw, line, x, y, is_last_line=False):
     if len(line) == 0:
@@ -195,5 +197,5 @@ def justify_line(draw, line, x, y, is_last_line=False):
         space_width = line[0][1].getbbox(" ")[2]
 
     for word, font in line:
-        draw.text((x, y), word, font=font, fill="white")
+        draw.text((x, y), word, font=font, fill="white", anchor="la")
         x += font.getbbox(word)[2] + space_width
