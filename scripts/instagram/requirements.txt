@@ -144,7 +144,7 @@ spacy-legacy==3.0.12
 spacy-loggers==1.0.5
 srsly==2.4.8
 SudachiDict-core==20241021
-SudachiPy==0.6.9
+SudachiPy==0.6.8
 sympy==1.13.1
 tensorboard==2.18.0
 tensorboard-data-server==0.7.2

@@ -33,13 +33,17 @@ ENV RUSTUP_TOOLCHAIN=1.82.0
 # Install python dependencies
 COPY requirements.txt /app/
 RUN pip install --upgrade pip
+RUN pip install setuptools-rust maturin
 
 RUN pip install --no-cache-dir --no-input -r requirements.txt
 
 RUN pip uninstall -y opencv-python opencv-python-headless
 RUN python -m pip install --no-binary opencv-python opencv-python
 
+# Pre-Download required assets
 RUN python -m unidic download
+COPY download_xtts.py /app/
+RUN python ./download_xtts.py
 
 # Copy application files
 COPY . /app/

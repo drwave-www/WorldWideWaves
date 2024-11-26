@@ -1,8 +1,8 @@
-import os
 import logging
 import yaml
 from TTS.api import TTS
 import wave
+from moviepy import *
 
 texts = {
     "en": """To be, or not to be, that is the question:
@@ -96,14 +96,15 @@ VOICES = load_tts_config()
 
 tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to("cpu")
 for language, text in texts.items():
+    print(f"Generate voice for language {language}")
     text = text.replace(".", ";") # Workaround to not pronounce the dot
     if language not in VOICES["languages"]:
         print(f"Language '{language}' not supported.")
         continue
-    print(f"Generate voice for language {language}")
-    if VOICES["languages"][language]["engine"] == "xtts":
-        speaker = VOICES["languages"][language]["default-voice"]
-        output_file = f"app/static/output/tts/xtts-{speaker}-{language}.wav"
+    engine = VOICES["languages"][language]["engine"]
+    speaker = VOICES["languages"][language].get("default-voice", "default")
+    output_file = f"/tmp/{engine}-{speaker}-{language}.wav"
+    if engine == "xtts":
         print(f"Generate for speaker {speaker} in language {language}")
         if len(text) >= VOICES["languages"][language]["char-limit"]:
             logging.info("Text will not be split")
@@ -118,5 +119,49 @@ for language, text in texts.items():
         print(f"Audio length: {audio_length:.2f} seconds")
     else:
         print(f"Skip language {language} NOT SUPPORTED")
+
+    # Paths
+    intro_video_path = "template/intro-video.mp4"
+    intro_glitch_audio_path = "template/intro-glitch.mp3"
+    intro_www_audio_path = "template/intro-www.wav"
+    main_video_path = "tts_test_video.mp4"
+    main_audio_path = output_file  # Assuming this is defined elsewhere
+    outro_video_path = "template/outro-video.mp4"
+    output_path = "app/static/output/output.mp4"
+
+    try:
+        # Load intro video
+        intro_video = VideoFileClip(intro_video_path)
+
+        # Load and combine intro audio
+        intro_glitch_audio = AudioFileClip(intro_glitch_audio_path).with_start(0.2)
+        intro_www_audio = AudioFileClip(intro_www_audio_path).with_start(0.5)
+        combined_intro_audio = CompositeAudioClip([intro_glitch_audio, intro_www_audio])
+        intro_video = intro_video.with_audio(combined_intro_audio)
+
+        # Load main video and audio
+        main_video = VideoFileClip(main_video_path)
+        main_audio = AudioFileClip(main_audio_path)
+        main_video = main_video.with_audio(main_audio)
+
+        # Load outro video
+        #outro_video = VideoFileClip(outro_video_path)
+
+        # Concatenate all video clips
+        final_video = concatenate_videoclips([intro_video, main_video]) #, outro_video])
+
+        # Write the final output
+        final_video.write_videofile(output_path, codec="libx264", audio_codec="aac")
+
+        intro_glitch_audio.close()
+        intro_www_audio.close()
+        main_audio.close()
+
+        print(f"Video successfully saved to {output_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    break # test
 
 
