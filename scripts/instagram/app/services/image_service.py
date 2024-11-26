@@ -37,7 +37,6 @@ def get_cover(language, author, title, author_image_url = None):
 
     logging.info(f"Create texts")
     title_height = draw_bounded_title(language, draw, title, Config.bold_font, y_start=120)
-    author_height = draw_bounded_title(language, draw, author, Config.bold_font, y_start=900)
 
     # Calculate the available vertical space between the titles
     available_top = 120 + title_height  # Bottom of the first title
@@ -93,12 +92,12 @@ def create_images(language, json_data, cover_url = None):
         draw = ImageDraw.Draw(text_template)
 
         # Debug
-        rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
-        rect_y = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_H) // 2
-        draw.rectangle((
-            rect_x, rect_y,
-            rect_x + Config.TEXT_RECT_SIZE_W,
-            rect_y + Config.TEXT_RECT_SIZE_H), fill='green')
+        #rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
+        #rect_y = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_H) // 2
+        #draw.rectangle((
+        #    rect_x, rect_y,
+        #    rect_x + Config.TEXT_RECT_SIZE_W,
+        #    rect_y + Config.TEXT_RECT_SIZE_H), fill='green')
 
         logging.info(f"Draw the text")
         draw_bounded_text(language, draw, json_data[page_key], json_data["bold_parts"])

@@ -22,7 +22,7 @@ RUN apt-get install -y build-essential cmake git python3-dev python3-numpy \
     libgstreamer1.0-dev libgtk-3-dev curl \
     libpng-dev libjpeg-dev libopenexr-dev libtiff-dev libwebp-dev \
     gcc g++ make espeak-ng libsndfile1-dev libespeak-dev \
-    libopencv-dev x264 libx264-dev libssl-dev ffmpeg
+    libopencv-dev x264 libx264-dev libssl-dev libraqm-dev ffmpeg
 
 RUN rm -rf /var/lib/apt/lists/*
 

@@ -22,7 +22,7 @@
 import logging
 import re
 from app.config import Config
-from PIL import ImageFont
+from PIL import ImageFont, features
 
 def split_text_into_lines(text, font, max_width):
     words = text.split()
@@ -89,7 +89,13 @@ def draw_bounded_title(language, draw, text, font_name, y_start):
     total_height = line_height * len(best_lines)
     return total_height
 
-def layout_text(language, font_size, styled_parts):
+
+def split_japanese_text_vertically(text):
+    pattern = re.compile(r'(.)([、。]*)')
+    split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
+    return split_text
+
+def layout_text(language, font_size, styled_parts, orientation):
     lines = []
     current_line = []
     current_width = 0
@@ -97,23 +103,34 @@ def layout_text(language, font_size, styled_parts):
 
     current_font = Config.normal_font(language, font_size)
     bbox = current_font.getbbox("Ay")
-    line_height = bbox[3]# - bbox[1]
+    line_height = bbox[3] if orientation == "H" else bbox[2]
+    width_indice = 2 if orientation == "H" else 3
+    max_width = Config.TEXT_RECT_SIZE_W if orientation == "H" else Config.TEXT_RECT_SIZE_H
+
     for part, current_font in styled_parts:
         current_font = current_font(language, font_size)
-        space_width = current_font.getbbox(" ")[2]
+        space_width = current_font.getbbox(" ")[width_indice]
 
         # Tokenize words and handle punctuation
-        words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
+        if language == 'ja': # Japanese specifics
+            words = split_japanese_text_vertically(part)
+            space_width = 0
+        else:
+            words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
+
         for word in words:
             if word in {",", "."}:
-                current_width += current_font.getbbox(".")[2]
+                current_width += current_font.getbbox(".")[width_indice]
                 if current_line:
                     current_line[-1][0] += word  # Append punctuation to the previous word
                 continue
             else:
-                word_width = current_font.getbbox(word)[2]
+                if orientation == "H":
+                    word_width = current_font.getbbox(word)[width_indice] - current_font.getbbox(word)[width_indice - 2]
+                else: # V
+                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 10 for char in word) # +10 is secret
 
-            if current_width + word_width > Config.TEXT_RECT_SIZE_W:
+            if current_width + word_width > max_width:
                 # Finish the current line
                 lines.append(current_line)
                 total_height += line_height
@@ -130,7 +147,14 @@ def layout_text(language, font_size, styled_parts):
     return lines, line_height, total_height
 
 def draw_bounded_text(language, draw, text, bold_parts):
-    rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
+    logging.info(f"LibRAQM available : {features.check_feature(feature='raqm')}")
+
+    # Load layout
+    layout_parts = Config.LANGUAGES[language]["layout"].split('-')
+    orientation = layout_parts[0]
+    direction = layout_parts[1]
+    assert orientation in ("H", "V"), f"Invalid orientation '{orientation}'. Must be 'H' or 'V'."
+    assert direction in ("RL", "LR"), f"Invalid direction '{direction}'. Must be 'RL' or 'LR'."
 
     # Load the text and fonts
     font_size = Config.MAX_FONT_SIZE
@@ -155,12 +179,13 @@ def draw_bounded_text(language, draw, text, bold_parts):
     total_height = 0
     lines = []
     line_height = 0
+    max_height = Config.TEXT_RECT_SIZE_H if orientation == "H" else Config.TEXT_RECT_SIZE_W
     while font_size >= Config.MIN_FONT_SIZE:
         # Simulate the layout with current font size
-        lines, line_height, total_height = layout_text(language, font_size, styled_parts)
+        lines, line_height, total_height = layout_text(language, font_size, styled_parts, orientation)
 
         # Check if the total height fits within the rectangle
-        if total_height <= Config.TEXT_RECT_SIZE_H:
+        if total_height <= max_height:
             logging.info(f"Selected font size : {font_size} for height : {total_height}")
             break
 
@@ -173,20 +198,47 @@ def draw_bounded_text(language, draw, text, bold_parts):
         raise ValueError("The text is too large to fit within the bounds.")
 
     # Calculate starting position to center the text within the rectangle
+    rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
     y = (Config.IMAGE_SIZE - total_height) // 2
 
-    draw.rectangle((rect_x, y, rect_x + Config.TEXT_RECT_SIZE_W, y + total_height), fill='gray')
+    # debug
+    #draw.rectangle((rect_x, y, rect_x + Config.TEXT_RECT_SIZE_W, y + total_height), fill='gray')
+
+    # Orientation and direction adaptation
+    if direction == "RL":
+        rect_x = (Config.IMAGE_SIZE - rect_x)
+
+    if orientation == "V":
+        if direction == "RL":
+            rect_x = Config.IMAGE_SIZE - y
+        y = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_H) // 2
 
     # Draw each line of justified text
+    x = rect_x
     for i, line in enumerate(lines):
-        x = rect_x
-        justify_line(draw, line, x, y, is_last_line=(i == len(lines) - 1))
-        draw.rectangle((x, y, x + Config.TEXT_RECT_SIZE_W, y + line_height), outline='yellow')
-        y += line_height
+        write_line(language, draw, line, x, y, orientation, direction, is_last_line=(i == len(lines) - 1))
+        # debug
+        # draw.rectangle((x, y, x + Config.TEXT_RECT_SIZE_W, y + line_height), outline='yellow')
+        if orientation == "H":
+            x = rect_x
+            y += line_height
+        else: # V
+            if direction == "RL":
+                x -= line_height
+            else:
+                x += line_height
 
-def justify_line(draw, line, x, y, is_last_line=False):
+def write_line(language, draw, line, x, y, orientation, direction, is_last_line=False):
     if len(line) == 0:
         return
+
+    anchor = "la"
+    pillow_direction = "ltr"
+    if orientation == "H" and direction == "RL":
+            pillow_direction = "rtl"
+    elif orientation == "V": #
+        pillow_direction = "ttb"
+        anchor = "rt"
 
     total_width = sum((font.getbbox(word)[2] for word, font in line))
     space_count = len(line) - 1
@@ -196,6 +248,13 @@ def justify_line(draw, line, x, y, is_last_line=False):
     else:
         space_width = line[0][1].getbbox(" ")[2]
 
+    if language == "ja":
+        space_width = 0
+
     for word, font in line:
-        draw.text((x, y), word, font=font, fill="white", anchor="la")
-        x += font.getbbox(word)[2] + space_width
+        draw.text((x, y), word, font=font, fill="white", anchor=anchor, direction=pillow_direction)
+        step = font.getbbox(word)[2] + space_width
+        if direction == "LR":
+            x += step
+        else: # RL
+            y += step

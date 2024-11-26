@@ -1,22 +1,28 @@
+- texte vertical
+- cover verticale
+- arabe
+- les apostrophes ne sont pas bien gerees
+
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html
     - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
     - voice cleaning from xtts : https://huggingface.co/spaces/coqui/xtts/blob/main/app.py
     - doc XTTS : https://docs.coqui.ai/en/dev/models/xtts.html
 
-- regler ce pb de taille de textes....
 - post a reel at  the same time
 - post de la video sur instagram + option post as reel
-- adapt image generation for arabic
+
+FEATURES:
+- post avec un mot ecrit en grand, traduit en plusieurs langues
+
+----
+
 - accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
 - refresh de token FB pas top
 
 - worldwidewaves.net page with instagram accounts + email form
 
-- les apostrophes ne sont pas bien gerees
-
 - FR: supprimer et reposter de zero les precedents posts
 
-FEATURES:
-- post avec un mot ecrit en grand, traduit en plusieurs langues
+
 
