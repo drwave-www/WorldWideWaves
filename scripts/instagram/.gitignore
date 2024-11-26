@@ -16,3 +16,4 @@ app/__pycache__/
 __pycache__/
 ./*.wav
 app/static/tts/*
+node_modules/

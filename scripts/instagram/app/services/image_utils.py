@@ -159,7 +159,7 @@ def layout_text(language, font_size, styled_parts, orientation):
     return lines, line_height, total_height
 
 def draw_bounded_text(language, draw, text, bold_parts):
-    logging.info(f"LibRAQM available : {features.check_feature(feature='raqm')}")
+    logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
 
     # Config
     orientation, direction = Config.get_layout(language)
@@ -192,7 +192,7 @@ def draw_bounded_text(language, draw, text, bold_parts):
 
         # Check if the total height fits within the rectangle
         if total_height <= max_height:
-            logging.info(f"Selected font size : {font_size} for height : {total_height}")
+            logging.debug(f"Selected font size : {font_size} for height : {total_height}")
             break
 
         # Reduce the font size
