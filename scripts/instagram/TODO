@@ -1,7 +1,5 @@
-- arabe
-- les apostrophes ne sont pas bien gerees
 
-- remove previous japanese posts + clean used_texts
+- les apostrophes ne sont pas bien gerees
 
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html
@@ -17,6 +15,7 @@ FEATURES:
 
 ----
 
+- remove previous japanese posts + clean used_texts
 - accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
 - refresh de token FB pas top
 

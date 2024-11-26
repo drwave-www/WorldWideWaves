@@ -98,6 +98,8 @@ def draw_bounded_title(language, title_type, draw, text, font_name):
     total_height = line_height * len(best_lines)
     return total_height
 
+# -----------------------------------------------------------------------------
+
 def split_japanese_text_vertically(text):
     text = text.replace('\n', '').replace('\r', '')
     punctuation = '、。！？…「」（）【】『』・ー'
@@ -208,10 +210,6 @@ def draw_bounded_text(language, draw, text, bold_parts):
     # debug
     #draw.rectangle((rect_x, y, rect_x + Config.TEXT_RECT_SIZE_W, y + total_height), fill='gray')
 
-    # Orientation and direction adaptation
-    if direction == "RL":
-        rect_x = (Config.IMAGE_SIZE - rect_x)
-
     if orientation == "V":
         if direction == "RL":
             rect_x = Config.IMAGE_SIZE - y
@@ -243,6 +241,8 @@ def write_line(language, draw, line, x, y, orientation, direction, is_last_line=
         space_width = (Config.TEXT_RECT_SIZE_W - total_width) // space_count
     else:
         space_width = line[0][1].getbbox(" ")[2]
+        if orientation == "H" and direction == "RL":
+            x += Config.TEXT_RECT_SIZE_W - total_width - space_width * space_count
 
     if language == "ja":
         space_width = 0
@@ -250,9 +250,9 @@ def write_line(language, draw, line, x, y, orientation, direction, is_last_line=
     for word, font in line:
         write_pillow(draw, x, y, word, font, orientation, direction)
         step = font.getbbox(word)[2] + space_width
-        if direction == "LR":
+        if orientation == "H":
             x += step
-        else: # RL
+        else: # V
             y += step
 
 def write_pillow(draw, x, y, line, font, orientation, direction):
