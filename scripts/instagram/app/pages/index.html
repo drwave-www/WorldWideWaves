@@ -284,7 +284,7 @@
         function generateVideo(language) {
 
             let cover_link = "";
-            const coverImage = document.querySelector('#carousel-${language} div:nth-child(3) img');
+            const coverImage = document.querySelector(`#carousel-${language} div:nth-child(3) img`);
 
             if (coverImage) {
                 cover_link = new URL(coverImage.src).pathname

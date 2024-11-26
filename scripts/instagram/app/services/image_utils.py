@@ -196,7 +196,7 @@ def draw_bounded_text(language, draw, text, bold_parts):
             break
 
         # Reduce the font size
-        logging.info(f"Reduce the font size from {font_size} as total height is {total_height} vs {Config.TEXT_RECT_SIZE_H}")
+        logging.debug(f"Reduce the font size from {font_size} as total height is {total_height} vs {Config.TEXT_RECT_SIZE_H}")
         font_size -= 1
 
     # If text doesn't fit, raise an error
