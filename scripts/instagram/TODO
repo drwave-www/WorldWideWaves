@@ -22,7 +22,8 @@
     - doc XTTS : https://docs.coqui.ai/en/dev/models/xtts.html
     - WARNING : There's text lenght in all languages, different
 
-- post de la video sur instagram
+- pouvoir fournir le lien la photo cover
+- post de la video sur instagram + option post as reel
 - adapt image generation for arabic
 - accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
 - refresh de token FB pas top

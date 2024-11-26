@@ -2,6 +2,7 @@
 FROM python:3.11-slim
 
 # Set environment variables
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -14,21 +15,31 @@ RUN apt-get update && apt-get install -y  \
     psmisc \
     lsof
 
-# Install dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir --no-input -r requirements.txt
-RUN pip uninstall -y opencv-python opencv-python-headless
+# Install system dependencies
 RUN apt-get install -y build-essential cmake git python3-dev python3-numpy \
     libavcodec-dev libavformat-dev libswscale-dev \
     libgstreamer-plugins-base1.0-dev \
-    libgstreamer1.0-dev libgtk-3-dev \
+    libgstreamer1.0-dev libgtk-3-dev curl \
     libpng-dev libjpeg-dev libopenexr-dev libtiff-dev libwebp-dev \
+    gcc g++ make espeak-ng libsndfile1-dev libespeak-dev \
     libopencv-dev x264 libx264-dev libssl-dev ffmpeg
-RUN python -m pip install --no-binary opencv-python opencv-python
-
-RUN apt-get install -y espeak libespeak-dev
 
 RUN rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain 1.82.0 -y
+ENV PATH=$PATH:/root/.cargo/bin
+ENV RUSTUP_TOOLCHAIN=1.82.0
+
+# Install python dependencies
+COPY requirements.txt /app/
+RUN pip install --upgrade pip
+
+RUN pip install --no-cache-dir --no-input -r requirements.txt
+
+RUN pip uninstall -y opencv-python opencv-python-headless
+RUN python -m pip install --no-binary opencv-python opencv-python
+
+RUN python -m unidic download
 
 # Copy application files
 COPY . /app/
