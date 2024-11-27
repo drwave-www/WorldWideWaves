@@ -140,7 +140,7 @@ def create_and_publish_carousel(language, image_urls, caption, account):
     access_token = Config.LANGUAGES[language]["accounts"][account]["access_token"]
 
     # Refresh the token if needed
-    access_token = refresh_token(language, ig_user_id, access_token)
+    access_token = refresh_token(language, account, access_token)
 
     try:
         # Step 1: Create individual item containers
