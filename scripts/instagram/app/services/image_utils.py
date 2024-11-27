@@ -146,7 +146,7 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
                 if orientation == "H":
                     word_width = current_font.getbbox(word)[width_indice] - current_font.getbbox(word)[width_indice - 2]
                 else: # V
-                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 10 for char in word) # +10 is secret
+                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 12 for char in word) # +12 is secret
 
             if current_width + word_width > max_width:
                 # Finish the current line
