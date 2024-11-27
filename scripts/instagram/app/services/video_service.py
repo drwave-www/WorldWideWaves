@@ -54,7 +54,8 @@ def render_progressive_text(format, video_writer, image_size, language, text, bo
     words = split_by_words(language, text)
     last_frame = None
     for i in range(len(words) + 1):
-        current_text = ' '.join(words[:i])
+        separator = " " if orientation == "H" or language == "ko" else "" # FIXME: ko specifics
+        current_text = separator.join(words[:i])
 
         logging.debug(f"Draw the text")
         pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format

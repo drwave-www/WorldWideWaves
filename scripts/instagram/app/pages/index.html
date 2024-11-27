@@ -160,6 +160,10 @@
             });
         }
 
+        // --------------------------------------------------------------------
+
+        let player = null
+
         function updateMediaContainerClass() {
             const videoContainer = document.querySelector('.video-container');
             const mediaContainer = document.querySelector('.media-container');
@@ -184,12 +188,25 @@
             const format = getField(language, "format-selector")
             let ratio = 1
             switch (format) {
-                case 'SQUARE': ratio = 1 ; break
-                case 'RECT_POST': ratio = 4 / 5 ; break
-                case 'RECT_REEL': ratio = 9 / 16 ; break
+                case 'SQUARE':
+                    ratio = 1;
+                    break
+                case 'RECT_POST':
+                    ratio = 4 / 5;
+                    break
+                case 'RECT_REEL':
+                    ratio = 9 / 16;
+                    break
             }
 
-            const player = videojs(`video-${language}`, {
+            if (player != null)
+                player.dispose()
+
+            const video_div = document.createElement('video-js');
+            video_div.id = `video-${language}`;
+            videoContainer.appendChild(video_div);
+
+            player = videojs(`video-${language}`, {
                 autoplay: true,
                 controls: true,
                 width: 300,
@@ -199,7 +216,7 @@
                 "nativeControlsForTouch": false
             });
             player.src({
-              src: video
+                src: video
             });
         }
 
@@ -613,9 +630,7 @@
                         <!-- Images will be dynamically added here -->
                     </div>
 
-                    <div id="video-container-{{ language }}" class="video-container" style="display: none;">
-                        <video-js id="video-{{ language }}"></video-js>
-                    </div>
+                    <div id="video-container-{{ language }}" class="video-container" style="display: none;"></div>
                 </div>
 
                 <br/>
