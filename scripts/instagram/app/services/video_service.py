@@ -31,7 +31,6 @@ from app.services.image_utils import draw_bounded_text, split_by_words, get_styl
 from app.services.utils import u_num
 
 # Configuration
-IMAGE_SIZE = (1080, 1080)
 FPS = 30
 STATIC_DISPLAY_TIME = 3  # Seconds to display static pages
 WORD_DISPLAY_TIME = 0.2
@@ -39,10 +38,10 @@ WORD_DISPLAY_TIME = 0.2
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
 
-def render_progressive_text(format, video_writer, language, text, bold_parts):
-    background_path = os.path.join(Config.TEMPLATE_FOLDER, "1.jpg")
+def render_progressive_text(format, video_writer, image_size, language, text, bold_parts):
+    background_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "quote.jpg")
     bg_image = cv2.imread(background_path)
-    bg_image = cv2.resize(bg_image, IMAGE_SIZE)
+    bg_image = cv2.resize(bg_image, image_size)
 
     styled_parts = get_styled_parts(text, bold_parts)
 
@@ -72,36 +71,39 @@ def render_progressive_text(format, video_writer, language, text, bold_parts):
         for _ in range(math.ceil(FPS * STATIC_DISPLAY_TIME)):
             video_writer.write(last_frame)
 
-def display_static_page(video_writer, page_path, timeunit=1):
+def display_static_page(video_writer, image_size, page_path, timeunit=1):
     static_frame = cv2.imread(page_path)
-    static_frame = cv2.resize(static_frame, IMAGE_SIZE)
+    static_frame = cv2.resize(static_frame, image_size)
 
     for _ in range(FPS * STATIC_DISPLAY_TIME * timeunit):
         video_writer.write(static_frame)
 
 def generate_video(format, language, page1, page2, bold_parts, cover_link):
     format = Config.FORMATS[format]
+
     fourcc = cv2.VideoWriter_fourcc(*"H264")
     output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+
     logging.info(f"Output file: {output_video}")
-    video_writer = cv2.VideoWriter(output_video, fourcc, FPS, IMAGE_SIZE)
+    image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
+    video_writer = cv2.VideoWriter(output_video, fourcc, FPS, image_size)
 
     if not video_writer.isOpened():
         raise Exception("Failed to open VideoWriter")
 
     # Logo frame
-    display_static_page(video_writer, Config.TEMPLATE_FOLDER + "/5.jpg")
+    display_static_page(video_writer, image_size, Config.TEMPLATE_FOLDER + "/" + format["FOLDER"] + "/logo.jpg")
 
     logging.info(f"Create pages with progressive text rendering")
-    render_progressive_text(format, video_writer, language, page1, bold_parts)
-    render_progressive_text(format, video_writer, language, page2, bold_parts)
+    render_progressive_text(format, video_writer, image_size, language, page1, bold_parts)
+    render_progressive_text(format, video_writer, image_size, language, page2, bold_parts)
 
-    display_static_page(video_writer, "app/" + cover_link)
+    display_static_page(video_writer, image_size, "app/" + cover_link)
 
     logging.info(f"Display static pages")
-    for static_page in [ "4.jpg", "5.jpg" ]:
-        static_page = os.path.join(Config.TEMPLATE_FOLDER, static_page)
-        display_static_page(video_writer, static_page)
+    for static_page in [ "2026.jpg", "logo.jpg" ]:
+        static_page = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], static_page)
+        display_static_page(video_writer, image_size, static_page)
 
     logging.info(f"Save and return video")
     video_writer.release()

@@ -56,7 +56,7 @@ class Config:
     COVER_MARGIN_WITH_TEXT = 40
 
     MIN_FONT_SIZE = 15
-    MAX_FONT_SIZE = 70
+    MAX_FONT_SIZE = 90
 
     FORMATS = {
         "SQUARE": {
@@ -72,7 +72,7 @@ class Config:
             "POS": {
                 "H" : {
                     "TITLE": 120,
-                    "AUTHOR": 850,
+                    "AUTHOR": 750,
                 },
                 "V" : {
                     "TITLE": 200,
@@ -93,7 +93,7 @@ class Config:
             "POS": {
                 "H": {
                     "TITLE": 150,
-                    "AUTHOR": 1100,
+                    "AUTHOR": 1000,
                 },
                 "V": {
                     "TITLE": 200,

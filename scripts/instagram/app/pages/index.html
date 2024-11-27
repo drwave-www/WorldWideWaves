@@ -181,11 +181,18 @@
             const videoContainer = document.getElementById(`video-container-${language}`);// Process images
             videoContainer.style.display = 'block';
 
+            const format = getField(language, "format-selector")
+            let ratio = 1
+            switch (format) {
+                case 'SQUARE': ratio = 1 ; break
+                case 'RECT_POST': ratio = 4 / 5 ; break
+            }
+
             const player = videojs(`video-${language}`, {
                 autoplay: true,
                 controls: true,
                 width: 300,
-                height: 300,
+                height: 300 / ratio,
                 preload: 'auto',
                 "customControlsOnMobile": true,
                 "nativeControlsForTouch": false
