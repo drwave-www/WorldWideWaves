@@ -144,7 +144,7 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
             if language == "ko": # FIXME specifics for ko
                 space_width += 40
             else:
-                space_width = 0
+                space_width = 10
 
         # Tokenize words and handle punctuation
         words = split_by_words(language, part)
@@ -286,7 +286,7 @@ def write_line(format, language, draw, line, x, y, orientation, direction, is_la
         if language == "ko":  # FIXME specifics for ko
             space_width += 40
         else:
-            space_width = 0
+            space_width = 10
 
     if direction == 'RL' and orientation == "H":
         line.reverse()
