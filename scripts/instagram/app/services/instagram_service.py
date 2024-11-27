@@ -62,6 +62,8 @@ def refresh_token(language, access_token):
         response = requests.get(url, params=params)
         response_data = response.json()
 
+        logging.info(f"Response: {response_data}")
+
         if "access_token" not in response_data:
             raise Exception(f"Failed to refresh token: {response_data}")
 
