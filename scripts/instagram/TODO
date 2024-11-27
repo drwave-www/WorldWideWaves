@@ -1,3 +1,13 @@
+- refactoring : introduire FORMATS[] dans conf avec SQUARE et PORTRAIT
+- video
+    - logo + bruit + titre
+    - quote
+    - world wide wave en differents languages, affiches et exprimes
+    - 2026
+    - logo
+- post
+- tiktok
+
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html
     - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
@@ -12,11 +22,13 @@
 FEATURES:
 - add support for TikTok (videos)
 - post avec un mot ecrit en grand, traduit en plusieurs langues
+- refresh de token FB pas top
 
 ----
 
 - accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
-- refresh de token FB pas top
+- tiktok accounts
+- change emails for instagram accounts (?)
 
 - worldwidewaves.net page with instagram accounts + email form
 

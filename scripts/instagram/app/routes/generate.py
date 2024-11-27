@@ -31,6 +31,7 @@ def __generate():
     data = request.json
     language = data["language"]
     article = data.get("article")
+    format = data.get("format", "SQUARE")
     cover_url = None
 
     if article:
@@ -54,7 +55,7 @@ def __generate():
                 return jsonify({"openai_error": str(e)}), 500
 
     try:
-        images = create_images(language, article, cover_url)
+        images = create_images(format, language, article, cover_url)
         response = {"images": images}
 
         if return_article:

@@ -28,20 +28,23 @@ from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
-def get_cover(language, author, title, author_image_url = None):
+def get_cover(format, language, author, title, author_image_url = None):
     image_path = os.path.join(Config.TEMPLATE_FOLDER, "3.jpg")
+    if isinstance(format, str):
+        format = Config.FORMATS[format]
+    orientation, direction = Config.get_layout(language)
 
     logging.info(f"Open template {image_path}")
     cover_template = Image.open(image_path)
     draw = ImageDraw.Draw(cover_template)
 
     logging.info(f"Create texts")
-    title_height = draw_bounded_title(language, "title", draw, title, Config.bold_font)
-    author_height = draw_bounded_title(language, "author", draw, author, Config.bold_font)
+    title_height = draw_bounded_title(format, language, "TITLE", draw, title, Config.bold_font)
+    author_height = draw_bounded_title(format, language, "AUTHOR", draw, author, Config.bold_font)
 
     # Calculate the available vertical space between the titles
     available_top = 120 + title_height  # Bottom of the first title
-    available_bottom = Config.POS_AUTHOR_H_Y  # Y-position of the second title
+    available_bottom = format["POS"][orientation]["AUTHOR"]  # Y-position of the second title
     available_height = available_bottom - available_top
 
     logging.info(f"Search for author image on Google")
@@ -54,24 +57,27 @@ def get_cover(language, author, title, author_image_url = None):
     logging.info(f"Image found: {author_image_url}")
     if author_image_url:
         logging.info(f"Retrieve image raw")
-        response = requests.get(author_image_url, stream=True, headers={"User-Agent": "Mozilla/5.0"})
-        if response.headers["Content-Type"].startswith("image"):
-            author_image = Image.open(response.raw)
+        try:
+            response = requests.get(author_image_url, stream=True, headers={"User-Agent": "Mozilla/5.0"})
+            if response.headers["Content-Type"].startswith("image"):
+                author_image = Image.open(response.raw)
 
-            logging.info(f"Open and resize it")
-            fixed_height = min(560, available_height)
-            aspect_ratio = author_image.width / author_image.height
-            new_width = int(fixed_height * aspect_ratio)
-            author_image = author_image.resize((new_width, fixed_height))
+                logging.info(f"Open and resize it")
+                fixed_height = min(560, available_height)
+                aspect_ratio = author_image.width / author_image.height
+                new_width = int(fixed_height * aspect_ratio)
+                author_image = author_image.resize((new_width, fixed_height))
 
-            # Calculate x and y positions to paste the image
-            x = (Config.IMAGE_SIZE - new_width) // 2  # Center horizontally
-            available_middle = (available_top + available_bottom) // 2
-            y = available_middle - (fixed_height // 2)  # Center vertically in the available space
+                # Calculate x and y positions to paste the image
+                x = (format["IMAGE"]["WIDTH"] - new_width) // 2  # Center horizontally
+                available_middle = (available_top + available_bottom) // 2
+                y = available_middle - (fixed_height // 2)  # Center vertically in the available space
 
-            cover_template.paste(author_image, (x, y))
-        else:
-            logging.error("URL does not point to a valid image.")
+                cover_template.paste(author_image, (x, y))
+            else:
+                logging.error("URL does not point to a valid image.")
+        except Exception as e:
+            logging.error(f"Exception while downloading author image: {e}")
 
     logging.info(f"Save cover image")
     cover_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_1.jpg")
@@ -80,7 +86,8 @@ def get_cover(language, author, title, author_image_url = None):
 
 # -----------------------------------------------------------------------------
 
-def create_images(language, json_data, cover_url = None):
+def create_images(format, language, json_data, cover_url = None):
+    format = Config.FORMATS[format]
     image_paths = []
 
     # 1. Page 1 and 2
@@ -93,15 +100,15 @@ def create_images(language, json_data, cover_url = None):
         draw = ImageDraw.Draw(text_template)
 
         # Debug
-        #rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
-        #rect_y = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_H) // 2
+        #rect_x = (Config.IMAGE_SIZE - format["AREA"]["WIDTH"]) // 2
+        #rect_y = (Config.IMAGE_SIZE - format["AREA"]["HEIGHT"]) // 2
         #draw.rectangle((
         #    rect_x, rect_y,
-        #    rect_x + Config.TEXT_RECT_SIZE_W,
-        #    rect_y + Config.TEXT_RECT_SIZE_H), fill='green')
+        #    rect_x + format["AREA"]["WIDTH"],
+        #    rect_y + format["AREA"]["HEIGHT"]), fill='green')
 
         logging.info(f"Draw the text")
-        draw_bounded_text(language, draw, json_data[page_key], json_data["bold_parts"])
+        draw_bounded_text(format, language, draw, json_data[page_key], json_data["bold_parts"])
 
         logging.info(f"Save image")
         page_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_{idx}.jpg")
@@ -110,7 +117,7 @@ def create_images(language, json_data, cover_url = None):
 
     # 2. Cover Image
     logging.info(f"Create cover image")
-    cover_path = get_cover(language, json_data['author'], json_data['title'], cover_url)
+    cover_path = get_cover(format, language, json_data['author'], json_data['title'], cover_url)
     image_paths.append((3, cover_path))
 
     # 3. 2026 Page

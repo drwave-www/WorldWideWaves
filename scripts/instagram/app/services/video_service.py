@@ -25,7 +25,8 @@ import cv2
 import numpy as np
 
 from PIL import Image, ImageDraw
-from app import Config
+
+from app.config import Config
 from app.services.image_utils import draw_bounded_text, split_by_words, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
 
@@ -38,7 +39,7 @@ WORD_DISPLAY_TIME = 0.2
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
 
-def render_progressive_text(video_writer, language, text, bold_parts):
+def render_progressive_text(format, video_writer, language, text, bold_parts):
     background_path = os.path.join(Config.TEMPLATE_FOLDER, "1.jpg")
     bg_image = cv2.imread(background_path)
     bg_image = cv2.resize(bg_image, IMAGE_SIZE)
@@ -49,9 +50,9 @@ def render_progressive_text(video_writer, language, text, bold_parts):
     orientation, direction = Config.get_layout(language)
     font_size = Config.MAX_FONT_SIZE
     if Config.VIDEO_USE_FINAL_FONT_SIZE:
-        font_size, _, _, _ = split_text_in_lines(language, orientation, direction, styled_parts)
+        font_size, _, _, _ = split_text_in_lines(format, language, orientation, direction, styled_parts)
 
-    words = split_by_words(language, text, direction)
+    words = split_by_words(language, text)
     last_frame = None
     for i in range(len(words) + 1):
         current_text = ' '.join(words[:i])
@@ -59,7 +60,7 @@ def render_progressive_text(video_writer, language, text, bold_parts):
         logging.debug(f"Draw the text")
         pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
         draw = ImageDraw.Draw(pil_image)
-        draw_bounded_text(language, draw, current_text, bold_parts, font_size)
+        draw_bounded_text(format, language, draw, current_text, bold_parts, font_size)
 
         logging.debug(f"Convert PIL image back to OpenCV format")
         cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
@@ -78,7 +79,8 @@ def display_static_page(video_writer, page_path, timeunit=1):
     for _ in range(FPS * STATIC_DISPLAY_TIME * timeunit):
         video_writer.write(static_frame)
 
-def generate_video(language, page1, page2, bold_parts, cover_link):
+def generate_video(format, language, page1, page2, bold_parts, cover_link):
+    format = Config.FORMATS[format]
     fourcc = cv2.VideoWriter_fourcc(*"H264")
     output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
     logging.info(f"Output file: {output_video}")
@@ -91,8 +93,8 @@ def generate_video(language, page1, page2, bold_parts, cover_link):
     display_static_page(video_writer, Config.TEMPLATE_FOLDER + "/5.jpg")
 
     logging.info(f"Create pages with progressive text rendering")
-    render_progressive_text(video_writer, language, page1, bold_parts)
-    render_progressive_text(video_writer, language, page2, bold_parts)
+    render_progressive_text(format, video_writer, language, page1, bold_parts)
+    render_progressive_text(format, video_writer, language, page2, bold_parts)
 
     display_static_page(video_writer, "app/" + cover_link)
 

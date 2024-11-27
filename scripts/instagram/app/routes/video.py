@@ -32,9 +32,10 @@ def __video():
     page2 = data["page2"]
     bold_parts = data["bold_parts"]
     cover_link = data["cover_link"]
+    format = data.get("format", "SQUARE")
 
     try:
-        video_link = generate_video(language, page1, page2, bold_parts, cover_link)
+        video_link = generate_video(format, language, page1, page2, bold_parts, cover_link)
         response = {"video": video_link}
         return jsonify(response)
     except Exception as e:

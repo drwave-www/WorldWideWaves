@@ -30,9 +30,10 @@ def __cover():
     language = data["language"]
     title = data["title"]
     author = data["author"]
+    format = data.get("format", "SQUARE")
 
     try:
-        json_data = get_cover(language, author, title)
+        json_data = get_cover(format, language, author, title)
         return jsonify(json_data)
     except Exception as e:
         return jsonify({"cover error": str(e)}), 500

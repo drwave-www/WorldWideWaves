@@ -53,16 +53,31 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
-    TEXT_RECT_SIZE_W = 850
-    TEXT_RECT_SIZE_H = 850
     MIN_FONT_SIZE = 15
     MAX_FONT_SIZE = 70
-    IMAGE_SIZE = 1080
 
-    POS_TITLE_H_Y = 120
-    POS_AUTHOR_H_Y = 850
-    POS_TITLE_V_X = 200
-    POS_AUTHOR_V_X = 950
+    FORMATS = {
+        "SQUARE": {
+            "IMAGE": {
+                "WIDTH": 1080,
+                "HEIGHT": 1080,
+            },
+            "AREA": {
+                "WIDTH": 850,
+                "HEIGHT": 850,
+            },
+            "POS": {
+                "H" : {
+                    "TITLE": 120,
+                    "AUTHOR": 850,
+                },
+                "V" : {
+                    "TITLE": 200,
+                    "AUTHOR": 950
+                }
+            }
+        }
+    }
 
     TPL_FONT_NORMAL = "app/fonts/noto"
     TPL_FONT_BOLD = "app/fonts/noto-bold"
@@ -116,16 +131,3 @@ class Config:
             raise "layout V-LR is not supported"
 
         return orientation, direction
-
-    @classmethod
-    def get_title_start(cls, title_type, orientation):
-        if orientation == "H":
-            if title_type == "title":
-                return Config.POS_TITLE_H_Y
-            else:  # 'author'
-                return Config.POS_AUTHOR_H_Y
-        else:  # 'V'
-            if title_type == "title":
-                return Config.POS_TITLE_V_X
-            else:  # 'author'
-                return Config.POS_AUTHOR_V_X
