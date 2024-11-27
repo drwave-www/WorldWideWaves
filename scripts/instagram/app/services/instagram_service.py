@@ -42,7 +42,7 @@ def is_token_valid(access_token):
         logging.error(f"Error validating token: {e}")
         return False, None
 
-def refresh_token(language, access_token):
+def refresh_token(language, account, access_token):
     try:
         # Check if token is valid and not expired
         is_valid, expires_at = is_token_valid(access_token)
@@ -69,7 +69,7 @@ def refresh_token(language, access_token):
 
         # Cache the token and expiry time
         refreshed_token = response_data["access_token"]
-        Config.update_token(language, refreshed_token)
+        Config.update_token(language, account, refreshed_token)
 
         logging.info("Token refreshed successfully.")
         return refreshed_token
@@ -134,7 +134,7 @@ def create_and_publish_carousel(language, image_urls, caption, account):
     access_token = Config.LANGUAGES[language]["accounts"][account]["access_token"]
 
     # Refresh the token if needed
-    access_token = refresh_token(language, access_token)
+    access_token = refresh_token(language, ig_user_id, access_token)
 
     try:
         # Step 1: Create individual item containers

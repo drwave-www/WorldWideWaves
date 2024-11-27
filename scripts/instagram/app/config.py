@@ -70,8 +70,9 @@ class Config:
     font_cache = {}
 
     @staticmethod
-    def update_token(language, account):
-        Config.CONFIG["languages"][language]["accounts"][account]["access_token"] = account.access_token
+    def update_token(language, account, access_token):
+        logging.info(f"Updating token for {language} in configuration")
+        Config.CONFIG["languages"][language]["accounts"][account]["access_token"] = access_token
         try:
             with open("config.yaml", "w") as f:
                 yaml.safe_dump(Config.CONFIG, f)
