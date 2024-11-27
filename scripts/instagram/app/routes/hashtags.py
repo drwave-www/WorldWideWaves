@@ -31,6 +31,6 @@ def __hashtags():
 
     try:
         hashtag_list = get_openai_hashtags(language, extract)
-        return jsonify({ "hashtags": hashtag_list })
+        return jsonify({ "hashtags": hashtag_list[:30] }) # Instagram limit
     except Exception as e:
         return jsonify({"openai error": str(e)}), 500

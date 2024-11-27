@@ -68,7 +68,7 @@ def get_openai_extract(language):
          - "translated": The translated version of concatenated author, title, page1 and page2 in french separated by newlines
     4. **Hashtags**:
        - Include hashtags that maximize social engagement and reflect the text's themes and context.
-       - Do not propose more than 30 hashtags
+       - Do not propose more than 25 hashtags
 
     5. **Error Handling**:
        - If no suitable text is found, return: `{{"error": "No suitable text found"}}`.
@@ -97,6 +97,7 @@ def get_openai_extract(language):
     else:
         caption_list = caption
     json_data["caption"] = Config.LANGUAGES[language]["fixed_hashtags"] + caption_list
+    json_data["caption"] = json_data["caption"][:30] # Instagram limit
 
     return json_data
 
@@ -106,7 +107,7 @@ def get_openai_hashtags(language, extract):
     Generate in the '{language}' language (ISO 639 code) and in english a list of relevant and engaging Instagram hashtags that maximize social engagement and reflect the following text's themes and context :
     {extract}
     Do not output anything else than the hastags without newlines, in one line to be used as an instagram caption.
-    Do not propose more than 30 hashtags.
+    Do not propose more than 25 hashtags.
     """
     logging.info(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(

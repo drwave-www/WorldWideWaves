@@ -1,4 +1,3 @@
-
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html
     - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
