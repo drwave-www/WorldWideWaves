@@ -80,9 +80,7 @@ class Config:
                 }
             },
             "MAGICS": {
-                "ja": 8,
-                "zh": -40,
-                "ko": -40
+                "ja": 10
             }
         },
         "RECT_POST": {
@@ -106,9 +104,7 @@ class Config:
                 }
             },
             "MAGICS": {
-                "ja": 13,
-                "zh": -40,
-                "ko": -40
+                "ja": 13
             }
         },
         "RECT_REEL": {
@@ -123,8 +119,8 @@ class Config:
             },
             "POS": {
                 "H": {
-                    "TITLE": 150,
-                    "AUTHOR": 1570,
+                    "TITLE": 250,
+                    "AUTHOR": 1450,
                 },
                 "V": {
                     "TITLE": 200,
@@ -132,9 +128,7 @@ class Config:
                 }
             },
             "MAGICS": {
-                "ja": 20,
-                "zh": -40,
-                "ko": -40
+                "ja": 20
             }
         }
     }

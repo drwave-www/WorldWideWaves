@@ -24,7 +24,7 @@ import re
 from app.config import Config
 from PIL import ImageFont, features
 
-def split_text_into_lines(text, font, max_width):
+def split_title_into_lines(text, font, max_width):
     words = text.split()
     lines = []
     current_line = ""
@@ -63,7 +63,7 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
     while min_font_size <= max_font_size:
         font_size = (min_font_size + max_font_size) // 2
         font = font_name(language, font_size)
-        lines = split_text_into_lines(text, font, max_width)
+        lines = split_title_into_lines(text, font, max_width)
 
         if len(lines) <= max_lines:
             # Text fits within the constraints; try a larger font size
@@ -77,7 +77,7 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
     # If no suitable font size was found, use the minimum font size
     if best_font is None:
         best_font = ImageFont.truetype(font_name, min_font_size)
-        best_lines = split_text_into_lines(text, best_font, max_width)
+        best_lines = split_title_into_lines(text, best_font, max_width)
 
     # Draw the text on the image
     line_height = best_font.getbbox("Ay")[3] + 10
@@ -107,13 +107,6 @@ def split_japanese_text_vertically(text):
     split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
     return split_text
 
-def split_korean_text_vertically(text):
-    text = text.replace('\n', '').replace('\r', '')
-    punctuation = '.,!?…“”‘’〈〉《》「」『』【】（）'
-    pattern = re.compile(r'(.)([' + re.escape(punctuation) + r']*)')
-    split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
-    return split_text
-
 def split_chinese_text_vertically(text):
     text = text.replace('\n', '').replace('\r', '')
     punctuation = '、。！？…“”‘’〈〉《》「」『』【】（）'
@@ -124,8 +117,6 @@ def split_chinese_text_vertically(text):
 def split_by_words(language, text):
     if language == 'ja':  # Japanese specifics
         words = split_japanese_text_vertically(text)
-    elif language == 'ko':  # Korean specifics
-        words = split_korean_text_vertically(text)
     elif language in ['zh', 'zh-cn', 'zh-tw']:  # Chinese specifics
         words = split_chinese_text_vertically(text)
     else:
@@ -141,16 +132,19 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
     current_font = Config.normal_font(language, font_size)
     bbox = current_font.getbbox("Ay")
     line_height = bbox[3] if orientation == "H" else bbox[2]
-    width_indice = 2 if orientation == "H" else 3
+    width_indice = 2 if orientation == "H" or language == "ko" else 3 # FIXME specifics for ko
     max_width = format["AREA"]["WIDTH"] if orientation == "H" else format["AREA"]["HEIGHT"]
 
     magic = format["MAGICS"].get(language, 0)
     for part, current_font in styled_parts:
         current_font = current_font(language, font_size)
-        space_width = current_font.getbbox(" ")[width_indice]
+        space_width = current_font.getbbox(" ")[width_indice] - current_font.getbbox(" ")[width_indice - 2]
 
-        if language == 'ja': # Japanese specifics
-            space_width = 0
+        if orientation == "V":
+            if language == "ko": # FIXME specifics for ko
+                space_width += 40
+            else:
+                space_width = 0
 
         # Tokenize words and handle punctuation
         words = split_by_words(language, part)
@@ -166,7 +160,10 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
                     bbox = current_font.getbbox(word)
                     word_width = bbox[width_indice] - bbox[width_indice - 2]
                 else: # V
-                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + magic for char in word)
+                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 12 for char in word)
+
+            if word_width > max_width:
+                logging.error(f"WARNING: word overflow {word_width} > {max_width}")
 
             if current_width + word_width > max_width:
                 # Finish the current line
@@ -272,25 +269,32 @@ def write_line(format, language, draw, line, x, y, orientation, direction, is_la
     if len(line) == 0:
         return
 
-    total_width = sum((font.getbbox(word)[2] for word, font in line))
+    width_indice = 2 if orientation == "H" or language == "ko" else 3 # FIXME specifics for ko
+    magic = format["MAGICS"].get(language, 0)
+    total_width = sum((font.getbbox(word)[width_indice] - font.getbbox(word)[width_indice - 2] + magic for word, font in line))
     space_count = len(line) - 1
 
-    if space_count > 0 and not is_last_line:
+    if orientation == "H" and space_count > 0 and not is_last_line:
         space_width = (format["AREA"]["WIDTH"] - total_width) // space_count
     else:
-        space_width = line[0][1].getbbox(" ")[2]
+        bbox = line[0][1].getbbox(" ")
+        space_width = bbox[width_indice] - bbox[width_indice - 2]
         if orientation == "H" and direction == "RL":
             x += format["AREA"]["WIDTH"] - total_width - space_width * space_count
 
     if orientation == "V":
-        space_width = 0
+        if language == "ko":  # FIXME specifics for ko
+            space_width += 40
+        else:
+            space_width = 0
 
     if direction == 'RL' and orientation == "H":
         line.reverse()
 
     for word, font in line:
         write_pillow(draw, x, y, word, font, orientation, direction)
-        step = font.getbbox(word)[2] + space_width
+        bbox =  font.getbbox(word)
+        step = bbox[width_indice] - bbox[width_indice - 2] + space_width
         if orientation == "H":
             x += step
         else: # V
