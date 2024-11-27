@@ -78,6 +78,11 @@ class Config:
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
+            },
+            "MAGICS": {
+                "ja": 8,
+                "zh": -40,
+                "ko": -40
             }
         },
         "RECT_POST": {
@@ -99,6 +104,37 @@ class Config:
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
+            },
+            "MAGICS": {
+                "ja": 13,
+                "zh": -40,
+                "ko": -40
+            }
+        },
+        "RECT_REEL": {
+            "FOLDER": "RECT_REEL",
+            "IMAGE": {
+                "WIDTH": 1080,
+                "HEIGHT": 1920,
+            },
+            "AREA": {
+                "WIDTH": 850,
+                "HEIGHT": 1690,
+            },
+            "POS": {
+                "H": {
+                    "TITLE": 150,
+                    "AUTHOR": 1570,
+                },
+                "V": {
+                    "TITLE": 200,
+                    "AUTHOR": 950
+                }
+            },
+            "MAGICS": {
+                "ja": 20,
+                "zh": -40,
+                "ko": -40
             }
         }
     }

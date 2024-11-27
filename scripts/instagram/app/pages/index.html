@@ -186,6 +186,7 @@
             switch (format) {
                 case 'SQUARE': ratio = 1 ; break
                 case 'RECT_POST': ratio = 4 / 5 ; break
+                case 'RECT_REEL': ratio = 9 / 16 ; break
             }
 
             const player = videojs(`video-${language}`, {
@@ -628,6 +629,7 @@
                     <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
                         <option value="SQUARE">1:1</option>
                         <option value="RECT_POST">4:5 (POST)</option>
+                        <option value="RECT_REEL">9:16 (REEL)</option>
                     </select>
                     <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
                     <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>

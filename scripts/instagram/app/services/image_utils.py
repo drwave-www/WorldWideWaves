@@ -107,11 +107,29 @@ def split_japanese_text_vertically(text):
     split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
     return split_text
 
+def split_korean_text_vertically(text):
+    text = text.replace('\n', '').replace('\r', '')
+    punctuation = '.,!?…“”‘’〈〉《》「」『』【】（）'
+    pattern = re.compile(r'(.)([' + re.escape(punctuation) + r']*)')
+    split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
+    return split_text
+
+def split_chinese_text_vertically(text):
+    text = text.replace('\n', '').replace('\r', '')
+    punctuation = '、。！？…“”‘’〈〉《》「」『』【】（）'
+    pattern = re.compile(r'(.)([' + re.escape(punctuation) + r']*)')
+    split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
+    return split_text
+
 def split_by_words(language, text):
     if language == 'ja':  # Japanese specifics
         words = split_japanese_text_vertically(text)
+    elif language == 'ko':  # Korean specifics
+        words = split_korean_text_vertically(text)
+    elif language in ['zh', 'zh-cn', 'zh-tw']:  # Chinese specifics
+        words = split_chinese_text_vertically(text)
     else:
-        words = re.findall(r"[^\s,]+|[,.]", text)  # Split into words and punctuation
+        words = re.findall(r"[^\s,]+|[,.]", text)
     return words
 
 def layout_text(format, language, font_size, styled_parts, orientation, direction):
@@ -126,6 +144,7 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
     width_indice = 2 if orientation == "H" else 3
     max_width = format["AREA"]["WIDTH"] if orientation == "H" else format["AREA"]["HEIGHT"]
 
+    magic = format["MAGICS"].get(language, 0)
     for part, current_font in styled_parts:
         current_font = current_font(language, font_size)
         space_width = current_font.getbbox(" ")[width_indice]
@@ -138,15 +157,16 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
 
         for word in words:
             if word in {",", "."}:
-                current_width += current_font.getbbox(".")[width_indice]
+                current_width += current_font.getbbox(word)[width_indice]
                 if current_line:
                     current_line[-1][0] += word  # Append punctuation to the previous word
                 continue
             else:
                 if orientation == "H":
-                    word_width = current_font.getbbox(word)[width_indice] - current_font.getbbox(word)[width_indice - 2]
+                    bbox = current_font.getbbox(word)
+                    word_width = bbox[width_indice] - bbox[width_indice - 2]
                 else: # V
-                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 12 for char in word) # +12 is secret
+                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + magic for char in word)
 
             if current_width + word_width > max_width:
                 # Finish the current line
@@ -262,7 +282,7 @@ def write_line(format, language, draw, line, x, y, orientation, direction, is_la
         if orientation == "H" and direction == "RL":
             x += format["AREA"]["WIDTH"] - total_width - space_width * space_count
 
-    if language == "ja":
+    if orientation == "V":
         space_width = 0
 
     if direction == 'RL' and orientation == "H":
