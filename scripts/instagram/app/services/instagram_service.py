@@ -90,6 +90,8 @@ def create_media_container(image_url, caption, is_carousel_item, ig_user_id, acc
     response = requests.post(url, params=params)
     response_data = response.json()
 
+    logging.info(f"Response: {response_data}")
+
     if "id" not in response_data or response_data["id"] == 0:
         raise Exception(f"Failed to create media container: {response_data}")
 
@@ -106,6 +108,8 @@ def create_carousel_container(children_ids, caption, ig_user_id, access_token):
     response = requests.post(url, params=params)
     response_data = response.json()
 
+    logging.info(f"Response: {response_data}")
+
     if "id" not in response_data or response_data["id"] == 0:
         raise Exception(f"Failed to create carousel container: {response_data}")
 
@@ -119,6 +123,8 @@ def publish_carousel(container_id, ig_user_id, access_token):
     }
     response = requests.post(url, params=params)
     response_data = response.json()
+
+    logging.info(f"Response: {response_data}")
 
     if "id" not in response_data or response_data["id"] == 0:
         raise Exception(f"Failed to publish carousel: {response_data}")
