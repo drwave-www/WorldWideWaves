@@ -47,6 +47,8 @@ class Config:
 
     # -------------------------------------------------------------------------
 
+    VIDEO_USE_FINAL_FONT_SIZE = True # If true, directly fit the text at the target size in the video
+
     TEMPLATE_FOLDER = "template"
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"

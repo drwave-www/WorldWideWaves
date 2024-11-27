@@ -26,7 +26,7 @@ import numpy as np
 
 from PIL import Image, ImageDraw
 from app import Config
-from app.services.image_utils import draw_bounded_text
+from app.services.image_utils import draw_bounded_text, split_by_words, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
 
 # Configuration
@@ -43,7 +43,15 @@ def render_progressive_text(video_writer, language, text, bold_parts):
     bg_image = cv2.imread(background_path)
     bg_image = cv2.resize(bg_image, IMAGE_SIZE)
 
-    words = text.split()
+    styled_parts = get_styled_parts(text, bold_parts)
+
+    # Find the final font size
+    orientation, direction = Config.get_layout(language)
+    font_size = Config.MAX_FONT_SIZE
+    if Config.VIDEO_USE_FINAL_FONT_SIZE:
+        font_size, _, _, _ = split_text_in_lines(language, orientation, direction, styled_parts)
+
+    words = split_by_words(language, text, direction)
     last_frame = None
     for i in range(len(words) + 1):
         current_text = ' '.join(words[:i])
@@ -51,7 +59,7 @@ def render_progressive_text(video_writer, language, text, bold_parts):
         logging.debug(f"Draw the text")
         pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
         draw = ImageDraw.Draw(pil_image)
-        draw_bounded_text(language, draw, current_text, bold_parts)
+        draw_bounded_text(language, draw, current_text, bold_parts, font_size)
 
         logging.debug(f"Convert PIL image back to OpenCV format")
         cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)

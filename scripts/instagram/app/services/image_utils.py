@@ -107,7 +107,14 @@ def split_japanese_text_vertically(text):
     split_text = [match.group(1) + match.group(2) for match in pattern.finditer(text)]
     return split_text
 
-def layout_text(language, font_size, styled_parts, orientation):
+def split_by_words(language, text, direction):
+    if language == 'ja':  # Japanese specifics
+        words = split_japanese_text_vertically(text)
+    else:
+        words = re.findall(r"[^\s,]+|[,.]", text)  # Split into words and punctuation
+    return words
+
+def layout_text(language, font_size, styled_parts, orientation, direction):
     lines = []
     current_line = []
     current_width = 0
@@ -123,12 +130,11 @@ def layout_text(language, font_size, styled_parts, orientation):
         current_font = current_font(language, font_size)
         space_width = current_font.getbbox(" ")[width_indice]
 
-        # Tokenize words and handle punctuation
         if language == 'ja': # Japanese specifics
-            words = split_japanese_text_vertically(part)
             space_width = 0
-        else:
-            words = re.findall(r"[^\s,]+|[,.]", part)  # Split into words and punctuation
+
+        # Tokenize words and handle punctuation
+        words = split_by_words(language, part, direction)
 
         for word in words:
             if word in {",", "."}:
@@ -158,13 +164,7 @@ def layout_text(language, font_size, styled_parts, orientation):
 
     return lines, line_height, total_height
 
-def draw_bounded_text(language, draw, text, bold_parts):
-    logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
-
-    # Config
-    orientation, direction = Config.get_layout(language)
-    font_size = Config.MAX_FONT_SIZE
-
+def get_styled_parts(text, bold_parts):
     # Split text into parts, tagging bold sections
     styled_parts = []
     remaining_text = text
@@ -181,14 +181,18 @@ def draw_bounded_text(language, draw, text, bold_parts):
     if remaining_text.strip():
         styled_parts.append((remaining_text.strip(), Config.normal_font))
 
-    # Adjust font size to fit within the rectangle
+    return styled_parts
+
+def split_text_in_lines(language, orientation, direction, styled_parts, font_size = Config.MAX_FONT_SIZE):
     total_height = 0
     lines = []
     line_height = 0
+
     max_height = Config.TEXT_RECT_SIZE_H if orientation == "H" else Config.TEXT_RECT_SIZE_W
+
     while font_size >= Config.MIN_FONT_SIZE:
         # Simulate the layout with current font size
-        lines, line_height, total_height = layout_text(language, font_size, styled_parts, orientation)
+        lines, line_height, total_height = layout_text(language, font_size, styled_parts, orientation, direction)
 
         # Check if the total height fits within the rectangle
         if total_height <= max_height:
@@ -202,6 +206,20 @@ def draw_bounded_text(language, draw, text, bold_parts):
     # If text doesn't fit, raise an error
     if font_size < Config.MIN_FONT_SIZE:
         raise ValueError("The text is too large to fit within the bounds.")
+
+    return font_size, total_height, lines, line_height
+
+def draw_bounded_text(language, draw, text, bold_parts, font_size = Config.MAX_FONT_SIZE):
+    logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
+
+    # Config
+    orientation, direction = Config.get_layout(language)
+
+    # Split with bold
+    styled_parts = get_styled_parts(text, bold_parts)
+
+    # Adjust font size to fit within the rectangle
+    _, total_height, lines, line_height = split_text_in_lines(language, orientation, direction, styled_parts, font_size)
 
     # Calculate starting position to center the text within the rectangle
     rect_x = (Config.IMAGE_SIZE - Config.TEXT_RECT_SIZE_W) // 2
@@ -246,6 +264,9 @@ def write_line(language, draw, line, x, y, orientation, direction, is_last_line=
 
     if language == "ja":
         space_width = 0
+
+    if direction == 'RL':
+        line.reverse()
 
     for word, font in line:
         write_pillow(draw, x, y, word, font, orientation, direction)
