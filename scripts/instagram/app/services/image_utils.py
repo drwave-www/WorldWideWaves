@@ -230,7 +230,7 @@ def draw_bounded_text(format, language, draw, text, bold_parts, font_size = Conf
 
     if orientation == "V":
         if direction == "RL":
-            rect_x = format["IMAGE"]["WIDTH"] - y
+            rect_x = format["IMAGE"]["WIDTH"] - (format["IMAGE"]["WIDTH"] - total_height) // 2
         y = (format["IMAGE"]["HEIGHT"] - format["AREA"]["HEIGHT"]) // 2
 
     # Draw each line of justified text

@@ -81,6 +81,34 @@
             display: block;
         }
 
+       .buttons {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Vertically center items */
+    gap: 10px; /* Add space between items */
+}
+
+.format-selector {
+    background-color: #ccffcc; /* Light green background */
+    border: 1px solid #99cc99; /* Slightly darker green border */
+    color: #333; /* Text color */
+    padding: 8px 12px; /* Padding for better sizing */
+    font-size: 1rem; /* Match font size of buttons */
+    border-radius: 4px; /* Rounded corners */
+    height: 2.5em; /* Match the height of Bulma buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.format-selector:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 0 2px rgba(153, 204, 153, 0.5); /* Add a subtle green glow */
+}
+
+.format-selector option {
+    background-color: #ffffff; /* White background for options */
+    color: #333; /* Text color */
+}
+
+
         .published-overlay {
             position: absolute;
             top: 0;

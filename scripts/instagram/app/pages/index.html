@@ -253,6 +253,8 @@
                 data.article = article
             }
 
+            data.format = getField(language, "format-selector")
+
             apiCall('/generate', 'POST', data,
                 (data) => {
                     if (typeof data === 'string' && data.toLowerCase().includes('error')) {
@@ -304,7 +306,8 @@
                 page1: article["page1"],
                 page2: article["page2"],
                 bold_parts: article["bold_parts"],
-                cover_link: cover_link
+                cover_link: cover_link,
+                format: getField(language, "format-selector")
             }
 
             showSpinner(language)
@@ -344,7 +347,12 @@
 
             showSpinner(language)
             apiCall('/cover', 'POST',
-                {language: language, author: getField(language, "author"), title: getField(language, "title")},
+                {
+                    language: language,
+                    author: getField(language, "author"),
+                    title: getField(language, "title"),
+                    format: getField(language, "format-selector")
+                },
                 (data) => {
                     const coverImage = carousel.querySelector('div.image-wrapper:nth-child(3) img');
                     if (coverImage) {
@@ -610,6 +618,10 @@
                 </div>
 
                 <div class="buttons">
+                    <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
+                        <option value="SQUARE">1:1</option>
+                        <option value="RECT_POST">4:5 (POST)</option>
+                    </select>
                     <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
                     <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
                     <button class="button is-link" onclick="shuffleCover('{{ language }}')">Shuffle Cover</button>
@@ -619,7 +631,6 @@
                     <button class="button is-danger" onclick="postImageToInstagram('{{ language }}')">Post Images to Instagram</button>
                     <button class="button is-danger" onclick="postVideoToInstagram('{{ language }}')">Post Video to Instagram</button>
                 </div>
-
             </div>
 
             {% endfor %}

@@ -121,9 +121,9 @@ for language, text in texts.items():
         print(f"Skip language {language} NOT SUPPORTED")
 
     # Paths
-    intro_video_path = "template/intro-video.mp4"
-    intro_glitch_audio_path = "template/intro-glitch.mp3"
-    intro_www_audio_path = "template/intro-www.wav"
+    intro_video_path = "template/VIDEO/intro-video.mp4"
+    intro_glitch_audio_path = "template/VIDEO/intro-glitch.mp3"
+    intro_www_audio_path = "template/VIDEO/intro-www.wav"
     main_video_path = "tts_test_video.mp4"
     main_audio_path = output_file  # Assuming this is defined elsewhere
     outro_video_path = "template/outro-video.mp4"

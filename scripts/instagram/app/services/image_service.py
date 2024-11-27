@@ -28,10 +28,14 @@ from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
+
 def get_cover(format, language, author, title, author_image_url = None):
-    image_path = os.path.join(Config.TEMPLATE_FOLDER, "3.jpg")
     if isinstance(format, str):
         format = Config.FORMATS[format]
+
+    margin = Config.COVER_MARGIN_WITH_TEXT
+
+    image_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "empty.jpg")
     orientation, direction = Config.get_layout(language)
 
     logging.info(f"Open template {image_path}")
@@ -43,9 +47,19 @@ def get_cover(format, language, author, title, author_image_url = None):
     author_height = draw_bounded_title(format, language, "AUTHOR", draw, author, Config.bold_font)
 
     # Calculate the available vertical space between the titles
-    available_top = 120 + title_height  # Bottom of the first title
-    available_bottom = format["POS"][orientation]["AUTHOR"]  # Y-position of the second title
+    if orientation == "H":
+        available_top = format["POS"][orientation]["TITLE"] + title_height + margin
+        available_bottom = format["POS"][orientation]["AUTHOR"] - margin
+        available_left = (format["IMAGE"]["WIDTH"] - format["AREA"]["WIDTH"]) // 2
+        available_right = format["IMAGE"]["WIDTH"] - available_left
+    else: # V
+        available_top = (format["IMAGE"]["HEIGHT"] - format["AREA"]["HEIGHT"]) // 2
+        available_bottom = format["IMAGE"]["HEIGHT"] - available_top
+        available_left = format["POS"][orientation]["TITLE"] + title_height + margin
+        available_right = format["POS"][orientation]["AUTHOR"] - margin
+
     available_height = available_bottom - available_top
+    available_width = available_right - available_left
 
     logging.info(f"Search for author image on Google")
     if not author_image_url:
@@ -60,18 +74,31 @@ def get_cover(format, language, author, title, author_image_url = None):
         try:
             response = requests.get(author_image_url, stream=True, headers={"User-Agent": "Mozilla/5.0"})
             if response.headers["Content-Type"].startswith("image"):
+                logging.info(f"Open it")
                 author_image = Image.open(response.raw)
 
-                logging.info(f"Open and resize it")
-                fixed_height = min(560, available_height)
+                logging.info(f"Resize it")
+
                 aspect_ratio = author_image.width / author_image.height
-                new_width = int(fixed_height * aspect_ratio)
-                author_image = author_image.resize((new_width, fixed_height))
+                if orientation == "H":
+                    height = available_height
+                    width = int(height * aspect_ratio)
+                    if width > available_width:
+                        width = available_width
+                        height = int(width / aspect_ratio)
+                else:  # V
+                    width = available_width
+                    height = int(width / aspect_ratio)
+                    if height > available_height:
+                        height = available_height
+                        width = int(height * aspect_ratio)
+
+                author_image = author_image.resize((width, height))
 
                 # Calculate x and y positions to paste the image
-                x = (format["IMAGE"]["WIDTH"] - new_width) // 2  # Center horizontally
+                x = (format["IMAGE"]["WIDTH"] - width) // 2  # Center horizontally
                 available_middle = (available_top + available_bottom) // 2
-                y = available_middle - (fixed_height // 2)  # Center vertically in the available space
+                y = available_middle - (height // 2)  # Center vertically in the available space
 
                 cover_template.paste(author_image, (x, y))
             else:
@@ -92,9 +119,8 @@ def create_images(format, language, json_data, cover_url = None):
 
     # 1. Page 1 and 2
     logging.info(f"Generate text pages")
+    img_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], f"quote.jpg")
     for idx, page_key in enumerate(["page1", "page2"], start=1):
-        img_path = os.path.join(Config.TEMPLATE_FOLDER, f"{idx}.jpg")
-
         logging.info(f"Open file {img_path}")
         text_template = Image.open(img_path)
         draw = ImageDraw.Draw(text_template)
@@ -122,14 +148,14 @@ def create_images(format, language, json_data, cover_url = None):
 
     # 3. 2026 Page
     logging.info(f"Static page 2026")
-    year_path = os.path.join(Config.TEMPLATE_FOLDER, "4.jpg")
+    year_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "2026.jpg")
     final_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_4.jpg")
     Image.open(year_path).save(final_path)
     image_paths.append((4, final_path))
 
     # 4. Logo Page
     logging.info(f"Static page logo")
-    logo_path = os.path.join(Config.TEMPLATE_FOLDER, "5.jpg")
+    logo_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"],"logo.jpg")
     final_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_5.jpg")
     Image.open(logo_path).save(final_path)
     image_paths.append((5, final_path))

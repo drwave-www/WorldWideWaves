@@ -53,11 +53,14 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
+    COVER_MARGIN_WITH_TEXT = 40
+
     MIN_FONT_SIZE = 15
     MAX_FONT_SIZE = 70
 
     FORMATS = {
         "SQUARE": {
+            "FOLDER": "SQUARE",
             "IMAGE": {
                 "WIDTH": 1080,
                 "HEIGHT": 1080,
@@ -72,6 +75,27 @@ class Config:
                     "AUTHOR": 850,
                 },
                 "V" : {
+                    "TITLE": 200,
+                    "AUTHOR": 950
+                }
+            }
+        },
+        "RECT_POST": {
+            "FOLDER": "RECT_POST",
+            "IMAGE": {
+                "WIDTH": 1080,
+                "HEIGHT": 1350,
+            },
+            "AREA": {
+                "WIDTH": 850,
+                "HEIGHT": 1120,
+            },
+            "POS": {
+                "H": {
+                    "TITLE": 150,
+                    "AUTHOR": 1100,
+                },
+                "V": {
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
