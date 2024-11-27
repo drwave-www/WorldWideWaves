@@ -41,7 +41,7 @@ def get_cover(language, author, title, author_image_url = None):
 
     # Calculate the available vertical space between the titles
     available_top = 120 + title_height  # Bottom of the first title
-    available_bottom = 900  # Y-position of the second title
+    available_bottom = Config.POS_AUTHOR_H_Y  # Y-position of the second title
     available_height = available_bottom - available_top
 
     logging.info(f"Search for author image on Google")
