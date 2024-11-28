@@ -104,6 +104,19 @@
             }
         }
 
+        @media (min-width: 769px) {
+            .video-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            video, video-js {
+                height: auto; /* Adjust dynamically via JS */
+                max-height: 100%; /* Prevent overflow */
+            }
+        }
+
         .image-wrapper {
             position: relative;
             display: inline-block;
