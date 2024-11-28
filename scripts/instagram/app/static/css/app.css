@@ -175,12 +175,13 @@
             height: 60px !important; /* Force height to 60px */
         }
 
-        .spinner{
-            position:relative;
-            width:204px;
-            height:25px;
-            margin:auto;
+        .spinner {
+            position: relative;
+            width: 204px;
+            height: 45px; /* 25px height + 20px padding */
+            margin: auto;
             padding-bottom: 20px;
+            box-sizing: border-box;
         }
 
         .spinningSquaresG{
