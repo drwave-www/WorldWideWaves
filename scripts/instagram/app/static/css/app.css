@@ -93,9 +93,9 @@
 
        .buttons select {
             appearance: none; /* Removes default browser styling */
-            background-color: #209cee; /* Match the button's default background */
+            background-color: #90EE90; /* Match the button's default background */
             border: 1px solid #209cee; /* Match the button's border color */
-            color: white; /* Match button text color */
+            color: #209cee; /* Match button text color */
             padding: 0.5em 1em; /* Same padding as buttons */
             border-radius: 4px; /* Match button border radius */
             font-size: 1rem; /* Match font size */
