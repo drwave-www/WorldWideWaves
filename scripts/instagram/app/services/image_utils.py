@@ -85,10 +85,12 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
     line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
 
     for i, line in enumerate(best_lines):
-        bbox = best_font.getbbox(line)
-
         width_indice = 2 if orientation == "H" or language == "ko" else 3  # FIXME specifics for ko
-        line_width = bbox[width_indice] - bbox[width_indice - 2]
+        if orientation == "H":
+            bbox = best_font.getbbox(line)
+            line_width = bbox[width_indice] - bbox[width_indice - 2]
+        else:
+            line_width = sum(best_font.getbbox(char)[width_indice] - best_font.getbbox(char)[width_indice - 2] + 12 for char in line)
 
         if orientation == "H":
             x = (format["IMAGE"]["WIDTH"] - line_width) // 2  # Center the text horizontally
