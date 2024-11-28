@@ -28,7 +28,6 @@ from app.services.utils import u_num
 from app.services.image_utils import draw_bounded_title, draw_bounded_text
 from app.services.google_service import fetch_google_image
 
-
 def get_cover(format, language, author, title, author_image_url = None):
     if isinstance(format, str):
         format = Config.FORMATS[format]
@@ -36,7 +35,7 @@ def get_cover(format, language, author, title, author_image_url = None):
     margin = Config.COVER_MARGIN_WITH_TEXT
 
     image_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "empty.jpg")
-    orientation, direction = Config.get_layout(language)
+    orientation, direction, _ = Config.get_layout(language)
 
     logging.info(f"Open template {image_path}")
     cover_template = Image.open(image_path)

@@ -24,6 +24,37 @@ import re
 from app.config import Config
 from PIL import ImageFont, features
 
+def get_text_width(format, language, font, text):
+    orientation, direction, spaced = Config.get_layout(language)
+    width_indice = 2 if orientation == "H" or spaced else 3
+
+    if orientation == "H":
+        bbox = font.getbbox(text)
+        line_width = bbox[width_indice] - bbox[width_indice - 2]
+    else:
+        line_width = sum(font.getbbox(char)[width_indice] - font.getbbox(char)[width_indice - 2] for char in text)
+    return line_width
+
+def get_text_height(language, font):
+    orientation, direction, spaced = Config.get_layout(language)
+    bbox = font.getbbox("Ay")
+    height_indice = 3 if orientation == "H" or spaced else 2
+    line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
+    return line_height
+
+def get_space_width(font, language):
+    orientation, direction, spaced = Config.get_layout(language)
+    width_indice = 2 if orientation == "H" or spaced else 3
+    space_width = font.getbbox(" ")[width_indice] - font.getbbox(" ")[width_indice - 2]
+    if orientation == "V":
+        if spaced:
+            space_width += 40
+        else:
+            space_width = Config.DEFAULT_SPACE_WIDTH
+    return space_width
+
+# -----------------------------------------------------------------------------
+
 def split_title_into_lines(text, font, max_width):
     words = text.split()
     lines = []
@@ -47,7 +78,7 @@ def split_title_into_lines(text, font, max_width):
 
 def draw_bounded_title(format, language, title_type, draw, text, font_name):
     min_font_size = Config.MIN_FONT_SIZE
-    max_font_size = Config.MAX_FONT_SIZE
+    max_font_size = Config.MAX_TITLE_FONT_SIZE
     initial_font_size = max_font_size # Start with the initial font size
 
     max_width = format["AREA"]["WIDTH"]  # Maximum allowed width for the text
@@ -56,7 +87,7 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
     best_font = initial_font_size
     best_lines = []
 
-    orientation, direction = Config.get_layout(language)
+    orientation, direction, _ = Config.get_layout(language)
     pos_start = format["POS"][orientation][title_type]
 
     # Use binary search to find the optimal font size
@@ -80,18 +111,9 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
         best_lines = split_title_into_lines(text, best_font, max_width)
 
     # Draw the text on the image
-    bbox = best_font.getbbox("Ay")
-    height_indice = 3 if orientation == "H" or language == "ko" else 2  # FIXME specifics for ko
-    line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
-
+    line_height = get_text_height(language, best_font)
     for i, line in enumerate(best_lines):
-        width_indice = 2 if orientation == "H" or language == "ko" else 3  # FIXME specifics for ko
-        if orientation == "H":
-            bbox = best_font.getbbox(line)
-            line_width = bbox[width_indice] - bbox[width_indice - 2]
-        else:
-            line_width = sum(best_font.getbbox(char)[width_indice] - best_font.getbbox(char)[width_indice - 2] + 12 for char in line)
-
+        line_width = get_text_width(format, language, best_font, line)
         if orientation == "H":
             x = (format["IMAGE"]["WIDTH"] - line_width) // 2  # Center the text horizontally
             y = pos_start + i * line_height  # Position the text vertically
@@ -130,45 +152,32 @@ def split_by_words(language, text):
         words = re.findall(r"[^\s,]+|[,.]", text)
     return words
 
-def layout_text(format, language, font_size, styled_parts, orientation, direction):
+def layout_text(format, language, font_size, styled_parts):
     lines = []
     current_line = []
     current_width = 0
     total_height = 0
 
+    orientation, direction, _ = Config.get_layout(language)
     current_font = Config.normal_font(language, font_size)
-    bbox = current_font.getbbox("Ay")
-    width_indice = 2 if orientation == "H" or language == "ko" else 3 # FIXME specifics for ko
-    height_indice = 3 if orientation == "H" or language == "ko" else 2  # FIXME specifics for ko
-    line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
+    line_height = get_text_height(language, current_font)
     max_width = format["AREA"]["WIDTH"] if orientation == "H" else format["AREA"]["HEIGHT"]
 
-    magic = format["MAGICS"].get(language, 0)
     for part, current_font in styled_parts:
         current_font = current_font(language, font_size)
-        space_width = current_font.getbbox(" ")[width_indice] - current_font.getbbox(" ")[width_indice - 2]
-
-        if orientation == "V":
-            if language == "ko": # FIXME specifics for ko
-                space_width += 40
-            else:
-                space_width = Config.DEFAULT_SPACE_WIDTH
+        space_width = get_space_width(current_font, language)
 
         # Tokenize words and handle punctuation
         words = split_by_words(language, part)
 
         for word in words:
             if word in {",", "."}:
-                current_width += current_font.getbbox(word)[width_indice]
+                current_width += get_text_width(format, language, current_font, word)
                 if current_line:
                     current_line[-1][0] += word  # Append punctuation to the previous word
                 continue
             else:
-                if orientation == "H":
-                    bbox = current_font.getbbox(word)
-                    word_width = bbox[width_indice] - bbox[width_indice - 2]
-                else: # V
-                    word_width = sum(current_font.getbbox(char)[width_indice] - current_font.getbbox(char)[width_indice - 2] + 12 for char in word)
+                word_width = get_text_width(format, language, current_font, word)
 
             if word_width > max_width:
                 logging.error(f"WARNING: word overflow {word_width} > {max_width}")
@@ -209,16 +218,17 @@ def get_styled_parts(text, bold_parts):
 
     return styled_parts
 
-def split_text_in_lines(format, language, orientation, direction, styled_parts, font_size = Config.MAX_FONT_SIZE):
+def split_text_in_lines(format, language, styled_parts, font_size = Config.MAX_FONT_SIZE):
     total_height = 0
     lines = []
     line_height = 0
 
+    orientation, direction, _ = Config.get_layout(language)
     max_height = format["AREA"]["HEIGHT"] if orientation == "H" else format["AREA"]["WIDTH"]
 
     while font_size >= Config.MIN_FONT_SIZE:
         # Simulate the layout with current font size
-        lines, line_height, total_height = layout_text(format, language, font_size, styled_parts, orientation, direction)
+        lines, line_height, total_height = layout_text(format, language, font_size, styled_parts)
 
         # Check if the total height fits within the rectangle
         if total_height <= max_height:
@@ -239,13 +249,13 @@ def draw_bounded_text(format, language, draw, text, bold_parts, font_size = Conf
     logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
 
     # Config
-    orientation, direction = Config.get_layout(language)
+    orientation, direction, _ = Config.get_layout(language)
 
     # Split with bold
     styled_parts = get_styled_parts(text, bold_parts)
 
     # Adjust font size to fit within the rectangle
-    _, total_height, lines, line_height = split_text_in_lines(format, language, orientation, direction, styled_parts, font_size)
+    _, total_height, lines, line_height = split_text_in_lines(format, language, styled_parts, font_size)
 
     # Calculate starting position to center the text within the rectangle
     rect_x = (format["IMAGE"]["WIDTH"] - format["AREA"]["WIDTH"]) // 2
@@ -262,7 +272,7 @@ def draw_bounded_text(format, language, draw, text, bold_parts, font_size = Conf
     # Draw each line of justified text
     x = rect_x
     for i, line in enumerate(lines):
-        write_line(format, language, draw, line, x, y, orientation, direction, is_last_line=(i == len(lines) - 1))
+        write_line(format, language, draw, line, x, y, is_last_line=(i == len(lines) - 1))
         # debug
         # draw.rectangle((x, y, x + format["AREA"]["WIDTH"], y + line_height), outline='yellow')
         if orientation == "H":
@@ -274,36 +284,27 @@ def draw_bounded_text(format, language, draw, text, bold_parts, font_size = Conf
             else:
                 x += line_height
 
-def write_line(format, language, draw, line, x, y, orientation, direction, is_last_line=False):
+def write_line(format, language, draw, line, x, y, is_last_line=False):
     if len(line) == 0:
         return
 
-    width_indice = 2 if orientation == "H" or language == "ko" else 3 # FIXME specifics for ko
-    magic = format["MAGICS"].get(language, 0)
-    total_width = sum((font.getbbox(word)[width_indice] - font.getbbox(word)[width_indice - 2] + magic for word, font in line))
+    orientation, direction, _ = Config.get_layout(language)
+    total_width = sum((get_text_width(format, language, font, word) for word, font in line))
     space_count = len(line) - 1
 
     if orientation == "H" and space_count > 0 and not is_last_line:
         space_width = (format["AREA"]["WIDTH"] - total_width) // space_count
     else:
-        bbox = line[0][1].getbbox(" ")
-        space_width = bbox[width_indice] - bbox[width_indice - 2]
+        space_width = get_space_width(line[0][1], language)
         if orientation == "H" and direction == "RL":
             x += format["AREA"]["WIDTH"] - total_width - space_width * space_count
-
-    if orientation == "V":
-        if language == "ko":  # FIXME specifics for ko
-            space_width += 40
-        else:
-            space_width = Config.DEFAULT_SPACE_WIDTH
 
     if direction == 'RL' and orientation == "H":
         line.reverse()
 
     for word, font in line:
         write_pillow(draw, x, y, word, font, orientation, direction)
-        bbox =  font.getbbox(word)
-        step = bbox[width_indice] - bbox[width_indice - 2] + space_width
+        step = get_text_width(format, language, font, word) + space_width
         if orientation == "H":
             x += step
         else: # V

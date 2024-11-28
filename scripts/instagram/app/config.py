@@ -56,10 +56,11 @@ class Config:
     USED_TEXTS_FILE = "used_texts.json"
     OUTPUT_FOLDER = "app/static/output"
 
-    COVER_MARGIN_WITH_TEXT = 40
+    COVER_MARGIN_WITH_TEXT = 60
 
     MIN_FONT_SIZE = 15
     MAX_FONT_SIZE = 90
+    MAX_TITLE_FONT_SIZE = 70
     SPACE_BETWEEN_LINES = 20
     DEFAULT_SPACE_WIDTH = 10
 
@@ -83,9 +84,6 @@ class Config:
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
-            },
-            "MAGICS": {
-                "ja": 10
             }
         },
         "RECT_POST": {
@@ -107,9 +105,6 @@ class Config:
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
-            },
-            "MAGICS": {
-                "ja": 13
             }
         },
         "RECT_REEL": {
@@ -124,16 +119,13 @@ class Config:
             },
             "POS": {
                 "H": {
-                    "TITLE": 250,
-                    "AUTHOR": 1450,
+                    "TITLE": 180,
+                    "AUTHOR": 1600,
                 },
                 "V": {
                     "TITLE": 200,
                     "AUTHOR": 950
                 }
-            },
-            "MAGICS": {
-                "ja": 20
             }
         }
     }
@@ -183,10 +175,11 @@ class Config:
         layout_parts = Config.LANGUAGES[language]["layout"].split('-')
         orientation = layout_parts[0]
         direction = layout_parts[1]
+        spaced = layout_parts[2] == "S"
         assert orientation in ("H", "V"), f"Invalid orientation '{orientation}'. Must be 'H' or 'V'."
         assert direction in ("RL", "LR"), f"Invalid direction '{direction}'. Must be 'RL' or 'LR'."
 
         if orientation == "V" and direction == "LR":
             raise "layout V-LR is not supported"
 
-        return orientation, direction
+        return orientation, direction, spaced

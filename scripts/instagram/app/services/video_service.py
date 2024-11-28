@@ -46,10 +46,10 @@ def render_progressive_text(format, video_writer, image_size, language, text, bo
     styled_parts = get_styled_parts(text, bold_parts)
 
     # Find the final font size
-    orientation, direction = Config.get_layout(language)
+    orientation, direction, _ = Config.get_layout(language)
     font_size = Config.MAX_FONT_SIZE
     if Config.VIDEO_USE_FINAL_FONT_SIZE:
-        font_size, _, _, _ = split_text_in_lines(format, language, orientation, direction, styled_parts)
+        font_size, _, _, _ = split_text_in_lines(format, language, styled_parts)
 
     words = split_by_words(language, text)
     last_frame = None

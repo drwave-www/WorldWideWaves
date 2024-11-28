@@ -1,5 +1,4 @@
-- reduce the size of the spinner on mobile
-- URGENT: simplify / factorize the word/char length calculations + virer le passage de orientation/direction partout ou le language est deja passe
+
 - video
     - logo + bruit + titre
     - quote
