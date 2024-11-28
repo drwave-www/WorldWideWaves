@@ -322,22 +322,23 @@
                 height: 30px; /* Reduce spinner height */
                 margin-top: 10px; /* Adjust top margin */
                 padding-bottom: 10px; /* Adjust padding */
+                position: relative; /* Maintain relative positioning */
             }
 
             .spinningSquaresG {
                 width: 15px; /* Scale down square width */
                 height: 15px; /* Scale down square height */
+                background-color: rgb(1, 16, 38); /* Ensure visibility */
             }
 
-            #spinningSquaresG_2,
-            #spinningSquaresG_3,
-            #spinningSquaresG_4,
-            #spinningSquaresG_5,
-            #spinningSquaresG_6,
-            #spinningSquaresG_7,
-            #spinningSquaresG_8 {
-                left: auto; /* Adjust positions dynamically for smaller size */
-            }
+            #spinningSquaresG_1 { left: 0; }
+            #spinningSquaresG_2 { left: 20px; }
+            #spinningSquaresG_3 { left: 40px; }
+            #spinningSquaresG_4 { left: 60px; }
+            #spinningSquaresG_5 { left: 80px; }
+            #spinningSquaresG_6 { left: 100px; }
+            #spinningSquaresG_7 { left: 120px; }
+            #spinningSquaresG_8 { left: 140px; }
         }
 
         @media (max-width: 768px) {
