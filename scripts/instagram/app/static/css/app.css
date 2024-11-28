@@ -8,6 +8,20 @@
             font-weight: bold;
         }
 
+        .button.is-light {
+            display: flex; /* Ensure content inside the button is treated as flex items */
+            align-items: center; /* Vertically align the content inside the button */
+            justify-content: center; /* Center-align the content horizontally */
+            line-height: 1; /* Ensure consistent text height */
+            height: 40px; /* Explicit height to match adjacent elements */
+        }
+
+        .alignment-container {
+            display: flex; /* Enables Flexbox layout */
+            align-items: center; /* Vertically aligns all child items in the center */
+            gap: 10px; /* Adds spacing between the child items */
+        }
+
         .media-container {
             display: flex;
             align-items: flex-start;
@@ -162,9 +176,13 @@
         }
 
         .subtitle {
+            /* Remove default margin */
+            padding: 0; /* Remove padding */
+            line-height: normal; /* Ensure consistent alignment */
             text-transform: uppercase; /* Capitalize the text */
             font-weight: bold;          /* Make the text bold */
-            font-size: 42px;            /* Set font size to 42px */
+            font-size: 42px;
+            margin-bottom: 0px !important;
         }
 
         .field textarea.textarea.bold_parts {
@@ -175,13 +193,22 @@
             height: 60px !important; /* Force height to 60px */
         }
 
+        .errorbox {
+            margin-bottom: 20px;
+        }
+
         .spinner {
+            justify-content: center; /* Horizontally center content within the spinner */
+            align-items: center; /* Vertically align spinner squares */
             position: relative;
             width: 204px;
             height: 45px; /* 25px height + 20px padding */
             margin: auto;
             padding-bottom: 20px;
             box-sizing: border-box;
+            margin-bottom: 0px !important;
+            line-height: normal; /* Ensure consistent alignment */
+            margin-top: 20px;
         }
 
         .spinningSquaresG{

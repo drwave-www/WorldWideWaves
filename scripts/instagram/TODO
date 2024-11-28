@@ -1,6 +1,7 @@
-- ajout de la possibilite de remonter un bloc entier de langue (cacher en partie)
-- URGENT: simplify / factorize the word/char lenght calculations + virer le passage de orientation/direction partout ou le language est deja passe
 
+- all languages global sections closed by default, open on global actions, when the action is done (or error, error only in this case)
+   --> + ability to open/close all at once
+- URGENT: simplify / factorize the word/char lenght calculations + virer le passage de orientation/direction partout ou le language est deja passe
 - video
     - logo + bruit + titre
     - quote
@@ -8,12 +9,10 @@
     - 2026
     - logo
     ==> Son permanent + fading
-- post
-- tiktok
 
-
-- post de la video sur instagram
+- post de la video sur instagram (post et reel)
 - post a reel at the same time of the post and the video (link to the post), as an option
+- post on tiktok
 
 - les apostrophes ne sont pas bien gerees
 

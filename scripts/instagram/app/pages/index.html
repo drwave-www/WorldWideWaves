@@ -71,6 +71,7 @@
             console.log(syntaxHighlight(error))
             errField.innerHTML = syntaxHighlight(error); // Display the error message at the spinner position
             errField.style.display = 'block'; // Ensure it's visible
+            toggleGlobalOn(language)
         }
 
         function resetInputs(language) {
@@ -119,15 +120,30 @@
         }
 
         function updateLanguageFields(language, data) {
-            setField(language, "hashtags", data.caption.join(' '))
-            setField(language, "author", data.author)
-            setField(language, "title", data.title)
-            setField(language, "page1", data.page1)
-            setField(language, "page2", data.page2)
-            setField(language, "bold-parts", data.bold_parts.join("\n"))
-            if (language != 'fr') {
-                setField(language, "translated", data.translated)
-                document.getElementById(`translated-${language}`).style.display = 'block';
+            if (data.caption) {
+                setField(language, "hashtags", data.caption.join(' '));
+            }
+            if (data.author) {
+                setField(language, "author", data.author);
+            }
+            if (data.title) {
+                setField(language, "title", data.title);
+            }
+            if (data.page1) {
+                setField(language, "page1", data.page1);
+            }
+            if (data.page2) {
+                setField(language, "page2", data.page2);
+            }
+            if (data.bold_parts) {
+                setField(language, "bold-parts", data.bold_parts.join("\n"));
+            }
+            if (language !== 'fr' && data.translated) {
+                setField(language, "translated", data.translated);
+                const translatedElement = document.getElementById(`translated-${language}`);
+                if (translatedElement) {
+                    translatedElement.style.display = 'block';
+                }
             }
         }
 
@@ -252,6 +268,7 @@
                     // Update data
                     updateLanguageFields(language, data)
                     toggleFieldsOn(language)
+                    toggleGlobalOn(language)
                     stopSpinner(language)
                 },
                 (error) => {
@@ -508,6 +525,10 @@
             toggleSection("global", language, to_extend)
         }
 
+        function toggleGlobalOn(language) {
+            toggleGlobalSection(language, true)
+        }
+
         function toggleFieldsOn(language) {
             toggleFieldsSection(language, true)
         }
@@ -556,18 +577,14 @@
             {% for language in languages %}
             <div class="box" style="margin-bottom: 30px;">
 
-                <div style="display: flex; align-items: center;">
-                    <button class="button is-small is-light" id="global-toggle-button-{{ language }}"
+                <div class="alignment-container">
+                    <button class="button is-light" id="global-toggle-button-{{ language }}"
                             onclick="toggleGlobalSection('{{ language }}')" aria-expanded="false">
                         <span class="icon">
-                            <i class="fas fa-angle-up" id="global-toggle-icon-{{ language }}"></i>
+                            <i class="fas fa-angle-down" id="global-toggle-icon-{{ language }}"></i>
                         </span>
                     </button>
-                    <h2 class="subtitle" style="margin-left: 10px;">{{ language }}</h2>
-                </div>
-
-                <div id="global-fields-section-{{ language }}" style="display: block;">
-
+                    <h2 class="subtitle">{{ language }}</h2>
                     <div id="spinner-{{ language }}" class="spinner" style="display:none;">
                         <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
                         <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
@@ -578,8 +595,11 @@
                         <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
                         <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
                     </div>
+                </div>
 
-                    <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
+                <div id="global-fields-section-{{ language }}" style="display: none;margin-top: 20px;">
+
+                    <div id="error-{{ language }}" class="errorbox" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
 
                     <div class="control buttons">
                         <button class="button is-info" onclick="generateExtract('{{ language }}')">Generate Extract</button>
