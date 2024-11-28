@@ -74,7 +74,7 @@ class Config:
             "POS": {
                 "H" : {
                     "TITLE": 120,
-                    "AUTHOR": 750,
+                    "AUTHOR": 850,
                 },
                 "V" : {
                     "TITLE": 200,
@@ -98,7 +98,7 @@ class Config:
             "POS": {
                 "H": {
                     "TITLE": 150,
-                    "AUTHOR": 1000,
+                    "AUTHOR": 1050,
                 },
                 "V": {
                     "TITLE": 200,
