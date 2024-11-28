@@ -110,6 +110,18 @@
             box-shadow: 0 0 0 2px rgba(32, 156, 238, 0.5); /* Add a subtle focus ring */
         }
 
+        .control.buttons {
+            display: flex; /* Use flexbox for alignment */
+            flex-direction: column; /* Stack buttons vertically */
+            align-items: flex-end; /* Align buttons to the right */
+            gap: 10px; /* Add consistent spacing between buttons */
+        }
+
+        .control.buttons button {
+            flex: none; /* Prevent buttons from stretching */
+            width: auto; /* Ensure buttons retain their natural size */
+        }
+
         .format-selector {
             background-color: #ccffcc; /* Light green background */
             border: 1px solid #99cc99; /* Slightly darker green border */
@@ -298,6 +310,17 @@
                 width: 100%; /* Make both take full width */
                 margin-right: 0; /* Reset margins */
                 margin-bottom: 10px; /* Add spacing between the two */
+            }
+        }
+
+        @media (max-width: 768px) {
+            .control.buttons {
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: stretch; /* Make buttons span full width */
+            }
+
+            .control.buttons button {
+                width: 100%; /* Ensure buttons take up full width */
             }
         }
 
