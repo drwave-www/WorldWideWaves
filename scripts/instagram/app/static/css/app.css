@@ -82,9 +82,32 @@
         }
 
        .buttons {
-            display: flex; /* Use flexbox for alignment */
-            align-items: center; /* Vertically center items */
-            gap: 10px; /* Add space between items */
+            display: flex; /* Flexbox ensures consistent layout */
+            flex-wrap: wrap; /* Allow buttons to wrap to the next line if necessary */
+            justify-content: center; /* Center the buttons horizontally */
+            align-items: center; /* Align buttons vertically */
+            gap: 10px; /* Uniform spacing between buttons */
+            width: 100%; /* Ensure the container spans full width */
+            box-sizing: border-box; /* Prevent width calculations from breaking layout */
+        }
+
+       .buttons select {
+            appearance: none; /* Removes default browser styling */
+            background-color: #209cee; /* Match the button's default background */
+            border: 1px solid #209cee; /* Match the button's border color */
+            color: white; /* Match button text color */
+            padding: 0.5em 1em; /* Same padding as buttons */
+            border-radius: 4px; /* Match button border radius */
+            font-size: 1rem; /* Match font size */
+            height: 2.5em; /* Match the height of buttons */
+            text-align: center; /* Center the text */
+            cursor: pointer; /* Pointer cursor for consistency */
+            box-sizing: border-box; /* Ensure consistent sizing */
+        }
+
+        .buttons select:focus {
+            outline: none; /* Remove default focus outline */
+            box-shadow: 0 0 0 2px rgba(32, 156, 238, 0.5); /* Add a subtle focus ring */
         }
 
         .format-selector {
@@ -144,6 +167,7 @@
             width:204px;
             height:25px;
             margin:auto;
+            padding-bottom: 10px;
         }
 
         .spinningSquaresG{
@@ -252,15 +276,14 @@
         }
 
         @media (max-width: 768px) {
-            .buttons button,
-            .field.is-grouped .button {
-                flex: 1; /* Make the button take full width */
-                width: 100%; /* Ensure full width across the container */
+            .buttons {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+                align-items: stretch; /* Ensure buttons align uniformly across the container */
             }
 
-            .buttons {
-                flex-direction: column; /* Stack buttons vertically */
-                gap: 10px; /* Add spacing between buttons */
+            .buttons button {
+                flex: 1; /* Make buttons take equal width */
+                width: 100%; /* Ensure full width */
             }
         }
 
