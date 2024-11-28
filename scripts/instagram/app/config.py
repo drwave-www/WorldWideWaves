@@ -23,23 +23,30 @@ import os
 import yaml
 import logging
 from PIL import ImageFont
+from TTS.api import TTS
+
+logging.basicConfig(level=logging.DEBUG)
 
 class Config:
 
-    logging.basicConfig(level = logging.DEBUG)
-
     @staticmethod
-    def load_config():
+    def load_config(file):
         try:
-            with open("config.yaml", "r") as f:
+            with open(file, "r") as f:
                 return yaml.safe_load(f)
         except Exception as e:
             logging.error(f"Error loading config: {e}")
             return None
 
-    CONFIG = load_config()
+    CONFIG = load_config("config.yaml")
     if not CONFIG:
         raise RuntimeError("Configuration file could not be loaded. Exiting.")
+
+    TTS_CONFIG = load_config("tts.yaml")
+    if not TTS_CONFIG:
+        raise RuntimeError("Configuration file could not be loaded. Exiting.")
+
+    TTS_MODEL = "tts_models/multilingual/multi-dataset/xtts_v2"
 
     GOOGLE_API_KEY = CONFIG["google_search_api_key"]
     GOOGLE_CX = CONFIG["google_cx"]
@@ -63,6 +70,17 @@ class Config:
     MAX_TITLE_FONT_SIZE = 70
     SPACE_BETWEEN_LINES = 20
     DEFAULT_SPACE_WIDTH = 10
+
+    VIDEO_FPS = 30
+    VIDEO_TEXT_END_TIME = 1 # 1s added
+
+    TTS_ENGINE = None
+
+    @staticmethod
+    def tts():
+        if not Config.TTS_ENGINE:
+            Config.TTS_ENGINE = TTS(model_name=Config.TTS_MODEL, progress_bar=False).to("cpu")
+        return Config.TTS_ENGINE
 
     FORMATS = {
         "SQUARE": {

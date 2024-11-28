@@ -19,95 +19,110 @@
 # limitations under the License.
 #
 import logging
-import math
 import os
 import cv2
-import numpy as np
-
-from PIL import Image, ImageDraw
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
 
 from app.config import Config
-from app.services.image_utils import draw_bounded_text, split_by_words, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
-
-# Configuration
-FPS = 30
-STATIC_DISPLAY_TIME = 3  # Seconds to display static pages
-WORD_DISPLAY_TIME = 0.2
+from app.services.video_utils import display_static_page, render_progressive_text, generate_voice_for_text
 
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
 
-def render_progressive_text(format, video_writer, image_size, language, text, bold_parts):
-    background_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "quote.jpg")
-    bg_image = cv2.imread(background_path)
-    bg_image = cv2.resize(bg_image, image_size)
-
-    styled_parts = get_styled_parts(text, bold_parts)
-
-    # Find the final font size
-    orientation, direction, _ = Config.get_layout(language)
-    font_size = Config.MAX_FONT_SIZE
-    if Config.VIDEO_USE_FINAL_FONT_SIZE:
-        font_size, _, _, _ = split_text_in_lines(format, language, styled_parts)
-
-    words = split_by_words(language, text)
-    last_frame = None
-    for i in range(len(words) + 1):
-        separator = " " if orientation == "H" or language == "ko" else "" # FIXME: ko specifics
-        current_text = separator.join(words[:i])
-
-        logging.debug(f"Draw the text")
-        pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
-        draw = ImageDraw.Draw(pil_image)
-        draw_bounded_text(format, language, draw, current_text, bold_parts, font_size)
-
-        logging.debug(f"Convert PIL image back to OpenCV format")
-        cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-        last_frame = cv_frame
-        for _ in range(math.ceil(FPS * WORD_DISPLAY_TIME)):
-            video_writer.write(cv_frame)
-
-    if last_frame is not None: # Add extra time at the end of the page
-        for _ in range(math.ceil(FPS * STATIC_DISPLAY_TIME)):
-            video_writer.write(last_frame)
-
-def display_static_page(video_writer, image_size, page_path, timeunit=1):
-    static_frame = cv2.imread(page_path)
-    static_frame = cv2.resize(static_frame, image_size)
-
-    for _ in range(FPS * STATIC_DISPLAY_TIME * timeunit):
-        video_writer.write(static_frame)
-
 def generate_video(format, language, page1, page2, bold_parts, cover_link):
     format = Config.FORMATS[format]
 
-    fourcc = cv2.VideoWriter_fourcc(*"H264")
+    # Static files
     output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+    intro_video_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "intro.mp4")
+    intro_glitch_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-glitch.mp3")
+    intro_www_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-www.wav")
 
-    logging.info(f"Output file: {output_video}")
-    image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
-    video_writer = cv2.VideoWriter(output_video, fourcc, FPS, image_size)
+    # Generate voices for page1 and page2
+    try:
+        logging.info(f"Generate voices for text")
+        audio_page1_path, t_audio_page1 = generate_voice_for_text(page1, language)
+        audio_page2_path, t_audio_page2 = generate_voice_for_text(page2, language)
+    except Exception as e:
+        logging.error(f"Error generating voices for text: {e}")
+        raise
 
-    if not video_writer.isOpened():
-        raise Exception("Failed to open VideoWriter")
+    ## INTRO ##########################
+    try: # FIXME: could be cached
+        logging.info(f"Generate intro video")
 
-    # Logo frame
-    display_static_page(video_writer, image_size, Config.TEMPLATE_FOLDER + "/" + format["FOLDER"] + "/logo.jpg")
+        # Load intro video
+        intro_video = VideoFileClip(intro_video_path)
 
-    logging.info(f"Create pages with progressive text rendering")
-    render_progressive_text(format, video_writer, image_size, language, page1, bold_parts)
-    render_progressive_text(format, video_writer, image_size, language, page2, bold_parts)
+        # Load and combine intro audio
+        intro_glitch_audio = AudioFileClip(intro_glitch_audio_path).with_start(0.2)
+        intro_www_audio = AudioFileClip(intro_www_audio_path).with_start(0.5)
+        combined_intro_audio = CompositeAudioClip([intro_glitch_audio, intro_www_audio])
+        INTRO_VIDEO = intro_video.with_audio(combined_intro_audio)
+    except Exception as e:
+        logging.error(f"Error loading intro video: {e}")
+        raise
 
-    display_static_page(video_writer, image_size, "app/" + cover_link)
+    ## READ TEXT ######################
 
-    logging.info(f"Display static pages")
-    for static_page in [ "2026.jpg", "logo.jpg" ]:
-        static_page = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], static_page)
-        display_static_page(video_writer, image_size, static_page)
+    # Render text on specified time
+    try:
+        logging.info(f"Render text in frames")
 
-    logging.info(f"Save and return video")
-    video_writer.release()
+        output_text_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
+        logging.info(f"Output file: {output_text_video}")
+        image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
+        fourcc = cv2.VideoWriter_fourcc(*"H264")
+        video_writer = cv2.VideoWriter(output_text_video, fourcc, Config.VIDEO_FPS, image_size)
+
+        if not video_writer.isOpened():
+            raise Exception("Failed to open VideoWriter")
+
+        render_progressive_text(format, video_writer, image_size, t_audio_page1, language, page1, bold_parts)
+        render_progressive_text(format, video_writer, image_size, t_audio_page2, language, page2, bold_parts)
+        display_static_page(video_writer, image_size, "app/" + cover_link, 3)
+
+        video_writer.release()
+        text_video = VideoFileClip(intro_video_path)
+    except Exception as e:
+        logging.error(f"Error rendering text: {e}")
+        raise
+
+    # Load and combine audio
+    try:
+        logging.info(f"Combine audio")
+
+        audio_page1 = AudioFileClip(audio_page1_path)
+        audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_page1 + Config.VIDEO_TEXT_END_TIME)
+        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2])
+        TEXT_VIDEO = text_video.with_audio(combined_text_audio)
+    except Exception as e:
+        logging.error(f"Error loading and combining audio: {e}")
+        raise
+
+    # TODO : add outro video
+    #logging.info(f"Display static pages")
+    #for static_page in [ "2026.jpg", "logo.jpg" ]:
+    #    static_page = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], static_page)
+    #    display_static_page(video_writer, image_size, static_page, 3)
+
+    try:
+        logging.info(f"Concatenate and write video")
+
+        # Concatenate all video clips
+        final_video = concatenate_videoclips([INTRO_VIDEO, TEXT_VIDEO])  # , OUTRO_VIDEO])
+
+        # Write the final output
+        final_video.write_videofile(output_video, codec="libx264", audio_codec="aac")
+
+        intro_glitch_audio.close()
+        intro_www_audio.close()
+        audio_page1.close()
+        audio_page2.close()
+    except Exception as e:
+        logging.error(f"Error concatenating and writing video: {e}")
+        raise
+
+    print(f"Video successfully saved to {output_video}")
     return output_video.replace("app/", "", 1)
-
-
