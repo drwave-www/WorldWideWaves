@@ -72,12 +72,26 @@
                 align-items: center;
             }
 
+            .video-container {
+                width: 100%; /* Match the carousel width */
+                max-width: 100%; /* Prevent overflow */
+            }
+
             .carousel,
             .video-container {
                 flex: none;
                 width: 100%;
                 margin-right: 0;
                 margin-bottom: 10px;
+            }
+
+            video, video-js {
+                width: 100%; /* Stretch to container */
+                height: auto; /* Maintain aspect ratio */
+            }
+
+            .carousel {
+                width: 100%; /* Ensure consistent width */
             }
 
             .carousel img {
