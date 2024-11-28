@@ -318,7 +318,7 @@
 
         @media (max-width: 768px) {
             .spinner {
-                width: 120px; /* Reduce spinner width */
+                width: 100px; /* Reduce spinner width */
                 height: 30px; /* Reduce spinner height */
                 margin-top: 10px; /* Adjust top margin */
                 padding-bottom: 10px; /* Adjust padding */
@@ -326,19 +326,19 @@
             }
 
             .spinningSquaresG {
-                width: 15px; /* Scale down square width */
-                height: 15px; /* Scale down square height */
+                width: 10px; /* Scale down square width */
+                height: 10px; /* Scale down square height */
                 background-color: rgb(1, 16, 38); /* Ensure visibility */
             }
 
             #spinningSquaresG_1 { left: 0; }
-            #spinningSquaresG_2 { left: 20px; }
-            #spinningSquaresG_3 { left: 40px; }
-            #spinningSquaresG_4 { left: 60px; }
-            #spinningSquaresG_5 { left: 80px; }
-            #spinningSquaresG_6 { left: 100px; }
-            #spinningSquaresG_7 { left: 120px; }
-            #spinningSquaresG_8 { left: 140px; }
+            #spinningSquaresG_2 { left: 15px; }
+            #spinningSquaresG_3 { left: 30px; }
+            #spinningSquaresG_4 { left: 45px; }
+            #spinningSquaresG_5 { left: 60px; }
+            #spinningSquaresG_6 { left: 75px; }
+            #spinningSquaresG_7 { left: 90px; }
+            #spinningSquaresG_8 { left: 105px; }
         }
 
         @media (max-width: 768px) {
