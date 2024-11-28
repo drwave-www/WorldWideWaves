@@ -6,11 +6,11 @@ languages:
   'es':
     engine: "xtts"
     'char-limit': 239 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
-    'default-voice': "Alma María"
+    'default-voice': "Alexandra Hisakawa"
   'fr':
     engine: "xtts"
     'char-limit': 273 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
-    'default-voice': "Filip Traverse"
+    'default-voice': "Vjollca Johnnie"
   'de':
     engine: "xtts"
     'char-limit': 253 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
@@ -22,7 +22,7 @@ languages:
   'pt':
     engine: "xtts"
     'char-limit': 203 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
-    'default-voice': "Gilberto Mathias"
+    'default-voice': "Aaron Dreschner"
   'tr':
     engine: "xtts"
     'char-limit': 226 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py

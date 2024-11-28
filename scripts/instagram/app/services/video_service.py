@@ -19,167 +19,95 @@
 # limitations under the License.
 #
 import logging
+import math
 import os
-from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
-from moviepy.audio.fx import AudioFadeOut
+import cv2
+import numpy as np
+
+from PIL import Image, ImageDraw
 
 from app.config import Config
+from app.services.image_utils import draw_bounded_text, split_by_words, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
-from app.services.video_utils import display_static_page, render_progressive_text, generate_voice_for_text, \
-    get_video_writer
+
+# Configuration
+FPS = 30
+STATIC_DISPLAY_TIME = 3  # Seconds to display static pages
+WORD_DISPLAY_TIME = 0.2
 
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
 
-def get_boot_frame(format):
-    image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
-    intro_video_path_output = os.path.join(Config.TEMPLATE_FOLDER, "output", f"boot-{format['FOLDER']}.mp4")
+def render_progressive_text(format, video_writer, image_size, language, text, bold_parts):
+    background_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "quote.jpg")
+    bg_image = cv2.imread(background_path)
+    bg_image = cv2.resize(bg_image, image_size)
 
-    if not os.path.exists(intro_video_path_output):
-        try:
-            logging.info(f"Generate boot video for format {format['FOLDER']}")
+    styled_parts = get_styled_parts(text, bold_parts)
 
-            video_writer, boot_video_path = get_video_writer(image_size)
-            logo_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "logo.jpg")
-            display_static_page(video_writer, image_size, logo_path, 1)
-            video_writer.release()
-            boot_video = VideoFileClip(boot_video_path)
-        except Exception as e:
-            logging.error(f"Error generating boot video: {e}")
-            raise
-    else:
-        boot_video = VideoFileClip(intro_video_path_output)
+    # Find the final font size
+    orientation, direction, _ = Config.get_layout(language)
+    font_size = Config.MAX_FONT_SIZE
+    if Config.VIDEO_USE_FINAL_FONT_SIZE:
+        font_size, _, _, _ = split_text_in_lines(format, language, styled_parts)
 
-    return boot_video
+    words = split_by_words(language, text)
+    last_frame = None
+    for i in range(len(words) + 1):
+        separator = " " if orientation == "H" or language == "ko" else "" # FIXME: ko specifics
+        current_text = separator.join(words[:i])
 
-def get_intro_video(format):
-    intro_video_path_output = os.path.join(Config.TEMPLATE_FOLDER, "output", f"intro-{format['FOLDER']}.mp4")
+        logging.debug(f"Draw the text")
+        pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
+        draw = ImageDraw.Draw(pil_image)
+        draw_bounded_text(format, language, draw, current_text, bold_parts, font_size)
 
-    if not os.path.exists(intro_video_path_output):
-        try:
-            logging.info(f"Generate intro video for format {format['FOLDER']}")
+        logging.debug(f"Convert PIL image back to OpenCV format")
+        cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        last_frame = cv_frame
+        for _ in range(math.ceil(FPS * WORD_DISPLAY_TIME)):
+            video_writer.write(cv_frame)
 
-            intro_glitch_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-glitch.mp3")
-            intro_www_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-www.wav")
-            intro_video_template_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "intro.mp4")
+    if last_frame is not None: # Add extra time at the end of the page
+        for _ in range(math.ceil(FPS * STATIC_DISPLAY_TIME)):
+            video_writer.write(last_frame)
 
-            # Load intro video
-            intro_video = VideoFileClip(intro_video_template_path)
+def display_static_page(video_writer, image_size, page_path, timeunit=1):
+    static_frame = cv2.imread(page_path)
+    static_frame = cv2.resize(static_frame, image_size)
 
-            # Load and combine intro audio
-            intro_glitch_audio = AudioFileClip(intro_glitch_audio_path).with_start(0.2)
-            intro_www_audio = AudioFileClip(intro_www_audio_path).with_start(0.5)
-            combined_intro_audio = CompositeAudioClip([intro_glitch_audio, intro_www_audio])
-
-            intro_video = intro_video.with_audio(combined_intro_audio)
-            intro_video.write_videofile(intro_video_path_output, codec="libx264", audio_codec="aac")
-
-            intro_glitch_audio.close()
-            intro_www_audio.close()
-
-        except Exception as e:
-            logging.error(f"Error generating intro video: {e}")
-            raise
-    else:
-        intro_video = VideoFileClip(intro_video_path_output)
-
-    return intro_video
+    for _ in range(FPS * STATIC_DISPLAY_TIME * timeunit):
+        video_writer.write(static_frame)
 
 def generate_video(format, language, page1, page2, bold_parts, cover_link):
     format = Config.FORMATS[format]
+
+    fourcc = cv2.VideoWriter_fourcc(*"H264")
+    output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+
+    logging.info(f"Output file: {output_video}")
     image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
-    output_video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+    video_writer = cv2.VideoWriter(output_video, fourcc, FPS, image_size)
 
-    audio_page1, audio_page2, audio_tictac, text_video, background_music = None, None, None, None, None
-    BOOT_VIDEO, INTRO_VIDEO, combined_text_audio, output_video = None, None, None, None
+    if not video_writer.isOpened():
+        raise Exception("Failed to open VideoWriter")
 
-    template_tictac_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "tictac.wav")
-    template_2026_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "2026.jpg")
-    template_logo_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "logo.jpg")
+    # Logo frame
+    display_static_page(video_writer, image_size, Config.TEMPLATE_FOLDER + "/" + format["FOLDER"] + "/logo.jpg")
 
-    try:
-        ## AUDIO: READ TEXT
-        logging.info(f"Generate voices for text")
-        audio_page1_path, t_audio_page1 = generate_voice_for_text(language, page1)
-        audio_page2_path, t_audio_page2 = generate_voice_for_text(language, page2)
+    logging.info(f"Create pages with progressive text rendering")
+    render_progressive_text(format, video_writer, image_size, language, page1, bold_parts)
+    render_progressive_text(format, video_writer, image_size, language, page2, bold_parts)
 
-        ## VIDEO: READ TEXT
-        logging.info(f"Render text in frames")
-        video_writer, text_video_path = get_video_writer(image_size)
+    display_static_page(video_writer, image_size, "app/" + cover_link)
 
-        t_audio_page1_for_text = Config.RATE_TEXT_ADVANCE * t_audio_page1
-        t_audio_page2_for_text = Config.RATE_TEXT_ADVANCE * t_audio_page2
+    logging.info(f"Display static pages")
+    for static_page in [ "2026.jpg", "logo.jpg" ]:
+        static_page = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], static_page)
+        display_static_page(video_writer, image_size, static_page)
 
-        t_video_end_time_page1 = (t_audio_page1 - t_audio_page1_for_text) + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER
-        t_video_end_time_page2 = (t_audio_page2 - t_audio_page2_for_text) + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER
+    logging.info(f"Save and return video")
+    video_writer.release()
+    return output_video.replace("app/", "", 1)
 
-        render_progressive_text(format, video_writer, image_size, t_audio_page1_for_text, t_video_end_time_page1, language, page1, bold_parts)
-        render_progressive_text(format, video_writer, image_size, t_audio_page2_for_text, t_video_end_time_page2, language, page2, bold_parts)
 
-        display_static_page(video_writer, image_size, "app/" + cover_link, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
-        display_static_page(video_writer, image_size, template_2026_path, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
-        display_static_page(video_writer, image_size, template_logo_path, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
-
-        video_writer.release()
-
-        t_audio_start_page1 = Config.VIDEO_START_READ_AFTER
-        t_audio_start_page2 = t_audio_page1 + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER * 2
-
-        logging.info(f"Page1: Video duration {t_audio_page1_for_text + t_video_end_time_page1}, Audio duration: {t_audio_page1} startsec: {t_audio_start_page1}")
-        logging.info(f"Page2: Video duration {t_audio_page2_for_text + t_video_end_time_page2}, Audio duration: {t_audio_page2} startsec: {t_audio_start_page2}")
-
-        # Load and combine audio
-        logging.info(f"Combine audio")
-        audio_page1 = AudioFileClip(audio_page1_path).with_start(t_audio_start_page1)
-        audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_start_page2)
-        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2])
-
-        text_video = VideoFileClip(text_video_path)
-        TEXT_VIDEO = text_video.with_audio(combined_text_audio)
-
-        # Concatenate and write final video
-        logging.info(f"Concatenate and write video")
-        BOOT_VIDEO = get_boot_frame(format)
-        INTRO_VIDEO = get_intro_video(format)
-
-        output_video = concatenate_videoclips([BOOT_VIDEO, INTRO_VIDEO, TEXT_VIDEO])
-
-        # Add background music
-        audio_background_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "background.mp3")
-        background_music = AudioFileClip(audio_background_path).with_volume_scaled(0.05)
-        background_music = background_music.with_start(BOOT_VIDEO.duration + INTRO_VIDEO.duration)
-        background_music = background_music.with_duration(text_video.duration - Config.STATIC_PAGE_TIME * 2)
-        background_music = background_music.with_effects([AudioFadeOut(Config.STATIC_PAGE_TIME / 2)])
-        audio_tictac = AudioFileClip(template_tictac_path).with_start(output_video.duration - Config.STATIC_PAGE_TIME * 2)
-        final_audio = CompositeAudioClip([output_video.audio, background_music, audio_tictac])
-        output_video = output_video.with_audio(final_audio)
-
-        output_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac")
-
-    except Exception as e:
-        logging.error(f"Error generating video: {e}")
-        raise
-
-    finally:
-        # Close all resources
-        if audio_page1:
-            audio_page1.close()
-        if audio_page2:
-            audio_page2.close()
-        if audio_tictac:
-            audio_tictac.close()  # Release ticking sound
-        if text_video:
-            text_video.close()
-        if combined_text_audio:
-            combined_text_audio.close()
-        if BOOT_VIDEO:
-            BOOT_VIDEO.close()
-        if INTRO_VIDEO:
-            INTRO_VIDEO.close()
-        if background_music:
-            background_music.close()  # Release background music
-        if output_video:
-            output_video.close()  # Release final video object
-
-    logging.info(f"Video successfully saved to {output_video_path}")
-    return output_video_path.replace("app/", "", 1)

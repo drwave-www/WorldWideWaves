@@ -70,30 +70,12 @@
             .media-container {
                 flex-direction: column;
                 align-items: center;
-                width: 100%; /* Ensure it does not exceed screen width */
-            }
-
-            .video-container {
-                width: calc(100% - 20px); /* Add padding if needed */
-                max-width: 100%; /* Ensure it stays within the screen */
-                box-sizing: border-box; /* Include padding/borders in width calculation */
             }
 
             .carousel,
             .video-container {
                 flex: none;
                 width: 100%;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            video, video-js {
-                width: 90%; /* Stretch to container */
-                height: auto; /* Maintain aspect ratio */
-            }
-
-            .carousel {
-                width: calc(100% - 20px); /* Add padding if necessary */
                 margin-right: 0;
                 margin-bottom: 10px;
             }
@@ -181,7 +163,7 @@
             top: 0;
             left: 0;
             width: 300px;
-            height: 100%;
+            height: 300px;
             background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
             color: white;
             display: flex;

@@ -22,7 +22,7 @@
 import logging
 import re
 from app.config import Config
-from PIL import ImageFont
+from PIL import ImageFont, features
 
 def get_text_width(format, language, font, text):
     orientation, direction, spaced = Config.get_layout(language)
@@ -232,9 +232,11 @@ def split_text_in_lines(format, language, styled_parts, font_size = Config.MAX_F
 
         # Check if the total height fits within the rectangle
         if total_height <= max_height:
+            logging.debug(f"Selected font size : {font_size} for height : {total_height}")
             break
 
         # Reduce the font size
+        logging.debug(f"Reduce the font size from {font_size} as total height is {total_height} vs {format['AREA']['HEIGHT']}")
         font_size -= 1
 
     # If text doesn't fit, raise an error
@@ -244,6 +246,8 @@ def split_text_in_lines(format, language, styled_parts, font_size = Config.MAX_F
     return font_size, total_height, lines, line_height
 
 def draw_bounded_text(format, language, draw, text, bold_parts, font_size = Config.MAX_FONT_SIZE):
+    logging.debug(f"LibRAQM available : {features.check_feature(feature='raqm')}")
+
     # Config
     orientation, direction, _ = Config.get_layout(language)
 

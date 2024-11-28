@@ -1,40 +1,28 @@
 
-- separer chaque audio en deux, tts, puis joindre
-- set debug on run and logging only if there is no WWW_PRODUCTION=1, to add in docker-compose
-- nettoyer les intro-*mp4 du site externe avec ffmpeg (regenerer la video I/O avec ffmpeg)
-- mettre plusieurs speakers par langue et tourner (random)
+- video
+    - logo + bruit + titre
+    - quote
+    - world wide wave en differents languages, affiches et exprimes
+    - 2026
+    - logo
+    ==> Son permanent + fading
 
-- do not activate video button if no voice available
-- crontab de nettoyage des vieux fichiers d'output
-
-- review the logs of video gen
-- separer gen voix et gen video, utiliser l'audio gen sous forme de path pour la video
 - post de la video sur instagram (post et reel)
 - post a reel at the same time of the post and the video (link to the post), as an option
 - post on tiktok
-- post on instagram
-
-- regenrater cover with url if specified
-- ajouter un champ texte deroulable de sel pour le prompt openAI
-- move test LibRQAM dans config
-- save json of posted data + images
-- possibilite d'enregistrer sa propre voix pour page 1 et page 2 (nettoyer avec ffmpeg)
 
 - les apostrophes ne sont pas bien gerees
 
 FEATURES:
-- zone libre avec une langue de ISO 639 (liste) et post sur un des accounts supportes (liste)
-- post avec un mot/texte ecrit en grand, traduit en plusieurs langues
+- add support for TikTok (videos)
+- post avec un mot ecrit en grand, traduit en plusieurs langues
 - refresh de token FB pas top
-- case a cocher pour ignorer les textes deja utilises dans le prompt
 
 ----
 
 - accounts: add chinois (ZH), pendjabi (Shahmukhi) (PA), swahili (SW), japonais (JA)
 - tiktok accounts
 - change emails for instagram accounts (?)
-- compte linkedin
-- compte facebook et y attacher les autres comptes ?
 
 - worldwidewaves.net page with instagram accounts + email form
 

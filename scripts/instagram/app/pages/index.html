@@ -268,6 +268,7 @@
                     // Update data
                     updateLanguageFields(language, data)
                     toggleFieldsOn(language)
+                    toggleGlobalOn(language)
                     stopSpinner(language)
                 },
                 (error) => {
@@ -529,7 +530,6 @@
         }
 
         function toggleFieldsOn(language) {
-            toggleGlobalOn(language)
             toggleFieldsSection(language, true)
         }
 
@@ -660,8 +660,6 @@
                             <input class="input" type="text" id="cover-url-{{ language }}" placeholder="The url of an image to use for cover.." style="background-color: lightgreen;" value="">
                         </div>
 
-                        <br/>
-
                     </div>
 
                     <div class="media-container no-video">
@@ -679,7 +677,7 @@
                     </div>
 
                     <div class="buttons">
-                        <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation(); clearImages('{{ language }}');">
+                        <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
                             <option value="SQUARE">1:1</option>
                             <option value="RECT_POST">4:5 (POST)</option>
                             <option value="RECT_REEL">9:16 (REEL)</option>
