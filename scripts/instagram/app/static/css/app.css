@@ -70,11 +70,13 @@
             .media-container {
                 flex-direction: column;
                 align-items: center;
+                width: 100%; /* Ensure it does not exceed screen width */
             }
 
             .video-container {
-                width: 100%; /* Match the carousel width */
-                max-width: 100%; /* Prevent overflow */
+                width: calc(100% - 20px); /* Add padding if needed */
+                max-width: 100%; /* Ensure it stays within the screen */
+                box-sizing: border-box; /* Include padding/borders in width calculation */
             }
 
             .carousel,
@@ -91,7 +93,9 @@
             }
 
             .carousel {
-                width: 100%; /* Ensure consistent width */
+                width: calc(100% - 20px); /* Add padding if necessary */
+                margin-right: 0;
+                margin-bottom: 10px;
             }
 
             .carousel img {
