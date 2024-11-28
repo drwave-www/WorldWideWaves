@@ -29,6 +29,7 @@ services:
       - static-data:/usr/share/nginx/html/static  # Mount local static folder into NGINX
       - ./app/static/img:/usr/share/nginx/html/static/img:ro  # Mount the logo file
       - ./app/static/css:/usr/share/nginx/html/static/css:ro  # Mount the css folder
+      - ./app/static/js:/usr/share/nginx/html/static/js:ro  # Mount the css folder
     environment:
       - NGINX_USERNAME=admin      # Set default username for authentication
       - NGINX_PASSWORD=insta42 # Set default password for authentication
