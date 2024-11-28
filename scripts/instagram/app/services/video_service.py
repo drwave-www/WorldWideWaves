@@ -20,18 +20,19 @@
 #
 import logging
 import os
-import cv2
 from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
 
 from app.config import Config
 from app.services.utils import u_num
-from app.services.video_utils import display_static_page, render_progressive_text, generate_voice_for_text
+from app.services.video_utils import display_static_page, render_progressive_text, generate_voice_for_text, \
+    get_video_writer
 
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
 
 def generate_video(format, language, page1, page2, bold_parts, cover_link):
     format = Config.FORMATS[format]
+    image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
 
     # Static files
     output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
@@ -42,8 +43,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     # Generate voices for page1 and page2
     try:
         logging.info(f"Generate voices for text")
-        audio_page1_path, t_audio_page1 = generate_voice_for_text(page1, language)
-        audio_page2_path, t_audio_page2 = generate_voice_for_text(page2, language)
+        audio_page1_path, t_audio_page1 = generate_voice_for_text(language, page1)
+        audio_page2_path, t_audio_page2 = generate_voice_for_text(language, page2)
     except Exception as e:
         logging.error(f"Error generating voices for text: {e}")
         raise
@@ -69,22 +70,14 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     # Render text on specified time
     try:
         logging.info(f"Render text in frames")
+        video_writer, text_video_path = get_video_writer(image_size)
 
-        output_text_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
-        logging.info(f"Output file: {output_text_video}")
-        image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
-        fourcc = cv2.VideoWriter_fourcc(*"H264")
-        video_writer = cv2.VideoWriter(output_text_video, fourcc, Config.VIDEO_FPS, image_size)
-
-        if not video_writer.isOpened():
-            raise Exception("Failed to open VideoWriter")
-
-        render_progressive_text(format, video_writer, image_size, t_audio_page1, language, page1, bold_parts)
-        render_progressive_text(format, video_writer, image_size, t_audio_page2, language, page2, bold_parts)
-        display_static_page(video_writer, image_size, "app/" + cover_link, 3)
+        render_progressive_text(format, video_writer, image_size, t_audio_page1 + Config.VIDEO_START_READ_AFTER, language, page1, bold_parts)
+        render_progressive_text(format, video_writer, image_size, t_audio_page2 + Config.VIDEO_START_READ_AFTER, language, page2, bold_parts)
+        display_static_page(video_writer, image_size, "app/" + cover_link, 3 * Config.VIDEO_FPS)
 
         video_writer.release()
-        text_video = VideoFileClip(intro_video_path)
+        text_video = VideoFileClip(text_video_path)
     except Exception as e:
         logging.error(f"Error rendering text: {e}")
         raise
@@ -93,8 +86,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     try:
         logging.info(f"Combine audio")
 
-        audio_page1 = AudioFileClip(audio_page1_path)
-        audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_page1 + Config.VIDEO_TEXT_END_TIME)
+        audio_page1 = AudioFileClip(audio_page1_path).with_start(Config.VIDEO_START_READ_AFTER)
+        audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_page1 + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER * 2)
         combined_text_audio = CompositeAudioClip([audio_page1, audio_page2])
         TEXT_VIDEO = text_video.with_audio(combined_text_audio)
     except Exception as e:
@@ -110,8 +103,16 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     try:
         logging.info(f"Concatenate and write video")
 
+        # Add a single frame with the logo # FIXME can be cached
+        logging.info(f"Render text in frames")
+        video_writer, boot_video_path = get_video_writer(image_size)
+        logo_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "logo.jpg")
+        display_static_page(video_writer, image_size, logo_path, 1)
+        video_writer.release()
+        BOOT_VIDEO = VideoFileClip(boot_video_path)
+
         # Concatenate all video clips
-        final_video = concatenate_videoclips([INTRO_VIDEO, TEXT_VIDEO])  # , OUTRO_VIDEO])
+        final_video = concatenate_videoclips([BOOT_VIDEO, INTRO_VIDEO, TEXT_VIDEO])  # , OUTRO_VIDEO])
 
         # Write the final output
         final_video.write_videofile(output_video, codec="libx264", audio_codec="aac")

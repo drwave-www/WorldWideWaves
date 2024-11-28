@@ -33,6 +33,9 @@ from app.services.image_utils import draw_bounded_text, split_by_words, get_styl
 from app.services.utils import u_num
 
 def generate_voice_for_text(language, text):
+    if language not in Config.TTS_CONFIG["languages"]:
+        raise ValueError(f"Language '{language}' not supported.")
+
     engine = Config.TTS_CONFIG["languages"][language]["engine"]
     speaker = Config.TTS_CONFIG["languages"][language].get("default-voice", "default")
     output_file = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_audio.wav")
@@ -52,6 +55,7 @@ def generate_voice_for_text(language, text):
     code = Config.TTS_CONFIG["languages"][language].get("code", language)
 
     try:
+        text = text.replace(".", ";")
         Config.tts().tts_to_file(text, split_sentences=split_sentences, speaker=speaker, language=code, file_path=output_file)
     except Exception as e:
         logging.error(f"Error generating voice for language {language}: {e}")
@@ -67,6 +71,15 @@ def get_audio_length(audio_file_path):
         rate = wav_file.getframerate()
         duration = frames / float(rate)
     return duration
+
+def get_video_writer(image_size):
+    video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
+    logging.info(f"Output file: {video_path}")
+    fourcc = cv2.VideoWriter_fourcc(*"H264")
+    video_writer = cv2.VideoWriter(video_path, fourcc, Config.VIDEO_FPS, image_size)
+    if not video_writer.isOpened():
+        raise Exception("Failed to open VideoWriter")
+    return video_writer, video_path
 
 def render_progressive_text(format, video_writer, image_size, total_time, language, text, bold_parts):
     background_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "quote.jpg")
@@ -104,9 +117,9 @@ def render_progressive_text(format, video_writer, image_size, total_time, langua
         for _ in range(math.ceil(Config.VIDEO_FPS * Config.VIDEO_TEXT_END_TIME)):
             video_writer.write(last_frame)
 
-def display_static_page(video_writer, image_size, page_path, seconds):
+def display_static_page(video_writer, image_size, page_path, frames):
     static_frame = cv2.imread(page_path)
     static_frame = cv2.resize(static_frame, image_size)
 
-    for _ in range(Config.VIDEO_FPS * seconds):
+    for _ in range(frames):
         video_writer.write(static_frame)
