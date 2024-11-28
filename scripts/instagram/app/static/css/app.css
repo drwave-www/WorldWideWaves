@@ -317,6 +317,30 @@
         }
 
         @media (max-width: 768px) {
+            .spinner {
+                width: 120px; /* Reduce spinner width */
+                height: 30px; /* Reduce spinner height */
+                margin-top: 10px; /* Adjust top margin */
+                padding-bottom: 10px; /* Adjust padding */
+            }
+
+            .spinningSquaresG {
+                width: 15px; /* Scale down square width */
+                height: 15px; /* Scale down square height */
+            }
+
+            #spinningSquaresG_2,
+            #spinningSquaresG_3,
+            #spinningSquaresG_4,
+            #spinningSquaresG_5,
+            #spinningSquaresG_6,
+            #spinningSquaresG_7,
+            #spinningSquaresG_8 {
+                left: auto; /* Adjust positions dynamically for smaller size */
+            }
+        }
+
+        @media (max-width: 768px) {
             .buttons {
                 flex-direction: column; /* Stack buttons vertically on small screens */
                 align-items: stretch; /* Ensure buttons align uniformly across the container */
