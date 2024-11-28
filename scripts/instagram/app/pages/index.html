@@ -482,10 +482,10 @@
             })
         }
 
-        function toggleFieldsSection(language, to_extend = undefined) {
-            const fieldsSection = document.getElementById(`fields-section-${language}`);
-            const toggleIcon = document.getElementById(`toggle-icon-${language}`);
-            const toggleButton = document.getElementById(`toggle-button-${language}`);
+        function toggleSection(prefix, language, to_extend = undefined) {
+            const fieldsSection = document.getElementById(`${prefix}-fields-section-${language}`);
+            const toggleIcon = document.getElementById(`${prefix}-toggle-icon-${language}`);
+            const toggleButton = document.getElementById(`${prefix}-toggle-button-${language}`);
 
             if ((to_extend !== undefined && to_extend === true) || (to_extend === undefined && (fieldsSection.style.display === 'none' || fieldsSection.style.display === ''))) {
                 fieldsSection.style.display = 'block';
@@ -498,6 +498,14 @@
                 toggleIcon.classList.add('fa-angle-down');
                 toggleButton.setAttribute('aria-expanded', 'false');
             }
+        }
+
+        function toggleFieldsSection(language, to_extend = undefined) {
+            toggleSection("local", language, to_extend)
+        }
+
+        function toggleGlobalSection(language, to_extend = undefined) {
+            toggleSection("global", language, to_extend)
         }
 
         function toggleFieldsOn(language) {
@@ -543,120 +551,133 @@
                 </div>
             </div>
 
-            <br/>
+            <br/><br/>
 
             {% for language in languages %}
             <div class="box" style="margin-bottom: 30px;">
-                <h2 class="subtitle">{{ language }}</h2>
 
-                <div id="spinner-{{ language }}" class="spinner" style="display:none;">
-                    <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_3" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_4" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_5" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_6" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
-                    <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
+                <div style="display: flex; align-items: center;">
+                    <button class="button is-small is-light" id="global-toggle-button-{{ language }}"
+                            onclick="toggleGlobalSection('{{ language }}')" aria-expanded="false">
+                        <span class="icon">
+                            <i class="fas fa-angle-up" id="global-toggle-icon-{{ language }}"></i>
+                        </span>
+                    </button>
+                    <h2 class="subtitle" style="margin-left: 10px;">{{ language }}</h2>
                 </div>
 
-                <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
+                <div id="global-fields-section-{{ language }}" style="display: block;">
 
-                <div class="control buttons" style="flex: 1;">
-                    <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
-                    <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
-                </div>
+                    <div id="spinner-{{ language }}" class="spinner" style="display:none;">
+                        <div id="spinningSquaresG_1" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_2" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_3" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_4" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_5" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_6" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_7" class="spinningSquaresG"></div>
+                        <div id="spinningSquaresG_8" class="spinningSquaresG"></div>
+                        <br/><br/>
+                    </div>
 
-                <button class="button is-small is-light" id="toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
-                    Content fields&nbsp;&nbsp;
-                    <span class="icon">
-                        <i class="fas fa-angle-down" id="toggle-icon-{{ language }}"></i>
-                    </span>
-                </button>
+                    <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
 
-                <div id="fields-section-{{ language }}" style="display: none;">
+                    <div class="control buttons" style="flex: 1;">
+                        <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
+                        <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
+                    </div>
+
+                    <button class="button is-small is-light" id="local-toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
+                        Content fields&nbsp;&nbsp;
+                        <span class="icon">
+                            <i class="fas fa-angle-down" id="local-toggle-icon-{{ language }}"></i>
+                        </span>
+                    </button>
+
+                    <div id="local-fields-section-{{ language }}" style="display: none;">
+                        <br/>
+                        <div class="field is-grouped">
+                            <div class="control" style="flex: 1; margin-right: 10px;">
+                                <label class="label">Author</label>
+                                <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
+                            </div>
+                            <div class="control" style="flex: 1; margin-right: 10px;">
+                                <label class="label">Title</label>
+                                <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Page 1 Text</label>
+                            <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Page 2 Text</label>
+                            <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+                        </div>
+
+                        <div class="field">
+                            <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Bold Parts</label>
+                            <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
+                        </div>
+
+                        <label class="label">Caption</label>
+                        <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
+                            <div class="control" style="flex: 1; margin-right: 10px;">
+                                <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
+                            </div>
+                            <div class="control buttons" style="flex: 0;">
+                                <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
+                            </div>
+                        </div>
+
+                        <div class="field" style="flex: 1; margin-right: 10px;">
+                            <label class="label">Optional cover url to use (unless Google search)</label>
+                            <input class="input" type="text" id="cover-url-{{ language }}" placeholder="The url of an image to use for cover.." style="background-color: lightgreen;" value="">
+                        </div>
+
+                    </div>
+
                     <br/>
-                    <div class="field is-grouped">
-                        <div class="control" style="flex: 1; margin-right: 10px;">
-                            <label class="label">Author</label>
-                            <input class="input" type="text" id="author-{{ language }}" placeholder="Enter author name" value="">
+
+                    <div class="media-container no-video">
+                        <div id="carousel-{{ language }}" class="carousel">
+                            <!-- Images will be dynamically added here -->
                         </div>
-                        <div class="control" style="flex: 1; margin-right: 10px;">
-                            <label class="label">Title</label>
-                            <input class="input" type="text" id="title-{{ language }}" placeholder="Enter title name" value="">
-                        </div>
+                        <div id="video-container-{{ language }}" class="video-container" style="display: none;"></div>
                     </div>
 
-                    <div class="field">
-                        <label class="label">Page 1 Text</label>
-                        <textarea class="textarea" id="page1-{{ language }}" rows="6" placeholder="Enter text for page 1"></textarea>
+                    <br/>
+
+                    <label class="label">Publish on accounts : </label>
+                    <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
+                        <!-- Accounts checkboxes will be added here -->
                     </div>
 
-                    <div class="field">
-                        <label class="label">Page 2 Text</label>
-                        <textarea class="textarea" id="page2-{{ language }}" rows="6" placeholder="Enter text for page 2"></textarea>
+                    <div class="buttons">
+                        <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
+                            <option value="SQUARE">1:1</option>
+                            <option value="RECT_POST">4:5 (POST)</option>
+                            <option value="RECT_REEL">9:16 (REEL)</option>
+                        </select>
+                        <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
+                        <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
+                        <button class="button is-link" onclick="shuffleCover('{{ language }}')">Shuffle Cover</button>
+                        <button class="button is-info" onclick="generateVideo('{{ language }}')">Generate Video</button>
                     </div>
-
-                    <div class="field">
-                        <div id="translated-{{ language }}" style="display: none; font-size: 10px; padding-left: 20px; padding-right: 20px;" rows="6"></div>
-                    </div>
-
-                    <div class="field">
-                        <label class="label">Bold Parts</label>
-                        <textarea class="textarea bold_parts" id="bold-parts-{{ language }}" rows="4" placeholder="Enter bold parts"></textarea>
-                    </div>
-
-                    <label class="label">Caption</label>
-                    <div class="field is-grouped hashtags" style="display: flex; align-items: flex-start;">
-                        <div class="control" style="flex: 1; margin-right: 10px;">
-                            <textarea class="textarea" type="text" id="hashtags-{{ language }}" value="" placeholder="Enter hashtags"></textarea>
-                        </div>
-                        <div class="control buttons" style="flex: 0;">
-                            <button class="button is-info" onclick="generateHashtags('{{ language }}')" style="align-self: flex-start;">Generate</button>
-                        </div>
-                    </div>
-
-                    <div class="field" style="flex: 1; margin-right: 10px;">
-                        <label class="label">Optional cover url to use (unless Google search)</label>
-                        <input class="input" type="text" id="cover-url-{{ language }}" placeholder="The url of an image to use for cover.." style="background-color: lightgreen;" value="">
+                    <div class="buttons">
+                        <button class="button is-danger" onclick="postImageToInstagram('{{ language }}')">Post Images to Instagram</button>
+                        <button class="button is-danger" onclick="postVideoToInstagram('{{ language }}')">Post Video to Instagram</button>
                     </div>
 
                 </div>
 
-                <br/>
-
-                <div class="media-container no-video">
-                    <div id="carousel-{{ language }}" class="carousel">
-                        <!-- Images will be dynamically added here -->
-                    </div>
-
-                    <div id="video-container-{{ language }}" class="video-container" style="display: none;"></div>
-                </div>
-
-                <br/>
-
-                <label class="label">Publish on accounts : </label>
-                <div id="accounts-{{ language }}" style="margin-bottom: 15px;">
-                    <!-- Accounts checkboxes will be added here -->
-                </div>
-
-                <div class="buttons">
-                    <select id="format-selector-{{language}}" class="button format-selector" onchange="event.stopPropagation();">
-                        <option value="SQUARE">1:1</option>
-                        <option value="RECT_POST">4:5 (POST)</option>
-                        <option value="RECT_REEL">9:16 (REEL)</option>
-                    </select>
-                    <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
-                    <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
-                    <button class="button is-link" onclick="shuffleCover('{{ language }}')">Shuffle Cover</button>
-                    <button class="button is-info" onclick="generateVideo('{{ language }}')">Generate Video</button>
-                </div>
-                <div class="buttons">
-                    <button class="button is-danger" onclick="postImageToInstagram('{{ language }}')">Post Images to Instagram</button>
-                    <button class="button is-danger" onclick="postVideoToInstagram('{{ language }}')">Post Video to Instagram</button>
-                </div>
             </div>
-
             {% endfor %}
         </div>
     </section>

@@ -194,6 +194,7 @@ def get_styled_parts(text, bold_parts):
     styled_parts = []
     remaining_text = text
     for bold_part in bold_parts:
+        bold_part = bold_part.strip()
         if bold_part in remaining_text:
             # Split around the bold part
             before, bold, remaining_text = remaining_text.partition(bold_part)

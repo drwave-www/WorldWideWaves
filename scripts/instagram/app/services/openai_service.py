@@ -76,7 +76,7 @@ def get_openai_extract(language):
     ### Output:
     Return only the structured JSON described above wih no additional text before or after.
     """
-    logging.info(f"PROMPT USED: '{prompt}'")
+    logging.debug(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
@@ -88,7 +88,7 @@ def get_openai_extract(language):
     )
     content = response['choices'][0]['message']['content'].strip().replace("```json\n", "").replace("```", "")
     content = content.replace("**", "").replace(" ", " ")
-    logging.info(content)
+    logging.debug(content)
     json_data = json.loads(content)
 
     caption = json_data.get("caption", [])
@@ -109,7 +109,7 @@ def get_openai_hashtags(language, extract):
     Do not output anything else than the hastags without newlines, in one line to be used as an instagram caption.
     Do not propose more than 25 hashtags.
     """
-    logging.info(f"PROMPT USED: '{prompt}'")
+    logging.debug(f"PROMPT USED: '{prompt}'")
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
@@ -120,5 +120,5 @@ def get_openai_hashtags(language, extract):
         temperature=0.7,
     )
     content = " ".join(Config.LANGUAGES[language]["fixed_hashtags"]) + " " + response['choices'][0]['message']['content']
-    logging.info(content)
+    logging.debug(content)
     return content

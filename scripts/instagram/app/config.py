@@ -25,6 +25,9 @@ import logging
 from PIL import ImageFont
 
 class Config:
+
+    logging.basicConfig(level = logging.DEBUG)
+
     @staticmethod
     def load_config():
         try:
@@ -74,7 +77,7 @@ class Config:
             "POS": {
                 "H" : {
                     "TITLE": 120,
-                    "AUTHOR": 850,
+                    "AUTHOR": 800,
                 },
                 "V" : {
                     "TITLE": 200,
