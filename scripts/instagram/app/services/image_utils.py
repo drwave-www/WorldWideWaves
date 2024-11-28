@@ -80,11 +80,16 @@ def draw_bounded_title(format, language, title_type, draw, text, font_name):
         best_lines = split_title_into_lines(text, best_font, max_width)
 
     # Draw the text on the image
-    line_height = best_font.getbbox("Ay")[3] + 10
+    bbox = best_font.getbbox("Ay")
+    height_indice = 3 if orientation == "H" or language == "ko" else 2  # FIXME specifics for ko
+    line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
+
     for i, line in enumerate(best_lines):
         bbox = best_font.getbbox(line)
 
-        line_width = bbox[2] - bbox[0]
+        width_indice = 2 if orientation == "H" or language == "ko" else 3  # FIXME specifics for ko
+        line_width = bbox[width_indice] - bbox[width_indice - 2]
+
         if orientation == "H":
             x = (format["IMAGE"]["WIDTH"] - line_width) // 2  # Center the text horizontally
             y = pos_start + i * line_height  # Position the text vertically
@@ -131,8 +136,9 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
 
     current_font = Config.normal_font(language, font_size)
     bbox = current_font.getbbox("Ay")
-    line_height = bbox[3] if orientation == "H" else bbox[2]
     width_indice = 2 if orientation == "H" or language == "ko" else 3 # FIXME specifics for ko
+    height_indice = 3 if orientation == "H" or language == "ko" else 2  # FIXME specifics for ko
+    line_height = bbox[height_indice] - bbox[height_indice - 2] + Config.SPACE_BETWEEN_LINES
     max_width = format["AREA"]["WIDTH"] if orientation == "H" else format["AREA"]["HEIGHT"]
 
     magic = format["MAGICS"].get(language, 0)
@@ -144,7 +150,7 @@ def layout_text(format, language, font_size, styled_parts, orientation, directio
             if language == "ko": # FIXME specifics for ko
                 space_width += 40
             else:
-                space_width = 10
+                space_width = Config.DEFAULT_SPACE_WIDTH
 
         # Tokenize words and handle punctuation
         words = split_by_words(language, part)
@@ -286,7 +292,7 @@ def write_line(format, language, draw, line, x, y, orientation, direction, is_la
         if language == "ko":  # FIXME specifics for ko
             space_width += 40
         else:
-            space_width = 10
+            space_width = Config.DEFAULT_SPACE_WIDTH
 
     if direction == 'RL' and orientation == "H":
         line.reverse()

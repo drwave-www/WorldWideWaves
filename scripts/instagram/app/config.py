@@ -57,6 +57,8 @@ class Config:
 
     MIN_FONT_SIZE = 15
     MAX_FONT_SIZE = 90
+    SPACE_BETWEEN_LINES = 20
+    DEFAULT_SPACE_WIDTH = 10
 
     FORMATS = {
         "SQUARE": {
