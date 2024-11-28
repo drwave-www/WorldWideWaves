@@ -84,7 +84,7 @@
        .buttons {
             display: flex; /* Flexbox ensures consistent layout */
             flex-wrap: wrap; /* Allow buttons to wrap to the next line if necessary */
-            justify-content: center; /* Center the buttons horizontally */
+            justify-content: left; /* Center the buttons horizontally */
             align-items: center; /* Align buttons vertically */
             gap: 10px; /* Uniform spacing between buttons */
             width: 100%; /* Ensure the container spans full width */
@@ -111,15 +111,16 @@
         }
 
         .control.buttons {
-            display: flex; /* Use flexbox for alignment */
-            flex-direction: column; /* Stack buttons vertically */
-            align-items: flex-end; /* Align buttons to the right */
-            gap: 10px; /* Add consistent spacing between buttons */
+            display: flex; /* Enable flexbox layout */
+            flex-direction: row; /* Place buttons in a row */
+            justify-content: left; /* Center buttons horizontally */
+            align-items: center; /* Align buttons vertically */
+            gap: 10px; /* Add uniform spacing between buttons */
         }
 
         .control.buttons button {
             flex: none; /* Prevent buttons from stretching */
-            width: auto; /* Ensure buttons retain their natural size */
+            width: auto; /* Keep button size natural */
         }
 
         .format-selector {
@@ -179,7 +180,7 @@
             width:204px;
             height:25px;
             margin:auto;
-            padding-bottom: 10px;
+            padding-bottom: 20px;
         }
 
         .spinningSquaresG{

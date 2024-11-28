@@ -1,6 +1,5 @@
 - ajout de la possibilite de remonter un bloc entier de langue (cacher en partie)
 - URGENT: simplify / factorize the word/char lenght calculations + virer le passage de orientation/direction partout ou le language est deja passe
-- mobile visu : all buttons total width of screen + video on a separate line (test)
 
 - video
     - logo + bruit + titre

@@ -581,9 +581,9 @@
 
                     <div id="error-{{ language }}" style="white-space: pre-wrap; font-family: monospace; font-size: 9pt; padding: 10px; border: 1px solid #ccc;display:none;"></div>
 
-                    <div class="control buttons" style="flex: 1;">
-                        <button class="button is-info" onclick="generateExtract('{{ language }}')" style="align-self: flex-end;">Generate Extract</button>
-                        <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')" style="align-self: flex-end;">Clear fields</button>
+                    <div class="control buttons">
+                        <button class="button is-info" onclick="generateExtract('{{ language }}')">Generate Extract</button>
+                        <button class="button is-warning" onclick="resetInputs('{{ language }}'); clearImages('{{ language }}')">Clear fields</button>
                     </div>
 
                     <button class="button is-small is-light" id="local-toggle-button-{{ language }}" onclick="toggleFieldsSection('{{ language }}')" aria-expanded="false">
