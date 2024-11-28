@@ -88,7 +88,7 @@
             }
 
             video, video-js {
-                width: 100%; /* Stretch to container */
+                width: 90%; /* Stretch to container */
                 height: auto; /* Maintain aspect ratio */
             }
 
@@ -101,19 +101,6 @@
             .carousel img {
                 margin-right: 0;
                 margin-bottom: 10px;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .video-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            video, video-js {
-                height: auto; /* Adjust dynamically via JS */
-                max-height: 100%; /* Prevent overflow */
             }
         }
 
