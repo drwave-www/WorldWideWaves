@@ -90,9 +90,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
     output_video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
 
-    text_video_path = None
-    audio_page1, audio_page2, text_video = None, None, None
-    BOOT_VIDEO, INTRO_VIDEO, combined_text_audio = None, None, None
+    audio_page1, audio_page2, audio_tictac, text_video, background_music = None, None, None, None, None
+    BOOT_VIDEO, INTRO_VIDEO, combined_text_audio, output_video = None, None, None, None
 
     template_tictac_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "tictac.wav")
     template_2026_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "2026.jpg")
@@ -151,7 +150,7 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         audio_background_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "background.mp3")
         background_music = AudioFileClip(audio_background_path).with_volume_scaled(0.05)
         background_music = background_music.with_start(BOOT_VIDEO.duration + INTRO_VIDEO.duration)
-        background_music = background_music.with_duration(combined_text_audio.duration - Config.STATIC_PAGE_TIME * 2)
+        background_music = background_music.with_duration(text_video.duration - Config.STATIC_PAGE_TIME * 2)
         background_music = background_music.with_effects([AudioFadeOut(Config.STATIC_PAGE_TIME / 2)])
         final_audio = CompositeAudioClip([output_video.audio, background_music])
         output_video = output_video.with_audio(final_audio)
@@ -168,6 +167,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
             audio_page1.close()
         if audio_page2:
             audio_page2.close()
+        if audio_tictac:
+            audio_tictac.close()  # Release ticking sound
         if text_video:
             text_video.close()
         if combined_text_audio:
@@ -176,9 +177,10 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
             BOOT_VIDEO.close()
         if INTRO_VIDEO:
             INTRO_VIDEO.close()
-
-        if os.path.exists(text_video_path):
-            os.remove(text_video_path)
+        if background_music:
+            background_music.close()  # Release background music
+        if output_video:
+            output_video.close()  # Release final video object
 
     logging.info(f"Video successfully saved to {output_video_path}")
     return output_video_path.replace("app/", "", 1)

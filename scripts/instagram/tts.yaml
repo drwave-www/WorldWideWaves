@@ -10,7 +10,7 @@ languages:
   'fr':
     engine: "xtts"
     'char-limit': 273 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
-    'default-voice': "Xavier Hayasaka"
+    'default-voice': "Vjollca Johnnie"
   'de':
     engine: "xtts"
     'char-limit': 253 # from https://github.com/coqui-ai/TTS/blob/dev/TTS/tts/layers/xtts/tokenizer.py
