@@ -21,11 +21,19 @@
 
 import os
 import yaml
-import logging
 from PIL import ImageFont
 from TTS.api import TTS
+import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.root.handlers = []
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("logs/app.log"),
+        logging.StreamHandler()
+    ]
+)
 
 class Config:
 

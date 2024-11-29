@@ -3,7 +3,6 @@
 - mettre plusieurs speakers par langue et tourner (random)
 - add son de fond depuis le debut
 - do not activate video button if no voice available
-- IMPORTANT: regler le pb de split des sentences
 - crontab de nettoyage des vieux fichiers d'output
 - outro video / originale + 2026 + logo
 - functions in utils to generate static common videos + cache (template/output/)
@@ -17,7 +16,6 @@
 - post on tiktok
 - post on instagram
 
-- resoudre le pb des logs qui n'aparaissent plus... ?
 - regenrater cover with url if specified
 - ajouter un champ texte deroulable de sel pour le prompt openAI
 - move test LibRQAM dans config

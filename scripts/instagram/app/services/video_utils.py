@@ -65,12 +65,16 @@ def generate_voice_for_text(language, text):
     return output_file, get_audio_length(output_file)
 
 def get_audio_length(audio_file_path):
-    with wave.open(audio_file_path, 'rb') as wav_file:
-        # Calculate the length in seconds
-        frames = wav_file.getnframes()
-        rate = wav_file.getframerate()
-        duration = frames / float(rate)
-    return duration
+    try:
+        with wave.open(audio_file_path, 'rb') as wav_file:
+            frames = wav_file.getnframes()
+            rate = wav_file.getframerate()
+            duration = frames / float(rate)
+            logging.info(f"Audio duration: {duration} seconds")
+        return duration
+    except wave.Error as e:
+        logging.error(f"Error reading WAV file: {e}")
+        return None
 
 def get_video_writer(image_size):
     video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
