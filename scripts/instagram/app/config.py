@@ -81,6 +81,7 @@ class Config:
     VIDEO_FPS = 30
     VIDEO_TEXT_END_TIME = 1 # 1s added
     VIDEO_START_READ_AFTER = 1
+    STATIC_PAGE_TIME = 2
     RATE_TEXT_ADVANCE = 0.8
 
     TTS_ENGINE = None

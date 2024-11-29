@@ -21,6 +21,7 @@
 import logging
 import os
 from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips
+from moviepy.audio.fx import AudioFadeOut
 
 from app.config import Config
 from app.services.utils import u_num
@@ -93,6 +94,10 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     audio_page1, audio_page2, text_video = None, None, None
     BOOT_VIDEO, INTRO_VIDEO, combined_text_audio = None, None, None
 
+    template_tictac_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "tictac.wav")
+    template_2026_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "2026.jpg")
+    template_logo_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "logo.jpg")
+
     try:
         ## AUDIO: READ TEXT
         logging.info(f"Generate voices for text")
@@ -111,13 +116,16 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
 
         render_progressive_text(format, video_writer, image_size, t_audio_page1_for_text, t_video_end_time_page1, language, page1, bold_parts)
         render_progressive_text(format, video_writer, image_size, t_audio_page2_for_text, t_video_end_time_page2, language, page2, bold_parts)
-        display_static_page(video_writer, image_size, "app/" + cover_link, 3 * Config.VIDEO_FPS)
+
+        display_static_page(video_writer, image_size, "app/" + cover_link, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
+        display_static_page(video_writer, image_size, template_2026_path, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
+        display_static_page(video_writer, image_size, template_logo_path, Config.STATIC_PAGE_TIME * Config.VIDEO_FPS)
 
         video_writer.release()
-        text_video = VideoFileClip(text_video_path)
 
         t_audio_start_page1 = Config.VIDEO_START_READ_AFTER
         t_audio_start_page2 = t_audio_page1 + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER * 2
+        t_audio_start_tictac = t_audio_start_page2 + t_audio_page2 + Config.VIDEO_TEXT_END_TIME + Config.STATIC_PAGE_TIME
 
         logging.info(f"Page1: Video duration {t_audio_page1_for_text + t_video_end_time_page1}, Audio duration: {t_audio_page1} startsec: {t_audio_start_page1}")
         logging.info(f"Page2: Video duration {t_audio_page2_for_text + t_video_end_time_page2}, Audio duration: {t_audio_page2} startsec: {t_audio_start_page2}")
@@ -126,7 +134,10 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         logging.info(f"Combine audio")
         audio_page1 = AudioFileClip(audio_page1_path).with_start(t_audio_start_page1)
         audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_start_page2)
-        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2])
+        audio_tictac = AudioFileClip(template_tictac_path).with_start(t_audio_start_tictac)
+        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2, audio_tictac])
+
+        text_video = VideoFileClip(text_video_path)
         TEXT_VIDEO = text_video.with_audio(combined_text_audio)
 
         # Concatenate and write final video
@@ -135,6 +146,16 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         INTRO_VIDEO = get_intro_video(format)
 
         output_video = concatenate_videoclips([BOOT_VIDEO, INTRO_VIDEO, TEXT_VIDEO])
+
+        # Add background music
+        audio_background_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "background.mp3")
+        background_music = AudioFileClip(audio_background_path).with_volume_scaled(0.05)
+        background_music = background_music.with_start(BOOT_VIDEO.duration + INTRO_VIDEO.duration)
+        background_music = background_music.with_duration(combined_text_audio.duration - Config.STATIC_PAGE_TIME * 2)
+        background_music = background_music.with_effects([AudioFadeOut(Config.STATIC_PAGE_TIME / 2)])
+        final_audio = CompositeAudioClip([output_video.audio, background_music])
+        output_video = output_video.with_audio(final_audio)
+
         output_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac")
 
     except Exception as e:
