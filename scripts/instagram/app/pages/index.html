@@ -268,7 +268,6 @@
                     // Update data
                     updateLanguageFields(language, data)
                     toggleFieldsOn(language)
-                    toggleGlobalOn(language)
                     stopSpinner(language)
                 },
                 (error) => {
@@ -530,6 +529,7 @@
         }
 
         function toggleFieldsOn(language) {
+            toggleGlobalOn(language)
             toggleFieldsSection(language, true)
         }
 
