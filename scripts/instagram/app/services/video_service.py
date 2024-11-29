@@ -35,7 +35,7 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
     image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
 
     # Static files
-    output_video = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
+    output_video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
     intro_video_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "intro.mp4")
     intro_glitch_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-glitch.mp3")
     intro_www_audio_path = os.path.join(Config.TEMPLATE_FOLDER, "VIDEO", "intro-www.wav")
@@ -112,10 +112,10 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         BOOT_VIDEO = VideoFileClip(boot_video_path)
 
         # Concatenate all video clips
-        final_video = concatenate_videoclips([BOOT_VIDEO, INTRO_VIDEO, TEXT_VIDEO])  # , OUTRO_VIDEO])
+        output_video = concatenate_videoclips([BOOT_VIDEO, INTRO_VIDEO, TEXT_VIDEO])  # , OUTRO_VIDEO])
 
         # Write the final output
-        final_video.write_videofile(output_video, codec="libx264", audio_codec="aac")
+        output_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac")
 
         intro_glitch_audio.close()
         intro_www_audio.close()
@@ -125,5 +125,5 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         logging.error(f"Error concatenating and writing video: {e}")
         raise
 
-    print(f"Video successfully saved to {output_video}")
-    return output_video.replace("app/", "", 1)
+    print(f"Video successfully saved to {output_video_path}")
+    return output_video_path.replace("app/", "", 1)
