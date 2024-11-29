@@ -1,14 +1,15 @@
 
-- on format change, clean images and video
-- mettre plusieurs speakers par langue et tourner (random)
+- outro video / originale + 2026 + logo
 - add son de fond depuis le debut
+- page des frames boot sans contour blanc : logo-empty.jpg
+
+- mettre plusieurs speakers par langue et tourner (random)
+- verifier la fermeture de toutes les ressources lors de la generation
+
+- case a cocher pour ignorer les textes deja utilises dans le prompt
+- on format change, clean images and video
 - do not activate video button if no voice available
 - crontab de nettoyage des vieux fichiers d'output
-- outro video / originale + 2026 + logo
-- functions in utils to generate static common videos + cache (template/output/)
-- essayer d'ameliorer la synchro lecture / defilement : le son est tj plus rapide que le texte...
-- page des frames boot sans contour blanc : logo-empty.jpg
-- verifier la fermeture de toutes les ressources lors de la generation
 - faire une barre en haut avec des raccourcis vers chaque langue
 
 - post de la video sur instagram (post et reel)

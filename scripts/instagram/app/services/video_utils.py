@@ -76,16 +76,19 @@ def get_audio_length(audio_file_path):
         logging.error(f"Error reading WAV file: {e}")
         return None
 
-def get_video_writer(image_size):
-    video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
+def get_video_writer(image_size, video_path = None):
+    if video_path is None:
+        video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_text_video.mp4")
+
     logging.info(f"Output file: {video_path}")
     fourcc = cv2.VideoWriter_fourcc(*"H264")
     video_writer = cv2.VideoWriter(video_path, fourcc, Config.VIDEO_FPS, image_size)
     if not video_writer.isOpened():
         raise Exception("Failed to open VideoWriter")
+
     return video_writer, video_path
 
-def render_progressive_text(format, video_writer, image_size, total_time, language, text, bold_parts):
+def render_progressive_text(format, video_writer, image_size, total_time, end_time, language, text, bold_parts):
     background_path = os.path.join(Config.TEMPLATE_FOLDER, format["FOLDER"], "quote.jpg")
     bg_image = cv2.imread(background_path)
     bg_image = cv2.resize(bg_image, image_size)
@@ -118,7 +121,7 @@ def render_progressive_text(format, video_writer, image_size, total_time, langua
             video_writer.write(cv_frame)
 
     if last_frame is not None: # Add extra time at the end of the page
-        for _ in range(math.ceil(Config.VIDEO_FPS * Config.VIDEO_TEXT_END_TIME)):
+        for _ in range(math.ceil(Config.VIDEO_FPS * end_time)):
             video_writer.write(last_frame)
 
 def display_static_page(video_writer, image_size, page_path, frames):
