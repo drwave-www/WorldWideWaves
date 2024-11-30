@@ -55,7 +55,7 @@ def generate_voice_for_text(language, text):
     code = Config.TTS_CONFIG["languages"][language].get("code", language)
 
     try:
-        text = text.replace(".", " . ")
+        text = text.replace(".", ".")
         Config.tts().tts_to_file(text, split_sentences=split_sentences, speaker=speaker, language=code, file_path=output_file)
     except Exception as e:
         logging.error(f"Error generating voice for language {language}: {e}")

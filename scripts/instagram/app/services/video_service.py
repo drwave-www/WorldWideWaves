@@ -124,7 +124,6 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
 
         t_audio_start_page1 = Config.VIDEO_START_READ_AFTER
         t_audio_start_page2 = t_audio_page1 + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER * 2
-        t_audio_start_tictac = t_audio_start_page2 + t_audio_page2 + Config.VIDEO_TEXT_END_TIME + Config.STATIC_PAGE_TIME
 
         logging.info(f"Page1: Video duration {t_audio_page1_for_text + t_video_end_time_page1}, Audio duration: {t_audio_page1} startsec: {t_audio_start_page1}")
         logging.info(f"Page2: Video duration {t_audio_page2_for_text + t_video_end_time_page2}, Audio duration: {t_audio_page2} startsec: {t_audio_start_page2}")
@@ -133,8 +132,7 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         logging.info(f"Combine audio")
         audio_page1 = AudioFileClip(audio_page1_path).with_start(t_audio_start_page1)
         audio_page2 = AudioFileClip(audio_page2_path).with_start(t_audio_start_page2)
-        audio_tictac = AudioFileClip(template_tictac_path).with_start(t_audio_start_tictac)
-        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2, audio_tictac])
+        combined_text_audio = CompositeAudioClip([audio_page1, audio_page2])
 
         text_video = VideoFileClip(text_video_path)
         TEXT_VIDEO = text_video.with_audio(combined_text_audio)
@@ -152,7 +150,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         background_music = background_music.with_start(BOOT_VIDEO.duration + INTRO_VIDEO.duration)
         background_music = background_music.with_duration(text_video.duration - Config.STATIC_PAGE_TIME * 2)
         background_music = background_music.with_effects([AudioFadeOut(Config.STATIC_PAGE_TIME / 2)])
-        final_audio = CompositeAudioClip([output_video.audio, background_music])
+        audio_tictac = AudioFileClip(template_tictac_path).with_start(output_video.duration - Config.STATIC_PAGE_TIME * 2)
+        final_audio = CompositeAudioClip([output_video.audio, background_music, audio_tictac])
         output_video = output_video.with_audio(final_audio)
 
         output_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac")
