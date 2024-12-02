@@ -32,7 +32,7 @@ services:
       - ./app/static/js:/usr/share/nginx/html/static/js:ro  # Mount the css folder
     environment:
       - NGINX_USERNAME=admin      # Set default username for authentication
-      - NGINX_PASSWORD=insta42 # Set default password for authentication
+      - NGINX_PASSWORD=0Z7Re$5nRRwuCXa* # Set default password for authentication
     restart: always
 
 volumes:

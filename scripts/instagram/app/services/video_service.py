@@ -110,8 +110,8 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
         t_audio_page1_for_text = Config.RATE_TEXT_ADVANCE * t_audio_page1
         t_audio_page2_for_text = Config.RATE_TEXT_ADVANCE * t_audio_page2
 
-        t_video_end_time_page1 = (t_audio_page1 - t_audio_page1_for_text) + Config.VIDEO_TEXT_END_TIME # + Config.VIDEO_START_READ_AFTER
-        t_video_end_time_page2 = (t_audio_page2 - t_audio_page2_for_text) # + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER
+        t_video_end_time_page1 = (t_audio_page1 - t_audio_page1_for_text) + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER
+        t_video_end_time_page2 = (t_audio_page2 - t_audio_page2_for_text) + Config.VIDEO_TEXT_END_TIME + Config.VIDEO_START_READ_AFTER
 
         render_progressive_text(format, video_writer, image_size, t_audio_page1_for_text, t_video_end_time_page1, language, page1, bold_parts)
         render_progressive_text(format, video_writer, image_size, t_audio_page2_for_text, t_video_end_time_page2, language, page2, bold_parts)

@@ -7,6 +7,7 @@
 - do not activate video button if no voice available
 - crontab de nettoyage des vieux fichiers d'output
 
+- review the logs of video gen
 - separer gen voix et gen video, utiliser l'audio gen sous forme de path pour la video
 - post de la video sur instagram (post et reel)
 - post a reel at the same time of the post and the video (link to the post), as an option

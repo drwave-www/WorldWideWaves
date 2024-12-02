@@ -29,8 +29,9 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from app.config import Config
-from app.services.image_utils import draw_bounded_text, split_by_words, get_styled_parts, split_text_in_lines
+from app.services.image_utils import draw_bounded_text, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
+
 
 def generate_voice_for_text(language, text):
     if language not in Config.TTS_CONFIG["languages"]:
@@ -55,7 +56,7 @@ def generate_voice_for_text(language, text):
     code = Config.TTS_CONFIG["languages"][language].get("code", language)
 
     try:
-        text = text.replace(".", ".")
+        text = text.replace(".", "|\n") # Bug in xtts-2, pronouncing the '.' in some languages
         Config.tts().tts_to_file(text, split_sentences=split_sentences, speaker=speaker, language=code, file_path=output_file)
     except Exception as e:
         logging.error(f"Error generating voice for language {language}: {e}")
@@ -96,33 +97,50 @@ def render_progressive_text(format, video_writer, image_size, total_time, end_ti
     styled_parts = get_styled_parts(text, bold_parts)
 
     # Find the final font size
-    orientation, direction, _ = Config.get_layout(language)
+    _, _, spaced = Config.get_layout(language)
     font_size = Config.MAX_FONT_SIZE
     if Config.VIDEO_USE_FINAL_FONT_SIZE:
         font_size, _, _, _ = split_text_in_lines(format, language, styled_parts)
 
-    words = split_by_words(language, text)
-    time_per_word = total_time / len(words)
+    # Split text into individual letters
+    letters = list(text)
+    total_frames = math.ceil(Config.VIDEO_FPS * total_time)
+    frames_per_letter = total_frames // len(letters)
+    extra_frames = total_frames - frames_per_letter * len(letters)
 
+    # Track total written frames
+    frames_written = 0
     last_frame = None
-    for i in range(len(words) + 1):
-        separator = " " if orientation == "H" or language == "ko" else "" # FIXME: ko specifics
-        current_text = separator.join(words[:i])
 
-        logging.debug(f"Draw the text")
-        pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))  # Convert to PIL format
+    for i in range(len(letters) + 1):
+        current_text = "".join(letters[:i])
+
+        pil_image = Image.fromarray(cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB))
         draw = ImageDraw.Draw(pil_image)
         draw_bounded_text(format, language, draw, current_text, bold_parts, font_size)
 
-        logging.debug(f"Convert PIL image back to OpenCV format")
         cv_frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         last_frame = cv_frame
-        for _ in range(math.ceil(Config.VIDEO_FPS * time_per_word)):
-            video_writer.write(cv_frame)
 
-    if last_frame is not None: # Add extra time at the end of the page
-        for _ in range(math.ceil(Config.VIDEO_FPS * end_time)):
-            video_writer.write(last_frame)
+        # Write frames for the current letter
+        for _ in range(frames_per_letter):
+            video_writer.write(cv_frame)
+            frames_written += 1
+
+        # Distribute extra frames across letters
+        if extra_frames > 0:
+            video_writer.write(cv_frame)
+            frames_written += 1
+            extra_frames -= 1
+
+    # Write remaining frames if total_time is not exactly matched
+    while frames_written < total_frames:
+        video_writer.write(last_frame)
+        frames_written += 1
+
+    # Add frames for the end time
+    for _ in range(math.ceil(Config.VIDEO_FPS * end_time)):
+        video_writer.write(last_frame)
 
 def display_static_page(video_writer, image_size, page_path, frames):
     static_frame = cv2.imread(page_path)
