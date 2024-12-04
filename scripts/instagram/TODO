@@ -1,26 +1,20 @@
 
-- add regen/stop buttons for audio
+- regenerate cover with url if specified
 - set debug on run and logging only if there is no WWW_PRODUCTION=1, to add in docker-compose
-- nettoyer les intro-*mp4 du tool externe avec ffmpeg (regenerer la video I/O avec ffmpeg)
-- mettre plusieurs speakers par langue et tourner (random)
-- selection la bonne voix a utiliser par langue, besoin d'aider pour choisir de gens qui parlent la langue..
-- index out of bounds sur 'ja' (+sieurs gen video lancees en meme temps) ?
-
 - do not activate video button if no voice available
 - crontab de nettoyage des vieux fichiers d'output
 
-- review the logs of video gen
+- nettoyer les intro-*mp4 du tool externe avec ffmpeg (regenerer la video I/O avec ffmpeg)
+- selection la bonne voix a utiliser par langue, besoin d'aider pour choisir de gens qui parlent la langue..
+- index out of bounds sur 'ja' (+sieurs gen video lancees en meme temps) ?
+
 - post de la video sur instagram (post et reel)
-- post a reel at the same time of the post and the video (link to the post), as an option
 - post on tiktok
     add an account type in the list of accounts
-- post on instagram
+- post a reel at the same time of the post and the video (link to the post), as an option
 
-- regenrater cover with url if specified
 - ajouter un champ texte deroulable de sel pour le prompt openAI
-- move test LibRQAM dans config
 - save json of posted data + images
-- possibilite d'enregistrer sa propre voix pour page 1 et page 2 (nettoyer avec ffmpeg)
 
 - les apostrophes ne sont pas bien gerees
 
