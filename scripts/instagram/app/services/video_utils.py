@@ -32,7 +32,6 @@ from app.config import Config
 from app.services.image_utils import draw_bounded_text, get_styled_parts, split_text_in_lines
 from app.services.utils import u_num
 
-
 def generate_voice_for_text(language, text):
     if language not in Config.TTS_CONFIG["languages"]:
         raise ValueError(f"Language '{language}' not supported.")
@@ -63,7 +62,7 @@ def generate_voice_for_text(language, text):
         logging.debug(text)
         raise
 
-    return output_file, get_audio_length(output_file)
+    return output_file
 
 def get_audio_length(audio_file_path):
     try:

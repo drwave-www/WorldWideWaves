@@ -26,7 +26,7 @@ from moviepy.audio.fx import AudioFadeOut
 from app.config import Config
 from app.services.utils import u_num
 from app.services.video_utils import display_static_page, render_progressive_text, generate_voice_for_text, \
-    get_video_writer
+    get_video_writer, get_audio_length
 
 # Paths
 FONT_PATH = "app/fonts/montserrat.ttf"  # Update with your font path
@@ -85,8 +85,9 @@ def get_intro_video(format):
 
     return intro_video
 
-def generate_video(format, language, page1, page2, bold_parts, cover_link):
+def generate_video(format, language, page1, page2, bold_parts, cover_link, audio_page1_path = None, audio_page2_path = None):
     format = Config.FORMATS[format]
+
     image_size = (format["IMAGE"]["WIDTH"], format["IMAGE"]["HEIGHT"])
     output_video_path = os.path.join(Config.OUTPUT_FOLDER, f"{u_num()}_video.mp4")
 
@@ -99,9 +100,22 @@ def generate_video(format, language, page1, page2, bold_parts, cover_link):
 
     try:
         ## AUDIO: READ TEXT
-        logging.info(f"Generate voices for text")
-        audio_page1_path, t_audio_page1 = generate_voice_for_text(language, page1)
-        audio_page2_path, t_audio_page2 = generate_voice_for_text(language, page2)
+        if not audio_page1_path:
+            logging.info(f"Generate voices for text of page 1")
+            audio_page1_path = generate_voice_for_text(language, page1)
+        else:
+            logging.info(f"Reuse submitted voices for text of page 1")
+            audio_page1_path = "app/" + audio_page1_path
+
+        if not audio_page2_path:
+            logging.info(f"Generate voices for text of page 2")
+            audio_page2_path = generate_voice_for_text(language, page2)
+        else:
+            logging.info(f"Reuse submitted voices for text of page 2")
+            audio_page2_path = "app/" + audio_page2_path
+
+        t_audio_page1 = get_audio_length(audio_page1_path)
+        t_audio_page2 = get_audio_length(audio_page2_path)
 
         ## VIDEO: READ TEXT
         logging.info(f"Render text in frames")

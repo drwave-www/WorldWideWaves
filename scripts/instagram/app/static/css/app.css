@@ -45,12 +45,45 @@
             margin-right: 10px;
         }
 
+        .video-audio-container {
+            width: 300px;
+        }
+
         .video-container {
             flex: 1 1 0%; /* 25% width */
             box-sizing: border-box;
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .audio-container {
+            display: flex; /* Enable flexbox */
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center the audio players horizontally */
+            justify-content: flex-start; /* Align audio players to the top */
+            gap: 5px; /* Add spacing between audio players */
+            box-sizing: border-box; /* Include padding and border in width */
+        }
+
+        .audio-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-bottom: -30pxpx;
+        }
+
+        .audio-item i {
+            font-size: 20px; /* Icon size */
+            color: #007bff; /* Default blue color */
+            transition: color 0.2s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .audio-item i:hover {
+            color: #0056b3; /* Darker blue on hover */
+            transform: scale(1.2); /* Slightly enlarge on hover */
         }
 
         /* When video is hidden */
@@ -379,6 +412,13 @@
 
             .carousel,
             .video-container {
+                width: 100%; /* Make both take full width */
+                margin-right: 0; /* Reset margins */
+                margin-bottom: 10px; /* Add spacing between the two */
+            }
+
+            .carousel,
+            .audio-container {
                 width: 100%; /* Make both take full width */
                 margin-right: 0; /* Reset margins */
                 margin-bottom: 10px; /* Add spacing between the two */

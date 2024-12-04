@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="/static/css/app.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link href="/static/js/videojs/video-js.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/video-js.min.css" />
+    <link rel="stylesheet" href="/static/css/essential_audio.css"></link>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
@@ -19,7 +20,9 @@
 
     <script>
         // Reusable API call function
-        function apiCall(endpoint, method, body = {}, onSuccess = () => {}, onError = () => {}) {
+        function apiCall(endpoint, method, body = {}, onSuccess = () => {
+        }, onError = () => {
+        }) {
             fetch(endpoint, {
                 method: method,
                 headers: {'Content-Type': 'application/json'},
@@ -98,7 +101,10 @@
         function getField(language, inputName) {
             const inputElement = document.getElementById(`${inputName}-${language}`);
             if (inputElement) {
-                return inputElement.value
+                if (inputName.includes("audio-player"))
+                    return inputElement.dataset.url;
+                else
+                    return inputElement.value
             }
             return null;
         }
@@ -111,6 +117,8 @@
                 title: getField(language, "title"),
                 page1: getField(language, "page1"),
                 page2: getField(language, "page2"),
+                audio_page1_path: getField(language, "audio-player-page1"),
+                audio_page2_path: getField(language, "audio-player-page2"),
                 bold_parts: getField(language, "bold-parts")
                     .split("\n")
                     .map(tag => tag.trim())
@@ -178,7 +186,7 @@
 
         // --------------------------------------------------------------------
 
-        let player = null
+        let video_players = []
 
         function updateMediaContainerClass() {
             const videoContainer = document.querySelector('.video-container');
@@ -191,10 +199,83 @@
             }
         }
 
+        function clearAudio(language, page_index = undefined) {
+            const audioContainer = document.getElementById(`audio-container-${language}`);
+            audioContainer.style.display = 'none';
+            for (let i = 1; i < 3; i++) {
+                if (page_index === undefined || page_index === i) {
+                    const audio_id = `audio-page${i}-${language}`;
+                    let audio_div = document.getElementById(audio_id);
+                    if (audio_div) {
+                        audio_div.remove();
+                    }
+                }
+            }
+        }
+
         function clearVideo(language) {
             const videoContainer = document.getElementById(`video-container-${language}`);
             videoContainer.style.display = 'none';
             updateMediaContainerClass();
+        }
+
+        function setAudio(language, data_audio) {
+            const audioContainer = document.getElementById(`audio-container-${language}`);
+            audioContainer.style.display = 'block';
+
+            for (let page_index in data_audio) {
+                const audio_id = `audio-${page_index}-${language}`;
+                const audio_player_id = `audio-player-${page_index}-${language}`;
+
+                let audio_div = document.getElementById(audio_id);
+                if (audio_div) {
+                    audio_div.remove();
+                }
+
+                audio_div = document.createElement('div');
+                audio_div.id = audio_id;
+                audio_div.className = 'audio-item';
+
+                // Audio player element
+                const audioPlayer = document.createElement('div');
+                audioPlayer.id = audio_player_id;
+                audioPlayer.className = 'essential_audio';
+                audioPlayer.dataset.url = data_audio[page_index];
+                audioPlayer.style.width = '240px';
+                audioPlayer.style.height = '30px';
+                audioPlayer.style.marginTop = '30px';
+
+                // Regenerate icon
+                const regenerateIcon = document.createElement('i');
+                regenerateIcon.className = 'fas fa-redo';
+                regenerateIcon.title = 'Regenerate Audio';
+                regenerateIcon.style.cursor = 'pointer';
+                regenerateIcon.onclick = () => {
+                    generateAudio(language, page_index === "page1" ? 1 : 2); // Regenerate function
+                };
+
+                // Delete icon
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fas fa-trash';
+                deleteIcon.title = 'Delete Audio';
+                deleteIcon.style.cursor = 'pointer';
+                deleteIcon.onclick = () => {
+                    audio_div.remove();
+                };
+
+                // Append elements
+                audio_div.appendChild(audioPlayer);
+                audio_div.appendChild(regenerateIcon);
+                audio_div.appendChild(deleteIcon);
+
+                if (page_index === "page1") {
+                    audioContainer.insertBefore(audio_div, audioContainer.childNodes[0]);
+                } else {
+                    audioContainer.appendChild(audio_div);
+                }
+            }
+
+            Essential_Audio.init();
         }
 
         function setVideo(language, video) {
@@ -215,14 +296,14 @@
                     break
             }
 
-            if (player != null)
-                player.dispose()
+            if (video_players[language] != null)
+                video_players[language].dispose()
 
             const video_div = document.createElement('video-js');
             video_div.id = `video-${language}`;
             videoContainer.appendChild(video_div);
 
-            player = videojs(`video-${language}`, {
+            video_players[language] = videojs(`video-${language}`, {
                 autoplay: true,
                 controls: true,
                 width: 300,
@@ -231,7 +312,7 @@
                 "customControlsOnMobile": true,
                 "nativeControlsForTouch": false
             });
-            player.src({
+            video_players[language].src({
                 src: video
             });
         }
@@ -257,6 +338,7 @@
             resetInputs(language)
             clearImages(language)
             clearVideo(language)
+            clearAudio(language)
 
             apiCall('/extract', 'POST', {language: language},
                 (data) => {
@@ -288,7 +370,7 @@
             toggleFieldsOff(language)
 
             const article = getLanguageFields(language)
-            let data = { language: language }
+            let data = {language: language}
 
             if (!(article.page1.trim() === '' || article.page2.trim() === '' || article.author.trim() === '' || article.title.trim() === '')) {
                 data.article = article
@@ -324,6 +406,46 @@
             );
         }
 
+        function generateAudio(language, page_index = undefined) {
+            const article = getLanguageFields(language)
+            if (article.page1.trim() === '' || article.page2.trim() === '') {
+                alert(`No excerpt is available.`);
+                return;
+            }
+
+            let data = {
+                language: language,
+                page1: (page_index === 1 || page_index === undefined) ? article["page1"] : null,
+                page2: (page_index === 2 || page_index === undefined) ? article["page2"] : null,
+            }
+
+            showSpinner(language)
+            clearAudio(language, page_index)
+            toggleFieldsOff(language)
+
+            apiCall('/audio', 'POST', data,
+                (data) => {
+                    if (typeof data === 'string' && data.toLowerCase().includes('error')) {
+                        showError(language, data)
+                        return;
+                    }
+
+                    if (data.audio) {
+                        setAudio(language, data.audio)
+                    } else {
+                        showError(language, "Error: no audio returned.")
+                        return;
+                    }
+
+                    stopSpinner(language)
+                },
+                (error) => {
+                    showError(language, error)
+                    console.error('Error generating audio:', error);
+                }
+            );
+        }
+
         function generateVideo(language) {
 
             let cover_link = "";
@@ -346,6 +468,8 @@
                 language: language,
                 page1: article["page1"],
                 page2: article["page2"],
+                audio_page1_path: article["audio_page1_path"],
+                audio_page2_path: article["audio_page2_path"],
                 bold_parts: article["bold_parts"],
                 cover_link: cover_link,
                 format: getField(language, "format-selector")
@@ -441,7 +565,7 @@
         }
 
         // Function to post images to Instagram
-        function postImageToInstagram(language, author, title) {
+        function postImage(language, author, title) {
             const userConfirmed = confirm(`Are you sure you want to post this to Instagram for the selected accounts?`);
             if (!userConfirmed) {
                 return;
@@ -559,7 +683,7 @@
     </script>
 </head>
 <body style="background-color:#011026;">
-    <section class="section">
+<section class="section">
         <div class="container">
 
             <div style="text-align: center;">
@@ -668,7 +792,13 @@
                         <div id="carousel-{{ language }}" class="carousel">
                             <!-- Images will be dynamically added here -->
                         </div>
-                        <div id="video-container-{{ language }}" class="video-container" style="display: none;"></div>
+                        <div class="video-audio-container-{{ language }}">
+                            <div id="video-container-{{ language }}" class="video-container" style="display: none;"></div>
+                            <div id="audio-container-{{ language }}" class="audio-container" style="display: none;">
+                                <div id="audio-page1-{{language}}" class="essential_audio"></div>
+                                <div id="audio-page2-{{language}}" class="essential_audio"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <br/>
@@ -687,11 +817,12 @@
                         <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
                         <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
                         <button class="button is-link" onclick="shuffleCover('{{ language }}')">Shuffle Cover</button>
+                        <button class="button is-info" onclick="generateAudio('{{ language }}')">Generate Audio</button>
                         <button class="button is-info" onclick="generateVideo('{{ language }}')">Generate Video</button>
                     </div>
                     <div class="buttons">
-                        <button class="button is-danger" onclick="postImageToInstagram('{{ language }}')">Post Images to Instagram</button>
-                        <button class="button is-danger" onclick="postVideoToInstagram('{{ language }}')">Post Video to Instagram</button>
+                        <button class="button is-danger" onclick="postImage('{{ language }}')">Post Images</button>
+                        <button class="button is-danger" onclick="postVideo('{{ language }}')">Post Video</button>
                     </div>
 
                 </div>
@@ -701,7 +832,8 @@
         </div>
     </section>
 
-    <script src="/static/js/videojs/video.min.js"></script>
+    <script src="/static/js/video.min.js"></script>
+    <script src="/static/js/essential_audio.js"></script>
 </body>
 </html>
 

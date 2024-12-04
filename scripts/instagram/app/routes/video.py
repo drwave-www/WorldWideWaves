@@ -18,9 +18,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import logging
 
 from flask import Blueprint, request, jsonify
 from app.services.video_service import generate_video
+from app.services.video_utils import generate_voice_for_text
 
 video = Blueprint("video", __name__)
 
@@ -32,11 +34,37 @@ def __video():
     page2 = data["page2"]
     bold_parts = data["bold_parts"]
     cover_link = data["cover_link"]
+    audio_page1_path = data.get("audio_page1_path")
+    audio_page2_path = data.get("audio_page2_path")
+
     format = data.get("format", "SQUARE")
 
     try:
-        video_link = generate_video(format, language, page1, page2, bold_parts, cover_link)
+        video_link = generate_video(format, language, page1, page2, bold_parts, cover_link, audio_page1_path, audio_page2_path)
         response = {"video": video_link}
         return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@video.route("/audio", methods=["POST"])
+def __audio():
+    data = request.json
+    language = data["language"]
+    pages = {"page1": data.get("page1"), "page2": data.get("page2")}
+
+    output = { "audio": {} }
+    try:
+        # Process each page
+        for page_key, page_content in pages.items():
+            if page_content and page_content.strip():
+                logging.info(f"Generate audio for page {page_key}")
+                audio_path = generate_voice_for_text(language, page_content.strip())
+                output["audio"][f"{page_key}"] = audio_path.replace("app/", "", 1)
+
+        if not output:
+            raise ValueError("At least one of page1 and page2 must be provided")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify(output)
