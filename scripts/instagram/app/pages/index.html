@@ -408,7 +408,7 @@
 
         function generateAudio(language, page_index = undefined) {
             const article = getLanguageFields(language)
-            if (article.page1.trim() === '' || article.page2.trim() === '') {
+            if (article.page1.trim() === '' && article.page2.trim() === '') {
                 alert(`No excerpt is available.`);
                 return;
             }
