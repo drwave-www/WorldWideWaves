@@ -79,12 +79,50 @@ def refresh_token(language, account, access_token):
 
 # -----------------------------------------------------------------------------
 
-def create_media_container(image_url, caption, is_carousel_item, ig_user_id, access_token):
+def create_media_video(video_url, caption, ig_user_id, access_token):
+    url = f"https://graph.instagram.com/{ig_user_id}/media"
+    params = {
+        "media_type": "REELS",
+        "video_url": video_url,
+        "share_to_feed": True,
+        "caption": caption,
+        "audio_name": "World Wide Waves",
+        "access_token": access_token
+    }
+    response = requests.post(url, params=params)
+    response_data = response.json()
+
+    logging.debug(f"Response: {response_data}")
+
+    if "id" not in response_data or response_data["id"] == 0:
+        raise Exception(f"Failed to create media video (REEL): {response_data}")
+
+    id_reel = response_data["id"]
+
+    params = {
+        "media_type": "STORIES",
+        "video_url": video_url,
+        "access_token": access_token
+    }
+    response = requests.post(url, params=params)
+    response_data = response.json()
+
+    logging.debug(f"Response: {response_data}")
+
+    if "id" not in response_data or response_data["id"] == 0:
+        raise Exception(f"Failed to create media video (STORY): {response_data}")
+
+    id_story = response_data["id"]
+
+    return id_reel, id_story
+
+
+def create_media_container(image_url, caption, ig_user_id, access_token):
     url = f"https://graph.instagram.com/{ig_user_id}/media"
     params = {
         "image_url": image_url,
         "caption": caption,
-        "is_carousel_item": is_carousel_item,
+        "is_carousel_item": True,
         "access_token": access_token
     }
     response = requests.post(url, params=params)
@@ -115,7 +153,7 @@ def create_carousel_container(children_ids, caption, ig_user_id, access_token):
 
     return response_data["id"]
 
-def publish_carousel(container_id, ig_user_id, access_token):
+def publish_container(container_id, ig_user_id, access_token):
     url = f"https://graph.instagram.com/{ig_user_id}/media_publish"
     params = {
         "creation_id": container_id,
@@ -127,7 +165,7 @@ def publish_carousel(container_id, ig_user_id, access_token):
     logging.debug(f"Response: {response_data}")
 
     if "id" not in response_data or response_data["id"] == 0:
-        raise Exception(f"Failed to publish carousel: {response_data}")
+        raise Exception(f"Failed to publish container: {response_data}")
 
     return response_data
 
@@ -135,7 +173,7 @@ def publish_carousel(container_id, ig_user_id, access_token):
 
 def create_and_publish_carousel(language, image_urls, caption, account):
 
-    # Get API connection informations
+    # Get API connection information
     ig_user_id = Config.LANGUAGES[language]["accounts"][account]["account_id"]
     access_token = Config.LANGUAGES[language]["accounts"][account]["access_token"]
 
@@ -149,7 +187,6 @@ def create_and_publish_carousel(language, image_urls, caption, account):
             container_id = create_media_container(
                 image_url=image_url,
                 caption="",
-                is_carousel_item=True,
                 ig_user_id=ig_user_id,
                 access_token=access_token
             )
@@ -166,7 +203,7 @@ def create_and_publish_carousel(language, image_urls, caption, account):
         logging.info(f"Created carousel container: {carousel_container_id}")
 
         # Step 3: Publish the carousel
-        publish_response = publish_carousel(
+        publish_response = publish_container(
             container_id=carousel_container_id,
             ig_user_id=ig_user_id,
             access_token=access_token
@@ -177,3 +214,37 @@ def create_and_publish_carousel(language, image_urls, caption, account):
     except Exception as e:
         logging.error(f"Error during carousel publishing workflow: {e}")
         raise
+
+def create_and_publish_video(language, video_url, caption, account):
+
+    # Get API connection information
+    ig_user_id = Config.LANGUAGES[language]["accounts"][account]["account_id"]
+    access_token = Config.LANGUAGES[language]["accounts"][account]["access_token"]
+
+    # Refresh the token if needed
+    access_token = refresh_token(language, account, access_token)
+
+    try:
+        # Step 1: Create individual video containers
+        container_ids =  create_media_video(
+                video_url=video_url,
+                caption=caption,
+                ig_user_id=ig_user_id,
+                access_token=access_token
+            )
+        logging.info(f"Created containers for video {video_url}: {container_ids}")
+
+        # Step 2: Publish the containers
+        for container_id in container_ids:
+            publish_response = publish_container(
+                container_id=container_id,
+                ig_user_id=ig_user_id,
+                access_token=access_token
+            )
+            logging.info(f"Published container successfully: {publish_response['id']}")
+            return publish_response
+
+    except Exception as e:
+        logging.error(f"Error during video publishing workflow: {e}")
+        raise
+

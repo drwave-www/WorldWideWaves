@@ -16,12 +16,12 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License.xx
 #
 
 import logging
 from flask import Blueprint, request, jsonify
-from app.services.instagram_service import create_and_publish_carousel
+from app.services.instagram_service import create_and_publish_carousel, create_and_publish_video
 from app.services.utils import add_used_text
 
 post = Blueprint("post", __name__)
@@ -31,14 +31,16 @@ def __post():
     data = request.json
 
     # Validate input data
-    if not data or "language" not in data or "title" not in data or "images" not in data or "caption" not in data or "accounts" not in data:
+    if not data or "language" not in data or "title" not in data or ("images" not in data and "video_url" not in data) or "caption" not in data or "accounts" not in data:
         return jsonify({"error": "Missing required fields: language, title, images, hashtags, accounts"}), 400
 
     language = data["language"]
     title = f"{data['title']} by {data['author']}"
-    images = data["images"]
     caption = data["caption"]
     accounts = data["accounts"]
+
+    images = data.get("images")
+    video_url = data.get("video_url")
 
     try:
         # Iterate over each account
@@ -49,14 +51,28 @@ def __post():
                 logging.info(f"Prepare to post on account {account}")
 
                 # Publish the carousel for this account
-                try:
-                    response = create_and_publish_carousel(language, images, caption, account)
-                    logging.info(f"Carousel Post ID: {response['id']}")
-                    results[account] = {"success": True}
-                except Exception as e:
-                    logging.error(f"Failed to publish carousel: {e}")
-                    results[account] = {"error": str(e)}
-                    status = "error"
+                if images:
+                    try:
+                        response = create_and_publish_carousel(language, images, caption, account)
+                        logging.info(f"Carousel Post ID: {response['id']}")
+                        results[account] = {"success": True}
+                    except Exception as e:
+                        logging.error(f"Failed to publish carousel: {e}")
+                        results[account] = {"error": str(e)}
+                        status = "error"
+
+                elif video_url:
+                    try:
+                        response = create_and_publish_video(language, video_url, caption, account)
+                        logging.info(f"Video Post ID: {response['id']}")
+                        results[account] = {"success": True}
+                    except Exception as e:
+                        logging.error(f"Failed to publish video: {e}")
+                        results[account] = {"error": str(e)}
+                        status = "error"
+
+                else:
+                    logging.error(f"No carousel not video submitted")
 
             except Exception as account_error:
                 logging.error(f"Error for account {account}: {account_error}")

@@ -317,6 +317,14 @@
             });
         }
 
+        function getVideoUrl(language) {
+            if (video_players[language]) {
+                return video_players[language].currentSrc();
+            }
+
+            return null;
+        }
+
         function markPhotosAsPublished(language) {
             const imageWrappers = document.querySelectorAll(`#carousel-${language} .image-wrapper`);
             imageWrappers.forEach(wrapper => {
@@ -329,6 +337,18 @@
                     wrapper.appendChild(overlay);
                 }
             });
+        }
+
+        function markVideoAsPublished(language) {
+            const videoWrapper = document.querySelectorAll(`#video-container-${language} .video-container`);
+            if (!videoWrapper.querySelector('.published-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.classList.add('published-overlay');
+                overlay.innerText = 'PUBLISHED';
+
+                // Append the overlay to the wrapper
+                videoWrapper.appendChild(overlay);
+            }
         }
 
         // --------------------------------------------------------------------
@@ -568,8 +588,8 @@
         }
 
         // Function to post images to Instagram
-        function postImage(language, author, title) {
-            const userConfirmed = confirm(`Are you sure you want to post this to Instagram for the selected accounts?`);
+        function postImages(language) {
+            const userConfirmed = confirm(`Are you sure you want to post images to Instagram for the selected accounts?`);
             if (!userConfirmed) {
                 return;
             }
@@ -596,17 +616,59 @@
                 (response) => {
                     if (response.status === "error") {
                         showError(language, response)
-                        alert('Error posting to Instagram')
+                        alert('Error posting images to Instagram')
                     } else {
                         console.log(response);
                         stopSpinner(language)
                         markPhotosAsPublished(language)
-                        alert(`Instagram post successfully posted to the selected accounts.`);
+                        alert(`Images successfully posted to the selected accounts.`);
                     }
                 },
                 (error) => {
                     showError(language, error)
-                    alert("Error posting to Instagram")
+                    alert("Error posting images to Instagram")
+                }
+            )
+        }
+
+         // Function to post video to Instagram
+        function postVideo(language) {
+            const userConfirmed = confirm(`Are you sure you want to post video to Instagram for the selected accounts?`);
+            if (!userConfirmed) {
+                return;
+            }
+
+            toggleFieldsOff(language)
+            showSpinner(language)
+
+            // Collect selected accounts
+            const selectedAccounts = Array.from(document.querySelectorAll(`.account-checkbox-${language}:checked`))
+                .map(checkbox => checkbox.value)
+
+            if (selectedAccounts.length === 0) {
+                alert("Please select at least one account.");
+                return;
+            }
+
+            const data = getLanguageFields(language)
+            data.video_url = getVideoUrl(language)
+            data.accounts = selectedAccounts
+
+            apiCall('/post', 'POST', data,
+                (response) => {
+                    if (response.status === "error") {
+                        showError(language, response)
+                        alert('Error posting video to Instagram')
+                    } else {
+                        console.log(response);
+                        stopSpinner(language)
+                        markVideoAsPublished(language)
+                        alert(`Video successfully posted to the selected accounts.`);
+                    }
+                },
+                (error) => {
+                    showError(language, error)
+                    alert("Error posting video to Instagram")
                 }
             )
         }
@@ -825,7 +887,7 @@
                         <button class="button is-info" onclick="generateVideo('{{ language }}')" {% if language not in voices %}disabled{% endif %}>Generate Video</button>
                     </div>
                     <div class="buttons">
-                        <button class="button is-danger" onclick="postImage('{{ language }}')">Post Images</button>
+                        <button class="button is-danger" onclick="postImages('{{ language }}')">Post Images</button>
                         <button class="button is-danger" onclick="postVideo('{{ language }}')">Post Video</button>
                     </div>
 
