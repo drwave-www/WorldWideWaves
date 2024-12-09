@@ -349,6 +349,7 @@
 
                     // Update data
                     updateLanguageFields(language, data)
+                    toggleGlobalOn(language)
                     toggleFieldsOn(language)
                     stopSpinner(language)
                 },
@@ -387,6 +388,7 @@
 
                     if (data.images) {
                         setImages(language, data.images)
+                        toggleGlobalOn(language)
                     } else {
                         showError(language, "Error: no images returned.")
                         return;
@@ -516,7 +518,8 @@
                     language: language,
                     author: getField(language, "author"),
                     title: getField(language, "title"),
-                    format: getField(language, "format-selector")
+                    format: getField(language, "format-selector"),
+                    cover_url: getField(language, "cover-url"),
                 },
                 (data) => {
                     const coverImage = carousel.querySelector('div.image-wrapper:nth-child(3) img');
@@ -609,6 +612,7 @@
         }
 
         const languages = {{ languages | safe }}
+        const voices = {{ voices | safe }}
 
         function generateAllExtracts() {
             Object.keys(languages).forEach(language => {
@@ -817,8 +821,8 @@
                         <button class="button is-info" onclick="generateImages('{{ language }}')">Generate Images</button>
                         <button class="button is-success" onclick="generateImages('{{ language }}', true)">Regenerate Extract + Images</button>
                         <button class="button is-link" onclick="shuffleCover('{{ language }}')">Shuffle Cover</button>
-                        <button class="button is-info" onclick="generateAudio('{{ language }}')">Generate Audio</button>
-                        <button class="button is-info" onclick="generateVideo('{{ language }}')">Generate Video</button>
+                        <button class="button is-info" onclick="generateAudio('{{ language }}')" {% if language not in voices %}disabled{% endif %}>Generate Audio</button>
+                        <button class="button is-info" onclick="generateVideo('{{ language }}')" {% if language not in voices %}disabled{% endif %}>Generate Video</button>
                     </div>
                     <div class="buttons">
                         <button class="button is-danger" onclick="postImage('{{ language }}')">Post Images</button>

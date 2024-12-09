@@ -35,4 +35,4 @@ def filter_sensitive_data(languages):
 
 @index.route('/', methods=['GET'])
 def __index():
-    return render_template("index.html", languages=filter_sensitive_data(Config.LANGUAGES))
+    return render_template("index.html", languages=filter_sensitive_data(Config.LANGUAGES), voices=list(Config.TTS_CONFIG['languages'].keys()))

@@ -1,8 +1,6 @@
 
-- regenerate cover with url if specified
-- set debug on run and logging only if there is no WWW_PRODUCTION=1, to add in docker-compose
-- do not activate video button if no voice available
 - crontab de nettoyage des vieux fichiers d'output
+- move to https://github.com/idiap/coqui-ai-TTS
 
 - nettoyer les intro-*mp4 du tool externe avec ffmpeg (regenerer la video I/O avec ffmpeg)
 - selection la bonne voix a utiliser par langue, besoin d'aider pour choisir de gens qui parlent la langue..
@@ -24,9 +22,9 @@ FEATURES:
 - refresh de token FB pas top
 - case a cocher pour ignorer les textes deja utilises dans le prompt
 
+- Faire les slides de presentation, repartition des taches, organisation du groupe, planif, etc...
 - Faire mon propre son sur Ableton
 - Commencer a bosser sur une video d'intro
-- Faire les slides de presentation, repartition des taches, organisation du groupe, planif, etc...
 
 ----
 
@@ -36,7 +34,7 @@ FEATURES:
 - compte linkedin
 - compte facebook et y attacher les autres comptes ?
 
-- worldwidewaves.net page with instagram accounts + email form
+- worldwidewaves.net page with instagram accounts + some description text (at least for Google)
 
 - FR: supprimer et reposter de zero les precedents posts
 
@@ -44,6 +42,4 @@ FEATURES:
 
 - ajout de son sur la video :
     - test fairseq : https://docs.coqui.ai/en/dev/inference.html
-    - supported TTS/XTTS-2 : ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'tr', 'ru', 'nl', 'cs', 'ar', 'zh-cn', 'hu', 'ko', 'ja', 'hi']
     - voice cleaning from xtts : https://huggingface.co/spaces/coqui/xtts/blob/main/app.py
-    - doc XTTS : https://docs.coqui.ai/en/dev/models/xtts.html
