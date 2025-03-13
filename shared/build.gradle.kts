@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.places)
     implementation(libs.androidx.ui.graphics.android)
     implementation(libs.androidx.annotation.jvm)
+    implementation(libs.feature.delivery.ktx)
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

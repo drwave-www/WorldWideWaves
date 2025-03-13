@@ -52,6 +52,10 @@ actual fun getEventImage(type: String, id: String): Any? {
     TODO("Not yet implemented")
 }
 
+actual suspend fun readGeoJson(eventId: String): String? {
+    TODO("Not yet implemented")
+}
+
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     TODO("Not yet implemented")
 }

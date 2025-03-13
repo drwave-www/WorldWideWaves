@@ -66,6 +66,7 @@ class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvi
 
 expect fun getEventImage(type: String, id: String): Any?
 
+expect suspend fun readGeoJson(eventId: String): String?
 expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
 
 expect fun cachedFileExists(fileName: String): Boolean

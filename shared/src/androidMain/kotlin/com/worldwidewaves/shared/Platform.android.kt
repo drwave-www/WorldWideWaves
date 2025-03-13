@@ -24,7 +24,8 @@ package com.worldwidewaves.shared
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
+import com.google.android.play.core.splitcompat.SplitCompat
+import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
@@ -35,13 +36,15 @@ import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_bra
 import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
 import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.MissingResourceException
 import java.io.File
+import java.io.IOException
 import java.lang.ref.WeakReference
 
 // --- Platform-specific implementation of the WWWPlatform interface ---
@@ -72,7 +75,7 @@ object AndroidPlatform : WWWPlatform()  { // TODO: manage with the cache in prod
 actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
 actual fun getEventImage(type: String, id: String): Any? {
-    return when (type) {
+    return when (type) { // TODO : not possible, we need another way than this static mess
         "location" -> when (id) {
             "paris_france" -> Res.drawable.e_location_paris_france
             "unitedstates" -> Res.drawable.e_location_unitedstates
@@ -99,6 +102,22 @@ actual fun getEventImage(type: String, id: String): Any? {
 
 // ---------------------------
 
+actual suspend fun readGeoJson(eventId: String): String? {
+    val filePath = getMapFileAbsolutePath(eventId, "geojson")
+
+    return if (filePath != null) {
+        withContext(Dispatchers.IO) {
+            Log.i(::readGeoJson.name, "Loading geojson data for event $eventId from $filePath")
+            File(filePath).readText()
+        }
+    } else {
+        Log.e(::readGeoJson.name, "Map file not available for event $eventId")
+        null
+    }
+}
+
+// ---------------------------
+
 /**
  * Retrieves the absolute path of a map file for a given event.
  *
@@ -107,21 +126,74 @@ actual fun getEventImage(type: String, id: String): Any? {
  * cached file size does not match the expected size, it reads the file from the resources and caches it.
  *
  */
-@OptIn(ExperimentalResourceApi::class)
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     val context = AndroidPlatform.getContext() as Context
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
+    val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
+    val splitInstallManager = SplitInstallManagerFactory.create(context)
+
+    if (!splitInstallManager.installedModules.contains(eventId)) {
+        Log.e(::getMapFileAbsolutePath.name, "Feature module $eventId is not installed")
+        return null
+    }
+
+    // Ensure split compat is installed
+    SplitCompat.install(context)
+
     return try {
-        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension")
-        val fileBytes = Res.readBytes("$FS_MAPS_FOLDER/$eventId.$extension")
-        if (!cachedFile.exists() || cachedFile.length().toInt() != fileBytes.size) {
-            Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
-            cachedFile.outputStream().use { it.write(fileBytes) }
+        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension from feature module")
+
+        val assetPath = "$eventId.$extension"
+
+        try {
+            val assetFileDescriptor = context.assets.openFd(assetPath)
+            val assetFileSize = assetFileDescriptor.length
+            assetFileDescriptor.close()
+
+            val needsUpdate = when {
+                !cachedFile.exists() -> true
+                cachedFile.length() != assetFileSize -> true
+                !metadataFile.exists() -> true
+                else -> {
+                    val lastCacheTime = try {
+                        metadataFile.readText().toLong()
+                    } catch (e: Exception) {
+                        0L
+                    }
+
+                    // Check if the app was installed/updated after we cached the file
+                    val appInstallTime = try {
+                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+                    } catch (e: Exception) {
+                        System.currentTimeMillis()
+                    }
+
+                    // If the app was updated after we cached the file, we should update the cache
+                    appInstallTime > lastCacheTime
+                }
+            }
+
+            if (needsUpdate) {
+                Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+
+                context.assets.open(assetPath).use { input ->
+                    cachedFile.outputStream().use { output ->
+                        input.copyTo(output, bufferSize = 8192)
+                    }
+                }
+
+                metadataFile.writeText(System.currentTimeMillis().toString())
+            }
+
+            cachedFile.absolutePath
+        } catch (e: IOException) {
+            Log.e(::getMapFileAbsolutePath.name, "Resource not found in module: ${e.message}")
+            return null
         }
-        cachedFile.absolutePath
-    } catch (e: MissingResourceException) {
-        Log.e(::getMapFileAbsolutePath.name, "Resource not found: ${e.message}")
+    } catch (e: Exception) {
+        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
+        e.printStackTrace()
         null
     }
 }

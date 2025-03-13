@@ -46,7 +46,7 @@ class WWWGlobals {
         private const val FS_FILES_FOLDER = "files"
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
 
-        const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
+        //const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
 
         const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
         const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"

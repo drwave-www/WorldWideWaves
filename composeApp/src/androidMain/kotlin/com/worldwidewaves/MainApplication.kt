@@ -23,6 +23,7 @@ package com.worldwidewaves
 
 import android.app.Application
 import androidx.work.Configuration
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.WWWPlatform
@@ -46,6 +47,9 @@ class MainApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Ensure split compat is installed
+        SplitCompat.install(this)
 
         startKoin {
             androidContext(this@MainApplication)

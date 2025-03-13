@@ -8,6 +8,7 @@ androidx-appcompat = "1.7.0"
 androidx-constraintlayout = "2.2.0"
 androidx-material = "1.12.0"
 compose-plugin = "1.6.10"
+coreKtxVersion = "1.8.1"
 kotlin = "2.0.0"
 kotlinVersion = "2.0.0"
 kotlinxCoroutinesCore = "1.8.0"
@@ -34,11 +35,14 @@ maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
 napier = "2.7.1"
 coreKtx = "1.10.1"
+googleCoreKtx = "1.10.3"
+featureDeliveryKtx = "2.1.0"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+core-ktx = { module = "com.google.android.play:core-ktx", version.ref = "coreKtxVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidx-appcompat" }
 androidx-material = { group = "com.google.android.material", name = "material", version.ref = "androidx-material" }
@@ -69,6 +73,8 @@ maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.re
 maplibre-android-annotation = { group = "org.maplibre.gl", name = "android-plugin-annotation-v9", version.ref = "maplibreAndroidAnnotation" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 napier = { group = "io.github.aakira", name = "napier", version.ref = "napier" }
+play-core-ktx = { group = "com.google.android.play", name = "core-ktx", version.ref = "googleCoreKtx" }
+feature-delivery-ktx = { group = "com.google.android.play", name = "feature-delivery-ktx", version.ref = "featureDeliveryKtx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

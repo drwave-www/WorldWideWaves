@@ -44,10 +44,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,7 +70,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.viewmodels.EventsViewModel
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -97,6 +99,9 @@ import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
+import com.worldwidewaves.utils.MapFeatureManager
+import com.worldwidewaves.utils.MapFeatureState
+import com.worldwidewaves.viewmodels.EventsViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -265,15 +270,96 @@ class EventsListScreen(
     fun Event(viewModel: EventsViewModel, event: IWWWEvent, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
+        // Create and remember the MapFeatureManager
+        val mapManager = remember { MapFeatureManager(context) }
+
+        // Collect the state flow as a composable state
+        val mapState by mapManager.featureState.collectAsState()
+
+        // Check if map is available on first composition
+        LaunchedEffect(event.id) {
+            mapManager.checkIfMapIsAvailable(event.id)
+        }
+
+        // Clean up the manager when the composable leaves composition
+        DisposableEffect(Unit) {
+            onDispose {
+                mapManager.unregisterListener()
+            }
+        }
+
         Column(modifier = modifier.clickable(
             onClick = {
-                context.startActivity(Intent(context, EventActivity::class.java).apply {
-                    putExtra("eventId", event.id)
-                })
+                when (mapState) {
+                    is MapFeatureState.Available, is MapFeatureState.Installed -> {
+                        context.startActivity(Intent(context, EventActivity::class.java).apply {
+                            putExtra("eventId", event.id)
+                        })
+                    }
+                    is MapFeatureState.NotAvailable -> {
+                        mapManager.downloadMap(event.id)
+                    }
+                    is MapFeatureState.Failed -> {
+                        mapManager.downloadMap(event.id) // Exception will be raised on retry
+                    }
+                    else -> {
+                        // Do nothing for other states (downloading, pending)
+                    }
+                }
             }
         )) {
+
             EventOverlay(viewModel, event)
             EventLocationAndDate(event)
+
+            // Show download status if applicable
+            when (val state = mapState) {
+                MapFeatureState.NotChecked -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(24.dp)
+                    )
+                }
+                MapFeatureState.NotAvailable -> {
+                    // No map data available for this event for now
+                }
+                is MapFeatureState.Downloading -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { state.progress / 100f },
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .fillMaxWidth(0.8f),
+                        )
+                    }
+                }
+                is MapFeatureState.Failed -> {
+                    Text(
+                        state.errorMessage ?: "Failed",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                MapFeatureState.Pending -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(24.dp)
+                    )
+                }
+                else -> {
+                    // No special UI needed for Available/Installed states
+                }
+            }
+
+            if (mapState is MapFeatureState.Installed) {
+                // TODO: UI visible, comme un check
+            }
         }
     }
 

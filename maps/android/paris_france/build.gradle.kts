@@ -19,6 +19,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    androidResources {
+        noCompress += listOf("geojson", "mbtiles")
+    }
+
     kotlinOptions {
         jvmTarget = "11"
     }
