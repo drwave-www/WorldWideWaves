@@ -30,3 +30,4 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":shared")
+include(":maps:android:paris_france")

@@ -78,6 +78,7 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    dynamicFeatures += setOf(":maps:android:paris_france")
     dependencies {
         debugImplementation(compose.uiTooling)
         implementation(libs.koin.android)

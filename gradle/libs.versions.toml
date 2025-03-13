@@ -33,6 +33,7 @@ maplibreAndroid = "11.1.0" # 11.2.0 is SEGV_MAPERR
 maplibreAndroidAnnotation = "3.0.0"
 playServicesLocation = "21.3.0"
 napier = "2.7.1"
+coreKtx = "1.10.1"
 
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
@@ -76,3 +77,4 @@ jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+android-dynamic-feature = { id = "com.android.dynamic-feature", version.ref = "agp" }
