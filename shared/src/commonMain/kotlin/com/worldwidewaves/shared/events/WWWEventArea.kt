@@ -40,12 +40,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 
 // ---------------------------
 
 @Serializable
 data class WWWEventArea(
-    val osmAdminid: Int
+    val osmAdminids: List<Int>,
+    val bbox: String? = null
 ) : KoinComponent, DataValidator {
 
     private var _event: IWWWEvent? = null
@@ -63,6 +65,9 @@ data class WWWEventArea(
     @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
+    @Transient private var cachedPositionWithinResult: Pair<Position, Boolean>? = null
+
+    @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
 
     // ---------------------------
 
@@ -87,28 +92,84 @@ data class WWWEventArea(
     /**
      * Checks if a given position is within the event area.
      *
-     * This function retrieves the polygon representing the event area and uses the ray-casting algorithm
-     * to determine if the specified position lies within the polygon.
-     *
+     * This function first checks if the position is within the bounding box.
+     * If it's not within the bounding box, returns false immediately.
+     * If it is within the bounding box, it then checks if the position is within
+     * the polygons using the ray-casting algorithm.
      */
-    suspend fun isPositionWithin(position: Position): Boolean =
-        getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+    suspend fun isPositionWithin(position: Position): Boolean {
+
+        // Check if the cached result is within the epsilon
+        cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
+            if (isPositionWithinEpsilon(position, cachedPosition)) {
+                return cachedResult
+            }
+        }
+
+        // First, check if the position is within the bounding box (fast check)
+        val boundingBox = bbox()
+        val isWithinBbox = position.lat >= boundingBox.sw.lat &&
+                position.lat <= boundingBox.ne.lat &&
+                position.lng >= boundingBox.sw.lng &&
+                position.lng <= boundingBox.ne.lng
+
+        // If not within the bounding box, return false immediately
+        if (!isWithinBbox) {
+            // Cache the result
+            cachedPositionWithinResult = Pair(position, false)
+            return false
+        }
+
+        // If within bounding box, check if within polygon (more expensive check)
+        val result = getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+
+        // Cache the result
+        cachedPositionWithinResult = Pair(position, result)
+        return result
+    }
+
+    private fun isPositionWithinEpsilon(pos1: Position, pos2: Position): Boolean {
+        return abs(pos1.lat - pos2.lat) < positionEpsilon && abs(pos1.lng - pos2.lng) < positionEpsilon
+    }
 
     // ---------------------------
 
-    /**
-     * Retrieves the bounding box of the polygon.
-     *
-     * This function calculates the bounding box of the polygon associated with the event area.
-     * If the bounding box has been previously calculated and cached, it returns the cached value.
-     * Otherwise, it calculates the bounding box, caches it, and then returns it.
-     *
-     */
-    suspend fun bbox(): BoundingBox =
-        cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
+    private fun parseBboxString(): BoundingBox? {
+        bbox?.let {
+            try {
+                // Parse the string "minLng, minLat, maxLng, maxLat"
+                val coordinates = bbox.split(",").map { it.trim().toDouble() }
+                if (coordinates.size >= 4) {
+                    return BoundingBox(
+                        sw = Position(lat = coordinates[1], lng = coordinates[0]),
+                        ne = Position(lat = coordinates[3], lng = coordinates[2])
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(::parseBboxString.name, "Failed to parse bbox string: ${e.message}")
+            }
+        }
+        return null
+    }
+
+    suspend fun bbox(): BoundingBox {
+        // Return cached bounding box if available
+        if (cachedBoundingBox != null) {
+            return cachedBoundingBox!!
+        }
+
+        // If bbox parameter was provided in constructor, use it
+        parseBboxString()?.let { bbox ->
+            cachedBoundingBox = bbox
+            return bbox
+        }
+
+        // Otherwise calculate from polygons
+        return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
             } ?: BoundingBox(Position(0.0, 0.0), Position(0.0, 0.0))
+    }
 
     /**
      * Calculates the center position of the event area.
@@ -133,9 +194,9 @@ data class WWWEventArea(
      *
      * This function fetches the polygon data from the `geoJsonDataProvider` if the `areaPolygon` is empty.
      * It supports both "Polygon" and "MultiPolygon" types from the GeoJSON data.
-     *
+     * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
-     suspend fun getPolygons(): Area {
+    suspend fun getPolygons(): Area {
         if (cachedAreaPolygons.isEmpty()) {
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
@@ -148,7 +209,7 @@ data class WWWEventArea(
                                 Position(
                                     point.jsonArray[1].jsonPrimitive.double,
                                     point.jsonArray[0].jsonPrimitive.double
-                                )
+                                ).constrainToBoundingBox()
                             }.toPolygon.apply { cachedAreaPolygons.add(this) }
                         }
                         "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
@@ -157,7 +218,7 @@ data class WWWEventArea(
                                     Position(
                                         point.jsonArray[1].jsonPrimitive.double,
                                         point.jsonArray[0].jsonPrimitive.double
-                                    )
+                                    ).constrainToBoundingBox()
                                 }.toPolygon.apply { cachedAreaPolygons.add(this) }
                             }
                         }
@@ -171,13 +232,21 @@ data class WWWEventArea(
         return cachedAreaPolygons
     }
 
+    private fun Position.constrainToBoundingBox(): Position {
+        parseBboxString()?.let { bbox ->
+            return Position(
+                lat = lat.coerceIn(bbox.sw.lat, bbox.ne.lat),
+                lng = lng.coerceIn(bbox.sw.lng, bbox.ne.lng)
+            )
+        }
+
+        return this
+    }
+
     // ---------------------------
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
         when {
-            osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
-                add("OSM admin ID must be greater than 0 if it's not the world event")
-
             else -> { /* No validation errors */ }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }

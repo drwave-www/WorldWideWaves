@@ -177,13 +177,13 @@ class EarthAdaptedSpeedLongitudeTest {
 
         val waveLinear = WWWEventWaveLinear(
             speed = speed,
-            direction = direction
+            direction = direction,
+            approxDuration = 60
         )
 
         every { mockClock.now() } returns currentTime
         every { mockEvent.getWaveStartDateTime() } returns startTime
         coEvery { mockEvent.isRunning() } returns true
-        coEvery { mockEvent.isWarmingEnded() } returns true
         every { mockEvent.area } returns mockArea
         coEvery { mockEvent.area.bbox() } returns bbox
 

@@ -25,7 +25,7 @@ IN_STYLE_FILE=./osm-liberty/style.json
 OUT_STYLE_FILE=./data/mapstyle.json
 
 # Navigate to the directory of the script
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Download jq for JSON processing if not already present
 mkdir -p ./bin
@@ -62,7 +62,6 @@ mkdir -p ./data
   | (.sprite) |= "__SPRITE_URI__"
   | (.glyphs) |= sub("^(.*)/\\{fontstack\\}(.*)$"; "__GLYPHS_URI__/{fontstack}/{range}.pbf")
   | .sources.geojson = { "data": "__GEOJSON_URI__", "type": "geojson" }
-  | .sources.geojsonwarming = { "data": "__GEOJSON_WARMING_URI__", "type": "geojson" }
   | .layers += [
       {
         "id": "waveboundaryarea",
@@ -79,25 +78,6 @@ mkdir -p ./data
         "type": "line",
         "paint": {
           "line-color": "#0000ff",
-          "line-width": 2
-        }
-      },
-
-      {
-        "id": "warmingboundaryarea",
-        "source": "geojsonwarming",
-        "type": "fill",
-        "paint": {
-          "fill-color": "#ff0000",
-          "fill-opacity": 0.1
-        }
-      },
-      {
-        "id": "warmingboundaryline",
-        "source": "geojsonwarming",
-        "type": "line",
-        "paint": {
-          "line-color": "#ff0000",
           "line-width": 2
         }
       }

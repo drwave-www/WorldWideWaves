@@ -139,6 +139,7 @@ object PolygonUtils {
 
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
+                           // FIXME: this is problematic - not thread safe
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
 
@@ -164,7 +165,7 @@ object PolygonUtils {
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Anti-Clockwise loop
-                    var point = iterator.next()
+                    val point = iterator.next()
 
                     val nextPoint = iterator.viewCurrent()
                     prev?.let { if (point == it) return@let }
@@ -312,6 +313,7 @@ object PolygonUtils {
             val firstNextLat = polyLine.first()!!.lat
             val lastLat by lazy { current.last()!!.lat }
             val firstCurrentLat by lazy { current.first()!!.lat }
+
             if (current.isEmpty() || firstNextLat in minOf(lastLat, firstCurrentLat)..maxOf(lastLat, firstCurrentLat)) {
                 // Here we accept to have self-intersecting polygons on longitude cut
                 // ex: (Lat,lng): (-2,0),(-1,2),(0,0),(1,2),(2,0),(-2,0)

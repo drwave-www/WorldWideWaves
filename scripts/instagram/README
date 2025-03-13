@@ -1,8 +1,0 @@
-ensure that config.yaml (check doc and sample file) and used_texts.json (empty) are created before launching
-
-then
-
-docker-compose down && docker-compose up --build -d
-connect on 80 for nginx
-connect on 5000 for gunicorn (flask) without statics
-

@@ -22,12 +22,12 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_FOLDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.readGeoJson
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -156,16 +156,16 @@ interface GeoJsonDataProvider {
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
-    @OptIn(ExperimentalResourceApi::class)
     override suspend fun getGeoJsonData(eventId: String): JsonObject? =
         try {
-            val geojsonData = withContext(Dispatchers.IO) {
-                Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
-                Res.readBytes("$FS_MAPS_FOLDER/$eventId.geojson").decodeToString()
+            val geojsonData = readGeoJson(eventId)
+            if (geojsonData != null) {
+                Json.parseToJsonElement(geojsonData).jsonObject
+            } else {
+                null
             }
-            Json.parseToJsonElement(geojsonData).jsonObject
         } catch (e: Exception) {
-            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId", throwable = e)
+            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
             null
         }
 }

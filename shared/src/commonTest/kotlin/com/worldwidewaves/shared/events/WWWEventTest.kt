@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import com.worldwidewaves.shared.events.WWWEventWaveWarming.Type
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
@@ -393,7 +392,7 @@ fun buildEmptyEvent(
     instagramAccount: String = "user",
     instagramHashtag: String = "#hashtag",
     wavedef: WWWWaveDefinition = WWWWaveDefinition(),
-    osmAdminid: Int = 0,
+    osmAdminids: List<Int> = emptyList(),
     maxzoom: Double = 0.0,
     language: String = "",
     zone: String = ""
@@ -411,8 +410,7 @@ fun buildEmptyEvent(
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
-        area = WWWEventArea(osmAdminid),
-        warming = WWWEventWaveWarming(Type.LONGITUDE_CUT, 0.0),
+        area = WWWEventArea(osmAdminids),
         map = WWWEventMap(maxzoom, language, zone)
     )
 

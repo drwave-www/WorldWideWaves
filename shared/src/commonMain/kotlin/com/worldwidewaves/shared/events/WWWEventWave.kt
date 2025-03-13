@@ -1,7 +1,10 @@
 package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -11,11 +14,14 @@ import io.github.aakira.napier.Napier
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /*
  * Copyright 2024 DrWave
@@ -64,10 +70,14 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     abstract val speed: Double // m/s
     abstract val direction: Direction // E/W
+    abstract val approxDuration: Int // Min
+
+    fun getApproxDuration(): Duration = approxDuration.toDuration(DurationUnit.MINUTES)
 
     // ---------------------------
 
     protected val clock: IClock by inject()
+    private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
 
     // ---------------------------
 
@@ -79,7 +89,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons?
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
-    abstract suspend fun timeBeforeHit(): Duration?
+    abstract suspend fun userHitDateTime(): Instant?
+    abstract suspend fun closestWaveLongitude(latitude: Double): Double
+    abstract suspend fun userPositionToWaveRatio(): Double?
 
     // ---------------------------
 
@@ -111,6 +123,25 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         }
     }
 
+    suspend fun userIsGoingToBeHit(): Boolean = runCatching {
+        timeBeforeUserHit()?.let { duration ->
+            duration <= WAVE_WARN_BEFORE_HIT
+        } ?: false
+    }.getOrDefault(false)
+
+    suspend fun timeBeforeUserHit(): Duration? {
+        if (hasUserBeenHitInCurrentPosition()) return null
+        val hitTime = userHitDateTime() ?: return null
+
+        // Calculate the duration between now and the hit time
+        return hitTime - clock.now()
+    }
+
+    suspend fun userClosestWaveLongitude(): Double? {
+        val userPosition = getUserPosition() ?: return null
+        return closestWaveLongitude(userPosition.lat)
+    }
+
     // ---------------------------
 
     /**
@@ -124,12 +155,11 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      */
     suspend fun getProgression(): Double = when {
         event.isDone() -> 100.0
-        !event.isRunning() || !event.isWarmingEnded() -> 0.0
+        !event.isRunning() -> 0.0
         else -> {
-            Napier.v("${WWWEventWave::class.simpleName}: current time is ${IClock.instantToLiteral(clock.now(), event.getTZ())}")
             val elapsedTime = clock.now().epochSeconds - event.getWaveStartDateTime().epochSeconds
             val totalTime = getWaveDuration().inWholeSeconds
-            (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
+            (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
         }
     }
 
@@ -156,5 +186,15 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             else -> { /* No validation errors */ }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
+
+    // ---------------------------
+
+    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getWaitingSequence()
+    }
+
+    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getHitSequence()
+    }
 
 }

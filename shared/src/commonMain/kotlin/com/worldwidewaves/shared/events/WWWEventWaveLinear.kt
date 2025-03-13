@@ -29,9 +29,12 @@ import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
+import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -40,11 +43,16 @@ import kotlin.time.Duration.Companion.seconds
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: Direction
+    override val direction: Direction,
+    override val approxDuration: Int
 ) : KoinComponent, WWWEventWave() {
 
     @Transient private var cachedLongitude: EarthAdaptedSpeedLongitude? = null
     @Transient private var cachedWaveDuration: Duration? = null
+    @Transient private var cachedHitDateTime: Instant? = null
+    @Transient private var cachedHitPosition: Position? = null
+    @Transient private val epsilonLatPosition = 0.000009 // Approximately 1 meter
+    @Transient private val epsilonLngPosition = 0.000009 // Approximately 1 meter at the equator
 
     // ---------------------------
 
@@ -52,19 +60,19 @@ data class WWWEventWaveLinear(
         require(event.isRunning()) { "Event must be running to request the wave polygons" }
         require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
-        if (!event.isWarmingEnded()) return null
-
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
+        if (elapsedTime <= 0.seconds) return null
+
         val composedLongitude = // Compose an earth-aware speed longitude with bands
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
             .withProgression(elapsedTime)
 
-        val areaPolygons = event.area.getPolygons()
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
         val addedTraversedPolygons : MutableArea = mutableListOf()
 
         if (lastWaveState == null) {
+            val areaPolygons = event.area.getPolygons()
             val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
             traversedPolygons.addAll(traversed)
             remainingPolygons.addAll(remaining)
@@ -142,26 +150,53 @@ data class WWWEventWaveLinear(
     // ---------------------------
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
-        val userPosition = getUserPosition() ?: return false
-        val bbox = bbox()
-        val waveCurrentLongitude = currentWaveLongitude(userPosition.lat)
-        return if (userPosition.lng in bbox.minLongitude..waveCurrentLongitude)
-            event.area.isPositionWithin(userPosition) // Take now into consideration the terrain
-        else false
+        // Get the time when the user will be/was hit
+        val hitTime = userHitDateTime() ?: return false
+
+        // If hit time is in the past or present, the user has been hit
+        // Otherwise, the user has not been hit yet
+        return hitTime <= clock.now()
     }
 
-    override suspend fun timeBeforeHit(): Duration? {
+    override suspend fun userHitDateTime(): Instant? {
         val userPosition = getUserPosition() ?: return null
         if (!event.area.isPositionWithin(userPosition)) return null
 
-        val waveCurrentLongitude = currentWaveLongitude(userPosition.lat)
-        val distanceToUser = calculateDistance(waveCurrentLongitude, userPosition.lng, userPosition.lat)
+        // Check if we have a cached result for a nearby position
+        if (cachedHitPosition != null && cachedHitDateTime != null) {
+            val isCloseEnough =
+                abs(cachedHitPosition!!.lat - userPosition.lat) < epsilonLatPosition &&
+                        abs(cachedHitPosition!!.lng - userPosition.lng) < epsilonLngPosition
 
-        val timeInSeconds = distanceToUser / speed
-        return timeInSeconds.seconds
+            // If the user hasn't moved significantly, return the cached result
+            if (isCloseEnough) {
+                return cachedHitDateTime
+            }
+        }
+
+        val waveStartTime = event.getWaveStartDateTime()
+        val bbox = bbox()
+
+        // Calculate the distance from the wave starting position to the user position
+        val distanceToUser = when (direction) {
+            Direction.EAST -> calculateDistance(bbox.minLongitude, userPosition.lng, userPosition.lat)
+            Direction.WEST -> calculateDistance(bbox.maxLongitude, userPosition.lng, userPosition.lat)
+        }
+
+        // Calculate the time it will take for the wave to reach the user from its START position
+        val timeToReachUserInSeconds = distanceToUser / speed
+
+        // Calculate the exact hit time by adding the time to reach to the wave START time
+        val hitDateTime = waveStartTime + timeToReachUserInSeconds.seconds
+
+        // Cache the result
+        cachedHitPosition = userPosition
+        cachedHitDateTime = hitDateTime
+
+        return hitDateTime
     }
 
-    suspend fun currentWaveLongitude(latitude: Double): Double {
+    override suspend fun closestWaveLongitude(latitude: Double): Double {
         val bbox = bbox()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, latitude)
         val distanceTraveled = speed * (clock.now() - event.getWaveStartDateTime()).inWholeSeconds
@@ -172,6 +207,25 @@ data class WWWEventWaveLinear(
         } else {
             bbox.minLongitude + longitudeDelta
         }
+    }
+
+    override suspend fun userPositionToWaveRatio(): Double? {
+        val userPosition = getUserPosition() ?: return null
+
+        if (!event.area.isPositionWithin(userPosition)) {
+            return null
+        }
+
+        val waveBbox = event.area.bbox()
+        val waveWidth = waveBbox.ne.lng - waveBbox.sw.lng
+        val userLongitude = userPosition.lng
+
+        val userOffsetFromStart: Double = when (direction) {
+            Direction.EAST -> userLongitude - waveBbox.sw.lng
+            Direction.WEST -> waveBbox.ne.lng - userLongitude
+        }
+
+        return if(userOffsetFromStart < 0) 0.0 else (userOffsetFromStart / waveWidth).coerceIn(0.0, 1.0)
     }
 
     // ---------------------------

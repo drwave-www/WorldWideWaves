@@ -2,6 +2,7 @@ package com.worldwidewaves.shared
 
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -45,23 +46,30 @@ class WWWGlobals {
 
         private const val FS_FILES_FOLDER = "files"
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
-
-        const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
-
+        const val FS_CHOREOGRAPHIES_CONF = "$FS_FILES_FOLDER/choreographies.json"
+        const val FS_CHOREOGRAPHIES_SOUND_MIDIFILE = "$FS_FILES_FOLDER/symfony.mid"
         const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
         const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
+        val WAVE_SOON_DELAY = 30.days
         val WAVE_OBSERVE_DELAY = 2.hours // hours
-        val WAVE_WARMING_DURATION = 3.minutes
+        val WAVE_WARMING_DURATION = 2.5.minutes
+        val WAVE_WARN_BEFORE_HIT = 30.seconds
+        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 5.seconds
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
-        val WAVE_WARN_BEFORE_HIT = 15.seconds
+        const val WAVE_BACKGROUND_COLOR = "#D33682"
+        const val WAVE_BACKGROUND_OPACITY = 0.5f
 
         // -- UI Constants --
 
         val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
         val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
+
+        // -- MapLibre Constants
+        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 16.0
+        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = 10.0
 
         // ----------------------------
 
@@ -83,6 +91,7 @@ class WWWGlobals {
         private const val DIM_BIG_FONTSIZE = 24
         private const val DIM_BIG2_FONTSIZE = 26
         private const val DIM_BIG3_FONTSIZE = 32
+        private const val DIM_BIG4_FONTSIZE = 48
         private const val DIM_HUGE_FONTSIZE = 64
         private const val DIM_HUGE2_FONTSIZE = 90
 
@@ -106,6 +115,9 @@ class WWWGlobals {
 
         const val DIM_EVENT_MAP_RATIO = (16f / 9f)
 
+        const val DIM_EVENT_TARGET_WAVE_IMAGE_SIZE = 48
+        const val DIM_EVENT_TARGET_ME_IMAGE_SIZE = 48
+
         const val DIM_EVENT_WAVEBUTTON_WIDTH = 300
         const val DIM_EVENT_WAVEBUTTON_HEIGHT = 40
         const val DIM_EVENT_WAVEBUTTON_FONTSIZE = DIM_BIG_FONTSIZE
@@ -114,6 +126,11 @@ class WWWGlobals {
         const val DIM_EVENT_GEOLOCME_BORDER = 2
         const val DIM_EVENT_GEOLOCME_FONTSIZE = DIM_SMALL2_FONTSIZE
 
+        const val DIM_WAVE_PROGRESSION_HEIGHT = 40
+        const val DIM_WAVE_PROGRESSION_FONTSIZE = DIM_MEDIUM2_FONTSIZE
+        const val DIM_WAVE_TRIANGLE_SIZE = 25
+        const val DIM_WAVE_TIMEBEFOREHIT_FONTSIZE = DIM_HUGE_FONTSIZE
+
         const val DIM_EVENT_NUMBERS_BORDERWIDTH = 2
         const val DIM_EVENT_NUMBERS_BORDERROUND = 50
         const val DIM_EVENT_NUMBERS_TITLE_FONTSIZE = DIM_BIG3_FONTSIZE
@@ -121,6 +138,9 @@ class WWWGlobals {
         const val DIM_EVENT_NUMBERS_LABEL_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_EVENT_NUMBERS_VALUE_FONTSIZE = DIM_BIG_FONTSIZE
         const val DIM_EVENT_NUMBERS_TZ_FONTSIZE = DIM_SMALL_FONTSIZE
+
+        const val DIM_WAVE_BEREADY_FONTSIZE = DIM_BIG4_FONTSIZE
+        const val DIM_WAVE_BEREADY_PADDING = 10
 
         const val DIM_INFO_TEXT_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_INFO_DRWAVE_FONTSIZE = DIM_BIG2_FONTSIZE
@@ -155,10 +175,11 @@ class WWWGlobals {
         const val DIM_EVENTS_FLAG_WIDTH = 65
         const val DIM_EVENTS_FLAG_BORDER = 1
         const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
+        const val DIM_EVENTS_MAPDL_IMAGE_SIZE = 36
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
         const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
-        const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_DEFAULT_FONTSIZE
-
+        const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_MEDIUM_FONTSIZE
+        const val DIM_EVENTS_EVENT_COMMUNITY_FONSIZE = DIM_DEFAULT_FONTSIZE
     }
 
 }

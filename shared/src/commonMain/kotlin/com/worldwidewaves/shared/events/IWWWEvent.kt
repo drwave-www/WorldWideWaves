@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.time.Duration
@@ -80,35 +81,36 @@ interface IWWWEvent : DataValidator {
 
     fun getTZ(): TimeZone
     fun getStartDateTime(): Instant
+    suspend fun getTotalTime(): Duration
     suspend fun getEndDateTime(): Instant
 
     fun getLiteralTimezone(): String
     fun getLiteralStartDateSimple(): String
     fun getLiteralStartTime(): String
     suspend fun getLiteralEndTime(): String
-
     suspend fun getLiteralTotalTime(): String
+
+    fun getLiteralCountry(): String
+    fun getLiteralCommunity(): String
 
     fun getWaveStartDateTime() : Instant
     fun getWarmingDuration(): Duration
-    fun isWarmingEnded(): Boolean
     fun isNearTime(): Boolean
 
     // ---------------------------
 
     suspend fun getAllNumbers(): WaveNumbersLiterals
 
+    val eventStatus: StateFlow<Status>
+    val progression: StateFlow<Double>
+    val isWarmingInProgress: StateFlow<Boolean>
+    val userIsGoingToBeHit: StateFlow<Boolean>
+    val userHasBeenHit: StateFlow<Boolean>
+
     // ---------------------------
 
-    fun addOnStatusChangedListener(listener: (Status) -> Unit): Int
-    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int
-    fun addOnWarmingEndedListener(listener: () -> Unit): Int
-    fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int
-    fun addOnUserHasBeenHitListener(listener: () -> Unit): Int
-
+    fun startObservation()
     fun stopObservation()
-    fun stopListeners(vararg listenerKeys: Int)
-    fun stopListeners(listenerKeys: List<Int>)
 
 }
 

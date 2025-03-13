@@ -75,7 +75,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     private fun removePositionFromIndex(id: Int) : Position {
         val positionToRemove = requireNotNull(positionsIndex.remove(id)) {
-            "Position with id $id not found"
+            "Position with id $id not found when removing position from index"
         }
         if (positionToRemove is CutPosition) cutPositions.remove(positionToRemove)
         return positionToRemove
@@ -215,7 +215,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     fun insertAfter(newPosition: Position, id: Int): Position {
         val current = requireNotNull(positionsIndex[id]) {
-            "Position with id $id not found"
+            "Position with id $id not found when inserting position after index"
         }
         val addPosition = newPosition.xfer().apply {
             next = current.next
@@ -235,7 +235,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
     }
 
     fun insertBefore(newPosition: Position, id: Int): Position {
-        val current = requireNotNull(positionsIndex[id]) { "Position with id $id not found" }
+        val current = requireNotNull(positionsIndex[id]) {
+            "Position with id $id not found when inserting position before index"
+        }
         val addPosition = newPosition.xfer().apply {
             next = current
             prev = current.prev
