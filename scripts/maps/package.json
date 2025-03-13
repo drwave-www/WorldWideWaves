@@ -7,8 +7,6 @@
     "@maplibre/maplibre-gl-native": "^6.1.0",
     "fs-extra": "^11.3.0",
     "pngjs": "^7.0.0",
-    "sharp": "^0.34.2",
-    "sqlite3": "^5.1.7",
-    "zlib": "^1.0.5"
+    "sharp": "^0.34.2"
   }
 }

@@ -28,6 +28,7 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
+import com.worldwidewaves.shared.generated.resources.e_community_usa
 import com.worldwidewaves.shared.generated.resources.e_country_brazil
 import com.worldwidewaves.shared.generated.resources.e_country_france
 import com.worldwidewaves.shared.generated.resources.e_location_bangalore_india
@@ -70,7 +71,6 @@ import com.worldwidewaves.shared.generated.resources.e_location_tehran_iran
 import com.worldwidewaves.shared.generated.resources.e_location_tokyo_japan
 import com.worldwidewaves.shared.generated.resources.e_location_toronto_canada
 import com.worldwidewaves.shared.generated.resources.e_location_vancouver_canada
-import com.worldwidewaves.shared.generated.resources.*
 import com.worldwidewaves.shared.generated.resources.not_found
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -129,93 +129,58 @@ actual fun getEventImage(type: String, id: String): Any? {
             else -> Res.drawable.not_found
         }
 
-        "map" -> when(id) {
-            "bangalore_india" -> Res.drawable.e_map_bangalore_india
-            "bangkok_thailand" -> Res.drawable.e_map_bangkok_thailand
-            "beijing_china" -> Res.drawable.e_map_beijing_china
-            "berlin_germany" -> Res.drawable.e_map_berlin_germany
-            "bogota_colombia" -> Res.drawable.e_map_bogota_colombia
-            "buenos_aires_argentina" -> Res.drawable.e_map_buenos_aires_argentina
-            "cairo_egypt" -> Res.drawable.e_map_cairo_egypt
-            "chicago_usa" -> Res.drawable.e_map_chicago_usa
-            "delhi_india" -> Res.drawable.e_map_delhi_india
-            "dubai_united_arab_emirates" -> Res.drawable.e_map_dubai_united_arab_emirates
-            "hong_kong_china" -> Res.drawable.e_map_hong_kong_china
-            "istanbul_turkey" -> Res.drawable.e_map_istanbul_turkey
-            "jakarta_indonesia" -> Res.drawable.e_map_jakarta_indonesia
-            "johannesburg_south_africa" -> Res.drawable.e_map_johannesburg_south_africa
-            "karachi_pakistan" -> Res.drawable.e_map_karachi_pakistan
-            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_map_kinshasa_democratic_republic_of_the_congo
-            "lagos_nigeria" -> Res.drawable.e_map_lagos_nigeria
-            "lima_peru" -> Res.drawable.e_map_lima_peru
-            "london_england" -> Res.drawable.e_map_london_england
-            "los_angeles_usa" -> Res.drawable.e_map_los_angeles_usa
-            "madrid_spain" -> Res.drawable.e_map_madrid_spain
-            "manila_philippines" -> Res.drawable.e_map_manila_philippines
-            "melbourne_australia" -> Res.drawable.e_map_melbourne_australia
-            "mexico_city_mexico" -> Res.drawable.e_map_mexico_city_mexico
-            "moscow_russia" -> Res.drawable.e_map_moscow_russia
-            "mumbai_india" -> Res.drawable.e_map_mumbai_india
-            "nairobi_kenya" -> Res.drawable.e_map_nairobi_kenya
-            "new_york_usa" -> Res.drawable.e_map_new_york_usa
-            "paris_france" -> Res.drawable.e_map_paris_france
-            "rome_italy" -> Res.drawable.e_map_rome_italy
-            "san_francisco_usa" -> Res.drawable.e_map_san_francisco_usa
-            "santiago_chile" -> Res.drawable.e_map_santiago_chile
-            "sao_paulo_brazil" -> Res.drawable.e_map_sao_paulo_brazil
-            "seoul_south_korea" -> Res.drawable.e_map_seoul_south_korea
-            "shanghai_china" -> Res.drawable.e_map_shanghai_china
-            "sydney_australia" -> Res.drawable.e_map_sydney_australia
-            "tehran_iran" -> Res.drawable.e_map_tehran_iran
-            "tokyo_japan" -> Res.drawable.e_map_tokyo_japan
-            "toronto_canada" -> Res.drawable.e_map_toronto_canada
-            "vancouver_canada" -> Res.drawable.e_map_vancouver_canada
-            else -> Res.drawable.not_found
-        }
+        "map" -> Res.drawable.not_found // when(id) {
+//            "bangalore_india" -> Res.drawable.e_map_bangalore_india
+//            "bangkok_thailand" -> Res.drawable.e_map_bangkok_thailand
+//            "beijing_china" -> Res.drawable.e_map_beijing_china
+//            "berlin_germany" -> Res.drawable.e_map_berlin_germany
+//            "bogota_colombia" -> Res.drawable.e_map_bogota_colombia
+//            "buenos_aires_argentina" -> Res.drawable.e_map_buenos_aires_argentina
+//            "cairo_egypt" -> Res.drawable.e_map_cairo_egypt
+//            "chicago_usa" -> Res.drawable.e_map_chicago_usa
+//            "delhi_india" -> Res.drawable.e_map_delhi_india
+//            "dubai_united_arab_emirates" -> Res.drawable.e_map_dubai_united_arab_emirates
+//            "hong_kong_china" -> Res.drawable.e_map_hong_kong_china
+//            "istanbul_turkey" -> Res.drawable.e_map_istanbul_turkey
+//            "jakarta_indonesia" -> Res.drawable.e_map_jakarta_indonesia
+//            "johannesburg_south_africa" -> Res.drawable.e_map_johannesburg_south_africa
+//            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_map_kinshasa_democratic_republic_of_the_congo
+//            "lagos_nigeria" -> Res.drawable.e_map_lagos_nigeria
+//            "lima_peru" -> Res.drawable.e_map_lima_peru
+//            "london_england" -> Res.drawable.e_map_london_england
+//            "los_angeles_usa" -> Res.drawable.e_map_los_angeles_usa
+//            "madrid_spain" -> Res.drawable.e_map_madrid_spain
+//            "manila_philippines" -> Res.drawable.e_map_manila_philippines
+//            "melbourne_australia" -> Res.drawable.e_map_melbourne_australia
+//            "mexico_city_mexico" -> Res.drawable.e_map_mexico_city_mexico
+//            "moscow_russia" -> Res.drawable.e_map_moscow_russia
+//            "mumbai_india" -> Res.drawable.e_map_mumbai_india
+//            "nairobi_kenya" -> Res.drawable.e_map_nairobi_kenya
+//            "new_york_usa" -> Res.drawable.e_map_new_york_usa
+//            "paris_france" -> Res.drawable.e_map_paris_france
+//            "rome_italy" -> Res.drawable.e_map_rome_italy
+//            "san_francisco_usa" -> Res.drawable.e_map_san_francisco_usa
+//            "santiago_chile" -> Res.drawable.e_map_santiago_chile
+//            "sao_paulo_brazil" -> Res.drawable.e_map_sao_paulo_brazil
+//            "seoul_south_korea" -> Res.drawable.e_map_seoul_south_korea
+//            "shanghai_china" -> Res.drawable.e_map_shanghai_china
+//            "sydney_australia" -> Res.drawable.e_map_sydney_australia
+//            "tehran_iran" -> Res.drawable.e_map_tehran_iran
+//            "tokyo_japan" -> Res.drawable.e_map_tokyo_japan
+//            "toronto_canada" -> Res.drawable.e_map_toronto_canada
+//            "vancouver_canada" -> Res.drawable.e_map_vancouver_canada
+//            else -> Res.drawable.not_found
+//        }
 
         "community" -> when (id) {
-            "africa" -> Res.drawable.e_community_africa
-            "asia" -> Res.drawable.e_community_asia
             "europe" -> Res.drawable.e_community_europe
-            "middle_east" -> Res.drawable.e_community_middle_east
-            "north_america" -> Res.drawable.e_community_north_america
-            "oceania" -> Res.drawable.e_community_oceania
-            "south_america" -> Res.drawable.e_community_south_america
+            "usa" -> Res.drawable.e_community_usa
             else -> Res.drawable.not_found
         }
 
         "country" -> when (id) {
-            "argentina" -> Res.drawable.e_country_argentina
-            "australia" -> Res.drawable.e_country_australia
             "brazil" -> Res.drawable.e_country_brazil
-            "canada" -> Res.drawable.e_country_canada
-            "chile" -> Res.drawable.e_country_chile
-            "china" -> Res.drawable.e_country_china
-            "colombia" -> Res.drawable.e_country_colombia
-            "democratic_republic_of_the_congo" -> Res.drawable.e_country_democratic_republic_of_the_congo
-            "egypt" -> Res.drawable.e_country_egypt
-            "england" -> Res.drawable.e_country_england
             "france" -> Res.drawable.e_country_france
-            "germany" -> Res.drawable.e_country_germany
-            "india" -> Res.drawable.e_country_india
-            "indonesia" -> Res.drawable.e_country_indonesia
-            "iran" -> Res.drawable.e_country_iran
-            "italy" -> Res.drawable.e_country_italy
-            "japan" -> Res.drawable.e_country_japan
-            "kenya" -> Res.drawable.e_country_kenya
-            "mexico" -> Res.drawable.e_country_mexico
-            "nigeria" -> Res.drawable.e_country_nigeria
-            "pakistan" -> Res.drawable.e_country_pakistan
-            "peru" -> Res.drawable.e_country_peru
-            "philippines" -> Res.drawable.e_country_philippines
-            "russia" -> Res.drawable.e_country_russia
-            "south_africa" -> Res.drawable.e_country_south_africa
-            "south_korea" -> Res.drawable.e_country_south_korea
-            "spain" -> Res.drawable.e_country_spain
-            "thailand" -> Res.drawable.e_country_thailand
-            "turkey" -> Res.drawable.e_country_turkey
-            "united_arab_emirates" -> Res.drawable.e_country_united_arab_emirates
-            "usa" -> Res.drawable.e_country_usa
             else -> Res.drawable.not_found
         }
 

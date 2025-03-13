@@ -25,33 +25,16 @@
 EVENTS_FILE=../../shared/src/commonMain/composeResources/files/events.json
 echo "--> Using events file $EVENTS_FILE"
 
-# ---------------------------------------------------------------------------
-# Detect platform (Linux vs macOS) so we fetch the right jq/yq binaries and
-# use the proper in-place syntax for `sed -i`.
-# ---------------------------------------------------------------------------
-OS_NAME="$(uname -s)"
-
-JQ_URL="https://github.com/stedolan/jq/releases/latest/download/jq-linux64"
-YQ_URL="https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
-SED_INPLACE_FLAG=""
-
-if [ "$OS_NAME" = "Darwin" ]; then
-  # macOS binaries
-  JQ_URL="https://github.com/stedolan/jq/releases/latest/download/jq-osx-amd64"
-  YQ_URL="https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_darwin_amd64"
-  SED_INPLACE_FLAG="''"
-fi
-
 # Download jq for JSON processing if not already present
 mkdir -p ./bin
 if [ ! -f ./bin/jq ]; then
-  wget -q "$JQ_URL" -O ./bin/jq
+  wget -q https://github.com/stedolan/jq/releases/latest/download/jq-linux64 -O ./bin/jq
   chmod +x ./bin/jq
 fi
 
 # Download yq for YAML processing if not already present
 if [ ! -f ./bin/yq ]; then
-  wget -q "$YQ_URL" -O ./bin/yq
+  wget -q https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -O ./bin/yq
   chmod +x ./bin/yq
 fi
 
@@ -175,8 +158,7 @@ tpl() {
   # Then handle all other properties using the standard approach
   ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
-      # Use portable in-place editing for both GNU and BSD sed
-      eval sed -i $SED_INPLACE_FLAG \
+      sed -i \
         -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
         -e "s/#map.center#/$center/g" \
         -e "s/#map.bbox#/$bbox/g" \

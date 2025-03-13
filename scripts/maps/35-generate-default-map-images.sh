@@ -20,7 +20,6 @@
 # limitations under the License.
 #
 #
-#
 ### NOTICE: In non-X environments, run through xvfb-run
 
 # ---------- Vars and support functions ---------------------------------------

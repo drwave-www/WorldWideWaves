@@ -24,6 +24,7 @@ package com.worldwidewaves.compose.tabs
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,11 +78,11 @@ import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COMMUNITY_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COUNTRY_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_DATE_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_LOCATION_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FAVS_IMAGE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_BORDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_MAPDL_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_NOEVENTS_FONTSIZE
@@ -112,7 +113,6 @@ import com.worldwidewaves.shared.generated.resources.map_downloaded
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
-import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
@@ -417,7 +417,9 @@ class EventsListScreen(
         contentDescription: String
     ) {
         Image(
-            modifier = modifier.width(DIM_EVENTS_FLAG_WIDTH.dp),
+            modifier = modifier
+                .width(DIM_EVENTS_FLAG_WIDTH.dp)
+                .border(DIM_EVENTS_FLAG_BORDER.dp, Color.White),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(imageResource),
             contentDescription = contentDescription
@@ -556,26 +558,11 @@ class EventsListScreen(
                 }
 
                 // Country if present
-                Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = event.getLiteralCountry(),
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
-                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-                    )
-                    Text(
-                        text = " / ",
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
-                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-                    )
-                    Text(
-                        text = event.getLiteralCommunity(),
-                        style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
-                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-                    )
-                }
+                Text(
+                    text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
+                    style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                    modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
+                )
             }
         }
     }
