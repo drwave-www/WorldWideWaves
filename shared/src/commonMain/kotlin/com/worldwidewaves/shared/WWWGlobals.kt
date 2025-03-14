@@ -155,6 +155,7 @@ class WWWGlobals {
         const val DIM_EVENTS_FLAG_WIDTH = 65
         const val DIM_EVENTS_FLAG_BORDER = 1
         const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
+        const val DIM_EVENTS_MAPDL_IMAGE_SIZE = 36
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
         const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
         const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_DEFAULT_FONTSIZE

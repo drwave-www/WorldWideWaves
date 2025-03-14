@@ -24,11 +24,13 @@ package com.worldwidewaves
 import android.app.Application
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.di.CloseableCoroutineScope
 import com.worldwidewaves.di.androidModule
 import com.worldwidewaves.shared.AndroidPlatform
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.sharedModule
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -64,6 +66,7 @@ class MainApplication : Application(), Configuration.Provider {
 
     override fun onTerminate() {
         wwwShutdownHandler.onAppShutdown()
+        get<CloseableCoroutineScope>().close()
         super.onTerminate()
     }
 }

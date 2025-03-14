@@ -44,8 +44,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -68,6 +66,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.activities.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
@@ -79,6 +80,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_LOCATION_
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FAVS_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_BORDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_WIDTH
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_MAPDL_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_NOEVENTS_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_OVERLAY_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSIZE
@@ -86,8 +88,10 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.event_map_downloaded
 import com.worldwidewaves.shared.generated.resources.events_empty
 import com.worldwidewaves.shared.generated.resources.events_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_loading_error
@@ -99,8 +103,7 @@ import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
-import com.worldwidewaves.utils.MapFeatureManager
-import com.worldwidewaves.utils.MapFeatureState
+import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -112,6 +115,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventsListScreen(
     private val viewModel: EventsViewModel,
+    private val mapChecker: MapAvailabilityChecker,
     private val setEventFavorite: SetEventFavorite
 ) : TabScreen {
 
@@ -134,8 +138,33 @@ class EventsListScreen(
 
         viewModel.filterEvents(starredSelected)
 
+        // Refresh map availability when screen resumes
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    // Refresh availability when screen resumes
+                    mapChecker.refreshAvailability()
+                }
+            }
+
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+
+        // Pre-track all event IDs
+        LaunchedEffect(events) {
+            mapChecker.trackMaps(events.map { it.id })
+            mapChecker.refreshAvailability()
+        }
+
+        // Use the live map states
+        val mapStates by mapChecker.mapStates.collectAsState()
+
         EventsList(
-            modifier, events,
+            modifier, events, mapStates,
             onAllEventsClicked = { if (starredSelected) toggleStarredSelection() },
             onFavoriteEventsClicked = { if (!starredSelected) toggleStarredSelection() }
         )
@@ -152,6 +181,7 @@ class EventsListScreen(
     private fun EventsList(
         modifier: Modifier,
         events: List<IWWWEvent>,
+        mapStates: Map<String, Boolean>,
         onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit
     ) {
@@ -162,7 +192,7 @@ class EventsListScreen(
         ) {
             FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked)
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
-            Events(viewModel, events, modifier = Modifier.weight(1f))
+            Events(viewModel, events, mapStates, modifier = Modifier.weight(1f))
         }
     }
 
@@ -236,7 +266,12 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    fun Events(viewModel: EventsViewModel, events: List<IWWWEvent>, modifier: Modifier = Modifier) {
+    fun Events(
+        viewModel: EventsViewModel,
+        events: List<IWWWEvent>,
+        mapStates: Map<String, Boolean>,
+        modifier: Modifier = Modifier
+    ) {
         val state = rememberLazyListState()
         val hasLoadingError by viewModel.hasLoadingError.collectAsState()
 
@@ -245,7 +280,11 @@ class EventsListScreen(
             modifier = modifier
         ) {
             if (events.isNotEmpty()) {
-                items(events) { event -> Event(viewModel, event) }
+                items(events) { event ->
+                    // Get current availability state
+                    val isMapInstalled = mapStates[event.id] ?: false
+                    Event(viewModel, event, isMapInstalled)
+                }
             } else {
                 item {
                     Text(
@@ -267,99 +306,18 @@ class EventsListScreen(
     }
 
     @Composable
-    fun Event(viewModel: EventsViewModel, event: IWWWEvent, modifier: Modifier = Modifier) {
+    fun Event(viewModel: EventsViewModel, event: IWWWEvent, isMapInstalled: Boolean, modifier: Modifier = Modifier) {
         val context = LocalContext.current
-
-        // Create and remember the MapFeatureManager
-        val mapManager = remember { MapFeatureManager(context) }
-
-        // Collect the state flow as a composable state
-        val mapState by mapManager.featureState.collectAsState()
-
-        // Check if map is available on first composition
-        LaunchedEffect(event.id) {
-            mapManager.checkIfMapIsAvailable(event.id)
-        }
-
-        // Clean up the manager when the composable leaves composition
-        DisposableEffect(Unit) {
-            onDispose {
-                mapManager.unregisterListener()
-            }
-        }
 
         Column(modifier = modifier.clickable(
             onClick = {
-                when (mapState) {
-                    is MapFeatureState.Available, is MapFeatureState.Installed -> {
-                        context.startActivity(Intent(context, EventActivity::class.java).apply {
-                            putExtra("eventId", event.id)
-                        })
-                    }
-                    is MapFeatureState.NotAvailable -> {
-                        mapManager.downloadMap(event.id)
-                    }
-                    is MapFeatureState.Failed -> {
-                        mapManager.downloadMap(event.id) // Exception will be raised on retry
-                    }
-                    else -> {
-                        // Do nothing for other states (downloading, pending)
-                    }
-                }
+                context.startActivity(Intent(context, EventActivity::class.java).apply {
+                    putExtra("eventId", event.id)
+                })
             }
         )) {
-
-            EventOverlay(viewModel, event)
+            EventOverlay(viewModel, event, isMapInstalled)
             EventLocationAndDate(event)
-
-            // Show download status if applicable
-            when (val state = mapState) {
-                MapFeatureState.NotChecked -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .size(24.dp)
-                    )
-                }
-                MapFeatureState.NotAvailable -> {
-                    // No map data available for this event for now
-                }
-                is MapFeatureState.Downloading -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        LinearProgressIndicator(
-                            progress = { state.progress / 100f },
-                            modifier = Modifier
-                                .padding(top = 4.dp)
-                                .fillMaxWidth(0.8f),
-                        )
-                    }
-                }
-                is MapFeatureState.Failed -> {
-                    Text(
-                        state.errorMessage ?: "Failed",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-                MapFeatureState.Pending -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .size(24.dp)
-                    )
-                }
-                else -> {
-                    // No special UI needed for Available/Installed states
-                }
-            }
-
-            if (mapState is MapFeatureState.Installed) {
-                // TODO: UI visible, comme un check
-            }
         }
     }
 
@@ -369,6 +327,7 @@ class EventsListScreen(
     private fun EventOverlay(
         viewModel: EventsViewModel,
         event: IWWWEvent,
+        isMapInstalled: Boolean,
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
@@ -391,6 +350,7 @@ class EventsListScreen(
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
+            EventOverlayMapDownloaded(isMapInstalled)
             EventOverlayFavorite(viewModel, event)
         }
     }
@@ -436,6 +396,27 @@ class EventsListScreen(
             painter = painterResource(imageResource),
             contentDescription = contentDescription
         )
+    }
+
+    @Composable
+    private fun EventOverlayMapDownloaded(isMapInstalled: Boolean, modifier: Modifier = Modifier) {
+        if (isMapInstalled) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(
+                        end = DIM_DEFAULT_INT_PADDING.dp * 2 + DIM_EVENTS_MAPDL_IMAGE_SIZE.dp,
+                        bottom = DIM_DEFAULT_INT_PADDING.dp
+                    ),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                Image(
+                    modifier = Modifier.size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp),
+                    painter = painterResource(ShRes.drawable.downloaded_icon),
+                    contentDescription = stringResource(ShRes.string.event_map_downloaded),
+                )
+            }
+        }
     }
 
     @Composable

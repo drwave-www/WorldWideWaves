@@ -5,7 +5,12 @@ import com.worldwidewaves.compose.AboutInfoScreen
 import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -31,7 +36,7 @@ import org.koin.dsl.module
  */
 
 val androidModule = module {
-    single { EventsListScreen(viewModel = get(), setEventFavorite = get()) }
+    single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
     viewModel { EventsViewModel(wwwEvents = get()) }
 
     single { SettingsScreen() }
@@ -39,4 +44,35 @@ val androidModule = module {
     single { AboutInfoScreen() }
     single { AboutFaqScreen() }
 
+    // Map availability checker as a singleton
+    single {
+        MapAvailabilityChecker(androidContext()).apply {
+            // Register for cleanup when the app is terminated
+            get<CloseableCoroutineScope>().registerForCleanup {
+                this.destroy()
+            }
+        }
+    }
+
+    // A closeable coroutine scope for cleanup
+    single { CloseableCoroutineScope() }
+}
+
+/**
+ * A coroutine scope that can be closed and helps with resource cleanup
+ */
+class CloseableCoroutineScope : CoroutineScope {
+    private val job = SupervisorJob()
+    override val coroutineContext = job + Dispatchers.Main
+
+    private val cleanupActions = mutableListOf<() -> Unit>()
+
+    fun registerForCleanup(action: () -> Unit) {
+        cleanupActions.add(action)
+    }
+
+    fun close() {
+        cleanupActions.forEach { it() }
+        job.cancel()
+    }
 }

@@ -1,4 +1,4 @@
-package com.worldwidewaves.utils
+package com.worldwidewaves.viewmodels
 
 /*
  * Copyright 2024 DrWave
@@ -21,9 +21,12 @@ package com.worldwidewaves.utils
  * limitations under the License.
  */
 
+import android.app.Application
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
@@ -31,8 +34,11 @@ import com.google.android.play.core.splitinstall.SplitInstallSessionState
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
+import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 /**
  * Represents possible states during map feature installation.
@@ -52,10 +58,13 @@ sealed class MapFeatureState {
 }
 
 /**
- * Manages downloading and installing dynamic feature modules for maps.
+ * ViewModel that manages downloading and installing dynamic feature modules for maps.
  * Follows Google's Play Feature Delivery best practices.
  */
-class MapFeatureManager(context: Context) {
+class MapFeatureViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val context: Context
+        get() = getApplication()
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
@@ -63,19 +72,16 @@ class MapFeatureManager(context: Context) {
 
     private var currentSessionId = 0
     private var installStateListener: SplitInstallStateUpdatedListener? = null
+    private var currentMapId: String? = null
 
     private var retryCount = 0
     private val maxRetries = 3
     private val retryDelayMillis = 1000L // Base delay for exponential backoff
 
-
     init {
         registerListener()
     }
 
-    /**
-     * Registers a listener for split install state updates.
-     */
     private fun registerListener() {
         installStateListener = SplitInstallStateUpdatedListener { state ->
             // Only process updates for our current session
@@ -88,27 +94,20 @@ class MapFeatureManager(context: Context) {
         }
     }
 
-    /**
-     * Removes the install state listener. Should be called when the manager
-     * is no longer needed to prevent memory leaks.
-     */
-    fun unregisterListener() {
+    override fun onCleared() {
         installStateListener?.let {
             splitInstallManager.unregisterListener(it)
         }
+        super.onCleared()
     }
 
-    /**
-     * Updates the feature state based on installation status updates.
-     */
     private fun updateStateFromInstallState(state: SplitInstallSessionState) {
-
         // Special handling for SERVICE_DIED error
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED) {
 
             // Get current module from state if possible, otherwise use last known module
-            val moduleId = getCurrentModuleFromState(state)
+            val moduleId = getCurrentModuleFromState(state) ?: currentMapId
 
             if (moduleId != null && retryCount < maxRetries) {
                 // Prepare retry with exponential backoff
@@ -188,9 +187,6 @@ class MapFeatureManager(context: Context) {
         }
     }
 
-    /**
-     * Converts error codes into user-friendly messages.
-     */
     private fun getErrorMessage(errorCode: Int): String {
         return when (errorCode) {
             SplitInstallErrorCode.NETWORK_ERROR ->
@@ -219,14 +215,19 @@ class MapFeatureManager(context: Context) {
      * Checks if a map module is available/installed.
      */
     fun checkIfMapIsAvailable(mapId: String) {
-        if (splitInstallManager.installedModules.contains(mapId)) {
-            _featureState.value = MapFeatureState.Available
-        } else {
-            _featureState.value = MapFeatureState.NotAvailable
+        viewModelScope.launch {
+            currentMapId = mapId
+            if (splitInstallManager.installedModules.contains(mapId)) {
+                _featureState.value = MapFeatureState.Available
+            } else {
+                _featureState.value = MapFeatureState.NotAvailable
+            }
         }
     }
 
-    // Handle task failures using the recommended approach
+    /**
+     * Requests installation of a map module.
+     */
     fun downloadMap(mapId: String) {
         if (_featureState.value is MapFeatureState.Downloading ||
             _featureState.value is MapFeatureState.Pending) {
@@ -235,6 +236,7 @@ class MapFeatureManager(context: Context) {
 
         _featureState.value = MapFeatureState.Pending
         retryCount = 0 // Reset retry count
+        currentMapId = mapId
 
         val request = SplitInstallRequest.newBuilder()
             .addModule(mapId)
@@ -256,7 +258,6 @@ class MapFeatureManager(context: Context) {
                     val nextDelay = delay * (1 shl retryCount)
                     retryCount++
 
-                    // Update state to show we're retrying
                     _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
 
                     // Schedule retry after delay
@@ -272,9 +273,6 @@ class MapFeatureManager(context: Context) {
             }
     }
 
-    /**
-     * Cancels an ongoing download.
-     */
     fun cancelDownload() {
         if (currentSessionId > 0) {
             splitInstallManager.cancelInstall(currentSessionId)
@@ -282,11 +280,20 @@ class MapFeatureManager(context: Context) {
         }
     }
 
-    /**
-     * Extension function to check if a map is available or installed.
-     */
     fun isMapReady(mapId: String): Boolean {
         return splitInstallManager.installedModules.contains(mapId)
+    }
+
+    fun getMapFilePath(mapId: String, extension: String): String? {
+        if (!isMapReady(mapId)) {
+            return null
+        }
+
+        // This uses runBlocking which is generally not recommended in a ViewModel,
+        // but here it's used to provide a synchronous API for simplicity
+        return runBlocking {
+            getMapFileAbsolutePath(mapId, extension)
+        }
     }
 
 }
