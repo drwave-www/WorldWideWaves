@@ -26,10 +26,19 @@ import kotlinx.datetime.Instant
  */
 
 class WWWSimulation(private val startDateTime: Instant, private val userPosition: Position, private val speed : Int = 1) {
+
     init {
         require(speed in 1..500) { "Speed must be between 1 and 1000" }
     }
+
     private val realStartDate = Clock.System.now()
-    fun now() = startDateTime + (Clock.System.now() - realStartDate) * speed
+
+    fun now(): Instant {
+        val elapsedRealTime = Clock.System.now() - realStartDate
+        val simulatedElapsedTime = elapsedRealTime * speed
+        return startDateTime + simulatedElapsedTime
+    }
+
     fun getUserPosition() = userPosition
+
 }

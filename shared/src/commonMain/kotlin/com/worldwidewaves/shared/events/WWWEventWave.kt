@@ -16,6 +16,8 @@ import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 /*
  * Copyright 2024 DrWave
@@ -64,6 +66,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     abstract val speed: Double // m/s
     abstract val direction: Direction // E/W
+    abstract val approxDuration: Int // Min
+
+    fun getApproxDuration(): Duration = approxDuration.toDuration(DurationUnit.MINUTES)
 
     // ---------------------------
 

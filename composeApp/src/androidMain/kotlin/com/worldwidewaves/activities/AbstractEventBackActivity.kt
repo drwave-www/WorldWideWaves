@@ -213,10 +213,11 @@ abstract class AbstractEventBackActivity(
                 } else { // Map is not loaded yet, handle map states to show appropriate UI
 
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Center
                     ) {
 
                         when (val state = mapState) {
+
                             is MapFeatureState.NotChecked -> {
                                 // Initial state, waiting for check
                                 LoadingIndicator(message = stringResource(ShRes.string.map_checking_state))

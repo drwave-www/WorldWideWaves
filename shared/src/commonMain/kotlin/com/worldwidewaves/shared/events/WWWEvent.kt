@@ -232,8 +232,14 @@ data class WWWEvent(
      * 6. Adds the duration to the start time to get the end time.
      *
      */
-    override suspend fun getEndDateTime(): Instant =
-        getStartDateTime().plus(wave.getWaveDuration() + getWarmingDuration())
+    override suspend fun getEndDateTime(): Instant {
+        var waveDuration = wave.getWaveDuration()
+
+        if (waveDuration == 0.seconds) // If GeoJson has not been yet loaded we do not have the polygons
+            waveDuration = wave.getApproxDuration()
+
+        return getStartDateTime().plus(waveDuration + getWarmingDuration())
+    }
 
 
     // ------------------------------------------------------------------------

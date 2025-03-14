@@ -40,7 +40,8 @@ import kotlin.time.Duration.Companion.seconds
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
-    override val direction: Direction
+    override val direction: Direction,
+    override val approxDuration: Int
 ) : KoinComponent, WWWEventWave() {
 
     @Transient private var cachedLongitude: EarthAdaptedSpeedLongitude? = null
