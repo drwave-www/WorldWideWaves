@@ -91,7 +91,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.event_map_downloaded
 import com.worldwidewaves.shared.generated.resources.events_empty
 import com.worldwidewaves.shared.generated.resources.events_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_loading_error
@@ -99,6 +98,7 @@ import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.shared.generated.resources.map_downloaded
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
@@ -413,7 +413,7 @@ class EventsListScreen(
                 Image(
                     modifier = Modifier.size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp),
                     painter = painterResource(ShRes.drawable.downloaded_icon),
-                    contentDescription = stringResource(ShRes.string.event_map_downloaded),
+                    contentDescription = stringResource(ShRes.string.map_downloaded),
                 )
             }
         }

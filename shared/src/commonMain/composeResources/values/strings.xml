@@ -16,7 +16,15 @@
     <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
     <string name="events_empty">Event list is empty</string>
     <string name="events_loading_error">An error occurred when loading events</string>
-    <string name="event_map_downloaded">Map has been downloaded</string>
+
+    <string name="map_checking_state">Checking map status</string>
+    <string name="map_downloading">Downloading.. </string>
+    <string name="map_starting_download">Starting download..</string>
+    <string name="map_loading">Loading map..</string>
+    <string name="map_cancel_download">Cancel</string>
+    <string name="map_retry_download">Retry</string>
+    <string name="map_error_download">Error downloading map</string>
+    <string name="map_downloaded">Map has been downloaded</string>
 
     <string name="tab_infos_name">About</string>
     <string name="tab_faq_name">FAQ</string>

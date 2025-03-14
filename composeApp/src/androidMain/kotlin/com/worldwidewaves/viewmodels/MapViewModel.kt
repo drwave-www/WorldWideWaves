@@ -61,7 +61,7 @@ sealed class MapFeatureState {
  * ViewModel that manages downloading and installing dynamic feature modules for maps.
  * Follows Google's Play Feature Delivery best practices.
  */
-class MapFeatureViewModel(application: Application) : AndroidViewModel(application) {
+class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private val context: Context
         get() = getApplication()
