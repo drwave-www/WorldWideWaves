@@ -1,8 +1,10 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { PNG } = require('pngjs');
-const maplibre = require('@maplibre/maplibre-gl-native');
+const maplibre  = require('@maplibre/maplibre-gl-native');
 const sharp = require('sharp')
+const sqlite3   = require('sqlite3').verbose();
+const zlib      = require('zlib');
 
 // Debug mode
 const DEBUG = true;
@@ -65,8 +67,6 @@ async function renderMap(options) {
             effectiveZoom = hasValidBounds
                 ? getBoundsZoomLevel(geojsonBbox, width, height)
                 : 10; // sensible default for fallback
-            // Subtract a bit for padding
-            effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
             if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
         }
         
@@ -94,9 +94,7 @@ async function renderMap(options) {
         
         // Fix source paths
         if (styleData.sources) {
-            if (DEBUG) console.log(`Reading sources`);
             Object.keys(styleData.sources).forEach(sourceId => {
-                if (DEBUG) console.log(`sourceID --${sourceId}--`);
                 const source = styleData.sources[sourceId];
                 if (source.url && !source.url.startsWith('http') || source.data) {
                     var originalUrl = "";
@@ -108,12 +106,14 @@ async function renderMap(options) {
                         source.data = geojsonData;
                         targetUrl = "{GEOJSON DATA}";
                     } else if (sourceId === "openmaptiles") {
-                        /* Convert to MapLibre MBTiles source declaration */
+                        /* Serve tiles through mbtiles:// protocol */
                         originalUrl = source.url;
                         delete source.url;
-                        source.type = "mbtiles";
-                        source.path = path.resolve(mbtilesPath);
-                        targetUrl = source.path;
+                        // Keep regular vector source but point its tiles array to mbtiles://
+                        source.type  = "vector";
+                        const absPath = path.resolve(mbtilesPath);
+                        source.tiles = [`mbtiles://${absPath}/{z}/{x}/{y}.pbf`];
+                        targetUrl    = source.tiles[0];
                     } else {
                         console.log(`Unrecognized source`);
                     }
@@ -133,7 +133,13 @@ async function renderMap(options) {
             request: function(req, callback) {
                 if (req.url.startsWith('file://')) {
                     /* ---- local filesystem fetch (sprites, glyphs, etc.) ---- */
-                    const filePath = req.url.replace('file://', '');
+                    // Decode URI components so that `%20` and other encodings
+                    // are converted back to their literal characters. This is
+                    // required for font stack names that contain spaces
+                    // (e.g. “Roboto Regular”), which are stored on disk with
+                    // the actual space character.
+                    const rawPath  = req.url.replace('file://', '');
+                    const filePath = decodeURIComponent(rawPath);
                     fs.readFile(filePath, (err, data) => {
                         if (err) {
                             console.error(`Error reading file: ${err.message}`);
@@ -141,6 +147,14 @@ async function renderMap(options) {
                         }
                         return callback(null, { data });
                     });
+                    return;
+                }
+
+                /* ---- MBTiles protocol ---- */
+                if (req.url.startsWith('mbtiles://')) {
+                    handleMbtilesRequest(req.url)
+                        .then(buf => callback(null, { data: buf }))
+                        .catch(e  => callback(e));
                     return;
                 }
 
@@ -241,9 +255,10 @@ function getBoundsZoomLevel(bbox, imageWidth, imageHeight) {
     // Helper to convert latitude to its Mercator projection coordinate
     function latRad(lat) {
         const sin = Math.sin(lat * Math.PI / 180);
-        // This is a simplified version of the Mercator projection formula part
+        // Mercator projection (no absolute value – we need the sign to
+        // distinguish northern vs. southern hemisphere)
         const rad = Math.log((1 + sin) / (1 - sin)) / 2;
-        return Math.abs(rad);
+        return rad;
     }
 
     // Calculate the fraction of the world's circumference covered by the bbox
@@ -338,6 +353,97 @@ function getHintCenterFromFilename(filePath) {
         paris_france: [2.3522, 48.8566],
     };
     return hints[name] || [0, 0];
+}
+
+/* -------------------------------------------------------------------------- */
+/* -----------------------  MBTiles   helper  section  ----------------------- */
+/* -------------------------------------------------------------------------- */
+
+// Simple in-memory cache of opened mbtiles databases to avoid reopening files
+const mbtilesCache = new Map(); //  key: absolute path, value: sqlite3.Database
+
+/**
+ * Open (or retrieve from cache) a readonly sqlite3 DB handle to the given
+ * mbtiles file.  The handle is cached for the lifetime of this process.
+ */
+function getDb(absPath) {
+    if (mbtilesCache.has(absPath)) {
+        return mbtilesCache.get(absPath);
+    }
+    const db = new sqlite3.Database(absPath, sqlite3.OPEN_READONLY);
+    mbtilesCache.set(absPath, db);
+    return db;
+}
+
+/**
+ * Parse a `mbtiles://` URL of the form
+ *   mbtiles:///absolute/path/file.mbtiles/{z}/{x}/{y}.pbf
+ * and return `{ dbPath, z, x, y }`
+ */
+function parseMbtilesUrl(url) {
+    const withoutProto = url.replace('mbtiles://', '');
+    // pattern:  /absolute/path/file.mbtiles/Z/X/Y(.pbf|.png)
+    const match = withoutProto.match(/^(.*?\.mbtiles)\/(\d+)\/(\d+)\/(\d+)/);
+    if (!match) {
+        throw new Error(`Invalid mbtiles url: ${url}`);
+    }
+    const [, dbPath, zStr, xStr, yStr] = match;
+    const z = parseInt(zStr, 10);
+    const x = parseInt(xStr, 10);
+    const y = parseInt(yStr, 10);
+    return { dbPath, z, x, y };
+}
+
+/**
+ * Given a `mbtiles://` URL return a Promise that resolves with a Buffer
+ * containing the tile data.  Converts XYZ → TMS (row) index internally.
+ */
+function handleMbtilesRequest(url) {
+    return new Promise((resolve, reject) => {
+        let parsed;
+        try {
+            parsed = parseMbtilesUrl(url);
+        } catch (e) {
+            return reject(e);
+        }
+
+        const { dbPath, z, x, y } = parsed;
+        const db = getDb(dbPath);
+
+        // MBTiles spec stores rows in TMS (flipped-Y) orientation
+        const tmsY = (1 << z) - 1 - y;
+
+        db.get(
+            'SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?',
+            [z, x, tmsY],
+            (err, row) => {
+                if (err) return reject(err);
+                // If tile is missing, resolve with an empty buffer instead of
+                // failing the entire render. Missing tiles will simply render
+                // blank areas, which is preferable to aborting the map render.
+                if (!row) {
+                    if (DEBUG) {
+                        console.warn(`Tile not found ${z}/${x}/${y} in ${path.basename(dbPath)}`);
+                    }
+                    return resolve(Buffer.alloc(0));
+                }
+                let data = row.tile_data;
+                /* ----------------------------------------------------------
+                 * Tiles inside MBTiles are commonly gzipped.  MapLibre expects
+                 * raw, uncompressed PBF bytes.  If we detect the gzip magic
+                 * header (0x1f 0x8b) we transparently decompress.
+                 * ---------------------------------------------------------- */
+                if (data && data.length > 2 && data[0] === 0x1f && data[1] === 0x8b) {
+                    try {
+                        data = zlib.unzipSync(data);
+                    } catch (e) {
+                        return reject(e);
+                    }
+                }
+                resolve(data);
+            }
+        );
+    });
 }
 
 // Parse command line arguments
