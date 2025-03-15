@@ -21,6 +21,7 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
+import android.content.Context
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -41,11 +42,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +61,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
@@ -93,12 +97,14 @@ import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
 import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
+import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -114,15 +120,10 @@ class EventActivity : AbstractEventBackActivity() {
 
     override fun onResume() {
         super.onResume()
+        val context = this
         // Restart observation when activity is visible
-        currentEvent?.let { event ->
-            eventMapRef?.let { map ->
-                val context = this
-                waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
-                    map.updateWavePolygons(context, wavePolygons, clearPolygons)
-                }
-            }
-        }
+        lifecycleScope.launch { observeWave(context) }
+
     }
 
     override fun onPause() {
@@ -131,11 +132,30 @@ class EventActivity : AbstractEventBackActivity() {
         super.onPause()
     }
 
+    private suspend fun observeWave(context: Context) {
+        currentEvent?.let { event ->
+            eventMapRef?.let { eventMap ->
+                if (event.isRunning()) {
+                    waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+                        eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
+                    }
+                } else if (event.isDone()) {
+                    eventMap.updateWavePolygons(
+                        context,
+                        event.area.getPolygons().map { it.toMapLibrePolygon() },
+                        true
+                    )
+                }
+            }
+        }
+    }
+
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         currentEvent = event
 
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
         // Calculate height based on aspect ratio and available width
@@ -143,7 +163,8 @@ class EventActivity : AbstractEventBackActivity() {
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         val eventMap = remember(event.id) {
-            EventMap(platform, event,
+            EventMap(
+                platform, event,
                 onLocationUpdate = { newLocation ->
                     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
                         waveViewModel.updateGeolocation(newLocation)
@@ -160,8 +181,10 @@ class EventActivity : AbstractEventBackActivity() {
             }
         }
 
-        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
-            eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
+        LaunchedEffect(true) {
+            scope.launch {
+                observeWave(context)
+            }
         }
 
         Column(
@@ -257,7 +280,7 @@ private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: M
 @Composable
 fun DividerLine(modifier: Modifier = Modifier) {
     HorizontalDivider(
-        modifier = Modifier.width(DIM_DIVIDER_WIDTH.dp),
+        modifier = modifier.width(DIM_DIVIDER_WIDTH.dp),
         color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
     )
 }
@@ -287,7 +310,7 @@ private fun GeolocalizeMe(waveViewModel: WaveViewModel, modifier: Modifier = Mod
     }
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
             .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -337,7 +360,7 @@ private fun EventNumbers(waveViewModel: WaveViewModel, modifier: Modifier = Modi
         ShRes.string.wave_progression
     )
 
-    Box(modifier = Modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
+    Box(modifier = modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
         Box(
             modifier = Modifier
                 .border(
