@@ -2,7 +2,7 @@
 Semaine prochaine:
 
 - Large map screen
-    => add map actions (center user vs center wave)
+    => bug on camera positionning (?)
 
 - Wave screen (1 click user tracker = center, 2 clicks = zoom)
     - add a button to center the user on the map / zoom on the user

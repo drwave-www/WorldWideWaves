@@ -45,9 +45,6 @@ class WWWGlobals {
 
         private const val FS_FILES_FOLDER = "files"
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
-
-        //const val FS_MAPS_FOLDER = "$FS_FILES_FOLDER/maps"
-
         const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
         const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
@@ -62,6 +59,10 @@ class WWWGlobals {
 
         val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
         val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
+
+        // -- MapLibre Constants
+        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 16.0
+        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = 10.0
 
         // ----------------------------
 
@@ -162,7 +163,6 @@ class WWWGlobals {
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
         const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
         const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_DEFAULT_FONTSIZE
-
     }
 
 }

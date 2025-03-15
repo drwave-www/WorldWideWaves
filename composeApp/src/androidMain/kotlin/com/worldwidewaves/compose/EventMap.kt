@@ -53,10 +53,13 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_USER_ZOOM
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_WAVE_ZOOM
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave
+import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
@@ -359,6 +362,9 @@ class EventMap(
                 .include(LatLng(newNeLat, newNeLng))
                 .build()
 
+            val mapConstraints = MapConstraints(bbox)
+            // mapConstraints.applyConstraints(map)
+
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,0),
                 object: CancelableCallback {
                     override fun onFinish() {
@@ -366,9 +372,9 @@ class EventMap(
                         map.setMinZoomPreference(map.cameraPosition.zoom)
                         map.setMaxZoomPreference(event.map.maxZoom)
 
-                        // Constrain the camera movement to the bounds of the map
-                        map.addOnCameraMoveListener {
-                            constrainCameraOnMap(map, coroutineScope)
+                        mapConstraints.applyConstraints(map)
+                        map.addOnCameraIdleListener {
+                            mapConstraints.constrainCamera(map)
                         }
 
                         onCameraPositionSet?.invoke()
@@ -376,39 +382,6 @@ class EventMap(
                     override fun onCancel() {}
                 }
             )
-        }
-    }
-
-    /**
-     * Constrains the map camera movement to stay within the event area's bounding box.
-     *
-     * This function adds a camera move listener to the map. When the camera moves, it checks if the
-     * visible region extends beyond the event area's bounding box. If so, it adjusts the camera bounds
-     * to ensure the visible region is contained within the bounding box.
-     *
-     */
-    private val epsilon = 1e-7
-    private var dimPosition = Position(0.0, 0.0)
-
-    private fun constrainCameraOnMap(
-        map: MapLibreMap,
-        coroutineScope: CoroutineScope
-    ) {
-        val viewBounds = map.projection.visibleRegion.latLngBounds // FIXME: move to shared
-        val dimLat = (viewBounds.latitudeNorth - viewBounds.latitudeSouth) / 2
-        val dimLng = (viewBounds.longitudeEast - viewBounds.longitudeWest) / 2
-
-        if (abs(dimLat - dimPosition.lat) > epsilon || abs(dimLng - dimPosition.lng) > epsilon) {
-            dimPosition = Position(dimLat, dimLng)
-
-            coroutineScope.launch {
-                val mapBounds = event.area.bbox()
-                val bounds = LatLngBounds.Builder()
-                    .include(LatLng(mapBounds.sw.lat + dimLat, mapBounds.sw.lng + dimLng))
-                    .include(LatLng(mapBounds.ne.lat - dimLat, mapBounds.ne.lng - dimLng))
-                    .build()
-                map.setLatLngBoundsForCameraTarget(bounds)
-            }
         }
     }
 
@@ -448,18 +421,23 @@ class EventMap(
                     val currentWaveOffset = waveWidth * (progression / 100.0)
 
                     val currentWaveLongitude = when (direction) {
-                        WWWEventWave.Direction.EAST -> waveBbox.sw.lng + currentWaveOffset // Wave moves towards the east
-                        WWWEventWave.Direction.WEST -> waveBbox.ne.lng - currentWaveOffset // Wave moves towards the west
-                        else -> (waveBbox.ne.lng + waveBbox.sw.lng) / 2.0 // Default to center if direction is unknown
+                        WWWEventWave.Direction.EAST -> waveBbox.sw.lng + currentWaveOffset
+                        WWWEventWave.Direction.WEST -> waveBbox.ne.lng - currentWaveOffset
+                        else -> (waveBbox.ne.lng + waveBbox.sw.lng) / 2.0
                     }
 
                     val currentCameraPosition = map.cameraPosition
                     val currentMapLatitude = currentCameraPosition.target?.latitude
                         ?: ((waveBbox.ne.lat + waveBbox.sw.lat) / 2.0)
-                    val newCameraPosition = LatLng(currentMapLatitude, currentWaveLongitude)
+                    val waveLatLng = LatLng(currentMapLatitude, currentWaveLongitude)
+
+                    val cameraPosition = CameraPosition.Builder()
+                        .target(waveLatLng)
+                        .zoom(CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
+                        .build()
 
                     uiScope.launch {
-                        map.animateCamera(CameraUpdateFactory.newLatLng(newCameraPosition))
+                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
                     }
                 }
             }
@@ -473,8 +451,14 @@ class EventMap(
         mapViewState?.getMapAsync { map ->
             lastLocation?.let { location ->
                 val userLatLng = LatLng(location.latitude, location.longitude)
+
+                val cameraPosition = CameraPosition.Builder()
+                    .target(userLatLng)
+                    .zoom(CONST_MAPLIBRE_TARGET_USER_ZOOM)
+                    .build()
+
                 uiScope.launch {
-                    map.animateCamera(CameraUpdateFactory.newLatLng(userLatLng))
+                    map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
                 }
             }
         }
@@ -636,6 +620,135 @@ class EventMap(
 }
 
 /**
+ * Constrains the map view to a given bounding box
+ */
+class MapConstraints(private val mapBounds: BoundingBox) {
+
+    private var constraintBounds: LatLngBounds? = null
+    private var visibleRegionPadding = LatLngPadding()
+    private var constraintsApplied = false
+
+    private data class LatLngPadding(
+        var latPadding: Double = 0.0,
+        var lngPadding: Double = 0.0
+    )
+
+    fun applyConstraints(map: MapLibreMap) {
+        // Always recalculate constraints based on current zoom level
+        updateVisibleRegionPadding(map)
+        applyConstraintsWithPadding(map)
+
+        // Set up camera movement listener to update constraints on zoom changes
+        map.addOnCameraIdleListener {
+            val newPadding = calculateVisibleRegionPadding(map)
+            if (hasSignificantPaddingChange(newPadding)) {
+                visibleRegionPadding = newPadding
+                applyConstraintsWithPadding(map)
+            }
+        }
+
+        constraintsApplied = true
+    }
+
+    private fun applyConstraintsWithPadding(map: MapLibreMap) {
+        // Calculate padded bounds - SHRINK the allowed area by the visible region dimensions
+        // This ensures corners of the map can't go past screen edges
+        val paddedBounds = LatLngBounds.Builder()
+            .include(LatLng(
+                mapBounds.sw.lat + visibleRegionPadding.latPadding,
+                mapBounds.sw.lng + visibleRegionPadding.lngPadding
+            ))
+            .include(LatLng(
+                mapBounds.ne.lat - visibleRegionPadding.latPadding,
+                mapBounds.ne.lng - visibleRegionPadding.lngPadding
+            ))
+            .build()
+
+        constraintBounds = paddedBounds
+
+        // Apply constraints to the map
+        map.setLatLngBoundsForCameraTarget(paddedBounds)
+
+        // Also set min/max zoom
+        val minZoom = map.minZoomLevel
+        map.setMinZoomPreference(minZoom)
+
+        // Check if our constrained area is too small for the current view
+        if (!isValidBounds(paddedBounds)) {
+            // If bounds are too small, force a zoom level that makes them fit
+            fitMapToBounds(map, calculateSafeBounds())
+        }
+    }
+
+    private fun isValidBounds(bounds: LatLngBounds): Boolean {
+        // Check if bounds are valid (not inverted or too small)
+        return bounds.getLatNorth() > bounds.getLatSouth() &&
+                bounds.getLonEast() > bounds.getLonWest() &&
+                (bounds.getLatNorth() - bounds.getLatSouth()) > visibleRegionPadding.latPadding * 0.1 &&
+                (bounds.getLonEast() - bounds.getLonWest()) > visibleRegionPadding.lngPadding * 0.1
+    }
+
+    private fun calculateSafeBounds(): LatLngBounds {
+        // If constrained bounds become too small, use original bounds
+        return LatLngBounds.Builder()
+            .include(LatLng(mapBounds.sw.lat, mapBounds.sw.lng))
+            .include(LatLng(mapBounds.ne.lat, mapBounds.ne.lng))
+            .build()
+    }
+
+    private fun updateVisibleRegionPadding(map: MapLibreMap) {
+        visibleRegionPadding = calculateVisibleRegionPadding(map)
+    }
+
+    private fun calculateVisibleRegionPadding(map: MapLibreMap): LatLngPadding {
+        // Get the visible region from the current map view
+        val visibleRegion = map.projection.visibleRegion
+
+        // Calculate padding as half the visible region dimensions
+        val latPadding = (visibleRegion.latLngBounds.getLatNorth() -
+                visibleRegion.latLngBounds.getLatSouth()) / 2.0
+        val lngPadding = (visibleRegion.latLngBounds.getLonEast() -
+                visibleRegion.latLngBounds.getLonWest()) / 2.0
+
+        return LatLngPadding(latPadding, lngPadding)
+    }
+
+    private fun hasSignificantPaddingChange(newPadding: LatLngPadding): Boolean {
+        // Determine if padding change is significant enough to update constraints
+        val latChange = abs(newPadding.latPadding - visibleRegionPadding.latPadding) /
+                visibleRegionPadding.latPadding
+        val lngChange = abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
+                visibleRegionPadding.lngPadding
+
+        return latChange > 0.1 || lngChange > 0.1 // 10% change threshold
+    }
+
+    private fun fitMapToBounds(map: MapLibreMap, bounds: LatLngBounds) {
+        // Adjust camera to fit bounds
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0)
+        map.moveCamera(cameraUpdate)
+    }
+
+    fun constrainCamera(map: MapLibreMap) {
+        val position = map.cameraPosition
+        if (constraintBounds != null && !isCameraWithinConstraints(position)) {
+            val nearestValid = position.target?.let { getNearestValidPoint(it, constraintBounds!!) }
+            nearestValid?.let { CameraUpdateFactory.newLatLng(it) }?.let { map.animateCamera(it) }
+        }
+    }
+
+    private fun isCameraWithinConstraints(cameraPosition: CameraPosition): Boolean =
+        cameraPosition.target?.let { constraintBounds?.contains(it) } ?: true
+
+    // Helper to find nearest valid point within bounds
+    private fun getNearestValidPoint(point: LatLng, bounds: LatLngBounds): LatLng {
+        val lat = point.latitude.coerceIn(bounds.getLatSouth(), bounds.getLatNorth())
+        val lng = point.longitude.coerceIn(bounds.getLonWest(), bounds.getLonEast())
+        return LatLng(lat, lng)
+    }
+}
+
+/**
  * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView` with the
  * lifecycle of a `LifecycleOwner`.
  *
@@ -656,3 +769,4 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
+
