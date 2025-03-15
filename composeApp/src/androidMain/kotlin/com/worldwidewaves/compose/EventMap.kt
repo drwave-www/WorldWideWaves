@@ -72,7 +72,6 @@ import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.android.MapLibre
@@ -407,12 +406,19 @@ class EventMap(
     }
 
     /**
-     * Moves the camera to the current wave longitude
+     * Moves the camera to the current wave longitude with proper animation handling
      */
-    fun targetWave(uiScope: CoroutineScope) = runBlocking {
-        launch {
-            mapViewState?.getMapAsync { map ->
-                scopeProvider.launchIO {
+    fun targetWave(uiScope: CoroutineScope) {
+        var animationInProgress = false
+
+        mapViewState?.getMapAsync { map ->
+            if (animationInProgress) return@getMapAsync
+
+            animationInProgress = true
+
+            uiScope.launch {
+                try {
+                    // Calculate wave position in a structured way
                     val progression = event.wave.getProgression()
                     val waveBbox = event.area.bbox()
                     val direction = event.wave.direction
@@ -436,29 +442,74 @@ class EventMap(
                         .zoom(CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
                         .build()
 
-                    uiScope.launch {
-                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                    withContext(Dispatchers.Main) {
+                        map.animateCamera(
+                            CameraUpdateFactory.newCameraPosition(cameraPosition),
+                            500, // Animation duration in milliseconds
+                            object : CancelableCallback {
+                                override fun onFinish() {
+                                    animationInProgress = false
+                                    // Force a final camera update to ensure position is correct
+                                    map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                                }
+
+                                override fun onCancel() {
+                                    Log.d("EventMap", "targetWave animation canceled")
+                                    animationInProgress = false
+                                }
+                            }
+                        )
                     }
+                } catch (e: Exception) {
+                    Log.e("EventMap", "Error in targetWave: ${e.message}")
+                    animationInProgress = false
                 }
             }
         }
     }
 
     /**
-     * Moves the camera to the last known user's position
+     * Moves the camera to the last known user's position with proper animation handling
      */
     fun targetUser(uiScope: CoroutineScope) {
+        var animationInProgress = false
+
         mapViewState?.getMapAsync { map ->
-            lastLocation?.let { location ->
-                val userLatLng = LatLng(location.latitude, location.longitude)
+            if (animationInProgress) return@getMapAsync
 
-                val cameraPosition = CameraPosition.Builder()
-                    .target(userLatLng)
-                    .zoom(CONST_MAPLIBRE_TARGET_USER_ZOOM)
-                    .build()
+            val location = lastLocation ?: return@getMapAsync
 
-                uiScope.launch {
-                    map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+            animationInProgress = true
+
+            val userLatLng = LatLng(location.latitude, location.longitude)
+            val cameraPosition = CameraPosition.Builder()
+                .target(userLatLng)
+                .zoom(CONST_MAPLIBRE_TARGET_USER_ZOOM)
+                .build()
+
+            uiScope.launch {
+                try {
+                    withContext(Dispatchers.Main) {
+                        map.animateCamera(
+                            CameraUpdateFactory.newCameraPosition(cameraPosition),
+                            500, // Animation duration in milliseconds
+                            object : CancelableCallback {
+                                override fun onFinish() {
+                                    animationInProgress = false
+                                    // Force a final camera update to ensure position is correct
+                                    map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                                }
+
+                                override fun onCancel() {
+                                    Log.d("EventMap", "targetUser animation canceled")
+                                    animationInProgress = false
+                                }
+                            }
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e("EventMap", "Error in targetUser: ${e.message}")
+                    animationInProgress = false
                 }
             }
         }
