@@ -118,8 +118,8 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
         }
 
         Box(modifier = modifier.fillMaxWidth()) {
-            ButtonWave(event = event, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             eventMap.Screen(modifier = Modifier.fillMaxSize())
+            ButtonWave(event = event, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             MapActions(eventMap, waveViewModel)
         }
     }
