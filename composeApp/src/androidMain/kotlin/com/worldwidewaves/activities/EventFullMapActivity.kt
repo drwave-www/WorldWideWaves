@@ -45,19 +45,19 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_FOLLOW_ME_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_FOLLOW_WAVE_IMAGE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.event_follow_me_off
-import com.worldwidewaves.shared.generated.resources.event_follow_me_on
-import com.worldwidewaves.shared.generated.resources.event_follow_wave_off
-import com.worldwidewaves.shared.generated.resources.event_follow_wave_on
-import com.worldwidewaves.shared.generated.resources.follow_me_active
-import com.worldwidewaves.shared.generated.resources.follow_me_inactive
-import com.worldwidewaves.shared.generated.resources.follow_wave_active
-import com.worldwidewaves.shared.generated.resources.follow_wave_inactive
+import com.worldwidewaves.shared.generated.resources.event_target_me_off
+import com.worldwidewaves.shared.generated.resources.event_target_me_on
+import com.worldwidewaves.shared.generated.resources.event_target_wave_off
+import com.worldwidewaves.shared.generated.resources.event_target_wave_on
+import com.worldwidewaves.shared.generated.resources.target_me_active
+import com.worldwidewaves.shared.generated.resources.target_me_inactive
+import com.worldwidewaves.shared.generated.resources.target_wave_active
+import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -73,6 +73,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
     override fun onResume() {
         super.onResume()
+
         // Restart observation when activity is visible
         currentEvent?.let { event ->
             eventMapRef?.let { map ->
@@ -85,7 +86,6 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
     }
 
     override fun onPause() {
-        // Stop observation when activity is not visible
         waveViewModel.stopObservation()
         super.onPause()
     }
@@ -151,25 +151,29 @@ fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modif
         Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
             Image(
                 modifier = Modifier
-                    .size(DIM_EVENT_FOLLOW_WAVE_IMAGE_SIZE.dp)
+                    .size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
-                        scope.launch {
-                            // eventMap.followWave()
+                        if (isRunning) {
+                            scope.launch {
+                                eventMap.targetWave(scope)
+                            }
                         }
                     },
-                painter = painterResource(if (isRunning) ShRes.drawable.follow_wave_active else ShRes.drawable.follow_wave_inactive),
-                contentDescription = stringResource(if (isRunning) ShRes.string.event_follow_wave_on else Res.string.event_follow_wave_off)
+                painter = painterResource(if (isRunning) ShRes.drawable.target_wave_active else ShRes.drawable.target_wave_inactive),
+                contentDescription = stringResource(if (isRunning) ShRes.string.event_target_wave_on else Res.string.event_target_wave_off)
             )
             Image(
                 modifier = Modifier
-                    .size(DIM_EVENT_FOLLOW_ME_IMAGE_SIZE.dp)
+                    .size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
-                        scope.launch {
-                            // eventMap.followUser()
+                        if (isInArea) {
+                            scope.launch {
+                                eventMap.targetUser(scope)
+                            }
                         }
                     },
-                painter = painterResource(if (isInArea) ShRes.drawable.follow_me_active else ShRes.drawable.follow_me_inactive),
-                contentDescription = stringResource(if (isInArea) ShRes.string.event_follow_me_on else ShRes.string.event_follow_me_off)
+                painter = painterResource(if (isInArea) ShRes.drawable.target_me_active else ShRes.drawable.target_me_inactive),
+                contentDescription = stringResource(if (isInArea) ShRes.string.event_target_me_on else ShRes.string.event_target_me_off)
             )
         }
     }

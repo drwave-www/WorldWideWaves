@@ -106,8 +106,8 @@ class WWWGlobals {
 
         const val DIM_EVENT_MAP_RATIO = (16f / 9f)
 
-        const val DIM_EVENT_FOLLOW_WAVE_IMAGE_SIZE = 48
-        const val DIM_EVENT_FOLLOW_ME_IMAGE_SIZE = 48
+        const val DIM_EVENT_TARGET_WAVE_IMAGE_SIZE = 48
+        const val DIM_EVENT_TARGET_ME_IMAGE_SIZE = 48
 
         const val DIM_EVENT_WAVEBUTTON_WIDTH = 300
         const val DIM_EVENT_WAVEBUTTON_HEIGHT = 40

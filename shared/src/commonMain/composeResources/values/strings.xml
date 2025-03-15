@@ -14,10 +14,10 @@
     <string name="event_favorite_on">favorite_on</string>
     <string name="event_favorite_off">favorite_off</string>
 
-    <string name="event_follow_wave_on">Follow the wave</string>
-    <string name="event_follow_wave_off">The event is not running</string>
-    <string name="event_follow_me_on">Follow me</string>
-    <string name="event_follow_me_off">You're not in the area</string>
+    <string name="event_target_wave_on">Target the wave</string>
+    <string name="event_target_wave_off">The event is not running</string>
+    <string name="event_target_me_on">Target me</string>
+    <string name="event_target_me_off">You're not in the area</string>
 
 
     <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>

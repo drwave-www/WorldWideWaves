@@ -49,12 +49,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.toColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWave
+import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
@@ -66,6 +69,7 @@ import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.maplibre.android.MapLibre
@@ -101,7 +105,8 @@ class EventMap(
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
     private val onMapClick: ((latitude: Double, longitude: Double) -> Unit)? = null,
-    private val mapConfig: EventMapConfig = EventMapConfig()
+    private val mapConfig: EventMapConfig = EventMapConfig(),
+    private val scopeProvider: DefaultCoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) {
 
     data class EventMapConfig(
@@ -111,6 +116,8 @@ class EventMap(
     enum class MapCameraPosition { WINDOW, BOUNDS, DEFAULT_CENTER }
 
     private var mapViewState: MapView? = null
+    private var lastLocation: Location? = null
+    private var userHasBeenLocated = false
 
     // -------------------------
 
@@ -171,11 +178,15 @@ class EventMap(
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = extendedLight.quinary.color,
-                        modifier = Modifier.align(Alignment.Center).size(maxWidth / 3)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(maxWidth / 3)
                     )
                 } else {
                     Image(
-                        modifier = Modifier.size(maxWidth / 4).align(Alignment.Center),
+                        modifier = Modifier
+                            .size(maxWidth / 4)
+                            .align(Alignment.Center),
                         painter = painterResource(ShRes.drawable.map_error),
                         contentDescription = "error"
                     )
@@ -183,7 +194,9 @@ class EventMap(
             }
             AndroidView(
                 factory = { mapView },
-                modifier = Modifier.fillMaxSize().alpha(if (mapLoaded) 1f else 0f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(if (mapLoaded) 1f else 0f)
             )
         }
     }
@@ -213,6 +226,7 @@ class EventMap(
                             style.addSource(geoJsonSource)
                         }
 
+                        // FIXME
 //                        if (clearPolygons) {
 //                            style.removeLayer(layerId)
 //                            style.removeSource(sourceId)
@@ -230,7 +244,7 @@ class EventMap(
                         // Create or update the layer
                         if (style.getLayer(layerId) == null) {
                             val fillLayer = FillLayer(layerId, sourceId).withProperties(
-                                PropertyFactory.fillColor(Color.parseColor("#D33682")),
+                                PropertyFactory.fillColor("#D33682".toColorInt()),
                                 PropertyFactory.fillOpacity(0.5f)
                             )
                             style.addLayer(fillLayer)
@@ -419,6 +433,53 @@ class EventMap(
         )
     }
 
+    /**
+     * Moves the camera to the current wave longitude
+     */
+    fun targetWave(uiScope: CoroutineScope) = runBlocking {
+        launch {
+            mapViewState?.getMapAsync { map ->
+                scopeProvider.launchIO {
+                    val progression = event.wave.getProgression()
+                    val waveBbox = event.area.bbox()
+                    val direction = event.wave.direction
+
+                    val waveWidth = waveBbox.ne.lng - waveBbox.sw.lng
+                    val currentWaveOffset = waveWidth * (progression / 100.0)
+
+                    val currentWaveLongitude = when (direction) {
+                        WWWEventWave.Direction.EAST -> waveBbox.sw.lng + currentWaveOffset // Wave moves towards the east
+                        WWWEventWave.Direction.WEST -> waveBbox.ne.lng - currentWaveOffset // Wave moves towards the west
+                        else -> (waveBbox.ne.lng + waveBbox.sw.lng) / 2.0 // Default to center if direction is unknown
+                    }
+
+                    val currentCameraPosition = map.cameraPosition
+                    val currentMapLatitude = currentCameraPosition.target?.latitude
+                        ?: ((waveBbox.ne.lat + waveBbox.sw.lat) / 2.0)
+                    val newCameraPosition = LatLng(currentMapLatitude, currentWaveLongitude)
+
+                    uiScope.launch {
+                        map.animateCamera(CameraUpdateFactory.newLatLng(newCameraPosition))
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Moves the camera to the last known user's position
+     */
+    fun targetUser(uiScope: CoroutineScope) {
+        mapViewState?.getMapAsync { map ->
+            lastLocation?.let { location ->
+                val userLatLng = LatLng(location.latitude, location.longitude)
+                uiScope.launch {
+                    map.animateCamera(CameraUpdateFactory.newLatLng(userLatLng))
+                }
+            }
+        }
+    }
+
     // -- Location marker builders  -------------------------------------------
 
     @SuppressLint("MissingPermission")
@@ -428,8 +489,6 @@ class EventMap(
         coroutineScope: CoroutineScope,
         style: Style
     ) {
-        var lastLocation: Location? = null
-        var userHasBeenLocated = false
 
         map.locationComponent.activateLocationComponent(
             buildLocationComponentActivationOptions(context, style)
@@ -475,6 +534,13 @@ class EventMap(
      * pulsing animation around the user location.
      *
      */
+    /**
+     * Builds `LocationComponentActivationOptions` for configuring the Mapbox location component.
+     *
+     * This function sets up the location component enabling a
+     * pulsing animation around the user location.
+     *
+     */
     private fun buildLocationComponentActivationOptions(
         context: Context,
         style: Style
@@ -500,6 +566,10 @@ class EventMap(
      * Builds a `LocationEngineRequest` for location updates.
      *
      */
+    /**
+     * Builds a `LocationEngineRequest` for location updates.
+     *
+     */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
             .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
@@ -508,6 +578,10 @@ class EventMap(
 
     // -- Use the MapLibre MapView as a composable --------------------------------
 
+    /**
+     * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
+     * source : https://gist.github.com/PiotrPrus/d65378c36b0a0c744e647946f344103c
+     */
     /**
      * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
      * source : https://gist.github.com/PiotrPrus/d65378c36b0a0c744e647946f344103c
