@@ -109,8 +109,32 @@ class EventActivity : AbstractEventBackActivity() {
 
     private val waveViewModel: WaveViewModel by viewModels()
 
+    private var eventMapRef: EventMap? = null
+    private var currentEvent: IWWWEvent? = null
+
+    override fun onResume() {
+        super.onResume()
+        // Restart observation when activity is visible
+        currentEvent?.let { event ->
+            eventMapRef?.let { map ->
+                val context = this
+                waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+                    map.updateWavePolygons(context, wavePolygons, clearPolygons)
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        // Stop observation when activity is not visible
+        waveViewModel.stopObservation()
+        super.onPause()
+    }
+
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
+        currentEvent = event
+
         val context = LocalContext.current
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
@@ -118,19 +142,23 @@ class EventActivity : AbstractEventBackActivity() {
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
-        val eventMap = EventMap(platform, event,
-            onLocationUpdate = { newLocation ->
-                if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                    waveViewModel.updateGeolocation(newLocation)
-                    lastKnownLocation = newLocation
+        val eventMap = remember(event.id) {
+            EventMap(platform, event,
+                onLocationUpdate = { newLocation ->
+                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
+                        waveViewModel.updateGeolocation(newLocation)
+                        lastKnownLocation = newLocation
+                    }
+                },
+                onMapClick = { _, _ ->
+                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
+                        putExtra("eventId", event.id)
+                    })
                 }
-            },
-            onMapClick = { _, _ ->
-                context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
-                    putExtra("eventId", event.id)
-                })
+            ).also {
+                eventMapRef = it
             }
-        )
+        }
 
         waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
             eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
@@ -149,6 +177,13 @@ class EventActivity : AbstractEventBackActivity() {
             EventNumbers(waveViewModel)
             WWWEventSocialNetworks(event)
         }
+    }
+
+    override fun onDestroy() {
+        waveViewModel.stopObservation()
+        eventMapRef = null
+        currentEvent = null
+        super.onDestroy()
     }
 
 }

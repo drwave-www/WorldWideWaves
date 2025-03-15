@@ -60,12 +60,12 @@ data class WWWEventWaveLinear(
             (cachedLongitude ?: EarthAdaptedSpeedLongitude(bbox(), speed, direction).also { cachedLongitude = it })
             .withProgression(elapsedTime)
 
-        val areaPolygons = event.area.getPolygons()
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
         val addedTraversedPolygons : MutableArea = mutableListOf()
 
         if (lastWaveState == null) {
+            val areaPolygons = event.area.getPolygons()
             val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
             traversedPolygons.addAll(traversed)
             remainingPolygons.addAll(remaining)

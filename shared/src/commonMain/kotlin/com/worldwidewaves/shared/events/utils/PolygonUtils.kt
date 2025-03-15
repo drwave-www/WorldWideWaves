@@ -139,6 +139,7 @@ object PolygonUtils {
 
     fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
         this.close().pop() // Ensure the polygon is closed and remove the last point
+                           // FIXME: this is problematic - not thread safe
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
 

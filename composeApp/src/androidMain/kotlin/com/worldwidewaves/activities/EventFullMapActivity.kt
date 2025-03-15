@@ -68,23 +68,50 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
 
     private val waveViewModel: WaveViewModel by viewModels()
+    private var eventMapRef: EventMap? = null
+    private var currentEvent: IWWWEvent? = null
+
+    override fun onResume() {
+        super.onResume()
+        // Restart observation when activity is visible
+        currentEvent?.let { event ->
+            eventMapRef?.let { map ->
+                val context = this
+                waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+                    map.updateWavePolygons(context, wavePolygons, clearPolygons)
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        // Stop observation when activity is not visible
+        waveViewModel.stopObservation()
+        super.onPause()
+    }
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
+        currentEvent = event
+
         val context = LocalContext.current
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
-        val eventMap = EventMap(platform, event,
-            onLocationUpdate = { newLocation ->
-                if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                    waveViewModel.updateGeolocation(newLocation)
-                    lastKnownLocation = newLocation
-                }
-            },
-            mapConfig = EventMap.EventMapConfig(
-                initialCameraPosition = EventMap.MapCameraPosition.WINDOW
-            )
-        )
+        val eventMap =  remember(event.id) {
+            EventMap(platform, event,
+                onLocationUpdate = { newLocation ->
+                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
+                        waveViewModel.updateGeolocation(newLocation)
+                        lastKnownLocation = newLocation
+                    }
+                },
+                mapConfig = EventMap.EventMapConfig(
+                    initialCameraPosition = EventMap.MapCameraPosition.WINDOW
+                )
+            ).also {
+                eventMapRef = it
+            }
+        }
 
         waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
             eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
@@ -97,44 +124,53 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
         }
     }
 
-    @Composable
-    fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-        val scope = rememberCoroutineScope()
-        val eventStatus by waveViewModel.eventStatus.collectAsState()
-        val isInArea by waveViewModel.isInArea.collectAsState()
-
-        val isRunning = eventStatus == Status.RUNNING
-
-        Box(
-            modifier = modifier.fillMaxSize()
-                .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
-                Image(
-                    modifier = Modifier
-                        .size(DIM_EVENT_FOLLOW_WAVE_IMAGE_SIZE.dp)
-                        .clickable {
-                            scope.launch {
-                                // eventMap.followWave()
-                            }
-                        },
-                    painter = painterResource(if (isRunning) ShRes.drawable.follow_wave_active else ShRes.drawable.follow_wave_inactive),
-                    contentDescription = stringResource(if (isRunning) ShRes.string.event_follow_wave_on else Res.string.event_follow_wave_off)
-                )
-                Image(
-                    modifier = Modifier
-                        .size(DIM_EVENT_FOLLOW_ME_IMAGE_SIZE.dp)
-                        .clickable {
-                            scope.launch {
-                                // eventMap.followUser()
-                            }
-                        },
-                    painter = painterResource(if (isInArea) ShRes.drawable.follow_me_active else ShRes.drawable.follow_me_inactive),
-                    contentDescription = stringResource(if (isInArea) ShRes.string.event_follow_me_on else ShRes.string.event_follow_me_off)
-                )
-            }
-        }
+    override fun onDestroy() {
+        waveViewModel.stopObservation()
+        eventMapRef = null
+        currentEvent = null
+        super.onDestroy()
     }
 
+}
+
+// ----------------------------
+
+@Composable
+fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+    val eventStatus by waveViewModel.eventStatus.collectAsState()
+    val isInArea by waveViewModel.isInArea.collectAsState()
+
+    val isRunning = eventStatus == Status.RUNNING
+
+    Box(
+        modifier = modifier.fillMaxSize()
+            .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
+            Image(
+                modifier = Modifier
+                    .size(DIM_EVENT_FOLLOW_WAVE_IMAGE_SIZE.dp)
+                    .clickable {
+                        scope.launch {
+                            // eventMap.followWave()
+                        }
+                    },
+                painter = painterResource(if (isRunning) ShRes.drawable.follow_wave_active else ShRes.drawable.follow_wave_inactive),
+                contentDescription = stringResource(if (isRunning) ShRes.string.event_follow_wave_on else Res.string.event_follow_wave_off)
+            )
+            Image(
+                modifier = Modifier
+                    .size(DIM_EVENT_FOLLOW_ME_IMAGE_SIZE.dp)
+                    .clickable {
+                        scope.launch {
+                            // eventMap.followUser()
+                        }
+                    },
+                painter = painterResource(if (isInArea) ShRes.drawable.follow_me_active else ShRes.drawable.follow_me_inactive),
+                contentDescription = stringResource(if (isInArea) ShRes.string.event_follow_me_on else ShRes.string.event_follow_me_off)
+            )
+        }
+    }
 }

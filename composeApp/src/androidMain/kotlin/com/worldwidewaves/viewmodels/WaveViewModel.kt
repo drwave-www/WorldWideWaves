@@ -99,7 +99,7 @@ class WaveViewModel : ViewModel() {
         }
     }
 
-    private fun stopObservation() {
+    internal fun stopObservation() {
         if (observationStarted) {
             event?.stopListeners(
                 listOfNotNull(
