@@ -177,7 +177,8 @@ class EarthAdaptedSpeedLongitudeTest {
 
         val waveLinear = WWWEventWaveLinear(
             speed = speed,
-            direction = direction
+            direction = direction,
+            approxDuration = 60
         )
 
         every { mockClock.now() } returns currentTime

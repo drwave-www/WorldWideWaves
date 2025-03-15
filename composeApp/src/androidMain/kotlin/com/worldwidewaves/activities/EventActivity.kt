@@ -63,7 +63,6 @@ import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
-import com.worldwidewaves.viewmodels.WaveViewModel
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
@@ -85,8 +84,10 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.generated.resources.be_waved
+import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
+import com.worldwidewaves.shared.generated.resources.geoloc_yourein
+import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.generated.resources.wave_end_time
 import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
@@ -97,8 +98,8 @@ import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.viewmodels.WaveViewModel
 import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.android.geometry.LatLng
@@ -106,19 +107,12 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventActivity : AbstractEventBackActivity() {
 
-    private var event : IWWWEvent? = null
     private val waveViewModel: WaveViewModel by viewModels()
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
-
-        this.event = event
-
-        val waveNumbers by waveViewModel.waveNumbers.collectAsState()
-        val eventStatus by waveViewModel.eventStatus.collectAsState()
-        val geolocText by waveViewModel.geolocText.collectAsState()
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -127,7 +121,7 @@ class EventActivity : AbstractEventBackActivity() {
         val eventMap = EventMap(platform, event,
             onLocationUpdate = { newLocation ->
                 if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                    waveViewModel.updateGeolocationText(newLocation)
+                    waveViewModel.updateGeolocation(newLocation)
                     lastKnownLocation = newLocation
                 }
             },
@@ -146,13 +140,13 @@ class EventActivity : AbstractEventBackActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
-            EventOverlay(event, eventStatus)
+            EventOverlay(event, waveViewModel)
             EventDescription(event)
             DividerLine()
             ButtonWave(event)
             eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            GeolocalizeMe(geolocText)
-            EventNumbers(waveNumbers)
+            GeolocalizeMe(waveViewModel)
+            EventNumbers(waveViewModel)
             WWWEventSocialNetworks(event)
         }
     }
@@ -175,7 +169,9 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-private fun EventOverlay(event: IWWWEvent, eventStatus: Status) {
+private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel) {
+    val eventStatus by waveViewModel.eventStatus.collectAsState()
+
     Box {
         Image(
             modifier = Modifier.fillMaxWidth(),
@@ -224,7 +220,7 @@ private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: M
 // ----------------------------
 
 @Composable
-fun DividerLine() {
+fun DividerLine(modifier: Modifier = Modifier) {
     HorizontalDivider(
         modifier = Modifier.width(DIM_DIVIDER_WIDTH.dp),
         color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
@@ -234,8 +230,9 @@ fun DividerLine() {
 // ----------------------------
 
 @Composable
-private fun WWWEventSocialNetworks(event: IWWWEvent) {
+private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifier) {
     WWWSocialNetworks(
+        modifier = modifier,
         instagramAccount = event.instagramAccount,
         instagramHashtag = event.instagramHashtag
     )
@@ -244,7 +241,16 @@ private fun WWWEventSocialNetworks(event: IWWWEvent) {
 // ----------------------------
 
 @Composable
-private fun GeolocalizeMe(geolocText: StringResource) {
+private fun GeolocalizeMe(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+    val isInArea by waveViewModel.isInArea.collectAsState()
+    val isInWarming by waveViewModel.isInWarming.collectAsState()
+
+    val geolocText = when {
+        isInWarming -> ShRes.string.geoloc_warm_in
+        isInArea -> ShRes.string.geoloc_yourein
+        else -> ShRes.string.geoloc_yourenotin
+    }
+
     Row(
         modifier = Modifier
             .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
@@ -270,18 +276,23 @@ private fun GeolocalizeMe(geolocText: StringResource) {
 // ----------------------------
 
 @Composable
-private fun EventNumbers(waveNumbers: WaveNumbersLiterals?) {
-    val eventNumbers by remember(waveNumbers) {
+private fun EventNumbers(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+    val waveNumbers by waveViewModel.waveNumbers.collectAsState()
+
+    val eventNumbers by remember {
         derivedStateOf {
-            if (waveNumbers != null) mapOf(
-                ShRes.string.wave_start_time to waveNumbers.waveStartTime,
-                ShRes.string.wave_end_time to waveNumbers.waveEndTime,
-                ShRes.string.wave_speed to waveNumbers.waveSpeed,
-                ShRes.string.wave_total_time to waveNumbers.waveTotalTime,
-                ShRes.string.wave_progression to waveNumbers.waveProgression
-            ) else mapOf()
+            waveNumbers?.let {
+                mapOf(
+                    ShRes.string.wave_start_time to it.waveStartTime,
+                    ShRes.string.wave_end_time to it.waveEndTime,
+                    ShRes.string.wave_speed to it.waveSpeed,
+                    ShRes.string.wave_total_time to it.waveTotalTime,
+                    ShRes.string.wave_progression to it.waveProgression
+                )
+            } ?: emptyMap()
         }
     }
+
     val eventTimeZone = waveNumbers?.waveTimezone
     val order = listOf(
         ShRes.string.wave_start_time,

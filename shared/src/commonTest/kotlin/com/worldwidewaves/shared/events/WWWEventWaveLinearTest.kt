@@ -94,7 +94,8 @@ class WWWEventWaveLinearTest : KoinTest {
 
         waveLinear = WWWEventWaveLinear(
             speed = 100.0, // m/s
-            direction = WWWEventWave.Direction.EAST
+            direction = WWWEventWave.Direction.EAST,
+            approxDuration = 60
         )
         every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
@@ -457,7 +458,8 @@ class WWWEventWaveLinearTest : KoinTest {
         // GIVEN
         waveLinear = WWWEventWaveLinear(
             speed = 100.0,
-            direction = WWWEventWave.Direction.WEST
+            direction = WWWEventWave.Direction.WEST,
+            approxDuration = 60
         )
         every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)

@@ -29,7 +29,7 @@ Avril first part:
     - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
     - flags, ..
 
- - adapt wave behavior on countries and the world
+ - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
      --> add 'wave hours', so countries and the world can have several waves over days during the process
 
@@ -38,6 +38,8 @@ Avril first part:
 Avril second part:
 
 - manage with translations
+    - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
+    - https://phrase.com/blog/posts/kotlin-multiplatform-mobile-i18n-android-ios/
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 - Production:
     - Fill-in FAQ Contents

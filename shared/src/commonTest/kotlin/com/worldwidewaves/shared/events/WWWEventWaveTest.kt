@@ -58,6 +58,7 @@ class WWWEventWaveTest : KoinTest {
         wave = object : WWWEventWave() {
             override val speed: Double = 10.0
             override val direction: Direction = Direction.EAST
+            override val approxDuration: Int = 60
             override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons = WavePolygons(
                 clock.now(), emptyList(), emptyList()
             )

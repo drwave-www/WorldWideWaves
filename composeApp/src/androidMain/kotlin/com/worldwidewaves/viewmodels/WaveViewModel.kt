@@ -28,10 +28,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.WWWEventWave.WavePolygons
-import com.worldwidewaves.shared.generated.resources.geoloc_undone
-import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
-import com.worldwidewaves.shared.generated.resources.geoloc_yourein
-import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.toPosition
 import kotlinx.coroutines.Dispatchers
@@ -39,10 +35,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Polygon
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class WaveViewModel : ViewModel() {
 
@@ -62,8 +56,11 @@ class WaveViewModel : ViewModel() {
     private val _eventState = MutableStateFlow(IWWWEvent.Status.UNDEFINED)
     val eventStatus: StateFlow<IWWWEvent.Status> = _eventState.asStateFlow()
 
-    private val _geolocText = MutableStateFlow(ShRes.string.geoloc_undone)
-    val geolocText: StateFlow<StringResource> = _geolocText.asStateFlow()
+    private val _isInArea = MutableStateFlow(false)
+    val isInArea: StateFlow<Boolean> = _isInArea.asStateFlow()
+
+    private val _isInWarming = MutableStateFlow(false)
+    val isInWarming: StateFlow<Boolean> = _isInWarming.asStateFlow()
 
     private var lastWaveState : WavePolygons? = null
 
@@ -73,7 +70,7 @@ class WaveViewModel : ViewModel() {
 
     fun startObservation(
         event: IWWWEvent,
-        polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit
+        polygonsHandler: ((wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit)? = null
     ) {
         if (!observationStarted) {
             this.event = event
@@ -121,17 +118,17 @@ class WaveViewModel : ViewModel() {
     /**
      * Updates the geolocation text based on the new location provided.
      */
-    fun updateGeolocationText(newLocation: LatLng) {
+    fun updateGeolocation(newLocation: LatLng) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentEvent = event
             if (currentEvent != null) {
                 val currentPosition = newLocation.toPosition()
-                val newText = when {
-                    currentEvent.warming.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_warm_in
-                    currentEvent.area.isPositionWithin(currentPosition) -> ShRes.string.geoloc_yourein
-                    else -> ShRes.string.geoloc_yourenotin
+                if (currentEvent.warming.area.isPositionWithin(currentPosition)) {
+                    _isInWarming.value = true
+                    _isInArea.value = false
+                } else if (currentEvent.area.isPositionWithin(currentPosition)) {
+                    _isInArea.value = true
                 }
-                _geolocText.value = newText
             }
         }
     }
@@ -146,7 +143,7 @@ class WaveViewModel : ViewModel() {
      * to MapLibre polygons and updates the state flows.
      *
      */
-    private suspend fun updateWavePolygons(polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit) {
+    private suspend fun updateWavePolygons(polygonsHandler: ((wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit)?) {
         event?.let { event ->
             if (event.isRunning()) try { // FIXME: right setup vs perf to be found
                 val mode = WaveMode.ADD
@@ -158,7 +155,7 @@ class WaveViewModel : ViewModel() {
                 val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
 
                 viewModelScope.launch(Dispatchers.Main) {
-                    polygonsHandler(newPolygons, mode != WaveMode.ADD)
+                    polygonsHandler?.invoke(newPolygons, mode != WaveMode.ADD)
                 }
 
             } catch (e: Exception) {
