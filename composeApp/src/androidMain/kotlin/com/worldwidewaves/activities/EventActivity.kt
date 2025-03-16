@@ -35,9 +35,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,14 +60,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.ButtonWave
+import com.worldwidewaves.compose.DividerLine
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_MITER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_STROKE
@@ -87,6 +84,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
@@ -105,10 +103,13 @@ import com.worldwidewaves.viewmodels.WaveViewModel
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.android.ext.android.inject
 import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventActivity : AbstractEventBackActivity() {
+
+    private val clock: IClock by inject()
 
     private val waveViewModel: WaveViewModel by viewModels()
     private var waveObserver: WaveObserver? = null
@@ -165,7 +166,7 @@ class EventActivity : AbstractEventBackActivity() {
             EventOverlay(event, waveViewModel)
             EventDescription(event)
             DividerLine()
-            ButtonWave(event)
+            ButtonWave(event, clock)
             eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
             GeolocalizeMe(waveViewModel)
             EventNumbers(waveViewModel)
@@ -242,16 +243,6 @@ private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: M
             )
         )
     }
-}
-
-// ----------------------------
-
-@Composable
-fun DividerLine(modifier: Modifier = Modifier) {
-    HorizontalDivider(
-        modifier = modifier.width(DIM_DIVIDER_WIDTH.dp),
-        color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
-    )
 }
 
 // ----------------------------

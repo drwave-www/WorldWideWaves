@@ -51,6 +51,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_target_me_off
 import com.worldwidewaves.shared.generated.resources.event_target_me_on
@@ -64,10 +65,13 @@ import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.android.ext.android.inject
 import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
+
+    private val clock: IClock by inject()
 
     private val waveViewModel: WaveViewModel by viewModels()
     private var waveObserver: WaveObserver? = null
@@ -112,7 +116,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
         Box(modifier = modifier.fillMaxWidth()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize())
-            ButtonWave(event = event, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
+            ButtonWave(event, clock, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             MapActions(eventMap, waveViewModel)
         }
     }

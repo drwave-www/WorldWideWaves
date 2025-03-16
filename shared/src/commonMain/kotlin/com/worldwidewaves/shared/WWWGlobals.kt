@@ -84,6 +84,7 @@ class WWWGlobals {
         private const val DIM_BIG_FONTSIZE = 24
         private const val DIM_BIG2_FONTSIZE = 26
         private const val DIM_BIG3_FONTSIZE = 32
+        private const val DIM_BIG4_FONTSIZE = 48
         private const val DIM_HUGE_FONTSIZE = 64
         private const val DIM_HUGE2_FONTSIZE = 90
 
@@ -125,6 +126,9 @@ class WWWGlobals {
         const val DIM_EVENT_NUMBERS_LABEL_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_EVENT_NUMBERS_VALUE_FONTSIZE = DIM_BIG_FONTSIZE
         const val DIM_EVENT_NUMBERS_TZ_FONTSIZE = DIM_SMALL_FONTSIZE
+
+        const val DIM_WAVE_BEREADY_FONTSIZE = DIM_BIG4_FONTSIZE
+        const val DIM_WAVE_BEREADY_PADDING = 10
 
         const val DIM_INFO_TEXT_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_INFO_DRWAVE_FONTSIZE = DIM_BIG2_FONTSIZE

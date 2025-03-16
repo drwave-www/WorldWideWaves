@@ -31,6 +31,9 @@
             android:name=".activities.EventFullMapActivity"
             android:exported="true" />
         <activity
+            android:name=".activities.WaveActivity"
+            android:exported="true" />
+        <activity
             android:name=".activities.SplashActivity"
             android:exported="true">
             <intent-filter>

@@ -1,5 +1,6 @@
 package com.worldwidewaves.compose
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,17 +17,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.activities.WaveActivity
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
@@ -37,12 +44,15 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_PAD
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
@@ -51,9 +61,11 @@ import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
+import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.hours
 
 /*
  * Copyright 2024 DrWave
@@ -75,6 +87,18 @@ import org.jetbrains.compose.resources.stringResource
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// ----------------------------
+
+@Composable
+fun DividerLine(modifier: Modifier = Modifier) {
+    HorizontalDivider(
+        modifier = modifier.width(DIM_DIVIDER_WIDTH.dp),
+        color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
+    )
+}
+
+// ----------------------------
 
 @Composable
 fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifier) {
@@ -127,16 +151,26 @@ fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-fun ButtonWave(event: IWWWEvent, modifier: Modifier = Modifier) {
-    // val context = LocalContext.current
+fun ButtonWave(event: IWWWEvent, clock: IClock, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val isEnabled = remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        val isRunning = event.isRunning()
+        val isSoon = event.isSoon()
+        val isEndDateTimeRecent = event.getEndDateTime() > clock.now() - 1.hours
+        isEnabled.value = isRunning || isSoon || isEndDateTimeRecent
+    }
 
     Surface(
-        color = MaterialTheme.colorScheme.primary,
+        color = if (isEnabled.value) MaterialTheme.colorScheme.primary else onQuaternaryLight,
         modifier = modifier
             .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
             .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
-            .clickable(onClick = {
-                // TODO: Wave screen
+            .clickable(enabled = isEnabled.value, onClick = {
+                context.startActivity(Intent(context, WaveActivity::class.java).apply {
+                    putExtra("eventId", event.id)
+                })
             })
     ) {
         Text(
