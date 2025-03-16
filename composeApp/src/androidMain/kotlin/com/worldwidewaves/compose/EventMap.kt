@@ -60,7 +60,6 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
@@ -99,6 +98,8 @@ import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Polygon
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventMap(
@@ -107,8 +108,7 @@ class EventMap(
     private val onMapLoaded: () -> Unit = {},
     private val onLocationUpdate: (LatLng) -> Unit = {},
     private val onMapClick: ((latitude: Double, longitude: Double) -> Unit)? = null,
-    private val mapConfig: EventMapConfig = EventMapConfig(),
-    private val scopeProvider: DefaultCoroutineScopeProvider = DefaultCoroutineScopeProvider()
+    private val mapConfig: EventMapConfig = EventMapConfig()
 ) {
 
     data class EventMapConfig(
@@ -670,6 +670,8 @@ class EventMap(
 
 }
 
+// --------------------------------------------------------------------------------
+
 /**
  * Constrains the map view to a given bounding box
  */
@@ -725,25 +727,98 @@ class MapConstraints(private val mapBounds: BoundingBox) {
         map.setMinZoomPreference(minZoom)
 
         // Check if our constrained area is too small for the current view
-        if (!isValidBounds(paddedBounds)) {
-            // If bounds are too small, force a zoom level that makes them fit
-            fitMapToBounds(map, calculateSafeBounds())
+        if (!isValidBounds(paddedBounds, map)) {
+            // If bounds are too small, calculate safer bounds centered around current position
+            fitMapToBounds(map, calculateSafeBounds(map))
         }
     }
 
-    private fun isValidBounds(bounds: LatLngBounds): Boolean {
+    private fun isValidBounds(bounds: LatLngBounds, map: MapLibreMap): Boolean {
+        // Get current camera position
+        val target = map.cameraPosition.target ?: return false
+
         // Check if bounds are valid (not inverted or too small)
-        return bounds.getLatNorth() > bounds.getLatSouth() &&
+        val validSize = bounds.getLatNorth() > bounds.getLatSouth() &&
                 bounds.getLonEast() > bounds.getLonWest() &&
                 (bounds.getLatNorth() - bounds.getLatSouth()) > visibleRegionPadding.latPadding * 0.1 &&
                 (bounds.getLonEast() - bounds.getLonWest()) > visibleRegionPadding.lngPadding * 0.1
+
+        // Check if the current position is within or close to the bounds
+        val containsTarget = bounds.contains(target) ||
+                isNearBounds(target, bounds, visibleRegionPadding.latPadding * 0.5,
+                    visibleRegionPadding.lngPadding * 0.5)
+
+        return validSize && containsTarget
     }
 
-    private fun calculateSafeBounds(): LatLngBounds {
-        // If constrained bounds become too small, use original bounds
+    /**
+     * Checks if a point is near the bounds within the specified padding.
+     */
+    private fun isNearBounds(point: LatLng, bounds: LatLngBounds, latPadding: Double, lngPadding: Double): Boolean {
+        val nearLat = point.latitude >= bounds.getLatSouth() - latPadding &&
+                point.latitude <= bounds.getLatNorth() + latPadding
+        val nearLng = point.longitude >= bounds.getLonWest() - lngPadding &&
+                point.longitude <= bounds.getLonEast() + lngPadding
+        return nearLat && nearLng
+    }
+
+    /**
+     * Calculates safe bounds that are centered around the current camera position
+     * while still ensuring they are valid and within the overall map bounds.
+     */
+    private fun calculateSafeBounds(map: MapLibreMap): LatLngBounds {
+        // Get current camera position
+        val currentPosition = map.cameraPosition.target
+            ?: return LatLngBounds.Builder()
+                .include(LatLng(mapBounds.sw.lat, mapBounds.sw.lng))
+                .include(LatLng(mapBounds.ne.lat, mapBounds.ne.lng))
+                .build()
+
+        // If no position, return original bounds
+
+        // Calculate how much space we need (similar to visible region padding)
+        val neededLatPadding = visibleRegionPadding.latPadding * 1.5 // Add extra margin
+        val neededLngPadding = visibleRegionPadding.lngPadding * 1.5
+
+        // Calculate map dimensions
+        val mapLatSpan = mapBounds.ne.lat - mapBounds.sw.lat
+        val mapLngSpan = mapBounds.ne.lng - mapBounds.sw.lng
+
+        // Make sure our needed padding isn't larger than the map itself
+        val usableLatPadding = min(neededLatPadding, mapLatSpan * 0.4) // Max 40% of map height
+        val usableLngPadding = min(neededLngPadding, mapLngSpan * 0.4) // Max 40% of map width
+
+        // Try to center the bounds around the current position
+        var centerLat = currentPosition.latitude
+        var centerLng = currentPosition.longitude
+
+        // But constrain the center to be within the map bounds (with padding)
+        centerLat = centerLat.coerceIn(
+            mapBounds.sw.lat + usableLatPadding,
+            mapBounds.ne.lat - usableLatPadding
+        )
+        centerLng = centerLng.coerceIn(
+            mapBounds.sw.lng + usableLngPadding,
+            mapBounds.ne.lng - usableLngPadding
+        )
+
+        // Calculate the corners of our safe bounds
+        val safeSouth = max(mapBounds.sw.lat, centerLat - usableLatPadding)
+        val safeNorth = min(mapBounds.ne.lat, centerLat + usableLatPadding)
+        val safeWest = max(mapBounds.sw.lng, centerLng - usableLngPadding)
+        val safeEast = min(mapBounds.ne.lng, centerLng + usableLngPadding)
+
+        // Ensure the bounds have minimum size (at least 20% of padding)
+        val minLatSpan = visibleRegionPadding.latPadding * 0.2
+        val minLngSpan = visibleRegionPadding.lngPadding * 0.2
+
+        val finalNorth = max(safeNorth, safeSouth + minLatSpan)
+        val finalEast = max(safeEast, safeWest + minLngSpan)
+
+        // Build and return the safe bounds
         return LatLngBounds.Builder()
-            .include(LatLng(mapBounds.sw.lat, mapBounds.sw.lng))
-            .include(LatLng(mapBounds.ne.lat, mapBounds.ne.lng))
+            .include(LatLng(safeSouth, safeWest))
+            .include(LatLng(finalNorth, finalEast))
             .build()
     }
 
@@ -797,7 +872,10 @@ class MapConstraints(private val mapBounds: BoundingBox) {
         val lng = point.longitude.coerceIn(bounds.getLonWest(), bounds.getLonEast())
         return LatLng(lat, lng)
     }
+
 }
+
+// --------------------------------------------------------------------------------
 
 /**
  * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView` with the
