@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
@@ -68,33 +70,24 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
 
     private val waveViewModel: WaveViewModel by viewModels()
-    private var eventMapRef: EventMap? = null
-    private var currentEvent: IWWWEvent? = null
+    private var waveObserver: WaveObserver? = null
 
     override fun onResume() {
         super.onResume()
-
         // Restart observation when activity is visible
-        currentEvent?.let { event ->
-            eventMapRef?.let { map ->
-                val context = this
-                waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
-                    map.updateWavePolygons(context, wavePolygons, clearPolygons)
-                }
-            }
-        }
+        waveObserver?.startObservation()
     }
 
     override fun onPause() {
-        waveViewModel.stopObservation()
+        // Stop observation when activity is not visible
+        waveObserver?.stopObservation()
         super.onPause()
     }
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        currentEvent = event
-
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
 
         val eventMap =  remember(event.id) {
@@ -109,12 +102,12 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
                     initialCameraPosition = EventMap.MapCameraPosition.WINDOW
                 )
             ).also {
-                eventMapRef = it
+                waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
             }
         }
 
-        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
-            eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
+        LaunchedEffect(true) { // Start wave observation
+            waveObserver?.startObservation()
         }
 
         Box(modifier = modifier.fillMaxWidth()) {
@@ -125,9 +118,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
     }
 
     override fun onDestroy() {
-        waveViewModel.stopObservation()
-        eventMapRef = null
-        currentEvent = null
+        waveObserver?.stopObservation()
         super.onDestroy()
     }
 

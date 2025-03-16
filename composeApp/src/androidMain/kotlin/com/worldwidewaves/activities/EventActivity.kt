@@ -21,7 +21,6 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
-import android.content.Context
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -61,7 +60,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
@@ -97,14 +96,12 @@ import com.worldwidewaves.shared.generated.resources.wave_progression
 import com.worldwidewaves.shared.generated.resources.wave_speed
 import com.worldwidewaves.shared.generated.resources.wave_start_time
 import com.worldwidewaves.shared.generated.resources.wave_total_time
-import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -114,46 +111,22 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventActivity : AbstractEventBackActivity() {
 
     private val waveViewModel: WaveViewModel by viewModels()
-
-    private var eventMapRef: EventMap? = null
-    private var currentEvent: IWWWEvent? = null
+    private var waveObserver: WaveObserver? = null
 
     override fun onResume() {
         super.onResume()
-        val context = this
         // Restart observation when activity is visible
-        lifecycleScope.launch { observeWave(context) }
-
+        waveObserver?.startObservation()
     }
 
     override fun onPause() {
         // Stop observation when activity is not visible
-        waveViewModel.stopObservation()
+        waveObserver?.stopObservation()
         super.onPause()
-    }
-
-    private suspend fun observeWave(context: Context) {
-        currentEvent?.let { event ->
-            eventMapRef?.let { eventMap ->
-                if (event.isRunning()) {
-                    waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
-                        eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
-                    }
-                } else if (event.isDone()) {
-                    eventMap.updateWavePolygons(
-                        context,
-                        event.area.getPolygons().map { it.toMapLibrePolygon() },
-                        true
-                    )
-                }
-            }
-        }
     }
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        currentEvent = event
-
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -177,14 +150,12 @@ class EventActivity : AbstractEventBackActivity() {
                     })
                 }
             ).also {
-                eventMapRef = it
+                waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
             }
         }
 
-        LaunchedEffect(true) {
-            scope.launch {
-                observeWave(context)
-            }
+        LaunchedEffect(true) { // Start wave observation
+            waveObserver?.startObservation()
         }
 
         Column(
@@ -203,9 +174,7 @@ class EventActivity : AbstractEventBackActivity() {
     }
 
     override fun onDestroy() {
-        waveViewModel.stopObservation()
-        eventMapRef = null
-        currentEvent = null
+        waveObserver?.stopObservation()
         super.onDestroy()
     }
 
