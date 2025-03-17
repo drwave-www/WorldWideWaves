@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Polygon
+import kotlin.time.Duration
 
 class WaveViewModel : ViewModel() {
 
@@ -74,6 +75,9 @@ class WaveViewModel : ViewModel() {
     private val _hasBeenHit = MutableStateFlow(false)
     val hasBeenHit: StateFlow<Boolean> = _hasBeenHit.asStateFlow()
 
+    private val _timeBeforeHit = MutableStateFlow(Duration.INFINITE)
+    val timeBeforeHit: StateFlow<Duration> = _timeBeforeHit.asStateFlow()
+
     private var lastWaveState : WavePolygons? = null
 
     var clearPolygonsBeforeAdd = false
@@ -93,6 +97,7 @@ class WaveViewModel : ViewModel() {
                 _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                 _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
                 _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
+                _timeBeforeHit.value = event.wave.timeBeforeHit() ?: Duration.INFINITE
 
                 progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
@@ -100,6 +105,7 @@ class WaveViewModel : ViewModel() {
                         _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                         _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
                         _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
+                        _timeBeforeHit.value = event.wave.timeBeforeHit() ?: Duration.INFINITE
 
                         if (_waveNumbers.value == null) {
                             _waveNumbers.value = event.getAllNumbers()

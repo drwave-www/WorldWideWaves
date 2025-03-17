@@ -40,6 +40,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.abs
 
 // ---------------------------
 
@@ -63,6 +64,9 @@ data class WWWEventArea(
     @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
+    @Transient private var cachedPositionWithinResult: Pair<Position, Boolean>? = null
+
+    @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
 
     // ---------------------------
 
@@ -91,8 +95,25 @@ data class WWWEventArea(
      * to determine if the specified position lies within the polygon.
      *
      */
-    suspend fun isPositionWithin(position: Position): Boolean =
-        getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+    suspend fun isPositionWithin(position: Position): Boolean {
+        // Check if the cached result is within the epsilon
+        cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
+            if (isPositionWithinEpsilon(position, cachedPosition)) {
+                return cachedResult
+            }
+        }
+
+        // Calculate the result if not cached or outside the epsilon
+        val result = getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+
+        // Cache the result
+        cachedPositionWithinResult = Pair(position, result)
+        return result
+    }
+
+    private fun isPositionWithinEpsilon(pos1: Position, pos2: Position): Boolean {
+        return abs(pos1.lat - pos2.lat) < positionEpsilon && abs(pos1.lng - pos2.lng) < positionEpsilon
+    }
 
     // ---------------------------
 

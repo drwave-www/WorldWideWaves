@@ -156,6 +156,7 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun timeBeforeHit(): Duration? {
+        if (hasUserBeenHitInCurrentPosition()) return null
         val userPosition = getUserPosition() ?: return null
         if (!event.area.isPositionWithin(userPosition)) return null
 

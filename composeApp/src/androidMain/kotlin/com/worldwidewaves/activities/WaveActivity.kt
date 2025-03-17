@@ -31,6 +31,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,11 +69,13 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
+import com.worldwidewaves.theme.onPrimaryLight
 import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.onQuinaryLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
@@ -83,6 +86,8 @@ import com.worldwidewaves.viewmodels.WaveViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.android.geometry.LatLng
 import kotlin.math.min
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class WaveActivity : AbstractEventBackActivity() {
@@ -287,5 +292,43 @@ private fun WaveProgression(progression: Double) {
 
 @Composable
 fun WaveHitCounter(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+    val timeBeforeHit by waveViewModel.timeBeforeHit.collectAsState()
+    val text = formatDuration(timeBeforeHit)
 
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val boxWidth = screenWidth * 0.5f
+
+    Box(
+        modifier = modifier
+            .width(boxWidth)
+            .border(2.dp, onPrimaryLight),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
+            color = Color.White,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+private fun formatDuration(duration: Duration): String {
+    return when {
+        duration.isInfinite() -> "--:--"
+        duration < 1.hours -> {
+            val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
+            val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
+            "$minutes:$seconds"
+        }
+
+        duration < 99.hours -> {
+            val hours = duration.inWholeHours.toString().padStart(2, '0')
+            val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
+            "$hours:$minutes"
+        }
+
+        else -> "--:--"
+    }
 }
