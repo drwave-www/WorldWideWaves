@@ -65,6 +65,8 @@ class WWWEventWaveTest : KoinTest {
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
             override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
+            override suspend fun userClosestWaveLongitude() = 0.0
+            override suspend fun userPositionToWaveRatio() = 0.0
         }.setRelatedEvent(mockEvent)
     }
 

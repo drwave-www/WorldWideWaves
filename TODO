@@ -18,8 +18,9 @@ Semaine prochaine:
 - TODO : attention le targeting de l awave devrait etre dependant du type de wave, non un calcul lineaire comme c'est le cas actuellement dans la large view !!!
 
 - Warming procedure (decouper par tranches et 'lancer' par tranches)
+    -- attention aux cas limites: debut de zone et warning (<1 mn), faire un choix..
 - Faire s'agenouiller 30s avant le hit
-- systeme de vague sonore (turkish march --> precision gps 5m/s)
+- systeme de vague sonore (turkish march --> precision gps 5m/s) + flash lumineux
       --> https://stackoverflow.com/questions/2413426/playing-an-arbitrary-tone-with-android
       --> https://onlinesequencer.net/578198
       --> read midi file : https://stackoverflow.com/questions/71977401/how-to-open-and-play-stream-a-midi-file-using-using-android-midimanager

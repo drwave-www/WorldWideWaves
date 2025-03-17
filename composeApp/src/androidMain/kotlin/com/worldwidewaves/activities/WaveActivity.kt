@@ -73,6 +73,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FON
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
+import com.worldwidewaves.shared.generated.resources.wave_done
+import com.worldwidewaves.shared.generated.resources.wave_hit
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -144,7 +146,7 @@ class WaveActivity : AbstractEventBackActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
-            BeReady()
+            BeReady(waveViewModel)
             eventMap.Screen(modifier = Modifier
                 .fillMaxWidth()
                 .height(calculatedHeight))
@@ -163,13 +165,23 @@ class WaveActivity : AbstractEventBackActivity() {
 // ----------------------------
 
 @Composable
-fun BeReady(modifier: Modifier = Modifier) {
+fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+    val eventStatus by waveViewModel.eventStatus.collectAsState()
+    val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+
+    val message = if (eventStatus == IWWWEvent.Status.DONE)
+        ShRes.string.wave_done
+    else if (hasBeenHit)
+        ShRes.string.wave_hit
+    else
+        ShRes.string.wave_be_ready
+
     Box(
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(ShRes.string.wave_be_ready),
+            text = stringResource(message),
             style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE)
         )
     }

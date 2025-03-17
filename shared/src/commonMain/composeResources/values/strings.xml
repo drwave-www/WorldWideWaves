@@ -55,6 +55,8 @@
     <string name="wave_progression">Progression</string>
 
     <string name="wave_be_ready">Be ready!</string>
+    <string name="wave_done">Wave is done!</string>
+    <string name="wave_hit">Well done!</string>
 
     <string name="infos_core">
 WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries, culminating in a final, awe-inspiring wave that spans the globe. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.
