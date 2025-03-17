@@ -16,6 +16,7 @@ import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -85,6 +86,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun timeBeforeHit(): Duration?
+    abstract suspend fun userClosestWaveLongitude(): Double?
+    abstract suspend fun userPositionToWaveRatio(): Double?
 
     // ---------------------------
 
@@ -115,6 +118,12 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             positionRequester?.invoke()
         }
     }
+
+    suspend fun userIsGoingToBeHit(): Boolean = runCatching {
+        timeBeforeHit()?.let { duration ->
+            duration <= 1.minutes
+        } ?: false
+    }.getOrDefault(false)
 
     // ---------------------------
 

@@ -56,11 +56,23 @@ class WaveViewModel : ViewModel() {
     private val _eventState = MutableStateFlow(IWWWEvent.Status.UNDEFINED)
     val eventStatus: StateFlow<IWWWEvent.Status> = _eventState.asStateFlow()
 
+    private val _progression = MutableStateFlow(0.0)
+    val progression: StateFlow<Double> = _progression.asStateFlow()
+
+    private val _userPositionRatio = MutableStateFlow(0.0)
+    val userPositionRatio: StateFlow<Double> = _userPositionRatio.asStateFlow()
+
     private val _isInArea = MutableStateFlow(false)
     val isInArea: StateFlow<Boolean> = _isInArea.asStateFlow()
 
     private val _isInWarming = MutableStateFlow(false)
     val isInWarming: StateFlow<Boolean> = _isInWarming.asStateFlow()
+
+    private val _isGoingToBitHit = MutableStateFlow(false)
+    val isGoingToBitHit: StateFlow<Boolean> = _isGoingToBitHit.asStateFlow()
+
+    private val _hasBeenHit = MutableStateFlow(false)
+    val hasBeenHit: StateFlow<Boolean> = _hasBeenHit.asStateFlow()
 
     private var lastWaveState : WavePolygons? = null
 
@@ -75,10 +87,20 @@ class WaveViewModel : ViewModel() {
         if (!observationStarted) {
             this.event = event
             viewModelScope.launch(Dispatchers.Default) {
+                _progression.value = event.wave.getProgression()
                 _waveNumbers.value = event.getAllNumbers()
                 _eventState.value = event.getStatus()
+                _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
+                _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
+                _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
+
                 progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
+                        _progression.value = event.wave.getProgression()
+                        _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
+                        _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
+                        _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
+
                         if (_waveNumbers.value == null) {
                             _waveNumbers.value = event.getAllNumbers()
                         } else {

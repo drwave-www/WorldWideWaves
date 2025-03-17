@@ -63,6 +63,7 @@ val surfaceContainerLowLight = Color(0xFFF5F3F5)
 val surfaceContainerLight = Color(0xFFEFEDEF)
 val surfaceContainerHighLight = Color(0xFFEAE7EA)
 val surfaceContainerHighestLight = Color(0xFFE4E2E4)
+val extraElementsLight = Color(0xFFADFF00)
 
 val quaternaryContainerLight = Color(0xFFFFDAD4)
 val onQuaternaryContainerLight = Color(0xFF3A0905)

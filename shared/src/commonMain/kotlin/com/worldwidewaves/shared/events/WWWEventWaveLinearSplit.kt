@@ -57,6 +57,14 @@ data class WWWEventWaveLinearSplit(
         TODO("Not yet implemented")
     }
 
+    override suspend fun userClosestWaveLongitude(): Double? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun userPositionToWaveRatio(): Double? {
+        TODO("Not yet implemented")
+    }
+
     // ---------------------------
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {

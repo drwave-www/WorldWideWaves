@@ -146,9 +146,13 @@ data class WWWEventWaveLinear(
         val userPosition = getUserPosition() ?: return false
         val bbox = bbox()
         val waveCurrentLongitude = currentWaveLongitude(userPosition.lat)
-        return if (userPosition.lng in bbox.minLongitude..waveCurrentLongitude)
-            event.area.isPositionWithin(userPosition) // Take now into consideration the terrain
-        else false
+
+        val isWithinLongitudeRange = when (direction) {
+            Direction.EAST -> userPosition.lng in bbox.minLongitude..waveCurrentLongitude
+            Direction.WEST -> userPosition.lng in waveCurrentLongitude..bbox.maxLongitude
+        }
+
+        return isWithinLongitudeRange && event.area.isPositionWithin(userPosition)
     }
 
     override suspend fun timeBeforeHit(): Duration? {
@@ -161,6 +165,40 @@ data class WWWEventWaveLinear(
         val timeInSeconds = distanceToUser / speed
         return timeInSeconds.seconds
     }
+
+    override suspend fun userClosestWaveLongitude(): Double? {
+        val progression = getProgression()
+        val waveBbox = event.area.bbox()
+
+        val waveWidth = waveBbox.ne.lng - waveBbox.sw.lng
+        val currentWaveOffset = waveWidth * (progression / 100.0)
+
+        return when (direction) {
+            Direction.EAST -> waveBbox.sw.lng + currentWaveOffset
+            Direction.WEST -> waveBbox.ne.lng - currentWaveOffset
+        }
+    }
+
+    override suspend fun userPositionToWaveRatio(): Double? {
+        val userPosition = getUserPosition() ?: return null
+
+        if (!event.area.isPositionWithin(userPosition)) {
+            return null
+        }
+
+        val waveBbox = event.area.bbox()
+        val waveWidth = waveBbox.ne.lng - waveBbox.sw.lng
+        val userLongitude = userPosition.lng
+
+        val userOffsetFromStart: Double = when (direction) {
+            Direction.EAST -> userLongitude - waveBbox.sw.lng
+            Direction.WEST -> waveBbox.ne.lng - userLongitude
+        }
+
+        return if(userOffsetFromStart < 0) 0.0 else (userOffsetFromStart / waveWidth).coerceIn(0.0, 1.0)
+    }
+
+    // ---------------------------
 
     suspend fun currentWaveLongitude(latitude: Double): Double {
         val bbox = bbox()

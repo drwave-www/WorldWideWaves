@@ -58,7 +58,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_WAVE
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
@@ -419,46 +418,42 @@ class EventMap(
             uiScope.launch {
                 try {
                     // Calculate wave position in a structured way
-                    val progression = event.wave.getProgression()
                     val waveBbox = event.area.bbox()
-                    val direction = event.wave.direction
+                    val closestWaveLongitude = event.wave.userClosestWaveLongitude()
 
-                    val waveWidth = waveBbox.ne.lng - waveBbox.sw.lng
-                    val currentWaveOffset = waveWidth * (progression / 100.0)
+                    if (closestWaveLongitude != null) {
+                        val currentCameraPosition = map.cameraPosition
+                        val currentMapLatitude = currentCameraPosition.target?.latitude
+                            ?: ((waveBbox.ne.lat + waveBbox.sw.lat) / 2.0)
+                        val waveLatLng = LatLng(currentMapLatitude, closestWaveLongitude)
 
-                    val currentWaveLongitude = when (direction) {
-                        WWWEventWave.Direction.EAST -> waveBbox.sw.lng + currentWaveOffset
-                        WWWEventWave.Direction.WEST -> waveBbox.ne.lng - currentWaveOffset
-                        else -> (waveBbox.ne.lng + waveBbox.sw.lng) / 2.0
-                    }
+                        val cameraPosition = CameraPosition.Builder()
+                            .target(waveLatLng)
+                            .zoom(CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
+                            .build()
 
-                    val currentCameraPosition = map.cameraPosition
-                    val currentMapLatitude = currentCameraPosition.target?.latitude
-                        ?: ((waveBbox.ne.lat + waveBbox.sw.lat) / 2.0)
-                    val waveLatLng = LatLng(currentMapLatitude, currentWaveLongitude)
+                        withContext(Dispatchers.Main) {
+                            map.animateCamera(
+                                CameraUpdateFactory.newCameraPosition(cameraPosition),
+                                500, // Animation duration in milliseconds
+                                object : CancelableCallback {
+                                    override fun onFinish() {
+                                        animationInProgress = false
+                                        // Force a final camera update to ensure position is correct
+                                        map.moveCamera(
+                                            CameraUpdateFactory.newCameraPosition(
+                                                cameraPosition
+                                            )
+                                        )
+                                    }
 
-                    val cameraPosition = CameraPosition.Builder()
-                        .target(waveLatLng)
-                        .zoom(CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
-                        .build()
-
-                    withContext(Dispatchers.Main) {
-                        map.animateCamera(
-                            CameraUpdateFactory.newCameraPosition(cameraPosition),
-                            500, // Animation duration in milliseconds
-                            object : CancelableCallback {
-                                override fun onFinish() {
-                                    animationInProgress = false
-                                    // Force a final camera update to ensure position is correct
-                                    map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+                                    override fun onCancel() {
+                                        Log.d("EventMap", "targetWave animation canceled")
+                                        animationInProgress = false
+                                    }
                                 }
-
-                                override fun onCancel() {
-                                    Log.d("EventMap", "targetWave animation canceled")
-                                    animationInProgress = false
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 } catch (e: Exception) {
                     Log.e("EventMap", "Error in targetWave: ${e.message}")

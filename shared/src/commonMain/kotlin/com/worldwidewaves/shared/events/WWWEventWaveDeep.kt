@@ -54,6 +54,14 @@ data class WWWEventWaveDeep(
         TODO("Not yet implemented")
     }
 
+    override suspend fun userClosestWaveLongitude(): Double? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun userPositionToWaveRatio(): Double? {
+        TODO("Not yet implemented")
+    }
+
     // ---------------------------
 
     override fun validationErrors() : List<String>? {
