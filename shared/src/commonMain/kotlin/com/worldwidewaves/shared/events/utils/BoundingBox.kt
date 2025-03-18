@@ -54,18 +54,10 @@ data class BoundingBox(val sw: Position, val ne: Position) {
 
     // --- Properties
 
-    val southwest: Position get() = sw
-    val northeast: Position get() = ne
-
     val minLatitude: Double get() = sw.lat
     val maxLatitude: Double get() = ne.lat
     val minLongitude: Double get() = sw.lng
     val maxLongitude: Double get() = ne.lng
-
-    val southLatitude: Double get() = sw.lat
-    val northLatitude: Double get() = ne.lat
-    val westLongitude: Double get() = sw.lng
-    val eastLongitude: Double get() = ne.lng
 
     val width: Double get() =
         if (ne.lng >= sw.lng) ne.lng - sw.lng

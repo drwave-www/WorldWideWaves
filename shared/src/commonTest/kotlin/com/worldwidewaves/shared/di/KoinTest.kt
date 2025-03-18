@@ -30,15 +30,22 @@ import kotlin.test.Test
 
 class KoinTest : KoinTest {
 
+    class MockWWWPlatform : WWWPlatform() {
+        override val name: String = "MockPlatform"
+        override fun getContext(): Any = "MockContext"
+    }
+
+    // ---------------------------
+
     @Test
     fun `check MVP hierarchy`() {
         val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
+            single<WWWPlatform> { MockWWWPlatform() }
             single { createDataStore { "/fake/path" } }
         }
 
         checkModules {
-            modules(sharedModule + testPlatformModule)
+            modules(sharedModule() + testPlatformModule)
         }
     }
 

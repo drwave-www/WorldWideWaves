@@ -22,51 +22,37 @@
 
 #set -x
 
-# Check if admin IDs are provided as arguments
+# Check if an admin ID is provided as an argument
 if [ $# -eq 0 ]; then
-    echo "Error: Please provide at least one admin ID as an argument."
+    echo "Error: Please provide an admin ID as an argument."
     exit 1
 fi
 
-# Initialize variables for the final bounding box
-final_minlat=90
-final_minlon=180
-final_maxlat=-90
-final_maxlon=-180
+admin_id=$1 # Get the admin ID from the first argument
 
-# Process each admin ID
-admin_ids=$(echo "$1" | tr ',' ' ')
-for admin_id in $admin_ids; do
-    # Construct the Overpass API query URL
-    url="https://overpass-api.de/api/interpreter?data=\[out:json\];relation(id:$admin_id);out%20bb;"
+# Construct theOverpass API query URL
+url="https://overpass-api.de/api/interpreter?data=\[out:json\];relation(id:$admin_id);out%20bb;"
 
-    # Fetch the JSON response using curl
-    response=$(curl -s "$url")
+# Fetch the JSON response using curl
+response=$(curl -s "$url")
 
-    # Extract the bounding box coordinates using jq
-    minlat=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.minlat')
-    minlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.minlon')
-    maxlat=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlat')
-    maxlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlon')
+# Extract the bounding box coordinates using jq
+minlat=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.minlat')
+minlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.minlon')
+maxlat=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlat')
+maxlon=$(echo "$response" | ./bin/jq -r '.elements[0].bounds.maxlon')
 
-    # Update the final bounding box to encompass all areas
-    if (( $(echo "$minlat < $final_minlat" | bc -l) )); then final_minlat=$minlat; fi
-    if (( $(echo "$minlon < $final_minlon" | bc -l) )); then final_minlon=$minlon; fi
-    if (( $(echo "$maxlat > $final_maxlat" | bc -l) )); then final_maxlat=$maxlat; fi
-    if (( $(echo "$maxlon > $final_maxlon" | bc -l) )); then final_maxlon=$maxlon; fi
-done
-
-# Calculate the center of the final bounding box
-center_lat=$(echo "($final_minlat + $final_maxlat) / 2" | bc -l | awk '{printf "%.7f\n", $0}' )
-center_lon=$(echo "($final_minlon + $final_maxlon) / 2" | bc -l | awk '{printf "%.7f\n", $0}')
+# Calculate the center of the bounding box
+center_lat=$(echo "($minlat + $maxlat) / 2" | bc -l | awk '{printf "%.7f\n", $0}' )
+center_lon=$(echo "($minlon + $maxlon) / 2" | bc -l | awk '{printf "%.7f\n", $0}')
 
 # Output the bounding box coordinates
-bbox=$final_minlon,$final_minlat,$final_maxlon,$final_maxlat
+bbox=$minlon,$minlat,$maxlon,$maxlat
 center=$center_lon,$center_lat
 if [ "$2" = "bbox" ]; then
-  echo "$bbox"
+  echo $bbox
 elif [ "$2" = "center" ]; then 
-  echo "$center"
+  echo $center
 else
   echo "bbox: $bbox"
   echo "center: $center"

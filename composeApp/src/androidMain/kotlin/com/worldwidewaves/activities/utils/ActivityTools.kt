@@ -38,6 +38,7 @@ fun setStatusBarColor(window: Window) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // For Android R and above, use WindowInsetsController
+            // to hide navigation bars and show status bars
             window.insetsController?.apply {
                 hide(WindowInsets.Type.navigationBars())
                 show(WindowInsets.Type.statusBars())

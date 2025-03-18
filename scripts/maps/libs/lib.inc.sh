@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Copyright 2024 DrWave
 #
@@ -20,6 +18,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+#!/bin/bash
 
 # Events configuration file
 EVENTS_FILE=../../shared/src/commonMain/composeResources/files/events.json
@@ -42,7 +42,7 @@ fi
 EVENTS=$(./bin/jq -r '.[] | .id' "$EVENTS_FILE")
 
 exists() {
-  echo "$EVENTS" | grep "$1" > /dev/null
+  echo $EVENTS | grep "$1" > /dev/null
 }
 
 # Function to read an event's configuration property
@@ -50,86 +50,6 @@ exists() {
 conf() {
   ./bin/jq -r --arg event "$1" \
     ".[] | select(.id == \$event) | .$2" "$EVENTS_FILE"
-}
-
-# Function to get the osmAdminids for an event
-# It handles backward compatibility with the old osmAdminid field
-# Usage: get_osmAdminids <event_id>
-get_osmAdminids() {
-  local event="$1"
-  local ids
-  
-  # First try to get the osmAdminids as an array
-  ids=$(./bin/jq -r --arg event "$event" \
-    '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then map(tostring) | join(",") else . end' "$EVENTS_FILE")
-
-  # If osmAdminids doesn't exist or is null, try the legacy osmAdminid field for backward compatibility
-  if [ "$ids" = "null" ] || [ -z "$ids" ]; then
-    ids=$(./bin/jq -r --arg event "$event" \
-      '.[] | select(.id == $event) | .area.osmAdminid' "$EVENTS_FILE")
-    
-    # If neither field exists, return an error
-    if [ "$ids" = "null" ] || [ -z "$ids" ]; then
-      echo ""
-      return 1
-    fi
-  fi
-  
-  echo "$ids"
-}
-
-# Function to get the bbox for an event
-# It first checks if area.bbox is specified; if not, it gets it from area.osmAdminids
-# Usage: get_event_bbox <event_id>
-get_event_bbox() {
-  local event="$1"
-  local direct_bbox
-  direct_bbox=$(conf "$event" "area.bbox")
-  
-  # If a direct bbox is specified, use that
-  if [ "$direct_bbox" != "null" ] && [ -n "$direct_bbox" ]; then
-    echo "$direct_bbox"
-    return
-  fi
-  
-  # Get the OSM admin IDs
-  local osmAdminids
-  osmAdminids=$(get_osmAdminids "$event")
-  
-  if [ -z "$osmAdminids" ]; then
-    echo "Error: No area.bbox or area.osmAdminids found for event $event" >&2
-    return 1
-  fi
-  
-  # Use the admin IDs to get the bbox
-  ./libs/get_bbox.dep.sh "$osmAdminids" bbox
-}
-
-# Function to get the center for an event
-# It follows the same logic as get_event_bbox
-# Usage: get_event_center <event_id>
-get_event_center() {
-  local event="$1"
-  local direct_center
-  direct_center=$(conf "$event" "area.center")
-  
-  # If a direct center is specified, use that
-  if [ "$direct_center" != "null" ] && [ -n "$direct_center" ]; then
-    echo "$direct_center"
-    return
-  fi
-  
-  # Get the OSM admin IDs
-  local osmAdminids
-  osmAdminids=$(get_osmAdminids "$event")
-  
-  if [ -z "$osmAdminids" ]; then
-    echo "Error: No area.center or area.osmAdminids found for event $event" >&2
-    return 1
-  fi
-  
-  # Use the admin IDs to get the center
-  ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
 
 # Function to replace placeholders in the template file with event configuration values
@@ -144,20 +64,20 @@ tpl() {
   tpl_file=$(mktemp)
   cp "$template_file" "$tpl_file"
 
-  # Get bbox and center information
+  # Retrieve the event's mapOsmadminid and bbox information
+  local mapOsmadminid
+  mapOsmadminid=$(conf "$event" "area.osmAdminid")
+
+  local bbox_output
+  bbox_output=$(./libs/get_bbox.dep.sh "$mapOsmadminid")
+
   local bbox center
-  bbox=$(get_event_bbox "$event")
-  center=$(get_event_center "$event")
+  bbox=$(echo "$bbox_output" | head -n 1 | cut -d ':' -f 2)
+  center=$(echo "$bbox_output" | tail -n 1 | cut -d ':' -f 2)
 
   # Replace placeholders with event properties and bbox/center data
-  # First, handle array values specifically
-  # Replace osmAdminids array elements with their values using proper array syntax
-  local osmids_count
-  osmids_count=$(./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then length else 0 end' "$EVENTS_FILE")
-
-  # Then handle all other properties using the standard approach
-  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
-    if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
+  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | sed -e 's/^[0-9\.]\.*//' | sort | uniq | while read -r prop; do
+  if [ -n "$prop" ] && [ "$(conf $event $prop | wc -l)" = "1" ]; then
       sed -i \
         -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
         -e "s/#map.center#/$center/g" \
@@ -169,3 +89,5 @@ tpl() {
   # Move the processed template to the output file
   mv "$tpl_file" "$output_file"
 }
+
+

@@ -1,13 +1,11 @@
 package com.worldwidewaves.activities.utils
 
 import android.content.Context
-import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 /*
@@ -31,16 +29,12 @@ import kotlinx.coroutines.launch
  * limitations under the License.
  */
 
-/**
- * Coordination of map, event and viewmodel during wave observation
- */
 class WaveObserver(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val eventMap: AndroidEventMap?,
+    private val eventMap: EventMap?,
     private val event: IWWWEvent?,
-    private val waveViewModel: WaveViewModel,
-    private val observerId: String // Add observer ID
+    private val waveViewModel: WaveViewModel
 ) {
 
     fun startObservation() {
@@ -48,27 +42,18 @@ class WaveObserver(
             event?.let { event ->
                 scope.launch {
                     if (event.isRunning()) {
-                        waveViewModel.startObservation(observerId, event) { wavePolygons, clearPolygons ->
+                        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
                             eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
                         }
                     } else {
-                        waveViewModel.startObservation(observerId, event)
+                        waveViewModel.startObservation(event)
                         if (event.isDone()) {
-                            // Set full wave polygons when MapLibre is set
-                            eventMap.mapLibreAdapter.onMapSet {
-                                scope.launch {
-                                    it.addWavePolygons(
-                                        event.area.getPolygons().map { it.toMapLibrePolygon() },
-                                        true
-                                    )
-                                }
-                            }
+                            eventMap.updateWavePolygons(
+                                context,
+                                event.area.getPolygons().map { it.toMapLibrePolygon() },
+                                true
+                            )
                         }
-                    }
-
-                    // Set first user location value
-                    eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
-                        waveViewModel.updateUserLocation(observerId, location)
                     }
                 }
             }
@@ -76,6 +61,7 @@ class WaveObserver(
     }
 
     fun stopObservation() {
-        waveViewModel.stopObservation(observerId)
+        waveViewModel.stopObservation()
     }
+
 }

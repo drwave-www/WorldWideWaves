@@ -21,8 +21,9 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-val sharedModule = listOf(
+fun sharedModule() = listOf(
     commonModule,
     helpersModule,
+    platformModule,
     datastoreModule
 )

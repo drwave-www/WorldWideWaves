@@ -46,7 +46,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 
 interface TabScreen {
     @Composable fun Screen(modifier: Modifier)
-    val name : String
+    fun getName(): String?
 }
 
 // ----------------------------
@@ -86,7 +86,7 @@ class TabManager(
                     Box(modifier = Modifier.clickable {
                         originalScreen = null
                         currentTab = index
-                    }) { tabBarItem(currentTab == index, index, tab.name) }
+                    }) { tabBarItem(currentTab == index, index, tab.getName()) }
                 }
             }
         }

@@ -20,15 +20,11 @@
 # limitations under the License.
 #
 
-DEST_DIR=data/  #../../shared/src/commonMain/composeResources/files/maps
+DEST_DIR=../../shared/src/commonMain/composeResources/files/maps
 
 cd "$(dirname "$0")" # always work from executable folder
 
 #set -x
-
-# Create necessary directories
-mkdir -p ./data
-mkdir -p $DEST_DIR
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
@@ -36,7 +32,7 @@ mkdir -p $DEST_DIR
 # -----------------------------------------------------------------------------
 
 if [ ! -z "$1" ]; then
-  if $(exists "$1"); then
+  if $(exists $1); then
     EVENTS=$1
   else
     echo "Unexistent event $1"
@@ -44,85 +40,22 @@ if [ ! -z "$1" ]; then
   fi
 fi
 
-# Function to merge multiple GeoJSON files into one
-# Usage: merge_geojsons <output_file> <input_file1> [<input_file2> ...]
-merge_geojsons() {
-  local output_file="$1"
-  shift
-  local input_files=("$@")
-
-  # If there's only one input file, just copy it to the output
-  if [ ${#input_files[@]} -eq 1 ]; then
-    cp "${input_files[0]}" "$output_file"
-    return
-  fi
-
-  # Build a single FeatureCollection containing features from every input file.
-  # jq explanation:
-  #   -s : slurp all input files into an array
-  #   map(.features) collects the `features` array from each file
-  #   | add          concatenates all feature arrays into one
-  #   {type:...,features:...} builds the final GeoJSON object
-  ./bin/jq -s '{type:"FeatureCollection",features: (map(.features) | add)}' \
-      "${input_files[@]}" > "$output_file"
-}
-
 for event in $EVENTS; do # Retrieve Geojson files from OSM
+
   echo "==> EVENT $event"
   echo
 
-  TYPE=$(conf "$event" type)
+  TYPE=$(conf $event type)
 
   if [ "$TYPE" = "world" ]; then
     echo "Skip the world"
     continue
   fi
 
-  # Get the OSM admin IDs for this event
-  ADMINIDS=$(get_osmAdminids "$event")
+  OSMADMINID=$(conf $event area.osmAdminid)
 
-  if [ -z "$ADMINIDS" ]; then
-    echo "Error: No area.osmAdminids found for event $event"
-    continue
-  fi
+  DEST_GEOJSON=$DEST_DIR/$event.geojson
+  wget http://polygons.openstreetmap.fr/get_geojson.py?id=${OSMADMINID}\&params=0 -O data/$event.geojson
+  cp data/$event.geojson $DEST_GEOJSON
 
-  echo "Retrieved OSM Admin IDs for event $event: $ADMINIDS"
-
-  # Array to store the paths of downloaded GeoJSON files
-  geojson_files=()
-
-  # Download GeoJSON for each admin ID
-  for admin_id in $(echo "$ADMINIDS" | tr ',' ' '); do
-    echo "Downloading GeoJSON for OSM Admin ID: $admin_id"
-    # Create a unique temporary filename for each admin ID
-    temp_geojson="data/${event}_${admin_id}.geojson"
-    wget "http://polygons.openstreetmap.fr/get_geojson.py?id=${admin_id}&params=0" -O "$temp_geojson"
-
-    # Add this file to our array if the download was successful
-    if [ -s "$temp_geojson" ]; then
-      geojson_files+=("$temp_geojson")
-    else
-      echo "Warning: Failed to download GeoJSON for admin ID $admin_id"
-    fi
-  done
-
-  # Merge all downloaded GeoJSON files into a single one
-  #DEST_GEOJSON=$DEST_DIR/$event.geojson
-  MERGED_GEOJSON="data/${event}.geojson"
-
-  echo "Merging ${#geojson_files[@]} GeoJSON files for event $event"
-  merge_geojsons "$MERGED_GEOJSON" "${geojson_files[@]}"
-
-  # Copy the final merged GeoJSON to the destination
-  #cp "$MERGED_GEOJSON" "$DEST_GEOJSON"
-  echo "Created GeoJSON for event $event at $MERGED_GEOJSON"
-
-  # Clean up temporary files if needed
-  for temp_file in "${geojson_files[@]}"; do
-    if [ "$temp_file" != "$MERGED_GEOJSON" ]; then
-      rm "$temp_file"
-    fi
-  done
-
-  echo
 done

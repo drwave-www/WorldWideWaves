@@ -14,6 +14,10 @@
     "geojson": {
       "data": "__GEOJSON_URI__",
       "type": "geojson"
+    },
+    "geojsonwarming": {
+      "data": "__GEOJSON_WARMING_URI__",
+      "type": "geojson"
     }
   },
   "sprite": "__SPRITE_URI__",
@@ -4207,6 +4211,7 @@
         "text-halo-width": 1
       }
     },
+
     {
       "id": "waveboundaryarea",
       "source": "geojson",
@@ -4223,6 +4228,15 @@
       "paint": {
         "line-color": "#0000ff",
         "line-width": 2
+      }
+    },
+    {
+      "id": "warmingboundaryarea",
+      "source": "geojsonwarming",
+      "type": "fill",
+      "paint": {
+        "fill-color": "#ff0000",
+        "fill-opacity": 0.1
       }
     }
   ],

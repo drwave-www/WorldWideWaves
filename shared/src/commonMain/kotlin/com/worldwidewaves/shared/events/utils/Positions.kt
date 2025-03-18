@@ -48,9 +48,6 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
 
     // ------------------------
 
-    val latitude: Double get() = lat
-    val longitude: Double get() = lng
-
     open operator fun component1() = lat
     open operator fun component2() = lng
 
@@ -98,6 +95,12 @@ class CutPosition( // A position that has been cut
     val pairId: Double by lazy { (cutId + listOf(cutLeft.id, cutRight.id).sorted().let { (first, second) ->
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
+
+    fun uncut(): Position = Position(lat, lng).apply {
+        id = this@CutPosition.id
+        prev = this@CutPosition.prev
+        next = this@CutPosition.next
+    }
 
     val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 

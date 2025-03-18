@@ -41,7 +41,6 @@ featureDeliveryKtx = "2.1.0"
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }
-androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 core-ktx = { module = "com.google.android.play:core-ktx", version.ref = "coreKtxVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

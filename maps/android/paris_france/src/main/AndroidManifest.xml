@@ -4,7 +4,7 @@
 
     <dist:module
         dist:instant="false"
-        dist:title="Map Paris">
+        dist:title="Map Paris France">
         <dist:delivery>
             <dist:on-demand />
         </dist:delivery>

@@ -2,9 +2,3 @@ bin/*
 data/*
 openmaptiles/*
 openmaptiles-tools/*
-lib/
-lib64
-pyvenv.cfg
-tmp/*
-package-lock.json
-node_modules/

@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.time.Duration
@@ -98,16 +97,17 @@ interface IWWWEvent : DataValidator {
 
     suspend fun getAllNumbers(): WaveNumbersLiterals
 
-    val eventStatus: StateFlow<Status>
-    val progression: StateFlow<Double>
-    val isWarmingInProgress: StateFlow<Boolean>
-    val userIsGoingToBeHit: StateFlow<Boolean>
-    val userHasBeenHit: StateFlow<Boolean>
-
     // ---------------------------
 
-    fun startObservation()
+    fun addOnStatusChangedListener(listener: (Status) -> Unit): Int
+    fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int
+    fun addOnWarmingStartedListener(listener: () -> Unit): Int
+    fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int
+    fun addOnUserHasBeenHitListener(listener: () -> Unit): Int
+
     fun stopObservation()
+    fun stopListeners(vararg listenerKeys: Int)
+    fun stopListeners(listenerKeys: List<Int>)
 
 }
 

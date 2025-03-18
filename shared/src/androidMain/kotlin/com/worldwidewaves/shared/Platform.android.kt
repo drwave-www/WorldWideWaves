@@ -31,146 +31,58 @@ import com.worldwidewaves.shared.generated.resources.e_community_europe
 import com.worldwidewaves.shared.generated.resources.e_community_usa
 import com.worldwidewaves.shared.generated.resources.e_country_brazil
 import com.worldwidewaves.shared.generated.resources.e_country_france
-import com.worldwidewaves.shared.generated.resources.e_location_bangalore_india
-import com.worldwidewaves.shared.generated.resources.e_location_bangkok_thailand
-import com.worldwidewaves.shared.generated.resources.e_location_beijing_china
-import com.worldwidewaves.shared.generated.resources.e_location_berlin_germany
-import com.worldwidewaves.shared.generated.resources.e_location_bogota_colombia
-import com.worldwidewaves.shared.generated.resources.e_location_buenos_aires_argentina
-import com.worldwidewaves.shared.generated.resources.e_location_cairo_egypt
-import com.worldwidewaves.shared.generated.resources.e_location_chicago_usa
-import com.worldwidewaves.shared.generated.resources.e_location_delhi_india
-import com.worldwidewaves.shared.generated.resources.e_location_dubai_united_arab_emirates
-import com.worldwidewaves.shared.generated.resources.e_location_hong_kong_china
-import com.worldwidewaves.shared.generated.resources.e_location_istanbul_turkey
-import com.worldwidewaves.shared.generated.resources.e_location_jakarta_indonesia
-import com.worldwidewaves.shared.generated.resources.e_location_johannesburg_south_africa
-import com.worldwidewaves.shared.generated.resources.e_location_karachi_pakistan
-import com.worldwidewaves.shared.generated.resources.e_location_kinshasa_democratic_republic_of_the_congo
-import com.worldwidewaves.shared.generated.resources.e_location_lagos_nigeria
-import com.worldwidewaves.shared.generated.resources.e_location_lima_peru
-import com.worldwidewaves.shared.generated.resources.e_location_london_england
-import com.worldwidewaves.shared.generated.resources.e_location_los_angeles_usa
-import com.worldwidewaves.shared.generated.resources.e_location_madrid_spain
-import com.worldwidewaves.shared.generated.resources.e_location_manila_philippines
-import com.worldwidewaves.shared.generated.resources.e_location_melbourne_australia
-import com.worldwidewaves.shared.generated.resources.e_location_mexico_city_mexico
-import com.worldwidewaves.shared.generated.resources.e_location_moscow_russia
-import com.worldwidewaves.shared.generated.resources.e_location_mumbai_india
-import com.worldwidewaves.shared.generated.resources.e_location_nairobi_kenya
-import com.worldwidewaves.shared.generated.resources.e_location_new_york_usa
 import com.worldwidewaves.shared.generated.resources.e_location_paris_france
-import com.worldwidewaves.shared.generated.resources.e_location_rome_italy
-import com.worldwidewaves.shared.generated.resources.e_location_san_francisco_usa
-import com.worldwidewaves.shared.generated.resources.e_location_santiago_chile
-import com.worldwidewaves.shared.generated.resources.e_location_sao_paulo_brazil
-import com.worldwidewaves.shared.generated.resources.e_location_seoul_south_korea
-import com.worldwidewaves.shared.generated.resources.e_location_shanghai_china
-import com.worldwidewaves.shared.generated.resources.e_location_sydney_australia
-import com.worldwidewaves.shared.generated.resources.e_location_tehran_iran
-import com.worldwidewaves.shared.generated.resources.e_location_tokyo_japan
-import com.worldwidewaves.shared.generated.resources.e_location_toronto_canada
-import com.worldwidewaves.shared.generated.resources.e_location_vancouver_canada
+import com.worldwidewaves.shared.generated.resources.e_location_riodejaneiro_brazil
+import com.worldwidewaves.shared.generated.resources.e_location_unitedstates
+import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.koin.java.KoinJavaComponent.inject
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
+import java.lang.ref.WeakReference
+
+// --- Platform-specific implementation of the WWWPlatform interface ---
+
+object AndroidPlatform : WWWPlatform()  { // TODO: manage with the cache in production on app update
+    private var _contextRef: WeakReference<Context>? = null
+
+    private val context: Context
+        get() = _contextRef?.get()
+            ?: throw UninitializedPropertyAccessException(
+                "$(::AndroidPlatform.name) must be initialized with a context before use.")
+
+    override val name: String
+        get() = "Android ${Build.VERSION.SDK_INT}"
+
+    override fun getContext(): Any = context
+
+    fun initialize(context: Context): AndroidPlatform {
+        debugBuild()
+        _contextRef = WeakReference(context.applicationContext)
+        return this
+    }
+
+}
+
+// ---------------------------
+
+actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
 actual fun getEventImage(type: String, id: String): Any? {
     return when (type) { // TODO : not possible, we need another way than this static mess
-                         // FIXME: Use AndroidImageResolver
-
         "location" -> when (id) {
-            "bangalore_india" -> Res.drawable.e_location_bangalore_india
-            "bangkok_thailand" -> Res.drawable.e_location_bangkok_thailand
-            "beijing_china" -> Res.drawable.e_location_beijing_china
-            "berlin_germany" -> Res.drawable.e_location_berlin_germany
-            "bogota_colombia" -> Res.drawable.e_location_bogota_colombia
-            "buenos_aires_argentina" -> Res.drawable.e_location_buenos_aires_argentina
-            "cairo_egypt" -> Res.drawable.e_location_cairo_egypt
-            "chicago_usa" -> Res.drawable.e_location_chicago_usa
-            "delhi_india" -> Res.drawable.e_location_delhi_india
-            "dubai_united_arab_emirates" -> Res.drawable.e_location_dubai_united_arab_emirates
-            "hong_kong_china" -> Res.drawable.e_location_hong_kong_china
-            "istanbul_turkey" -> Res.drawable.e_location_istanbul_turkey
-            "jakarta_indonesia" -> Res.drawable.e_location_jakarta_indonesia
-            "johannesburg_south_africa" -> Res.drawable.e_location_johannesburg_south_africa
-            "karachi_pakistan" -> Res.drawable.e_location_karachi_pakistan
-            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_location_kinshasa_democratic_republic_of_the_congo
-            "lagos_nigeria" -> Res.drawable.e_location_lagos_nigeria
-            "lima_peru" -> Res.drawable.e_location_lima_peru
-            "london_england" -> Res.drawable.e_location_london_england
-            "los_angeles_usa" -> Res.drawable.e_location_los_angeles_usa
-            "madrid_spain" -> Res.drawable.e_location_madrid_spain
-            "manila_philippines" -> Res.drawable.e_location_manila_philippines
-            "melbourne_australia" -> Res.drawable.e_location_melbourne_australia
-            "mexico_city_mexico" -> Res.drawable.e_location_mexico_city_mexico
-            "moscow_russia" -> Res.drawable.e_location_moscow_russia
-            "mumbai_india" -> Res.drawable.e_location_mumbai_india
-            "nairobi_kenya" -> Res.drawable.e_location_nairobi_kenya
-            "new_york_usa" -> Res.drawable.e_location_new_york_usa
             "paris_france" -> Res.drawable.e_location_paris_france
-            "rome_italy" -> Res.drawable.e_location_rome_italy
-            "san_francisco_usa" -> Res.drawable.e_location_san_francisco_usa
-            "santiago_chile" -> Res.drawable.e_location_santiago_chile
-            "sao_paulo_brazil" -> Res.drawable.e_location_sao_paulo_brazil
-            "seoul_south_korea" -> Res.drawable.e_location_seoul_south_korea
-            "shanghai_china" -> Res.drawable.e_location_shanghai_china
-            "sydney_australia" -> Res.drawable.e_location_sydney_australia
-            "tehran_iran" -> Res.drawable.e_location_tehran_iran
-            "tokyo_japan" -> Res.drawable.e_location_tokyo_japan
-            "toronto_canada" -> Res.drawable.e_location_toronto_canada
-            "vancouver_canada" -> Res.drawable.e_location_vancouver_canada
+            "unitedstates" -> Res.drawable.e_location_unitedstates
+            "riodejaneiro_brazil" -> Res.drawable.e_location_riodejaneiro_brazil
+            "world" -> Res.drawable.e_location_world
             else -> Res.drawable.not_found
         }
-
-        "map" -> Res.drawable.not_found // when(id) {
-//            "bangalore_india" -> Res.drawable.e_map_bangalore_india
-//            "bangkok_thailand" -> Res.drawable.e_map_bangkok_thailand
-//            "beijing_china" -> Res.drawable.e_map_beijing_china
-//            "berlin_germany" -> Res.drawable.e_map_berlin_germany
-//            "bogota_colombia" -> Res.drawable.e_map_bogota_colombia
-//            "buenos_aires_argentina" -> Res.drawable.e_map_buenos_aires_argentina
-//            "cairo_egypt" -> Res.drawable.e_map_cairo_egypt
-//            "chicago_usa" -> Res.drawable.e_map_chicago_usa
-//            "delhi_india" -> Res.drawable.e_map_delhi_india
-//            "dubai_united_arab_emirates" -> Res.drawable.e_map_dubai_united_arab_emirates
-//            "hong_kong_china" -> Res.drawable.e_map_hong_kong_china
-//            "istanbul_turkey" -> Res.drawable.e_map_istanbul_turkey
-//            "jakarta_indonesia" -> Res.drawable.e_map_jakarta_indonesia
-//            "johannesburg_south_africa" -> Res.drawable.e_map_johannesburg_south_africa
-//            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_map_kinshasa_democratic_republic_of_the_congo
-//            "lagos_nigeria" -> Res.drawable.e_map_lagos_nigeria
-//            "lima_peru" -> Res.drawable.e_map_lima_peru
-//            "london_england" -> Res.drawable.e_map_london_england
-//            "los_angeles_usa" -> Res.drawable.e_map_los_angeles_usa
-//            "madrid_spain" -> Res.drawable.e_map_madrid_spain
-//            "manila_philippines" -> Res.drawable.e_map_manila_philippines
-//            "melbourne_australia" -> Res.drawable.e_map_melbourne_australia
-//            "mexico_city_mexico" -> Res.drawable.e_map_mexico_city_mexico
-//            "moscow_russia" -> Res.drawable.e_map_moscow_russia
-//            "mumbai_india" -> Res.drawable.e_map_mumbai_india
-//            "nairobi_kenya" -> Res.drawable.e_map_nairobi_kenya
-//            "new_york_usa" -> Res.drawable.e_map_new_york_usa
-//            "paris_france" -> Res.drawable.e_map_paris_france
-//            "rome_italy" -> Res.drawable.e_map_rome_italy
-//            "san_francisco_usa" -> Res.drawable.e_map_san_francisco_usa
-//            "santiago_chile" -> Res.drawable.e_map_santiago_chile
-//            "sao_paulo_brazil" -> Res.drawable.e_map_sao_paulo_brazil
-//            "seoul_south_korea" -> Res.drawable.e_map_seoul_south_korea
-//            "shanghai_china" -> Res.drawable.e_map_shanghai_china
-//            "sydney_australia" -> Res.drawable.e_map_sydney_australia
-//            "tehran_iran" -> Res.drawable.e_map_tehran_iran
-//            "tokyo_japan" -> Res.drawable.e_map_tokyo_japan
-//            "toronto_canada" -> Res.drawable.e_map_toronto_canada
-//            "vancouver_canada" -> Res.drawable.e_map_vancouver_canada
-//            else -> Res.drawable.not_found
-//        }
 
         "community" -> when (id) {
             "europe" -> Res.drawable.e_community_europe
@@ -215,8 +127,9 @@ actual suspend fun readGeoJson(eventId: String): String? {
  *
  */
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
-    val context: Context by inject(Context::class.java)
+    val context = AndroidPlatform.getContext() as Context
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
+
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
     val splitInstallManager = SplitInstallManagerFactory.create(context)
 
@@ -234,16 +147,13 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
         val assetPath = "$eventId.$extension"
 
         try {
-            // Get asset information - this might not provide accurate size for compressed assets
-            val assetFileDescriptor = try {
-                context.assets.openFd(assetPath)
-            } catch (e: IOException) {
-                // Some compressed assets can't be accessed via openFd, fall back to open
-                null
-            }
+            val assetFileDescriptor = context.assets.openFd(assetPath)
+            val assetFileSize = assetFileDescriptor.length
+            assetFileDescriptor.close()
 
             val needsUpdate = when {
                 !cachedFile.exists() -> true
+                cachedFile.length() != assetFileSize -> true
                 !metadataFile.exists() -> true
                 else -> {
                     val lastCacheTime = try {
@@ -264,43 +174,16 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
                 }
             }
 
-            // Close the descriptor if we opened one
-            assetFileDescriptor?.close()
-
             if (needsUpdate) {
                 Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
 
-                withContext(Dispatchers.IO) {
-                    try {
-                        // Use a buffered approach for better memory efficiency
-                        context.assets.open(assetPath).use { input ->
-                            BufferedInputStream(input, 8192).use { bufferedInput ->
-                                cachedFile.outputStream().use { fileOutput ->
-                                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                        val buffer = ByteArray(8192)
-                                        var bytesRead: Int
-
-                                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                            bufferedOutput.write(buffer, 0, bytesRead)
-                                        }
-
-                                        bufferedOutput.flush()
-                                    }
-                                }
-                            }
-                        }
-
-                        // Update metadata after successful copy
-                        metadataFile.writeText(System.currentTimeMillis().toString())
-                    } catch (e: Exception) {
-                        Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                        // Delete partially written file if there was an error
-                        if (cachedFile.exists()) {
-                            cachedFile.delete()
-                        }
-                        throw e
+                context.assets.open(assetPath).use { input ->
+                    cachedFile.outputStream().use { output ->
+                        input.copyTo(output, bufferSize = 8192)
                     }
                 }
+
+                metadataFile.writeText(System.currentTimeMillis().toString())
             }
 
             cachedFile.absolutePath
@@ -326,7 +209,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
  *
  */
 actual fun cachedFileExists(fileName: String): Boolean {
-    val context: Context by inject(Context::class.java)
+    val context = AndroidPlatform.getContext() as Context
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
@@ -346,7 +229,7 @@ actual fun cachedFileExists(fileName: String): Boolean {
  *
  */
 actual fun cachedFilePath(fileName: String): String? {
-    val context: Context by inject(Context::class.java)
+    val context = AndroidPlatform.getContext() as Context
     return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
 }
 
@@ -359,8 +242,8 @@ actual fun cachedFilePath(fileName: String): String? {
  *
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
-    val context: Context by inject(Context::class.java)
-    Log.v(::cacheStringToFile.name, "Caching data to $fileName")
+    val context = AndroidPlatform.getContext() as Context
+    Log.i(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
@@ -376,7 +259,7 @@ actual fun cacheStringToFile(fileName: String, content: String) : String {
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun cacheDeepFile(fileName: String) {
     try {
-        val context: Context by inject(Context::class.java)
+        val context = AndroidPlatform.getContext() as Context
         val fileBytes = Res.readBytes(fileName)
         val cacheFile = File(context.cacheDir, fileName)
 
@@ -397,6 +280,18 @@ actual suspend fun cacheDeepFile(fileName: String) {
  *
  */
 actual fun getCacheDir(): String {
-    val context: Context by inject(Context::class.java)
+    val context = AndroidPlatform.getContext() as Context
     return context.cacheDir.absolutePath
 }
+
+// ---------------------------
+
+/**
+ * Retrieves the current local date and time.
+ *
+ * This function uses the system clock to get the current instant in time and converts it to a
+ * `LocalDateTime` object using the system's default time zone.
+ *
+ */
+actual fun getLocalDatetime(): LocalDateTime =
+    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
