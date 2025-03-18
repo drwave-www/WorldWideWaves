@@ -24,27 +24,36 @@ package com.worldwidewaves.activities
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,16 +61,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
@@ -71,7 +83,10 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
@@ -85,7 +100,12 @@ import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.android.ext.android.inject
 import org.maplibre.android.geometry.LatLng
 import kotlin.math.min
 import kotlin.time.Duration
@@ -94,7 +114,8 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class WaveActivity : AbstractEventBackActivity() {
 
-    private val waveViewModel: WaveViewModel by viewModels()
+    private val clock: IClock by inject()
+    private val waveViewModel by viewModels<WaveViewModel>()
     private var waveObserver: WaveObserver? = null
 
     override fun onResume() {
@@ -142,16 +163,27 @@ class WaveActivity : AbstractEventBackActivity() {
             waveObserver?.startObservation()
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp)
-        ) {
-            BeReady(waveViewModel)
-            eventMap.Screen(modifier = Modifier
-                .fillMaxWidth()
-                .height(calculatedHeight))
-            WaveProgressionBar(waveViewModel)
-            WaveHitCounter(waveViewModel)
+        // Use Box as the root container to allow for overlapping elements
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                BeReady(waveViewModel)
+                eventMap.Screen(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(calculatedHeight))
+                WaveProgressionBar(waveViewModel)
+                WaveHitCounter(waveViewModel)
+            }
+
+            WaveChroreographies(
+                event = event,
+                waveViewModel = waveViewModel,
+                clock = clock,
+                modifier = Modifier.fillMaxSize().zIndex(10f)
+            )
         }
     }
 
@@ -195,7 +227,7 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, modifier: Modifier = Modifi
     val progression by waveViewModel.progression.collectAsState()
     val isInArea by waveViewModel.isInArea.collectAsState()
     val userPositionRatio by waveViewModel.userPositionRatio.collectAsState()
-    val isGoingToBeHit by waveViewModel.isGoingToBitHit.collectAsState()
+    val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
     val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
 
     val configuration = LocalConfiguration.current
@@ -342,5 +374,124 @@ private fun formatDuration(duration: Duration): String {
         }
 
         else -> "--:--"
+    }
+}
+
+// ----------------------------
+
+@Composable
+fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: IClock, modifier: Modifier = Modifier) {
+    val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
+    val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
+    val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+    val hitDateTime by waveViewModel.hitDateTime.collectAsState()
+
+    when {
+        // Show warming choreography
+        isWarmingInProgress -> {
+            ChoreographyDisplay(event.warming.getCurrentChoregraphySequence(), clock, modifier.zIndex(10f))
+        }
+        // Show waiting choreography when going to be hit
+        isGoingToBeHit -> {
+            ChoreographyDisplay(event.wave.waitingChoregraphySequence(), clock, modifier.zIndex(10f))
+        }
+        // Show hit choreography when user has been hit
+        hasBeenHit -> {
+            // Show hit choreography sequence if we're within X seconds after hit time
+            val currentTime = clock.now()
+            val showHitSequence by remember {
+                derivedStateOf {
+                    hitDateTime.let { hitTime ->
+                        val secondsSinceHit = (currentTime - hitTime).inWholeSeconds
+                        secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                    }
+                }
+            }
+
+            if (showHitSequence) {
+                ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
+            }
+        }
+    }
+}
+
+@Composable
+fun ChoreographyDisplay(
+    sequence: ChoreographyManager.DisplayableSequence<DrawableResource>?,
+    clock: IClock,
+    modifier: Modifier = Modifier
+) {
+    if (sequence == null || sequence.images.isEmpty()) return
+
+    var currentImageIndex by remember { mutableIntStateOf(0) }
+    var isVisible by remember { mutableStateOf(true) }
+    val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
+
+    // Create a timer to cycle through images
+    LaunchedEffect(sequence) {
+        val startTime = clock.now()
+
+        while (this.isActive) {
+            // Check if we should stop showing the sequence
+            if (remainingTime != null) {
+                val elapsed = clock.now() - startTime
+                if (elapsed > remainingTime!!) break
+            }
+
+            delay(sequence.timing.inWholeMilliseconds)
+            isVisible = false
+            delay(300) // Short delay for fade out
+
+            if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
+                currentImageIndex = (currentImageIndex + 1) % sequence.images.size
+                isVisible = true
+            } else {
+                break // Stop if we've shown all images and not looping
+            }
+        }
+    }
+
+    BoxWithConstraints(
+        modifier = modifier.fillMaxSize().padding(20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .shadow(8.dp)
+                .background(Color.Black.copy(alpha = 0.7f))
+                .border(2.dp, Color.White, RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            AnimatedVisibility(
+                visible = isVisible,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                Image(
+                    painter = painterResource(sequence.images[currentImageIndex]),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(
+                            this@BoxWithConstraints.maxWidth * 0.7f,
+                            this@BoxWithConstraints.maxHeight * 0.7f
+                        ),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            Text(
+                text = sequence.text,
+                style = quinaryColoredBoldTextStyle(18),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 24.dp)
+                    .fillMaxWidth()
+            )
+        }
     }
 }

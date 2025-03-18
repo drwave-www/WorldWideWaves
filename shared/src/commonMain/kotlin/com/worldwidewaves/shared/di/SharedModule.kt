@@ -24,6 +24,5 @@ package com.worldwidewaves.shared.di
 fun sharedModule() = listOf(
     commonModule,
     helpersModule,
-    platformModule,
     datastoreModule
 )

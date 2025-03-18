@@ -7,6 +7,7 @@ import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
+import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,9 +36,11 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val androidModule = module {
+val applicationModule = module {
     single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
+
     viewModel { EventsViewModel(wwwEvents = get()) }
+    viewModel { WaveViewModel(platform = get()) }
 
     single { SettingsScreen() }
     single { AboutScreen(get(), get()) }

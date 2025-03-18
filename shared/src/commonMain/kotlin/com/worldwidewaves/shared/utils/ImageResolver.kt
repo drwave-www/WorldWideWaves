@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.shared.utils
 
 /*
  * Copyright 2024 DrWave
@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.di
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,6 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.getPlatform
-import org.koin.dsl.module
-
-val platformModule = module {
-    single { getPlatform() }
+interface ImageResolver<T> {
+    fun resolve(path: String): T?
 }

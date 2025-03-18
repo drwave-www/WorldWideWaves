@@ -46,6 +46,7 @@ class WWWGlobals {
 
         private const val FS_FILES_FOLDER = "files"
         const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
+        const val FS_CHOREOGRAPHIES_CONF = "$FS_FILES_FOLDER/choreographies.json"
         const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
         const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
@@ -55,6 +56,7 @@ class WWWGlobals {
         val WAVE_OBSERVE_DELAY = 2.hours // hours
         val WAVE_WARMING_DURATION = 2.5.minutes
         val WAVE_WARN_BEFORE_HIT = 30.seconds
+        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 10.seconds
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
 
         // -- UI Constants --

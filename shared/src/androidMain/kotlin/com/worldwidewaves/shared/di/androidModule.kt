@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.data
+package com.worldwidewaves.shared.di
 
 /*
  * Copyright 2024 DrWave
@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.data
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,21 +21,25 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import android.app.Application
 import android.content.Context
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
-import org.koin.java.KoinJavaComponent.inject
+import android.os.Build
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.debugBuild
+import com.worldwidewaves.shared.utils.AndroidImageResolver
+import com.worldwidewaves.shared.utils.ImageResolver
+import org.jetbrains.compose.resources.DrawableResource
+import org.koin.dsl.module
 
-/**
- * Retrieves the file path for the key-value store.
- *
- * This function constructs the file path for the key-value store by accessing the application's
- * files directory and appending the specified folder and file name for the data store.
- *
- */
-actual fun keyValueStorePath(): String {
-        val context: Context by inject(Context::class.java)
-        return context
-                .filesDir
-                .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
-                .absolutePath
+fun androidModule(application: Application) = module {
+    single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
+    single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
+
+    single<WWWPlatform> {
+        debugBuild()
+        WWWPlatform("Android ${Build.VERSION.SDK_INT}")
+    }
+
+    single<Context> { application }
 }

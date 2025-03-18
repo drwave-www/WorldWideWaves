@@ -2,8 +2,11 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.IClock
 import kotlinx.datetime.Instant
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
@@ -32,6 +35,7 @@ import kotlin.time.Duration
 class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     private val clock: IClock by inject()
+    private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
 
     fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
 
@@ -41,9 +45,11 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
         }
     }
 
-    /**
-     * Warming is started
-     */
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
+
+    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        val startTime = event.getStartDateTime()
+        return choreographyManager.getCurrentWarmingSequence(startTime)
+    }
 
 }

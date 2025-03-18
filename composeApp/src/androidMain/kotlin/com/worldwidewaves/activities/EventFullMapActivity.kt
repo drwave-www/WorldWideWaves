@@ -73,7 +73,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
     private val clock: IClock by inject()
 
-    private val waveViewModel: WaveViewModel by viewModels()
+    private val waveViewModel by viewModels<WaveViewModel>()
     private var waveObserver: WaveObserver? = null
 
     override fun onResume() {

@@ -24,6 +24,8 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
@@ -31,15 +33,17 @@ import com.worldwidewaves.shared.events.WWWEventWave.WavePolygons
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.toPosition
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Polygon
 import kotlin.time.Duration
 
-class WaveViewModel : ViewModel() {
+class WaveViewModel(private val platform: WWWPlatform? = null) : ViewModel() {
 
     companion object {
         private const val MAX_POLY_RECOMPOSE = 100
@@ -69,14 +73,17 @@ class WaveViewModel : ViewModel() {
     private val _isInArea = MutableStateFlow(false)
     val isInArea: StateFlow<Boolean> = _isInArea.asStateFlow()
 
-    private val _warmingStarted = MutableStateFlow(false)
-    val warmingStarted: StateFlow<Boolean> = _warmingStarted.asStateFlow()
+    private val _isWarmingInProgress = MutableStateFlow(false)
+    val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
 
-    private val _isGoingToBitHit = MutableStateFlow(false)
-    val isGoingToBitHit: StateFlow<Boolean> = _isGoingToBitHit.asStateFlow()
+    private val _isGoingToBeHit = MutableStateFlow(false)
+    val isGoingToBeHit: StateFlow<Boolean> = _isGoingToBeHit.asStateFlow()
 
     private val _hasBeenHit = MutableStateFlow(false)
     val hasBeenHit: StateFlow<Boolean> = _hasBeenHit.asStateFlow()
+
+    private val _hitDateTime = MutableStateFlow(Instant.DISTANT_FUTURE)
+    val hitDateTime: StateFlow<Instant> = _hitDateTime.asStateFlow()
 
     private val _timeBeforeHit = MutableStateFlow(Duration.INFINITE)
     val timeBeforeHit: StateFlow<Duration> = _timeBeforeHit.asStateFlow()
@@ -94,21 +101,26 @@ class WaveViewModel : ViewModel() {
         if (!observationStarted) {
             this.event = event
             viewModelScope.launch(Dispatchers.Default) {
+
                 _progression.value = event.wave.getProgression()
                 _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                 _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
                 _waveNumbers.value = event.getAllNumbers()
+                _hitDateTime.value = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE
 
                 _eventState.value = event.getStatus()
-                _warmingStarted.value = event.warming.isUserWarmingStarted()
-                _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
+                _isWarmingInProgress.value = event.warming.isUserWarmingStarted()
+                _isGoingToBeHit.value = event.wave.userIsGoingToBeHit()
                 _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
+
+            }.invokeOnCompletion {
 
                 progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
                         _progression.value = event.wave.getProgression()
                         _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                         _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
+                        _hitDateTime.value = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE
 
                         if (_waveNumbers.value == null) {
                             _waveNumbers.value = event.getAllNumbers()
@@ -117,27 +129,33 @@ class WaveViewModel : ViewModel() {
                                 waveProgression = event.wave.getLiteralProgression()
                             )
                         }
+                    }
+                    viewModelScope.launch(Dispatchers.Default) {
                         updateWavePolygons(polygonsHandler)
                     }
                 }
+
                 statusListenerKey = event.addOnStatusChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
                         _eventState.value = event.getStatus()
                     }
                 }
+
                 userWarmingStartedListenerKey = event.addOnWarmingStartedListener {
-                    viewModelScope.launch(Dispatchers.Default) {
-                        _warmingStarted.value = true
-                    }
+                    platform?.disableSimulation() // Disable simulation during the wave warming and hit sequence
+                    _isWarmingInProgress.value = true
                 }
                 userGoingToBeHitListenerKey = event.addOnUserIsGoingToBeHitListener {
-                    viewModelScope.launch(Dispatchers.Default) {
-                        _isGoingToBitHit.value = true
-                    }
+                    _isGoingToBeHit.value = true
+                    _isWarmingInProgress.value = false
                 }
                 userHasBeenHitListenerKey = event.addOnUserHasBeenHitListener {
+                    _hasBeenHit.value = true
+                    _isWarmingInProgress.value = false
+                    _isGoingToBeHit.value = false
                     viewModelScope.launch(Dispatchers.Default) {
-                        _hasBeenHit.value = true
+                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds)
+                        platform?.restartSimulation() // Reactivate simulation after the hit sequence
                     }
                 }
 

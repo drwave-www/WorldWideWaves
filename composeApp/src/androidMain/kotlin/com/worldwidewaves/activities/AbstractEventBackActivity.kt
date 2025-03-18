@@ -61,7 +61,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.worldwidewaves.MainApplication
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
@@ -91,7 +90,7 @@ abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
 ) : MainActivity() {
 
-    private val mapViewModel: MapViewModel by viewModels()
+    private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
     var platform : WWWPlatform? = null
 
@@ -99,8 +98,6 @@ abstract class AbstractEventBackActivity(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        platform = (applicationContext as MainApplication).platform
 
         // Prevent the screen from turning off
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)

@@ -30,9 +30,7 @@ import kotlinx.datetime.toLocalDateTime
  * limitations under the License.
  */
 
-abstract class WWWPlatform {
-    abstract val name: String
-    abstract fun getContext(): Any
+class WWWPlatform(val name: String) {
 
     init {
         val instant = Instant.parse("2024-03-15T17:00:00Z")
@@ -42,21 +40,28 @@ abstract class WWWPlatform {
     }
 
     private var _simulation : WWWSimulation? = null
+    private var _disabledSimulation : WWWSimulation? = null
 
     fun disableSimulation() {
+        _disabledSimulation = _simulation
         _simulation = null
     }
 
+    fun restartSimulation() {
+        _disabledSimulation?.let {
+            setSimulation(it)
+            _disabledSimulation = null
+        }
+    }
+
     fun setSimulation(simulation : WWWSimulation) {
-        Log.i(::setSimulation.name, "Set simulation to ${simulation.now().toString()} and ${simulation.getUserPosition().toString()}")
+        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
         _simulation = simulation
     }
 
     fun getSimulation() : WWWSimulation? = _simulation
     fun isUnderSimulation() : Boolean = _simulation != null
 }
-
-expect fun getPlatform(): WWWPlatform
 
 class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvider) {
     fun onAppShutdown() {

@@ -3,6 +3,8 @@ package com.worldwidewaves.shared.events
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.Area
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -12,6 +14,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.koin.core.component.inject
@@ -74,6 +77,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     // ---------------------------
 
     protected val clock: IClock by inject()
+    private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
 
     // ---------------------------
 
@@ -183,5 +187,15 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             else -> { /* No validation errors */ }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
+
+    // ---------------------------
+
+    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getWaitingSequence()
+    }
+
+    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getHitSequence()
+    }
 
 }

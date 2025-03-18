@@ -1,6 +1,8 @@
 
 Semaine prochaine:
 
+- Check by sharedViewModel() (koin)
+
 == MECANIQUE DE VAGUE ET DE WARMING AVANT TOUTE CHOSE
     -- le calcul de la zone de warming doit etre un calcul fait a partir du temps de hit
 
@@ -21,7 +23,7 @@ Semaine prochaine:
       --> https://onlinesequencer.net/578198
       --> read midi file : https://stackoverflow.com/questions/71977401/how-to-open-and-play-stream-a-midi-file-using-using-android-midimanager
 
-- Bug : sir refresh de l'affichage, la vague n'est plus visible
+- Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
 
 ---------------------------------------------
 
