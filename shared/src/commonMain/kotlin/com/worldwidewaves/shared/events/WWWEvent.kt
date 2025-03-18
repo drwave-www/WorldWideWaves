@@ -88,7 +88,6 @@ data class WWWEvent(
 
     override val wavedef: WWWWaveDefinition,
     override val area: WWWEventArea,
-    override val warming: WWWEventWaveWarming,
     override val map: WWWEventMap,
 
     override var favorite: Boolean = false
@@ -161,8 +160,9 @@ data class WWWEvent(
     init {
         map.setRelatedEvent(this)
         area.setRelatedEvent(this)
-        warming.setRelatedEvent(this)
     }
+
+    @Transient override val warming = WWWEventWaveWarming(this)
 
     // ---------------------------
 
@@ -640,7 +640,6 @@ data class WWWEvent(
             else -> wavedef.validationErrors()?.let { addAll(it) }
                 .also { area.validationErrors()?.let { addAll(it) } }
                 .also { map.validationErrors()?.let { addAll(it) } }
-                .also { warming.validationErrors()?.let { addAll(it) } }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
 

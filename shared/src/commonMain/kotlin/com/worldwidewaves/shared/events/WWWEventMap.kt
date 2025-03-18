@@ -30,7 +30,6 @@ import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
-import com.worldwidewaves.shared.events.utils.PolygonUtils.convertPolygonsToGeoJson
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
@@ -88,16 +87,11 @@ class WWWEventMap(
             return cachedFilePath(styleFilename)
 
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
-        val warmingGeoJsonFilePath = cacheStringToFile(
-            "warming-${event.id}.geojson",
-            convertPolygonsToGeoJson(event.warming.area.getPolygons())
-        ).let { cachedFilePath(it) }
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
         val newFileStr = mapDataProvider.geoMapStyleData()
             .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
             .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
-            .replace("__GEOJSON_WARMING_URI__", "file:///$warmingGeoJsonFilePath")
             .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
             .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 

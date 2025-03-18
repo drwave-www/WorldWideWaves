@@ -66,9 +66,6 @@ class WaveViewModel : ViewModel() {
     private val _isInArea = MutableStateFlow(false)
     val isInArea: StateFlow<Boolean> = _isInArea.asStateFlow()
 
-    private val _isInWarming = MutableStateFlow(false)
-    val isInWarming: StateFlow<Boolean> = _isInWarming.asStateFlow()
-
     private val _isGoingToBitHit = MutableStateFlow(false)
     val isGoingToBitHit: StateFlow<Boolean> = _isGoingToBitHit.asStateFlow()
 
@@ -151,10 +148,7 @@ class WaveViewModel : ViewModel() {
             val currentEvent = event
             if (currentEvent != null) {
                 val currentPosition = newLocation.toPosition()
-                if (currentEvent.warming.area.isPositionWithin(currentPosition)) {
-                    _isInWarming.value = true
-                    _isInArea.value = false
-                } else if (currentEvent.area.isPositionWithin(currentPosition)) {
+                if (currentEvent.area.isPositionWithin(currentPosition)) {
                     _isInArea.value = true
                 }
             }

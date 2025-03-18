@@ -86,7 +86,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.be_waved
-import com.worldwidewaves.shared.generated.resources.geoloc_warm_in
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
 import com.worldwidewaves.shared.generated.resources.wave_end_time
@@ -261,10 +260,8 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 @Composable
 private fun GeolocalizeMe(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     val isInArea by waveViewModel.isInArea.collectAsState()
-    val isInWarming by waveViewModel.isInWarming.collectAsState()
 
     val geolocText = when {
-        isInWarming -> ShRes.string.geoloc_warm_in
         isInArea -> ShRes.string.geoloc_yourein
         else -> ShRes.string.geoloc_yourenotin
     }

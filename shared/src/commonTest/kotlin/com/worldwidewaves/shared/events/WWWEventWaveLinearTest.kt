@@ -97,7 +97,6 @@ class WWWEventWaveLinearTest : KoinTest {
             direction = WWWEventWave.Direction.EAST,
             approxDuration = 60
         )
-        every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
         every { mockEvent.area } returns mockArea
@@ -461,7 +460,6 @@ class WWWEventWaveLinearTest : KoinTest {
             direction = WWWEventWave.Direction.WEST,
             approxDuration = 60
         )
-        every { mockWarming.setRelatedEvent(any()) } returns mockWarming
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
         val mockBoundingBox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))

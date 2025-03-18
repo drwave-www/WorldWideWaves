@@ -21,10 +21,6 @@
     "area": {
       "osmAdminid": 71525
     },
-    "warming": {
-      "type": "LONGITUDE_CUT",
-      "longitude": 2.39492
-    },
     "map": {
       "maxZoom": 18,
       "language": "fr",
@@ -52,10 +48,6 @@
     },
     "area": {
       "osmAdminid": 2697338
-    },
-    "warming": {
-      "type": "LONGITUDE_CUT",
-      "longitude": -43.28212428287723
     },
     "map": {
       "maxZoom": 18,
@@ -85,10 +77,6 @@
     "area": {
       "osmAdminid": 9331155
     },
-    "warming": {
-      "type": "METERS",
-      "meters": 300
-    },
     "map": {
       "maxZoom": 18,
       "language": "en",
@@ -115,10 +103,6 @@
     },
     "area": {
       "osmAdminid": 0
-    },
-    "warming": {
-      "type": "METERS",
-      "meters": 500
     },
     "map": {
       "maxZoom": 5,
