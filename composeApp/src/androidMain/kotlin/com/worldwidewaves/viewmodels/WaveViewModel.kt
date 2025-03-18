@@ -52,6 +52,8 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     private var event : IWWWEvent? = null
     @Volatile private var observationStarted = false
 
+    private var backupSimulationSpeed: Int? = null
+
     private var progressionListenerKey: Int? = null
     private var statusListenerKey: Int? = null
     private var userWarmingStartedListenerKey: Int? = null
@@ -142,7 +144,10 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                 }
 
                 userWarmingStartedListenerKey = event.addOnWarmingStartedListener {
-                    platform.disableSimulation() // Disable simulation during the wave warming and hit sequence
+                    // Disable simulation speed during the wave warming and hit sequence
+                    backupSimulationSpeed = platform.getSimulation()?.speed
+                    platform.getSimulation()?.setSpeed(1)
+
                     _isWarmingInProgress.value = true
                 }
                 userGoingToBeHitListenerKey = event.addOnUserIsGoingToBeHitListener {
@@ -153,9 +158,13 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                     _hasBeenHit.value = true
                     _isWarmingInProgress.value = false
                     _isGoingToBeHit.value = false
-                    viewModelScope.launch(Dispatchers.Default) {
-                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds)
-                        platform.restartSimulation() // Reactivate simulation after the hit sequence
+
+                    // Reactivate simulation speed after the hit sequence
+                    backupSimulationSpeed?.let { backupSimulationSpeed ->
+                        viewModelScope.launch(Dispatchers.Default) {
+                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds)
+                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
+                        }
                     }
                 }
 
