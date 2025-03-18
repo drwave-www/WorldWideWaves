@@ -25,7 +25,7 @@ IN_STYLE_FILE=./osm-liberty/style.json
 OUT_STYLE_FILE=./data/mapstyle.json
 
 # Navigate to the directory of the script
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Download jq for JSON processing if not already present
 mkdir -p ./bin

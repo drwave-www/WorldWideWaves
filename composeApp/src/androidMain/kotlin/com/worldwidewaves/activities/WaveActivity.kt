@@ -88,6 +88,7 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
+import com.worldwidewaves.shared.generated.resources.wave_is_running
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
 import com.worldwidewaves.theme.extendedLight
@@ -200,13 +201,16 @@ class WaveActivity : AbstractEventBackActivity() {
 fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     val eventStatus by waveViewModel.eventStatus.collectAsState()
     val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+    val isInArea by waveViewModel.isInArea.collectAsState()
 
     val message = if (eventStatus == IWWWEvent.Status.DONE)
         ShRes.string.wave_done
     else if (hasBeenHit)
         ShRes.string.wave_hit
-    else
+    else if (isInArea)
         ShRes.string.wave_be_ready
+    else
+        ShRes.string.wave_is_running
 
     Box(
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),

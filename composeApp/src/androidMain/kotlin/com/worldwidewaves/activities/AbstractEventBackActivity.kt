@@ -92,7 +92,7 @@ abstract class AbstractEventBackActivity(
 
     private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
-    var platform : WWWPlatform? = null
+    protected val platform: WWWPlatform by inject()
 
     // ----------------------------
 

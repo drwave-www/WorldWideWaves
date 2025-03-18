@@ -57,7 +57,7 @@ data class ChoreographySequence(
 
     companion object {
         // Create an empty placeholder sequence
-        fun <T> empty(): ChoreographySequence = ChoreographySequence(
+        fun empty(): ChoreographySequence = ChoreographySequence(
             images = listOf("transparent"),
             timing = 1.seconds,
             text = "",
