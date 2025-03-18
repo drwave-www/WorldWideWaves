@@ -67,6 +67,8 @@ First push prive Play Store
                 - 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
                       --> Faire une fonction de telemetrie
 - add tests for all missing functions
+    - caching mechanism
+    - download of app features on app update / feature update
 - Add a full test for event behavior AND wave progression using listeners
 
 - ======== Bugs/Issues/Refactorings =========

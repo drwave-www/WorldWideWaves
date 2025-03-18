@@ -156,7 +156,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             Napier.v("${WWWEventWave::class.simpleName}: current time is ${IClock.instantToLiteral(clock.now(), event.getTZ())}")
             val elapsedTime = clock.now().epochSeconds - event.getWaveStartDateTime().epochSeconds
             val totalTime = getWaveDuration().inWholeSeconds
-            (elapsedTime.toDouble() / totalTime * 100).coerceAtMost(100.0)
+            (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
         }
     }
 

@@ -37,7 +37,7 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     suspend fun userWarmingStartDateTime(): Instant? {
         return event.wave.userHitDateTime()?.let { hitDateTime ->
-            hitDateTime - WAVE_WARN_BEFORE_HIT
+            hitDateTime - getWarmingDuration() - WAVE_WARN_BEFORE_HIT
         }
     }
 

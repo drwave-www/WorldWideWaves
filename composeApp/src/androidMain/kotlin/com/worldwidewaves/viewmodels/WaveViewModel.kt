@@ -50,6 +50,9 @@ class WaveViewModel : ViewModel() {
 
     private var progressionListenerKey: Int? = null
     private var statusListenerKey: Int? = null
+    private var userWarmingStartedListenerKey: Int? = null
+    private var userGoingToBeHitListenerKey: Int? = null
+    private var userHasBeenHitListenerKey: Int? = null
 
     private val _waveNumbers = MutableStateFlow<WaveNumbersLiterals?>(null)
     val waveNumbers: StateFlow<WaveNumbersLiterals?> = _waveNumbers.asStateFlow()
@@ -65,6 +68,9 @@ class WaveViewModel : ViewModel() {
 
     private val _isInArea = MutableStateFlow(false)
     val isInArea: StateFlow<Boolean> = _isInArea.asStateFlow()
+
+    private val _warmingStarted = MutableStateFlow(false)
+    val warmingStarted: StateFlow<Boolean> = _warmingStarted.asStateFlow()
 
     private val _isGoingToBitHit = MutableStateFlow(false)
     val isGoingToBitHit: StateFlow<Boolean> = _isGoingToBitHit.asStateFlow()
@@ -89,19 +95,19 @@ class WaveViewModel : ViewModel() {
             this.event = event
             viewModelScope.launch(Dispatchers.Default) {
                 _progression.value = event.wave.getProgression()
-                _waveNumbers.value = event.getAllNumbers()
-                _eventState.value = event.getStatus()
                 _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
+                _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
+                _waveNumbers.value = event.getAllNumbers()
+
+                _eventState.value = event.getStatus()
+                _warmingStarted.value = event.warming.isUserWarmingStarted()
                 _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
                 _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
-                _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
 
                 progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
                         _progression.value = event.wave.getProgression()
                         _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
-                        _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
-                        _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
                         _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
 
                         if (_waveNumbers.value == null) {
@@ -119,6 +125,22 @@ class WaveViewModel : ViewModel() {
                         _eventState.value = event.getStatus()
                     }
                 }
+                userWarmingStartedListenerKey = event.addOnWarmingStartedListener {
+                    viewModelScope.launch(Dispatchers.Default) {
+                        _warmingStarted.value = true
+                    }
+                }
+                userGoingToBeHitListenerKey = event.addOnUserIsGoingToBeHitListener {
+                    viewModelScope.launch(Dispatchers.Default) {
+                        _isGoingToBitHit.value = true
+                    }
+                }
+                userHasBeenHitListenerKey = event.addOnUserHasBeenHitListener {
+                    viewModelScope.launch(Dispatchers.Default) {
+                        _hasBeenHit.value = true
+                    }
+                }
+
             }
             observationStarted = true
         }
@@ -129,12 +151,20 @@ class WaveViewModel : ViewModel() {
             event?.stopListeners(
                 listOfNotNull(
                     progressionListenerKey,
-                    statusListenerKey
+                    statusListenerKey,
+                    userWarmingStartedListenerKey,
+                    userGoingToBeHitListenerKey ,
+                    userHasBeenHitListenerKey
                 )
             )
+
             observationStarted = false
+
             progressionListenerKey = null
             statusListenerKey = null
+            userWarmingStartedListenerKey = null
+            userGoingToBeHitListenerKey = null
+            userHasBeenHitListenerKey = null
         }
     }
 

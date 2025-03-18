@@ -123,19 +123,19 @@ data class WWWEvent(
 
     @Transient private val statusChangedListeners = mutableMapOf<Int, (Status) -> Unit>()
     @Transient private val waveProgressionChangedListeners = mutableMapOf<Int, (Double) -> Unit>()
-    @Transient private val warmingStartedListeners = mutableMapOf<Int, () -> Unit>()
+    @Transient private val userWarmingStartedListeners = mutableMapOf<Int, () -> Unit>()
     @Transient private val userIsGoingToBeHitListeners = mutableMapOf<Int, () -> Unit>()
     @Transient private val userHasBeenHitListeners = mutableMapOf<Int, () -> Unit>()
 
     // --
 
-    @Transient private val warmingStartedNotifiedListeners = mutableListOf<Int>()
+    @Transient private val userWarmingStartedNotifiedListeners = mutableListOf<Int>()
     @Transient private val userIsGoingToBeHitNotifiedListeners = mutableListOf<Int>()
     @Transient private val userHasBeenHitNotifiedListeners = mutableListOf<Int>()
 
     @Transient private val statusChangedMutex = Mutex()
     @Transient private val waveProgressionChangedMutex = Mutex()
-    @Transient private val warmingStartedMutex = Mutex()
+    @Transient private val userWarmingStartedMutex = Mutex()
     @Transient private val userIsGoingToBeHitMutex = Mutex()
     @Transient private val userHasBeenHitMutex = Mutex()
 
@@ -403,7 +403,7 @@ data class WWWEvent(
             listOf(
                 statusChangedListeners,
                 waveProgressionChangedListeners,
-                warmingStartedListeners,
+                userWarmingStartedListeners,
                 userIsGoingToBeHitListeners,
                 userHasBeenHitListeners
             ).firstOrNull { it.remove(key) != null }
@@ -430,7 +430,7 @@ data class WWWEvent(
             // No more listeners, stop observation
             if (statusChangedListeners.isEmpty() &&
                 waveProgressionChangedListeners.isEmpty() &&
-                warmingStartedListeners.isEmpty() &&
+                userWarmingStartedListeners.isEmpty() &&
                 userIsGoingToBeHitListeners.isEmpty() &&
                 userHasBeenHitListeners.isEmpty()) {
                 stopObservation()
@@ -454,10 +454,10 @@ data class WWWEvent(
             }
 
             // Warming started
-            warmingStartedMutex.withLock {
-                if (warmingStartedListeners.isNotEmpty() &&
-                    warming.isUserWarmingStarted() && warmingStartedNotifiedListeners.size != warmingStartedListeners.size) {
-                    onWarmingStarted()
+            userWarmingStartedMutex.withLock {
+                if (userWarmingStartedListeners.isNotEmpty() &&
+                    warming.isUserWarmingStarted() && userWarmingStartedNotifiedListeners.size != userWarmingStartedListeners.size) {
+                    onUserWarmingStarted()
                 }
             }
 
@@ -539,7 +539,7 @@ data class WWWEvent(
         addListener(listener, waveProgressionChangedListeners, waveProgressionChangedMutex, 200)
 
     override fun addOnWarmingStartedListener(listener: () -> Unit): Int =
-        addListener(listener, warmingStartedListeners, warmingStartedMutex, 300)
+        addListener(listener, userWarmingStartedListeners, userWarmingStartedMutex, 300)
 
     override fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int =
         addListener(listener, userIsGoingToBeHitListeners, userIsGoingToBeHitMutex, 400)
@@ -566,20 +566,28 @@ data class WWWEvent(
         }
     }
 
-    private fun onEventStatusChanged(status: Status) =
+    private fun onEventStatusChanged(status: Status) {
+        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} Event status changed to $status")
         notifyListeners(statusChangedListeners, { it(status) })
+    }
 
     private fun onWaveProgressionChanged(progression: Double) =
         notifyListeners(waveProgressionChangedListeners, { it(progression) })
 
-    private fun onWarmingStarted() =
-        notifyListeners(warmingStartedListeners, { it() }, warmingStartedNotifiedListeners)
+    private fun onUserWarmingStarted() {
+        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User warming started")
+        notifyListeners(userWarmingStartedListeners, { it() }, userWarmingStartedNotifiedListeners)
+    }
 
-    private fun onUserIsGoingToBeHit() =
+    private fun onUserIsGoingToBeHit() {
+        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User is going to be hit soon")
         notifyListeners(userIsGoingToBeHitListeners, { it() }, userIsGoingToBeHitNotifiedListeners)
+    }
 
-    private fun onUserHasBeenHit() =
+    private fun onUserHasBeenHit() {
+        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User has been hit")
         notifyListeners(userHasBeenHitListeners, { it() }, userHasBeenHitNotifiedListeners)
+    }
 
     // ---------------------------
 
