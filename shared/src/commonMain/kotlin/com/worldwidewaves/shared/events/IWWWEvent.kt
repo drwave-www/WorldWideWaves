@@ -80,18 +80,17 @@ interface IWWWEvent : DataValidator {
 
     fun getTZ(): TimeZone
     fun getStartDateTime(): Instant
+    suspend fun getTotalTime(): Duration
     suspend fun getEndDateTime(): Instant
 
     fun getLiteralTimezone(): String
     fun getLiteralStartDateSimple(): String
     fun getLiteralStartTime(): String
     suspend fun getLiteralEndTime(): String
-
     suspend fun getLiteralTotalTime(): String
 
     fun getWaveStartDateTime() : Instant
     fun getWarmingDuration(): Duration
-    fun isWarmingEnded(): Boolean
     fun isNearTime(): Boolean
 
     // ---------------------------
@@ -102,7 +101,7 @@ interface IWWWEvent : DataValidator {
 
     fun addOnStatusChangedListener(listener: (Status) -> Unit): Int
     fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int
-    fun addOnWarmingEndedListener(listener: () -> Unit): Int
+    fun addOnWarmingStartedListener(listener: () -> Unit): Int
     fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int
     fun addOnUserHasBeenHitListener(listener: () -> Unit): Int
 

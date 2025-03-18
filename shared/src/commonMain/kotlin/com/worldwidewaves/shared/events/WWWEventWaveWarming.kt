@@ -1,5 +1,13 @@
 package com.worldwidewaves.shared.events
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import com.worldwidewaves.shared.events.utils.IClock
+import kotlinx.datetime.Instant
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.time.Duration
+
 /*
  * Copyright 2024 DrWave
  *
@@ -21,6 +29,21 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-class WWWEventWaveWarming(event: IWWWEvent) {
+class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
+
+    private val clock: IClock by inject()
+
+    fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
+
+    suspend fun userWarmingStartDateTime(): Instant? {
+        return event.wave.userHitDateTime()?.let { hitDateTime ->
+            hitDateTime - WAVE_WARN_BEFORE_HIT
+        }
+    }
+
+    /**
+     * Warming is started
+     */
+    suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
 }

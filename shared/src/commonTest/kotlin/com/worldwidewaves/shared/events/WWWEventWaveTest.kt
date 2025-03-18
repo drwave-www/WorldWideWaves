@@ -26,6 +26,7 @@ import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.mockk.mockk
+import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -64,8 +65,8 @@ class WWWEventWaveTest : KoinTest {
             )
             override suspend fun getWaveDuration(): Duration = Duration.ZERO
             override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
-            override suspend fun timeBeforeHit(): Duration = Duration.INFINITE
-            override suspend fun userClosestWaveLongitude() = 0.0
+            override suspend fun userHitDateTime(): Instant? = null
+            override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
             override suspend fun userPositionToWaveRatio() = 0.0
         }.setRelatedEvent(mockEvent)
     }

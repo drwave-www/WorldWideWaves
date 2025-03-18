@@ -94,7 +94,7 @@ class WaveViewModel : ViewModel() {
                 _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                 _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
                 _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
-                _timeBeforeHit.value = event.wave.timeBeforeHit() ?: Duration.INFINITE
+                _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
 
                 progressionListenerKey = event.addOnWaveProgressionChangedListener {
                     viewModelScope.launch(Dispatchers.Default) {
@@ -102,7 +102,7 @@ class WaveViewModel : ViewModel() {
                         _userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
                         _isGoingToBitHit.value = event.wave.userIsGoingToBeHit()
                         _hasBeenHit.value = event.wave.hasUserBeenHitInCurrentPosition()
-                        _timeBeforeHit.value = event.wave.timeBeforeHit() ?: Duration.INFINITE
+                        _timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
 
                         if (_waveNumbers.value == null) {
                             _waveNumbers.value = event.getAllNumbers()

@@ -184,7 +184,6 @@ class EarthAdaptedSpeedLongitudeTest {
         every { mockClock.now() } returns currentTime
         every { mockEvent.getWaveStartDateTime() } returns startTime
         coEvery { mockEvent.isRunning() } returns true
-        coEvery { mockEvent.isWarmingEnded() } returns true
         every { mockEvent.area } returns mockArea
         coEvery { mockEvent.area.bbox() } returns bbox
 

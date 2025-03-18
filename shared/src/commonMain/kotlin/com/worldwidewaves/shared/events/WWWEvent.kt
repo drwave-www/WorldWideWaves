@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SOON_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
 import com.worldwidewaves.shared.events.IWWWEvent.EventObservation
 import com.worldwidewaves.shared.events.IWWWEvent.Status
@@ -123,19 +123,19 @@ data class WWWEvent(
 
     @Transient private val statusChangedListeners = mutableMapOf<Int, (Status) -> Unit>()
     @Transient private val waveProgressionChangedListeners = mutableMapOf<Int, (Double) -> Unit>()
-    @Transient private val warmingEndedListeners = mutableMapOf<Int, () -> Unit>()
+    @Transient private val warmingStartedListeners = mutableMapOf<Int, () -> Unit>()
     @Transient private val userIsGoingToBeHitListeners = mutableMapOf<Int, () -> Unit>()
     @Transient private val userHasBeenHitListeners = mutableMapOf<Int, () -> Unit>()
 
     // --
 
-    @Transient private val warmingEndedNotifiedListeners = mutableListOf<Int>()
+    @Transient private val warmingStartedNotifiedListeners = mutableListOf<Int>()
     @Transient private val userIsGoingToBeHitNotifiedListeners = mutableListOf<Int>()
     @Transient private val userHasBeenHitNotifiedListeners = mutableListOf<Int>()
 
     @Transient private val statusChangedMutex = Mutex()
     @Transient private val waveProgressionChangedMutex = Mutex()
-    @Transient private val warmingEndedMutex = Mutex()
+    @Transient private val warmingStartedMutex = Mutex()
     @Transient private val userIsGoingToBeHitMutex = Mutex()
     @Transient private val userHasBeenHitMutex = Mutex()
 
@@ -183,7 +183,7 @@ data class WWWEvent(
     override fun isSoon(): Boolean {
         val eventDateTime = getStartDateTime()
         val now = clock.now()
-        return eventDateTime > now && eventDateTime <= now.plus(30.days)
+        return eventDateTime > now && eventDateTime <= now.plus(WAVE_SOON_DELAY)
     }
 
     override suspend fun isRunning(): Boolean {
@@ -212,12 +212,22 @@ data class WWWEvent(
      * and then converts it to a `LocalDateTime` in the same time zone.
      *
      */
-    override fun getStartDateTime(): Instant = runCatching {
-        val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
-        localDateTime.toInstant(getTZ())
-    }.getOrElse {
-        Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $it")
-        throw IllegalStateException("$id: Error parsing start date and time")
+    override fun getStartDateTime(): Instant =
+        try {
+            val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
+            localDateTime.toInstant(getTZ())
+        } catch (e: Exception) {
+            Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $e")
+            throw IllegalStateException("$id: Error parsing start date and time")
+        }
+
+    override suspend fun getTotalTime(): Duration {
+        var waveDuration = wave.getWaveDuration()
+
+        if (waveDuration == 0.seconds) // If GeoJson has not been yet loaded we do not have the polygons
+            waveDuration = wave.getApproxDuration()
+
+        return getWarmingDuration() + WAVE_WARN_BEFORE_HIT + waveDuration
     }
 
     /**
@@ -232,15 +242,7 @@ data class WWWEvent(
      * 6. Adds the duration to the start time to get the end time.
      *
      */
-    override suspend fun getEndDateTime(): Instant {
-        var waveDuration = wave.getWaveDuration()
-
-        if (waveDuration == 0.seconds) // If GeoJson has not been yet loaded we do not have the polygons
-            waveDuration = wave.getApproxDuration()
-
-        return getStartDateTime().plus(waveDuration + getWarmingDuration())
-    }
-
+    override suspend fun getEndDateTime(): Instant = getStartDateTime().plus(getTotalTime())
 
     // ------------------------------------------------------------------------
 
@@ -252,8 +254,7 @@ data class WWWEvent(
      *
      */
     override fun getLiteralTimezone(): String {
-        val offset = getTZ().offsetAt(clock.now())
-        val hoursOffset = offset.totalSeconds / 3600
+        val hoursOffset = getTZ().offsetAt(clock.now()).totalSeconds / 3600
         return when {
             hoursOffset == 0 -> "UTC"
             hoursOffset > 0 -> "UTC+$hoursOffset"
@@ -308,24 +309,19 @@ data class WWWEvent(
      * in the format of "X min", where X is the total time in whole minutes.
      *
      */
-    override suspend fun getLiteralTotalTime(): String = "${wave.getWaveDuration().inWholeMinutes} min" // FIXME bad time used
+    override suspend fun getLiteralTotalTime(): String = "${getTotalTime().inWholeMinutes} min"
 
     // -----------------------------------------------------------------------
 
     /**
      * Starting date/time of the wave
      */
-    override fun getWaveStartDateTime() : Instant = getStartDateTime() + getWarmingDuration()
+    override fun getWaveStartDateTime() : Instant = getStartDateTime() + getWarmingDuration() + WAVE_WARN_BEFORE_HIT
 
     /**
      * Duration of the warming phase
      */
-    override fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
-
-    /**
-     * Warming is ended
-     */
-    override fun isWarmingEnded(): Boolean = clock.now() > getStartDateTime().plus(getWarmingDuration())
+    override fun getWarmingDuration(): Duration = warming.getWarmingDuration()
 
     /**
      * Determines if the current time is near the event start time.
@@ -336,7 +332,7 @@ data class WWWEvent(
      * Is different than isSoon on the delay, isSoon is on date while isNearTime is on hours
      *
      */
-    override fun isNearTime(): Boolean { // FIXME: quite duplicate with event.isSoon() !?
+    override fun isNearTime(): Boolean {
         val now = clock.now()
         val eventStartTime: Instant = getStartDateTime()
         val durationUntilEvent = eventStartTime - now
@@ -407,7 +403,7 @@ data class WWWEvent(
             listOf(
                 statusChangedListeners,
                 waveProgressionChangedListeners,
-                warmingEndedListeners,
+                warmingStartedListeners,
                 userIsGoingToBeHitListeners,
                 userHasBeenHitListeners
             ).firstOrNull { it.remove(key) != null }
@@ -434,7 +430,7 @@ data class WWWEvent(
             // No more listeners, stop observation
             if (statusChangedListeners.isEmpty() &&
                 waveProgressionChangedListeners.isEmpty() &&
-                warmingEndedListeners.isEmpty() &&
+                warmingStartedListeners.isEmpty() &&
                 userIsGoingToBeHitListeners.isEmpty() &&
                 userHasBeenHitListeners.isEmpty()) {
                 stopObservation()
@@ -457,16 +453,16 @@ data class WWWEvent(
                 }
             }
 
-            // Warming ended
-            warmingEndedMutex.withLock {
-                if (warmingEndedListeners.isNotEmpty() &&
-                    isWarmingEnded() && warmingEndedNotifiedListeners.size != warmingEndedListeners.size) {
-                    onWarmingEnded()
+            // Warming started
+            warmingStartedMutex.withLock {
+                if (warmingStartedListeners.isNotEmpty() &&
+                    warming.isUserWarmingStarted() && warmingStartedNotifiedListeners.size != warmingStartedListeners.size) {
+                    onWarmingStarted()
                 }
             }
 
             // User is going to be hit
-            val timeBeforeHit = wave.timeBeforeHit() ?: INFINITE
+            val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
             userIsGoingToBeHitMutex.withLock {
                 if (userIsGoingToBeHitListeners.isNotEmpty() &&
                     (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) &&
@@ -497,7 +493,7 @@ data class WWWEvent(
         val now = clock.now()
         val eventStartTime = getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = wave.timeBeforeHit() ?: 1.days
+        val timeBeforeHit = wave.timeBeforeUserHit() ?: 1.days
 
         val interval =  when {
             timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
@@ -542,8 +538,8 @@ data class WWWEvent(
     override fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int =
         addListener(listener, waveProgressionChangedListeners, waveProgressionChangedMutex, 200)
 
-    override fun addOnWarmingEndedListener(listener: () -> Unit): Int =
-        addListener(listener, warmingEndedListeners, warmingEndedMutex, 300)
+    override fun addOnWarmingStartedListener(listener: () -> Unit): Int =
+        addListener(listener, warmingStartedListeners, warmingStartedMutex, 300)
 
     override fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int =
         addListener(listener, userIsGoingToBeHitListeners, userIsGoingToBeHitMutex, 400)
@@ -576,8 +572,8 @@ data class WWWEvent(
     private fun onWaveProgressionChanged(progression: Double) =
         notifyListeners(waveProgressionChangedListeners, { it(progression) })
 
-    private fun onWarmingEnded() =
-        notifyListeners(warmingEndedListeners, { it() }, warmingEndedNotifiedListeners)
+    private fun onWarmingStarted() =
+        notifyListeners(warmingStartedListeners, { it() }, warmingStartedNotifiedListeners)
 
     private fun onUserIsGoingToBeHit() =
         notifyListeners(userIsGoingToBeHitListeners, { it() }, userIsGoingToBeHitNotifiedListeners)

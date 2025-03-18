@@ -2,6 +2,7 @@ package com.worldwidewaves.shared
 
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -50,10 +51,11 @@ class WWWGlobals {
         const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
 
         // -- Wave Constants --
+        val WAVE_SOON_DELAY = 30.days
         val WAVE_OBSERVE_DELAY = 2.hours // hours
-        val WAVE_WARMING_DURATION = 3.minutes
+        val WAVE_WARMING_DURATION = 2.5.minutes
+        val WAVE_WARN_BEFORE_HIT = 30.seconds
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
-        val WAVE_WARN_BEFORE_HIT = 15.seconds
 
         // -- UI Constants --
 

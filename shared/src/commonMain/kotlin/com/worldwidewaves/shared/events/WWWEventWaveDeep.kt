@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
@@ -50,11 +51,11 @@ data class WWWEventWaveDeep(
         TODO("Not yet implemented")
     }
 
-    override suspend fun timeBeforeHit(): Duration? {
+    override suspend fun userHitDateTime(): Instant? {
         TODO("Not yet implemented")
     }
 
-    override suspend fun userClosestWaveLongitude(): Double? {
+    override suspend fun closestWaveLongitude(latitude: Double): Double {
         TODO("Not yet implemented")
     }
 

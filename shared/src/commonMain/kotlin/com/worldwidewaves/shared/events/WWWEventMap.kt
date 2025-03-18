@@ -124,7 +124,7 @@ class WWWEventMap(
     }
 
     /**
-     * Checks if a given position is within the event area's bounding box.
+     * Checks if a given position is within the event map's bounding box.
      *
      */
     suspend fun isPositionWithin(position: Position): Boolean =
