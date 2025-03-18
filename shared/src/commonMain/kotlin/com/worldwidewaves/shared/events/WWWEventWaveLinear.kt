@@ -29,10 +29,12 @@ import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
+import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
+import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,6 +49,10 @@ data class WWWEventWaveLinear(
 
     @Transient private var cachedLongitude: EarthAdaptedSpeedLongitude? = null
     @Transient private var cachedWaveDuration: Duration? = null
+    @Transient private var cachedHitDateTime: Instant? = null
+    @Transient private var cachedHitPosition: Position? = null
+    @Transient private val epsilonLatPosition = 0.000009 // Approximately 1 meter
+    @Transient private val epsilonLngPosition = 0.000009 // Approximately 1 meter at the equator
 
     // ---------------------------
 
@@ -156,6 +162,18 @@ data class WWWEventWaveLinear(
         val userPosition = getUserPosition() ?: return null
         if (!event.area.isPositionWithin(userPosition)) return null
 
+        // Check if we have a cached result for a nearby position
+        if (cachedHitPosition != null && cachedHitDateTime != null) {
+            val isCloseEnough =
+                abs(cachedHitPosition!!.lat - userPosition.lat) < epsilonLatPosition &&
+                        abs(cachedHitPosition!!.lng - userPosition.lng) < epsilonLngPosition
+
+            // If the user hasn't moved significantly, return the cached result
+            if (isCloseEnough) {
+                return cachedHitDateTime
+            }
+        }
+
         val waveStartTime = event.getWaveStartDateTime()
         val bbox = bbox()
 
@@ -169,7 +187,13 @@ data class WWWEventWaveLinear(
         val timeToReachUserInSeconds = distanceToUser / speed
 
         // Calculate the exact hit time by adding the time to reach to the wave START time
-        return waveStartTime + timeToReachUserInSeconds.seconds
+        val hitDateTime = waveStartTime + timeToReachUserInSeconds.seconds
+
+        // Cache the result
+        cachedHitPosition = userPosition
+        cachedHitDateTime = hitDateTime
+
+        return hitDateTime
     }
 
     override suspend fun closestWaveLongitude(latitude: Double): Double {
