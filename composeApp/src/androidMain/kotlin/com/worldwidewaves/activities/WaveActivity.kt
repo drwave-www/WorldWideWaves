@@ -23,7 +23,6 @@ package com.worldwidewaves.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
@@ -88,9 +87,9 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
-import com.worldwidewaves.shared.generated.resources.wave_is_running
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
+import com.worldwidewaves.shared.generated.resources.wave_is_running
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -107,6 +106,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.maplibre.android.geometry.LatLng
 import kotlin.math.min
 import kotlin.time.Duration
@@ -116,7 +116,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class WaveActivity : AbstractEventBackActivity() {
 
     private val clock: IClock by inject()
-    private val waveViewModel by viewModels<WaveViewModel>()
+    private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
     override fun onResume() {

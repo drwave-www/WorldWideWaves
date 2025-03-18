@@ -22,7 +22,6 @@ package com.worldwidewaves.activities
  */
 
 import android.content.Intent
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -103,6 +102,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -110,7 +110,7 @@ class EventActivity : AbstractEventBackActivity() {
 
     private val clock: IClock by inject()
 
-    private val waveViewModel by viewModels<WaveViewModel>()
+    private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
     override fun onResume() {

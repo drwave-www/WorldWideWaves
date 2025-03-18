@@ -21,8 +21,6 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-import android.app.Application
-import android.content.Context
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
@@ -32,14 +30,11 @@ import com.worldwidewaves.shared.utils.ImageResolver
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 
-fun androidModule(application: Application) = module {
-    single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
-    single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
-
+val androidModule = module {
     single<WWWPlatform> {
         debugBuild()
         WWWPlatform("Android ${Build.VERSION.SDK_INT}")
     }
-
-    single<Context> { application }
+    single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
+    single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 }

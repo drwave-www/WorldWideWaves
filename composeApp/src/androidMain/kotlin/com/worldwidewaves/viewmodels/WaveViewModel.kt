@@ -43,7 +43,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Polygon
 import kotlin.time.Duration
 
-class WaveViewModel(private val platform: WWWPlatform? = null) : ViewModel() {
+class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     companion object {
         private const val MAX_POLY_RECOMPOSE = 100
@@ -142,7 +142,7 @@ class WaveViewModel(private val platform: WWWPlatform? = null) : ViewModel() {
                 }
 
                 userWarmingStartedListenerKey = event.addOnWarmingStartedListener {
-                    platform?.disableSimulation() // Disable simulation during the wave warming and hit sequence
+                    platform.disableSimulation() // Disable simulation during the wave warming and hit sequence
                     _isWarmingInProgress.value = true
                 }
                 userGoingToBeHitListenerKey = event.addOnUserIsGoingToBeHitListener {
@@ -155,7 +155,7 @@ class WaveViewModel(private val platform: WWWPlatform? = null) : ViewModel() {
                     _isGoingToBeHit.value = false
                     viewModelScope.launch(Dispatchers.Default) {
                         delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds)
-                        platform?.restartSimulation() // Reactivate simulation after the hit sequence
+                        platform.restartSimulation() // Reactivate simulation after the hit sequence
                     }
                 }
 

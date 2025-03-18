@@ -52,7 +52,7 @@ class MainApplication : Application(), Configuration.Provider {
         startKoin {
             androidContext(this@MainApplication)
             androidLogger()
-            modules(sharedModule() + androidModule(this@MainApplication) + applicationModule)
+            modules(sharedModule + androidModule + applicationModule)
         }
 
     }

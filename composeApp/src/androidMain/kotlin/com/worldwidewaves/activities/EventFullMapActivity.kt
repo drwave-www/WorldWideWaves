@@ -21,7 +21,6 @@ package com.worldwidewaves.activities
  * limitations under the License.
  */
 
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +65,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -73,7 +73,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
     private val clock: IClock by inject()
 
-    private val waveViewModel by viewModels<WaveViewModel>()
+    private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
     override fun onResume() {
