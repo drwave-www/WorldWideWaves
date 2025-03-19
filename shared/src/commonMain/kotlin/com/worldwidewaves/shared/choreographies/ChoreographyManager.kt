@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 
 /**
  * Manages choreography sequences for different phases of wave events.
@@ -69,7 +70,7 @@ class ChoreographyManager<T>(
         val sequence: ChoreographySequence,
         val resolvedImages: List<T>,
         val startTime: Duration, // Offset from the beginning of the warming phase
-        val endTime: Duration    // When this sequence ends
+        val endTime: Duration // When this sequence ends
     )
 
     init {
@@ -154,7 +155,8 @@ class ChoreographyManager<T>(
     }
 
     /**
-     * Get the appropriate warming sequence based on elapsed time since warming started
+     * Get the appropriate warming sequence based on elapsed time since warming started.
+     * Sequences will loop continuously rather than stopping at the last one.
      * @param startTime When the warming phase started
      * @return The appropriate choreography sequence or null if none available
      */
@@ -162,31 +164,28 @@ class ChoreographyManager<T>(
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
-        // Calculate elapsed time since warming started
+        val totalDuration = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
 
-        // Find the appropriate sequence
-        val sequence = resolved.warmingSequences.find {
-            elapsedTime >= it.startTime && elapsedTime < it.endTime
-        } ?: run {
-            // If we're past all sequences, return the last one
-            if (elapsedTime >= resolved.warmingSequences.last().endTime) {
-                resolved.warmingSequences.last()
-            } else {
-                // Or if we're before any sequence, return the first one
-                resolved.warmingSequences.first()
-            }
+        val wrappedElapsedTime = if (totalDuration.isPositive()) {
+            (elapsedTime.inWholeNanoseconds % totalDuration.inWholeNanoseconds).nanoseconds
+                .coerceAtLeast(Duration.ZERO)
+        } else {
+            Duration.ZERO
         }
 
-        // Calculate remaining time in this sequence
-        val remainingInSequence = sequence.endTime - elapsedTime
+        // Find the sequence for this wrapped time
+        val sequence = resolved.warmingSequences.find {
+            wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
+        } ?: resolved.warmingSequences.first() // Fallback to first if not found
 
         return DisplayableSequence(
             images = sequence.resolvedImages,
             timing = sequence.sequence.timing,
             text = sequence.sequence.text,
             loop = sequence.sequence.loop,
-            remainingDuration = remainingInSequence
+            // We provide the actual remaining time within this sequence iteration
+            remainingDuration = sequence.endTime - wrappedElapsedTime
         )
     }
 

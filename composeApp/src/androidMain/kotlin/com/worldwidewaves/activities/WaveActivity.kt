@@ -82,7 +82,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
@@ -392,6 +392,9 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
     // State to track if we should show the hit sequence
     var showHitSequence by remember { mutableStateOf(false) }
 
+    // For warming sequences - use recomposition to update sequence
+    var warmingKey by remember { mutableIntStateOf(0) }
+
     // Calculate and schedule the hiding of the hit sequence
     LaunchedEffect(hasBeenHit, hitDateTime) {
         if (hasBeenHit) {
@@ -420,14 +423,29 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
     }
 
     when {
-        // Show warming choreography
+        // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
-            ChoreographyDisplay(event.warming.getCurrentChoregraphySequence(), clock, modifier.zIndex(10f))
+            // Get the current sequence
+            val warmingSequence = remember(warmingKey) {
+                event.warming.getCurrentChoregraphySequence()
+            }
+
+            // When this sequence ends, request a new one
+            if (warmingSequence != null) {
+                TimedSequenceDisplay(
+                    sequence = warmingSequence,
+                    clock = clock,
+                    modifier = modifier.zIndex(10f),
+                    onSequenceComplete = { warmingKey++ }
+                )
+            }
         }
+
         // Show waiting choreography when going to be hit
         isGoingToBeHit -> {
             ChoreographyDisplay(event.wave.waitingChoregraphySequence(), clock, modifier.zIndex(10f))
         }
+
         // Show hit choreography when user has been hit and within time window
         hasBeenHit && showHitSequence -> {
             ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
@@ -436,8 +454,25 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
 }
 
 @Composable
+fun TimedSequenceDisplay(
+    sequence: DisplayableSequence<DrawableResource>?,
+    clock: IClock,
+    modifier: Modifier = Modifier,
+    onSequenceComplete: () -> Unit
+) {
+    if (sequence == null) return
+
+    ChoreographyDisplay(sequence, clock, modifier)
+
+    LaunchedEffect(sequence) {
+        delay(sequence.remainingDuration ?: sequence.timing)
+        onSequenceComplete()
+    }
+}
+
+@Composable
 fun ChoreographyDisplay(
-    sequence: ChoreographyManager.DisplayableSequence<DrawableResource>?,
+    sequence: DisplayableSequence<DrawableResource>?,
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
