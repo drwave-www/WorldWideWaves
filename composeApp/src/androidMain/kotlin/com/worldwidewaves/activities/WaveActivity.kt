@@ -50,7 +50,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -390,6 +389,36 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
     val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
     val hitDateTime by waveViewModel.hitDateTime.collectAsState()
 
+    // State to track if we should show the hit sequence
+    var showHitSequence by remember { mutableStateOf(false) }
+
+    // Calculate and schedule the hiding of the hit sequence
+    LaunchedEffect(hasBeenHit, hitDateTime) {
+        if (hasBeenHit) {
+            val currentTime = clock.now()
+            val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
+
+            if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
+                // Show the sequence
+                showHitSequence = true
+
+                // Calculate remaining time to show
+                val remainingTimeMs = maxOf(0,
+                    WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
+                            (currentTime - hitDateTime).inWholeMilliseconds
+                )
+
+                // Schedule hiding after the remaining time
+                delay(remainingTimeMs)
+                showHitSequence = false
+            } else {
+                showHitSequence = false
+            }
+        } else {
+            showHitSequence = false
+        }
+    }
+
     when {
         // Show warming choreography
         isWarmingInProgress -> {
@@ -399,22 +428,9 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
         isGoingToBeHit -> {
             ChoreographyDisplay(event.wave.waitingChoregraphySequence(), clock, modifier.zIndex(10f))
         }
-        // Show hit choreography when user has been hit
-        hasBeenHit -> {
-            // Show hit choreography sequence if we're within X seconds after hit time
-            val currentTime = clock.now()
-            val showHitSequence by remember {
-                derivedStateOf {
-                    hitDateTime.let { hitTime ->
-                        val secondsSinceHit = (currentTime - hitTime).inWholeSeconds
-                        secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                    }
-                }
-            }
-
-            if (showHitSequence) {
-                ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
-            }
+        // Show hit choreography when user has been hit and within time window
+        hasBeenHit && showHitSequence -> {
+            ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
         }
     }
 }
@@ -444,7 +460,7 @@ fun ChoreographyDisplay(
 
             delay(sequence.timing.inWholeMilliseconds)
             isVisible = false
-            delay(300) // Short delay for fade out
+            // delay(300) // Short delay for fade out
 
             if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
                 currentImageIndex = (currentImageIndex + 1) % sequence.images.size
