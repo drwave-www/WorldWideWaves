@@ -560,34 +560,27 @@ class EventMap(
                 val horizontalPadding = (bboxWidth * 0.3) // 30% padding horizontally
                 val verticalPadding = (bboxHeight * 0.2) // 20% padding vertically
 
-                val paddingLeft = maxOf(minOf(
-                    minOf(userLatLng.longitude, waveLatLng.longitude) - bbox.sw.lng,
-                    horizontalPadding
-                ), 0.0)
-                val paddingRight = maxOf(minOf(
-                    bbox.ne.lng - maxOf(userLatLng.longitude, waveLatLng.longitude),
-                    horizontalPadding
-                ), 0.0)
-                val paddingTop = maxOf(minOf(
-                    bbox.ne.lat - maxOf(userLatLng.latitude, waveLatLng.latitude),
-                    verticalPadding
-                ), 0.0)
-                val paddingBottom = maxOf(minOf(
-                    minOf(userLatLng.latitude, waveLatLng.latitude) - bbox.sw.lat,
-                    verticalPadding
-                ), 0.0)
+                val distanceLeft = bounds.getLonWest() - bbox.sw.lng
+                val paddingLeft = minOf(horizontalPadding, distanceLeft)
+
+                val distanceRight = bbox.ne.lng - bounds.getLonEast()
+                val paddingRight = minOf(horizontalPadding, distanceRight)
+
+                val distanceTop = bbox.ne.lat - bounds.getLatNorth()
+                val paddingTop = minOf(verticalPadding, distanceTop)
+
+                val distanceBottom = bounds.getLatSouth() - bbox.sw.lat
+                val paddingBottom = minOf(verticalPadding, distanceBottom)
 
                 val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
                     bounds,
-                    ((paddingLeft / bboxWidth) * screenWidth).toInt(), // left
-                    ((paddingTop / bboxHeight) * screenHeight).toInt(), // top
-                    ((paddingRight / bboxWidth) * screenWidth).toInt(), // right
-                    ((paddingBottom / bboxHeight) * screenHeight).toInt() // bottom
+                    ((maxOf(paddingLeft, 0.0) / bboxWidth) * screenWidth).toInt(), // left
+                    ((maxOf(paddingTop, 0.0) / bboxHeight) * screenHeight).toInt(), // top
+                    ((maxOf(paddingRight, 0.0) / bboxWidth) * screenWidth).toInt(), // right
+                    ((maxOf(paddingBottom, 0.0)/ bboxHeight) * screenHeight).toInt() // bottom
                 )
 
-                map.animateCamera(
-                    cameraUpdate,
-                    500, // Animation duration in milliseconds
+                map.animateCamera(cameraUpdate, 500,
                     object : CancelableCallback {
                         override fun onFinish() {
                             animationInProgress = false
