@@ -331,7 +331,10 @@ abstract class AbstractEventBackActivity(
 
             // Cancel button
             Button(
-                onClick = { mapViewModel.cancelDownload() },
+                onClick = {
+                            mapViewModel.cancelDownload()
+                            finish()
+                          },
                 modifier = Modifier
             ) {
                 Text(text = stringResource(ShRes.string.map_cancel_download))
