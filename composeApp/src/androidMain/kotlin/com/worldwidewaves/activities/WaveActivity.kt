@@ -29,22 +29,20 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -140,6 +138,9 @@ class WaveActivity : AbstractEventBackActivity() {
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
+        // Shared state to track if any choreography is being displayed
+        var isAnyChoreographyVisible by remember { mutableStateOf(false) }
+
         val eventMap = remember(event.id) {
             EventMap(
                 platform, event,
@@ -163,8 +164,25 @@ class WaveActivity : AbstractEventBackActivity() {
             waveObserver?.startObservation()
         }
 
-        // Use Box as the root container to allow for overlapping elements
-        Box(modifier = Modifier.fillMaxSize()) {
+        // Get choreography-related states
+        val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
+        val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
+        val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+        val hitDateTime by waveViewModel.hitDateTime.collectAsState()
+
+        // Calculate if any choreography should be visible
+        LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
+            val showHitSequence = if (hasBeenHit) {
+                val currentTime = clock.now()
+                val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
+                secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+            } else false
+
+            isAnyChoreographyVisible = isWarmingInProgress || isGoingToBeHit || (hasBeenHit && showHitSequence)
+        }
+
+        Box(modifier = modifier.fillMaxSize()) {
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -175,15 +193,23 @@ class WaveActivity : AbstractEventBackActivity() {
                     .fillMaxWidth()
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel)
-                WaveHitCounter(waveViewModel)
+
+                if (!isAnyChoreographyVisible) {
+                    WaveHitCounter(waveViewModel)
+                }
             }
 
+            // Pass the visibility state to WaveChroreographies for coordination
             WaveChroreographies(
                 event = event,
                 waveViewModel = waveViewModel,
                 clock = clock,
-                modifier = Modifier.fillMaxSize().zIndex(10f)
+                modifier = Modifier.fillMaxSize().zIndex(10f),
+                onVisibilityChanged = { isVisible ->
+                    isAnyChoreographyVisible = isVisible
+                }
             )
+
         }
     }
 
@@ -383,7 +409,13 @@ private fun formatDuration(duration: Duration): String {
 // ----------------------------
 
 @Composable
-fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: IClock, modifier: Modifier = Modifier) {
+fun WaveChroreographies(
+    event: IWWWEvent,
+    waveViewModel: WaveViewModel,
+    clock: IClock,
+    modifier: Modifier = Modifier,
+    onVisibilityChanged: (Boolean) -> Unit = {}
+) {
     val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
     val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
     val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
@@ -402,8 +434,8 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
             val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
 
             if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
-                // Show the sequence
                 showHitSequence = true
+                onVisibilityChanged(true)
 
                 // Calculate remaining time to show
                 val remainingTimeMs = maxOf(0,
@@ -414,12 +446,20 @@ fun WaveChroreographies(event: IWWWEvent, waveViewModel: WaveViewModel, clock: I
                 // Schedule hiding after the remaining time
                 delay(remainingTimeMs)
                 showHitSequence = false
+                onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
             } else {
                 showHitSequence = false
+                onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
             }
         } else {
             showHitSequence = false
+            onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
         }
+    }
+
+    // Notify about warming or going-to-be-hit visibility changes
+    LaunchedEffect(isWarmingInProgress, isGoingToBeHit) {
+        onVisibilityChanged(isWarmingInProgress || isGoingToBeHit || (hasBeenHit && showHitSequence))
     }
 
     when {
@@ -495,7 +535,6 @@ fun ChoreographyDisplay(
 
             delay(sequence.timing.inWholeMilliseconds)
             isVisible = false
-            // delay(300) // Short delay for fade out
 
             if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
                 currentImageIndex = (currentImageIndex + 1) % sequence.images.size
@@ -506,47 +545,48 @@ fun ChoreographyDisplay(
         }
     }
 
-    BoxWithConstraints(
-        modifier = modifier.fillMaxSize().padding(20.dp),
+    Box(
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .widthIn(max = 800.dp) // Maximum width
+                .heightIn(max = 800.dp) // Maximum height
+                .padding(24.dp) // Outer padding
                 .shadow(8.dp)
                 .background(Color.Black.copy(alpha = 0.7f))
                 .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
-                .padding(16.dp)
+                .padding(24.dp), // Inner padding
+            contentAlignment = Alignment.Center
         ) {
-            AnimatedVisibility(
-                visible = isVisible,
-                enter = fadeIn(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(300))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = painterResource(sequence.images[currentImageIndex]),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(
-                            this@BoxWithConstraints.maxWidth * 0.7f,
-                            this@BoxWithConstraints.maxHeight * 0.7f
-                        ),
-                    contentScale = ContentScale.Fit
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    this@Column.AnimatedVisibility(visible = isVisible) {
+                        Image(
+                            painter = painterResource(sequence.images[currentImageIndex]),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                Text(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = sequence.text,
+                    style = quinaryColoredBoldTextStyle(24),
+                    color = Color.White,
+                    textAlign = TextAlign.Center
                 )
             }
-
-            Text(
-                text = sequence.text,
-                style = quinaryColoredBoldTextStyle(18),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp)
-                    .fillMaxWidth()
-            )
         }
     }
 }

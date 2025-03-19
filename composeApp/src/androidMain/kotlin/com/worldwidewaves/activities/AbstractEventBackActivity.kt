@@ -131,7 +131,7 @@ abstract class AbstractEventBackActivity(
 
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize()) {
                     tabManager.TabView(startScreen = {
                         BackwardScreen(eventId, selectedEvent, mapViewModel)
                     })
@@ -155,7 +155,7 @@ abstract class AbstractEventBackActivity(
         val scrollState = rememberScrollState()
         val mapState by mapViewModel.featureState.collectAsState()
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxSize()) {
 
             // Back layer
             Box(
@@ -196,7 +196,7 @@ abstract class AbstractEventBackActivity(
                         screenModifier = screenModifier.verticalScroll(scrollState)
 
                     Box(modifier = screenModifier) {
-                        Screen(modifier = Modifier, event)
+                        Screen(modifier = Modifier.fillMaxSize(), event)
                     }
 
             } else {
