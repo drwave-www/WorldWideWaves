@@ -99,6 +99,7 @@ import com.worldwidewaves.theme.tertiaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -170,6 +171,26 @@ class WaveActivity : AbstractEventBackActivity() {
         val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
         val hitDateTime by waveViewModel.hitDateTime.collectAsState()
 
+        // Play the hit sound when the user has been hit
+        var hasPlayedHitSound = false
+        LaunchedEffect(hasBeenHit) {
+            if (hasBeenHit && !hasPlayedHitSound) {
+                event.warming.playCurrentSoundChoreographyTone()
+                hasPlayedHitSound = true
+            }
+        }
+
+        /* - For manual testing purposes - very noisy
+        LaunchedEffect(true) {
+            while (true) {
+                delay(50)
+                scope.launch {
+                    event.warming.playCurrentSoundChoreographyTone()
+                }
+            }
+        }
+        */
+
         // Calculate if any choreography should be visible
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val showHitSequence = if (hasBeenHit) {
@@ -180,6 +201,9 @@ class WaveActivity : AbstractEventBackActivity() {
 
             isAnyChoreographyVisible = isWarmingInProgress || isGoingToBeHit || (hasBeenHit && showHitSequence)
         }
+
+        // Always target the closest view to have user and wave in the same view
+        MapZoomAndLocationUpdate(waveViewModel, eventMap)
 
         Box(modifier = modifier.fillMaxSize()) {
 
@@ -218,6 +242,23 @@ class WaveActivity : AbstractEventBackActivity() {
         super.onDestroy()
     }
 
+}
+
+// ----------------------------
+
+@Composable
+fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: EventMap) {
+    val scope = rememberCoroutineScope()
+    val progression by waveViewModel.progression.collectAsState()
+    val isInArea by waveViewModel.isInArea.collectAsState()
+
+    LaunchedEffect(progression, isInArea) {
+        if (isInArea) {
+            scope.launch {
+                eventMap.targetUserAndWave(scope)
+            }
+        }
+    }
 }
 
 // ----------------------------
@@ -551,8 +592,8 @@ fun ChoreographyDisplay(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 800.dp) // Maximum width
-                .heightIn(max = 800.dp) // Maximum height
+                .widthIn(max = 400.dp) // Maximum width
+                .heightIn(max = 600.dp) // Maximum height
                 .padding(24.dp) // Outer padding
                 .shadow(8.dp)
                 .background(Color.Black.copy(alpha = 0.7f))

@@ -23,7 +23,9 @@ package com.worldwidewaves.shared.di
 
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.AndroidSoundPlayer
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.SoundPlayer
 import com.worldwidewaves.shared.debugBuild
 import com.worldwidewaves.shared.utils.AndroidImageResolver
 import com.worldwidewaves.shared.utils.ImageResolver
@@ -37,4 +39,6 @@ val androidModule = module {
     }
     single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
     single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
+
+    single<SoundPlayer> { AndroidSoundPlayer(get()) }
 }

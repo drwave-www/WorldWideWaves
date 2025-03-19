@@ -4,6 +4,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
+import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.IClock
 import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.DrawableResource
@@ -36,6 +37,7 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     private val clock: IClock by inject()
     private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
+    private val soundChoreographyManager: SoundChoreographyManager by inject()
 
     fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
 
@@ -47,9 +49,10 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
-    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? {
-        val startTime = event.getStartDateTime()
-        return choreographyManager.getCurrentWarmingSequence(startTime)
-    }
+    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
+        choreographyManager.getCurrentWarmingSequence(event.getStartDateTime())
+
+    suspend fun playCurrentSoundChoreographyTone() =
+        soundChoreographyManager.playCurrentSoundTone(event.getStartDateTime())
 
 }

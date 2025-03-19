@@ -1,13 +1,13 @@
 
 Semaine prochaine:
 
-
-- systeme de vague sonore (turkish march --> precision gps 5m/s) + flash lumineux
-      --> https://stackoverflow.com/questions/2413426/playing-an-arbitrary-tone-with-android
-      --> https://onlinesequencer.net/578198
-      --> read midi file : https://stackoverflow.com/questions/71977401/how-to-open-and-play-stream-a-midi-file-using-using-android-midimanager
-
+- zoom auto map sur wave screen
+- cancel download app features doit revenir sur l'ecran precedent
 - Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
+
+- reread code / refactor
+
+- RAF: images et vraie choregraphie !!
 
 ---------------------------------------------
 

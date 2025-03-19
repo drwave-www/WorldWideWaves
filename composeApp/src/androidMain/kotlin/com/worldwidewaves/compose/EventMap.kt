@@ -115,6 +115,7 @@ class EventMap(
     )
 
     enum class MapCameraPosition { WINDOW, BOUNDS, DEFAULT_CENTER }
+    var mapMinZoomLevel: Double? = null
 
     private var mapViewState: MapView? = null
     private var lastLocation: Location? = null
@@ -367,6 +368,7 @@ class EventMap(
                 object: CancelableCallback {
                     override fun onFinish() {
                         // Set the min/max camera zoom level
+                        mapMinZoomLevel = map.cameraPosition.zoom
                         map.setMinZoomPreference(map.cameraPosition.zoom)
                         map.setMaxZoomPreference(event.map.maxZoom)
 
@@ -398,11 +400,16 @@ class EventMap(
                 event.area.bbox().toLatLngBounds(), 0
             ),
             object : CancelableCallback {
-                override fun onFinish() { onCameraPositionSet?.invoke() }
+                override fun onFinish() {
+                    mapMinZoomLevel = map.cameraPosition.zoom
+                    onCameraPositionSet?.invoke()
+                }
                 override fun onCancel() {}
             }
         )
     }
+
+    // -- Target user ans wave ------------------------------------------------
 
     /**
      * Moves the camera to the current wave longitude with proper animation handling
@@ -506,6 +513,91 @@ class EventMap(
                     Log.e("EventMap", "Error in targetUser: ${e.message}")
                     animationInProgress = false
                 }
+            }
+        }
+    }
+
+    /**
+     * Moves the camera to show both the user and wave positions with proper positioning:
+     * - Both positions are always visible in the current window
+     * - View is centered between user and wave
+     * - User is positioned at 1/3 of the window, wave at 2/3 (horizontally)
+     * - Respects minimum and maximum zoom levels
+     */
+    fun targetUserAndWave(uiScope: CoroutineScope) {
+        var animationInProgress = false
+
+        mapViewState?.getMapAsync { map ->
+            if (animationInProgress) return@getMapAsync
+
+            val location = lastLocation ?: return@getMapAsync
+
+            uiScope.launch {
+                // Get the event area bounds
+                val bbox = event.area.bbox()
+
+                // Get wave position
+                val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return@launch
+
+                animationInProgress = true
+
+                // Create LatLng objects for user and wave
+                val userLatLng = LatLng(location.latitude, location.longitude)
+                val waveLatLng = LatLng(location.latitude, closestWaveLongitude)
+
+                // Create bounds with just the two actual points
+                val bounds = LatLngBounds.Builder()
+                    .include(userLatLng)
+                    .include(waveLatLng)
+                    .build()
+
+                val screenWidth = map.width
+                val screenHeight = map.height
+                val bboxWidth = bbox.ne.lng - bbox.sw.lng
+                val bboxHeight = bbox.ne.lat - bbox.sw.lat
+
+                // Default padding (initial values)
+                val horizontalPadding = (bboxWidth * 0.3) // 30% padding horizontally
+                val verticalPadding = (bboxHeight * 0.2) // 20% padding vertically
+
+                val paddingLeft = maxOf(minOf(
+                    minOf(userLatLng.longitude, waveLatLng.longitude) - bbox.sw.lng,
+                    horizontalPadding
+                ), 0.0)
+                val paddingRight = maxOf(minOf(
+                    bbox.ne.lng - maxOf(userLatLng.longitude, waveLatLng.longitude),
+                    horizontalPadding
+                ), 0.0)
+                val paddingTop = maxOf(minOf(
+                    bbox.ne.lat - maxOf(userLatLng.latitude, waveLatLng.latitude),
+                    verticalPadding
+                ), 0.0)
+                val paddingBottom = maxOf(minOf(
+                    minOf(userLatLng.latitude, waveLatLng.latitude) - bbox.sw.lat,
+                    verticalPadding
+                ), 0.0)
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngBounds(
+                    bounds,
+                    ((paddingLeft / bboxWidth) * screenWidth).toInt(), // left
+                    ((paddingTop / bboxHeight) * screenHeight).toInt(), // top
+                    ((paddingRight / bboxWidth) * screenWidth).toInt(), // right
+                    ((paddingBottom / bboxHeight) * screenHeight).toInt() // bottom
+                )
+
+                map.animateCamera(
+                    cameraUpdate,
+                    500, // Animation duration in milliseconds
+                    object : CancelableCallback {
+                        override fun onFinish() {
+                            animationInProgress = false
+                        }
+                        override fun onCancel() {
+                            Log.d("EventMap", "targetUserAndWave animation canceled")
+                            animationInProgress = false
+                        }
+                    }
+                )
             }
         }
     }

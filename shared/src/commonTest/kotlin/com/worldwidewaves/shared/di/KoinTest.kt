@@ -38,7 +38,7 @@ class KoinTest : KoinTest {
         }
 
         checkModules {
-            modules(sharedModule() + testPlatformModule)
+            modules(sharedModule + testPlatformModule)
         }
     }
 
