@@ -62,7 +62,8 @@ abstract class AbstractEventMap(
     abstract val locationProvider: LocationProvider?
 
     // Class variables
-    private var screenComponentRatio: Double = 1.0
+    private var screenHeight: Double = 800.0
+    private var screenWidth: Double = 600.0
     private var userHasBeenLocated = false
 
     /**
@@ -103,6 +104,7 @@ abstract class AbstractEventMap(
 
         // Calculate the new southwest and northeast longitudes or latitudes,
         // depending on whether the event map is wider or taller than the MapLibre component.
+        val screenComponentRatio = screenWidth / screenHeight
         val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > screenComponentRatio) {
             val lngDiff = eventMapHeight * screenComponentRatio / 2
             Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
@@ -166,19 +168,29 @@ abstract class AbstractEventMap(
         val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
         val wavePosition = Position(userPosition.latitude, closestWaveLongitude)
 
-        // Create bounds with just the two points
-        val bounds = BoundingBox(
+        // Create the bounds containing user and wave positions
+        val bounds = BoundingBox.fromPositions(listOf(userPosition, wavePosition)) ?: return
+
+        // Get the area's bounding box
+        val areaBbox = event.area.bbox()
+
+        // Calculate padding as percentages of the area's dimensions
+        val horizontalPadding = (areaBbox.ne.lng - areaBbox.sw.lng) * 0.2
+        val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
+
+        // Create new bounds with padding, constrained by the area's bounding box
+        val newBounds = BoundingBox(
             Position(
-                minOf(userPosition.latitude, wavePosition.latitude),
-                minOf(userPosition.longitude, wavePosition.longitude)
+                maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
+                maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng)
             ),
             Position(
-                maxOf(userPosition.latitude, wavePosition.latitude),
-                maxOf(userPosition.longitude, wavePosition.longitude)
+                minOf(bounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - bounds.northLatitude), areaBbox.ne.lat),
+                minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng)
             )
         )
 
-        mapLibreAdapter.animateCameraToBounds(bounds, padding = 100)
+        mapLibreAdapter.animateCameraToBounds(newBounds)
     }
 
     /**
@@ -186,11 +198,13 @@ abstract class AbstractEventMap(
      */
     fun setupMap(
         scope: CoroutineScope,
-        screenComponentRatio: Double = 1.0,
+        screenWidth: Double,
+        screenHeight: Double,
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null
     ) {
-        this.screenComponentRatio = screenComponentRatio
+        this.screenWidth = screenWidth
+        this.screenHeight = screenHeight
 
         // Set the click listener
         mapLibreAdapter.setOnMapClickListener(onMapClick)

@@ -1,7 +1,6 @@
 
 Semaine prochaine:
 
-- zoom auto map sur wave screen (last 'bug' on bounds)
 - reread code
 - refacto: Faire heriter le waveviewmodel de event et transformer les listeners en flows dans WWWEvent
     --> Devrait corriger le pb d'affichage de la choregraphie sur le wave screen - VERIFIER

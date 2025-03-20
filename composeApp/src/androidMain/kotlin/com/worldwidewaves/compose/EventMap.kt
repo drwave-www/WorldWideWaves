@@ -134,7 +134,7 @@ class EventMap(
                         }
 
                         // Initialize view and setup listeners
-                        setupMap(scope, map.width.toDouble() / map.height.toDouble(),
+                        setupMap(scope, map.width.toDouble(), map.height.toDouble(),
                             onMapLoaded = {
                                 onMapLoaded()
                                 isMapLoaded = true
