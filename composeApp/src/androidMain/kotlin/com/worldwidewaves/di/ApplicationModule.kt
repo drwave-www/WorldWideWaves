@@ -62,8 +62,9 @@ val applicationModule = module {
     // A closeable coroutine scope for cleanup
     single { CloseableCoroutineScope() }
 
+    // Location engine and provider for Android
     single { WWWSimulationEnabledLocationEngine(get()) }
-    single { AndroidLocationProvider() }
+    factory { AndroidLocationProvider() }
 }
 
 /**

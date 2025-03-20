@@ -1,13 +1,15 @@
 
 Semaine prochaine:
 
-- zoom auto map sur wave screen
-- cancel download app features doit revenir sur l'ecran precedent
+- zoom auto map sur wave screen (last 'bug' on bounds)
+- Bug si has been hit, ne doit plus afficher les chroregraohies, jouer le son, etc...
 - Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
+- check reload de la carte a chaque ecran: mode dev ou bug ?
 
-- reread code / refactor
+- reread code
 
 - RAF: images et vraie choregraphie !!
+- refacto: Faire heriter le waveviewmodel de event et transformer les listeners en flows dans WWWEvent
 
 ---------------------------------------------
 

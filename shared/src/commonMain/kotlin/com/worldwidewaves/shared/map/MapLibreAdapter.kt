@@ -28,9 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Map interface that platform-specific implementations must implement
  */
-interface PlatformMap {
-    val isLoaded: StateFlow<Boolean>
-    val isError: StateFlow<Boolean>
+interface MapLibreAdapter {
     val currentPosition: StateFlow<Position?>
     val currentZoom: StateFlow<Double>
 

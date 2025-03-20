@@ -26,8 +26,6 @@ import android.content.Context
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -38,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,17 +49,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.worldwidewaves.map.MapLibreAdapter
+import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.shared.map.MapConstraintManager
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
@@ -74,9 +69,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.inject
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.engine.LocationEngineProxy
@@ -103,7 +95,7 @@ class EventMap(
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
-    override val platformMap: MapLibreAdapter by lazy { MapLibreAdapter() }
+    override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
 
     /**
      * The Compose UI for the map
@@ -114,8 +106,8 @@ class EventMap(
         val scope = rememberCoroutineScope()
         val mapView: MapView = rememberMapViewWithLifecycle()
 
-        val isMapLoaded by platformMap.isLoaded.collectAsState()
-        val mapError by platformMap.isError.collectAsState()
+        var isMapLoaded by remember { mutableStateOf(false) }
+        var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
 
         // Request GPS location Android permissions
@@ -130,40 +122,32 @@ class EventMap(
 
             styleUri?.let { uri ->
                 mapView.getMapAsync { map ->
-                    platformMap.setMap(map)
-
                     map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
                         map.uiSettings.setAttributionMargins(0, 0, 0, 0)
 
+                        // Provide Adapter with Android MapLibre instance
+                        mapLibreAdapter.setMap(map)
+
                         // Initialize location provider if we have permission
                         if (hasLocationPermission) {
-                            setupAndroidLocationComponent(map, context, style)
+                            setupMapLocationComponent(map, context, style)
                         }
 
                         // Initialize view and setup listeners
-                        setupMap(scope,
+                        setupMap(scope, map.width.toDouble() / map.height.toDouble(),
                             onMapLoaded = {
                                 onMapLoaded()
-                                platformMap.setLoaded(true)
+                                isMapLoaded = true
                             },
                             onMapClick = { _, _ ->
                                 onMapClick?.invoke()
                             }
                         )
 
-                        // Update adapter with initial camera position
-                        platformMap.updateCameraInfo(map)
-
-                        // Set camera movement listener to update position
-                        map.addOnCameraIdleListener {
-                            platformMap.updateCameraInfo(map)
-                            platformMap.constrainCamera()
-                        }
-
                     }
                 }
             } ?: run {
-                platformMap.setError(true)
+                mapError = true
             }
         }
 
@@ -201,7 +185,7 @@ class EventMap(
      * Sets up the Android location component
      */
     @SuppressLint("MissingPermission")
-    private fun setupAndroidLocationComponent(map: MapLibreMap, context: Context, style: Style) {
+    private fun setupMapLocationComponent(map: MapLibreMap, context: Context, style: Style) {
         // Activate location component
         map.locationComponent.activateLocationComponent(
             buildLocationComponentActivationOptions(context, style)
@@ -295,158 +279,8 @@ class EventMap(
      */
     fun updateWavePolygons(context: Context, wavePolygons: List<Polygon>, clearPolygons: Boolean) {
         (context as? AppCompatActivity)?.runOnUiThread {
-            platformMap.addWavePolygons(wavePolygons, clearPolygons)
+            mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
         }
-    }
-}
-
-/**
- * MapLibre-specific implementation of map constraints
- */
-class MapLibreConstraintHandler(mapBounds: BoundingBox) {
-    private val constraintManager = MapConstraintManager(mapBounds)
-    private var constraintBounds: LatLngBounds? = null
-    private var constraintsApplied = false
-
-    /**
-     * Apply constraints to a MapLibre map
-     */
-    @UiThread
-    fun applyConstraints(map: MapLibreMap) {
-        // Calculate visible region padding from the map
-        updateVisibleRegionPadding(map)
-
-        // Apply the constraints with the current padding
-        applyConstraintsWithPadding(map)
-
-        // Set up camera movement listener to update constraints on zoom changes
-        map.addOnCameraIdleListener {
-            val newPadding = calculateVisibleRegionPadding(map)
-
-            if (constraintManager.hasSignificantPaddingChange(
-                    MapConstraintManager.VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
-                )) {
-                constraintManager.setVisibleRegionPadding(
-                    MapConstraintManager.VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
-                )
-                applyConstraintsWithPadding(map)
-            }
-        }
-
-        constraintsApplied = true
-    }
-
-    /**
-     * Apply constraints based on the current padding
-     */
-    private fun applyConstraintsWithPadding(map: MapLibreMap) {
-        try {
-            // Get platform-independent bounds from the constraint manager
-            val paddedBounds = constraintManager.calculateConstraintBounds()
-
-            // Convert to MapLibre LatLngBounds
-            val latLngBounds = convertToLatLngBounds(paddedBounds)
-            constraintBounds = latLngBounds
-
-            // Apply constraints to the map
-            map.setLatLngBoundsForCameraTarget(latLngBounds)
-
-            // Also set min zoom
-            val minZoom = map.minZoomLevel
-            map.setMinZoomPreference(minZoom)
-
-            // Check if our constrained area is too small for the current view
-            val currentPosition = map.cameraPosition.target?.let { Position(it.latitude, it.longitude) }
-
-            if (!constraintManager.isValidBounds(paddedBounds, currentPosition)) {
-                // If bounds are too small, calculate safer bounds centered around current position
-                currentPosition?.let {
-                    val safeBounds = constraintManager.calculateSafeBounds(it)
-                    fitMapToBounds(map, convertToLatLngBounds(safeBounds))
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("MapConstraints", "Error applying constraints: ${e.message}")
-        }
-    }
-
-    /**
-     * Constrain the camera to the valid bounds if needed
-     */
-    fun constrainCamera(map: MapLibreMap) {
-        val position = map.cameraPosition
-        if (constraintBounds != null && !isCameraWithinConstraints(position)) {
-            position.target?.let { target ->
-                val mapPosition = Position(target.latitude, target.longitude)
-                val constraintBoundsMapped = constraintBounds?.let { bounds ->
-                    BoundingBox(
-                        Position(bounds.getLatSouth(), bounds.getLonWest()),
-                        Position(bounds.getLatNorth(), bounds.getLonEast())
-                    )
-                }
-
-                constraintBoundsMapped?.let { bounds ->
-                    val nearestValid = constraintManager.getNearestValidPoint(mapPosition, bounds)
-                    val latLng = LatLng(nearestValid.latitude, nearestValid.longitude)
-                    map.animateCamera(CameraUpdateFactory.newLatLng(latLng))
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks if camera is within the constraint bounds
-     */
-    private fun isCameraWithinConstraints(cameraPosition: CameraPosition): Boolean =
-        cameraPosition.target?.let { constraintBounds?.contains(it) } ?: true
-
-    /**
-     * Moves the camera to fit specified bounds
-     */
-    private fun fitMapToBounds(map: MapLibreMap, bounds: LatLngBounds) {
-        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0)
-        map.moveCamera(cameraUpdate)
-    }
-
-    /**
-     * Updates visible region padding from the map
-     */
-    private fun updateVisibleRegionPadding(map: MapLibreMap) {
-        val padding = calculateVisibleRegionPadding(map)
-        constraintManager.setVisibleRegionPadding(
-            MapConstraintManager.VisibleRegionPadding(padding.latPadding, padding.lngPadding)
-        )
-    }
-
-    /**
-     * Calculates visible region padding from the map projection
-     */
-    private data class MapLibrePadding(
-        val latPadding: Double,
-        val lngPadding: Double
-    )
-
-    private fun calculateVisibleRegionPadding(map: MapLibreMap): MapLibrePadding {
-        // Get the visible region from the current map view
-        val visibleRegion = map.projection.visibleRegion
-
-        // Calculate padding as half the visible region dimensions
-        val latPadding = (visibleRegion.latLngBounds.getLatNorth() -
-                visibleRegion.latLngBounds.getLatSouth()) / 2.0
-        val lngPadding = (visibleRegion.latLngBounds.getLonEast() -
-                visibleRegion.latLngBounds.getLonWest()) / 2.0
-
-        return MapLibrePadding(latPadding, lngPadding)
-    }
-
-    /**
-     * Converts platform-independent MapBounds to MapLibre LatLngBounds
-     */
-    private fun convertToLatLngBounds(bounds: BoundingBox): LatLngBounds {
-        return LatLngBounds.Builder()
-            .include(LatLng(bounds.southwest.latitude, bounds.southwest.longitude))
-            .include(LatLng(bounds.northeast.latitude, bounds.northeast.longitude))
-            .build()
     }
 }
 

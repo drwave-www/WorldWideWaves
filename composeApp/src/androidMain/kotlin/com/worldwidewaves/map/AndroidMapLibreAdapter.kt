@@ -1,12 +1,32 @@
 package com.worldwidewaves.map
 
+/*
+ * Copyright 2024 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import android.util.Log
 import androidx.core.graphics.toColorInt
-import com.worldwidewaves.compose.MapLibreConstraintHandler
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
-import com.worldwidewaves.shared.map.PlatformMap
+import com.worldwidewaves.shared.map.MapLibreAdapter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.android.camera.CameraPosition
@@ -25,12 +45,9 @@ import org.maplibre.geojson.Polygon
 /**
  * MapLibre adapter that implements the PlatformMap interface
  */
-class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMap {
-    private val _isLoaded = MutableStateFlow(false)
-    override val isLoaded: StateFlow<Boolean> = _isLoaded
+class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter {
 
-    private val _isError = MutableStateFlow(false)
-    override val isError: StateFlow<Boolean> = _isError
+    // -- Public/Override properties
 
     private val _currentPosition = MutableStateFlow<Position?>(null)
     override val currentPosition: StateFlow<Position?> = _currentPosition
@@ -38,21 +55,24 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
 
-    private var animationInProgress = false
-    private var constraintHandler: MapLibreConstraintHandler? = null
+    // -- Private properties
 
+    private var constraintHandler: MapLibreConstraintHandler? = null
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
 
-    fun setLoaded(loaded: Boolean) {
-        _isLoaded.value = loaded
-    }
-
-    fun setError(error: Boolean) {
-        _isError.value = error
-    }
+    // -- Setters
 
     fun setMap(map: MapLibreMap) {
         mapLibreMap = map
+
+        // Update adapter with initial camera position
+        updateCameraInfo(map)
+
+        // Set camera movement listener to update position
+        map.addOnCameraIdleListener {
+            updateCameraInfo(map)
+            constrainCamera()
+        }
     }
 
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
@@ -75,11 +95,10 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
         }
     }
 
-    override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
-        if (animationInProgress) return
-        val map = mapLibreMap ?: return
+    // -- Camera animations
 
-        animationInProgress = true
+    override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
+        val map = mapLibreMap ?: return
 
         val builder = CameraPosition.Builder()
             .target(LatLng(position.latitude, position.longitude))
@@ -93,12 +112,10 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
             500, // Animation duration
             object : CancelableCallback {
                 override fun onFinish() {
-                    animationInProgress = false
                     _currentZoom.value = map.cameraPosition.zoom
                     callback?.onFinish()
                 }
                 override fun onCancel() {
-                    animationInProgress = false
                     callback?.onCancel()
                 }
             }
@@ -106,10 +123,7 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
     }
 
     override fun animateCameraToBounds(bounds: BoundingBox, padding: Int, callback: MapCameraCallback?) {
-        if (animationInProgress) return
         val map = mapLibreMap ?: return
-
-        animationInProgress = true
 
         val latLngBounds = LatLngBounds.Builder()
             .include(LatLng(bounds.southwest.latitude, bounds.southwest.longitude))
@@ -121,12 +135,10 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
             500, // Animation duration
             object : CancelableCallback {
                 override fun onFinish() {
-                    animationInProgress = false
                     _currentZoom.value = map.cameraPosition.zoom
                     callback?.onFinish()
                 }
                 override fun onCancel() {
-                    animationInProgress = false
                     callback?.onCancel()
                 }
             }
@@ -147,6 +159,23 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
     override fun setMaxZoomPreference(maxZoom: Double) {
         mapLibreMap?.setMaxZoomPreference(maxZoom)
     }
+
+    // Method to update the camera position and zoom
+    private fun updateCameraInfo(map: MapLibreMap) {
+        map.cameraPosition.target?.let { target ->
+            _currentPosition.value = Position(target.latitude, target.longitude)
+        }
+        _currentZoom.value = map.cameraPosition.zoom
+    }
+
+    // Check and constrain camera if needed
+    private fun constrainCamera() {
+        mapLibreMap?.let { map ->
+            constraintHandler?.constrainCamera(map)
+        }
+    }
+
+    // -- Add the Wave polygons to the map
 
     override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
         val map = mapLibreMap ?: return
@@ -187,18 +216,4 @@ class MapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : PlatformMa
         }
     }
 
-    // Method to update the camera position and zoom
-    fun updateCameraInfo(map: MapLibreMap) {
-        map.cameraPosition.target?.let { target ->
-            _currentPosition.value = Position(target.latitude, target.longitude)
-        }
-        _currentZoom.value = map.cameraPosition.zoom
-    }
-
-    // Check and constrain camera if needed
-    fun constrainCamera() {
-        mapLibreMap?.let { map ->
-            constraintHandler?.constrainCamera(map)
-        }
-    }
 }

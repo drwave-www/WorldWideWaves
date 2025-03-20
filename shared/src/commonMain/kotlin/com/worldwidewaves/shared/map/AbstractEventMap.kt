@@ -21,8 +21,11 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_USER_ZOOM
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_WAVE_ZOOM
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -55,12 +58,20 @@ abstract class AbstractEventMap(
     private val onLocationUpdate: (Position) -> Unit
 ) {
     // Properties that will be implemented by platform-specific subclasses
-    abstract val platformMap: PlatformMap
+    abstract val mapLibreAdapter: MapLibreAdapter
     abstract val locationProvider: LocationProvider?
 
     // Class variables
-    private var mapMinZoomLevel: Double? = null
+    private var screenComponentRatio: Double = 1.0
     private var userHasBeenLocated = false
+
+    /**
+     * Configures map constraints based on the event area.
+     * This is meant to be called by platform-specific implementations
+     * during initialization.
+     */
+    private suspend fun configureMapConstraints() =
+        mapLibreAdapter.setConstraints(event.area.bbox())
 
     // Camera position methods - shared logic for all platforms
 
@@ -70,12 +81,9 @@ abstract class AbstractEventMap(
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
         val bounds = event.area.bbox()
 
-        platformMap.animateCameraToBounds(bounds, callback = object : MapCameraCallback {
-            override fun onFinish() {
-                mapMinZoomLevel = platformMap.currentZoom.value
-                onComplete()
-            }
-            override fun onCancel() {}
+        mapLibreAdapter.animateCameraToBounds(bounds, callback = object : MapCameraCallback {
+            override fun onFinish() { onComplete() }
+            override fun onCancel() { onComplete() }
         })
     }
 
@@ -83,15 +91,38 @@ abstract class AbstractEventMap(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        val mapBounds = event.area.bbox()
         configureMapConstraints() // Apply constraints first
 
-        platformMap.animateCameraToBounds(mapBounds, padding = 0, object : MapCameraCallback {
+        val (sw, ne) = event.area.bbox()
+        val eventMapWidth = ne.lng - sw.lng
+        val eventMapHeight = ne.lat - sw.lat
+        val (centerLat, centerLng) = event.area.getCenter()
+
+        // Calculate the aspect ratios of the event map and MapLibre component.
+        val eventAspectRatio = eventMapWidth / eventMapHeight
+
+        // Calculate the new southwest and northeast longitudes or latitudes,
+        // depending on whether the event map is wider or taller than the MapLibre component.
+        val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > screenComponentRatio) {
+            val lngDiff = eventMapHeight * screenComponentRatio / 2
+            Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+        } else {
+            val latDiff = eventMapWidth / screenComponentRatio / 2
+            Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+        }
+
+        val bounds = BoundingBox(
+            Position(newSwLat, newSwLng),
+            Position(newNeLat, newNeLng)
+        )
+
+        mapLibreAdapter.animateCameraToBounds(bounds, padding = 0, object : MapCameraCallback {
             override fun onFinish() {
-                mapMinZoomLevel = platformMap.currentZoom.value
+                mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
+                mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
                 onComplete()
             }
-            override fun onCancel() {}
+            override fun onCancel() { onComplete() }
         })
     }
 
@@ -100,14 +131,13 @@ abstract class AbstractEventMap(
      */
     suspend fun moveToCenter(onComplete: () -> Unit = {}) {
         val (centerLat, centerLng) = event.area.getCenter()
-        platformMap.animateCamera(Position(centerLat, centerLng), null, object : MapCameraCallback {
-            override fun onFinish() {
-                onComplete()
-            }
-
-            override fun onCancel() {}
+        mapLibreAdapter.animateCamera(Position(centerLat, centerLng), null, object : MapCameraCallback {
+            override fun onFinish() { onComplete() }
+            override fun onCancel() { onComplete() }
         })
     }
+
+    // Camera targeting methods - shared logic for all platforms
 
     /**
      * Moves the camera to the current wave position
@@ -117,7 +147,7 @@ abstract class AbstractEventMap(
         val closestWaveLongitude = event.wave.userClosestWaveLongitude() ?: return
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
-        platformMap.animateCamera(wavePosition, CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
+        mapLibreAdapter.animateCamera(wavePosition, CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
     }
 
     /**
@@ -125,7 +155,7 @@ abstract class AbstractEventMap(
      */
     fun targetUser() {
         val userPosition = locationProvider?.currentLocation?.value ?: return
-        platformMap.animateCamera(userPosition, CONST_MAPLIBRE_TARGET_USER_ZOOM)
+        mapLibreAdapter.animateCamera(userPosition, CONST_MAPLIBRE_TARGET_USER_ZOOM)
     }
 
     /**
@@ -148,39 +178,32 @@ abstract class AbstractEventMap(
             )
         )
 
-        platformMap.animateCameraToBounds(bounds, padding = 100)
+        mapLibreAdapter.animateCameraToBounds(bounds, padding = 100)
     }
-
-    /**
-     * Configures map constraints based on the event area.
-     * This is meant to be called by platform-specific implementations
-     * during initialization.
-     */
-    private suspend fun configureMapConstraints() =
-        platformMap.setConstraints(event.area.bbox())
 
     /**
      * Sets up the map with initial configuration
      */
     fun setupMap(
         scope: CoroutineScope,
+        screenComponentRatio: Double = 1.0,
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null
     ) {
-        platformMap.setOnMapClickListener(onMapClick)
+        this.screenComponentRatio = screenComponentRatio
+
+        // Set the click listener
+        mapLibreAdapter.setOnMapClickListener(onMapClick)
 
         // Set the max zoom level from the event configuration
-        platformMap.setMaxZoomPreference(event.map.maxZoom)
+        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
         // Configure initial camera position
         scope.launch {
             when (mapConfig.initialCameraPosition) {
                 MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
                 MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
-                MapCameraPosition.WINDOW -> {
-                    configureMapConstraints()
-                    moveToWindowBounds(onMapLoaded)
-                }
+                MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
             }
         }
 
@@ -201,9 +224,5 @@ abstract class AbstractEventMap(
         }
     }
 
-    companion object {
-        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 18.0
-        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = 16.0
-    }
 }
 

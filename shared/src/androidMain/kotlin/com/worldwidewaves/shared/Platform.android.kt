@@ -218,7 +218,7 @@ actual fun cachedFilePath(fileName: String): String? {
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
     val context: Context by inject(Context::class.java)
-    Log.i(::cacheStringToFile.name, "Caching data to $fileName")
+    Log.v(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
