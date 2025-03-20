@@ -500,7 +500,7 @@ data class WWWEvent(
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
             isRunning() -> 500L
-            timeBeforeHit < 5.seconds -> 100L
+            timeBeforeHit < 2.seconds -> 50L // For sound accuracy
             else -> 1.days
         }
 

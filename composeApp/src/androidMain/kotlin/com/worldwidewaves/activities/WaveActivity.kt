@@ -133,14 +133,20 @@ class WaveActivity : AbstractEventBackActivity() {
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
+
+        // States
         var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
+        var hasPlayedHitSound = false
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
-        // Shared state to track if any choreography is being displayed
-        var isAnyChoreographyVisible by remember { mutableStateOf(false) }
+        // Get choreography-related states
+        val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
+        val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
+        val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+        val hitDateTime by waveViewModel.hitDateTime.collectAsState()
 
         val eventMap = remember(event.id) {
             EventMap(event,
@@ -164,21 +170,6 @@ class WaveActivity : AbstractEventBackActivity() {
             waveObserver?.startObservation()
         }
 
-        // Get choreography-related states
-        val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
-        val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
-        val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
-        val hitDateTime by waveViewModel.hitDateTime.collectAsState()
-
-        // Play the hit sound when the user has been hit
-        var hasPlayedHitSound = false
-        LaunchedEffect(hasBeenHit) {
-            if (hasBeenHit && !hasPlayedHitSound) {
-                event.warming.playCurrentSoundChoreographyTone()
-                hasPlayedHitSound = true
-            }
-        }
-
         /* - For manual testing purposes - very noisy
         LaunchedEffect(true) {
             while (true) {
@@ -190,15 +181,13 @@ class WaveActivity : AbstractEventBackActivity() {
         }
         */
 
-        // Calculate if any choreography should be visible
+        // Play the hit sound when the user has been hit
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-            val showHitSequence = if (hasBeenHit) {
-                val currentTime = clock.now()
-                val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
-                secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-            } else false
-
-            isAnyChoreographyVisible = isWarmingInProgress || isGoingToBeHit || (hasBeenHit && showHitSequence)
+            val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
+            if (hasBeenHit && secondsSinceHit in 0.. 1 && !hasPlayedHitSound) {
+                event.warming.playCurrentSoundChoreographyTone()
+                hasPlayedHitSound = true
+            }
         }
 
         // Always target the closest view to have user and wave in the same view
@@ -216,10 +205,7 @@ class WaveActivity : AbstractEventBackActivity() {
                     .fillMaxWidth()
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel)
-
-                if (!isAnyChoreographyVisible) {
-                    WaveHitCounter(waveViewModel)
-                }
+                WaveHitCounter(waveViewModel)
             }
 
             // Pass the visibility state to WaveChroreographies for coordination
@@ -227,10 +213,7 @@ class WaveActivity : AbstractEventBackActivity() {
                 event = event,
                 waveViewModel = waveViewModel,
                 clock = clock,
-                modifier = Modifier.fillMaxSize().zIndex(10f),
-                onVisibilityChanged = { isVisible ->
-                    isAnyChoreographyVisible = isVisible
-                }
+                modifier = Modifier.fillMaxSize().zIndex(10f)
             )
 
         }
@@ -453,8 +436,7 @@ fun WaveChroreographies(
     event: IWWWEvent,
     waveViewModel: WaveViewModel,
     clock: IClock,
-    modifier: Modifier = Modifier,
-    onVisibilityChanged: (Boolean) -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
     val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
@@ -475,7 +457,6 @@ fun WaveChroreographies(
 
             if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
                 showHitSequence = true
-                onVisibilityChanged(true)
 
                 // Calculate remaining time to show
                 val remainingTimeMs = maxOf(0,
@@ -486,20 +467,12 @@ fun WaveChroreographies(
                 // Schedule hiding after the remaining time
                 delay(remainingTimeMs)
                 showHitSequence = false
-                onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
             } else {
                 showHitSequence = false
-                onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
             }
         } else {
             showHitSequence = false
-            onVisibilityChanged(isWarmingInProgress || isGoingToBeHit)
         }
-    }
-
-    // Notify about warming or going-to-be-hit visibility changes
-    LaunchedEffect(isWarmingInProgress, isGoingToBeHit) {
-        onVisibilityChanged(isWarmingInProgress || isGoingToBeHit || (hasBeenHit && showHitSequence))
     }
 
     when {
@@ -527,7 +500,7 @@ fun WaveChroreographies(
         }
 
         // Show hit choreography when user has been hit and within time window
-        hasBeenHit && showHitSequence -> {
+        showHitSequence -> {
             ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
         }
     }
