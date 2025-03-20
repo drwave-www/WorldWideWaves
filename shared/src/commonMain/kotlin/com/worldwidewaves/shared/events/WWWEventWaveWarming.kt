@@ -1,17 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
-import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
-import com.worldwidewaves.shared.events.utils.IClock
-import kotlinx.datetime.Instant
-import org.jetbrains.compose.resources.DrawableResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import kotlin.time.Duration
-
 /*
  * Copyright 2024 DrWave
  *
@@ -32,6 +20,18 @@ import kotlin.time.Duration
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
+import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
+import com.worldwidewaves.shared.events.utils.IClock
+import kotlinx.datetime.Instant
+import org.jetbrains.compose.resources.DrawableResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.time.Duration
 
 class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 

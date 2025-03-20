@@ -48,6 +48,9 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
 
     // ------------------------
 
+    val latitude: Double get() = lat
+    val longitude: Double get() = lng
+
     open operator fun component1() = lat
     open operator fun component2() = lng
 

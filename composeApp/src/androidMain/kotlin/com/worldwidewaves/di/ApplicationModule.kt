@@ -5,7 +5,9 @@ import com.worldwidewaves.compose.AboutInfoScreen
 import com.worldwidewaves.compose.AboutScreen
 import com.worldwidewaves.compose.EventsListScreen
 import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
+import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.viewmodels.EventsViewModel
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +61,9 @@ val applicationModule = module {
 
     // A closeable coroutine scope for cleanup
     single { CloseableCoroutineScope() }
+
+    single { WWWSimulationEnabledLocationEngine(get()) }
+    single { AndroidLocationProvider() }
 }
 
 /**

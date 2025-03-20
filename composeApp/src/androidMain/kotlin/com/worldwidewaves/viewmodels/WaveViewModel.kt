@@ -30,8 +30,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.WWWEventWave.WavePolygons
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.toMapLibrePolygon
-import com.worldwidewaves.shared.toPosition
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.geojson.Polygon
 import kotlin.time.Duration
 
@@ -200,12 +199,11 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     /**
      * Updates the geolocation text based on the new location provided.
      */
-    fun updateGeolocation(newLocation: LatLng) {
+    fun updateUserLocation(newLocation: Position) {
         viewModelScope.launch(Dispatchers.IO) {
             val currentEvent = event
             if (currentEvent != null) {
-                val currentPosition = newLocation.toPosition()
-                if (currentEvent.area.isPositionWithin(currentPosition)) {
+                if (currentEvent.area.isPositionWithin(newLocation)) {
                     _isInArea.value = true
                 }
             }

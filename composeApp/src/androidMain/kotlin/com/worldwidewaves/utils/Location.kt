@@ -22,6 +22,7 @@ package com.worldwidewaves.utils
  */
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -31,6 +32,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -42,13 +44,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.ask_gps_enable
 import com.worldwidewaves.shared.generated.resources.no
 import com.worldwidewaves.shared.generated.resources.yes
+import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.toLocation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.stringResource
+import org.koin.core.component.KoinComponent
+import org.koin.java.KoinJavaComponent.inject
 import org.maplibre.android.location.engine.LocationEngineCallback
+import org.maplibre.android.location.engine.LocationEngineProxy
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
@@ -117,10 +127,14 @@ fun CheckGPSEnable() {
  * default location engine behavior.
  *
  */
-class WWWSimulationEnabledLocationEngine(context : Context, val platform: WWWPlatform?) : MapLibreFusedLocationEngineImpl(context) {
+class WWWSimulationEnabledLocationEngine(
+    context: Context
+) : KoinComponent, MapLibreFusedLocationEngineImpl(context) {
+
+    private val platform: WWWPlatform by inject(WWWPlatform::class.java)
 
     private fun getSimulatedLocation(): Location? {
-        return if (platform?.isUnderSimulation() == true) {
+        return if (platform.isUnderSimulation()) {
             val simulation = platform.getSimulation()!!
             simulation.getUserPosition().toLocation(simulation.now())
         } else null
@@ -138,4 +152,62 @@ class WWWSimulationEnabledLocationEngine(context : Context, val platform: WWWPla
     ) = getSimulatedLocation()?.let { location ->
         listener.onLocationChanged(location)
     } ?: super.requestLocationUpdates(request, listener, looper)
+}
+
+/**
+ * Android-specific location provider
+ */
+class AndroidLocationProvider : KoinComponent, LocationProvider {
+
+    val locationEngine: WWWSimulationEnabledLocationEngine by inject(WWWSimulationEnabledLocationEngine::class.java)
+
+    private val _currentLocation = MutableStateFlow<Position?>(null)
+    override val currentLocation: StateFlow<Position?> = _currentLocation
+
+    private var proxyLocationEngine: LocationEngineProxy<LocationListener>? = null
+    private var locationCallback: LocationEngineCallback<LocationEngineResult>? = null
+
+    @SuppressLint("MissingPermission")
+    override fun startLocationUpdates(onLocationUpdate: (Position) -> Unit) {
+        if (proxyLocationEngine != null) return // Already started
+
+        // Create location engine
+        proxyLocationEngine = LocationEngineProxy(locationEngine)
+
+        // Create callback
+        locationCallback = object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                result?.lastLocation?.let { location ->
+                    val position = Position(location.latitude, location.longitude)
+                    _currentLocation.value = position
+                    onLocationUpdate(position)
+                }
+            }
+
+            override fun onFailure(exception: Exception) {
+                Log.e("EventMap", "Failed to get location: $exception")
+            }
+        }
+
+        // Request location updates
+        proxyLocationEngine?.requestLocationUpdates(
+            buildLocationEngineRequest(),
+            locationCallback!!,
+            Looper.getMainLooper()
+        )
+    }
+
+    override fun stopLocationUpdates() {
+        locationCallback?.let { callback ->
+            proxyLocationEngine?.removeLocationUpdates(callback)
+        }
+        proxyLocationEngine = null
+        locationCallback = null
+    }
+
+    private fun buildLocationEngineRequest(): LocationEngineRequest =
+        LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
+            .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
+            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+            .build()
 }

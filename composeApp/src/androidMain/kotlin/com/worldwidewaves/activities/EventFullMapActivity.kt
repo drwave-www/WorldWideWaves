@@ -51,6 +51,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAG
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_target_me_off
 import com.worldwidewaves.shared.generated.resources.event_target_me_on
@@ -60,13 +61,14 @@ import com.worldwidewaves.shared.generated.resources.target_me_active
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
+import com.worldwidewaves.shared.map.EventMapConfig
+import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
@@ -92,18 +94,18 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
+        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
 
         val eventMap =  remember(event.id) {
-            EventMap(platform, event,
+            EventMap(event,
                 onLocationUpdate = { newLocation ->
                     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateGeolocation(newLocation)
+                        waveViewModel.updateUserLocation(newLocation)
                         lastKnownLocation = newLocation
                     }
                 },
-                mapConfig = EventMap.EventMapConfig(
-                    initialCameraPosition = EventMap.MapCameraPosition.WINDOW
+                mapConfig = EventMapConfig(
+                    initialCameraPosition = MapCameraPosition.WINDOW
                 )
             ).also {
                 waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
@@ -150,7 +152,7 @@ fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modif
                     .clickable {
                         if (isRunning) {
                             scope.launch {
-                                eventMap.targetWave(scope)
+                                eventMap.targetWave()
                             }
                         }
                     },
@@ -163,7 +165,7 @@ fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modif
                     .clickable {
                         if (isInArea) {
                             scope.launch {
-                                eventMap.targetUser(scope)
+                                eventMap.targetUser()
                             }
                         }
                     },

@@ -83,6 +83,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SEC
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
@@ -105,7 +106,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.maplibre.android.geometry.LatLng
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -133,7 +133,7 @@ class WaveActivity : AbstractEventBackActivity() {
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
+        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -143,15 +143,14 @@ class WaveActivity : AbstractEventBackActivity() {
         var isAnyChoreographyVisible by remember { mutableStateOf(false) }
 
         val eventMap = remember(event.id) {
-            EventMap(
-                platform, event,
+            EventMap(event,
                 onLocationUpdate = { newLocation ->
                     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateGeolocation(newLocation)
+                        waveViewModel.updateUserLocation(newLocation)
                         lastKnownLocation = newLocation
                     }
                 },
-                onMapClick = { _, _ ->
+                onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
                         putExtra("eventId", event.id)
                     })
@@ -255,7 +254,7 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: EventMap) {
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
             scope.launch {
-                eventMap.targetUserAndWave(scope)
+                eventMap.targetUserAndWave()
             }
         }
     }

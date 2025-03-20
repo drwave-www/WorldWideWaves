@@ -84,6 +84,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FO
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
@@ -103,13 +104,11 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.maplibre.android.geometry.LatLng
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventActivity : AbstractEventBackActivity() {
 
     private val clock: IClock by inject()
-
     private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
@@ -129,22 +128,21 @@ class EventActivity : AbstractEventBackActivity() {
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        var lastKnownLocation by remember { mutableStateOf<LatLng?>(null) }
+        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         val eventMap = remember(event.id) {
-            EventMap(
-                platform, event,
+            EventMap(event,
                 onLocationUpdate = { newLocation ->
                     if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateGeolocation(newLocation)
+                        waveViewModel.updateUserLocation(newLocation)
                         lastKnownLocation = newLocation
                     }
                 },
-                onMapClick = { _, _ ->
+                onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
                         putExtra("eventId", event.id)
                     })
@@ -155,7 +153,7 @@ class EventActivity : AbstractEventBackActivity() {
         }
 
         LaunchedEffect(true) { // Start wave observation
-            waveObserver?.startObservation()
+            waveObserver!!.startObservation()
         }
 
         Column(
