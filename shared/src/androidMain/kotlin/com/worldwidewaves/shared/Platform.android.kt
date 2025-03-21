@@ -38,44 +38,15 @@ import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.io.IOException
-import java.lang.ref.WeakReference
 
-// --- Platform-specific implementation of the WWWPlatform interface ---
-
-object AndroidPlatform : WWWPlatform()  { // TODO: manage with the cache in production on app update
-    private var _contextRef: WeakReference<Context>? = null
-
-    private val context: Context
-        get() = _contextRef?.get()
-            ?: throw UninitializedPropertyAccessException(
-                "$(::AndroidPlatform.name) must be initialized with a context before use.")
-
-    override val name: String
-        get() = "Android ${Build.VERSION.SDK_INT}"
-
-    override fun getContext(): Any = context
-
-    fun initialize(context: Context): AndroidPlatform {
-        debugBuild()
-        _contextRef = WeakReference(context.applicationContext)
-        return this
-    }
-
-}
-
-// ---------------------------
-
-actual fun getPlatform(): WWWPlatform = AndroidPlatform
 
 actual fun getEventImage(type: String, id: String): Any? {
     return when (type) { // TODO : not possible, we need another way than this static mess
+                         // FIXME: Use AndroidImageResolver
         "location" -> when (id) {
             "paris_france" -> Res.drawable.e_location_paris_france
             "unitedstates" -> Res.drawable.e_location_unitedstates
@@ -127,7 +98,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
  *
  */
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
-    val context = AndroidPlatform.getContext() as Context
+    val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
 
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
@@ -209,7 +180,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
  *
  */
 actual fun cachedFileExists(fileName: String): Boolean {
-    val context = AndroidPlatform.getContext() as Context
+    val context: Context by inject(Context::class.java)
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
@@ -229,7 +200,7 @@ actual fun cachedFileExists(fileName: String): Boolean {
  *
  */
 actual fun cachedFilePath(fileName: String): String? {
-    val context = AndroidPlatform.getContext() as Context
+    val context: Context by inject(Context::class.java)
     return File(context.cacheDir, fileName).takeIf { it.exists() }?.toURI()?.path
 }
 
@@ -242,8 +213,8 @@ actual fun cachedFilePath(fileName: String): String? {
  *
  */
 actual fun cacheStringToFile(fileName: String, content: String) : String {
-    val context = AndroidPlatform.getContext() as Context
-    Log.i(::cacheStringToFile.name, "Caching data to $fileName")
+    val context: Context by inject(Context::class.java)
+    Log.v(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
@@ -259,7 +230,7 @@ actual fun cacheStringToFile(fileName: String, content: String) : String {
 @OptIn(ExperimentalResourceApi::class)
 actual suspend fun cacheDeepFile(fileName: String) {
     try {
-        val context = AndroidPlatform.getContext() as Context
+        val context: Context by inject(Context::class.java)
         val fileBytes = Res.readBytes(fileName)
         val cacheFile = File(context.cacheDir, fileName)
 
@@ -280,18 +251,6 @@ actual suspend fun cacheDeepFile(fileName: String) {
  *
  */
 actual fun getCacheDir(): String {
-    val context = AndroidPlatform.getContext() as Context
+    val context: Context by inject(Context::class.java)
     return context.cacheDir.absolutePath
 }
-
-// ---------------------------
-
-/**
- * Retrieves the current local date and time.
- *
- * This function uses the system clock to get the current instant in time and converts it to a
- * `LocalDateTime` object using the system's default time zone.
- *
- */
-actual fun getLocalDatetime(): LocalDateTime =
-    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

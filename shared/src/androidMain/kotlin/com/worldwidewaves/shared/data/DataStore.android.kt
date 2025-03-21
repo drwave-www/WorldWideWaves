@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.data
 
 import android.content.Context
 import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
-import com.worldwidewaves.shared.getPlatform
+import org.koin.java.KoinJavaComponent.inject
 
 /**
  * Retrieves the file path for the key-value store.
@@ -32,7 +32,10 @@ import com.worldwidewaves.shared.getPlatform
  * files directory and appending the specified folder and file name for the data store.
  *
  */
-actual fun keyValueStorePath(): String = (getPlatform().getContext() as Context)
-        .filesDir
-        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
-        .absolutePath
+actual fun keyValueStorePath(): String {
+        val context: Context by inject(Context::class.java)
+        return context
+                .filesDir
+                .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
+                .absolutePath
+}

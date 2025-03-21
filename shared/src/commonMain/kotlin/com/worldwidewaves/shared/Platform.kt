@@ -4,7 +4,6 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -30,15 +29,13 @@ import kotlinx.datetime.toLocalDateTime
  * limitations under the License.
  */
 
-abstract class WWWPlatform {
-    abstract val name: String
-    abstract fun getContext(): Any
+class WWWPlatform(val name: String) {
 
     init {
         val instant = Instant.parse("2024-03-15T17:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
         val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
-        setSimulation(WWWSimulation(now, Position(lat = 48.862725, lng = 2.287592), 30)) // Center of Paris, 1h is 2mn
+        setSimulation(WWWSimulation(now, Position(lat = 48.862725, lng = 2.287592), 50)) // In Paris, 1h is 2mn
     }
 
     private var _simulation : WWWSimulation? = null
@@ -48,15 +45,13 @@ abstract class WWWPlatform {
     }
 
     fun setSimulation(simulation : WWWSimulation) {
-        Log.i(::setSimulation.name, "Set simulation to ${simulation.now().toString()} and ${simulation.getUserPosition().toString()}")
+        Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
         _simulation = simulation
     }
 
     fun getSimulation() : WWWSimulation? = _simulation
     fun isUnderSimulation() : Boolean = _simulation != null
 }
-
-expect fun getPlatform(): WWWPlatform
 
 class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvider) {
     fun onAppShutdown() {
@@ -76,7 +71,3 @@ expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String): String
 expect suspend fun cacheDeepFile(fileName: String)
 expect fun getCacheDir(): String
-
-// ---------------------------
-
-expect fun getLocalDatetime(): LocalDateTime
