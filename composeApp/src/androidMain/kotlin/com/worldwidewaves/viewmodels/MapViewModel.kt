@@ -22,7 +22,6 @@ package com.worldwidewaves.viewmodels
  */
 
 import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
@@ -34,11 +33,9 @@ import com.google.android.play.core.splitinstall.SplitInstallSessionState
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import com.worldwidewaves.shared.getMapFileAbsolutePath
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * Represents possible states during map feature installation.
@@ -57,16 +54,15 @@ sealed class MapFeatureState {
     data class Retrying(val attempt: Int, val maxAttempts: Int) : MapFeatureState()
 }
 
+// ----------------------------------------------------------------------------
+
 /**
  * ViewModel that manages downloading and installing dynamic feature modules for maps.
  * Follows Google's Play Feature Delivery best practices.
  */
 class MapViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val context: Context
-        get() = getApplication()
-
-    private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
+    private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     val featureState: StateFlow<MapFeatureState> = _featureState
 
@@ -78,9 +74,13 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val maxRetries = 3
     private val retryDelayMillis = 1000L // Base delay for exponential backoff
 
+    // ------------------------------------------------------------------------
+
     init {
         registerListener()
     }
+
+    // ------------------------------------------------------------------------
 
     private fun registerListener() {
         installStateListener = SplitInstallStateUpdatedListener { state ->
@@ -94,6 +94,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // ------------------------------------------------------------------------
+
     override fun onCleared() {
         installStateListener?.let {
             splitInstallManager.unregisterListener(it)
@@ -101,7 +103,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         super.onCleared()
     }
 
+    // ------------------------------------------------------------------------
+
     private fun updateStateFromInstallState(state: SplitInstallSessionState) {
+
         // Special handling for SERVICE_DIED error
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED) {
@@ -110,6 +115,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             val moduleId = getCurrentModuleFromState(state) ?: currentMapId
 
             if (moduleId != null && retryCount < maxRetries) {
+
                 // Prepare retry with exponential backoff
                 val delay = retryDelayMillis * (1 shl retryCount)
                 retryCount++
@@ -178,6 +184,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // ------------------------------------------------------------------------
+
     // Utility method to extract module ID from session state
     private fun getCurrentModuleFromState(state: SplitInstallSessionState): String? {
         return try {
@@ -186,6 +194,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             null
         }
     }
+
+    // ------------------------------------------------------------------------
 
     private fun getErrorMessage(errorCode: Int): String {
         return when (errorCode) {
@@ -211,9 +221,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Checks if a map module is available/installed.
-     */
+    // ------------------------------------------------------------------------
+
     fun checkIfMapIsAvailable(mapId: String) {
         viewModelScope.launch {
             currentMapId = mapId
@@ -225,10 +234,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Requests installation of a map module.
-     */
-    fun downloadMap(mapId: String) {
+    // ------------------------------------------------------------------------
+
+    fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)? = null) {
         if (_featureState.value is MapFeatureState.Downloading ||
             _featureState.value is MapFeatureState.Pending) {
             return // Already downloading
@@ -242,14 +250,22 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             .addModule(mapId)
             .build()
 
-        startInstallWithRetry(request, mapId)
+        startInstallWithRetry(request, mapId, onMapDownloaded = onMapDownloaded)
     }
 
-    private fun startInstallWithRetry(request: SplitInstallRequest, mapId: String, delay: Long = retryDelayMillis) {
+    // ------------------------------------------------------------------------
+
+    private fun startInstallWithRetry(
+        request: SplitInstallRequest,
+        mapId: String,
+        delay: Long = retryDelayMillis,
+        onMapDownloaded: (() -> Unit)? = null
+    ) {
         splitInstallManager.startInstall(request)
             .addOnSuccessListener { sessionId ->
                 currentSessionId = sessionId
                 retryCount = 0 // Reset retry count on success
+                onMapDownloaded?.invoke()
             }
             .addOnFailureListener { exception ->
                 // Check if it's worth retrying
@@ -273,26 +289,12 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
+    // ------------------------------------------------------------------------
+
     fun cancelDownload() {
         if (currentSessionId > 0) {
             splitInstallManager.cancelInstall(currentSessionId)
             // State will be updated via the listener when cancellation completes
-        }
-    }
-
-    fun isMapReady(mapId: String): Boolean {
-        return splitInstallManager.installedModules.contains(mapId)
-    }
-
-    fun getMapFilePath(mapId: String, extension: String): String? {
-        if (!isMapReady(mapId)) {
-            return null
-        }
-
-        // This uses runBlocking which is generally not recommended in a ViewModel,
-        // but here it's used to provide a synchronous API for simplicity
-        return runBlocking {
-            getMapFileAbsolutePath(mapId, extension)
         }
     }
 

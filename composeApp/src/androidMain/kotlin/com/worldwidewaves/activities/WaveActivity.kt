@@ -83,7 +83,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SEC
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
@@ -117,6 +116,8 @@ class WaveActivity : AbstractEventBackActivity() {
     private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
+    // ------------------------------------------------------------------------
+
     override fun onResume() {
         super.onResume()
         // Restart observation when activity is visible
@@ -129,13 +130,14 @@ class WaveActivity : AbstractEventBackActivity() {
         super.onPause()
     }
 
+    // ------------------------------------------------------------------------
+
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
         // States
-        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
         var hasPlayedHitSound = false
 
         // Calculate height based on aspect ratio and available width
@@ -151,10 +153,7 @@ class WaveActivity : AbstractEventBackActivity() {
         val eventMap = remember(event.id) {
             EventMap(event,
                 onLocationUpdate = { newLocation ->
-                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateUserLocation(newLocation)
-                        lastKnownLocation = newLocation
-                    }
+                    waveViewModel.updateUserLocation(newLocation)
                 },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
@@ -208,8 +207,8 @@ class WaveActivity : AbstractEventBackActivity() {
                 WaveHitCounter(waveViewModel)
             }
 
-            // Pass the visibility state to WaveChroreographies for coordination
-            WaveChroreographies(
+            // Pass the visibility state to WaveChoreographies for coordination
+            WaveChoreographies(
                 event = event,
                 waveViewModel = waveViewModel,
                 clock = clock,
@@ -226,7 +225,7 @@ class WaveActivity : AbstractEventBackActivity() {
 
 }
 
-// ----------------------------
+// ------------------------------------------------------------------------
 
 @Composable
 fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: EventMap) {
@@ -243,7 +242,7 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: EventMap) {
     }
 }
 
-// ----------------------------
+// ------------------------------------------------------------------------
 
 @Composable
 fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
@@ -271,7 +270,7 @@ fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     }
 }
 
-// ----------------------------
+// ------------------------------------------------------------------------
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -317,6 +316,34 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, modifier: Modifier = Modifi
 }
 
 @Composable
+private fun WaveProgression(progression: Double) {
+    val density = LocalDensity.current
+    val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(barHeight.dp)
+    ) {
+        val width = size.width
+        val height = barHeight // Adjusted height
+        val traversedWidth = (width * min(progression, 100.0).toFloat() / 100f)
+
+        // Draw the progression bar
+        drawRect(
+            color = onQuinaryLight,
+            size = Size(traversedWidth, height)
+        )
+        drawRect(
+            color = quinaryLight,
+            topLeft = Offset(traversedWidth, 0f),
+            size = Size(width - traversedWidth, height)
+        )
+
+    }
+}
+
+@Composable
 fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoingToBeHit: Boolean, hasBeenHit: Boolean) {
     val normalColor = extraElementsLight
     val alertColor = tertiaryLight
@@ -356,35 +383,7 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
     }
 }
 
-@Composable
-private fun WaveProgression(progression: Double) {
-    val density = LocalDensity.current
-    val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(barHeight.dp)
-    ) {
-        val width = size.width
-        val height = barHeight // Adjusted height
-        val traversedWidth = (width * min(progression, 100.0).toFloat() / 100f)
-
-        // Draw the progression bar
-        drawRect(
-            color = onQuinaryLight,
-            size = Size(traversedWidth, height)
-        )
-        drawRect(
-            color = quinaryLight,
-            topLeft = Offset(traversedWidth, 0f),
-            size = Size(width - traversedWidth, height)
-        )
-
-    }
-}
-
-// ----------------------------
+// ------------------------------------------------------------------------
 
 @Composable
 fun WaveHitCounter(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
@@ -429,10 +428,10 @@ private fun formatDuration(duration: Duration): String {
     }
 }
 
-// ----------------------------
+// ------------------------------------------------------------------------
 
 @Composable
-fun WaveChroreographies(
+fun WaveChoreographies(
     event: IWWWEvent,
     waveViewModel: WaveViewModel,
     clock: IClock,

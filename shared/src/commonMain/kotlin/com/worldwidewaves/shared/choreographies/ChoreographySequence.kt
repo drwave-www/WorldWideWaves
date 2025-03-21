@@ -27,6 +27,13 @@ import kotlinx.serialization.Serializable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+@Serializable
+data class ChoreographyDefinition(
+    @SerialName("warming_sequences") val warmingSequences: List<ChoreographySequence> = emptyList(),
+    @SerialName("waiting_sequence") val waitingSequence: ChoreographySequence? = null,
+    @SerialName("hit_sequence") val hitSequence: ChoreographySequence? = null
+)
+
 /**
  * Represents a sequence of images to be displayed in order with timing information
  * and associated text for wave choreography animations.
@@ -55,23 +62,4 @@ data class ChoreographySequence(
             ?: listOfNotNull(resolver.resolve("transparent"))
     }
 
-    companion object {
-        // Create an empty placeholder sequence
-        fun empty(): ChoreographySequence = ChoreographySequence(
-            images = listOf("transparent"),
-            timing = 1.seconds,
-            text = "",
-            loop = false
-        )
-    }
 }
-
-/**
- * JSON structure for choreography definitions
- */
-@Serializable
-data class ChoreographyDefinition(
-    @SerialName("warming_sequences") val warmingSequences: List<ChoreographySequence> = emptyList(),
-    @SerialName("waiting_sequence") val waitingSequence: ChoreographySequence? = null,
-    @SerialName("hit_sequence") val hitSequence: ChoreographySequence? = null
-)

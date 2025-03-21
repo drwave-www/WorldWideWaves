@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.choreographies
+package com.worldwidewaves.shared.sound
 
 /*
  * Copyright 2024 DrWave
@@ -26,7 +26,6 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioTrack
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -46,6 +45,8 @@ actual object AudioBufferFactory {
         return AndroidAudioBuffer(samples, sampleRate, bitsPerSample, channels)
     }
 }
+
+// ----------------------------------------------------------------------------
 
 /**
  * Android-specific audio buffer implementation
@@ -92,12 +93,13 @@ class AndroidAudioBuffer(
     override fun getRawBuffer(): ByteArray = buffer
 }
 
+// ----------------------------------------------------------------------------
+
 /**
  * Android implementation of SoundPlayer using AudioTrack
  */
 class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeController {
     private val sampleRate = 44100 // Hz
-    private val scope = CoroutineScope(Dispatchers.Default)
     private val activeTracks = mutableListOf<AudioTrack>()
 
     // Audio manager for volume control
@@ -127,6 +129,7 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
         duration: Duration,
         waveform: SoundPlayer.Waveform
     ) = withContext(Dispatchers.Main) {
+
         // Save current volume
         val originalVolume = getCurrentVolume()
 
@@ -160,6 +163,7 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
 
             // Wait for playback to complete
             delay(duration + 100.milliseconds)
+
         } finally {
             // Always restore original volume
             setVolume(originalVolume)
@@ -207,4 +211,5 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
             activeTracks.clear()
         }
     }
+
 }

@@ -27,6 +27,7 @@ import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ImageResolver
+import io.github.aakira.napier.Napier
 import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -37,7 +38,6 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 /**
  * Manages choreography sequences for different phases of wave events.
- * Loads sequences from JSON definition files.
  */
 class ChoreographyManager<T>(
     coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
@@ -45,128 +45,108 @@ class ChoreographyManager<T>(
 
     private val clock: IClock by inject()
     private val imageResolver: ImageResolver<T> by inject()
+    private var definition: ChoreographyDefinition? = null
+    private var resolvedSequences: ResolvedChoreography<T>? = null
+    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    private var definition : ChoreographyDefinition? = null
-    private var resolvedSequences : ResolvedChoreography<T>? = null
+    // ------------------------------------------------------------------------
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
-
-    /**
-     * Holds resolved choreography sequences with actual resource IDs
-     */
     data class ResolvedChoreography<T>(
         val warmingSequences: List<ResolvedSequence<T>> = emptyList(),
         val waitingSequence: ResolvedSequence<T>? = null,
         val hitSequence: ResolvedSequence<T>? = null
     )
 
-    /**
-     * A sequence with resolved resource IDs and timing information
-     */
     data class ResolvedSequence<T>(
         val sequence: ChoreographySequence,
         val resolvedImages: List<T>,
-        val startTime: Duration, // Offset from the beginning of the warming phase
-        val endTime: Duration // When this sequence ends
+        val startTime: Duration,
+        val endTime: Duration
     )
 
+    data class DisplayableSequence<T>(
+        val images: List<T>,
+        val timing: Duration,
+        val text: String,
+        val loop: Boolean,
+        val remainingDuration: Duration?
+    )
+
+    // ----------------------
+
+    private fun ChoreographySequence.toResolved(
+        startTime: Duration = Duration.ZERO
+    ): ResolvedSequence<T> = ResolvedSequence(
+        sequence = this,
+        resolvedImages = resolveImageResources(imageResolver),
+        startTime = startTime,
+        endTime = startTime + totalDuration
+    )
+
+    private fun ResolvedSequence<T>.toDisplayable(
+        remainingDuration: Duration? = null
+    ): DisplayableSequence<T> = DisplayableSequence(
+        images = resolvedImages,
+        timing = sequence.timing,
+        text = sequence.text,
+        loop = sequence.loop,
+        remainingDuration = remainingDuration
+    )
+
+    // ------------------------------------------------------------------------
+
     init {
+        // This could be moved outside and managed by Koin
         coroutineScopeProvider.launchIO {
             prepareChoreography(FS_CHOREOGRAPHIES_CONF)
         }
     }
 
-    /**
-     * Load a choreography definition from a resource file
-     * @param definitionResource Resource path to the JSON definition file
-     * @return The loaded definition
-     */
+    // ------------------------------------------------------------------------
+
     @OptIn(ExperimentalResourceApi::class)
     private suspend fun loadDefinition(definitionResource: String): ChoreographyDefinition {
         definition?.let { return it }
 
         try {
-            // Read the resource bytes
             val bytes = Res.readBytes(definitionResource)
             val jsonString = bytes.decodeToString()
-
-            definition = json.decodeFromString<ChoreographyDefinition>(jsonString)
-            return definition as ChoreographyDefinition
+            return json.decodeFromString<ChoreographyDefinition>(jsonString).also {
+                definition = it
+            }
         } catch (e: Exception) {
-            println("Error loading choreography definition: ${e.message}")
+            Napier.e("Error loading choreography definition: ${e.message}")
             return ChoreographyDefinition()
         }
     }
 
-    /**
-     * Prepare choreography sequences for an event
-     * Resolves resource IDs and calculates timing information
-     * @param definitionResource Resource path to the JSON definition
-     */
+    // ------------------------------------------------------------------------
+
     private suspend fun prepareChoreography(definitionResource: String) {
         val definition = loadDefinition(definitionResource)
-
-        // Build the warmingSequences with timing information
         var currentOffset = Duration.ZERO
-        val resolvedWarmingSequences = definition.warmingSequences.map { sequence ->
-            val startTime = currentOffset
-            val duration = sequence.totalDuration
-            val endTime = startTime + duration
-            currentOffset = endTime
 
-            ResolvedSequence(
-                sequence = sequence,
-                resolvedImages = sequence.resolveImageResources(imageResolver),
-                startTime = startTime,
-                endTime = endTime
-            )
+        val warmingSequences = definition.warmingSequences.map { sequence ->
+            sequence.toResolved(currentOffset).also {
+                currentOffset += sequence.totalDuration
+            }
         }
 
-        // Resolve waiting and hit sequences
-        val resolvedWaitingSequence = definition.waitingSequence?.let {
-            ResolvedSequence(
-                sequence = it,
-                resolvedImages = it.resolveImageResources(imageResolver),
-                startTime = Duration.ZERO,
-                endTime = it.totalDuration
-            )
-        }
-
-        val resolvedHitSequence = definition.hitSequence?.let {
-            ResolvedSequence(
-                sequence = it,
-                resolvedImages = it.resolveImageResources(imageResolver),
-                startTime = Duration.ZERO,
-                endTime = it.totalDuration
-            )
-        }
-
-        // Store the resolved choreography
-        val resolved = ResolvedChoreography(
-            warmingSequences = resolvedWarmingSequences,
-            waitingSequence = resolvedWaitingSequence,
-            hitSequence = resolvedHitSequence
+        resolvedSequences = ResolvedChoreography(
+            warmingSequences = warmingSequences,
+            waitingSequence = definition.waitingSequence?.toResolved(),
+            hitSequence = definition.hitSequence?.toResolved()
         )
-
-        resolvedSequences = resolved
     }
 
-    /**
-     * Get the appropriate warming sequence based on elapsed time since warming started.
-     * Sequences will loop continuously rather than stopping at the last one.
-     * @param startTime When the warming phase started
-     * @return The appropriate choreography sequence or null if none available
-     */
+    // ------------------------------------------------------------------------
+
     fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
         val totalDuration = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
-
         val wrappedElapsedTime = if (totalDuration.isPositive()) {
             (elapsedTime.inWholeNanoseconds % totalDuration.inWholeNanoseconds).nanoseconds
                 .coerceAtLeast(Duration.ZERO)
@@ -174,61 +154,16 @@ class ChoreographyManager<T>(
             Duration.ZERO
         }
 
-        // Find the sequence for this wrapped time
         val sequence = resolved.warmingSequences.find {
             wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
-        } ?: resolved.warmingSequences.first() // Fallback to first if not found
+        } ?: resolved.warmingSequences.first()
 
-        return DisplayableSequence(
-            images = sequence.resolvedImages,
-            timing = sequence.sequence.timing,
-            text = sequence.sequence.text,
-            loop = sequence.sequence.loop,
-            // We provide the actual remaining time within this sequence iteration
-            remainingDuration = sequence.endTime - wrappedElapsedTime
-        )
+        return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
-    /**
-     * Get the waiting sequence (when user is about to be hit)
-     */
-    fun getWaitingSequence(): DisplayableSequence<T>? {
-        val resolved = resolvedSequences ?: return null
-        val sequence = resolved.waitingSequence ?: return null
+    fun getWaitingSequence(): DisplayableSequence<T>? =
+        resolvedSequences?.waitingSequence?.toDisplayable()
 
-        return DisplayableSequence(
-            images = sequence.resolvedImages,
-            timing = sequence.sequence.timing,
-            text = sequence.sequence.text,
-            loop = sequence.sequence.loop,
-            remainingDuration = null // Loop indefinitely
-        )
-    }
-
-    /**
-     * Get the hit sequence (when user has been hit)
-     */
-    fun getHitSequence(): DisplayableSequence<T>? {
-        val resolved = resolvedSequences ?: return null
-        val sequence = resolved.hitSequence ?: return null
-
-        return DisplayableSequence(
-            images = sequence.resolvedImages,
-            timing = sequence.sequence.timing,
-            text = sequence.sequence.text,
-            loop = sequence.sequence.loop,
-            remainingDuration = null // Loop indefinitely
-        )
-    }
-
-    /**
-     * A sequence ready for display with resolved resource IDs
-     */
-    data class DisplayableSequence<T>(
-        val images: List<T>,
-        val timing: Duration,
-        val text: String,
-        val loop: Boolean,
-        val remainingDuration: Duration? // How long this sequence should be displayed
-    )
+    fun getHitSequence(): DisplayableSequence<T>? =
+        resolvedSequences?.hitSequence?.toDisplayable()
 }

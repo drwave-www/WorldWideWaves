@@ -42,10 +42,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -84,7 +82,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FO
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
@@ -112,6 +109,8 @@ class EventActivity : AbstractEventBackActivity() {
     private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
+    // ------------------------------------------------------------------------
+
     override fun onResume() {
         super.onResume()
         // Restart observation when activity is visible
@@ -124,11 +123,12 @@ class EventActivity : AbstractEventBackActivity() {
         super.onPause()
     }
 
+    // ------------------------------------------------------------------------
+
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -137,10 +137,7 @@ class EventActivity : AbstractEventBackActivity() {
         val eventMap = remember(event.id) {
             EventMap(event,
                 onLocationUpdate = { newLocation ->
-                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateUserLocation(newLocation)
-                        lastKnownLocation = newLocation
-                    }
+                    waveViewModel.updateUserLocation(newLocation)
                 },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
@@ -165,11 +162,13 @@ class EventActivity : AbstractEventBackActivity() {
             DividerLine()
             ButtonWave(event, clock)
             eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            GeolocalizeMe(waveViewModel)
+            NotifyAreaUserPosition(waveViewModel)
             EventNumbers(waveViewModel)
             WWWEventSocialNetworks(event)
         }
     }
+
+    // ------------------------------------------------------------------------
 
     override fun onDestroy() {
         waveObserver?.stopObservation()
@@ -178,7 +177,7 @@ class EventActivity : AbstractEventBackActivity() {
 
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
@@ -191,7 +190,7 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
     )
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel) {
@@ -212,7 +211,7 @@ private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel) {
     }
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: Modifier = Modifier) {
@@ -242,7 +241,7 @@ private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: M
     }
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifier) {
@@ -253,10 +252,10 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
     )
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
-private fun GeolocalizeMe(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     val isInArea by waveViewModel.isInArea.collectAsState()
 
     val geolocText = when {
@@ -286,7 +285,7 @@ private fun GeolocalizeMe(waveViewModel: WaveViewModel, modifier: Modifier = Mod
     }
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 private fun EventNumbers(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {

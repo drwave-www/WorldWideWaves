@@ -2,6 +2,11 @@ package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.sound.MidiNote
+import com.worldwidewaves.shared.sound.MidiParser
+import com.worldwidewaves.shared.sound.MidiTrack
+import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.WaveformGenerator
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify

@@ -65,7 +65,6 @@ import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
@@ -92,21 +91,21 @@ abstract class AbstractEventBackActivity(
 
     private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
-    protected val platform: WWWPlatform by inject()
+    private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
 
     // ----------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Prevent the screen from turning off
+        // Prevent the screen from turning off when on event screens
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         setStatusBarColor(window)
 
-        var selectedEvent by mutableStateOf<IWWWEvent?>(null)
         val eventId = intent.getStringExtra("eventId")
 
+        // Download or Load the map
         if (eventId != null) {
             lifecycleScope.launch {
                 // Check if map is available
@@ -117,11 +116,13 @@ abstract class AbstractEventBackActivity(
                     when (state) {
                         is MapFeatureState.Available, is MapFeatureState.Installed -> {
                             // Load event when map is available
-                            loadEvent(eventId) { event -> selectedEvent = event }
+                            trackEventLoading(eventId) { event -> selectedEvent = event }
                         }
                         is MapFeatureState.NotAvailable -> {
                             // Download map if not available
-                            mapViewModel.downloadMap(eventId)
+                            mapViewModel.downloadMap(eventId) {
+                                trackEventLoading(eventId) { event -> selectedEvent = event }
+                            }
                         }
                         else -> { /* Do nothing, managed by BackwardScreen() */ }
                     }
@@ -140,7 +141,9 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    private fun loadEvent(eventId: String, onEventLoaded: (IWWWEvent?) -> Unit) {
+    // ----------------------------
+
+    private fun trackEventLoading(eventId: String, onEventLoaded: (IWWWEvent?) -> Unit) {
         wwwEvents.addOnEventsLoadedListener {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
@@ -248,7 +251,9 @@ abstract class AbstractEventBackActivity(
                                 ErrorMessage(
                                     message = state.errorMessage
                                         ?: stringResource(ShRes.string.map_error_download),
-                                    onRetry = { mapViewModel.downloadMap(eventId) }
+                                    onRetry = { mapViewModel.downloadMap(eventId) {
+                                        trackEventLoading(eventId) { event -> selectedEvent = event }
+                                    } }
                                 )
                             }
 
@@ -290,10 +295,7 @@ abstract class AbstractEventBackActivity(
 
     // Reusable composable for showing download progress
     @Composable
-    private fun DownloadProgressIndicator(
-        progress: Int = 0,
-        message: String
-    ) {
+    private fun DownloadProgressIndicator(progress: Int = 0, message: String) {
         Column(
             horizontalAlignment = CenterHorizontally,
             modifier = Modifier.padding(16.dp)
@@ -342,12 +344,8 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // Reusable composable for showing error messages
     @Composable
-    private fun ErrorMessage(
-        message: String,
-        onRetry: () -> Unit
-    ) {
+    private fun ErrorMessage(message: String, onRetry: () -> Unit) {
         Column(
             horizontalAlignment = CenterHorizontally,
             modifier = Modifier.padding(16.dp)
@@ -385,7 +383,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // ----------------------------
+    // Main activity UI building methode to be implemented --------------------
 
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)

@@ -22,10 +22,25 @@ package com.worldwidewaves.shared.utils
  */
 
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.*
+import com.worldwidewaves.shared.generated.resources.wave_hit_1
+import com.worldwidewaves.shared.generated.resources.wave_hit_2
+import com.worldwidewaves.shared.generated.resources.wave_hit_3
+import com.worldwidewaves.shared.generated.resources.wave_waiting_1
+import com.worldwidewaves.shared.generated.resources.wave_waiting_2
+import com.worldwidewaves.shared.generated.resources.wave_waiting_3
+import com.worldwidewaves.shared.generated.resources.wave_warmup_1
+import com.worldwidewaves.shared.generated.resources.wave_warmup_2
+import com.worldwidewaves.shared.generated.resources.wave_warmup_3
+import com.worldwidewaves.shared.generated.resources.wave_warmup_4
+import com.worldwidewaves.shared.generated.resources.wave_warmup_5
+import com.worldwidewaves.shared.generated.resources.wave_warmup_6
+import com.worldwidewaves.shared.generated.resources.wave_warmup_7
+import com.worldwidewaves.shared.generated.resources.wave_warmup_8
+import com.worldwidewaves.shared.generated.resources.wave_warmup_9
 import org.jetbrains.compose.resources.DrawableResource
 
 object DrawableResources {
+
     // Mapping of path names to resource IDs
     private val resourceMap = mapOf(
         "wave_warmup_1" to Res.drawable.wave_warmup_1,

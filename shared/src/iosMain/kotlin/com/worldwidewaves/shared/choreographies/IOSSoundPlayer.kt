@@ -21,6 +21,9 @@ package com.worldwidewaves.shared.choreographies
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.sound.AudioBuffer
+import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.VolumeController
 import platform.AVFAudio.AVAudioEngine
 import kotlin.time.Duration
 import platform.AVFoundation.*

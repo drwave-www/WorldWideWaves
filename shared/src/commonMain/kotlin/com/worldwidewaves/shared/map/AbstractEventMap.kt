@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 
 // ----------------------------------------------------------------------------
 
-interface MapCameraCallback {
+interface MapCameraCallback { // Call back for camera animations
     fun onFinish()
     fun onCancel()
 }
 
-data class EventMapConfig(
+data class EventMapConfig( // Type of EventMap initial view setup
     val initialCameraPosition: MapCameraPosition = MapCameraPosition.BOUNDS
 )
 
@@ -57,24 +57,17 @@ abstract class AbstractEventMap(
     protected val mapConfig: EventMapConfig = EventMapConfig(),
     private val onLocationUpdate: (Position) -> Unit
 ) {
-    // Properties that will be implemented by platform-specific subclasses
-    abstract val mapLibreAdapter: MapLibreAdapter
-    abstract val locationProvider: LocationProvider?
+    // Properties that must be implemented by platform-specific subclasses
+    abstract val mapLibreAdapter: MapLibreAdapter // MapLibre is native map library
+    abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Class variables
     private var screenHeight: Double = 800.0
     private var screenWidth: Double = 600.0
     private var userHasBeenLocated = false
+    private var lastKnownPosition: Position? = null
 
-    /**
-     * Configures map constraints based on the event area.
-     * This is meant to be called by platform-specific implementations
-     * during initialization.
-     */
-    private suspend fun configureMapConstraints() =
-        mapLibreAdapter.setConstraints(event.area.bbox())
-
-    // Camera position methods - shared logic for all platforms
+    // Camera position methods - shared logic for all platforms ---------------
 
     /**
      * Moves the camera to view the event bounds
@@ -92,7 +85,7 @@ abstract class AbstractEventMap(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        configureMapConstraints() // Apply constraints first
+        mapLibreAdapter.setConstraints(event.area.bbox()) // Apply constraints first
 
         val (sw, ne) = event.area.bbox()
         val eventMapWidth = ne.lng - sw.lng
@@ -139,10 +132,10 @@ abstract class AbstractEventMap(
         })
     }
 
-    // Camera targeting methods - shared logic for all platforms
+    // Camera targeting methods - shared logic for all platforms --------------
 
     /**
-     * Moves the camera to the current wave position
+     * Moves the camera to the current wave longitude, keeping current latitude
      */
     suspend fun targetWave() {
         val currentLocation = locationProvider?.currentLocation?.value ?: return
@@ -161,7 +154,7 @@ abstract class AbstractEventMap(
     }
 
     /**
-     * Moves the camera to show both the user and wave positions
+     * Moves the camera to show both the user and wave positions with good padding
      */
     suspend fun targetUserAndWave() {
         val userPosition = locationProvider?.currentLocation?.value ?: return
@@ -193,6 +186,8 @@ abstract class AbstractEventMap(
         mapLibreAdapter.animateCameraToBounds(newBounds)
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * Sets up the map with initial configuration
      */
@@ -203,10 +198,11 @@ abstract class AbstractEventMap(
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null
     ) {
+        // Set screen dimensions
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
 
-        // Set the click listener
+        // Set the click listener - platform-specific
         mapLibreAdapter.setOnMapClickListener(onMapClick)
 
         // Set the max zoom level from the event configuration
@@ -230,11 +226,15 @@ abstract class AbstractEventMap(
                 userHasBeenLocated = true
             }
 
-            // Allow the wave to know the current location of the user for computations
-            event.wave.setPositionRequester { mapPosition }
+            if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
+                // Allow the wave to know the current location of the user for computations
+                event.wave.setPositionRequester { mapPosition }
 
-            // Notify caller
-            onLocationUpdate(mapPosition)
+                // Notify caller
+                onLocationUpdate(mapPosition)
+
+                lastKnownPosition = mapPosition
+            }
         }
     }
 

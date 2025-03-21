@@ -34,10 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -51,7 +49,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAG
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_target_me_off
 import com.worldwidewaves.shared.generated.resources.event_target_me_on
@@ -78,6 +75,8 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
     private val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
+    // ------------------------------------------------------------------------
+
     override fun onResume() {
         super.onResume()
         // Restart observation when activity is visible
@@ -90,19 +89,17 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
         super.onPause()
     }
 
+    // ------------------------------------------------------------------------
+
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        var lastKnownLocation by remember { mutableStateOf<Position?>(null) }
 
         val eventMap =  remember(event.id) {
             EventMap(event,
                 onLocationUpdate = { newLocation ->
-                    if (lastKnownLocation == null || lastKnownLocation != newLocation) {
-                        waveViewModel.updateUserLocation(newLocation)
-                        lastKnownLocation = newLocation
-                    }
+                    waveViewModel.updateUserLocation(newLocation)
                 },
                 mapConfig = EventMapConfig(
                     initialCameraPosition = MapCameraPosition.WINDOW
@@ -123,6 +120,8 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
         }
     }
 
+    // ------------------------------------------------------------------------
+
     override fun onDestroy() {
         waveObserver?.stopObservation()
         super.onDestroy()
@@ -130,7 +129,7 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
 
 }
 
-// ----------------------------
+// ----------------------------------------------------------------------------
 
 @Composable
 fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
@@ -140,15 +139,13 @@ fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modif
 
     val isRunning = eventStatus == Status.RUNNING
 
-    Box(
-        modifier = modifier.fillMaxSize()
+    Box(modifier = modifier.fillMaxSize()
             .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
             Image(
-                modifier = Modifier
-                    .size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
+                modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
                         if (isRunning) {
                             scope.launch {
@@ -160,8 +157,7 @@ fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modif
                 contentDescription = stringResource(if (isRunning) ShRes.string.event_target_wave_on else Res.string.event_target_wave_off)
             )
             Image(
-                modifier = Modifier
-                    .size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
+                modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
                             scope.launch {
