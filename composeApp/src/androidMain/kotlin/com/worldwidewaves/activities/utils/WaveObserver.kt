@@ -37,19 +37,19 @@ class WaveObserver(
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,
     private val event: IWWWEvent?,
-    private val waveViewModel: WaveViewModel
+    private val waveViewModel: WaveViewModel,
+    private val observerId: String // Add observer ID
 ) {
-
     fun startObservation() {
         eventMap?.let { eventMap ->
             event?.let { event ->
                 scope.launch {
                     if (event.isRunning()) {
-                        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+                        waveViewModel.startObservation(observerId, event) { wavePolygons, clearPolygons ->
                             eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
                         }
                     } else {
-                        waveViewModel.startObservation(event)
+                        waveViewModel.startObservation(observerId, event)
                         if (event.isDone()) {
                             eventMap.updateWavePolygons(
                                 context,
@@ -64,7 +64,6 @@ class WaveObserver(
     }
 
     fun stopObservation() {
-        waveViewModel.stopObservation()
+        waveViewModel.stopObservation(observerId)
     }
-
 }

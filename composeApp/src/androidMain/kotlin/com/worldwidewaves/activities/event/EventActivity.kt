@@ -117,7 +117,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val eventMap = remember(event.id) {
             AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(newLocation)
+                    waveViewModel.updateUserLocation(observerId, newLocation)
                 },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
@@ -135,13 +135,13 @@ class EventActivity : AbstractEventWaveActivity() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
-            EventOverlay(event, waveViewModel)
+            EventOverlay(event, waveViewModel, observerId)
             EventDescription(event)
             DividerLine()
             ButtonWave(event, clock)
             eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            NotifyAreaUserPosition(waveViewModel)
-            EventNumbers(waveViewModel)
+            NotifyAreaUserPosition(waveViewModel, observerId)
+            EventNumbers(waveViewModel, observerId)
             WWWEventSocialNetworks(event)
         }
     }
@@ -164,8 +164,8 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel) {
-    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
+private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel, observerId: String) {
+    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
 
     Box {
         Image(
@@ -226,8 +226,8 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val isInArea by waveViewModel.isInArea.collectAsState()
+private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
     val geolocText = when {
         isInArea -> ShRes.string.geoloc_yourein
@@ -259,10 +259,10 @@ private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, modifier: Modif
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun EventNumbers(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val waveNumbers by waveViewModel.waveNumbers.collectAsState()
+private fun EventNumbers(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+    val waveNumbers by waveViewModel.getWaveNumbersFlow(observerId).collectAsState()
 
-    val eventNumbers by remember {
+    val eventNumbers by remember(observerId) {
         derivedStateOf {
             waveNumbers?.let {
                 mapOf(

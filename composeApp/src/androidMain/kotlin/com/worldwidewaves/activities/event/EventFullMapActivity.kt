@@ -77,7 +77,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(newLocation)
+                    waveViewModel.updateUserLocation(observerId, newLocation)
                 },
                 mapConfig = EventMapConfig(
                     initialCameraPosition = MapCameraPosition.WINDOW
@@ -92,7 +92,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         Box(modifier = modifier.fillMaxWidth()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize())
             ButtonWave(event, clock, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(eventMap, waveViewModel)
+            MapActions(eventMap, waveViewModel, observerId)
         }
     }
 
@@ -101,10 +101,10 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 // ----------------------------------------------------------------------------
 
 @Composable
-fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
-    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by waveViewModel.isInArea.collectAsState()
+    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING
 
