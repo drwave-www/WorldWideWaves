@@ -81,6 +81,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
@@ -220,7 +221,7 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: AndroidEven
 
 @Composable
 fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val eventStatus by waveViewModel.eventStatus.collectAsState()
+    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
     val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
     val isInArea by waveViewModel.isInArea.collectAsState()
 

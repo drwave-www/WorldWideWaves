@@ -165,7 +165,7 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 
 @Composable
 private fun EventOverlay(event: IWWWEvent, waveViewModel: WaveViewModel) {
-    val eventStatus by waveViewModel.eventStatus.collectAsState()
+    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
 
     Box {
         Image(

@@ -103,7 +103,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 @Composable
 fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
-    val eventStatus by waveViewModel.eventStatus.collectAsState()
+    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by waveViewModel.isInArea.collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING

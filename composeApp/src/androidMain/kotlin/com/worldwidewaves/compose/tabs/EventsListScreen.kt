@@ -53,7 +53,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -332,9 +331,7 @@ class EventsListScreen(
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
-        val eventStatus by produceState(initialValue = IWWWEvent.Status.UNDEFINED, key1 = event.id) {
-            viewModel.eventStatus[event.id]?.collect { value = it } ?: run { value = IWWWEvent.Status.UNDEFINED }
-        }
+        val eventStatus by viewModel.getEventStatusFlow(event.id).collectAsState()
 
         Box(modifier = heightModifier) {
 

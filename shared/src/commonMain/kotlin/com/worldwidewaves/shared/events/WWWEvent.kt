@@ -33,19 +33,21 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
-import io.github.aakira.napier.Napier
+import com.worldwidewaves.shared.utils.updateIfChanged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -58,12 +60,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.random.Random
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
@@ -121,30 +124,24 @@ data class WWWEvent(
 
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val statusChangedListeners = mutableMapOf<Int, (Status) -> Unit>()
-    @Transient private val waveProgressionChangedListeners = mutableMapOf<Int, (Double) -> Unit>()
-    @Transient private val userWarmingStartedListeners = mutableMapOf<Int, () -> Unit>()
-    @Transient private val userIsGoingToBeHitListeners = mutableMapOf<Int, () -> Unit>()
-    @Transient private val userHasBeenHitListeners = mutableMapOf<Int, () -> Unit>()
+    private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
+    override val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
+
+    private val _progression = MutableStateFlow(0.0)
+    override val progression: StateFlow<Double> = _progression.asStateFlow()
+
+    private val _isWarmingInProgress = MutableStateFlow(false)
+    override val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
+
+    private val _userIsGoingToBeHit = MutableStateFlow(false)
+    override val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
+
+    private val _userHasBeenHit = MutableStateFlow(false)
+    override val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
 
     // --
 
-    @Transient private val userWarmingStartedNotifiedListeners = mutableListOf<Int>()
-    @Transient private val userIsGoingToBeHitNotifiedListeners = mutableListOf<Int>()
-    @Transient private val userHasBeenHitNotifiedListeners = mutableListOf<Int>()
-
-    @Transient private val statusChangedMutex = Mutex()
-    @Transient private val waveProgressionChangedMutex = Mutex()
-    @Transient private val userWarmingStartedMutex = Mutex()
-    @Transient private val userIsGoingToBeHitMutex = Mutex()
-    @Transient private val userHasBeenHitMutex = Mutex()
-
-    // --
-
-    @Transient private var isObserving: Boolean = false
     @Transient private var observationJob: Job? = null
-    @Transient private var lastObservedStatus: Status? = null
-    @Transient private var lastObservedProgression: Double? = null
 
     // ---------------------------
 
@@ -370,117 +367,107 @@ data class WWWEvent(
      * Launches a coroutine to initialize the last observed status and progression,
      * then calls `observeWave` to begin periodic checks.
      */
-    private fun startObservation() {
+    override fun startObservation() {
         if (observationJob == null) {
             coroutineScopeProvider.launchDefault {
-                lastObservedStatus = getStatus()
+
+                // Initialize state with current values
+                _eventStatus.value = getStatus()
 
                 try {
-                    lastObservedProgression = wave.getProgression()
+                    _progression.value = wave.getProgression()
                 } catch (e: Throwable) {
                     Log.e(
                         tag = WWWEventWave::class.simpleName!!,
-                        message = "Error initializing last observed progression: $e"
+                        message = "Error initializing progression: $e"
                     )
                 }
 
+                // Start observation if event is running or about to start
                 if (isRunning() || (isSoon() && isNearTime())) {
-                    observationJob = observe().launchIn(coroutineScopeProvider.scopeDefault())
+                    observationJob = createObservationFlow()
+                        .flowOn(Dispatchers.IO)
+                        .catch { e ->
+                            Log.e("observeWave", "Error in observation flow: $e")
+                        }
+                        .onEach { (progressionValue, status) ->
+                            updateStates(progressionValue, status)
+                        }
+                        .launchIn(coroutineScopeProvider.scopeDefault())
                 }
             }
         }
     }
 
     override fun stopObservation() {
-        observationJob?.cancel()
-        observationJob = null
-        isObserving = false
-    }
-
-    override fun stopListeners(vararg listenerKeys: Int) = stopListeners(listenerKeys.toList())
-    override fun stopListeners(listenerKeys: List<Int>) {
-        listenerKeys.forEach { key ->
-            listOf(
-                statusChangedListeners,
-                waveProgressionChangedListeners,
-                userWarmingStartedListeners,
-                userIsGoingToBeHitListeners,
-                userHasBeenHitListeners
-            ).firstOrNull { it.remove(key) != null }
+        coroutineScopeProvider.launchDefault {
+            try {
+                observationJob?.cancelAndJoin()
+            } catch (e: CancellationException) {
+                // Expected exception during cancellation
+            } catch (e: Exception) {
+                Log.e("stopObservation", "Error stopping observation: $e")
+            } finally {
+                observationJob = null
+            }
         }
     }
 
     /**
-     * Observes the wave event for changes in status and progression.
-     *
-     * Launches a coroutine to periodically check the wave's status and progression.
-     * If changes are detected, the corresponding change handlers are invoked.
+     * Creates a flow that periodically emits wave observations.
      */
-    private fun observe() = flow {
-        isObserving = true
-        while (isObserving) {
-            emit(EventObservation(wave.getProgression(), getStatus()))
-            if (isDone()) break
-            delay(getObservationInterval())
+    private fun createObservationFlow() = callbackFlow {
+        try {
+            while (!isDone()) {
+                // Get current state and emit it
+                val progression = wave.getProgression()
+                val status = getStatus()
+                send(EventObservation(progression, status))
+
+                // Wait for the next observation interval
+                delay(getObservationInterval())
+            }
+
+            // Final emission when event is done
+            send(EventObservation(100.0, Status.DONE))
+
+        } catch (e: Exception) {
+            Log.e("observationFlow", "Error in observation flow: $e")
         }
-    }.flowOn(Dispatchers.IO)
-        .catch { e -> Log.e("observeWave", "Error observing wave changes: $e") }
-        .onEach { (progression, status) ->
 
-            // No more listeners, stop observation
-            if (statusChangedListeners.isEmpty() &&
-                waveProgressionChangedListeners.isEmpty() &&
-                userWarmingStartedListeners.isEmpty() &&
-                userIsGoingToBeHitListeners.isEmpty() &&
-                userHasBeenHitListeners.isEmpty()) {
-                stopObservation()
-                return@onEach
-            }
+        // Clean up when flow is cancelled
+        awaitClose()
+    }
 
-            // Wave progression
-            waveProgressionChangedMutex.withLock {
-                if (waveProgressionChangedListeners.isNotEmpty() && progression != lastObservedProgression) {
-                    lastObservedProgression = progression
-                    onWaveProgressionChanged(progression)
-                }
-            }
+    /**
+     * Updates all state flows based on the current event state.
+     */
+    private suspend fun updateStates(progression: Double, status: Status) {
+        // Update the main state flows
+        _progression.updateIfChanged(progression)
+        _eventStatus.updateIfChanged(status)
 
-            // Wave/Event status
-            statusChangedMutex.withLock {
-                if (statusChangedListeners.isNotEmpty() && status != lastObservedStatus) {
-                    lastObservedStatus = status
-                    onEventStatusChanged(status)
-                }
-            }
-
-            // Warming started
-            userWarmingStartedMutex.withLock {
-                if (userWarmingStartedListeners.isNotEmpty() &&
-                    warming.isUserWarmingStarted() && userWarmingStartedNotifiedListeners.size != userWarmingStartedListeners.size) {
-                    onUserWarmingStarted()
-                }
-            }
-
-            // User is going to be hit
-            val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
-            userIsGoingToBeHitMutex.withLock {
-                if (userIsGoingToBeHitListeners.isNotEmpty() &&
-                    (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) &&
-                    userIsGoingToBeHitNotifiedListeners.size != userIsGoingToBeHitListeners.size) {
-                    onUserIsGoingToBeHit()
-                }
-            }
-
-            // User has been hit
-            userHasBeenHitMutex.withLock {
-                if (userHasBeenHitListeners.isNotEmpty() &&
-                    wave.hasUserBeenHitInCurrentPosition() &&
-                    userHasBeenHitNotifiedListeners.size != userHasBeenHitListeners.size) {
-                    onUserHasBeenHit()
-                }
-            }
-
+        // Check for warming started
+        var warmingInProgress = false
+        if (warming.isUserWarmingStarted()) {
+            warmingInProgress = true
         }
+
+        // Check if user is about to be hit
+        val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
+        if (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) {
+            warmingInProgress = false
+            _userIsGoingToBeHit.updateIfChanged(true)
+        }
+
+        // Check if user has been hit
+        if (wave.hasUserBeenHitInCurrentPosition()) {
+            warmingInProgress = false
+            _userHasBeenHit.updateIfChanged(true)
+        }
+
+        _isWarmingInProgress.updateIfChanged(warmingInProgress)
+    }
 
     /**
      * Calculates the observation interval for the wave event.
@@ -489,104 +476,20 @@ data class WWWEvent(
      * current time, the event start time, and the time before the user is hit by the wave.
      *
      */
-    private suspend fun getObservationInterval(): Long {
+    private suspend fun getObservationInterval(): Duration {
         val now = clock.now()
         val eventStartTime = getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
         val timeBeforeHit = wave.timeBeforeUserHit() ?: 1.days
 
-        val interval =  when {
+        return when {
             timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
-            isRunning() -> 500L
-            timeBeforeHit < 2.seconds -> 50L // For sound accuracy
-            else -> 1.days
+            isRunning() -> 500.milliseconds
+            timeBeforeHit < 2.seconds -> 50.milliseconds // For sound accuracy
+            else -> 1.minutes // Default case, more reasonable than 1 day
         }
-
-        return if (interval is Duration) interval.inWholeMilliseconds else interval as Long
-    }
-
-    // ---------------------------
-
-    private fun generateKey(prefix: Int): Int {
-        val randomPart = Random.nextInt(1000000)
-        return "$prefix$randomPart".toInt()
-    }
-
-    private fun <T> addListener(
-        listener: T,
-        listenersMap: MutableMap<Int, T>,
-        mutex: Mutex,
-        keyPrefix: Int
-    ): Int {
-        val key = generateKey(keyPrefix)
-        runBlocking {
-            mutex.withLock {
-                if (!listenersMap.containsValue(listener)) {
-                    listenersMap[key] = listener
-                }
-            }
-            startObservation()
-        }
-        return key
-    }
-
-    override fun addOnStatusChangedListener(listener: (Status) -> Unit): Int =
-        addListener(listener, statusChangedListeners, statusChangedMutex, 100)
-
-    override fun addOnWaveProgressionChangedListener(listener: (Double) -> Unit): Int =
-        addListener(listener, waveProgressionChangedListeners, waveProgressionChangedMutex, 200)
-
-    override fun addOnWarmingStartedListener(listener: () -> Unit): Int =
-        addListener(listener, userWarmingStartedListeners, userWarmingStartedMutex, 300)
-
-    override fun addOnUserIsGoingToBeHitListener(listener: () -> Unit): Int =
-        addListener(listener, userIsGoingToBeHitListeners, userIsGoingToBeHitMutex, 400)
-
-    override fun addOnUserHasBeenHitListener(listener: () -> Unit): Int =
-        addListener(listener, userHasBeenHitListeners, userHasBeenHitMutex, 500)
-
-    // --------
-
-    private fun <T> notifyListeners(
-        listeners: Map<Int, T>,
-        action: (T) -> Unit,
-        notificationTracker: MutableList<Int>? = null
-    ) {
-        listeners.forEach { (key, listener) ->
-            if (notificationTracker == null || key !in notificationTracker) {
-                try {
-                    action(listener)
-                    notificationTracker?.add(key)
-                } catch (e: Exception) {
-                    Napier.e("Error invoking event listener: $e")
-                }
-            }
-        }
-    }
-
-    private fun onEventStatusChanged(status: Status) {
-        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} Event status changed to $status")
-        notifyListeners(statusChangedListeners, { it(status) })
-    }
-
-    private fun onWaveProgressionChanged(progression: Double) =
-        notifyListeners(waveProgressionChangedListeners, { it(progression) })
-
-    private fun onUserWarmingStarted() {
-        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User warming started")
-        notifyListeners(userWarmingStartedListeners, { it() }, userWarmingStartedNotifiedListeners)
-    }
-
-    private fun onUserIsGoingToBeHit() {
-        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User is going to be hit soon")
-        notifyListeners(userIsGoingToBeHitListeners, { it() }, userIsGoingToBeHitNotifiedListeners)
-    }
-
-    private fun onUserHasBeenHit() {
-        Log.v(::onEventStatusChanged.name, "$id - At ${clock.now()} User has been hit")
-        notifyListeners(userHasBeenHitListeners, { it() }, userHasBeenHitNotifiedListeners)
     }
 
     // ---------------------------
