@@ -68,4 +68,5 @@ class WWWSimulationEnabledLocationEngine(
     ) = getSimulatedLocation()?.let { location ->
         listener.onLocationChanged(location)
     } ?: super.requestLocationUpdates(request, listener, looper)
+
 }

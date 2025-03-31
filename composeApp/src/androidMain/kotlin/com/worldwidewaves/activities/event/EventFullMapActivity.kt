@@ -1,4 +1,4 @@
-package com.worldwidewaves.activities
+package com.worldwidewaves.activities.event
 
 /*
  * Copyright 2024 DrWave
@@ -31,18 +31,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.ButtonWave
-import com.worldwidewaves.compose.EventMap
+import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
@@ -65,54 +62,33 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = false) {
+class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
 
     private val clock: IClock by inject()
-
-    private val waveViewModel: WaveViewModel by viewModel()
-    private var waveObserver: WaveObserver? = null
-
-    // ------------------------------------------------------------------------
-
-    override fun onResume() {
-        super.onResume()
-        // Restart observation when activity is visible
-        waveObserver?.startObservation()
-    }
-
-    override fun onPause() {
-        // Stop observation when activity is not visible
-        waveObserver?.stopObservation()
-        super.onPause()
-    }
 
     // ------------------------------------------------------------------------
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
+        // Construct the event map
         val eventMap =  remember(event.id) {
-            EventMap(event,
+            AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
                     waveViewModel.updateUserLocation(newLocation)
                 },
                 mapConfig = EventMapConfig(
                     initialCameraPosition = MapCameraPosition.WINDOW
                 )
-            ).also {
-                waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
-            }
+            )
         }
 
-        LaunchedEffect(true) { // Start wave observation
-            waveObserver?.startObservation()
-        }
+        // Start event/map coordination
+        ObserveEventMap(event, eventMap)
 
+        // Screen composition
         Box(modifier = modifier.fillMaxWidth()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize())
             ButtonWave(event, clock, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
@@ -120,19 +96,12 @@ class EventFullMapActivity : AbstractEventBackActivity(activateInfiniteScroll = 
         }
     }
 
-    // ------------------------------------------------------------------------
-
-    override fun onDestroy() {
-        waveObserver?.stopObservation()
-        super.onDestroy()
-    }
-
 }
 
 // ----------------------------------------------------------------------------
 
 @Composable
-fun MapActions(eventMap: EventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
+fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val eventStatus by waveViewModel.eventStatus.collectAsState()
     val isInArea by waveViewModel.isInArea.collectAsState()

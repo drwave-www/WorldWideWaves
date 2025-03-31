@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.tabs
 
 /*
  * Copyright 2024 DrWave
@@ -69,8 +69,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.worldwidewaves.activities.EventActivity
+import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.compose.EventOverlayDone
+import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -118,11 +120,10 @@ class EventsListScreen(
     private val mapChecker: MapAvailabilityChecker,
     private val setEventFavorite: SetEventFavorite
 ) : TabScreen {
+    override val name = "Events"
 
     private var starredSelected = false
     private var firstLaunch = true
-
-    override fun getName(): String = "Events"
 
     // ----------------------------
 

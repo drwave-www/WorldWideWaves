@@ -17,7 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,14 +33,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.WaveActivity
+import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
@@ -58,6 +67,8 @@ import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.generated.resources.event_running
 import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.instagram_icon
+import com.worldwidewaves.shared.generated.resources.map_cancel_download
+import com.worldwidewaves.shared.generated.resources.map_retry_download
 import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
@@ -225,4 +236,116 @@ fun WWWSocialNetworks(
         }
     }
     Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+}
+
+// ----------------------------
+
+// Reusable composable for showing loading state
+@Composable
+fun LoadingIndicator(message: String) {
+    Column(
+        horizontalAlignment = CenterHorizontally,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            strokeWidth = 4.dp,
+            strokeCap = StrokeCap.Round
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+// Reusable composable for showing download progress
+@Composable
+fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -> Unit = {}) {
+    Column(
+        horizontalAlignment = CenterHorizontally,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        // Show progress percentage
+        Text(
+            text = "$progress%",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Linear progress indicator
+        LinearProgressIndicator(
+            progress = { progress / 100f },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(8.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.primary,
+            strokeCap = StrokeCap.Round
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress message
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Cancel button
+        Button(
+            onClick = onCancel,
+            modifier = Modifier
+        ) {
+            Text(text = stringResource(Res.string.map_cancel_download))
+        }
+    }
+}
+
+@Composable
+fun ErrorMessage(message: String, onRetry: () -> Unit) {
+    Column(
+        horizontalAlignment = CenterHorizontally,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = "Error",
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.error
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = onRetry,
+            modifier = Modifier
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = "Retry",
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(Res.string.map_retry_download))
+        }
+    }
 }

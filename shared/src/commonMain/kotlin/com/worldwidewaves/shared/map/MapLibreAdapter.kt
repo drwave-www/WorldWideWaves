@@ -34,7 +34,7 @@ interface MapLibreAdapter {
 
     fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback? = null)
     fun animateCameraToBounds(bounds: BoundingBox, padding: Int = 0, callback: MapCameraCallback? = null)
-    fun setConstraints(bounds: BoundingBox)
+    fun setBoundsConstraints(bounds: BoundingBox)
     fun setMinZoomPreference(minZoom: Double)
     fun setMaxZoomPreference(maxZoom: Double)
     fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)

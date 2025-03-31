@@ -27,13 +27,8 @@ import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -53,9 +48,6 @@ class MapAvailabilityChecker(context: Context) {
 
     // Cache of queried map IDs to avoid unnecessary checks
     private val queriedMaps = ConcurrentHashMap.newKeySet<String>()
-
-    // Coroutine scope for derived state flows
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     // Listener for module installation events
     private val installStateListener: SplitInstallStateUpdatedListener
@@ -98,53 +90,6 @@ class MapAvailabilityChecker(context: Context) {
     }
 
     /**
-     * Checks if a map module is installed.
-     * Note: This returns the current state immediately and doesn't trigger updates.
-     * For reactive updates, use observeMapAvailability() instead.
-     *
-     * @param mapId The ID of the map module to check (e.g., "paris_france")
-     * @return true if the map is installed, false otherwise
-     */
-    fun isMapInstalled(mapId: String): Boolean {
-        // Add to queried maps for future refreshes
-        queriedMaps.add(mapId)
-        return splitInstallManager.installedModules.contains(mapId)
-    }
-
-    /**
-     * Returns a StateFlow for observing a specific map's availability.
-     * This will emit updates whenever the availability changes.
-     *
-     * @param mapId The ID of the map module to observe
-     * @return A StateFlow emitting true if installed, false otherwise
-     */
-    fun observeMapAvailability(mapId: String): StateFlow<Boolean> {
-        // Make sure this map is being tracked
-        queriedMaps.add(mapId)
-
-        // Ensure states are up to date
-        refreshAvailability()
-
-        // Create a derived flow for this specific map
-        return mapStates.map { states ->
-            states[mapId] ?: false
-        }.stateIn(
-            coroutineScope,
-            SharingStarted.Lazily,
-            splitInstallManager.installedModules.contains(mapId)
-        )
-    }
-
-    /**
-     * Gets a list of all currently installed map modules.
-     *
-     * @return A set of installed module IDs
-     */
-    fun getInstalledMaps(): Set<String> {
-        return splitInstallManager.installedModules
-    }
-
-    /**
      * Refreshes the availability state of all tracked maps.
      * Call this when returning to a list to ensure fresh data.
      */
@@ -162,15 +107,6 @@ class MapAvailabilityChecker(context: Context) {
 
         // Update the state flow with the new map
         _mapStates.value = updatedStates
-    }
-
-    /**
-     * Add a map ID to the list of maps being tracked.
-     * This is useful when you want to track a map without immediately checking its status.
-     */
-    fun trackMap(mapId: String) {
-        queriedMaps.add(mapId)
-        // Don't refresh here - caller should call refreshAvailability() if needed
     }
 
     /**

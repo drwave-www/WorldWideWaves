@@ -1,4 +1,4 @@
-package com.worldwidewaves.activities
+package com.worldwidewaves.activities.event
 
 /*
  * Copyright 2024 DrWave
@@ -70,8 +70,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.activities.utils.WaveObserver
-import com.worldwidewaves.compose.EventMap
+import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
@@ -104,38 +103,20 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-class WaveActivity : AbstractEventBackActivity() {
+class WaveActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
-    private val waveViewModel: WaveViewModel by viewModel()
-    private var waveObserver: WaveObserver? = null
-
-    // ------------------------------------------------------------------------
-
-    override fun onResume() {
-        super.onResume()
-        // Restart observation when activity is visible
-        waveObserver?.startObservation()
-    }
-
-    override fun onPause() {
-        // Stop observation when activity is not visible
-        waveObserver?.stopObservation()
-        super.onPause()
-    }
 
     // ------------------------------------------------------------------------
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
@@ -150,8 +131,9 @@ class WaveActivity : AbstractEventBackActivity() {
         val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
         val hitDateTime by waveViewModel.hitDateTime.collectAsState()
 
+        // Construct the event Map
         val eventMap = remember(event.id) {
-            EventMap(event,
+            AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
                     waveViewModel.updateUserLocation(newLocation)
                 },
@@ -160,25 +142,21 @@ class WaveActivity : AbstractEventBackActivity() {
                         putExtra("eventId", event.id)
                     })
                 }
-            ).also {
-                waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
-            }
+            )
         }
 
-        LaunchedEffect(true) { // Start wave observation
-            waveObserver?.startObservation()
-        }
+        // Start event/map coordination
+        ObserveEventMap(event, eventMap)
 
-        /* - For manual testing purposes - very noisy
-        LaunchedEffect(true) {
+        // - For manual testing purposes - very noisy
+        /*LaunchedEffect(true) {
             while (true) {
                 delay(50)
                 scope.launch {
                     event.warming.playCurrentSoundChoreographyTone()
                 }
             }
-        }
-        */
+        }*/
 
         // Play the hit sound when the user has been hit
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
@@ -192,6 +170,7 @@ class WaveActivity : AbstractEventBackActivity() {
         // Always target the closest view to have user and wave in the same view
         MapZoomAndLocationUpdate(waveViewModel, eventMap)
 
+        // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
 
             Column(
@@ -218,17 +197,12 @@ class WaveActivity : AbstractEventBackActivity() {
         }
     }
 
-    override fun onDestroy() {
-        waveObserver?.stopObservation()
-        super.onDestroy()
-    }
-
 }
 
 // ------------------------------------------------------------------------
 
 @Composable
-fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: EventMap) {
+fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
     val progression by waveViewModel.progression.collectAsState()
     val isInArea by waveViewModel.isInArea.collectAsState()
@@ -475,6 +449,7 @@ fun WaveChoreographies(
     }
 
     when {
+
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
             // Get the current sequence

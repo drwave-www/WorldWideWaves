@@ -60,7 +60,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     private var constraintHandler: MapLibreConstraintHandler? = null
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
 
-    // -- Setters
+    // --------------------------------
 
     fun setMap(map: MapLibreMap) {
         mapLibreMap = map
@@ -75,8 +75,11 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         }
     }
 
+    // -- Setters -------------------------------------------------------------
+
     override fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) {
         mapLibreMap?.let { map ->
+
             // First remove any existing listener
             currentMapClickListener?.let { existingListener ->
                 map.removeOnMapClickListener(existingListener)
@@ -95,7 +98,39 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         }
     }
 
-    // -- Camera animations
+    override fun setBoundsConstraints(bounds: BoundingBox) {
+        val map = mapLibreMap ?: return
+
+        constraintHandler = MapLibreConstraintHandler(bounds)
+        constraintHandler?.applyConstraints(map)
+    }
+
+    override fun setMinZoomPreference(minZoom: Double) {
+        mapLibreMap?.setMinZoomPreference(minZoom)
+    }
+
+    override fun setMaxZoomPreference(maxZoom: Double) {
+        mapLibreMap?.setMaxZoomPreference(maxZoom)
+    }
+
+    // ------------------------------------------------------------------------
+
+    // Method to update the camera position and zoom
+    private fun updateCameraInfo(map: MapLibreMap) {
+        map.cameraPosition.target?.let { target ->
+            _currentPosition.value = Position(target.latitude, target.longitude)
+        }
+        _currentZoom.value = map.cameraPosition.zoom
+    }
+
+    // Check and constrain camera if needed
+    private fun constrainCamera() {
+        mapLibreMap?.let { map ->
+            constraintHandler?.constrainCamera(map)
+        }
+    }
+
+    // -- Camera animations ---------------------------------------------------
 
     override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
@@ -122,6 +157,8 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         )
     }
 
+    // --------------------------------
+
     override fun animateCameraToBounds(bounds: BoundingBox, padding: Int, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
 
@@ -143,36 +180,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                 }
             }
         )
-    }
-
-    override fun setConstraints(bounds: BoundingBox) {
-        val map = mapLibreMap ?: return
-
-        constraintHandler = MapLibreConstraintHandler(bounds)
-        constraintHandler?.applyConstraints(map)
-    }
-
-    override fun setMinZoomPreference(minZoom: Double) {
-        mapLibreMap?.setMinZoomPreference(minZoom)
-    }
-
-    override fun setMaxZoomPreference(maxZoom: Double) {
-        mapLibreMap?.setMaxZoomPreference(maxZoom)
-    }
-
-    // Method to update the camera position and zoom
-    private fun updateCameraInfo(map: MapLibreMap) {
-        map.cameraPosition.target?.let { target ->
-            _currentPosition.value = Position(target.latitude, target.longitude)
-        }
-        _currentZoom.value = map.cameraPosition.zoom
-    }
-
-    // Check and constrain camera if needed
-    private fun constrainCamera() {
-        mapLibreMap?.let { map ->
-            constraintHandler?.constrainCamera(map)
-        }
     }
 
     // -- Add the Wave polygons to the map
@@ -210,6 +217,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                     )
                     style.addLayer(fillLayer)
                 }
+
             } catch (e: Exception) {
                 Log.e("MapUpdate", "Error updating wave polygons", e)
             }

@@ -1,4 +1,4 @@
-package com.worldwidewaves.activities
+package com.worldwidewaves.activities.event
 
 /*
  * Copyright 2024 DrWave
@@ -29,22 +29,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,25 +44,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.compose.DownloadProgressIndicator
+import com.worldwidewaves.compose.ErrorMessage
+import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
-import com.worldwidewaves.shared.generated.resources.map_cancel_download
 import com.worldwidewaves.shared.generated.resources.map_checking_state
 import com.worldwidewaves.shared.generated.resources.map_downloading
 import com.worldwidewaves.shared.generated.resources.map_error_download
 import com.worldwidewaves.shared.generated.resources.map_loading
-import com.worldwidewaves.shared.generated.resources.map_retry_download
 import com.worldwidewaves.shared.generated.resources.map_starting_download
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
@@ -105,7 +94,7 @@ abstract class AbstractEventBackActivity(
 
         val eventId = intent.getStringExtra("eventId")
 
-        // Download or Load the map
+        // Download or Load the map as app feature
         if (eventId != null) {
             lifecycleScope.launch {
                 // Check if map is available
@@ -124,7 +113,7 @@ abstract class AbstractEventBackActivity(
                                 trackEventLoading(eventId) { event -> selectedEvent = event }
                             }
                         }
-                        else -> { /* Do nothing, managed by BackwardScreen() */ }
+                        else -> { /* Do nothing, managed by BackwardScreen() for consistency */ }
                     }
                 }
             }
@@ -191,6 +180,7 @@ abstract class AbstractEventBackActivity(
                 }
             }
 
+            // Default page to manage initializations, download process and errors
             if (event != null) { // Event has been loaded
 
                     // Content Event screen
@@ -212,6 +202,11 @@ abstract class AbstractEventBackActivity(
 
                 } else { // Map is not loaded yet, handle map states to show appropriate UI
 
+                    fun cancelDownload() {
+                        mapViewModel.cancelDownload()
+                        finish()
+                    }
+
                     Box(modifier = Modifier.fillMaxSize().padding(16.dp),
                         contentAlignment = Center
                     ) {
@@ -230,7 +225,8 @@ abstract class AbstractEventBackActivity(
                                     message = stringResource(
                                         ShRes.string.map_downloading,
                                         state.progress
-                                    )
+                                    ),
+                                    ::cancelDownload
                                 )
                             }
 
@@ -242,7 +238,8 @@ abstract class AbstractEventBackActivity(
                             is MapFeatureState.Retrying -> {
                                 // Show retry progress
                                 DownloadProgressIndicator(
-                                    message = "Retrying download (${state.attempt}/${state.maxAttempts})..."
+                                    message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
+                                    onCancel = ::cancelDownload
                                 )
                             }
 
@@ -268,123 +265,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // ----------------------------
-
-    // Reusable composable for showing loading state
-    @Composable
-    private fun LoadingIndicator(message: String) {
-        Column(
-            horizontalAlignment = CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(48.dp),
-                strokeWidth = 4.dp,
-                strokeCap = StrokeCap.Round
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-
-    // Reusable composable for showing download progress
-    @Composable
-    private fun DownloadProgressIndicator(progress: Int = 0, message: String) {
-        Column(
-            horizontalAlignment = CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // Show progress percentage
-            Text(
-                text = "$progress%",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Linear progress indicator
-            LinearProgressIndicator(
-                progress = { progress / 100f },
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(8.dp),
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                color = MaterialTheme.colorScheme.primary,
-                strokeCap = StrokeCap.Round
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Progress message
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Cancel button
-            Button(
-                onClick = {
-                            mapViewModel.cancelDownload()
-                            finish()
-                          },
-                modifier = Modifier
-            ) {
-                Text(text = stringResource(ShRes.string.map_cancel_download))
-            }
-        }
-    }
-
-    @Composable
-    private fun ErrorMessage(message: String, onRetry: () -> Unit) {
-        Column(
-            horizontalAlignment = CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = "Error",
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = onRetry,
-                modifier = Modifier
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Retry",
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(ShRes.string.map_retry_download))
-            }
-        }
-    }
-
     // Main activity UI building methode to be implemented --------------------
-
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 

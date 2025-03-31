@@ -25,7 +25,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,6 +67,8 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
 
     private val _eventState = ConcurrentHashMap<String, MutableStateFlow<IWWWEvent.Status>>()
     val eventStatus: Map<String, StateFlow<IWWWEvent.Status>> get() = _eventState
+
+    // ---------------------------
 
     init {
         loadEvents { exception -> // Error management

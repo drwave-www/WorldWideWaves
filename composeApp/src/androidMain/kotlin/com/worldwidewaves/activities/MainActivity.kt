@@ -35,9 +35,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsListScreen
-import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.compose.tabs.AboutScreen
+import com.worldwidewaves.compose.tabs.EventsListScreen
+import com.worldwidewaves.compose.tabs.SettingsScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected

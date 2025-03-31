@@ -26,6 +26,7 @@ import androidx.annotation.UiThread
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapConstraintManager
+import com.worldwidewaves.shared.toLatLngBounds
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -83,7 +84,7 @@ class MapLibreConstraintHandler(mapBounds: BoundingBox) {
             val paddedBounds = constraintManager.calculateConstraintBounds()
 
             // Convert to MapLibre LatLngBounds
-            val latLngBounds = convertToLatLngBounds(paddedBounds)
+            val latLngBounds = paddedBounds.toLatLngBounds()
             constraintBounds = latLngBounds
 
             // Apply constraints to the map
@@ -105,7 +106,7 @@ class MapLibreConstraintHandler(mapBounds: BoundingBox) {
                 // If bounds are too small, calculate safer bounds centered around current position
                 currentPosition?.let {
                     val safeBounds = constraintManager.calculateSafeBounds(it)
-                    fitMapToBounds(map, convertToLatLngBounds(safeBounds))
+                    fitMapToBounds(map, safeBounds.toLatLngBounds())
                 }
             }
         } catch (e: Exception) {
@@ -182,13 +183,4 @@ class MapLibreConstraintHandler(mapBounds: BoundingBox) {
         return MapLibrePadding(latPadding, lngPadding)
     }
 
-    /**
-     * Converts platform-independent MapBounds to MapLibre LatLngBounds
-     */
-    private fun convertToLatLngBounds(bounds: BoundingBox): LatLngBounds {
-        return LatLngBounds.Builder()
-            .include(LatLng(bounds.southwest.latitude, bounds.southwest.longitude))
-            .include(LatLng(bounds.northeast.latitude, bounds.northeast.longitude))
-            .build()
-    }
 }

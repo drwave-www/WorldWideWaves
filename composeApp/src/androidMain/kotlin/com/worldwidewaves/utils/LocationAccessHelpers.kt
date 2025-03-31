@@ -58,6 +58,7 @@ fun requestLocationPermission(): Boolean {
     }
 
     LaunchedEffect(Unit) {
+
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -80,6 +81,8 @@ fun requestLocationPermission(): Boolean {
 
     return permissionGranted
 }
+
+// ------------------------------------
 
 @Composable
 fun CheckGPSEnable() {

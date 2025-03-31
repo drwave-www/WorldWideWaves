@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.tabs
 
 /*
  * Copyright 2024 DrWave
@@ -32,8 +32,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.theme.commonTextStyle
 
 class SettingsScreen : TabScreen {
-
-    override fun getName(): String = "Settings"
+    override val name = "Settings"
 
     @Composable
     override fun Screen(modifier: Modifier) {

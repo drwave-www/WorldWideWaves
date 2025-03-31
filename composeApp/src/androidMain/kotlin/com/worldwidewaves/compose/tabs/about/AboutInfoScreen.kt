@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.tabs.about
 
 /*
  * Copyright 2024 DrWave
@@ -42,6 +42,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.compose.tabs.AboutDividerLine
+import com.worldwidewaves.compose.tabs.AboutWWWLogo
+import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
@@ -61,8 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class AboutInfoScreen : TabScreen {
-
-    override fun getName(): String = "Infos"
+    override val name = "Infos"
 
     @Composable
     override fun Screen(modifier: Modifier) {

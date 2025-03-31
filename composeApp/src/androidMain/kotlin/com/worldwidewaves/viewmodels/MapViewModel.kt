@@ -63,6 +63,7 @@ sealed class MapFeatureState {
 class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
+
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     val featureState: StateFlow<MapFeatureState> = _featureState
 
@@ -92,15 +93,6 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         installStateListener?.let {
             splitInstallManager.registerListener(it)
         }
-    }
-
-    // ------------------------------------------------------------------------
-
-    override fun onCleared() {
-        installStateListener?.let {
-            splitInstallManager.unregisterListener(it)
-        }
-        super.onCleared()
     }
 
     // ------------------------------------------------------------------------
@@ -296,6 +288,15 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             splitInstallManager.cancelInstall(currentSessionId)
             // State will be updated via the listener when cancellation completes
         }
+    }
+
+    // ------------------------------------------------------------------------
+
+    override fun onCleared() {
+        installStateListener?.let {
+            splitInstallManager.unregisterListener(it)
+        }
+        super.onCleared()
     }
 
 }

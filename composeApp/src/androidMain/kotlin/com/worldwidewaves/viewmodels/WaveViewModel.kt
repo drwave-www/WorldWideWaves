@@ -45,7 +45,7 @@ import kotlin.time.Duration
 class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     companion object {
-        private const val MAX_POLY_RECOMPOSE = 100
+        // private const val MAX_POLY_RECOMPOSE = 100
     }
 
     private var event : IWWWEvent? = null
@@ -91,7 +91,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     private var lastWaveState : WavePolygons? = null
 
-    var clearPolygonsBeforeAdd = false
+    // var clearPolygonsBeforeAdd = false
 
     // ----------------------------
 

@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.tabs
 
 /*
  * Copyright 2024 DrWave
@@ -42,6 +42,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
+import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
@@ -65,6 +68,7 @@ private val tabInfo = listOf(
 )
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
+    override val name = "Info"
 
     private val tabManager = TabManager(
         listOf(
@@ -72,10 +76,6 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
             aboutFaqScreen
         )
     ) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
-
-    // ----------------------------
-
-    override fun getName(): String = "Info"
 
     // ----------------------------
 

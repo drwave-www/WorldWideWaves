@@ -1,10 +1,10 @@
 package com.worldwidewaves.di
 
-import com.worldwidewaves.compose.AboutFaqScreen
-import com.worldwidewaves.compose.AboutInfoScreen
-import com.worldwidewaves.compose.AboutScreen
-import com.worldwidewaves.compose.EventsListScreen
-import com.worldwidewaves.compose.SettingsScreen
+import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
+import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
+import com.worldwidewaves.compose.tabs.AboutScreen
+import com.worldwidewaves.compose.tabs.EventsListScreen
+import com.worldwidewaves.compose.tabs.SettingsScreen
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine

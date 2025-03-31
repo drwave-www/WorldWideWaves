@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.map
 
 /*
  * Copyright 2024 DrWave
@@ -63,6 +63,7 @@ import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
@@ -85,7 +86,7 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 /**
  * Android-specific implementation of the EventMap
  */
-class EventMap(
+class AndroidEventMap(
     event: IWWWEvent,
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
@@ -104,7 +105,7 @@ class EventMap(
     fun Screen(modifier: Modifier) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val mapView: MapView = rememberMapViewWithLifecycle()
+        val mapLibreView: MapView = rememberMapLibreViewWithLifecycle()
 
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
@@ -116,38 +117,41 @@ class EventMap(
 
         // Setup Map Style and properties, initialize the map view
         LaunchedEffect(Unit) {
-            val styleUri = withContext(Dispatchers.IO) {
-                event.map.getStyleUri()?.let { Uri.fromFile(File(it)) }
-            }
+            withContext(Dispatchers.IO) { // IO actions
+                event.map.getStyleUri()?.let {
+                    val uri = Uri.fromFile(File(it))
 
-            styleUri?.let { uri ->
-                mapView.getMapAsync { map ->
-                    map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
-                        map.uiSettings.setAttributionMargins(0, 0, 0, 0)
+                    scope.launch { // UI actions
+                        mapLibreView.getMapAsync { map ->
+                            map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
+                                map.uiSettings.setAttributionMargins(0, 0, 0, 0)
 
-                        // Provide Adapter with Android MapLibre instance
-                        mapLibreAdapter.setMap(map)
+                                // Provide Adapter with Android MapLibre instance
+                                mapLibreAdapter.setMap(map)
 
-                        // Initialize location provider if we have permission
-                        if (hasLocationPermission) {
-                            setupMapLocationComponent(map, context, style)
-                        }
+                                // Initialize location provider if we have permission
+                                if (hasLocationPermission) {
+                                    setupMapLocationComponent(map, context, style)
+                                }
 
-                        // Initialize view and setup listeners
-                        setupMap(scope, map.width.toDouble(), map.height.toDouble(),
-                            onMapLoaded = {
-                                onMapLoaded()
-                                isMapLoaded = true
-                            },
-                            onMapClick = { _, _ ->
-                                onMapClick?.invoke()
+                                // Initialize view and setup listeners
+                                setupMap(
+                                    scope, map.width.toDouble(), map.height.toDouble(),
+                                    onMapLoaded = {
+                                        onMapLoaded()
+                                        isMapLoaded = true // Map is loaded
+                                    },
+                                    onMapClick = { _, _ ->
+                                        onMapClick?.invoke()
+                                    }
+                                )
+
                             }
-                        )
-
+                        }
                     }
+                } ?: run {
+                    mapError = true
                 }
-            } ?: run {
-                mapError = true
             }
         }
 
@@ -172,14 +176,16 @@ class EventMap(
                     )
                 }
             }
+
+            // LibreMap as Android Composable
             AndroidView(
-                factory = { mapView },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (isMapLoaded) 1f else 0f)
+                factory = { mapLibreView },
+                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
             )
         }
     }
+
+    // ------------------------------------------------------------------------
 
     /**
      * Sets up the Android location component
@@ -224,11 +230,13 @@ class EventMap(
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
+    // ------------------------------------------------------------------------
+
     /**
      * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
      */
     @Composable
-    fun rememberMapViewWithLifecycle(): MapView {
+    fun rememberMapLibreViewWithLifecycle(): MapView {
         val context = LocalContext.current
 
         // Build the MapLibre view
@@ -274,6 +282,8 @@ class EventMap(
         return mapView
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * Update wave polygons on the map
      */
@@ -283,6 +293,8 @@ class EventMap(
         }
     }
 }
+
+// ----------------------------------------------------------------------------
 
 /**
  * Creates a `LifecycleEventObserver` that synchronizes the lifecycle of a `MapView`

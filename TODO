@@ -1,13 +1,14 @@
 
 Semaine prochaine:
 
-- reread code
 - refacto: Faire heriter le waveviewmodel de event et transformer les listeners en flows dans WWWEvent
     --> Devrait corriger le pb d'affichage de la choregraphie sur le wave screen - VERIFIER
 
-- check reload de la carte a chaque ecran: mode dev ou bug ?
+- add tests
 
+- check reload de la carte a chaque ecran: mode dev ou bug ?
 - Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
+- debug wave
 
 ---------------------------------------------
 

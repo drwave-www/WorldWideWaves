@@ -85,7 +85,7 @@ abstract class AbstractEventMap(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        mapLibreAdapter.setConstraints(event.area.bbox()) // Apply constraints first
+        mapLibreAdapter.setBoundsConstraints(event.area.bbox()) // Apply constraints first
 
         val (sw, ne) = event.area.bbox()
         val eventMapWidth = ne.lng - sw.lng

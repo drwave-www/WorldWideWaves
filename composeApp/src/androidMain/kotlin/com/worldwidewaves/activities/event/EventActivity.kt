@@ -1,4 +1,4 @@
-package com.worldwidewaves.activities
+package com.worldwidewaves.activities.event
 
 /*
  * Copyright 2024 DrWave
@@ -38,12 +38,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,13 +53,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
-import com.worldwidewaves.compose.EventMap
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
@@ -100,42 +97,25 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-class EventActivity : AbstractEventBackActivity() {
+class EventActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
-    private val waveViewModel: WaveViewModel by viewModel()
-    private var waveObserver: WaveObserver? = null
-
-    // ------------------------------------------------------------------------
-
-    override fun onResume() {
-        super.onResume()
-        // Restart observation when activity is visible
-        waveObserver?.startObservation()
-    }
-
-    override fun onPause() {
-        // Stop observation when activity is not visible
-        waveObserver?.stopObservation()
-        super.onPause()
-    }
 
     // ------------------------------------------------------------------------
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
+        // Construct the event map
         val eventMap = remember(event.id) {
-            EventMap(event,
+            AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
                     waveViewModel.updateUserLocation(newLocation)
                 },
@@ -144,15 +124,13 @@ class EventActivity : AbstractEventBackActivity() {
                         putExtra("eventId", event.id)
                     })
                 }
-            ).also {
-                waveObserver = WaveObserver(context, scope, it, event, waveViewModel)
-            }
+            )
         }
 
-        LaunchedEffect(true) { // Start wave observation
-            waveObserver!!.startObservation()
-        }
+        // Start event/map coordination
+        ObserveEventMap(event, eventMap)
 
+        // Screen composition
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp)
@@ -166,13 +144,6 @@ class EventActivity : AbstractEventBackActivity() {
             EventNumbers(waveViewModel)
             WWWEventSocialNetworks(event)
         }
-    }
-
-    // ------------------------------------------------------------------------
-
-    override fun onDestroy() {
-        waveObserver?.stopObservation()
-        super.onDestroy()
     }
 
 }

@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose
+package com.worldwidewaves.compose.tabs.about
 
 /*
  * Copyright 2024 DrWave
@@ -52,6 +52,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.compose.tabs.AboutDividerLine
+import com.worldwidewaves.compose.tabs.AboutWWWLogo
+import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -150,8 +153,7 @@ val faq_contents = listOf(
 // ----------------------------
 
 class AboutFaqScreen : TabScreen {
-
-    override fun getName(): String = "FAQ"
+    override val name = "FAQ"
 
     @Composable
     override fun Screen(modifier: Modifier) {

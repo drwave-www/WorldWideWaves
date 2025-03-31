@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.utils
 
 import android.content.Context
-import com.worldwidewaves.compose.EventMap
+import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.viewmodels.WaveViewModel
@@ -29,10 +29,13 @@ import kotlinx.coroutines.launch
  * limitations under the License.
  */
 
+/**
+ * Coordination of map, event and viewmodel during wave observation
+ */
 class WaveObserver(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val eventMap: EventMap?,
+    private val eventMap: AndroidEventMap?,
     private val event: IWWWEvent?,
     private val waveViewModel: WaveViewModel
 ) {
