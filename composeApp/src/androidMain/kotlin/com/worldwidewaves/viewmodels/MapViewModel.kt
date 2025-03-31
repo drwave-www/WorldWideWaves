@@ -100,6 +100,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private fun updateStateFromInstallState(state: SplitInstallSessionState) {
 
         // Special handling for SERVICE_DIED error
+        @Suppress("DEPRECATION")
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED) {
 
@@ -190,6 +191,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     // ------------------------------------------------------------------------
 
     private fun getErrorMessage(errorCode: Int): String {
+        @Suppress("DEPRECATION")
         return when (errorCode) {
             SplitInstallErrorCode.NETWORK_ERROR ->
                 "Network error. Please check your connection."

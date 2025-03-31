@@ -165,7 +165,7 @@ object PolygonUtils {
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Anti-Clockwise loop
-                    var point = iterator.next()
+                    val point = iterator.next()
 
                     val nextPoint = iterator.viewCurrent()
                     prev?.let { if (point == it) return@let }

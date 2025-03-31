@@ -99,12 +99,6 @@ class CutPosition( // A position that has been cut
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
 
-    fun uncut(): Position = Position(lat, lng).apply {
-        id = this@CutPosition.id
-        prev = this@CutPosition.prev
-        next = this@CutPosition.next
-    }
-
     val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
