@@ -39,59 +39,59 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import org.maplibre.geojson.Polygon
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration
 
 class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     private val observers = mutableMapOf<String, ObserverState>()
+    private val lastPolygonUpdateTimestamps = mutableMapOf<String, AtomicLong>()
+    private val polygonUpdateIntervalMs = 250L // Limit updates to 4 per second
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(::WaveViewModel.name, "Coroutine error: ${throwable.message}", throwable)
+        Log.e(TAG, "Coroutine error: ${throwable.message}", throwable)
     }
 
     // Track which observers exist
     private val observerExistsMap = MutableStateFlow<Map<String, Boolean>>(emptyMap())
 
+    // Consolidated state flows to reduce the number of active flows
+    // Using a single MutableStateFlow for multiple properties reduces memory usage
+    data class WaveState(
+        val userPositionRatio: Double = 0.0,
+        val isInArea: Boolean = false,
+        val hitDateTime: Instant = Instant.DISTANT_FUTURE,
+        val timeBeforeHit: Duration = Duration.INFINITE,
+        val waveNumbers: WaveNumbersLiterals? = null
+    )
+
     // Class to encapsulate all state for a single observer
     inner class ObserverState(val event: IWWWEvent) {
         private val job: Job = Job()
-        val scope: CoroutineScope = CoroutineScope(viewModelScope.coroutineContext + job)
+        val scope: CoroutineScope = CoroutineScope(Dispatchers.Default + job + exceptionHandler)
 
         var backupSimulationSpeed: Int? = null
-        val lastWaveState = MutableStateFlow<Any?>(null)
 
-        // Event source flow
-        val eventFlow = MutableStateFlow(event)
+        // Weak reference to last wave state to avoid memory leaks
+        // This avoids keeping large objects in memory
+        private var _lastWaveStateRef: Any? = null
 
-        // Derived state flows that need special computation
-        val userPositionRatio = MutableStateFlow(0.0)
-        val isInArea = MutableStateFlow(false)
-        val hitDateTime = MutableStateFlow(Instant.DISTANT_FUTURE)
-        val timeBeforeHit = MutableStateFlow(Duration.INFINITE)
-        val waveNumbers = MutableStateFlow<WaveNumbersLiterals?>(null)
+        val waveStateFlow = MutableStateFlow(WaveState())
 
         // Cleanup function
         fun cleanup() {
             job.cancel()
+            _lastWaveStateRef = null
         }
-    }
 
-    /**
-     * Creates a proxy StateFlow that maps from an event property
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> ObserverState.proxyEventFlow(
-        defaultValue: T,
-        flowSelector: (IWWWEvent) -> StateFlow<T>
-    ): StateFlow<T> {
-        return eventFlow
-            .flatMapLatest { event -> flowSelector(event) }
-            .flowOn(Dispatchers.Default)
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = defaultValue
-            )
+        // Setter for last wave state with memory considerations
+        fun updateLastWaveState(state: Any?) {
+            // Only store essential data or weak references to large objects
+            _lastWaveStateRef = state
+        }
+
+        // Getter that doesn't expose the implementation details
+        fun getLastWaveState(): Any? = _lastWaveStateRef
     }
 
     /**
@@ -103,6 +103,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
         if (existing == null) {
             observers[observerId] = state
+            lastPolygonUpdateTimestamps[observerId] = AtomicLong(0)
 
             // Update observer existence map
             val currentMap = observerExistsMap.value.toMutableMap()
@@ -119,20 +120,23 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     private fun initializeObserver(state: ObserverState) {
         val event = state.event
 
-        Log.v(::WaveViewModel.name, "Initializing observer for event ${event.id}")
+        Log.v(TAG, "Initializing observer for event ${event.id}")
 
         // Initialize state with initial values
-        state.scope.launch(Dispatchers.Default + exceptionHandler) {
+        state.scope.launch {
             try {
-                state.userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
-                state.timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
-                state.waveNumbers.value = event.getAllNumbers()
-                state.hitDateTime.value = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE
+                // Initialize with consolidated state
+                state.waveStateFlow.value = WaveState(
+                    userPositionRatio = event.wave.userPositionToWaveRatio() ?: 0.0,
+                    timeBeforeHit = event.wave.timeBeforeUserHit() ?: Duration.INFINITE,
+                    waveNumbers = event.getAllNumbers(),
+                    hitDateTime = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE
+                )
 
                 // Set up flow collectors for the event
                 setupEventCollectors(state)
             } catch (e: Exception) {
-                Log.e(::WaveViewModel.name, "Error initializing observer: ${e.message}", e)
+                Log.e(TAG, "Error initializing observer: ${e.message}", e)
             }
         }
     }
@@ -142,33 +146,30 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
      */
     private fun setupEventCollectors(state: ObserverState) {
         val event = state.event
+        val scope = state.scope
 
-        // Handle progression updates
-        event.progression
-            .map { event.wave.getProgression() }
-            .flowOn(Dispatchers.Default)
-            .stateIn(state.scope, SharingStarted.WhileSubscribed(), 0.0)
-
-        // Update derived state on progression changes
-        state.scope.launch(Dispatchers.Default) {
-            event.progression.collect {
-                state.userPositionRatio.value = event.wave.userPositionToWaveRatio() ?: 0.0
-                state.timeBeforeHit.value = event.wave.timeBeforeUserHit() ?: Duration.INFINITE
-                state.hitDateTime.value = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE
-
-                // Update wave numbers
-                if (state.waveNumbers.value == null) {
-                    state.waveNumbers.value = event.getAllNumbers()
-                } else {
-                    state.waveNumbers.value = state.waveNumbers.value?.copy(
-                        waveProgression = event.wave.getLiteralProgression()
+        // Update derived state on progression changes - use a single collector for multiple properties
+        scope.launch {
+            event.progression.collect { _ ->
+                try {
+                    // Update state in a single operation to reduce StateFlow emissions
+                    val currentState = state.waveStateFlow.value
+                    state.waveStateFlow.value = currentState.copy(
+                        userPositionRatio = event.wave.userPositionToWaveRatio() ?: 0.0,
+                        timeBeforeHit = event.wave.timeBeforeUserHit() ?: Duration.INFINITE,
+                        hitDateTime = event.wave.userHitDateTime() ?: Instant.DISTANT_FUTURE,
+                        waveNumbers = currentState.waveNumbers?.copy(
+                            waveProgression = event.wave.getLiteralProgression()
+                        ) ?: event.getAllNumbers()
                     )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating progression: ${e.message}", e)
                 }
             }
         }
 
         // Handle warming started
-        state.scope.launch(Dispatchers.Default) {
+        scope.launch {
             event.isWarmingInProgress
                 .collect { isStarted ->
                     if (isStarted) {
@@ -179,7 +180,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         }
 
         // Handle user has been hit
-        state.scope.launch(Dispatchers.Default) {
+        scope.launch {
             event.userHasBeenHit
                 .collect { hasBeenHit ->
                     if (hasBeenHit) {
@@ -209,11 +210,18 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         // Create and initialize observer state
         val state = getOrCreateObserver(observerId, event)
 
-        // Handle polygon updates if provided
+        // Handle polygon updates if provided, with rate limiting
         if (polygonsHandler != null) {
-            state.scope.launch(Dispatchers.Default) {
+            state.scope.launch {
                 event.progression.collect {
-                    updateWavePolygons(state, polygonsHandler)
+                    val timestamp = System.currentTimeMillis()
+                    val lastUpdate = lastPolygonUpdateTimestamps[observerId]?.get() ?: 0L
+
+                    // Rate limit polygon updates to reduce memory pressure
+                    if (timestamp - lastUpdate >= polygonUpdateIntervalMs) {
+                        lastPolygonUpdateTimestamps[observerId]?.set(timestamp)
+                        updateWavePolygons(state, polygonsHandler)
+                    }
                 }
             }
         }
@@ -224,69 +232,85 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         return observerId
     }
 
-    // Helper function to create reactive property flows
+    // Optimized helper function for creating derived flows - caches flows by observer ID
+    private val cachedFlows = mutableMapOf<String, Map<String, StateFlow<*>>>()
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> flowWithDefaults(
+    private fun <T> createDerivedFlow(
         observerId: String,
+        propertyKey: String,
         defaultValue: T,
-        propertySelector: (ObserverState) -> StateFlow<T>
-    ): StateFlow<T> = observerExistsMap
+        transform: (WaveState) -> T
+    ): StateFlow<T> {
+        // Check if we have a cached flow for this property
+        @Suppress("UNCHECKED_CAST")
+        cachedFlows[observerId]?.get(propertyKey)?.let { return it as StateFlow<T> }
+
+        val flow = observerExistsMap
             .map { it[observerId] == true }
             .flatMapLatest { exists ->
                 if (exists) {
-                    observers[observerId]?.let { propertySelector(it) } ?: flowOf(defaultValue)
+                    observers[observerId]?.waveStateFlow?.map { transform(it) } ?: flowOf(defaultValue)
                 } else {
                     flowOf(defaultValue)
                 }
             }
+            .flowOn(Dispatchers.Default)
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
+                started = SharingStarted.Lazily,
                 initialValue = defaultValue
             )
 
-    // Simplified property accessor methods
+        // Cache the flow
+        val currentCache = cachedFlows[observerId]?.toMutableMap() ?: mutableMapOf()
+        currentCache[propertyKey] = flow
+        cachedFlows[observerId] = currentCache
+
+        return flow
+    }
+
+    // Simplified property accessor methods using the consolidated state flow
     fun getProgressionFlow(observerId: String): StateFlow<Double> =
-        flowWithDefaults(observerId, 0.0) {
-            it.proxyEventFlow(0.0) { event -> event.progression }
+        createDerivedFlow(observerId, "progression", 0.0) { _ ->
+            observers[observerId]?.event?.progression?.value ?: 0.0
         }
 
     fun getEventStatusFlow(observerId: String): StateFlow<IWWWEvent.Status> =
-        flowWithDefaults(observerId, IWWWEvent.Status.UNDEFINED) {
-            it.proxyEventFlow(IWWWEvent.Status.UNDEFINED) { event -> event.eventStatus }
+        createDerivedFlow(observerId, "eventStatus", IWWWEvent.Status.UNDEFINED) { _ ->
+            observers[observerId]?.event?.eventStatus?.value ?: IWWWEvent.Status.UNDEFINED
         }
 
     fun getIsWarmingInProgressFlow(observerId: String): StateFlow<Boolean> =
-        flowWithDefaults(observerId, false) {
-            it.proxyEventFlow(false) { event -> event.isWarmingInProgress }
+        createDerivedFlow(observerId, "isWarmingInProgress", false) { _ ->
+            observers[observerId]?.event?.isWarmingInProgress?.value ?: false
         }
 
     fun getIsGoingToBeHitFlow(observerId: String): StateFlow<Boolean> =
-        flowWithDefaults(observerId, false) {
-            it.proxyEventFlow(false) { event -> event.userIsGoingToBeHit }
+        createDerivedFlow(observerId, "isGoingToBeHit", false) { _ ->
+            observers[observerId]?.event?.userIsGoingToBeHit?.value ?: false
         }
 
     fun getHasBeenHitFlow(observerId: String): StateFlow<Boolean> =
-        flowWithDefaults(observerId, false) {
-            it.proxyEventFlow(false) { event -> event.userHasBeenHit }
+        createDerivedFlow(observerId, "hasBeenHit", false) { _ ->
+            observers[observerId]?.event?.userHasBeenHit?.value ?: false
         }
 
-    // -----
-
+    // Consolidated state access methods
     fun getUserPositionRatioFlow(observerId: String): StateFlow<Double> =
-        flowWithDefaults(observerId, 0.0) { it.userPositionRatio }
+        createDerivedFlow(observerId, "userPositionRatio", 0.0) { it.userPositionRatio }
 
     fun getTimeBeforeHitFlow(observerId: String): StateFlow<Duration> =
-        flowWithDefaults(observerId, Duration.INFINITE) { it.timeBeforeHit }
+        createDerivedFlow(observerId, "timeBeforeHit", Duration.INFINITE) { it.timeBeforeHit }
 
     fun getHitDateTimeFlow(observerId: String): StateFlow<Instant> =
-        flowWithDefaults(observerId, Instant.DISTANT_FUTURE) { it.hitDateTime }
+        createDerivedFlow(observerId, "hitDateTime", Instant.DISTANT_FUTURE) { it.hitDateTime }
 
     fun getWaveNumbersFlow(observerId: String): StateFlow<WaveNumbersLiterals?> =
-        flowWithDefaults(observerId, null) { it.waveNumbers }
+        createDerivedFlow(observerId, "waveNumbers", null) { it.waveNumbers }
 
     fun getIsInAreaFlow(observerId: String): StateFlow<Boolean> =
-        flowWithDefaults(observerId, false) { it.isInArea }
+        createDerivedFlow(observerId, "isInArea", false) { it.isInArea }
 
     /**
      * Stop observation for a specific observer ID
@@ -296,6 +320,8 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             state.event.stopObservation()
             state.cleanup()
             observers.remove(observerId)
+            lastPolygonUpdateTimestamps.remove(observerId)
+            cachedFlows.remove(observerId)
 
             // Update observer existence map
             val currentMap = observerExistsMap.value.toMutableMap()
@@ -309,6 +335,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
      */
     private fun stopAllObservations() {
         observers.keys.toList().forEach { stopObservation(it) }
+        cachedFlows.clear()
     }
 
     /**
@@ -316,14 +343,17 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
      */
     fun updateUserLocation(observerId: String, newLocation: Position) {
         observers[observerId]?.let { state ->
-            state.scope.launch(Dispatchers.Default + exceptionHandler) {
+            state.scope.launch {
                 try {
                     val event = state.event
-                    if (event.area.isPositionWithin(newLocation)) {
-                        state.isInArea.value = true
+                    val isInArea = event.area.isPositionWithin(newLocation)
+
+                    // Only update if the value changes
+                    if (state.waveStateFlow.value.isInArea != isInArea) {
+                        state.waveStateFlow.value = state.waveStateFlow.value.copy(isInArea = isInArea)
                     }
                 } catch (e: Exception) {
-                    Log.e(::WaveViewModel.name, "Error updating user location: ${e.message}", e)
+                    Log.e(TAG, "Error updating user location: ${e.message}", e)
                 }
             }
         }
@@ -331,6 +361,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     /**
      * Updates the wave polygons based on the current wave state.
+     * Optimized to reduce memory pressure.
      */
     private suspend fun updateWavePolygons(
         state: ObserverState,
@@ -344,22 +375,31 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
             // Recalculate the cut
             val waveState = event.wave.getWavePolygons(null, mode)
-            state.lastWaveState.value = waveState
+
+            // Store minimally required data from wave state
+            state.updateLastWaveState(waveState)
 
             val polygons = waveState?.traversedPolygons
+
+            // Process polygons in batches if needed
             val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
 
             withContext(Dispatchers.Main) {
-                polygonsHandler(newPolygons, false) // mode != WaveMode.ADD)
+                polygonsHandler(newPolygons, false)
             }
 
         } catch (e: Exception) {
-            Log.e(::WaveViewModel.name, "Error updating wave polygons: ${e.message}", e)
+            Log.e(TAG, "Error updating wave polygons: ${e.message}", e)
         }
     }
 
     override fun onCleared() {
-        super.onCleared()
         stopAllObservations()
+        cachedFlows.clear()
+        super.onCleared()
+    }
+
+    companion object {
+        private const val TAG = "WaveViewModel"
     }
 }

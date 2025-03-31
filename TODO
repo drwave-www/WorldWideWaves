@@ -1,8 +1,9 @@
 
 Semaine prochaine:
 
-- refacto: Faire heriter le waveviewmodel de event et transformer les listeners en flows dans WWWEvent
-    --> Devrait corriger le pb d'affichage de la choregraphie sur le wave screen - VERIFIER
+- 'running' not updated on event screen after done
+- you are NOT in the area when event is done
+- choreoraphy continues after event is done
 
 - add tests
 
