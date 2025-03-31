@@ -4,7 +4,6 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -72,7 +71,3 @@ expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String): String
 expect suspend fun cacheDeepFile(fileName: String)
 expect fun getCacheDir(): String
-
-// ---------------------------
-
-expect fun getLocalDatetime(): LocalDateTime

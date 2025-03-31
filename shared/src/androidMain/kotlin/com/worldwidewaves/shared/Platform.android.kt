@@ -38,10 +38,6 @@ import com.worldwidewaves.shared.generated.resources.e_location_world
 import com.worldwidewaves.shared.generated.resources.not_found
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
@@ -258,15 +254,3 @@ actual fun getCacheDir(): String {
     val context: Context by inject(Context::class.java)
     return context.cacheDir.absolutePath
 }
-
-// ---------------------------
-
-/**
- * Retrieves the current local date and time.
- *
- * This function uses the system clock to get the current instant in time and converts it to a
- * `LocalDateTime` object using the system's default time zone.
- *
- */
-actual fun getLocalDatetime(): LocalDateTime =
-    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

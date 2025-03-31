@@ -117,10 +117,6 @@ actual fun getCacheDir(): String {
     ).first() as String
 }
 
-actual fun getLocalDatetime(): LocalDateTime {
-    TODO("Not yet implemented")
-}
-
 actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
 }
