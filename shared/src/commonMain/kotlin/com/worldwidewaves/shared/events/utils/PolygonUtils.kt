@@ -313,6 +313,7 @@ object PolygonUtils {
             val firstNextLat = polyLine.first()!!.lat
             val lastLat by lazy { current.last()!!.lat }
             val firstCurrentLat by lazy { current.first()!!.lat }
+
             if (current.isEmpty() || firstNextLat in minOf(lastLat, firstCurrentLat)..maxOf(lastLat, firstCurrentLat)) {
                 // Here we accept to have self-intersecting polygons on longitude cut
                 // ex: (Lat,lng): (-2,0),(-1,2),(0,0),(1,2),(2,0),(-2,0)

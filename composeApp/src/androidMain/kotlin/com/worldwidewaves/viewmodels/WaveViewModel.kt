@@ -91,8 +91,6 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
     private var lastWaveState : WavePolygons? = null
 
-    // var clearPolygonsBeforeAdd = false
-
     // ----------------------------
 
     fun startObservation(
@@ -225,7 +223,12 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             if (event.isRunning()) try { // FIXME: right setup vs perf to be found
                 val mode = WaveMode.ADD
 
+                // FIXME: Insert here RECOMPOSITION / ADD / RENEW heuristic
+
+                // Add new bands (FIXME: currently not aesthetic on the screen...)
                 // lastWaveState = event.wave.getWavePolygons(lastWaveState, mode)
+
+                // OR Recalculate the cut
                 lastWaveState = event.wave.getWavePolygons(null, mode)
 
                 val polygons =  lastWaveState?.traversedPolygons
