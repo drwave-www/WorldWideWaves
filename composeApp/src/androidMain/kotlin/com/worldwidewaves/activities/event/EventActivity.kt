@@ -262,7 +262,7 @@ private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, observerId: Str
 private fun EventNumbers(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
     val waveNumbers by waveViewModel.getWaveNumbersFlow(observerId).collectAsState()
 
-    val eventNumbers by remember(observerId) {
+    val eventNumbers by remember(waveNumbers) {
         derivedStateOf {
             waveNumbers?.let {
                 mapOf(
@@ -277,7 +277,7 @@ private fun EventNumbers(waveViewModel: WaveViewModel, observerId: String, modif
     }
 
     val eventTimeZone = waveNumbers?.waveTimezone
-    val order = listOf(
+    val orderedLabels = listOf(
         ShRes.string.wave_start_time,
         ShRes.string.wave_end_time,
         ShRes.string.wave_speed,
@@ -308,7 +308,7 @@ private fun EventNumbers(waveViewModel: WaveViewModel, observerId: String, modif
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
-                    order.forEach { key ->
+                    orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
 
                         Row(

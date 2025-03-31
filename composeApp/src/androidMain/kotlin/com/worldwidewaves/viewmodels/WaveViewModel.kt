@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -47,7 +46,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     private val observers = mutableMapOf<String, ObserverState>()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e("WaveViewModel", "Coroutine error: ${throwable.message}", throwable)
+        Log.e(::WaveViewModel.name, "Coroutine error: ${throwable.message}", throwable)
     }
 
     // Track which observers exist
@@ -81,7 +80,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
      * Creates a proxy StateFlow that maps from an event property
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun <T> ObserverState.createEventFlow(
+    private fun <T> ObserverState.proxyEventFlow(
         defaultValue: T,
         flowSelector: (IWWWEvent) -> StateFlow<T>
     ): StateFlow<T> {
@@ -120,7 +119,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     private fun initializeObserver(state: ObserverState) {
         val event = state.event
 
-        Log.v("WaveViewModel", "Initializing observer for event ${event.id}")
+        Log.v(::WaveViewModel.name, "Initializing observer for event ${event.id}")
 
         // Initialize state with initial values
         state.scope.launch(Dispatchers.Default + exceptionHandler) {
@@ -133,7 +132,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                 // Set up flow collectors for the event
                 setupEventCollectors(state)
             } catch (e: Exception) {
-                Log.e("WaveViewModel", "Error initializing observer: ${e.message}", e)
+                Log.e(::WaveViewModel.name, "Error initializing observer: ${e.message}", e)
             }
         }
     }
@@ -210,9 +209,6 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         // Create and initialize observer state
         val state = getOrCreateObserver(observerId, event)
 
-        // Start the event's observation
-        event.startObservation()
-
         // Handle polygon updates if provided
         if (polygonsHandler != null) {
             state.scope.launch(Dispatchers.Default) {
@@ -222,23 +218,25 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             }
         }
 
+        // Start the event's observation
+        event.startObservation()
+
         return observerId
     }
 
     // Helper function to create reactive property flows
-    private fun <T> createPropertyFlow(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun <T> flowWithDefaults(
         observerId: String,
         defaultValue: T,
         propertySelector: (ObserverState) -> StateFlow<T>
-    ): StateFlow<T> {
-        return observerExistsMap
+    ): StateFlow<T> = observerExistsMap
             .map { it[observerId] == true }
-            .combine(flowOf(Unit)) { exists, _ -> exists }
-            .map { exists ->
+            .flatMapLatest { exists ->
                 if (exists) {
-                    observers[observerId]?.let { propertySelector(it).value } ?: defaultValue
+                    observers[observerId]?.let { propertySelector(it) } ?: flowOf(defaultValue)
                 } else {
-                    defaultValue
+                    flowOf(defaultValue)
                 }
             }
             .stateIn(
@@ -246,46 +244,49 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = defaultValue
             )
-    }
 
     // Simplified property accessor methods
     fun getProgressionFlow(observerId: String): StateFlow<Double> =
-        createPropertyFlow(observerId, 0.0) { it.createEventFlow(0.0) { event -> event.progression } }
+        flowWithDefaults(observerId, 0.0) {
+            it.proxyEventFlow(0.0) { event -> event.progression }
+        }
 
     fun getEventStatusFlow(observerId: String): StateFlow<IWWWEvent.Status> =
-        createPropertyFlow(observerId, IWWWEvent.Status.UNDEFINED) {
-            it.createEventFlow(IWWWEvent.Status.UNDEFINED) { event -> event.eventStatus }
+        flowWithDefaults(observerId, IWWWEvent.Status.UNDEFINED) {
+            it.proxyEventFlow(IWWWEvent.Status.UNDEFINED) { event -> event.eventStatus }
         }
 
     fun getIsWarmingInProgressFlow(observerId: String): StateFlow<Boolean> =
-        createPropertyFlow(observerId, false) {
-            it.createEventFlow(false) { event -> event.isWarmingInProgress }
+        flowWithDefaults(observerId, false) {
+            it.proxyEventFlow(false) { event -> event.isWarmingInProgress }
         }
 
     fun getIsGoingToBeHitFlow(observerId: String): StateFlow<Boolean> =
-        createPropertyFlow(observerId, false) {
-            it.createEventFlow(false) { event -> event.userIsGoingToBeHit }
+        flowWithDefaults(observerId, false) {
+            it.proxyEventFlow(false) { event -> event.userIsGoingToBeHit }
         }
 
     fun getHasBeenHitFlow(observerId: String): StateFlow<Boolean> =
-        createPropertyFlow(observerId, false) {
-            it.createEventFlow(false) { event -> event.userHasBeenHit }
+        flowWithDefaults(observerId, false) {
+            it.proxyEventFlow(false) { event -> event.userHasBeenHit }
         }
 
+    // -----
+
     fun getUserPositionRatioFlow(observerId: String): StateFlow<Double> =
-        createPropertyFlow(observerId, 0.0) { it.userPositionRatio }
+        flowWithDefaults(observerId, 0.0) { it.userPositionRatio }
 
     fun getTimeBeforeHitFlow(observerId: String): StateFlow<Duration> =
-        createPropertyFlow(observerId, Duration.INFINITE) { it.timeBeforeHit }
+        flowWithDefaults(observerId, Duration.INFINITE) { it.timeBeforeHit }
 
     fun getHitDateTimeFlow(observerId: String): StateFlow<Instant> =
-        createPropertyFlow(observerId, Instant.DISTANT_FUTURE) { it.hitDateTime }
+        flowWithDefaults(observerId, Instant.DISTANT_FUTURE) { it.hitDateTime }
 
     fun getWaveNumbersFlow(observerId: String): StateFlow<WaveNumbersLiterals?> =
-        createPropertyFlow(observerId, null) { it.waveNumbers }
+        flowWithDefaults(observerId, null) { it.waveNumbers }
 
     fun getIsInAreaFlow(observerId: String): StateFlow<Boolean> =
-        createPropertyFlow(observerId, false) { it.isInArea }
+        flowWithDefaults(observerId, false) { it.isInArea }
 
     /**
      * Stop observation for a specific observer ID
@@ -322,7 +323,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                         state.isInArea.value = true
                     }
                 } catch (e: Exception) {
-                    Log.e("WaveViewModel", "Error updating user location: ${e.message}", e)
+                    Log.e(::WaveViewModel.name, "Error updating user location: ${e.message}", e)
                 }
             }
         }
@@ -349,11 +350,11 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
 
             withContext(Dispatchers.Main) {
-                polygonsHandler(newPolygons, mode != WaveMode.ADD)
+                polygonsHandler(newPolygons, false) // mode != WaveMode.ADD)
             }
 
         } catch (e: Exception) {
-            Log.e("WaveViewModel", "Error updating wave polygons: ${e.message}", e)
+            Log.e(::WaveViewModel.name, "Error updating wave polygons: ${e.message}", e)
         }
     }
 
