@@ -385,7 +385,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             val newPolygons = polygons?.map { it.toMapLibrePolygon() } ?: listOf()
 
             withContext(Dispatchers.Main) {
-                polygonsHandler(newPolygons, false)
+                polygonsHandler(newPolygons, true)
             }
 
         } catch (e: Exception) {
