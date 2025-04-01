@@ -317,6 +317,11 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
      */
     fun stopObservation(observerId: String) {
         observers[observerId]?.let { state ->
+            // Restore simulation speed
+            state.backupSimulationSpeed?.let { speed ->
+                platform.getSimulation()?.setSpeed(speed)
+            }
+
             state.event.stopObservation()
             state.cleanup()
             observers.remove(observerId)
@@ -368,7 +373,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         polygonsHandler: (wavePolygons: List<Polygon>, clearPolygons: Boolean) -> Unit
     ) {
         val event = state.event
-        if (!event.isRunning()) return
+        if (!event.isRunning() && !event.isDone()) return
 
         try {
             val mode = WaveMode.ADD

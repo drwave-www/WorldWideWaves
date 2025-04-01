@@ -53,12 +53,15 @@ class WaveObserver(
                     } else {
                         waveViewModel.startObservation(observerId, event)
                         if (event.isDone()) {
-                            // Set full wave polygons
-                            eventMap.updateWavePolygons(
-                                context,
-                                event.area.getPolygons().map { it.toMapLibrePolygon() },
-                                true
-                            )
+                            // Set full wave polygons when MapLibre is set
+                            eventMap.mapLibreAdapter.onMapSet {
+                                scope.launch {
+                                    it.addWavePolygons(
+                                        event.area.getPolygons().map { it.toMapLibrePolygon() },
+                                        true
+                                    )
+                                }
+                            }
                             // Set first user location value
                             eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
                                 waveViewModel.updateUserLocation(observerId, location)

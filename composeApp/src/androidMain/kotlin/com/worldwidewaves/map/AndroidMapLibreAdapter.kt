@@ -64,6 +64,8 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     // --------------------------------
 
+    private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
+
     fun setMap(map: MapLibreMap) {
         mapLibreMap = map
 
@@ -74,6 +76,22 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         map.addOnCameraIdleListener {
             updateCameraInfo(map)
             constrainCamera()
+        }
+
+        // Execute any pending callbacks
+        onMapSetCallbacks.forEach { callback ->
+            callback(this)
+        }
+        onMapSetCallbacks.clear()
+    }
+
+    fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
+        if (mapLibreMap != null) {
+            // Map is already set, execute callback immediately
+            callback(this)
+        } else {
+            // Store callback for execution when map is set
+            onMapSetCallbacks.add(callback)
         }
     }
 

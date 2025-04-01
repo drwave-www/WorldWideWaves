@@ -292,6 +292,7 @@ class AndroidEventMap(
             mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
         }
     }
+
 }
 
 // ----------------------------------------------------------------------------
