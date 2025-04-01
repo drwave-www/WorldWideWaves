@@ -62,11 +62,11 @@ class WaveObserver(
                                     )
                                 }
                             }
-                            // Set first user location value
-                            eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
-                                waveViewModel.updateUserLocation(observerId, location)
-                            }
                         }
+                    }
+                    // Set first user location value
+                    eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
+                        waveViewModel.updateUserLocation(observerId, location)
                     }
                 }
             }
