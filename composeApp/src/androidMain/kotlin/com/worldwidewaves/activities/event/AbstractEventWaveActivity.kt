@@ -39,6 +39,8 @@ abstract class AbstractEventWaveActivity(
     protected val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
+    private var _eventMap : AndroidEventMap? = null
+
     // Create a stable observer ID based on activity instance
     protected val observerId = UUID.randomUUID().toString()
 
@@ -46,6 +48,7 @@ abstract class AbstractEventWaveActivity(
 
     override fun onResume() {
         super.onResume()
+
         // Restart observation when activity is visible
         waveObserver?.startObservation()
     }
@@ -62,6 +65,8 @@ abstract class AbstractEventWaveActivity(
     protected fun ObserveEventMap(event: IWWWEvent, eventMap: AndroidEventMap) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
+
+        _eventMap = eventMap
 
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {

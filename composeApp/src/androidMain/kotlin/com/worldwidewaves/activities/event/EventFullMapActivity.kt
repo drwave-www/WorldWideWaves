@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -59,6 +60,7 @@ import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
@@ -72,6 +74,10 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
+        val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
+        val endDateTime by produceState<Instant?>(initialValue = null, key1 = event) {
+            value = event.getEndDateTime()
+        }
 
         // Construct the event map
         val eventMap =  remember(event.id) {
@@ -91,7 +97,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Screen composition
         Box(modifier = modifier.fillMaxWidth()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize())
-            ButtonWave(event, clock, modifier = Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
+            ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             MapActions(eventMap, waveViewModel, observerId)
         }
     }

@@ -1,13 +1,9 @@
 
 Semaine prochaine:
 
-- listeners to flow :
-    - 'running' not updated on event screen after done
-    - you are NOT in the area when event is done
-    - choreoraphy continues after event is done
-
 - add tests
 
+- test complet vitesse normale
 - Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
 - OPTIM: Wave split en tenant en compte les noeuds deja splites
 

@@ -38,9 +38,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,6 +95,7 @@ import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -108,6 +111,12 @@ class EventActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
+        val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
+        val endDateTime = remember(event) { mutableStateOf<Instant?>(null) }
+
+        LaunchedEffect(event) {
+            endDateTime.value = event.getEndDateTime()
+        }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -138,7 +147,7 @@ class EventActivity : AbstractEventWaveActivity() {
             EventOverlay(event, waveViewModel, observerId)
             EventDescription(event)
             DividerLine()
-            ButtonWave(event, clock)
+            ButtonWave(event.id, eventStatus, endDateTime.value, clock)
             eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
             NotifyAreaUserPosition(waveViewModel, observerId)
             EventNumbers(waveViewModel, observerId)

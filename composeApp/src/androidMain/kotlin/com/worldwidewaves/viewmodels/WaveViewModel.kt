@@ -125,6 +125,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         // Initialize state with initial values
         state.scope.launch {
             try {
+
                 // Initialize with consolidated state
                 state.waveStateFlow.value = WaveState(
                     userPositionRatio = event.wave.userPositionToWaveRatio() ?: 0.0,
@@ -135,6 +136,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
                 // Set up flow collectors for the event
                 setupEventCollectors(state)
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error initializing observer: ${e.message}", e)
             }
@@ -170,29 +172,27 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
         // Handle warming started
         scope.launch {
-            event.isWarmingInProgress
-                .collect { isStarted ->
-                    if (isStarted) {
-                        state.backupSimulationSpeed = platform.getSimulation()?.speed
-                        platform.getSimulation()?.setSpeed(1)
-                    }
+            event.isWarmingInProgress.collect { isStarted ->
+                if (isStarted) {
+                    state.backupSimulationSpeed = platform.getSimulation()?.speed
+                    platform.getSimulation()?.setSpeed(1)
                 }
+            }
         }
 
         // Handle user has been hit
         scope.launch {
-            event.userHasBeenHit
-                .collect { hasBeenHit ->
-                    if (hasBeenHit) {
-                        // Restore simulation speed after a delay
-                        state.backupSimulationSpeed?.let { speed ->
-                            launch {
-                                delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
-                                platform.getSimulation()?.setSpeed(speed)
-                            }
+            event.userHasBeenHit.collect { hasBeenHit ->
+                if (hasBeenHit) {
+                    // Restore simulation speed after a delay
+                    state.backupSimulationSpeed?.let { speed ->
+                        launch {
+                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                            platform.getSimulation()?.setSpeed(speed)
                         }
                     }
                 }
+            }
         }
     }
 
@@ -206,6 +206,9 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     ): String {
         // First stop any existing observation for this ID
         stopObservation(observerId)
+
+        // Start the event's observation
+        event.startObservation()
 
         // Create and initialize observer state
         val state = getOrCreateObserver(observerId, event)
@@ -225,9 +228,6 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                 }
             }
         }
-
-        // Start the event's observation
-        event.startObservation()
 
         return observerId
     }

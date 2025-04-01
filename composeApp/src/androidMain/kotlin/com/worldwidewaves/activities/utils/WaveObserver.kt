@@ -6,6 +6,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 /*
@@ -51,11 +53,16 @@ class WaveObserver(
                     } else {
                         waveViewModel.startObservation(observerId, event)
                         if (event.isDone()) {
+                            // Set full wave polygons
                             eventMap.updateWavePolygons(
                                 context,
                                 event.area.getPolygons().map { it.toMapLibrePolygon() },
                                 true
                             )
+                            // Set first user location value
+                            eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
+                                waveViewModel.updateUserLocation(observerId, location)
+                            }
                         }
                     }
                 }
