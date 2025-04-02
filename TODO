@@ -11,11 +11,10 @@
 
 Avril first part:
 
+- generate maps
 - script de creation des modules
-- scripting to add a new event : param city/country
-    - openAI: images + descriptions
-    - openAI for geo coordinates too (bbox 16/9 + ask some padding, ...)
-    - flags, ..
+- images / flags
+- in app : bbox / geojson / zoom behaviors
 
  - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
