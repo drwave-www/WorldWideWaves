@@ -30,12 +30,13 @@ mkdir -p ./data
 # ---------- Download dependencies --------------------------------------------
 
 # git clone openmpatiles-tools to download OSM areas
-[ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
+# [ ! -d openmaptiles-tools ] && git clone git@github.com:openmaptiles/openmaptiles-tools.git && rm -rf openmaptiles-tools/.git
+pip install openmaptiles-tools
 
 # Download osmconvert to extract BBOX from OSM areas
-[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert && (
-  cd openmaptiles-tools && make
-)
+#[ ! -f ./bin/osmconvert ] && wget http://m.m.i24.cc/osmconvert64 -O ./bin/osmconvert && chmod +x ./bin/osmconvert && (
+#  cd openmaptiles-tools && make
+#)
 
 # ---------- Vars and support functions ---------------------------------------
 . ./libs/lib.inc.sh
@@ -74,7 +75,7 @@ for event in $EVENTS; do # Download OSM area as PBF file
   DPBF=data/www-${event}.osm.pbf
 
   echo "-- Download area $AREAZONE from OSM.."
-  [ ! -f $SPBF ] && ./openmaptiles-tools/bin/download-osm $AREAZONE -o $SPBF
+  [ ! -f $SPBF ] && download-osm $AREAZONE -o $SPBF
 
   echo "-- Extract bbox $BBOX from area $AREAZONE.."
   [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics

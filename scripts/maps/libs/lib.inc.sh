@@ -76,7 +76,7 @@ tpl() {
   center=$(echo "$bbox_output" | tail -n 1 | cut -d ':' -f 2)
 
   # Replace placeholders with event properties and bbox/center data
-  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | sed -e 's/^[0-9\.]\.*//' | sort | uniq | while read -r prop; do
+  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
   if [ -n "$prop" ] && [ "$(conf $event $prop | wc -l)" = "1" ]; then
       sed -i \
         -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
