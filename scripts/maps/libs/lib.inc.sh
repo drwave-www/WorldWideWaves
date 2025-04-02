@@ -59,14 +59,14 @@ get_osmAdminids() {
   local event="$1"
   local ids
   
-  # First try to get the new osmAdminids field
+  # First try to get the osmAdminids as an array
   ids=$(./bin/jq -r --arg event "$event" \
-    ".[] | select(.id == \$event) | .area.osmAdminids | if type==\"array\" then map(tostring) | join(\",\") else . end" "$EVENTS_FILE")
-  
+    '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then map(tostring) | join(",") else . end' "$EVENTS_FILE")
+
   # If osmAdminids doesn't exist or is null, try the legacy osmAdminid field for backward compatibility
   if [ "$ids" = "null" ] || [ -z "$ids" ]; then
     ids=$(./bin/jq -r --arg event "$event" \
-      ".[] | select(.id == \$event) | .area.osmAdminid" "$EVENTS_FILE")
+      '.[] | select(.id == $event) | .area.osmAdminid' "$EVENTS_FILE")
     
     # If neither field exists, return an error
     if [ "$ids" = "null" ] || [ -z "$ids" ]; then
