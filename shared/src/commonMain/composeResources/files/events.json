@@ -18,7 +18,7 @@
         "approxDuration": 157.2
       }
     },
-    "area": { "osmAdminid": 1752724 },
+    "area": { "osmAdminid": 175905 },
     "map": { "maxZoom": 18, "language": "en", "zone": "north-america/us/new-york" }
   },
   {
@@ -40,7 +40,7 @@
         "approxDuration": 157.7
       }
     },
-    "area": { "osmAdminid": 2251931 },
+    "area": { "osmAdminid": 207359 },
     "map": { "maxZoom": 18, "language": "en", "zone": "north-america/us/california" }
   },
   {
@@ -62,7 +62,7 @@
         "approxDuration": 148.6
       }
     },
-    "area": { "osmAdminid": 114686 },
+    "area": { "osmAdminid": 17483459 },
     "map": { "maxZoom": 18, "language": "es", "zone": "north-america/mexico" }
   },
   {
@@ -84,7 +84,7 @@
         "approxDuration": 156.3
       }
     },
-    "area": { "osmAdminid": 298887 },
+    "area": { "osmAdminid": 298285 },
     "map": { "maxZoom": 18, "language": "pt", "zone": "south-america/brazil" }
   },
   {
@@ -106,7 +106,7 @@
         "approxDuration": 136.9
       }
     },
-    "area": { "osmAdminid": 343395 },
+    "area": { "osmAdminid": 1224652 },
     "map": { "maxZoom": 18, "language": "es", "zone": "south-america/argentina" }
   },
   {
@@ -128,7 +128,7 @@
         "approxDuration": 195.1
       }
     },
-    "area": { "osmAdminid": 1753427 },
+    "area": { "osmAdminid": 65606 },
     "map": { "maxZoom": 18, "language": "en", "zone": "europe/great-britain" }
   },
   {
@@ -194,7 +194,7 @@
         "approxDuration": 104.5
       }
     },
-    "area": { "osmAdminid": 347316 },
+    "area": { "osmAdminid": 5326784 },
     "map": { "maxZoom": 18, "language": "es", "zone": "europe/spain" }
   },
   {
@@ -216,7 +216,7 @@
         "approxDuration": 170.8
       }
     },
-    "area": { "osmAdminid": 41480 },
+    "area": { "osmAdminid": 41485 },
     "map": { "maxZoom": 18, "language": "it", "zone": "europe/italy" }
   },
   {
@@ -260,7 +260,7 @@
         "approxDuration": 234.0
       }
     },
-    "area": { "osmAdminid": 411522 },
+    "area": { "osmAdminid": 16214059 },
     "map": { "maxZoom": 18, "language": "tr", "zone": "asia/turkey" }
   },
   {
@@ -282,7 +282,7 @@
         "approxDuration": 137.1
       }
     },
-    "area": { "osmAdminid": 147057 },
+    "area": { "osmAdminid": 4103336 },
     "map": { "maxZoom": 18, "language": "ar", "zone": "africa/egypt" }
   },
   {
@@ -304,7 +304,7 @@
         "approxDuration": 173.4
       }
     },
-    "area": { "osmAdminid": 1133297 },
+    "area": { "osmAdminid": 594508 },
     "map": { "maxZoom": 18, "language": "en", "zone": "africa/south-africa" }
   },
   {
@@ -326,7 +326,7 @@
         "approxDuration": 150.8
       }
     },
-    "area": { "osmAdminid": 2106472 },
+    "area": { "osmAdminid": 3492709 },
     "map": { "maxZoom": 18, "language": "sw", "zone": "africa/kenya" }
   },
   {
@@ -348,7 +348,7 @@
         "approxDuration": 112.2
       }
     },
-    "area": { "osmAdminid": 192799 },
+    "area": { "osmAdminid": 3718182 },
     "map": { "maxZoom": 18, "language": "en", "zone": "africa/nigeria" }
   },
   {
@@ -370,7 +370,7 @@
         "approxDuration": 120.3
       }
     },
-    "area": { "osmAdminid": 195981 },
+    "area": { "osmAdminid": 5646651 },
     "map": { "maxZoom": 18, "language": "fr", "zone": "africa/democratic-republic-of-the-congo" }
   },
   {
@@ -392,8 +392,8 @@
         "approxDuration": 177.3
       }
     },
-    "area": { "osmAdminid": 1705399 },
-    "map": { "maxZoom": 18, "language": "ar", "zone": "asia/united-arab-emirates" }
+    "area": { "osmAdminid": 4479752 },
+    "map": { "maxZoom": 18, "language": "ar", "zone": "asia/gcc-states" }
   },
   {
     "id": "mumbai_india",
@@ -414,7 +414,7 @@
         "approxDuration": 73.7
       }
     },
-    "area": { "osmAdminid": 187069 },
+    "area": { "osmAdminid": 7964375 },
     "map": { "maxZoom": 18, "language": "en", "zone": "asia/india" }
   },
   {
@@ -436,7 +436,7 @@
         "approxDuration": 164.4
       }
     },
-    "area": { "osmAdminid": 295605 },
+    "area": { "osmAdminid": 1942586 },
     "map": { "maxZoom": 18, "language": "en", "zone": "asia/india" }
   },
   {
@@ -458,7 +458,7 @@
         "approxDuration": 115.9
       }
     },
-    "area": { "osmAdminid": 155385 },
+    "area": { "osmAdminid": 7902476 },
     "map": { "maxZoom": 18, "language": "en", "zone": "asia/india" }
   },
   {
@@ -480,7 +480,7 @@
         "approxDuration": 114.5
       }
     },
-    "area": { "osmAdminid": 163643 },
+    "area": { "osmAdminid": 6362934 },
     "map": { "maxZoom": 18, "language": "id", "zone": "asia/indonesia" }
   },
   {
@@ -502,7 +502,7 @@
         "approxDuration": 220.0
       }
     },
-    "area": { "osmAdminid": 378612 },
+    "area": { "osmAdminid": 92277 },
     "map": { "maxZoom": 18, "language": "th", "zone": "asia/thailand" }
   },
   {
@@ -524,7 +524,7 @@
         "approxDuration": 105.8
       }
     },
-    "area": { "osmAdminid": 14041 },
+    "area": { "osmAdminid": 103703 },
     "map": { "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
   },
   {
@@ -546,7 +546,7 @@
         "approxDuration": 109.4
       }
     },
-    "area": { "osmAdminid": 382313 },
+    "area": { "osmAdminid": 1543125 },
     "map": { "maxZoom": 18, "language": "ja", "zone": "asia/japan" }
   },
   {
@@ -568,8 +568,8 @@
         "approxDuration": 123.2
       }
     },
-    "area": { "osmAdminid": 270185 },
-    "map": { "maxZoom": 18, "language": "ko", "zone": "asia/south_korea" }
+    "area": { "osmAdminid": 2297418 },
+    "map": { "maxZoom": 18, "language": "ko", "zone": "asia/south-korea" }
   },
   {
     "id": "beijing_china",
@@ -590,7 +590,7 @@
         "approxDuration": 592.2
       }
     },
-    "area": { "osmAdminid": 2706054 },
+    "area": { "osmAdminid": 16077736 },
     "map": { "maxZoom": 18, "language": "zh", "zone": "asia/china" }
   },
   {
@@ -612,7 +612,7 @@
         "approxDuration": 355.7
       }
     },
-    "area": { "osmAdminid": 2706079 },
+    "area": { "osmAdminid": 913067 },
     "map": { "maxZoom": 18, "language": "zh", "zone": "asia/china" }
   },
   {
@@ -634,7 +634,7 @@
         "approxDuration": 211.7
       }
     },
-    "area": { "osmAdminid": 913022 },
+    "area": { "osmAdminid": 10264792 },
     "map": { "maxZoom": 18, "language": "zh", "zone": "asia/china/hong-kong" }
   },
   {
@@ -656,7 +656,7 @@
         "approxDuration": 243.2
       }
     },
-    "area": { "osmAdminid": 1785116 },
+    "area": { "osmAdminid": 5750005 },
     "map": { "maxZoom": 18, "language": "en", "zone": "australia-oceania/australia" }
   },
   {
@@ -678,7 +678,7 @@
         "approxDuration": 356.2
       }
     },
-    "area": { "osmAdminid": 2863936 },
+    "area": { "osmAdminid": 4246124 },
     "map": { "maxZoom": 18, "language": "en", "zone": "australia-oceania/australia" }
   },
   {
@@ -700,7 +700,7 @@
         "approxDuration": 140.1
       }
     },
-    "area": { "osmAdminid": 2526739 },
+    "area": { "osmAdminid": 324211 },
     "map": { "maxZoom": 18, "language": "en", "zone": "north-america/canada" }
   },
   {
@@ -722,7 +722,7 @@
         "approxDuration": 48.6
       }
     },
-    "area": { "osmAdminid": 1859617 },
+    "area": { "osmAdminid": 1852574 },
     "map": { "maxZoom": 18, "language": "en", "zone": "north-america/canada" }
   },
   {
@@ -788,7 +788,7 @@
         "approxDuration": 165.5
       }
     },
-    "area": { "osmAdminid": 394399 },
+    "area": { "osmAdminid": 1944756 },
     "map": { "maxZoom": 18, "language": "es", "zone": "south-america/peru" }
   },
   {
@@ -810,7 +810,7 @@
         "approxDuration": 91.8
       }
     },
-    "area": { "osmAdminid": 123970 },
+    "area": { "osmAdminid": 7426387 },
     "map": { "maxZoom": 18, "language": "es", "zone": "south-america/colombia" }
   },
   {
@@ -832,7 +832,7 @@
         "approxDuration": 98.4
       }
     },
-    "area": { "osmAdminid": 152968 },
+    "area": { "osmAdminid": 164609 },
     "map": { "maxZoom": 18, "language": "es", "zone": "south-america/chile" }
   },
   {
@@ -854,7 +854,7 @@
         "approxDuration": 154.1
       }
     },
-    "area": { "osmAdminid": 2617436 },
+    "area": { "osmAdminid": 6663864 },
     "map": { "maxZoom": 18, "language": "fa", "zone": "asia/iran" }
   },
   {
@@ -876,7 +876,7 @@
         "approxDuration": 277.3
       }
     },
-    "area": { "osmAdminid": 1226374 },
+    "area": { "osmAdminid": 6080948 },
     "map": { "maxZoom": 18, "language": "ur", "zone": "asia/pakistan" }
   }
 ]
