@@ -32,7 +32,7 @@ import kotlinx.datetime.toLocalDateTime
 class WWWPlatform(val name: String) {
 
     init {
-        val instant = Instant.parse("2024-03-15T17:00:00Z")
+        val instant = Instant.parse("2024-07-14T16:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
         val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
         setSimulation(WWWSimulation(now, Position(lat = 48.862725, lng = 2.287592), 50)) // In Paris, 1h is 2mn

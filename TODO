@@ -1,17 +1,16 @@
 
-Semaine prochaine:
 
-- add tests
+- ------>>>> add tests <<<<------
 
 - test complet vitesse normale
-- Bug : sur refresh de l'affichage (IDE Live Edit), la vague n'est plus visible
+    - on se demande ce qu'il se passe quand rien ne bouge
+    - au moins mettre a jour le time avant hit
 - OPTIM: Wave split en tenant en compte les noeuds deja splites
 
 ---------------------------------------------
 
 Avril first part:
 
-- determination des villes et pays PRIORITAIRES
 - script de creation des modules
 - scripting to add a new event : param city/country
     - openAI: images + descriptions
