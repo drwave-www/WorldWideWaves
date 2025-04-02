@@ -20,9 +20,28 @@
 # limitations under the License.
 #
 
-cd "$(dirname "$0")" # always work from executable folder
+cd "$(dirname "$0")" || exit # always work from executable folder
 
 #set -x
+
+# Parse command line arguments
+FORCE_GENERATION=false
+EVENT_PARAM=""
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -f|--force) FORCE_GENERATION=true ;;
+    *)
+      if [ -z "$EVENT_PARAM" ]; then
+        EVENT_PARAM="$1"
+      else
+        echo "Unknown parameter: $1"
+        exit 1
+      fi
+      ;;
+  esac
+  shift
+done
 
 mkdir -p ./bin
 mkdir -p ./data
@@ -43,47 +62,56 @@ pip install openmaptiles-tools
 
 # -----------------------------------------------------------------------------
 
-if [ ! -z "$1" ]; then
-  if $(exists $1); then
-    EVENTS=$1
-    rm -f data/.env-$1
-    rm -f data/$1.yaml
+if [ ! -z "$EVENT_PARAM" ]; then
+  if $(exists "$EVENT_PARAM"); then
+    EVENTS=$EVENT_PARAM
+    rm -f data/.env-"$EVENT_PARAM"
+    rm -f data/"$EVENT_PARAM".yaml
   else
-    echo "Unexistent event $1"
+    echo "Unexistent event $EVENT_PARAM"
     exit 1
   fi
 fi
 
-for event in $EVENTS; do # Download OSM area as PBF file 
+for event in $EVENTS; do # Download OSM area as PBF file
                          # and generates a dedicated PBF file for corresponding BBOX
                          # EVENTS is defined in lib.inc.sh
   echo "==> EVENT $event"
-  TYPE=$(conf $event type)
+  TYPE=$(conf "$event" type)
 
   if [ "$TYPE" = "world" ]; then
     echo "Skip the world"
     continue
   fi
 
-  OSMADMINID=$(conf $event area.osmAdminid)
-  BBOX=$(./libs/get_bbox.dep.sh $OSMADMINID bbox)
+  # Get the BBOX for this event using the helper function
+  BBOX=$(get_event_bbox "$event")
 
-  echo "Retrieved BBOX for OSM admin id $OSMADMINID : $BBOX"
+  if [ $? -ne 0 ]; then
+    echo "Failed to get BBOX for event $event"
+    continue
+  fi
 
-  AREAZONE=$(conf $event map.zone)
-  SPBF=data/osm-$(echo $AREAZONE | sed -e 's,/,_,g').osm.pbf
+  echo "Retrieved BBOX for event $event : $BBOX"
+
+  AREAZONE=$(conf "$event" map.zone)
+  SPBF=data/osm-$(echo "$AREAZONE" | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 
   echo "-- Download area $AREAZONE from OSM.."
-  [ ! -f $SPBF ] && download-osm $AREAZONE -o $SPBF
+  [ ! -f "$SPBF" ] && download-osm "$AREAZONE" -o "$SPBF"
 
   echo "-- Extract bbox $BBOX from area $AREAZONE.."
-  [ ! -f $DPBF ] && ./bin/osmconvert $SPBF -b=$BBOX -o=$DPBF && ./bin/osmconvert $DPBF --out-statistics
+  if [ "$FORCE_GENERATION" = true ] || [ ! -f "$DPBF" ]; then
+    ./bin/osmconvert "$SPBF" -b="$BBOX" -o="$DPBF" && ./bin/osmconvert "$DPBF" --out-statistics
+  else
+    echo "   DPBF file already exists. Use -f to force regeneration."
+  fi
 
   echo "-- Generates OpenMapTiles environment for event $event"
-  tpl $event templates/.env-template-${TYPE} data/.env-${event}
+  tpl "$event" templates/.env-template-"${TYPE}" data/.env-"${event}"
 
   echo "-- Generates OpenMapTiles tileset definition for event $event"
-  tpl $event templates/template-omt-${TYPE}.yaml data/${event}.yaml
+  tpl "$event" templates/template-omt-"${TYPE}".yaml data/"${event}".yaml
 
 done
