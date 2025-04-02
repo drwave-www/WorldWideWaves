@@ -349,7 +349,7 @@
       }
     },
     "area": { "osmAdminids": [3718182], "bbox": "3.196678,6.371119,3.598022,6.642783" },
-    "map": { "minZoom": 11, maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
+    "map": { "minZoom": 11, "maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
   },
   {
     "id": "kinshasa_democratic_republic_of_the_congo",
