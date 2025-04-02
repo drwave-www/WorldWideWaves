@@ -1,4 +1,2 @@
-- kinshasa...
-- allow bbox to be specified, and then use it instead of bbox from osmadminid
-- allow list of ids instead of only one
-- geojson from a file if specified instead of from osmadminid
+- report zooms min and max to templates
+
