@@ -155,17 +155,8 @@ tpl() {
   local osmids_count
   osmids_count=$(./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then length else 0 end' "$EVENTS_FILE")
 
-  # If osmAdminids is an array, process each element
-  if [ "$osmids_count" -gt 0 ]; then
-    for i in $(seq 0 $(($osmids_count - 1))); do
-      local admin_id
-      admin_id=$(./bin/jq -r --arg event "$event" --argjson idx "$i" '.[] | select(.id == $event) | .area.osmAdminids[$idx]' "$EVENTS_FILE")
-      sed -i -e "s/#area.osmAdminids\[$i\]#/$admin_id/g" "$tpl_file"
-    done
-  fi
-
   # Then handle all other properties using the standard approach
-  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
+  ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
       sed -i \
         -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
