@@ -52,39 +52,57 @@ conf() {
     ".[] | select(.id == \$event) | .$2" "$EVENTS_FILE"
 }
 
+# Function to get the osmAdminids for an event
+# It handles backward compatibility with the old osmAdminid field
+# Usage: get_osmAdminids <event_id>
+get_osmAdminids() {
+  local event="$1"
+  local ids
+  
+  # First try to get the new osmAdminids field
+  ids=$(./bin/jq -r --arg event "$event" \
+    ".[] | select(.id == \$event) | .area.osmAdminids | if type==\"array\" then map(tostring) | join(\",\") else . end" "$EVENTS_FILE")
+  
+  # If osmAdminids doesn't exist or is null, try the legacy osmAdminid field for backward compatibility
+  if [ "$ids" = "null" ] || [ -z "$ids" ]; then
+    ids=$(./bin/jq -r --arg event "$event" \
+      ".[] | select(.id == \$event) | .area.osmAdminid" "$EVENTS_FILE")
+    
+    # If neither field exists, return an error
+    if [ "$ids" = "null" ] || [ -z "$ids" ]; then
+      echo ""
+      return 1
+    fi
+  fi
+  
+  echo "$ids"
+}
+
 # Function to get the bbox for an event
-# It first checks if area.bbox is specified; if not, it gets it from area.osmAdminids or area.osmAdminid
+# It first checks if area.bbox is specified; if not, it gets it from area.osmAdminids
 # Usage: get_event_bbox <event_id>
 get_event_bbox() {
   local event="$1"
   local direct_bbox
   direct_bbox=$(conf "$event" "area.bbox")
-
+  
   # If a direct bbox is specified, use that
   if [ "$direct_bbox" != "null" ] && [ -n "$direct_bbox" ]; then
     echo "$direct_bbox"
     return
   fi
-
-  # Try to get osmAdminids (plural) first
+  
+  # Get the OSM admin IDs
   local osmAdminids
-  osmAdminids=$(conf "$event" "area.osmAdminids")
-
-  # If osmAdminids is not found, fall back to osmAdminid (singular)
-  if [ "$osmAdminids" = "null" ] || [ -z "$osmAdminids" ]; then
-    local osmAdminid
-    osmAdminid=$(conf "$event" "area.osmAdminid")
-    if [ "$osmAdminid" != "null" ] && [ -n "$osmAdminid" ]; then
-      # Use the single admin ID for backward compatibility
-      ./libs/get_bbox.dep.sh "$osmAdminid" bbox
-    else
-      echo "Error: No area.bbox, area.osmAdminids, or area.osmAdminid found for event $event" >&2
-      return 1
-    fi
-  else
-    # Use multiple admin IDs
-    ./libs/get_bbox.dep.sh "$osmAdminids" bbox
+  osmAdminids=$(get_osmAdminids "$event")
+  
+  if [ -z "$osmAdminids" ]; then
+    echo "Error: No area.bbox or area.osmAdminids found for event $event" >&2
+    return 1
   fi
+  
+  # Use the admin IDs to get the bbox
+  ./libs/get_bbox.dep.sh "$osmAdminids" bbox
 }
 
 # Function to get the center for an event
@@ -94,32 +112,24 @@ get_event_center() {
   local event="$1"
   local direct_center
   direct_center=$(conf "$event" "area.center")
-
+  
   # If a direct center is specified, use that
   if [ "$direct_center" != "null" ] && [ -n "$direct_center" ]; then
     echo "$direct_center"
     return
   fi
-
-  # Try to get osmAdminids (plural) first
+  
+  # Get the OSM admin IDs
   local osmAdminids
-  osmAdminids=$(conf "$event" "area.osmAdminids")
-
-  # If osmAdminids is not found, fall back to osmAdminid (singular)
-  if [ "$osmAdminids" = "null" ] || [ -z "$osmAdminids" ]; then
-    local osmAdminid
-    osmAdminid=$(conf "$event" "area.osmAdminid")
-    if [ "$osmAdminid" != "null" ] && [ -n "$osmAdminid" ]; then
-      # Use the single admin ID for backward compatibility
-      ./libs/get_bbox.dep.sh "$osmAdminid" center
-    else
-      echo "Error: No area.center, area.osmAdminids, or area.osmAdminid found for event $event" >&2
-      return 1
-    fi
-  else
-    # Use multiple admin IDs
-    ./libs/get_bbox.dep.sh "$osmAdminids" center
+  osmAdminids=$(get_osmAdminids "$event")
+  
+  if [ -z "$osmAdminids" ]; then
+    echo "Error: No area.center or area.osmAdminids found for event $event" >&2
+    return 1
   fi
+  
+  # Use the admin IDs to get the center
+  ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
 
 # Function to replace placeholders in the template file with event configuration values
