@@ -20,7 +20,7 @@
 # limitations under the License.
 #
 
-DEST_DIR=../../shared/src/commonMain/composeResources/files/maps
+DEST_DIR=data/  #../../shared/src/commonMain/composeResources/files/maps
 
 cd "$(dirname "$0")" # always work from executable folder
 
@@ -115,15 +115,15 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
   done
 
   # Merge all downloaded GeoJSON files into a single one
-  DEST_GEOJSON=$DEST_DIR/$event.geojson
+  #DEST_GEOJSON=$DEST_DIR/$event.geojson
   MERGED_GEOJSON="data/${event}.geojson"
 
   echo "Merging ${#geojson_files[@]} GeoJSON files for event $event"
   merge_geojsons "$MERGED_GEOJSON" "${geojson_files[@]}"
 
   # Copy the final merged GeoJSON to the destination
-  cp "$MERGED_GEOJSON" "$DEST_GEOJSON"
-  echo "Created GeoJSON for event $event at $DEST_GEOJSON"
+  #cp "$MERGED_GEOJSON" "$DEST_GEOJSON"
+  echo "Created GeoJSON for event $event at $MERGED_GEOJSON"
 
   # Clean up temporary files if needed
   for temp_file in "${geojson_files[@]}"; do
