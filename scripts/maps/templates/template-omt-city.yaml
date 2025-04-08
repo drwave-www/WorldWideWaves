@@ -15,8 +15,8 @@ tileset:
   attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
   center: [ #map.center#, 10 ]
   bounds: [ #map.bbox#]
-  maxzoom: 14
-  minzoom: 9
+  maxzoom: #map.maxZoom#
+  minzoom: #map.minZoom#
   pixel_scale: 256
   languages:
     - #map.language#
