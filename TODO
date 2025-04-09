@@ -5,7 +5,6 @@
 - test complet vitesse normale
     - on se demande ce qu'il se passe quand rien ne bouge
     - au moins mettre a jour le time avant hit
-- OPTIM: Wave split en tenant en compte les noeuds deja splites
 
 ---------------------------------------------
 
@@ -15,7 +14,9 @@ Avril first part:
     - zooms
     - miss istanbul/karachi/kinshasa
     - pb de taille des maps (40) ?
-        - compter et desinstaller les moins utilises >
+        - compter et desinstaller les moins utilises
+    - show some map elements on min zoom
+        + styling script : jq => every minzoom < 10 = 3
 - images / flags
 - in app : bbox / geojson / zoom behaviors
 
@@ -23,9 +24,16 @@ Avril first part:
      --> add end date additionally to end hour for countries and the world
      --> add 'wave hours', so countries and the world can have several waves over days during the process
 
-- RAF: images et vraie choregraphie !!
+- Ecran event:
+    - do not download map by default
+    - default image outside of module for map
+    - bouton to download map if not present
+    - ask for download if event isSoon or started
+    - + settings: list of maps and ability to uninstall
 
 - PDF + Message + Planif presentation mi-juin
+
+- RAF: images et vraie choregraphie !! --> Delphine
 
 ---------------------------------------------
 
@@ -51,11 +59,8 @@ Avril second part:
 First push prive Play Store
 ---------------------------------------------
 
-- 1: resoudre le pb de difference de vitesse entre la wave et la progression
-                - POSTPONE: use split systematique pour le moment, to be DEBUGGED (maplibre) + perf stats
-                - 2: tester RECOMPOSE sur une liste de polygons splittes (faire deux splits et recomposer)
-                - 3: tester SUR UN DEVICE les perfs de ADD, RECOMPOSE et SPLIT systematique
-                      --> Faire une fonction de telemetrie
+- OPTIM: Wave split en tenant en compte les noeuds deja splites
+
 - add tests for all missing functions
     - caching mechanism
     - download of app features on app update / feature update
@@ -64,9 +69,6 @@ First push prive Play Store
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation requests
-    - perf: create the longitude-cut geojson at build phase not runtime
-    - show some map elements on min zoom
-        + styling script : jq => every minzoom < 10 = 3
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
 
 ---------------------------------------------

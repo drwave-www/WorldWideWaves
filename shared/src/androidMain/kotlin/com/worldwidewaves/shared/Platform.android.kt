@@ -40,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
 
@@ -100,7 +102,6 @@ actual suspend fun readGeoJson(eventId: String): String? {
 actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
-
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
     val splitInstallManager = SplitInstallManagerFactory.create(context)
 
@@ -118,13 +119,16 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
         val assetPath = "$eventId.$extension"
 
         try {
-            val assetFileDescriptor = context.assets.openFd(assetPath)
-            val assetFileSize = assetFileDescriptor.length
-            assetFileDescriptor.close()
+            // Get asset information - this might not provide accurate size for compressed assets
+            val assetFileDescriptor = try {
+                context.assets.openFd(assetPath)
+            } catch (e: IOException) {
+                // Some compressed assets can't be accessed via openFd, fall back to open
+                null
+            }
 
             val needsUpdate = when {
                 !cachedFile.exists() -> true
-                cachedFile.length() != assetFileSize -> true
                 !metadataFile.exists() -> true
                 else -> {
                     val lastCacheTime = try {
@@ -145,16 +149,43 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
                 }
             }
 
+            // Close the descriptor if we opened one
+            assetFileDescriptor?.close()
+
             if (needsUpdate) {
                 Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
 
-                context.assets.open(assetPath).use { input ->
-                    cachedFile.outputStream().use { output ->
-                        input.copyTo(output, bufferSize = 8192)
+                withContext(Dispatchers.IO) {
+                    try {
+                        // Use a buffered approach for better memory efficiency
+                        context.assets.open(assetPath).use { input ->
+                            BufferedInputStream(input, 8192).use { bufferedInput ->
+                                cachedFile.outputStream().use { fileOutput ->
+                                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                                        val buffer = ByteArray(8192)
+                                        var bytesRead: Int
+
+                                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                                            bufferedOutput.write(buffer, 0, bytesRead)
+                                        }
+
+                                        bufferedOutput.flush()
+                                    }
+                                }
+                            }
+                        }
+
+                        // Update metadata after successful copy
+                        metadataFile.writeText(System.currentTimeMillis().toString())
+                    } catch (e: Exception) {
+                        Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                        // Delete partially written file if there was an error
+                        if (cachedFile.exists()) {
+                            cachedFile.delete()
+                        }
+                        throw e
                     }
                 }
-
-                metadataFile.writeText(System.currentTimeMillis().toString())
             }
 
             cachedFile.absolutePath
