@@ -15,7 +15,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 157.2
+        "approxDuration": 157
       }
     },
     "area": { "osmAdminids": [175905] },
@@ -37,7 +37,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 157.7
+        "approxDuration": 157
       }
     },
     "area": { "osmAdminids": [207359] },
@@ -59,7 +59,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 148.6
+        "approxDuration": 148
       }
     },
     "area": { "osmAdminids": [17483459] },
@@ -81,7 +81,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 156.3
+        "approxDuration": 156
       }
     },
     "area": { "osmAdminids": [298285] },
@@ -103,7 +103,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 136.9
+        "approxDuration": 136
       }
     },
     "area": { "osmAdminids": [1224652] },
@@ -125,7 +125,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 195.1
+        "approxDuration": 195
       }
     },
     "area": { "osmAdminids": [17624136, 17624135] },
@@ -147,7 +147,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 60.0
+        "approxDuration": 60
       }
     },
     "area": { "osmAdminids": [71525] },
@@ -169,7 +169,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 151.7
+        "approxDuration": 151
       }
     },
     "area": { "osmAdminids": [62422] },
@@ -191,7 +191,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 104.5
+        "approxDuration": 104
       }
     },
     "area": { "osmAdminids": [5326784] },
@@ -213,7 +213,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 170.8
+        "approxDuration": 170
       }
     },
     "area": { "osmAdminids": [119515] },
@@ -235,7 +235,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 130.8
+        "approxDuration": 130
       }
     },
     "area": { "osmAdminids": [2555133] },
@@ -257,7 +257,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 234.0
+        "approxDuration": 234
       }
     },
     "area": { "osmAdminids": [223474] },
@@ -279,7 +279,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 137.1
+        "approxDuration": 137
       }
     },
     "area": { "osmAdminids": [4103336] },
@@ -301,7 +301,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 173.4
+        "approxDuration": 173
       }
     },
     "area": { "osmAdminids": [594508] },
@@ -323,7 +323,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 150.8
+        "approxDuration": 150
       }
     },
     "area": { "osmAdminids": [9721587] },
@@ -345,7 +345,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 112.2
+        "approxDuration": 112
       }
     },
     "area": { "osmAdminids": [3718182], "bbox": "3.196678,6.371119,3.598022,6.642783" },
@@ -367,7 +367,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 120.3
+        "approxDuration": 120
       }
     },
     "area": { "osmAdminids": [5646651], "bbox": "15.222416,-4.377576,15.368929,-4.294815" },
@@ -389,7 +389,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 177.3
+        "approxDuration": 177
       }
     },
     "area": { "osmAdminids": [4479752] },
@@ -411,7 +411,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 73.7
+        "approxDuration": 73
       }
     },
     "area": { "osmAdminids": [7964375] },
@@ -433,7 +433,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 164.4
+        "approxDuration": 164
       }
     },
     "area": { "osmAdminids": [1942586] },
@@ -455,7 +455,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 115.9
+        "approxDuration": 115
       }
     },
     "area": { "osmAdminids": [2020589] },
@@ -477,7 +477,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 114.5
+        "approxDuration": 114
       }
     },
     "area": { "osmAdminids": [5802438, 7626002, 7626001, 5802441, 7625977 ] },
@@ -499,7 +499,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 220.0
+        "approxDuration": 220
       }
     },
     "area": { "osmAdminids": [92277], "bbox": "99.833794,13.292753,101.005898,13.938075" },
@@ -521,7 +521,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 105.8
+        "approxDuration": 105
       }
     },
     "area": { "osmAdminids": [103703], "bbox": "120.826178,14.522368,121.119204,14.683002" },
@@ -543,7 +543,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 109.4
+        "approxDuration": 109
       }
     },
     "area": { "osmAdminids": [1543125], "bbox": "138.822556,35.450628,139.994659,35.989700" },
@@ -565,7 +565,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 123.2
+        "approxDuration": 123
       }
     },
     "area": { "osmAdminids": [2297418] },
@@ -587,7 +587,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 592.2
+        "approxDuration": 592
       }
     },
     "area": { "osmAdminids": [912940] },
@@ -609,7 +609,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 355.7
+        "approxDuration": 355
       }
     },
     "area": { "osmAdminids": [913067], "bbox": "119.204407,30.279516,123.892822,32.545934" },
@@ -631,7 +631,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 211.7
+        "approxDuration": 211
       }
     },
     "area": { "osmAdminids": [10264792] },
@@ -653,7 +653,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 243.2
+        "approxDuration": 243
       }
     },
     "area": { "osmAdminids": [5750005] },
@@ -675,7 +675,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 356.2
+        "approxDuration": 356
       }
     },
     "area": { "osmAdminids": [4246124] },
@@ -697,7 +697,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 140.1
+        "approxDuration": 140
       }
     },
     "area": { "osmAdminids": [324211] },
@@ -719,7 +719,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 48.6
+        "approxDuration": 48
       }
     },
     "area": { "osmAdminids": [1852574] },
@@ -741,7 +741,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 115.1
+        "approxDuration": 115
       }
     },
     "area": { "osmAdminids": [122604] },
@@ -763,7 +763,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 261.6
+        "approxDuration": 261
       }
     },
     "area": { "osmAdminids": [111968], "bbox": "-122.747326,37.692107,-122.161274,37.954350" },
@@ -785,7 +785,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 165.5
+        "approxDuration": 165
       }
     },
     "area": { "osmAdminids": [1944756] },
@@ -807,7 +807,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 91.8
+        "approxDuration": 91
       }
     },
     "area": { "osmAdminids": [7426387] },
@@ -829,7 +829,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 98.4
+        "approxDuration": 98
       }
     },
     "area": { "osmAdminids": [164609], "bbox": "-70.954514,-33.589647,-70.368462,-33.312647" },
@@ -851,7 +851,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 154.1
+        "approxDuration": 154
       }
     },
     "area": { "osmAdminids": [6663864] },
@@ -873,7 +873,7 @@
       "linear": {
         "direction": "WEST",
         "speed": 5,
-        "approxDuration": 277.3
+        "approxDuration": 277
       }
     },
     "area": { "osmAdminids": [16350242, 16350836, 16349281, 520314691, 521867561] },

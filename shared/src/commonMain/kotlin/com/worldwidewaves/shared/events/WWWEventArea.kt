@@ -46,7 +46,7 @@ import kotlin.math.abs
 
 @Serializable
 data class WWWEventArea(
-    val osmAdminid: Int
+    val osmAdminids: List<Int>
 ) : KoinComponent, DataValidator {
 
     private var _event: IWWWEvent? = null
@@ -196,9 +196,6 @@ data class WWWEventArea(
 
     override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
         when {
-            osmAdminid < 0 || osmAdminid == 0 && event.type != "world" ->
-                add("OSM admin ID must be greater than 0 if it's not the world event")
-
             else -> { /* No validation errors */ }
         }
     }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }

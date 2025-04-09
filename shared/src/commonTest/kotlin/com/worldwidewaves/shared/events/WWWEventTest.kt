@@ -392,7 +392,7 @@ fun buildEmptyEvent(
     instagramAccount: String = "user",
     instagramHashtag: String = "#hashtag",
     wavedef: WWWWaveDefinition = WWWWaveDefinition(),
-    osmAdminid: Int = 0,
+    osmAdminids: List<Int> = emptyList(),
     maxzoom: Double = 0.0,
     language: String = "",
     zone: String = ""
@@ -410,7 +410,7 @@ fun buildEmptyEvent(
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
-        area = WWWEventArea(osmAdminid),
+        area = WWWEventArea(osmAdminids),
         map = WWWEventMap(maxzoom, language, zone)
     )
 

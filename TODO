@@ -12,7 +12,10 @@
 Avril first part:
 
 - generate maps
-- script de creation des modules
+    - zooms
+    - miss istanbul/karachi/kinshasa
+    - pb de taille des maps (40) ?
+        - compter et desinstaller les moins utilises >
 - images / flags
 - in app : bbox / geojson / zoom behaviors
 
@@ -37,6 +40,7 @@ Avril second part:
     - select good images for flags, same ratio
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - manage with translation of events contents (description, location, etc, ...)
+    - licences / tools mentions
 - Packaging :
     - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr

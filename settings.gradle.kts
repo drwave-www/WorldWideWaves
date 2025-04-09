@@ -30,7 +30,9 @@ dependencyResolutionManagement {
 
 include(":composeApp")
 include(":shared")
-include(":maps:android:paris_france")include(":maps:android:new_york_usa")
+
+include(":maps:android:paris_france")
+include(":maps:android:new_york_usa")
 include(":maps:android:los_angeles_usa")
 include(":maps:android:mexico_city_mexico")
 include(":maps:android:sao_paulo_brazil")
