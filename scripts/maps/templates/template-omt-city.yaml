@@ -10,7 +10,7 @@ tileset:
     - layers/waterway/waterway.yaml
   name: #id#
   version: 0.1
-  id: www_paris_france
+  id: www_#id#
   description: "WWW EVENT #location#"
   attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
   center: [ #map.center#, 10 ]
