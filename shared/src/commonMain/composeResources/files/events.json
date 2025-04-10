@@ -261,7 +261,7 @@
       }
     },
     "area": { "osmAdminids": [223474] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "tr", "zone": "asia/turkey" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "tr", "zone": "europe/turkey" }
   },
   {
     "id": "cairo_egypt",
@@ -371,7 +371,7 @@
       }
     },
     "area": { "osmAdminids": [5646651], "bbox": "15.222416,-4.377576,15.368929,-4.294815" },
-    "map": { "minZoom": 10, "maxZoom": 18, "language": "fr", "zone": "africa/democratic-republic-of-the-congo" }
+    "map": { "minZoom": 10, "maxZoom": 18, "language": "fr", "zone": "africa/congo-democratic-republic" }
   },
   {
     "id": "dubai_united_arab_emirates",

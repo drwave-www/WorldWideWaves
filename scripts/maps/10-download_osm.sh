@@ -98,11 +98,10 @@ for event in $EVENTS; do # Download OSM area as PBF file
   SPBF=data/osm-$(echo "$AREAZONE" | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
 
-  echo "-- Download area $AREAZONE from OSM.."
-  [ ! -f "$SPBF" ] && download-osm "$AREAZONE" -o "$SPBF"
+  [ ! -f "$SPBF" ] && echo "-- Download area $AREAZONE from OSM.." && download-osm "$AREAZONE" -o "$SPBF"
 
-  echo "-- Extract bbox $BBOX from area $AREAZONE.."
-  if [ "$FORCE_GENERATION" = true ] || [ ! -f "$DPBF" ]; then
+   if [ "$FORCE_GENERATION" = true ] || [ ! -f "$DPBF" ]; then
+    echo "-- Extract bbox $BBOX from area $AREAZONE.."
     ./bin/osmconvert "$SPBF" -b="$BBOX" -o="$DPBF" && ./bin/osmconvert "$DPBF" --out-statistics
   else
     echo "   DPBF file already exists. Use -f to force regeneration."
