@@ -234,6 +234,6 @@ echo "We saved the log file to $log_file  (for debugging) You can compare with t
 mv ./data/$MBTILES_FILE ../data
 #cp ./data/$MBTILES_FILE $DEST_MBTILES
 echo
-echo "MBTILES output file is now available in $DEST_MBTILES"
+echo "MBTILES output file is now available"
 
 rm -rf data/

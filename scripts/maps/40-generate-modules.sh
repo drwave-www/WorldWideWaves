@@ -61,8 +61,21 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
 
   tpl $event templates/template-android-build-gradle.kts $DEST_DIR_MODULE/build.gradle.kts
   tpl $event templates/template-AndroidManifest.xml $DEST_DIR_MODULE_MAIN/AndroidManifest.xml
-  cp -f data/$event.mbtiles $DEST_DIR_MODULE_FILES/
-  cp -f data/$event.geojson $DEST_DIR_MODULE_FILES/
+
+  # 1) Check the MBTiles file
+  if [ ! -f "$DEST_DIR_MODULE_FILES/$event.mbtiles" ] || \
+     [ "$(md5sum "data/$event.mbtiles" | awk '{print $1}')" != "$(md5sum "$DEST_DIR_MODULE_FILES/$event.mbtiles" 2>/dev/null | awk '{print $1}')" ]; then
+      cp -f "data/$event.mbtiles" "$DEST_DIR_MODULE_FILES/"
+      echo "Copied $event.mbtiles because it did not exist or differed by MD5."
+  fi
+
+  # 2) Check the GeoJSON file
+  if [ ! -f "$DEST_DIR_MODULE_FILES/$event.geojson" ] || \
+     [ "$(md5sum "data/$event.geojson" | awk '{print $1}')" != "$(md5sum "$DEST_DIR_MODULE_FILES/$event.geojson" 2>/dev/null | awk '{print $1}')" ]; then
+      cp -f "data/$event.geojson" "$DEST_DIR_MODULE_FILES/"
+      echo "Copied $event.geojson because it did not exist or differed by MD5."
+  fi
+
   [ ! -f "$DEST_DIR_MODULE/.gitignore" ] && echo "/build" > "$DEST_DIR_MODULE/.gitignore"
 
   INCLUDE_GRADLE='include(":maps:android:'$event'")'
