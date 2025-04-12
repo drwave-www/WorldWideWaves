@@ -19,7 +19,7 @@
       }
     },
     "area": { "osmAdminids": [175905] },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "en", "zone": "north-america/us/new-york" }
+    "map": { "minZoom": 8, "maxZoom": 18, "language": "en", "zone": "north-america/us/new-york" }
   },
   {
     "id": "los_angeles_usa",
