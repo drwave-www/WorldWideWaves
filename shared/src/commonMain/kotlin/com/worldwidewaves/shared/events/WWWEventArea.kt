@@ -46,7 +46,8 @@ import kotlin.math.abs
 
 @Serializable
 data class WWWEventArea(
-    val osmAdminids: List<Int>
+    val osmAdminids: List<Int>,
+    val bbox: String? = null
 ) : KoinComponent, DataValidator {
 
     private var _event: IWWWEvent? = null
@@ -117,19 +118,34 @@ data class WWWEventArea(
 
     // ---------------------------
 
-    /**
-     * Retrieves the bounding box of the polygon.
-     *
-     * This function calculates the bounding box of the polygon associated with the event area.
-     * If the bounding box has been previously calculated and cached, it returns the cached value.
-     * Otherwise, it calculates the bounding box, caches it, and then returns it.
-     *
-     */
-    suspend fun bbox(): BoundingBox =
-        cachedBoundingBox ?: getPolygons().takeIf { it.isNotEmpty() }
+    suspend fun bbox(): BoundingBox {
+        // Return cached bounding box if available
+        if (cachedBoundingBox != null) {
+            return cachedBoundingBox!!
+        }
+
+        // If bbox parameter was provided in constructor, use it
+        bbox?.let { bboxString ->
+            try {
+                // Parse the string "minLng, minLat, maxLng, maxLat"
+                val coordinates = bboxString.split(",").map { it.trim().toDouble() }
+                if (coordinates.size >= 4) {
+                    return BoundingBox(
+                        sw = Position(lat = coordinates[1], lng = coordinates[0]),
+                        ne = Position(lat = coordinates[3], lng = coordinates[2])
+                    ).also { bbox -> cachedBoundingBox = bbox }
+                }
+            } catch (e: Exception) {
+                Log.e("WWWEventArea", "Failed to parse bbox string: ${e.message}")
+            }
+        }
+
+        // Otherwise calculate from polygons
+        return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
             } ?: BoundingBox(Position(0.0, 0.0), Position(0.0, 0.0))
+    }
 
     /**
      * Calculates the center position of the event area.

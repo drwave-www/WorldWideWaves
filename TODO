@@ -19,6 +19,7 @@ Avril first part:
         + styling script : jq => every minzoom < 10 = 3
 - images / flags
 - in app : bbox / geojson / zoom behaviors
+- onglet avec les cartes telechargees
 
  - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
