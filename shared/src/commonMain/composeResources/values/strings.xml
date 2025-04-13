@@ -9,6 +9,12 @@
     <string name="events_select_starred">Starred</string>
     <string name="events_select_downloaded">Downloaded</string>
 
+    <string name="events_uninstall_map_title">Uninstall Map</string>
+    <string name="events_uninstall_map_confirmation">Are you sure you want to uninstall this map? You can download it again later if needed.</string>
+    <string name="events_cannot_uninstall_map_message">This map cannot be uninstalled because it is part of the base app or is required by other features. It will be removed when you uninstall the app.</string>
+    <string name="events_uninstall">Uninstall</string>
+    <string name="events_uninstall_cancel">Cancel</string>
+
     <string name="event_done">Done</string>
     <string name="event_soon">soon !</string>
     <string name="event_running">running</string>

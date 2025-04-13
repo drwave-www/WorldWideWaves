@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityChecker(context: Context) {
+class MapAvailabilityChecker(val context: Context) {
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
 
@@ -89,10 +89,6 @@ class MapAvailabilityChecker(context: Context) {
         splitInstallManager.unregisterListener(installStateListener)
     }
 
-    fun isMapDownloaded(eventId: String): Boolean {
-        return mapStates.value[eventId] == true
-    }
-
     /**
      * Refreshes the availability state of all tracked maps.
      * Call this when returning to a list to ensure fresh data.
@@ -119,6 +115,34 @@ class MapAvailabilityChecker(context: Context) {
     fun trackMaps(mapIds: Collection<String>) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
+    }
+
+    fun isMapDownloaded(eventId: String): Boolean {
+        return mapStates.value[eventId] == true
+    }
+
+    fun canUninstallMap(eventId: String): Boolean {
+        try {
+            val splitInstallManager = SplitInstallManagerFactory.create(context)
+            return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
+        } catch (e: Exception) {
+            Log.e("MapAvailabilityChecker", "Error checking if map can be uninstalled: ${e.message}")
+            return false // If there's an error, assume it can't be uninstalled
+        }
+    }
+
+    fun uninstallMap(eventId: String) {
+        try {
+            // Call the API to uninstall the feature module
+            val splitInstallManager = SplitInstallManagerFactory.create(context)
+
+            // Directly call deferredUninstall with the module name
+            splitInstallManager.deferredUninstall(listOf(eventId))
+
+            Log.i("MapAvailabilityChecker", "Uninstalled map for event: $eventId")
+        } catch (e: Exception) {
+            Log.e("MapAvailabilityChecker", "Error uninstalling map for event $eventId: ${e.message}")
+        }
     }
 
 }

@@ -44,9 +44,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -92,6 +95,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.events_cannot_uninstall_map_message
 import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
 import com.worldwidewaves.shared.generated.resources.events_empty
 import com.worldwidewaves.shared.generated.resources.events_favorites_empty
@@ -99,6 +103,10 @@ import com.worldwidewaves.shared.generated.resources.events_loading_error
 import com.worldwidewaves.shared.generated.resources.events_select_all
 import com.worldwidewaves.shared.generated.resources.events_select_downloaded
 import com.worldwidewaves.shared.generated.resources.events_select_starred
+import com.worldwidewaves.shared.generated.resources.events_uninstall
+import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_title
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
 import com.worldwidewaves.shared.generated.resources.map_downloaded
@@ -369,7 +377,7 @@ class EventsListScreen(
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
-            EventOverlayMapDownloaded(isMapInstalled)
+            EventOverlayMapDownloaded(event.id, isMapInstalled)
             EventOverlayFavorite(viewModel, event)
         }
     }
@@ -418,7 +426,18 @@ class EventsListScreen(
     }
 
     @Composable
-    private fun EventOverlayMapDownloaded(isMapInstalled: Boolean, modifier: Modifier = Modifier) {
+    private fun EventOverlayMapDownloaded(
+        eventId: String,
+        isMapInstalled: Boolean,
+        modifier: Modifier = Modifier
+    ) {
+        // State for controlling dialog visibility
+        var showUninstallDialog by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
+        // Check if the map can be uninstalled
+        val canUninstall = remember(eventId) { mapChecker.canUninstallMap(eventId) }
+
         if (isMapInstalled) {
             Box(
                 modifier = modifier
@@ -430,10 +449,43 @@ class EventsListScreen(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
-                    modifier = Modifier.size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp),
+                    modifier = Modifier
+                        .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
+                        .clickable { showUninstallDialog = true }, // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
                     contentDescription = stringResource(ShRes.string.map_downloaded),
                 )
+
+                // Show confirmation dialog when clicked
+                if (showUninstallDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showUninstallDialog = false },
+                        title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                        text = {
+                            if (canUninstall) {
+                                Text(stringResource(ShRes.string.events_uninstall_map_confirmation))
+                            } else {
+                                Text(stringResource(ShRes.string.events_cannot_uninstall_map_message))
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                        scope.launch {
+                                            mapChecker.uninstallMap(eventId)
+                                            showUninstallDialog = false
+                                        }
+                                    }
+                            ) {
+                                Text(stringResource(ShRes.string.events_uninstall))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showUninstallDialog = false }) {
+                                Text(stringResource(ShRes.string.events_uninstall_cancel))
+                            }
+                        }
+                    )
+                }
             }
         }
     }
