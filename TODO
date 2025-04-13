@@ -18,8 +18,6 @@ Avril first part:
     - show some map elements on min zoom
         + styling script : jq => every minzoom < 10 = 3
 - images / flags
-- in app : bbox / geojson / zoom behaviors
-- onglet avec les cartes telechargees
 
  - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
@@ -30,7 +28,6 @@ Avril first part:
     - default image outside of module for map
     - bouton to download map if not present
     - ask for download if event isSoon or started
-    - + settings: list of maps and ability to uninstall
 
 - PDF + Message + Planif presentation mi-juin
 
