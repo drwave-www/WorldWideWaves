@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,10 @@ import kotlinx.coroutines.sync.withLock
  * `StateFlow`, and provides filtering functionality for displaying all events or only
  * favorite events.
  */
-class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
+class EventsViewModel(
+    private val wwwEvents: WWWEvents,
+    private val mapChecker: MapAvailabilityChecker
+) : ViewModel() {
 
     private val originalEventsMutex = Mutex()
     private var originalEvents: List<IWWWEvent> = emptyList()
@@ -141,10 +145,17 @@ class EventsViewModel(private val wwwEvents: WWWEvents) : ViewModel() {
     /**
      * Filter events by favorite status
      */
-    fun filterEvents(onlyFavorites: Boolean) {
-        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
-            originalEventsMutex.withLock {
-                _events.value = originalEvents.filter { !onlyFavorites || it.favorite }
+    fun filterEvents(
+        onlyFavorites: Boolean = false,
+        onlyDownloaded: Boolean = false
+    ) {
+        viewModelScope.launch {
+            _events.value = originalEvents.filter { event ->
+                when {
+                    onlyFavorites -> event.favorite
+                    onlyDownloaded ->mapChecker.isMapDownloaded(event.id)
+                    else -> true // All events
+                }
             }
         }
     }

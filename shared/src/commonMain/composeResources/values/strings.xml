@@ -7,6 +7,7 @@
 
     <string name="events_select_all">All</string>
     <string name="events_select_starred">Starred</string>
+    <string name="events_select_downloaded">Downloaded</string>
 
     <string name="event_done">Done</string>
     <string name="event_soon">soon !</string>
@@ -21,6 +22,7 @@
 
 
     <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
+    <string name="events_downloaded_empty">No events has been yet downloaded</string>
     <string name="events_empty">Event list is empty</string>
     <string name="events_loading_error">An error occurred when loading events</string>
 

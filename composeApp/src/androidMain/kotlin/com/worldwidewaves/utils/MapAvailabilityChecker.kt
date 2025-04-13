@@ -89,6 +89,10 @@ class MapAvailabilityChecker(context: Context) {
         splitInstallManager.unregisterListener(installStateListener)
     }
 
+    fun isMapDownloaded(eventId: String): Boolean {
+        return mapStates.value[eventId] == true
+    }
+
     /**
      * Refreshes the availability state of all tracked maps.
      * Call this when returning to a list to ensure fresh data.
@@ -116,4 +120,5 @@ class MapAvailabilityChecker(context: Context) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
     }
+
 }
