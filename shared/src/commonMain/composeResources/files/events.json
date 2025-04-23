@@ -876,7 +876,7 @@
         "approxDuration": 277
       }
     },
-    "area": { "osmAdminids": [16350242, 16350836, 16349281, 520314691, 521867561] },
+    "area": { "osmAdminids": [6080948], "bbox": "66.410294,24.638185,67.582397,25.237770" },
     "map": { "minZoom": 9, "maxZoom": 18, "language": "ur", "zone": "asia/pakistan" }
   }
 ]
