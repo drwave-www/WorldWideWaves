@@ -11,12 +11,7 @@
 Avril first part:
 
 - generate maps
-    - zooms
     - miss istanbul/karachi/kinshasa
-    - pb de taille des maps (40) ?
-        - compter et desinstaller les moins utilises
-    - show some map elements on min zoom
-        + styling script : jq => every minzoom < 10 = 3
 - images / flags
 
  - adapt wave behavior on countries and the world (linear split, ...)
