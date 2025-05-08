@@ -97,7 +97,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
     /**
      * Gets or creates an observer state for a given ID
      */
-    private fun getOrCreateObserver(observerId: String, event: IWWWEvent): ObserverState {
+    private fun getOrCreateObserverState(observerId: String, event: IWWWEvent): ObserverState {
         val existing = observers[observerId]
         val state = existing ?: ObserverState(event).also { initializeObserver(it) }
 
@@ -172,8 +172,8 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
 
         // Handle warming started
         scope.launch {
-            event.isWarmingInProgress.collect { isStarted ->
-                if (isStarted) {
+            event.isWarmingInProgress.collect { isWarmingStarted ->
+                if (isWarmingStarted) {
                     state.backupSimulationSpeed = platform.getSimulation()?.speed
                     platform.getSimulation()?.setSpeed(1)
                 }
@@ -211,7 +211,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         event.startObservation()
 
         // Create and initialize observer state
-        val state = getOrCreateObserver(observerId, event)
+        val state = getOrCreateObserverState(observerId, event)
 
         // Handle polygon updates if provided, with rate limiting
         if (polygonsHandler != null) {

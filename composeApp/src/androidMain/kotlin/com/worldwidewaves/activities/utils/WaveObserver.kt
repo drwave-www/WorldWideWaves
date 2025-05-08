@@ -42,6 +42,7 @@ class WaveObserver(
     private val waveViewModel: WaveViewModel,
     private val observerId: String // Add observer ID
 ) {
+
     fun startObservation() {
         eventMap?.let { eventMap ->
             event?.let { event ->
@@ -64,6 +65,7 @@ class WaveObserver(
                             }
                         }
                     }
+
                     // Set first user location value
                     eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
                         waveViewModel.updateUserLocation(observerId, location)

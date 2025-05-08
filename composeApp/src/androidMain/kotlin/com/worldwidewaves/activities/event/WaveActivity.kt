@@ -106,6 +106,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -184,7 +185,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                     .fillMaxWidth()
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
-                WaveHitCounter(waveViewModel, observerId)
+                WaveHitCounter(waveViewModel, observerId, clock)
             }
 
             // Pass the visibility state to WaveChoreographies for coordination
@@ -356,9 +357,21 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
 // ------------------------------------------------------------------------
 
 @Composable
-fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val timeBeforeHit by waveViewModel.getTimeBeforeHitFlow(observerId).collectAsState()
-    val text = formatDuration(timeBeforeHit)
+fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClock, modifier: Modifier = Modifier) {
+    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState(0.0)
+    val timeBeforeHitProgression by waveViewModel.getTimeBeforeHitFlow(observerId).collectAsState(INFINITE)
+    val userHitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
+    var timeBeforeHit by remember { mutableStateOf(INFINITE) }
+
+    // Recalculate timeBeforeHit every second until wave is progression
+    LaunchedEffect(Unit) {
+        while (progression == 0.0) {
+            delay(1000L)
+            timeBeforeHit = userHitDateTime - clock.now()
+        }
+    }
+
+    val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
