@@ -20,15 +20,14 @@
 # limitations under the License.
 #
 
-cd "$(dirname "$0")" # always work from executable folder
-
 # ---------- Vars and support functions ---------------------------------------
+cd "$(dirname "$0")" # always work from executable folder
 . ./libs/lib.inc.sh
+cd "$(dirname "$0")" # always work from executable folder
 
 # Create necessary directories
 mkdir -p ./data
 mkdir -p ./bin
-mkdir -p ./tmp
 
 # Constants
 IMAGE_WIDTH=1024
@@ -36,7 +35,6 @@ IMAGE_WIDTH=1024
 IMAGE_HEIGHT=$(echo "$IMAGE_WIDTH / (16/9)" | bc -l | xargs printf "%.0f")
 OUTPUT_DIR="../../shared/src/commonMain/composeResources/drawable"
 STYLE_DIR="../../shared/src/commonMain/composeResources/files/style"
-TEMP_DIR="./tmp"
 # Node renderer is now a standalone script committed in this folder
 NODE_SCRIPT="./render-map.js"
 GEOJSON_DIR="./data"
@@ -64,9 +62,8 @@ if ! command -v npm &> /dev/null; then
 fi
 
 # Create a temporary package.json if it doesn't exist
-if [ ! -f "$TEMP_DIR/package.json" ]; then
-    mkdir -p "$TEMP_DIR"
-    cat > "$TEMP_DIR/package.json" << EOF
+if [ ! -f "package.json" ]; then
+    cat > "package.json" << EOF
 {
   "name": "maplibre-renderer",
   "version": "1.0.0",
@@ -83,17 +80,14 @@ fi
 
 # Install required packages if they're not already installed
 echo -e "${BLUE}Checking for required Node.js packages...${NC}"
-cd "$TEMP_DIR"
 if [ ! -d "node_modules" ]; then
     echo -e "${YELLOW}Installing required Node.js packages...${NC}"
     npm install
     if [ $? -ne 0 ]; then
         echo -e "${RED}Failed to install required Node.js packages.${NC}"
-        cd ..
         exit 1
     fi
 fi
-cd ..
 
 # ---------- Process maps ---------------------------------------------------
 
