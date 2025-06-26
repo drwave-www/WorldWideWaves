@@ -21,6 +21,7 @@ package com.worldwidewaves.debug
  * limitations under the License.
  */
 
+// Show test-mode UI only in debug builds ------------------------------------
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -79,6 +80,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
@@ -95,8 +97,6 @@ import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
-// Show test-mode UI only in debug builds ------------------------------------
-import com.worldwidewaves.BuildConfig
 
 /**
  * Test mode for sound choreography in WorldWideWaves.
@@ -188,8 +188,8 @@ fun SoundChoreographyTestModeOverlay(
     var isSimulating by remember { mutableStateOf(false) }
     
     // Test parameters
-    var userCount by remember { mutableIntStateOf(5) }
-    var waveDuration by remember { mutableFloatStateOf(10f) } // seconds
+    var userCount by remember { mutableIntStateOf(10000) }
+    var waveDuration by remember { mutableFloatStateOf(5f) } // seconds
     var waveformType by remember { mutableStateOf(SoundPlayer.Waveform.SINE) }
     
     // Last played note visualization
@@ -308,7 +308,7 @@ fun SoundChoreographyTestModeOverlay(
                     Slider(
                         value = userCount.toFloat(),
                         onValueChange = { userCount = it.roundToInt() },
-                        valueRange = 2f..2000f,
+                        valueRange = 2f..20000f,
                         steps = 18,
                         modifier = Modifier.weight(1f)
                     )

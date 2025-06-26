@@ -30,6 +30,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(libs.koin.core)
+            implementation(libs.androidx.material.icons.extended)
         }
     }
 }
