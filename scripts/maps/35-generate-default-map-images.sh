@@ -71,9 +71,9 @@ if [ ! -f "$TEMP_DIR/package.json" ]; then
   "description": "Temporary package for rendering maps",
   "main": "render-map.js",
   "dependencies": {
-    "@maplibre/maplibre-gl-native": "^5.1.0",
-    "fs-extra": "^11.1.1",
-    "pngjs": "^7.0.0"
+    "@maplibre/maplibre-gl-native": "",
+    "fs-extra": "",
+    "pngjs": ""
   }
 }
 EOF

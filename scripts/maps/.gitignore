@@ -5,3 +5,6 @@ openmaptiles-tools/*
 lib/
 lib64
 pyvenv.cfg
+tmp/*
+package.json
+package-lock.json
