@@ -23,6 +23,8 @@ package com.worldwidewaves.map
 
 import android.util.Log
 import androidx.core.graphics.toColorInt
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_COLOR
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_OPACITY
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
@@ -62,6 +64,8 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     // --------------------------------
 
+    private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
+
     fun setMap(map: MapLibreMap) {
         mapLibreMap = map
 
@@ -72,6 +76,22 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         map.addOnCameraIdleListener {
             updateCameraInfo(map)
             constrainCamera()
+        }
+
+        // Execute any pending callbacks
+        onMapSetCallbacks.forEach { callback ->
+            callback(this)
+        }
+        onMapSetCallbacks.clear()
+    }
+
+    fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
+        if (mapLibreMap != null) {
+            // Map is already set, execute callback immediately
+            callback(this)
+        } else {
+            // Store callback for execution when map is set
+            onMapSetCallbacks.add(callback)
         }
     }
 
@@ -212,8 +232,8 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                 // Create or update the layer
                 if (style.getLayer(layerId) == null) {
                     val fillLayer = FillLayer(layerId, sourceId).withProperties(
-                        PropertyFactory.fillColor("#D33682".toColorInt()),
-                        PropertyFactory.fillOpacity(0.5f)
+                        PropertyFactory.fillColor(WAVE_BACKGROUND_COLOR.toColorInt()),
+                        PropertyFactory.fillOpacity(WAVE_BACKGROUND_OPACITY)
                     )
                     style.addLayer(fillLayer)
                 }

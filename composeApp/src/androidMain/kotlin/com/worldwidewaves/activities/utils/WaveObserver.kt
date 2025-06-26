@@ -6,6 +6,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 /*
@@ -37,7 +39,8 @@ class WaveObserver(
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,
     private val event: IWWWEvent?,
-    private val waveViewModel: WaveViewModel
+    private val waveViewModel: WaveViewModel,
+    private val observerId: String // Add observer ID
 ) {
 
     fun startObservation() {
@@ -45,18 +48,27 @@ class WaveObserver(
             event?.let { event ->
                 scope.launch {
                     if (event.isRunning()) {
-                        waveViewModel.startObservation(event) { wavePolygons, clearPolygons ->
+                        waveViewModel.startObservation(observerId, event) { wavePolygons, clearPolygons ->
                             eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
                         }
                     } else {
-                        waveViewModel.startObservation(event)
+                        waveViewModel.startObservation(observerId, event)
                         if (event.isDone()) {
-                            eventMap.updateWavePolygons(
-                                context,
-                                event.area.getPolygons().map { it.toMapLibrePolygon() },
-                                true
-                            )
+                            // Set full wave polygons when MapLibre is set
+                            eventMap.mapLibreAdapter.onMapSet {
+                                scope.launch {
+                                    it.addWavePolygons(
+                                        event.area.getPolygons().map { it.toMapLibrePolygon() },
+                                        true
+                                    )
+                                }
+                            }
                         }
+                    }
+
+                    // Set first user location value
+                    eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
+                        waveViewModel.updateUserLocation(observerId, location)
                     }
                 }
             }
@@ -64,7 +76,6 @@ class WaveObserver(
     }
 
     fun stopObservation() {
-        waveViewModel.stopObservation()
+        waveViewModel.stopObservation(observerId)
     }
-
 }

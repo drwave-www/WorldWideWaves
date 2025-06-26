@@ -44,9 +44,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -92,11 +95,18 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.events_cannot_uninstall_map_message
+import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
 import com.worldwidewaves.shared.generated.resources.events_empty
 import com.worldwidewaves.shared.generated.resources.events_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_loading_error
 import com.worldwidewaves.shared.generated.resources.events_select_all
+import com.worldwidewaves.shared.generated.resources.events_select_downloaded
 import com.worldwidewaves.shared.generated.resources.events_select_starred
+import com.worldwidewaves.shared.generated.resources.events_uninstall
+import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_title
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
 import com.worldwidewaves.shared.generated.resources.map_downloaded
@@ -122,6 +132,7 @@ class EventsListScreen(
     override val name = "Events"
 
     private var starredSelected = false
+    private var downloadedSelected = false  // Add state for downloaded tab
     private var firstLaunch = true
 
     // ----------------------------
@@ -130,13 +141,15 @@ class EventsListScreen(
     override fun Screen(modifier: Modifier) {
         val events by viewModel.events.collectAsState()
         val hasFavorites by viewModel.hasFavorites.collectAsState()
+        val mapStates by mapChecker.mapStates.collectAsState()
 
         if (firstLaunch) { // Select favorites at launch if any
             firstLaunch = false
             starredSelected = hasFavorites
         }
 
-        viewModel.filterEvents(starredSelected)
+        // Update filter logic to include downloaded events
+        viewModel.filterEvents(starredSelected, downloadedSelected)
 
         // Refresh map availability when screen resumes
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -160,19 +173,19 @@ class EventsListScreen(
             mapChecker.refreshAvailability()
         }
 
-        // Use the live map states
-        val mapStates by mapChecker.mapStates.collectAsState()
-
         EventsList(
             modifier, events, mapStates,
-            onAllEventsClicked = { if (starredSelected) toggleStarredSelection() },
-            onFavoriteEventsClicked = { if (!starredSelected) toggleStarredSelection() }
+            onAllEventsClicked = { selectTab() },
+            onFavoriteEventsClicked = { selectTab(starredSelected = true) },
+            onDownloadedEventsClicked = { selectTab(downloadedSelected = true) }
         )
     }
 
-    private fun toggleStarredSelection() {
-        starredSelected = !starredSelected
-        viewModel.filterEvents(starredSelected)
+    // New method to handle tab selection with mutual exclusion
+    private fun selectTab(starredSelected: Boolean = false, downloadedSelected: Boolean = false) {
+        this.starredSelected = starredSelected
+        this.downloadedSelected = downloadedSelected
+        viewModel.filterEvents(this.starredSelected, this.downloadedSelected)
     }
 
     // ----------------------------
@@ -183,14 +196,15 @@ class EventsListScreen(
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
         onAllEventsClicked: () -> Unit,
-        onFavoriteEventsClicked: () -> Unit
+        onFavoriteEventsClicked: () -> Unit,
+        onDownloadedEventsClicked: () -> Unit  // Add parameter for downloaded tab
     ) {
         Column(
             modifier = modifier
                 .fillMaxHeight()
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked)
+            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked, onDownloadedEventsClicked)
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
             Events(viewModel, events, mapStates, modifier = Modifier.weight(1f))
         }
@@ -202,13 +216,19 @@ class EventsListScreen(
     private fun FavoritesSelector(
         onAllEventsCLicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
+        onDownloadedEventsClicked: () -> Unit,  // Add parameter for downloaded tab
         modifier: Modifier = Modifier
     ) {
-        val allColor = if (this.starredSelected) extendedLight.quaternary else extendedLight.quinary
-        val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
+        // Determine colors and weights based on which tab is selected
+        val allSelected = !starredSelected && !downloadedSelected
 
-        val allWeight = if (starredSelected) FontWeight.Normal else FontWeight.Bold
+        val allColor = if (allSelected) extendedLight.quinary else extendedLight.quaternary
+        val starredColor = if (starredSelected) extendedLight.quinary else extendedLight.quaternary
+        val downloadedColor = if (downloadedSelected) extendedLight.quinary else extendedLight.quaternary
+
+        val allWeight = if (allSelected) FontWeight.Bold else FontWeight.Normal
         val starredWeight = if (starredSelected) FontWeight.Bold else FontWeight.Normal
+        val downloadedWeight = if (downloadedSelected) FontWeight.Bold else FontWeight.Normal
 
         Box(
             modifier = modifier
@@ -217,7 +237,7 @@ class EventsListScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(.5f),
+                    modifier = Modifier.fillMaxWidth(1/3f),  // Each tab takes 1/3 of the width
                     backgroundColor = allColor.color,
                     onClick = onAllEventsCLicked,
                     textColor = allColor.onColor,
@@ -225,12 +245,20 @@ class EventsListScreen(
                     text = stringResource(ShRes.string.events_select_all)
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(0.5f),  // Takes 1/2 of the remaining 2/3
                     backgroundColor = starredColor.color,
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
                     fontWeight = starredWeight,
                     text = stringResource(ShRes.string.events_select_starred)
+                )
+                SelectorBox(
+                    modifier = Modifier.fillMaxWidth(1f),  // Takes all remaining space
+                    backgroundColor = downloadedColor.color,
+                    onClick = onDownloadedEventsClicked,
+                    textColor = downloadedColor.onColor,
+                    fontWeight = downloadedWeight,
+                    text = stringResource(ShRes.string.events_select_downloaded)
                 )
             }
         }
@@ -293,6 +321,7 @@ class EventsListScreen(
                             when {
                                 hasLoadingError -> ShRes.string.events_loading_error
                                 starredSelected -> ShRes.string.events_favorites_empty
+                                downloadedSelected -> ShRes.string.events_downloaded_empty  // Add message for empty downloaded
                                 else -> ShRes.string.events_empty
                             }
                         ),
@@ -348,7 +377,7 @@ class EventsListScreen(
             EventOverlayCountryAndCommunityFlags(event, heightModifier)
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
-            EventOverlayMapDownloaded(isMapInstalled)
+            EventOverlayMapDownloaded(event.id, isMapInstalled)
             EventOverlayFavorite(viewModel, event)
         }
     }
@@ -397,7 +426,18 @@ class EventsListScreen(
     }
 
     @Composable
-    private fun EventOverlayMapDownloaded(isMapInstalled: Boolean, modifier: Modifier = Modifier) {
+    private fun EventOverlayMapDownloaded(
+        eventId: String,
+        isMapInstalled: Boolean,
+        modifier: Modifier = Modifier
+    ) {
+        // State for controlling dialog visibility
+        var showUninstallDialog by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
+        // Check if the map can be uninstalled
+        val canUninstall = remember(eventId) { mapChecker.canUninstallMap(eventId) }
+
         if (isMapInstalled) {
             Box(
                 modifier = modifier
@@ -409,10 +449,43 @@ class EventsListScreen(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 Image(
-                    modifier = Modifier.size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp),
+                    modifier = Modifier
+                        .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
+                        .clickable { showUninstallDialog = true }, // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
                     contentDescription = stringResource(ShRes.string.map_downloaded),
                 )
+
+                // Show confirmation dialog when clicked
+                if (showUninstallDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showUninstallDialog = false },
+                        title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                        text = {
+                            if (canUninstall) {
+                                Text(stringResource(ShRes.string.events_uninstall_map_confirmation))
+                            } else {
+                                Text(stringResource(ShRes.string.events_cannot_uninstall_map_message))
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                        scope.launch {
+                                            mapChecker.uninstallMap(eventId)
+                                            showUninstallDialog = false
+                                        }
+                                    }
+                            ) {
+                                Text(stringResource(ShRes.string.events_uninstall))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showUninstallDialog = false }) {
+                                Text(stringResource(ShRes.string.events_uninstall_cancel))
+                            }
+                        }
+                    )
+                }
             }
         }
     }

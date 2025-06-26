@@ -454,19 +454,22 @@ data class WWWEvent(
         }
 
         // Check if user is about to be hit
+        var userIsGoingToBeHit = false
         val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
         if (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) {
             warmingInProgress = false
-            _userIsGoingToBeHit.updateIfChanged(true)
+            userIsGoingToBeHit = true
         }
 
         // Check if user has been hit
         if (wave.hasUserBeenHitInCurrentPosition()) {
             warmingInProgress = false
+            userIsGoingToBeHit = false
             _userHasBeenHit.updateIfChanged(true)
         }
 
         _isWarmingInProgress.updateIfChanged(warmingInProgress)
+        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
     }
 
     /**

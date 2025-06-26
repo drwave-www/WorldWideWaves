@@ -29,9 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -59,7 +56,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
-import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
@@ -74,9 +70,9 @@ import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Duration.Companion.hours
 
 /*
  * Copyright 2024 DrWave
@@ -162,25 +158,22 @@ fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
-fun ButtonWave(event: IWWWEvent, clock: IClock, modifier: Modifier = Modifier) {
+fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock: IClock, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val isEnabled = remember { mutableStateOf(false) }
 
-    LaunchedEffect(event) {
-        val isRunning = event.isRunning()
-        val isSoon = event.isSoon()
-        val isEndDateTimeRecent = event.getEndDateTime() > clock.now() - 1.hours
-        isEnabled.value = isRunning || isSoon || isEndDateTimeRecent
-    }
+    val isRunning = eventState == Status.RUNNING
+    val isSoon = eventState == Status.SOON
+    val isEndDateTimeRecent = endDateTime?.let { it > clock.now() } ?: false
+    val isEnabled = isRunning || isSoon || isEndDateTimeRecent
 
     Surface(
-        color = if (isEnabled.value) MaterialTheme.colorScheme.primary else onQuaternaryLight,
+        color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,
         modifier = modifier
             .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
             .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
-            .clickable(enabled = isEnabled.value, onClick = {
+            .clickable(enabled = isEnabled, onClick = {
                 context.startActivity(Intent(context, WaveActivity::class.java).apply {
-                    putExtra("eventId", event.id)
+                    putExtra("eventId", eventId)
                 })
             })
     ) {

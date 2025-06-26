@@ -3,10 +3,17 @@
     <string name="background_description">background</string>
 
     <string name="back">Back</string>
-    <string name="wave_now">Wave Now!</string>">
+    <string name="wave_now">Wave Now!</string>
 
     <string name="events_select_all">All</string>
     <string name="events_select_starred">Starred</string>
+    <string name="events_select_downloaded">Downloaded</string>
+
+    <string name="events_uninstall_map_title">Uninstall Map</string>
+    <string name="events_uninstall_map_confirmation">Are you sure you want to uninstall this map? You can download it again later if needed.</string>
+    <string name="events_cannot_uninstall_map_message">This map cannot be uninstalled because it is part of the base app or is required by other features. It will be removed when you uninstall the app.</string>
+    <string name="events_uninstall">Uninstall</string>
+    <string name="events_uninstall_cancel">Cancel</string>
 
     <string name="event_done">Done</string>
     <string name="event_soon">soon !</string>
@@ -21,10 +28,12 @@
 
 
     <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
+    <string name="events_downloaded_empty">No events has been yet downloaded</string>
     <string name="events_empty">Event list is empty</string>
     <string name="events_loading_error">An error occurred when loading events</string>
 
     <string name="map_checking_state">Checking map status</string>
+    <string name="map_download">Download Map</string>
     <string name="map_downloading">Downloading.. </string>
     <string name="map_starting_download">Starting download..</string>
     <string name="map_loading">Loading map..</string>

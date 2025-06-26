@@ -1,0 +1,3 @@
+[submodule "scripts/maps/openmaptiles-tools"]
+	path = scripts/maps/openmaptiles-tools
+	url = https://github.com/openmaptiles/openmaptiles-tools.git

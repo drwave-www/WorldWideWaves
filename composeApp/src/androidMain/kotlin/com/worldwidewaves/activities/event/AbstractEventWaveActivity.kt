@@ -30,6 +30,7 @@ import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.viewmodels.WaveViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.UUID
 
 abstract class AbstractEventWaveActivity(
     activateInfiniteScroll : Boolean = true
@@ -38,10 +39,16 @@ abstract class AbstractEventWaveActivity(
     protected val waveViewModel: WaveViewModel by viewModel()
     private var waveObserver: WaveObserver? = null
 
+    private var _eventMap : AndroidEventMap? = null
+
+    // Create a stable observer ID based on activity instance
+    protected val observerId = UUID.randomUUID().toString()
+
     // ------------------------------------------------------------------------
 
     override fun onResume() {
         super.onResume()
+
         // Restart observation when activity is visible
         waveObserver?.startObservation()
     }
@@ -59,10 +66,14 @@ abstract class AbstractEventWaveActivity(
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
-        waveObserver = WaveObserver(context, scope, eventMap, event, waveViewModel)
+        _eventMap = eventMap
 
-        LaunchedEffect(true) { // Start wave observation
-            waveObserver!!.startObservation()
+        // Only create the observer once per activity instance
+        LaunchedEffect(Unit) {
+            if (waveObserver == null) {
+                waveObserver = WaveObserver(context, scope, eventMap, event, waveViewModel, observerId)
+                waveObserver!!.startObservation()
+            }
         }
     }
 
@@ -70,6 +81,7 @@ abstract class AbstractEventWaveActivity(
 
     override fun onDestroy() {
         waveObserver?.stopObservation()
+        waveObserver = null
         super.onDestroy()
     }
 

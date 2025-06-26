@@ -106,6 +106,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -127,16 +128,16 @@ class WaveActivity : AbstractEventWaveActivity() {
         val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
-        val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
-        val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
-        val hitDateTime by waveViewModel.hitDateTime.collectAsState()
+        val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
+        val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
+        val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
+        val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
 
         // Construct the event Map
         val eventMap = remember(event.id) {
             AndroidEventMap(event,
                 onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(newLocation)
+                    waveViewModel.updateUserLocation(observerId, newLocation)
                 },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
@@ -169,7 +170,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         }
 
         // Always target the closest view to have user and wave in the same view
-        MapZoomAndLocationUpdate(waveViewModel, eventMap)
+        MapZoomAndLocationUpdate(waveViewModel, observerId, eventMap)
 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
@@ -179,21 +180,16 @@ class WaveActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                BeReady(waveViewModel)
+                BeReady(waveViewModel, observerId)
                 eventMap.Screen(modifier = Modifier
                     .fillMaxWidth()
                     .height(calculatedHeight))
-                WaveProgressionBar(waveViewModel)
-                WaveHitCounter(waveViewModel)
+                WaveProgressionBar(waveViewModel, observerId)
+                WaveHitCounter(waveViewModel, observerId, clock)
             }
 
             // Pass the visibility state to WaveChoreographies for coordination
-            WaveChoreographies(
-                event = event,
-                waveViewModel = waveViewModel,
-                clock = clock,
-                modifier = Modifier.fillMaxSize().zIndex(10f)
-            )
+            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.fillMaxSize().zIndex(10f))
 
         }
     }
@@ -203,10 +199,10 @@ class WaveActivity : AbstractEventWaveActivity() {
 // ------------------------------------------------------------------------
 
 @Composable
-fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: AndroidEventMap) {
+fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
-    val progression by waveViewModel.progression.collectAsState()
-    val isInArea by waveViewModel.isInArea.collectAsState()
+    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
@@ -220,12 +216,12 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, eventMap: AndroidEven
 // ------------------------------------------------------------------------
 
 @Composable
-fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val eventStatus by waveViewModel.eventStatus.collectAsState(Status.UNDEFINED)
-    val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
-    val isInArea by waveViewModel.isInArea.collectAsState()
+fun BeReady(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
+    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
-    val message = if (eventStatus == IWWWEvent.Status.DONE)
+    val message = if (eventStatus == Status.DONE)
         ShRes.string.wave_done
     else if (hasBeenHit)
         ShRes.string.wave_hit
@@ -249,12 +245,12 @@ fun BeReady(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun WaveProgressionBar(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val progression by waveViewModel.progression.collectAsState()
-    val isInArea by waveViewModel.isInArea.collectAsState()
-    val userPositionRatio by waveViewModel.userPositionRatio.collectAsState()
-    val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
-    val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
+fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+    val userPositionRatio by waveViewModel.getUserPositionRatioFlow(observerId).collectAsState()
+    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
+    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -361,9 +357,21 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
 // ------------------------------------------------------------------------
 
 @Composable
-fun WaveHitCounter(waveViewModel: WaveViewModel, modifier: Modifier = Modifier) {
-    val timeBeforeHit by waveViewModel.timeBeforeHit.collectAsState()
-    val text = formatDuration(timeBeforeHit)
+fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClock, modifier: Modifier = Modifier) {
+    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState(0.0)
+    val timeBeforeHitProgression by waveViewModel.getTimeBeforeHitFlow(observerId).collectAsState(INFINITE)
+    val userHitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
+    var timeBeforeHit by remember { mutableStateOf(INFINITE) }
+
+    // Recalculate timeBeforeHit every second until wave is progression
+    LaunchedEffect(Unit) {
+        while (progression == 0.0) {
+            delay(1000L)
+            timeBeforeHit = userHitDateTime - clock.now()
+        }
+    }
+
+    val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
@@ -409,13 +417,14 @@ private fun formatDuration(duration: Duration): String {
 fun WaveChoreographies(
     event: IWWWEvent,
     waveViewModel: WaveViewModel,
+    observerId: String,
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    val isWarmingInProgress by waveViewModel.isWarmingInProgress.collectAsState()
-    val isGoingToBeHit by waveViewModel.isGoingToBeHit.collectAsState()
-    val hasBeenHit by waveViewModel.hasBeenHit.collectAsState()
-    val hitDateTime by waveViewModel.hitDateTime.collectAsState()
+    val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
+    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
+    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
+    val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
 
     // State to track if we should show the hit sequence
     var showHitSequence by remember { mutableStateOf(false) }
