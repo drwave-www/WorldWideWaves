@@ -1,13 +1,4 @@
 
-- recalcul de 'in the area' apres init du gps :
-   - paris, wave, puis go back to paris : 'you are NOT in the area'
-- tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
-  et des numbers, du compteur de l'ecran wave
-
-- Ecran event:
-    - mandatory download for full map screen and Wave now screen
-    - ask for download if event isSoon or started
-
 - generate default map images
 
 - generate maps
@@ -17,6 +8,13 @@
     - delete warming zone in maps
 
 - images / flags
+
+- recalcul de 'in the area' apres init du gps :
+   - paris, wave, puis go back to paris : 'you are NOT in the area'
+- tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+  et des numbers, du compteur de l'ecran wave
+
+---------------------------------------------
 
  - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
@@ -30,15 +28,7 @@
 
 Avril second part:
 
-- manage with translations
-    - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
-    - https://phrase.com/blog/posts/kotlin-multiplatform-mobile-i18n-android-ios/
 - replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
-- Production:
-    - Fill-in FAQ Contents
-    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
-    - manage with translation of events contents (description, location, etc, ...)
-    - licences / tools mentions
 
 - Packaging :
     - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
@@ -46,6 +36,18 @@ Avril second part:
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
 - Limit size taken by events in cached WWWEvents : clean on request after a certain size
+
+------
+
+- manage with translations
+    - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
+    - https://phrase.com/blog/posts/kotlin-multiplatform-mobile-i18n-android-ios/
+    - manage with translation of events contents (description, location, etc, ...)
+
+- Production:
+    - Fill-in FAQ Contents
+    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
+    - licences / tools mentions
 
 - ------>>>> add missing tests in SHARED <<<<------
 

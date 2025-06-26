@@ -71,9 +71,8 @@ if [ ! -f "$TEMP_DIR/package.json" ]; then
   "description": "Temporary package for rendering maps",
   "main": "render-map.js",
   "dependencies": {
-    "@maplibre/maplibre-gl-native": "",
-    "fs-extra": "",
-    "pngjs": ""
+    "@maplibre/maplibre-gl-native": "^6.1.0",
+    "fs-extra": "^11.3.0"
   }
 }
 EOF
@@ -100,6 +99,9 @@ const path = require('path');
 const { PNG } = require('pngjs');
 const maplibre = require('@maplibre/maplibre-gl-native');
 
+// Debug mode
+const DEBUG = true;
+
 // Function to render a map
 async function renderMap(options) {
     const {
@@ -112,13 +114,48 @@ async function renderMap(options) {
         zoom
     } = options;
 
+    if (DEBUG) console.log(\`Debug: Starting map rendering with options:\`, JSON.stringify(options, null, 2));
+
     try {
         // Read the GeoJSON file
+        if (DEBUG) console.log(\`Debug: Reading GeoJSON from \${geojsonPath}\`);
         const geojsonData = await fs.readJson(geojsonPath);
         
         // Read the style file
+        if (DEBUG) console.log(\`Debug: Reading style from \${stylePath}\`);
         const styleData = await fs.readJson(stylePath);
         
+        // Make paths in the style absolute
+        const styleDir = path.dirname(stylePath);
+        if (DEBUG) console.log(\`Debug: Style directory is \${styleDir}\`);
+        
+        // Fix sprite paths
+        if (styleData.sprite) {
+            const originalSprite = styleData.sprite;
+            styleData.sprite = \`file://\${path.resolve(styleDir, styleData.sprite)}\`;
+            if (DEBUG) console.log(\`Debug: Changed sprite from \${originalSprite} to \${styleData.sprite}\`);
+        }
+        
+        // Fix glyphs paths
+        if (styleData.glyphs) {
+            const originalGlyphs = styleData.glyphs;
+            styleData.glyphs = \`file://\${path.resolve(styleDir, styleData.glyphs)}\`;
+            if (DEBUG) console.log(\`Debug: Changed glyphs from \${originalGlyphs} to \${styleData.glyphs}\`);
+        }
+        
+        // Fix source paths
+        if (styleData.sources) {
+            Object.keys(styleData.sources).forEach(sourceId => {
+                const source = styleData.sources[sourceId];
+                if (source.url && !source.url.startsWith('http')) {
+                    const originalUrl = source.url;
+                    source.url = \`file://\${path.resolve(styleDir, source.url)}\`;
+                    if (DEBUG) console.log(\`Debug: Changed source \${sourceId} URL from \${originalUrl} to \${source.url}\`);
+                }
+            });
+        }
+        
+        if (DEBUG) console.log('Debug: Creating map instance');
         // Create a map
         const map = new maplibre.Map({
             width,
@@ -131,28 +168,38 @@ async function renderMap(options) {
                 try {
                     // Handle file requests (sprites, fonts, etc.)
                     const url = req.url;
+                    if (DEBUG) console.log(\`Debug: Request for \${url}\`);
+                    
                     if (url.startsWith('file://')) {
                         const filePath = url.replace('file://', '');
                         if (fs.existsSync(filePath)) {
+                            if (DEBUG) console.log(\`Debug: Found file \${filePath}\`);
                             const data = fs.readFileSync(filePath);
                             callback(null, { data });
                         } else {
+                            if (DEBUG) console.log(\`Debug: File not found: \${filePath}\`);
                             callback(new Error(\`File not found: \${filePath}\`));
                         }
                     } else {
+                        if (DEBUG) console.log(\`Debug: Unsupported URL: \${url}\`);
                         callback(new Error(\`Unsupported URL: \${url}\`));
                     }
                 } catch (error) {
+                    console.error(\`Request error: \${error.message}\`);
                     callback(error);
                 }
             }
         });
+        
+        if (DEBUG) console.log('Debug: Map instance created, adding GeoJSON source');
         
         // Add GeoJSON source and layer for the event area
         map.addSource('event-area', {
             type: 'geojson',
             data: geojsonData
         });
+        
+        if (DEBUG) console.log('Debug: Added GeoJSON source, adding layers');
         
         map.addLayer({
             id: 'event-area-fill',
@@ -174,13 +221,20 @@ async function renderMap(options) {
             }
         });
         
+        if (DEBUG) console.log('Debug: Added layers, rendering map');
+        
         // Render the map
         const pixels = await new Promise((resolve, reject) => {
             map.render((err, buffer) => {
-                if (err) reject(err);
+                if (err) {
+                    console.error(\`Render error: \${err.message}\`);
+                    reject(err);
+                }
                 else resolve(buffer);
             });
         });
+        
+        if (DEBUG) console.log('Debug: Map rendered, creating PNG');
         
         // Create a PNG from the pixels
         const png = new PNG({
@@ -194,6 +248,8 @@ async function renderMap(options) {
             png.data[i] = pixels[i];
         }
         
+        if (DEBUG) console.log('Debug: Saving PNG to', outputPath);
+        
         // Write the PNG to a file
         await new Promise((resolve, reject) => {
             png.pack()
@@ -206,6 +262,7 @@ async function renderMap(options) {
         return true;
     } catch (error) {
         console.error(\`Error rendering map: \${error.message}\`);
+        if (DEBUG) console.error(error.stack);
         return false;
     }
 }
