@@ -31,7 +31,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,7 +66,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_download
 import com.worldwidewaves.shared.generated.resources.map_downloading
-import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
@@ -153,10 +151,17 @@ class AndroidEventMap(
                     isMapDownloading = false
                     isMapAvailable = true
                     // Trigger map loading after successful download
-                    loadMap(context, scope, mapLibreView, hasLocationPermission) { 
-                        isMapLoaded = true
-                        onMapLoaded()
-                    }
+                    loadMap(
+                        context = context,
+                        scope = scope, 
+                        mapLibreView = mapLibreView, 
+                        hasLocationPermission = hasLocationPermission,
+                        onMapLoaded = { 
+                            isMapLoaded = true
+                            onMapLoaded()
+                        },
+                        onMapError = { mapError = true }
+                    )
                 }
                 is MapFeatureState.Failed -> {
                     isMapDownloading = false
@@ -173,10 +178,17 @@ class AndroidEventMap(
         // Setup Map Style and properties, initialize the map view if map is available
         LaunchedEffect(isMapAvailable) {
             if (isMapAvailable) {
-                loadMap(context, scope, mapLibreView, hasLocationPermission) {
-                    isMapLoaded = true
-                    onMapLoaded()
-                }
+                loadMap(
+                    context = context,
+                    scope = scope,
+                    mapLibreView = mapLibreView,
+                    hasLocationPermission = hasLocationPermission,
+                    onMapLoaded = {
+                        isMapLoaded = true
+                        onMapLoaded()
+                    },
+                    onMapError = { mapError = true }
+                )
             }
         }
 
@@ -272,7 +284,8 @@ class AndroidEventMap(
         scope: kotlinx.coroutines.CoroutineScope,
         mapLibreView: MapView,
         hasLocationPermission: Boolean,
-        onMapLoaded: () -> Unit
+        onMapLoaded: () -> Unit,
+        onMapError: () -> Unit = {}
     ) {
         scope.launch {
             withContext(Dispatchers.IO) { // IO actions
@@ -304,7 +317,7 @@ class AndroidEventMap(
                         }
                     }
                 } ?: run {
-                    mapError = true
+                    onMapError()
                 }
             }
         }
