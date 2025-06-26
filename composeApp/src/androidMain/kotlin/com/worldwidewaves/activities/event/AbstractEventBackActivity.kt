@@ -98,7 +98,8 @@ abstract class AbstractEventBackActivity(
         if (eventId != null) {
             lifecycleScope.launch {
                 // Check if map is available
-                mapViewModel.checkIfMapIsAvailable(eventId)
+                // Check if map is available (don't auto-download, wait for user action)
+                mapViewModel.checkIfMapIsAvailable(eventId, autoDownload = false)
 
                 // Then manage the state
                 mapViewModel.featureState.collect { state ->

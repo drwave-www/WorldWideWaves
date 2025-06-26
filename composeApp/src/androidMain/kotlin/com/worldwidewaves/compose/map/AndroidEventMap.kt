@@ -74,7 +74,6 @@ import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -141,7 +140,8 @@ class AndroidEventMap(
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
-            mapViewModel.checkIfMapIsAvailable(event.id)
+            // Check only – let the user trigger the download via the UI button
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
             isMapAvailable = mapAvailabilityChecker.isMapDownloaded(event.id)
         }
 

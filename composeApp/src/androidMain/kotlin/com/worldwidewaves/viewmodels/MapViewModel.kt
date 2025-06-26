@@ -217,13 +217,17 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     // ------------------------------------------------------------------------
 
-    fun checkIfMapIsAvailable(mapId: String) {
+    fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean = false) {
         viewModelScope.launch {
             currentMapId = mapId
             if (splitInstallManager.installedModules.contains(mapId)) {
                 _featureState.value = MapFeatureState.Available
             } else {
                 _featureState.value = MapFeatureState.NotAvailable
+                // Only auto-download if explicitly requested
+                if (autoDownload) {
+                    downloadMap(mapId)
+                }
             }
         }
     }
