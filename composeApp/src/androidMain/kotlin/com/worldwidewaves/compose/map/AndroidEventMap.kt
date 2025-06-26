@@ -28,15 +28,21 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,14 +52,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.worldwidewaves.compose.DownloadProgressIndicator
+import com.worldwidewaves.compose.ErrorMessage
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.generated.resources.map_download
+import com.worldwidewaves.shared.generated.resources.map_downloading
 import com.worldwidewaves.shared.generated.resources.map_error
 import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
@@ -63,12 +76,16 @@ import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
+import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
+import com.worldwidewaves.viewmodels.MapFeatureState
+import com.worldwidewaves.viewmodels.MapViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.inject
 import org.maplibre.android.MapLibre
@@ -101,6 +118,10 @@ class AndroidEventMap(
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
     override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
 
+    // Map availability and download state tracking
+    private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
+    private var isMapDownloading by mutableStateOf(false)
+
     /**
      * The Compose UI for the map
      */
@@ -109,17 +130,151 @@ class AndroidEventMap(
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val mapLibreView: MapView = rememberMapLibreViewWithLifecycle()
+        val mapViewModel: MapViewModel = viewModel()
+        val mapFeatureState by mapViewModel.featureState.collectAsState()
 
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
+        var isMapAvailable by remember { mutableStateOf(false) }
+
+        // Check if map is downloaded
+        LaunchedEffect(Unit) {
+            mapViewModel.checkIfMapIsAvailable(event.id)
+            isMapAvailable = mapAvailabilityChecker.isMapDownloaded(event.id)
+        }
+
+        // Update download state based on MapViewModel state
+        LaunchedEffect(mapFeatureState) {
+            when (mapFeatureState) {
+                is MapFeatureState.Downloading -> isMapDownloading = true
+                is MapFeatureState.Pending -> isMapDownloading = true
+                is MapFeatureState.Installed -> {
+                    isMapDownloading = false
+                    isMapAvailable = true
+                    // Trigger map loading after successful download
+                    loadMap(context, scope, mapLibreView, hasLocationPermission) { 
+                        isMapLoaded = true
+                        onMapLoaded()
+                    }
+                }
+                is MapFeatureState.Failed -> {
+                    isMapDownloading = false
+                    mapError = true
+                }
+                else -> isMapDownloading = false
+            }
+        }
 
         // Request GPS location Android permissions
         hasLocationPermission = requestLocationPermission()
         if (hasLocationPermission) CheckGPSEnable()
 
-        // Setup Map Style and properties, initialize the map view
-        LaunchedEffect(Unit) {
+        // Setup Map Style and properties, initialize the map view if map is available
+        LaunchedEffect(isMapAvailable) {
+            if (isMapAvailable) {
+                loadMap(context, scope, mapLibreView, hasLocationPermission) {
+                    isMapLoaded = true
+                    onMapLoaded()
+                }
+            }
+        }
+
+        // The map view
+        BoxWithConstraints(modifier = modifier) {
+            // Default map image as background
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(getEventImage("map", event.id) as DrawableResource),
+                contentDescription = "defaultMap"
+            )
+
+            // Show appropriate UI based on map state
+            when {
+                isMapLoaded -> {
+                    // Map is loaded and visible, show nothing extra
+                }
+                isMapDownloading -> {
+                    // Show download progress
+                    when (val state = mapFeatureState) {
+                        is MapFeatureState.Downloading -> {
+                            DownloadProgressIndicator(
+                                progress = state.progress,
+                                message = stringResource(ShRes.string.map_downloading),
+                                onCancel = { mapViewModel.cancelDownload() }
+                            )
+                        }
+                        else -> {
+                            // Generic loading indicator for other download states
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = extendedLight.quinary.color,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(maxWidth / 3)
+                            )
+                        }
+                    }
+                }
+                mapError -> {
+                    // Show error with retry option
+                    ErrorMessage(
+                        message = "Failed to load map for ${event.id}",
+                        onRetry = { 
+                            mapError = false
+                            mapViewModel.downloadMap(event.id)
+                        }
+                    )
+                }
+                !isMapAvailable -> {
+                    // Show download button overlay
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .size(width = 200.dp, height = 60.dp)
+                        ) {
+                            Button(
+                                onClick = { mapViewModel.downloadMap(event.id) },
+                                modifier = Modifier.fillMaxSize(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Text(
+                                    text = stringResource(ShRes.string.map_download),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // LibreMap as Android Composable - only visible when map is loaded
+            AndroidView(
+                factory = { mapLibreView },
+                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
+            )
+        }
+    }
+
+    /**
+     * Helper function to load the map
+     */
+    private fun loadMap(
+        context: Context,
+        scope: kotlinx.coroutines.CoroutineScope,
+        mapLibreView: MapView,
+        hasLocationPermission: Boolean,
+        onMapLoaded: () -> Unit
+    ) {
+        scope.launch {
             withContext(Dispatchers.IO) { // IO actions
                 event.map.getStyleUri()?.let {
                     val uri = Uri.fromFile(File(it))
@@ -140,15 +295,11 @@ class AndroidEventMap(
                                 // Initialize view and setup listeners
                                 setupMap(
                                     scope, map.width.toDouble(), map.height.toDouble(),
-                                    onMapLoaded = {
-                                        onMapLoaded()
-                                        isMapLoaded = true // Map is loaded
-                                    },
+                                    onMapLoaded = onMapLoaded,
                                     onMapClick = { _, _ ->
                                         onMapClick?.invoke()
                                     }
                                 )
-
                             }
                         }
                     }
@@ -156,43 +307,6 @@ class AndroidEventMap(
                     mapError = true
                 }
             }
-        }
-
-        // The map view
-        BoxWithConstraints(modifier = modifier) {
-            if (!isMapLoaded) {
-                if (!mapError) {
-                    if (isMapDownloading) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = extendedLight.quinary.color,
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(maxWidth / 3)
-                        )
-                    } else {
-                        Image(
-                            modifier = Modifier
-                                .size(maxWidth / 4)
-                                .align(Alignment.Center),
-                            painter = painterResource(ShRes.drawable.map_error),
-                            contentDescription = "error"
-                        )
-                    }
-                } else {
-                    Image(
-                        modifier = Modifier.fillMaxSize(),
-                        painter = painterResource(getEventImage("map", event.id) as DrawableResource),
-                        contentDescription = "defaultMap"
-                    )
-                }
-            }
-
-            // LibreMap as Android Composable
-            AndroidView(
-                factory = { mapLibreView },
-                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
-            )
         }
     }
 
