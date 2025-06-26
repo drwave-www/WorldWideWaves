@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +55,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_error
+import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
@@ -65,6 +67,7 @@ import com.worldwidewaves.utils.requestLocationPermission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.inject
@@ -159,20 +162,28 @@ class AndroidEventMap(
         BoxWithConstraints(modifier = modifier) {
             if (!isMapLoaded) {
                 if (!mapError) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = extendedLight.quinary.color,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(maxWidth / 3)
-                    )
+                    if (isMapDownloading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = extendedLight.quinary.color,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(maxWidth / 3)
+                        )
+                    } else {
+                        Image(
+                            modifier = Modifier
+                                .size(maxWidth / 4)
+                                .align(Alignment.Center),
+                            painter = painterResource(ShRes.drawable.map_error),
+                            contentDescription = "error"
+                        )
+                    }
                 } else {
                     Image(
-                        modifier = Modifier
-                            .size(maxWidth / 4)
-                            .align(Alignment.Center),
-                        painter = painterResource(ShRes.drawable.map_error),
-                        contentDescription = "error"
+                        modifier = Modifier.fillMaxSize(),
+                        painter = painterResource(getEventImage("map", event.id) as DrawableResource),
+                        contentDescription = "defaultMap"
                     )
                 }
             }
