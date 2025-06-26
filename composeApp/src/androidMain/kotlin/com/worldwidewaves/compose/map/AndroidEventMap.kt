@@ -265,25 +265,23 @@ class AndroidEventMap(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                            modifier = Modifier
-                                .size(width = 200.dp, height = 60.dp)
+                        Button(
+                            onClick = {
+                                // Immediately reflect downloading state for better UX
+                                isMapDownloading = true
+                                mapViewModel.downloadMap(event.id)
+                            },
+                            modifier = Modifier.size(width = 200.dp, height = 60.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
-                            Button(
-                                onClick = { mapViewModel.downloadMap(event.id) },
-                                modifier = Modifier.fillMaxSize(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text(
-                                    text = stringResource(ShRes.string.map_download),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            Text(
+                                text = stringResource(ShRes.string.map_download),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
                 }
