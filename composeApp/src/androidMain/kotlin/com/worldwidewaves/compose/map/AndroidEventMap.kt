@@ -29,7 +29,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -120,7 +119,6 @@ class AndroidEventMap(
 
     // Map availability and download state tracking
     private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-    private var isMapDownloading by mutableStateOf(false)
 
     /**
      * The Compose UI for the map
@@ -137,6 +135,7 @@ class AndroidEventMap(
         var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
         var isMapAvailable by remember { mutableStateOf(false) }
+        var isMapDownloading by remember { mutableStateOf(false) }
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
@@ -153,24 +152,11 @@ class AndroidEventMap(
                 is MapFeatureState.Installed -> {
                     isMapDownloading = false
                     isMapAvailable = true
-                    // Trigger map loading after successful download
-                    loadMap(
-                        context = context,
-                        scope = scope, 
-                        mapLibreView = mapLibreView, 
-                        hasLocationPermission = hasLocationPermission,
-                        onMapLoaded = { 
-                            isMapLoaded = true
-                            onMapLoaded()
-                        },
-                        onMapError = { mapError = true }
-                    )
                 }
                 is MapFeatureState.Failed -> {
-                    isMapDownloading = false
                     mapError = true
                 }
-                else -> isMapDownloading = false
+                else -> {}
             }
         }
 
@@ -196,7 +182,7 @@ class AndroidEventMap(
         }
 
         // The map view
-        BoxWithConstraints(modifier = modifier) {
+        Box(modifier = modifier) {
             // Default map image as background
             Image(
                 modifier = Modifier.fillMaxSize(),
@@ -204,12 +190,18 @@ class AndroidEventMap(
                 contentDescription = "defaultMap"
             )
 
+            // LibreMap as Android Composable - only visible when map is loaded
+            AndroidView(
+                factory = { mapLibreView },
+                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
+            )
+
             // Show appropriate UI based on map state
             when {
                 isMapLoaded -> {
                     // Map is loaded and visible, show nothing extra
                 }
-                isMapDownloading -> {
+                isMapDownloading && !mapError -> {
                     // Semi-transparent overlay for download UI
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -237,7 +229,10 @@ class AndroidEventMap(
                                     is MapFeatureState.Retrying -> {
                                         DownloadProgressIndicator(
                                             message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
-                                            onCancel = { mapViewModel.cancelDownload() }
+                                            onCancel = {
+                                                isMapDownloading = false
+                                                mapViewModel.cancelDownload()
+                                            }
                                         )
                                     }
                                     else -> {
@@ -249,15 +244,17 @@ class AndroidEventMap(
                         }
                     }
                 }
-                mapError -> {
+                mapError && isMapDownloading -> {
                     // Show error with retry option
-                    ErrorMessage(
-                        message = stringResource(ShRes.string.map_error_download),
-                        onRetry = { 
-                            mapError = false
-                            mapViewModel.downloadMap(event.id)
-                        }
-                    )
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        ErrorMessage(
+                            message = stringResource(ShRes.string.map_error_download),
+                            onRetry = {
+                                mapError = false
+                                mapViewModel.downloadMap(event.id)
+                            }
+                        )
+                    }
                 }
                 !isMapAvailable -> {
                     // Show download button overlay
@@ -268,6 +265,7 @@ class AndroidEventMap(
                         Button(
                             onClick = {
                                 // Immediately reflect downloading state for better UX
+                                mapError = false
                                 isMapDownloading = true
                                 mapViewModel.downloadMap(event.id)
                             },
@@ -286,12 +284,6 @@ class AndroidEventMap(
                     }
                 }
             }
-
-            // LibreMap as Android Composable - only visible when map is loaded
-            AndroidView(
-                factory = { mapLibreView },
-                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
-            )
         }
     }
 

@@ -305,10 +305,10 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
 }
 
 @Composable
-fun ErrorMessage(message: String, onRetry: () -> Unit) {
+fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = modifier.padding(16.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Info,

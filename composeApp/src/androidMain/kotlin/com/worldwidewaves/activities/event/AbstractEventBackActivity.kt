@@ -38,7 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,24 +49,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.compose.DownloadProgressIndicator
-import com.worldwidewaves.compose.ErrorMessage
-import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.back
-import com.worldwidewaves.shared.generated.resources.map_checking_state
-import com.worldwidewaves.shared.generated.resources.map_downloading
-import com.worldwidewaves.shared.generated.resources.map_error_download
-import com.worldwidewaves.shared.generated.resources.map_loading
-import com.worldwidewaves.shared.generated.resources.map_starting_download
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -97,23 +87,7 @@ abstract class AbstractEventBackActivity(
         // Download or Load the map as app feature
         if (eventId != null) {
             lifecycleScope.launch {
-                // Check if map is available
-                // Check if map is available (don't auto-download, wait for user action)
-                mapViewModel.checkIfMapIsAvailable(eventId, autoDownload = false)
-
-                // Then manage the state
-                mapViewModel.featureState.collect { state ->
-                    when (state) {
-                        is MapFeatureState.Available, 
-                        is MapFeatureState.Installed,
-                        is MapFeatureState.NotAvailable -> {
-                            // Load event regardless of map availability status
-                            // The map UI will show download button if needed
-                            trackEventLoading(eventId) { event -> selectedEvent = event }
-                        }
-                        else -> { /* Do nothing, managed by BackwardScreen() for consistency */ }
-                    }
-                }
+                trackEventLoading(eventId) { event -> selectedEvent = event }
             }
         }
 
@@ -121,7 +95,7 @@ abstract class AbstractEventBackActivity(
             AppTheme {
                 Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize()) {
                     tabManager.TabView(startScreen = {
-                        BackwardScreen(eventId, selectedEvent, mapViewModel)
+                        BackwardScreen()
                     })
                 }
             }
@@ -141,9 +115,8 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    private fun BackwardScreen(eventId: String?, event: IWWWEvent?, mapViewModel: MapViewModel) {
+    private fun BackwardScreen() {
         val scrollState = rememberScrollState()
-        val mapState by mapViewModel.featureState.collectAsState()
 
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -166,10 +139,10 @@ abstract class AbstractEventBackActivity(
                         text = "< " + stringResource(ShRes.string.back),
                         style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
                     )
-                    if (event != null) {
+                    if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
-                            text = event.location.uppercase(),
+                            text = selectedEvent!!.location.uppercase(),
                             style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )
@@ -179,7 +152,7 @@ abstract class AbstractEventBackActivity(
             }
 
             // Default page to manage initializations, download process and errors
-            if (event != null) { // Event has been loaded
+            if (selectedEvent != null) { // Event has been loaded
 
                     // Content Event screen
                     var screenModifier = Modifier.fillMaxSize()
@@ -187,78 +160,14 @@ abstract class AbstractEventBackActivity(
                         screenModifier = screenModifier.verticalScroll(scrollState)
 
                     Box(modifier = screenModifier) {
-                        Screen(modifier = Modifier.fillMaxSize(), event)
+                        Screen(modifier = Modifier.fillMaxSize(), selectedEvent!!)
                     }
 
             } else {
-                if (eventId == null) { // Should not occur, activity has been called with empty data
-
                     Text(
                         text = "Event not found",
                         style = primaryColoredTextStyle()
                     )
-
-                } else { // Map is not loaded yet, handle map states to show appropriate UI
-
-                    fun cancelDownload() {
-                        mapViewModel.cancelDownload()
-                        finish()
-                    }
-
-                    Box(modifier = Modifier.fillMaxSize().padding(16.dp),
-                        contentAlignment = Center
-                    ) {
-
-                        when (val state = mapState) {
-
-                            is MapFeatureState.NotChecked -> {
-                                // Initial state, waiting for check
-                                LoadingIndicator(message = stringResource(ShRes.string.map_checking_state))
-                            }
-
-                            is MapFeatureState.Downloading -> {
-                                // Show download progress
-                                DownloadProgressIndicator(
-                                    progress = state.progress,
-                                    message = stringResource(
-                                        ShRes.string.map_downloading,
-                                        state.progress
-                                    ),
-                                    ::cancelDownload
-                                )
-                            }
-
-                            is MapFeatureState.Pending -> {
-                                // Waiting for download to start
-                                LoadingIndicator(message = stringResource(ShRes.string.map_starting_download))
-                            }
-
-                            is MapFeatureState.Retrying -> {
-                                // Show retry progress
-                                DownloadProgressIndicator(
-                                    message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
-                                    onCancel = ::cancelDownload
-                                )
-                            }
-
-                            is MapFeatureState.Failed -> {
-                                // Show error message with retry button
-                                ErrorMessage(
-                                    message = state.errorMessage
-                                        ?: stringResource(ShRes.string.map_error_download),
-                                    onRetry = { mapViewModel.downloadMap(eventId) {
-                                        trackEventLoading(eventId) { event -> selectedEvent = event }
-                                    } }
-                                )
-                            }
-
-                            else -> {
-                                // For other states, show a generic loading indicator
-                                LoadingIndicator(message = stringResource(ShRes.string.map_loading))
-                            }
-                        }
-                    }
-                }
             }
         }
     }

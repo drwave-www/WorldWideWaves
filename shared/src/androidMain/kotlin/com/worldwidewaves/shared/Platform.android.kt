@@ -45,6 +45,7 @@ import com.worldwidewaves.shared.generated.resources.e_location_hong_kong_china
 import com.worldwidewaves.shared.generated.resources.e_location_istanbul_turkey
 import com.worldwidewaves.shared.generated.resources.e_location_jakarta_indonesia
 import com.worldwidewaves.shared.generated.resources.e_location_johannesburg_south_africa
+import com.worldwidewaves.shared.generated.resources.e_location_karachi_pakistan
 import com.worldwidewaves.shared.generated.resources.e_location_kinshasa_democratic_republic_of_the_congo
 import com.worldwidewaves.shared.generated.resources.e_location_lagos_nigeria
 import com.worldwidewaves.shared.generated.resources.e_location_lima_peru
@@ -99,6 +100,7 @@ actual fun getEventImage(type: String, id: String): Any? {
             "istanbul_turkey" -> Res.drawable.e_location_istanbul_turkey
             "jakarta_indonesia" -> Res.drawable.e_location_jakarta_indonesia
             "johannesburg_south_africa" -> Res.drawable.e_location_johannesburg_south_africa
+            "karachi_pakistan" -> Res.drawable.e_location_karachi_pakistan
             "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_location_kinshasa_democratic_republic_of_the_congo
             "lagos_nigeria" -> Res.drawable.e_location_lagos_nigeria
             "lima_peru" -> Res.drawable.e_location_lima_peru

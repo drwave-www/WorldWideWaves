@@ -369,6 +369,7 @@ class EventsListScreen(
                 Image(
                     modifier = modifier.fillMaxWidth(),
                     contentScale = ContentScale.Crop,
+                    alignment = Alignment.TopCenter,
                     painter = painterResource(event.getLocationImage() as DrawableResource),
                     contentDescription = event.location
                 )
