@@ -39,6 +39,7 @@ STYLE_DIR="../../shared/src/commonMain/composeResources/files/style"
 TEMP_DIR="./tmp"
 NODE_SCRIPT="$TEMP_DIR/render-map.js"
 GEOJSON_DIR="./data"
+MBTILES_DIR="./data"
 
 # Colors for output
 RED='\033[0;31m'
@@ -106,6 +107,7 @@ const DEBUG = true;
 async function renderMap(options) {
     const {
         geojsonPath,
+        mbtilesPath,
         stylePath,
         outputPath,
         width,
@@ -119,8 +121,8 @@ async function renderMap(options) {
     try {
         // Read the GeoJSON file
         if (DEBUG) console.log(\`Debug: Reading GeoJSON from \${geojsonPath}\`);
-        const geojsonData = await fs.readJson(geojsonPath);
-        
+        const geojsonData = await fs.readJson(geojsonPath);       
+
         // Read the style file
         if (DEBUG) console.log(\`Debug: Reading style from \${stylePath}\`);
         const styleData = await fs.readJson(stylePath);
@@ -132,30 +134,50 @@ async function renderMap(options) {
         // Fix sprite paths
         if (styleData.sprite) {
             const originalSprite = styleData.sprite;
-            styleData.sprite = \`file://\${path.resolve(styleDir, styleData.sprite)}\`;
+            styleData.sprite = \`file://\${path.resolve(styleDir, 'sprites')}\`;
             if (DEBUG) console.log(\`Debug: Changed sprite from \${originalSprite} to \${styleData.sprite}\`);
         }
         
         // Fix glyphs paths
         if (styleData.glyphs) {
             const originalGlyphs = styleData.glyphs;
-            styleData.glyphs = \`file://\${path.resolve(styleDir, styleData.glyphs)}\`;
+            styleData.glyphs = \`file://\${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}\`;
             if (DEBUG) console.log(\`Debug: Changed glyphs from \${originalGlyphs} to \${styleData.glyphs}\`);
         }
         
         // Fix source paths
         if (styleData.sources) {
+            if (DEBUG) console.log(\`Reading sources\`)
             Object.keys(styleData.sources).forEach(sourceId => {
+                if (DEBUG) console.log(\`sourceID --\${sourceId}--\`)
                 const source = styleData.sources[sourceId];
-                if (source.url && !source.url.startsWith('http')) {
-                    const originalUrl = source.url;
-                    source.url = \`file://\${path.resolve(styleDir, source.url)}\`;
-                    if (DEBUG) console.log(\`Debug: Changed source \${sourceId} URL from \${originalUrl} to \${source.url}\`);
+                if (source.url && !source.url.startsWith('http') || source.data) {
+                    var originalUrl = "";
+                    var targetUrl = ""
+
+                    // Use different paths based on source ID
+                    if (sourceId === "geojson") {
+                        originalUrl = source.data
+                        source.data = geojsonData;
+                        targetUrl = "{GEOJSON DATA}"
+                    } else if (sourceId === "openmaptiles") {
+                        originalUrl = source.url
+                        source.url = \`file://\${path.resolve(mbtilesPath)}\`;
+                        targetUrl = source.url
+                    } else {
+                        console.log(\`Unrecognized source\`)
+                    }
+
+                    if (DEBUG) console.log(\`Debug: Changed source \${sourceId} URL from \${originalUrl} to \${targetUrl}\`);
                 }
             });
         }
+
+        fs.writeFileSync('/tmp/debug-mapstyle.json', JSON.stringify(styleData, null, 2));
+        if (DEBUG) console.log('Debug: Dumped modified style data to /tmp/debug-mapstyle.json');
         
         if (DEBUG) console.log('Debug: Creating map instance');
+
         // Create a map
         const map = new maplibre.Map({
             width,
@@ -191,37 +213,7 @@ async function renderMap(options) {
             }
         });
         
-        if (DEBUG) console.log('Debug: Map instance created, adding GeoJSON source');
-        
-        // Add GeoJSON source and layer for the event area
-        map.addSource('event-area', {
-            type: 'geojson',
-            data: geojsonData
-        });
-        
-        if (DEBUG) console.log('Debug: Added GeoJSON source, adding layers');
-        
-        map.addLayer({
-            id: 'event-area-fill',
-            type: 'fill',
-            source: 'event-area',
-            paint: {
-                'fill-color': '#D33682',
-                'fill-opacity': 0.5
-            }
-        });
-        
-        map.addLayer({
-            id: 'event-area-line',
-            type: 'line',
-            source: 'event-area',
-            paint: {
-                'line-color': '#D33682',
-                'line-width': 2
-            }
-        });
-        
-        if (DEBUG) console.log('Debug: Added layers, rendering map');
+        if (DEBUG) console.log('Debug: Map instance created, rendering map');
         
         // Render the map
         const pixels = await new Promise((resolve, reject) => {
@@ -275,16 +267,18 @@ if (args.length < 7) {
 }
 
 const geojsonPath = args[0];
-const stylePath = args[1];
-const outputPath = args[2];
-const width = parseInt(args[3], 10);
-const height = parseInt(args[4], 10);
-const centerLat = parseFloat(args[5]);
-const centerLng = parseFloat(args[6]);
-const zoom = args[7] ? parseFloat(args[7]) : 10;
+const mbtilesPath = args[1]
+const stylePath = args[2];
+const outputPath = args[3];
+const width = parseInt(args[4], 10);
+const height = parseInt(args[5], 10);
+const centerLat = parseFloat(args[6]);
+const centerLng = parseFloat(args[7]);
+const zoom = args[8] ? parseFloat(args[8]) : 10;
 
 renderMap({
     geojsonPath,
+    mbtilesPath,
     stylePath,
     outputPath,
     width,
@@ -326,12 +320,15 @@ for event in $EVENTS; do
     # Check if GeoJSON file exists
     GEOJSON_FILE="$GEOJSON_DIR/${event}.geojson"
     if [ ! -f "$GEOJSON_FILE" ]; then
-        echo -e "${YELLOW}GeoJSON file not found for $event. Generating it...${NC}"
-        ./30-retrieve-geojson.sh "$event"
-        if [ ! -f "$GEOJSON_FILE" ]; then
-            echo -e "${RED}Failed to generate GeoJSON for $event. Skipping.${NC}"
-            continue
-        fi
+        echo -e "${YELLOW}GeoJSON file not found for $event. Skipping.${NC}"
+        continue
+    fi
+
+    # Check if GeoJSON file exists
+    MBTILES_FILE="$MBTILES_DIR/${event}.mbtiles"
+    if [ ! -f "$MBTILES_FILE" ]; then
+        echo -e "${YELLOW}MBTILES file not found for $event. Skipping.${NC}"
+        continue
     fi
     
     # Get the center coordinates for the event
@@ -382,6 +379,7 @@ for event in $EVENTS; do
     # Render the map using the Node.js script
     node "$NODE_SCRIPT" \
         "$GEOJSON_FILE" \
+        "$MBTILES_FILE" \
         "$STYLE_DIR/mapstyle.json" \
         "$OUTPUT_FILE" \
         "$IMAGE_WIDTH" \
