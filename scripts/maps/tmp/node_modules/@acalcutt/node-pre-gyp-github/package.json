@@ -1,0 +1,50 @@
+{
+  "name": "@acalcutt/node-pre-gyp-github",
+  "version": "1.4.8",
+  "description": "A node-pre-gyp module which provides the ability to publish to GitHub releases.",
+  "bin": "./bin/node-pre-gyp-github.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "nyc --reporter=html --reporter=text mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "ship": "STATUS=$(git status --porcelain); echo $STATUS; if [ -z \"$STATUS\" ]; then yarn publish && git push --follow-tags; fi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acalcutt/node-pre-gyp-github.git"
+  },
+  "files": [
+    "bin",
+    "index.js"
+  ],
+  "keywords": [
+    "node-pre-gyp",
+    "binary",
+    "bindings",
+    "c++",
+    "c",
+    "native",
+    "addon",
+    "module",
+    "github",
+    "releases"
+  ],
+  "dependencies": {
+    "@octokit/rest": "18.12.0",
+    "commander": "7.2.0"
+  },
+  "devDependencies": {
+    "chai": "4.3.6",
+    "chai-as-promised": "7.1.1",
+    "coveralls": "3.0.2",
+    "mocha": "7.2.0",
+    "nyc": "15.1.0",
+    "sinon": "13.0.1"
+  },
+  "author": "Bill Christo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bchr02/node-pre-gyp-github/issues"
+  },
+  "homepage": "https://github.com/bchr02/node-pre-gyp-github#readme"
+}
