@@ -126,7 +126,8 @@ async function renderMap(options) {
         // Helper function to check style status
         const checkStyleStatus = () => {
             try {
-                const loaded = map.isStyleLoaded();
+                // MapLibre GL Native exposes `loaded()` instead of `isStyleLoaded()`
+                const loaded = map.loaded();
                 console.log(`Debug: Style loaded status: ${loaded}`);
                 return loaded;
             } catch (e) {
