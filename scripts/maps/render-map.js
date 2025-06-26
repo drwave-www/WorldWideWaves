@@ -84,10 +84,6 @@ async function renderMap(options) {
         
         if (DEBUG) console.log('Debug: Creating map instance');
         
-        // Store loaded state
-        let styleLoaded = false;
-        let styleLoadError = null;
-        
         // Create the map
         const map = new maplibre.Map({
             width,
@@ -123,42 +119,21 @@ async function renderMap(options) {
             }
         });
         
-        // Helper function to check style status
-        const checkStyleStatus = () => {
-            try {
-                // MapLibre GL Native exposes `loaded()` instead of `isStyleLoaded()`
-                const loaded = map.loaded();
-                console.log(`Debug: Style loaded status: ${loaded}`);
-                return loaded;
-            } catch (e) {
-                console.log(`Debug: Error checking style status: ${e.message}`);
-                return false;
-            }
-        };
+        // Load the style using the proper callback-based approach
+        console.log('Debug: Loading map style...');
         
-        // Wait for style to load with timeout
-        console.log('Debug: Waiting for style to load...');
-        
-        // Wait with polling - MapLibre GL Native doesn't always have reliable events
-        let attempts = 0;
-        const maxAttempts = 30; // 15 seconds total
-        
-        while (!styleLoaded && attempts < maxAttempts) {
-            attempts++;
-            styleLoaded = checkStyleStatus();
-            
-            if (styleLoaded) {
-                console.log(`Debug: Style successfully loaded after ${attempts} attempts`);
-                break;
-            }
-            
-            // Wait 500ms between checks
-            await delay(500);
-        }
-        
-        if (!styleLoaded) {
-            throw new Error(`Style failed to load after ${maxAttempts} attempts (15 seconds)`);
-        }
+        // Wrap the map.load() callback in a Promise for async/await compatibility
+        await new Promise((resolve, reject) => {
+            map.load((err) => {
+                if (err) {
+                    console.error(`Debug: Style loading failed: ${err.message}`);
+                    reject(new Error(`Failed to load map style: ${err.message}`));
+                } else {
+                    console.log('Debug: Style successfully loaded');
+                    resolve();
+                }
+            });
+        });
         
         // Dump loaded layers for debugging
         console.log('Debug: Loaded style layers:');
