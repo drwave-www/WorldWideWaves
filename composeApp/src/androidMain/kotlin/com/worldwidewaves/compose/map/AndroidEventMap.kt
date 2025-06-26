@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,12 +59,16 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.worldwidewaves.compose.DownloadProgressIndicator
 import com.worldwidewaves.compose.ErrorMessage
+import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_download
 import com.worldwidewaves.shared.generated.resources.map_downloading
+import com.worldwidewaves.shared.generated.resources.map_error_download
+import com.worldwidewaves.shared.generated.resources.map_loading
+import com.worldwidewaves.shared.generated.resources.map_starting_download
 import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
@@ -207,31 +210,49 @@ class AndroidEventMap(
                     // Map is loaded and visible, show nothing extra
                 }
                 isMapDownloading -> {
-                    // Show download progress
-                    when (val state = mapFeatureState) {
-                        is MapFeatureState.Downloading -> {
-                            DownloadProgressIndicator(
-                                progress = state.progress,
-                                message = stringResource(ShRes.string.map_downloading),
-                                onCancel = { mapViewModel.cancelDownload() }
-                            )
-                        }
-                        else -> {
-                            // Generic loading indicator for other download states
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = extendedLight.quinary.color,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(maxWidth / 3)
-                            )
+                    // Semi-transparent overlay for download UI
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when (val state = mapFeatureState) {
+                                    is MapFeatureState.Downloading -> {
+                                        DownloadProgressIndicator(
+                                            progress = state.progress,
+                                            message = stringResource(ShRes.string.map_downloading),
+                                            onCancel = { mapViewModel.cancelDownload() }
+                                        )
+                                    }
+                                    is MapFeatureState.Pending -> {
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_starting_download))
+                                    }
+                                    is MapFeatureState.Retrying -> {
+                                        DownloadProgressIndicator(
+                                            message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
+                                            onCancel = { mapViewModel.cancelDownload() }
+                                        )
+                                    }
+                                    else -> {
+                                        // Generic loading indicator for other download states
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_loading))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
                 mapError -> {
                     // Show error with retry option
                     ErrorMessage(
-                        message = "Failed to load map for ${event.id}",
+                        message = stringResource(ShRes.string.map_error_download),
                         onRetry = { 
                             mapError = false
                             mapViewModel.downloadMap(event.id)

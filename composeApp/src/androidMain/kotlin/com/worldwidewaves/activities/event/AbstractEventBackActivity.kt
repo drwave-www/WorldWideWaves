@@ -103,15 +103,12 @@ abstract class AbstractEventBackActivity(
                 // Then manage the state
                 mapViewModel.featureState.collect { state ->
                     when (state) {
-                        is MapFeatureState.Available, is MapFeatureState.Installed -> {
-                            // Load event when map is available
-                            trackEventLoading(eventId) { event -> selectedEvent = event }
-                        }
+                        is MapFeatureState.Available, 
+                        is MapFeatureState.Installed,
                         is MapFeatureState.NotAvailable -> {
-                            // Download map if not available
-                            mapViewModel.downloadMap(eventId) {
-                                trackEventLoading(eventId) { event -> selectedEvent = event }
-                            }
+                            // Load event regardless of map availability status
+                            // The map UI will show download button if needed
+                            trackEventLoading(eventId) { event -> selectedEvent = event }
                         }
                         else -> { /* Do nothing, managed by BackwardScreen() for consistency */ }
                     }
