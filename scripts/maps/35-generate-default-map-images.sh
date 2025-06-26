@@ -37,7 +37,8 @@ IMAGE_HEIGHT=$(echo "$IMAGE_WIDTH / (16/9)" | bc -l | xargs printf "%.0f")
 OUTPUT_DIR="../../shared/src/commonMain/composeResources/drawable"
 STYLE_DIR="../../shared/src/commonMain/composeResources/files/style"
 TEMP_DIR="./tmp"
-NODE_SCRIPT="$TEMP_DIR/render-map.js"
+# Node renderer is now a standalone script committed in this folder
+NODE_SCRIPT="./render-map.js"
 GEOJSON_DIR="./data"
 MBTILES_DIR="./data"
 
@@ -73,7 +74,8 @@ if [ ! -f "$TEMP_DIR/package.json" ]; then
   "main": "render-map.js",
   "dependencies": {
     "@maplibre/maplibre-gl-native": "^6.1.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "pngjs": "^7.0.0"
   }
 }
 EOF
@@ -92,203 +94,6 @@ if [ ! -d "node_modules" ]; then
     fi
 fi
 cd ..
-
-# Create the Node.js renderer script
-cat > "$NODE_SCRIPT" << EOF
-const fs = require('fs-extra');
-const path = require('path');
-const { PNG } = require('pngjs');
-const maplibre = require('@maplibre/maplibre-gl-native');
-
-// Debug mode
-const DEBUG = true;
-
-// Function to render a map
-async function renderMap(options) {
-    const {
-        geojsonPath,
-        mbtilesPath,
-        stylePath,
-        outputPath,
-        width,
-        height,
-        center,
-        zoom
-    } = options;
-
-    if (DEBUG) console.log(\`Debug: Starting map rendering with options:\`, JSON.stringify(options, null, 2));
-
-    try {
-        // Read the GeoJSON file
-        if (DEBUG) console.log(\`Debug: Reading GeoJSON from \${geojsonPath}\`);
-        const geojsonData = await fs.readJson(geojsonPath);       
-
-        // Read the style file
-        if (DEBUG) console.log(\`Debug: Reading style from \${stylePath}\`);
-        const styleData = await fs.readJson(stylePath);
-        
-        // Make paths in the style absolute
-        const styleDir = path.dirname(stylePath);
-        if (DEBUG) console.log(\`Debug: Style directory is \${styleDir}\`);
-        
-        // Fix sprite paths
-        if (styleData.sprite) {
-            const originalSprite = styleData.sprite;
-            styleData.sprite = \`file://\${path.resolve(styleDir, 'sprites')}\`;
-            if (DEBUG) console.log(\`Debug: Changed sprite from \${originalSprite} to \${styleData.sprite}\`);
-        }
-        
-        // Fix glyphs paths
-        if (styleData.glyphs) {
-            const originalGlyphs = styleData.glyphs;
-            styleData.glyphs = \`file://\${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}\`;
-            if (DEBUG) console.log(\`Debug: Changed glyphs from \${originalGlyphs} to \${styleData.glyphs}\`);
-        }
-        
-        // Fix source paths
-        if (styleData.sources) {
-            if (DEBUG) console.log(\`Reading sources\`)
-            Object.keys(styleData.sources).forEach(sourceId => {
-                if (DEBUG) console.log(\`sourceID --\${sourceId}--\`)
-                const source = styleData.sources[sourceId];
-                if (source.url && !source.url.startsWith('http') || source.data) {
-                    var originalUrl = "";
-                    var targetUrl = ""
-
-                    // Use different paths based on source ID
-                    if (sourceId === "geojson") {
-                        originalUrl = source.data
-                        source.data = geojsonData;
-                        targetUrl = "{GEOJSON DATA}"
-                    } else if (sourceId === "openmaptiles") {
-                        originalUrl = source.url
-                        source.url = \`file://\${path.resolve(mbtilesPath)}\`;
-                        targetUrl = source.url
-                    } else {
-                        console.log(\`Unrecognized source\`)
-                    }
-
-                    if (DEBUG) console.log(\`Debug: Changed source \${sourceId} URL from \${originalUrl} to \${targetUrl}\`);
-                }
-            });
-        }
-
-        fs.writeFileSync('/tmp/debug-mapstyle.json', JSON.stringify(styleData, null, 2));
-        if (DEBUG) console.log('Debug: Dumped modified style data to /tmp/debug-mapstyle.json');
-        
-        if (DEBUG) console.log('Debug: Creating map instance');
-
-        // Create a map
-        const map = new maplibre.Map({
-            width,
-            height,
-            ratio: 1,
-            center,
-            zoom,
-            style: styleData,
-            request: (req, callback) => {
-                try {
-                    // Handle file requests (sprites, fonts, etc.)
-                    const url = req.url;
-                    if (DEBUG) console.log(\`Debug: Request for \${url}\`);
-                    
-                    if (url.startsWith('file://')) {
-                        const filePath = url.replace('file://', '');
-                        if (fs.existsSync(filePath)) {
-                            if (DEBUG) console.log(\`Debug: Found file \${filePath}\`);
-                            const data = fs.readFileSync(filePath);
-                            callback(null, { data });
-                        } else {
-                            if (DEBUG) console.log(\`Debug: File not found: \${filePath}\`);
-                            callback(new Error(\`File not found: \${filePath}\`));
-                        }
-                    } else {
-                        if (DEBUG) console.log(\`Debug: Unsupported URL: \${url}\`);
-                        callback(new Error(\`Unsupported URL: \${url}\`));
-                    }
-                } catch (error) {
-                    console.error(\`Request error: \${error.message}\`);
-                    callback(error);
-                }
-            }
-        });
-        
-        if (DEBUG) console.log('Debug: Map instance created, rendering map');
-        
-        // Render the map
-        const pixels = await new Promise((resolve, reject) => {
-            map.render((err, buffer) => {
-                if (err) {
-                    console.error(\`Render error: \${err.message}\`);
-                    reject(err);
-                }
-                else resolve(buffer);
-            });
-        });
-        
-        if (DEBUG) console.log('Debug: Map rendered, creating PNG');
-        
-        // Create a PNG from the pixels
-        const png = new PNG({
-            width,
-            height,
-            inputHasAlpha: true
-        });
-        
-        // Copy the pixels to the PNG
-        for (let i = 0; i < pixels.length; i++) {
-            png.data[i] = pixels[i];
-        }
-        
-        if (DEBUG) console.log('Debug: Saving PNG to', outputPath);
-        
-        // Write the PNG to a file
-        await new Promise((resolve, reject) => {
-            png.pack()
-                .pipe(fs.createWriteStream(outputPath))
-                .on('finish', resolve)
-                .on('error', reject);
-        });
-        
-        console.log(\`Map rendered successfully: \${outputPath}\`);
-        return true;
-    } catch (error) {
-        console.error(\`Error rendering map: \${error.message}\`);
-        if (DEBUG) console.error(error.stack);
-        return false;
-    }
-}
-
-// Parse command line arguments
-const args = process.argv.slice(2);
-if (args.length < 7) {
-    console.error('Usage: node render-map.js <geojsonPath> <stylePath> <outputPath> <width> <height> <centerLat> <centerLng> [<zoom>]');
-    process.exit(1);
-}
-
-const geojsonPath = args[0];
-const mbtilesPath = args[1]
-const stylePath = args[2];
-const outputPath = args[3];
-const width = parseInt(args[4], 10);
-const height = parseInt(args[5], 10);
-const centerLat = parseFloat(args[6]);
-const centerLng = parseFloat(args[7]);
-const zoom = args[8] ? parseFloat(args[8]) : 10;
-
-renderMap({
-    geojsonPath,
-    mbtilesPath,
-    stylePath,
-    outputPath,
-    width,
-    height,
-    center: [centerLng, centerLat],
-    zoom
-}).then(success => {
-    process.exit(success ? 0 : 1);
-});
-EOF
 
 # ---------- Process maps ---------------------------------------------------
 
