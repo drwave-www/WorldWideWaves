@@ -181,9 +181,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 BeReady(waveViewModel, observerId)
-                eventMap.Screen(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(calculatedHeight))
+                eventMap.Screen(autoMapDownload = true, Modifier.fillMaxWidth().height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
                 WaveHitCounter(waveViewModel, observerId, clock)
             }

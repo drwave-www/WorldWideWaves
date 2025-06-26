@@ -5,10 +5,10 @@
   et des numbers, du compteur de l'ecran wave
 
 - Ecran event:
-    - do not download map by default
-    - default image outside of module for map
-    - bouton to download map if not present
+    - mandatory download for full map screen and Wave now screen
     - ask for download if event isSoon or started
+
+- generate default map images
 
 - generate maps
     - miss istanbul/karachi/kinshasa

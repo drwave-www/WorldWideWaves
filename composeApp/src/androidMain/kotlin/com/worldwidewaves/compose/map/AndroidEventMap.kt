@@ -124,7 +124,7 @@ class AndroidEventMap(
      * The Compose UI for the map
      */
     @Composable
-    fun Screen(modifier: Modifier) {
+    fun Screen(autoMapDownload: Boolean = false, modifier: Modifier) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val mapLibreView: MapView = rememberMapLibreViewWithLifecycle()
@@ -178,6 +178,8 @@ class AndroidEventMap(
                     },
                     onMapError = { mapError = true }
                 )
+            } else if (autoMapDownload) {
+                mapViewModel.downloadMap(event.id)
             }
         }
 
