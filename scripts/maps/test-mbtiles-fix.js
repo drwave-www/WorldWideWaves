@@ -109,6 +109,32 @@ const testGeojson = {
 const pointGeojson = { type: 'Point', coordinates: [-74, 40.5] };
 const lineGeojson = { type: 'LineString', coordinates: [[-74, 40.5], [-73.5, 41]] };
 
+// Empty collection (used for fallback tests)
+const emptyFeatureCollection = { type: 'FeatureCollection', features: [] };
+
+// Helper borrowed from render-map.js (abbreviated)
+function isValidBounds(bbox) {
+    return (
+        bbox &&
+        bbox.length === 4 &&
+        bbox.every((n) => Number.isFinite(n)) &&
+        !(bbox[0] === Infinity ||
+            bbox[1] === Infinity ||
+            bbox[2] === -Infinity ||
+            bbox[3] === -Infinity)
+    );
+}
+
+function getHintCenterFromFilename(filePath) {
+    const name = path.basename(filePath, path.extname(filePath)).toLowerCase();
+    const hints = {
+        london_england: [-0.1276, 51.5072],
+        new_york_usa: [-73.9795, 40.6971],
+        paris_france: [2.3522, 48.8566],
+    };
+    return hints[name] || [0, 0];
+}
+
 
 // --- Main Test Runner ---
 
@@ -152,6 +178,22 @@ async function runTest() {
         if (Math.abs(calculatedCenter[0] - -73.990472) > 1e-6) failTest('Center longitude calculation incorrect.');
         if (Math.abs(calculatedCenter[1] - 40.7814895) > 1e-6) failTest('Center latitude calculation incorrect.');
         if (calculatedZoom < 9 || calculatedZoom > 11) failTest(`Calculated zoom level (${calculatedZoom}) is outside expected range (9-11).`);
+
+        // --- Test: Empty GeoJSON & fallback helpers ---
+        console.log('\n--- Testing Empty GeoJSON Handling ---');
+        const emptyBounds = getGeojsonBounds(emptyFeatureCollection);
+        console.log('Empty Bounds:', emptyBounds);
+        if (isValidBounds(emptyBounds)) failTest('Empty GeoJSON should produce invalid bounds.');
+
+        // invalid array check
+        if (isValidBounds([Infinity, 0, 0, -Infinity])) failTest('isValidBounds failed on obvious invalid array.');
+
+        // Filename hint test
+        const londonHint = getHintCenterFromFilename('london_england.geojson');
+        if (londonHint[0] !== -0.1276 || londonHint[1] !== 51.5072) {
+            failTest('Filename hint for London is incorrect.');
+        }
+
 
     } catch (error) {
         failTest(`An unexpected error occurred during tests: ${error.message}`);
