@@ -412,7 +412,15 @@ function handleMbtilesRequest(url) {
             [z, x, tmsY],
             (err, row) => {
                 if (err) return reject(err);
-                if (!row) return reject(new Error(`Tile not found ${z}/${x}/${y}`));
+                // If tile is missing, resolve with an empty buffer instead of
+                // failing the entire render. Missing tiles will simply render
+                // blank areas, which is preferable to aborting the map render.
+                if (!row) {
+                    if (DEBUG) {
+                        console.warn(`Tile not found ${z}/${x}/${y} in ${path.basename(dbPath)}`);
+                    }
+                    return resolve(Buffer.alloc(0));
+                }
                 resolve(row.tile_data);
             }
         );
