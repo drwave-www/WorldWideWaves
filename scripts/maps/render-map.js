@@ -70,10 +70,17 @@ async function renderMap(options) {
                     } else if (sourceId === "openmaptiles") {
                         /* Convert to MapLibre MBTiles source declaration */
                         originalUrl = source.url;
-                        delete source.url;
-                        source.type = "mbtiles";
-                        source.path = path.resolve(mbtilesPath);
-                        targetUrl = source.path;
+                        //delete source.url;
+                        //source.type = "mbtiles";
+                        //source.path = path.resolve(mbtilesPath);
+                        ////source.url = `mbtiles://${path.resolve(mbtilesPath)}`;
+                        //targetUrl = source.path;
+                        ////targetUrl = source.url;
+                        delete source.url
+                        delete source.type
+                        source.type = "mbtiles"
+                        source.tiles = [ `mbtiles://${path.resolve(mbtilesPath)}` ]
+                        targetUrl = source.tiles
                     } else {
                         console.log(`Unrecognized source`);
                     }
@@ -91,9 +98,10 @@ async function renderMap(options) {
         // Create the map
         const map = new maplibre.Map({
             request: function(req, callback) {
-                if (req.url.startsWith('file://')) {
+                console.log(`READ ${req.url}`)
+                if (req.url.startsWith('file://') || req.url.startsWith('mbtiles://')) {
                     /* ---- local filesystem fetch (sprites, glyphs, etc.) ---- */
-                    const filePath = req.url.replace('file://', '');
+                    const filePath = req.url.replace('file://', '').replace('mbtiles://', '');
                     fs.readFile(filePath, (err, data) => {
                         if (err) {
                             console.error(`Error reading file: ${err.message}`);
