@@ -1,0 +1,12 @@
+{
+  "name": "maplibre-renderer",
+  "version": "1.0.0",
+  "description": "Temporary package for rendering maps",
+  "main": "render-map.js",
+  "dependencies": {
+    "@maplibre/maplibre-gl-native": "^6.1.0",
+    "fs-extra": "^11.3.0",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.34.2"
+  }
+}

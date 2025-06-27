@@ -61,23 +61,6 @@ if ! command -v npm &> /dev/null; then
     exit 1
 fi
 
-# Create a temporary package.json if it doesn't exist
-if [ ! -f "package.json" ]; then
-    cat > "package.json" << EOF
-{
-  "name": "maplibre-renderer",
-  "version": "1.0.0",
-  "description": "Temporary package for rendering maps",
-  "main": "render-map.js",
-  "dependencies": {
-    "@maplibre/maplibre-gl-native": "^6.1.0",
-    "fs-extra": "^11.3.0",
-    "pngjs": "^7.0.0"
-  }
-}
-EOF
-fi
-
 # Install required packages if they're not already installed
 echo -e "${BLUE}Checking for required Node.js packages...${NC}"
 if [ ! -d "node_modules" ]; then

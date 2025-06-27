@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const { PNG } = require('pngjs');
 const maplibre = require('@maplibre/maplibre-gl-native');
+const sharp = require('sharp')
 
 // Debug mode
 const DEBUG = true;
@@ -40,14 +41,14 @@ async function renderMap(options) {
         // Fix sprite paths
         if (styleData.sprite) {
             const originalSprite = styleData.sprite;
-            styleData.sprite = `file://${path.resolve(styleDir, 'sprites')}`;
+            styleData.sprite = `${path.resolve(styleDir, 'sprites/osm-liberty')}`;
             if (DEBUG) console.log(`Debug: Changed sprite from ${originalSprite} to ${styleData.sprite}`);
         }
         
         // Fix glyphs paths
         if (styleData.glyphs) {
             const originalGlyphs = styleData.glyphs;
-            styleData.glyphs = `file://${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}`;
+            styleData.glyphs = `${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}`;
             if (DEBUG) console.log(`Debug: Changed glyphs from ${originalGlyphs} to ${styleData.glyphs}`);
         }
         
@@ -68,7 +69,7 @@ async function renderMap(options) {
                         targetUrl = "{GEOJSON DATA}";
                     } else if (sourceId === "openmaptiles") {
                         originalUrl = source.url;
-                        source.url = `file://${path.resolve(mbtilesPath)}`;
+                        source.url = `${path.resolve(mbtilesPath)}`;
                         targetUrl = source.url;
                     } else {
                         console.log(`Unrecognized source`);
@@ -79,119 +80,80 @@ async function renderMap(options) {
             });
         }
 
-        fs.writeFileSync('/tmp/debug-mapstyle.json', JSON.stringify(styleData, null, 2));
+        fs.writeFileSync('/tmp/tmp-mapstyle.json', JSON.stringify(styleData, null, 2));
         if (DEBUG) console.log('Debug: Dumped modified style data to /tmp/debug-mapstyle.json');
         
         if (DEBUG) console.log('Debug: Creating map instance');
         
         // Create the map
         const map = new maplibre.Map({
-            width,
-            height,
-            ratio: 1,
-            center,
-            zoom,
-            style: styleData,
-            request: (req, callback) => {
+            request: function(req, callback) {
+                console.log(`READ ${req.url}`)
                 try {
-                    // Handle file requests (sprites, fonts, etc.)
-                    const url = req.url;
-                    if (DEBUG) console.log(`Debug: Request for ${url}`);
-                    
-                    if (url.startsWith('file://')) {
-                        const filePath = url.replace('file://', '');
-                        if (fs.existsSync(filePath)) {
-                            if (DEBUG) console.log(`Debug: Found file ${filePath}`);
-                            const data = fs.readFileSync(filePath);
-                            callback(null, { data });
-                        } else {
-                            if (DEBUG) console.log(`Debug: File not found: ${filePath}`);
-                            callback(new Error(`File not found: ${filePath}`));
-                        }
-                    } else {
-                        if (DEBUG) console.log(`Debug: Unsupported URL: ${url}`);
-                        callback(new Error(`Unsupported URL: ${url}`));
+                  fs.readFile(path.join(req.url), function(err, data) {
+                    if (err) {
+                      console.error(`Error reading file ${filePath}: ${err.message}`);
                     }
+                    callback(err, { data: data });
+                  });
                 } catch (error) {
-                    console.error(`Request error: ${error.message}`);
-                    callback(error);
+                  console.error(`Request error: ${error.message}`);
+                  callback(error);
                 }
-            }
+            },
         });
         
         // Load the style using the proper callback-based approach
         console.log('Debug: Loading map style...');
         
         // Wrap the map.load() callback in a Promise for async/await compatibility
-        await new Promise((resolve, reject) => {
-            map.load((err) => {
-                if (err) {
-                    console.error(`Debug: Style loading failed: ${err.message}`);
-                    reject(new Error(`Failed to load map style: ${err.message}`));
-                } else {
-                    console.log('Debug: Style successfully loaded');
-                    resolve();
-                }
-            });
-        });
-        
-        // Dump loaded layers for debugging
-        console.log('Debug: Loaded style layers:');
-        try {
-            const layers = map.getStyle().layers || [];
-            layers.forEach(layer => {
-                console.log(`  - Layer: ${layer.id} (${layer.type})`);
-            });
-        } catch (e) {
-            console.log(`Debug: Error getting style layers: ${e.message}`);
-        }
-        
+        map.load(styleData)
+
         console.log('Debug: Starting map rendering');
-        
-        // Render the map
-        const pixels = await new Promise((resolve, reject) => {
+
+        return new Promise((resolve, reject) => {
+          map.render({
+            zoom: zoom,
+            width: width,
+            height: height,
+            center: center,
+            ratio: 1
+          }, function(err, buffer) {
+            if (err) {
+                console.error(`Render error: ${err.message}`);
+                map.release();
+                reject(err);
+                return;
+            }
+
             try {
-                map.render((err, buffer) => {
-                    if (err) {
-                        console.error(`Render error: ${err.message}`);
-                        console.error(err.stack);
-                        reject(err);
+                map.release();
+
+                var image = sharp(buffer, {
+                    raw: {
+                        width: width,
+                        height: height,
+                        channels: 4
                     }
-                    else resolve(buffer);
+                });
+
+                // Convert raw image buffer to PNG
+                image.toFile(outputPath, function(err) {
+                    if (err) {
+                        console.log(`Error writing file: ${err}`);
+                        reject(err);
+                        return;
+                    }
+                    console.log(`Map rendered successfully: ${outputPath}`);
+                    resolve(true);
                 });
             } catch (error) {
-                console.error(`Unexpected render error: ${error.message}`);
-                console.error(error.stack);
+                console.error(`Processing error: ${error.message}`);
                 reject(error);
-            }
+            }            
+          });
         });
-        
-        if (DEBUG) console.log('Debug: Map rendered, creating PNG');
-        
-        // Create a PNG from the pixels
-        const png = new PNG({
-            width,
-            height,
-            inputHasAlpha: true
-        });
-        
-        // Copy the pixels to the PNG
-        for (let i = 0; i < pixels.length; i++) {
-            png.data[i] = pixels[i];
-        }
-        
-        if (DEBUG) console.log('Debug: Saving PNG to', outputPath);
-        
-        // Write the PNG to a file
-        await new Promise((resolve, reject) => {
-            png.pack()
-                .pipe(fs.createWriteStream(outputPath))
-                .on('finish', resolve)
-                .on('error', reject);
-        });
-        
-        console.log(`Map rendered successfully: ${outputPath}`);
-        return true;
+
     } catch (error) {
         // More detailed error handling
         console.error(`Error rendering map: ${error.message}`);
@@ -199,7 +161,6 @@ async function renderMap(options) {
         
         // Try to inspect the style file
         try {
-            console.log('Debug: Trying to check style file structure');
             const styleData = await fs.readJson(stylePath);
             console.log(`Style version: ${styleData.version}`);
             console.log(`Style has ${Object.keys(styleData.sources || {}).length} sources`);
@@ -209,33 +170,6 @@ async function renderMap(options) {
             const styleDir = path.dirname(stylePath);
             const absoluteStylePath = path.resolve(styleDir);
             console.log(`Absolute style directory: ${absoluteStylePath}`);
-            
-            // Check if sprite files exist
-            if (styleData.sprite) {
-                const spritePath = path.resolve(styleDir, 'sprites');
-                const spriteJsonPath = `${spritePath}.json`;
-                const spritePngPath = `${spritePath}.png`;
-                console.log(`Checking sprite files: 
-                  - JSON: ${spriteJsonPath} (exists: ${fs.existsSync(spriteJsonPath)})
-                  - PNG: ${spritePngPath} (exists: ${fs.existsSync(spritePngPath)})`);
-                
-                // Check @2x versions
-                const sprite2xJsonPath = `${spritePath}@2x.json`;
-                const sprite2xPngPath = `${spritePath}@2x.png`;
-                console.log(`Checking @2x sprite files: 
-                  - JSON: ${sprite2xJsonPath} (exists: ${fs.existsSync(sprite2xJsonPath)})
-                  - PNG: ${sprite2xPngPath} (exists: ${fs.existsSync(sprite2xPngPath)})`);
-            }
-            
-            // Check if glyphs directory exists
-            if (styleData.glyphs) {
-                const glyphsDir = path.resolve(styleDir, 'glyphs');
-                console.log(`Checking glyphs directory: ${glyphsDir} (exists: ${fs.existsSync(glyphsDir)})`);
-                if (fs.existsSync(glyphsDir)) {
-                    const fontDirs = fs.readdirSync(glyphsDir);
-                    console.log(`Available font stacks: ${fontDirs.join(', ')}`);
-                }
-            }
         } catch (e) {
             console.error(`Error analyzing style file: ${e.message}`);
         }
