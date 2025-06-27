@@ -376,7 +376,8 @@ function getDb(absPath) {
  */
 function parseMbtilesUrl(url) {
     const withoutProto = url.replace('mbtiles://', '');
-    const match = withoutProto.match(/^(.*?\\.mbtiles)\\/(\\d+)\\/(\\d+)\\/(\\d+)/);
+    // pattern:  /absolute/path/file.mbtiles/Z/X/Y(.pbf|.png)
+    const match = withoutProto.match(/^(.*?\.mbtiles)\/(\d+)\/(\d+)\/(\d+)/);
     if (!match) {
         throw new Error(`Invalid mbtiles url: ${url}`);
     }
