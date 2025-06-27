@@ -67,8 +67,6 @@ async function renderMap(options) {
             effectiveZoom = hasValidBounds
                 ? getBoundsZoomLevel(geojsonBbox, width, height)
                 : 10; // sensible default for fallback
-            // Subtract a bit for padding
-            effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
             if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
         }
         
