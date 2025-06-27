@@ -57,22 +57,14 @@ merge_geojsons() {
     return
   fi
 
-  # Start with a basic GeoJSON structure
-  echo '{"type":"FeatureCollection","features":[]}' > "$output_file"
-
-  # For each input file, extract the features and add them to the output
-  for input_file in "${input_files[@]}"; do
-    # Check if the file exists and is not empty
-    if [ -s "$input_file" ]; then
-      # Use jq to extract features from this file and append to the output
-      # This temporary approach merges features one by one
-      local temp_file=$(mktemp)
-      ./bin/jq -s '.[0].features = (.[0].features + .[1].features) | .[0]' "$output_file" "$input_file" > "$temp_file"
-      mv "$temp_file" "$output_file"
-    else
-      echo "Warning: File $input_file is empty or doesn't exist, skipping."
-    fi
-  done
+  # Build a single FeatureCollection containing features from every input file.
+  # jq explanation:
+  #   -s : slurp all input files into an array
+  #   map(.features) collects the `features` array from each file
+  #   | add          concatenates all feature arrays into one
+  #   {type:...,features:...} builds the final GeoJSON object
+  ./bin/jq -s '{type:"FeatureCollection",features: (map(.features) | add)}' \
+      "${input_files[@]}" > "$output_file"
 }
 
 for event in $EVENTS; do # Retrieve Geojson files from OSM
