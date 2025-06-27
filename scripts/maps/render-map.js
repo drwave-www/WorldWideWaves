@@ -135,7 +135,13 @@ async function renderMap(options) {
             request: function(req, callback) {
                 if (req.url.startsWith('file://')) {
                     /* ---- local filesystem fetch (sprites, glyphs, etc.) ---- */
-                    const filePath = req.url.replace('file://', '');
+                    // Decode URI components so that `%20` and other encodings
+                    // are converted back to their literal characters. This is
+                    // required for font stack names that contain spaces
+                    // (e.g. “Roboto Regular”), which are stored on disk with
+                    // the actual space character.
+                    const rawPath  = req.url.replace('file://', '');
+                    const filePath = decodeURIComponent(rawPath);
                     fs.readFile(filePath, (err, data) => {
                         if (err) {
                             console.error(`Error reading file: ${err.message}`);
