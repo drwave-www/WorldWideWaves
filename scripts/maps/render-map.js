@@ -255,9 +255,10 @@ function getBoundsZoomLevel(bbox, imageWidth, imageHeight) {
     // Helper to convert latitude to its Mercator projection coordinate
     function latRad(lat) {
         const sin = Math.sin(lat * Math.PI / 180);
-        // This is a simplified version of the Mercator projection formula part
+        // Mercator projection (no absolute value – we need the sign to
+        // distinguish northern vs. southern hemisphere)
         const rad = Math.log((1 + sin) / (1 - sin)) / 2;
-        return Math.abs(rad);
+        return rad;
     }
 
     // Calculate the fraction of the world's circumference covered by the bbox
