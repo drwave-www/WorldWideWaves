@@ -4,6 +4,7 @@ const { PNG } = require('pngjs');
 const maplibre  = require('@maplibre/maplibre-gl-native');
 const sharp = require('sharp')
 const sqlite3   = require('sqlite3').verbose();
+const zlib      = require('zlib');
 
 // Debug mode
 const DEBUG = true;
@@ -421,7 +422,20 @@ function handleMbtilesRequest(url) {
                     }
                     return resolve(Buffer.alloc(0));
                 }
-                resolve(row.tile_data);
+                let data = row.tile_data;
+                /* ----------------------------------------------------------
+                 * Tiles inside MBTiles are commonly gzipped.  MapLibre expects
+                 * raw, uncompressed PBF bytes.  If we detect the gzip magic
+                 * header (0x1f 0x8b) we transparently decompress.
+                 * ---------------------------------------------------------- */
+                if (data && data.length > 2 && data[0] === 0x1f && data[1] === 0x8b) {
+                    try {
+                        data = zlib.unzipSync(data);
+                    } catch (e) {
+                        return reject(e);
+                    }
+                }
+                resolve(data);
             }
         );
     });
