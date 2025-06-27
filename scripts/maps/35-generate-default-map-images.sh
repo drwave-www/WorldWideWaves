@@ -19,6 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
+### NOTICE: In non-X environments, run through xvfb-run
 
 # ---------- Vars and support functions ---------------------------------------
 cd "$(dirname "$0")" # always work from executable folder
@@ -166,8 +168,8 @@ for event in $EVENTS; do
         "$OUTPUT_FILE" \
         "$IMAGE_WIDTH" \
         "$IMAGE_HEIGHT" \
-        "$CENTER_LAT" \
         "$CENTER_LNG" \
+        "$CENTER_LAT" \
         "$ZOOM"
     
     if [ $? -eq 0 ]; then
