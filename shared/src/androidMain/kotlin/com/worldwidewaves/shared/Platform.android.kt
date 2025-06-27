@@ -28,7 +28,6 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.e_community_europe
-import com.worldwidewaves.shared.generated.resources.e_community_usa
 import com.worldwidewaves.shared.generated.resources.e_country_brazil
 import com.worldwidewaves.shared.generated.resources.e_country_france
 import com.worldwidewaves.shared.generated.resources.e_location_bangalore_india
@@ -175,14 +174,48 @@ actual fun getEventImage(type: String, id: String): Any? {
         }
 
         "community" -> when (id) {
+            "africa" -> Res.drawable.e_community_africa
+            "asia" -> Res.drawable.e_community_asia
             "europe" -> Res.drawable.e_community_europe
-            "usa" -> Res.drawable.e_community_usa
+            "middle_east" -> Res.drawable.e_community_middle_east
+            "north_america" -> Res.drawable.e_community_north_america
+            "oceania" -> Res.drawable.e_community_oceania
+            "south_america" -> Res.drawable.e_community_south_america
             else -> Res.drawable.not_found
         }
 
         "country" -> when (id) {
+            "argentina" -> Res.drawable.e_country_argentina
+            "australia" -> Res.drawable.e_country_australia
             "brazil" -> Res.drawable.e_country_brazil
+            "canada" -> Res.drawable.e_country_canada
+            "chile" -> Res.drawable.e_country_chile
+            "china" -> Res.drawable.e_country_china
+            "colombia" -> Res.drawable.e_country_colombia
+            "democratic_republic_of_the_congo" -> Res.drawable.e_country_democratic_republic_of_the_congo
+            "egypt" -> Res.drawable.e_country_egypt
+            "england" -> Res.drawable.e_country_england
             "france" -> Res.drawable.e_country_france
+            "germany" -> Res.drawable.e_country_germany
+            "india" -> Res.drawable.e_country_india
+            "indonesia" -> Res.drawable.e_country_indonesia
+            "iran" -> Res.drawable.e_country_iran
+            "italy" -> Res.drawable.e_country_italy
+            "japan" -> Res.drawable.e_country_japan
+            "kenya" -> Res.drawable.e_country_kenya
+            "mexico" -> Res.drawable.e_country_mexico
+            "nigeria" -> Res.drawable.e_country_nigeria
+            "pakistan" -> Res.drawable.e_country_pakistan
+            "peru" -> Res.drawable.e_country_peru
+            "philippines" -> Res.drawable.e_country_philippines
+            "russia" -> Res.drawable.e_country_russia
+            "south_africa" -> Res.drawable.e_country_south_africa
+            "south_korea" -> Res.drawable.e_country_south_korea
+            "spain" -> Res.drawable.e_country_spain
+            "thailand" -> Res.drawable.e_country_thailand
+            "turkey" -> Res.drawable.e_country_turkey
+            "united_arab_emirates" -> Res.drawable.e_country_united_arab_emirates
+            "usa" -> Res.drawable.e_country_usa
             else -> Res.drawable.not_found
         }
 

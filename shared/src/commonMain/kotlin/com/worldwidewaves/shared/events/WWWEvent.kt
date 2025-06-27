@@ -310,6 +310,31 @@ data class WWWEvent(
 
     // -----------------------------------------------------------------------
 
+    override fun getLiteralCountry(): String {
+        return country
+            ?.lowercase()
+            ?.replace("_", " ") // Replace underscores with spaces
+            ?.split(" ") // Split into words
+            ?.joinToString(" ") { word -> // Join words with spaces
+                word.replaceFirstChar { char -> char.uppercase() } // Capitalize each word
+            }
+            ?.replace("England", "United Kingdom") // FIXME: Ugly hack for London
+            ?: ""
+    }
+
+    override fun getLiteralCommunity(): String {
+        return community
+            ?.lowercase()
+            ?.replace("_", " ") // Replace underscores with spaces
+            ?.split(" ") // Split into words
+            ?.joinToString(" ") { word -> // Join words with spaces
+                word.replaceFirstChar { char -> char.uppercase() } // Capitalize each word
+            }
+            ?: ""
+    }
+
+    // -----------------------------------------------------------------------
+
     /**
      * Starting date/time of the wave
      */

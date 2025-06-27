@@ -147,6 +147,9 @@ fun primaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle
 fun quinaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     commonTextStyle(fontSize).copy(color = extendedLight.quinary.color)
 
+fun quaternaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = extendedLight.quaternary.color)
+
 fun quinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 

@@ -90,6 +90,9 @@ interface IWWWEvent : DataValidator {
     suspend fun getLiteralEndTime(): String
     suspend fun getLiteralTotalTime(): String
 
+    fun getLiteralCountry(): String
+    fun getLiteralCommunity(): String
+
     fun getWaveStartDateTime() : Instant
     fun getWarmingDuration(): Duration
     fun isNearTime(): Boolean
