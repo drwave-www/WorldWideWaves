@@ -20,10 +20,20 @@ async function renderMap(options) {
         width,
         height,
         center,
-        zoom
+        zoom,
+        bbox
     } = options;
 
     if (DEBUG) console.log(`Debug: Starting map rendering with options:`, JSON.stringify(options, null, 2));
+
+    let effectiveZoom = zoom;
+    if (bbox && (zoom === null || zoom === undefined || zoom < 0)) {
+        if (DEBUG) console.log(`Debug: Calculating zoom from bounding box: ${bbox}`);
+        effectiveZoom = getBoundsZoomLevel(bbox, width, height);
+        // Subtract a bit for padding
+        effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
+        if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
+    }
 
     try {
         // Read the GeoJSON file
@@ -70,17 +80,10 @@ async function renderMap(options) {
                     } else if (sourceId === "openmaptiles") {
                         /* Convert to MapLibre MBTiles source declaration */
                         originalUrl = source.url;
-                        //delete source.url;
-                        //source.type = "mbtiles";
-                        //source.path = path.resolve(mbtilesPath);
-                        ////source.url = `mbtiles://${path.resolve(mbtilesPath)}`;
-                        //targetUrl = source.path;
-                        ////targetUrl = source.url;
-                        delete source.url
-                        delete source.type
-                        source.type = "mbtiles"
-                        source.tiles = [ `mbtiles://${path.resolve(mbtilesPath)}` ]
-                        targetUrl = source.tiles
+                        delete source.url;
+                        source.type = "mbtiles";
+                        source.path = path.resolve(mbtilesPath);
+                        targetUrl = source.path;
                     } else {
                         console.log(`Unrecognized source`);
                     }
@@ -98,10 +101,9 @@ async function renderMap(options) {
         // Create the map
         const map = new maplibre.Map({
             request: function(req, callback) {
-                console.log(`READ ${req.url}`)
-                if (req.url.startsWith('file://') || req.url.startsWith('mbtiles://')) {
+                if (req.url.startsWith('file://')) {
                     /* ---- local filesystem fetch (sprites, glyphs, etc.) ---- */
-                    const filePath = req.url.replace('file://', '').replace('mbtiles://', '');
+                    const filePath = req.url.replace('file://', '');
                     fs.readFile(filePath, (err, data) => {
                         if (err) {
                             console.error(`Error reading file: ${err.message}`);
@@ -129,7 +131,7 @@ async function renderMap(options) {
 
         return new Promise((resolve, reject) => {
           map.render({
-            zoom: zoom,
+            zoom: effectiveZoom,
             width: width,
             height: height,
             center: center,
@@ -194,10 +196,45 @@ async function renderMap(options) {
     }
 }
 
+/**
+ * Calculates the optimal zoom level to fit a bounding box within given pixel dimensions.
+ * @param {number[]} bbox - The bounding box as [minLng, minLat, maxLng, maxLat].
+ * @param {number} imageWidth - The width of the image in pixels.
+ * @param {number} imageHeight - The height of the image in pixels.
+ * @returns {number} The optimal zoom level.
+ */
+function getBoundsZoomLevel(bbox, imageWidth, imageHeight) {
+    const [minLng, minLat, maxLng, maxLat] = bbox;
+    const TILE_SIZE = 512; // MapLibre uses 512px tiles
+    const MAX_ZOOM = 24;
+
+    // Helper to convert latitude to its Mercator projection coordinate
+    function latRad(lat) {
+        const sin = Math.sin(lat * Math.PI / 180);
+        // This is a simplified version of the Mercator projection formula part
+        const rad = Math.log((1 + sin) / (1 - sin)) / 2;
+        return Math.abs(rad);
+    }
+
+    // Calculate the fraction of the world's circumference covered by the bbox
+    const lngFraction = Math.abs(maxLng - minLng) / 360;
+    const latFraction = (latRad(maxLat) - latRad(minLat)) / (2 * Math.PI);
+
+    // Calculate required zoom level for both width and height
+    const lngZoom = Math.log(imageWidth / (TILE_SIZE * lngFraction)) / Math.LN2;
+    const latZoom = Math.log(imageHeight / (TILE_SIZE * latFraction)) / Math.LN2;
+
+    // The final zoom is the minimum of the two, to ensure the whole box fits
+    const zoom = Math.min(lngZoom, latZoom, MAX_ZOOM);
+
+    return zoom > 0 ? zoom : 0; // Ensure zoom is not negative
+}
+
+
 // Parse command line arguments
 const args = process.argv.slice(2);
-if (args.length < 7) {
-    console.error('Usage: node render-map.js <geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> <centerLat> <centerLng> [<zoom>]');
+if (args.length < 8) {
+    console.error('Usage: node render-map.js <geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> <centerLng> <centerLat> [<zoom> [<bbox>]]');
     process.exit(1);
 }
 
@@ -207,9 +244,12 @@ const stylePath = args[2];
 const outputPath = args[3];
 const width = parseInt(args[4], 10);
 const height = parseInt(args[5], 10);
-const centerLat = parseFloat(args[6]);
-const centerLng = parseFloat(args[7]);
-const zoom = args[8] ? parseFloat(args[8]) : 10;
+const centerLng = parseFloat(args[6]);
+const centerLat = parseFloat(args[7]);
+// If zoom is not provided or is invalid, set to -1 to trigger auto-calculation
+const zoom = (args[8] && !isNaN(parseFloat(args[8]))) ? parseFloat(args[8]) : -1;
+// Bbox is expected as a comma-separated string: "minLng,minLat,maxLng,maxLat"
+const bbox = args[9] ? args[9].split(',').map(Number) : null;
 
 renderMap({
     geojsonPath,
@@ -219,8 +259,8 @@ renderMap({
     width,
     height,
     center: [centerLng, centerLat],
-    zoom
+    zoom,
+    bbox
 }).then(success => {
     process.exit(success ? 0 : 1);
 });
-

@@ -124,34 +124,27 @@ for event in $EVENTS; do
     CENTER_LAT=$(echo $CENTER | cut -d',' -f1)
     CENTER_LNG=$(echo $CENTER | cut -d',' -f2)
     
-    # Get appropriate zoom level based on event area size
+    # ------------------------------------------------------------------
+    # Zoom & Bounding Box
+    # ------------------------------------------------------------------
+    # If we have a bounding box we can let render-map.js compute an
+    # accurate zoom level.  We simply pass the bbox as a 10th argument
+    # and set zoom to -1 (auto).
     BBOX=$(get_event_bbox "$event")
     if [ -z "$BBOX" ]; then
         echo -e "${YELLOW}Failed to get bounding box for $event. Using default zoom.${NC}"
         ZOOM=10
+        BBOX_STRING=""
     else {
-        # Calculate appropriate zoom level based on bounding box size
+        # Extract bbox corners
         SW_LAT=$(echo $BBOX | cut -d',' -f1)
         SW_LNG=$(echo $BBOX | cut -d',' -f2)
         NE_LAT=$(echo $BBOX | cut -d',' -f3)
         NE_LNG=$(echo $BBOX | cut -d',' -f4)
-        
-        # Calculate the size of the bounding box
-        LAT_DIFF=$(echo "$NE_LAT - $SW_LAT" | bc -l)
-        LNG_DIFF=$(echo "$NE_LNG - $SW_LNG" | bc -l)
-        
-        # Estimate zoom level based on the size
-        if (( $(echo "$LAT_DIFF > 10" | bc -l) )) || (( $(echo "$LNG_DIFF > 10" | bc -l) )); then
-            ZOOM=4
-        elif (( $(echo "$LAT_DIFF > 5" | bc -l) )) || (( $(echo "$LNG_DIFF > 5" | bc -l) )); then
-            ZOOM=6
-        elif (( $(echo "$LAT_DIFF > 1" | bc -l) )) || (( $(echo "$LNG_DIFF > 1" | bc -l) )); then
-            ZOOM=8
-        elif (( $(echo "$LAT_DIFF > 0.5" | bc -l) )) || (( $(echo "$LNG_DIFF > 0.5" | bc -l) )); then
-            ZOOM=10
-        else
-            ZOOM=12
-        fi
+        # Format expected by render-map.js: "minLng,minLat,maxLng,maxLat"
+        BBOX_STRING="$SW_LNG,$SW_LAT,$NE_LNG,$NE_LAT"
+        # Trigger auto-zoom in renderer
+        ZOOM=-1
     }
     fi
     
@@ -170,7 +163,8 @@ for event in $EVENTS; do
         "$IMAGE_HEIGHT" \
         "$CENTER_LNG" \
         "$CENTER_LAT" \
-        "$ZOOM"
+        "$ZOOM" \
+        "$BBOX_STRING"
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Successfully generated map image for $event: $OUTPUT_FILE${NC}"
