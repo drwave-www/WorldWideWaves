@@ -34,7 +34,24 @@ async function renderMap(options) {
         const geojsonBbox = getGeojsonBounds(geojsonData);
         if (DEBUG) console.log(`Debug: Calculated GeoJSON bbox: ${geojsonBbox}`);
 
-        let effectiveCenter = [(geojsonBbox[0] + geojsonBbox[2]) / 2, (geojsonBbox[1] + geojsonBbox[3]) / 2];
+        // ------------------------------------------------------------------
+        // Validate bounds – empty GeoJSON returns infinities
+        // ------------------------------------------------------------------
+        const hasValidBounds = isValidBounds(geojsonBbox);
+        if (!hasValidBounds) {
+            console.warn(
+                `[WARN] GeoJSON file '${path.basename(
+                    geojsonPath
+                )}' seems empty – falling back to default center/zoom`
+            );
+        }
+
+        let effectiveCenter = hasValidBounds
+            ? [
+                  (geojsonBbox[0] + geojsonBbox[2]) / 2,
+                  (geojsonBbox[1] + geojsonBbox[3]) / 2,
+              ]
+            : getHintCenterFromFilename(geojsonPath);
         if (center && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
             effectiveCenter = center;
             if (DEBUG) console.log(`Debug: Using provided center override: ${effectiveCenter}`);
@@ -45,7 +62,9 @@ async function renderMap(options) {
         let effectiveZoom = zoom;
         if (zoom === null || zoom === undefined || zoom < 0) {
             if (DEBUG) console.log(`Debug: Calculating zoom from GeoJSON bbox...`);
-            effectiveZoom = getBoundsZoomLevel(geojsonBbox, width, height);
+            effectiveZoom = hasValidBounds
+                ? getBoundsZoomLevel(geojsonBbox, width, height)
+                : 10; // sensible default for fallback
             // Subtract a bit for padding
             effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
             if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
@@ -290,6 +309,35 @@ function getGeojsonBounds(geojson) {
     }
 
     return bounds;
+}
+
+/**
+ * Returns true if bbox numbers are finite and not equal to infinities.
+ */
+function isValidBounds(bbox) {
+    return (
+        bbox &&
+        bbox.length === 4 &&
+        bbox.every((n) => Number.isFinite(n)) &&
+        !(bbox[0] === Infinity ||
+            bbox[1] === Infinity ||
+            bbox[2] === -Infinity ||
+            bbox[3] === -Infinity)
+    );
+}
+
+/**
+ * Very small helper: try to guess a center coord from the filename.
+ * Extend this dictionary as needed.
+ */
+function getHintCenterFromFilename(filePath) {
+    const name = path.basename(filePath, path.extname(filePath)).toLowerCase();
+    const hints = {
+        london_england: [-0.1276, 51.5072],
+        new_york_usa: [-73.9795, 40.6971],
+        paris_france: [2.3522, 48.8566],
+    };
+    return hints[name] || [0, 0];
 }
 
 // Parse command line arguments
