@@ -94,9 +94,7 @@ async function renderMap(options) {
         
         // Fix source paths
         if (styleData.sources) {
-            if (DEBUG) console.log(`Reading sources`);
             Object.keys(styleData.sources).forEach(sourceId => {
-                if (DEBUG) console.log(`sourceID --${sourceId}--`);
                 const source = styleData.sources[sourceId];
                 if (source.url && !source.url.startsWith('http') || source.data) {
                     var originalUrl = "";
