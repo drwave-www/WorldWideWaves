@@ -1,8 +1,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { PNG } = require('pngjs');
-const maplibre = require('@maplibre/maplibre-gl-native');
+const maplibre  = require('@maplibre/maplibre-gl-native');
 const sharp = require('sharp')
+const sqlite3   = require('sqlite3').verbose();
 
 // Debug mode
 const DEBUG = true;
@@ -106,12 +107,14 @@ async function renderMap(options) {
                         source.data = geojsonData;
                         targetUrl = "{GEOJSON DATA}";
                     } else if (sourceId === "openmaptiles") {
-                        /* Convert to MapLibre MBTiles source declaration */
+                        /* Serve tiles through mbtiles:// protocol */
                         originalUrl = source.url;
                         delete source.url;
-                        source.type = "mbtiles";
-                        source.path = path.resolve(mbtilesPath);
-                        targetUrl = source.path;
+                        // Keep regular vector source but point its tiles array to mbtiles://
+                        source.type  = "vector";
+                        const absPath = path.resolve(mbtilesPath);
+                        source.tiles = [`mbtiles://${absPath}/{z}/{x}/{y}.pbf`];
+                        targetUrl    = source.tiles[0];
                     } else {
                         console.log(`Unrecognized source`);
                     }
@@ -139,6 +142,14 @@ async function renderMap(options) {
                         }
                         return callback(null, { data });
                     });
+                    return;
+                }
+
+                /* ---- MBTiles protocol ---- */
+                if (req.url.startsWith('mbtiles://')) {
+                    handleMbtilesRequest(req.url)
+                        .then(buf => callback(null, { data: buf }))
+                        .catch(e  => callback(e));
                     return;
                 }
 
