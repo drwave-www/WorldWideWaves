@@ -68,9 +68,12 @@ async function renderMap(options) {
                         source.data = geojsonData;
                         targetUrl = "{GEOJSON DATA}";
                     } else if (sourceId === "openmaptiles") {
+                        /* Convert to MapLibre MBTiles source declaration */
                         originalUrl = source.url;
-                        source.url = `mbtiles://${path.resolve(mbtilesPath)}`;
-                        targetUrl = source.url;
+                        delete source.url;
+                        source.type = "mbtiles";
+                        source.path = path.resolve(mbtilesPath);
+                        targetUrl = source.path;
                     } else {
                         console.log(`Unrecognized source`);
                     }
@@ -88,19 +91,23 @@ async function renderMap(options) {
         // Create the map
         const map = new maplibre.Map({
             request: function(req, callback) {
-                console.log(`READ ${req.url}`)
-                try {
-                  filePath = path.join(req.url).replace(/mbtiles:/, "").replace(/file:/, "")
-                  fs.readFile(filePath, function(err, data) {
-                    if (err) {
-                      console.error(`Error reading file: ${err.message}`);
-                    }
-                    callback(err, { data: data });
-                  });
-                } catch (error) {
-                  console.error(`Request error: ${error.message}`);
-                  callback(error);
+                if (req.url.startsWith('file://')) {
+                    /* ---- local filesystem fetch (sprites, glyphs, etc.) ---- */
+                    const filePath = req.url.replace('file://', '');
+                    fs.readFile(filePath, (err, data) => {
+                        if (err) {
+                            console.error(`Error reading file: ${err.message}`);
+                            return callback(err);
+                        }
+                        return callback(null, { data });
+                    });
+                    return;
                 }
+
+                /* Unsupported protocol */
+                const err = new Error(`Unsupported protocol in URL: ${req.url}`);
+                console.error(err.message);
+                callback(err);
             },
         });
         
@@ -208,3 +215,4 @@ renderMap({
 }).then(success => {
     process.exit(success ? 0 : 1);
 });
+
