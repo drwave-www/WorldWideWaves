@@ -108,63 +108,27 @@ for event in $EVENTS; do
         continue
     fi
 
-    # Check if GeoJSON file exists
+    # Check if MBTiles file exists
     MBTILES_FILE="$MBTILES_DIR/${event}.mbtiles"
     if [ ! -f "$MBTILES_FILE" ]; then
         echo -e "${YELLOW}MBTILES file not found for $event. Skipping.${NC}"
         continue
     fi
     
-    # Get the center coordinates for the event
-    CENTER=$(get_event_center "$event")
-    if [ -z "$CENTER" ]; then
-        echo -e "${RED}Failed to get center coordinates for $event. Skipping.${NC}"
-        continue
-    fi
-    CENTER_LAT=$(echo $CENTER | cut -d',' -f1)
-    CENTER_LNG=$(echo $CENTER | cut -d',' -f2)
-    
-    # ------------------------------------------------------------------
-    # Zoom & Bounding Box
-    # ------------------------------------------------------------------
-    # If we have a bounding box we can let render-map.js compute an
-    # accurate zoom level.  We simply pass the bbox as a 10th argument
-    # and set zoom to -1 (auto).
-    BBOX=$(get_event_bbox "$event")
-    if [ -z "$BBOX" ]; then
-        echo -e "${YELLOW}Failed to get bounding box for $event. Using default zoom.${NC}"
-        ZOOM=10
-        BBOX_STRING=""
-    else {
-        # Extract bbox corners
-        SW_LAT=$(echo $BBOX | cut -d',' -f1)
-        SW_LNG=$(echo $BBOX | cut -d',' -f2)
-        NE_LAT=$(echo $BBOX | cut -d',' -f3)
-        NE_LNG=$(echo $BBOX | cut -d',' -f4)
-        # Format expected by render-map.js: "minLng,minLat,maxLng,maxLat"
-        BBOX_STRING="$SW_LNG,$SW_LAT,$NE_LNG,$NE_LAT"
-        # Trigger auto-zoom in renderer
-        ZOOM=-1
-    }
-    fi
-    
     # Output file path
     OUTPUT_FILE="$OUTPUT_DIR/e_map_${event}.png"
     
-    echo "Rendering map for $event (center: $CENTER_LAT,$CENTER_LNG, zoom: $ZOOM)"
+    echo "Rendering map for $event (center and zoom will be auto-calculated from GeoJSON)"
     
-    # Render the map using the Node.js script
+    # Render the map using the Node.js script.
+    # Center and zoom are calculated automatically by the script from the GeoJSON bounds.
     node "$NODE_SCRIPT" \
         "$GEOJSON_FILE" \
         "$MBTILES_FILE" \
         "$STYLE_DIR/mapstyle.json" \
         "$OUTPUT_FILE" \
         "$IMAGE_WIDTH" \
-        "$IMAGE_HEIGHT" \
-        "$CENTER_LNG" \
-        "$CENTER_LAT" \
-        "$ZOOM" \
-        "$BBOX_STRING"
+        "$IMAGE_HEIGHT"
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Successfully generated map image for $event: $OUTPUT_FILE${NC}"

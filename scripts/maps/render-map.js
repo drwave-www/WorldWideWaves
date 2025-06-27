@@ -20,25 +20,36 @@ async function renderMap(options) {
         width,
         height,
         center,
-        zoom,
-        bbox
+        zoom
     } = options;
 
     if (DEBUG) console.log(`Debug: Starting map rendering with options:`, JSON.stringify(options, null, 2));
-
-    let effectiveZoom = zoom;
-    if (bbox && (zoom === null || zoom === undefined || zoom < 0)) {
-        if (DEBUG) console.log(`Debug: Calculating zoom from bounding box: ${bbox}`);
-        effectiveZoom = getBoundsZoomLevel(bbox, width, height);
-        // Subtract a bit for padding
-        effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
-        if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
-    }
 
     try {
         // Read the GeoJSON file
         if (DEBUG) console.log(`Debug: Reading GeoJSON from ${geojsonPath}`);
         const geojsonData = await fs.readJson(geojsonPath);
+
+        // Calculate BBox and Center from GeoJSON
+        const geojsonBbox = getGeojsonBounds(geojsonData);
+        if (DEBUG) console.log(`Debug: Calculated GeoJSON bbox: ${geojsonBbox}`);
+
+        let effectiveCenter = [(geojsonBbox[0] + geojsonBbox[2]) / 2, (geojsonBbox[1] + geojsonBbox[3]) / 2];
+        if (center && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
+            effectiveCenter = center;
+            if (DEBUG) console.log(`Debug: Using provided center override: ${effectiveCenter}`);
+        } else {
+            if (DEBUG) console.log(`Debug: Using calculated center from GeoJSON: ${effectiveCenter}`);
+        }
+
+        let effectiveZoom = zoom;
+        if (zoom === null || zoom === undefined || zoom < 0) {
+            if (DEBUG) console.log(`Debug: Calculating zoom from GeoJSON bbox...`);
+            effectiveZoom = getBoundsZoomLevel(geojsonBbox, width, height);
+            // Subtract a bit for padding
+            effectiveZoom = effectiveZoom > 0.5 ? effectiveZoom - 0.5 : effectiveZoom;
+            if (DEBUG) console.log(`Debug: Calculated zoom level: ${effectiveZoom}`);
+        }
         
         // Read the style file
         if (DEBUG) console.log(`Debug: Reading style from ${stylePath}`);
@@ -134,7 +145,7 @@ async function renderMap(options) {
             zoom: effectiveZoom,
             width: width,
             height: height,
-            center: center,
+            center: effectiveCenter,
             ratio: 1
           }, function(err, buffer) {
             if (err) {
@@ -217,8 +228,12 @@ function getBoundsZoomLevel(bbox, imageWidth, imageHeight) {
     }
 
     // Calculate the fraction of the world's circumference covered by the bbox
-    const lngFraction = Math.abs(maxLng - minLng) / 360;
-    const latFraction = (latRad(maxLat) - latRad(minLat)) / (2 * Math.PI);
+    const lngFraction = (maxLng - minLng) === 0 ? 0 : Math.abs(maxLng - minLng) / 360;
+    const latFraction = (latRad(maxLat) - latRad(minLat)) === 0 ? 0 : (latRad(maxLat) - latRad(minLat)) / (2 * Math.PI);
+
+    if (lngFraction === 0 || latFraction === 0) {
+        return MAX_ZOOM; // It's a point or a straight line, zoom in max
+    }
 
     // Calculate required zoom level for both width and height
     const lngZoom = Math.log(imageWidth / (TILE_SIZE * lngFraction)) / Math.LN2;
@@ -230,11 +245,57 @@ function getBoundsZoomLevel(bbox, imageWidth, imageHeight) {
     return zoom > 0 ? zoom : 0; // Ensure zoom is not negative
 }
 
+/**
+ * Calculates the bounding box of a GeoJSON object.
+ * @param {object} geojson - The GeoJSON object.
+ * @returns {number[]} The bounding box as [minLng, minLat, maxLng, maxLat].
+ */
+function getGeojsonBounds(geojson) {
+    const bounds = [Infinity, Infinity, -Infinity, -Infinity]; // [minLng, minLat, maxLng, maxLat]
+
+    function processCoordinates(coordinates) {
+        if (!coordinates) return;
+        // Check if it's a single coordinate pair
+        if (typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
+            bounds[0] = Math.min(bounds[0], coordinates[0]);
+            bounds[1] = Math.min(bounds[1], coordinates[1]);
+            bounds[2] = Math.max(bounds[2], coordinates[0]);
+            bounds[3] = Math.max(bounds[3], coordinates[1]);
+        } else { // It's an array of coordinates
+            for (const coord of coordinates) {
+                processCoordinates(coord);
+            }
+        }
+    }
+
+    function processGeometry(geometry) {
+        if (!geometry || !geometry.coordinates) return;
+        if (geometry.type === 'GeometryCollection') {
+            for (const geom of geometry.geometries) {
+                processGeometry(geom);
+            }
+        } else {
+            processCoordinates(geometry.coordinates);
+        }
+    }
+
+    if (geojson.type === 'FeatureCollection') {
+        for (const feature of geojson.features) {
+            processGeometry(feature.geometry);
+        }
+    } else if (geojson.type === 'Feature') {
+        processGeometry(geojson.geometry);
+    } else { // It's a geometry object
+        processGeometry(geojson);
+    }
+
+    return bounds;
+}
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-if (args.length < 8) {
-    console.error('Usage: node render-map.js <geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> <centerLng> <centerLat> [<zoom> [<bbox>]]');
+if (args.length < 6) {
+    console.error('Usage: node render-map.js <geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> [<centerLng> <centerLat> [<zoom>]]');
     process.exit(1);
 }
 
@@ -244,12 +305,14 @@ const stylePath = args[2];
 const outputPath = args[3];
 const width = parseInt(args[4], 10);
 const height = parseInt(args[5], 10);
-const centerLng = parseFloat(args[6]);
-const centerLat = parseFloat(args[7]);
+
+// Center and zoom are now optional
+const centerLng = (args[6] && !isNaN(parseFloat(args[6]))) ? parseFloat(args[6]) : null;
+const centerLat = (args[7] && !isNaN(parseFloat(args[7]))) ? parseFloat(args[7]) : null;
+const center = (centerLng !== null && centerLat !== null) ? [centerLng, centerLat] : null;
+
 // If zoom is not provided or is invalid, set to -1 to trigger auto-calculation
 const zoom = (args[8] && !isNaN(parseFloat(args[8]))) ? parseFloat(args[8]) : -1;
-// Bbox is expected as a comma-separated string: "minLng,minLat,maxLng,maxLat"
-const bbox = args[9] ? args[9].split(',').map(Number) : null;
 
 renderMap({
     geojsonPath,
@@ -258,9 +321,8 @@ renderMap({
     outputPath,
     width,
     height,
-    center: [centerLng, centerLat],
-    zoom,
-    bbox
+    center,
+    zoom
 }).then(success => {
     process.exit(success ? 0 : 1);
 });
