@@ -349,6 +349,75 @@ function getHintCenterFromFilename(filePath) {
     return hints[name] || [0, 0];
 }
 
+/* -------------------------------------------------------------------------- */
+/* -----------------------  MBTiles   helper  section  ----------------------- */
+/* -------------------------------------------------------------------------- */
+
+// Simple in-memory cache of opened mbtiles databases to avoid reopening files
+const mbtilesCache = new Map(); //  key: absolute path, value: sqlite3.Database
+
+/**
+ * Open (or retrieve from cache) a readonly sqlite3 DB handle to the given
+ * mbtiles file.  The handle is cached for the lifetime of this process.
+ */
+function getDb(absPath) {
+    if (mbtilesCache.has(absPath)) {
+        return mbtilesCache.get(absPath);
+    }
+    const db = new sqlite3.Database(absPath, sqlite3.OPEN_READONLY);
+    mbtilesCache.set(absPath, db);
+    return db;
+}
+
+/**
+ * Parse a `mbtiles://` URL of the form
+ *   mbtiles:///absolute/path/file.mbtiles/{z}/{x}/{y}.pbf
+ * and return `{ dbPath, z, x, y }`
+ */
+function parseMbtilesUrl(url) {
+    const withoutProto = url.replace('mbtiles://', '');
+    const match = withoutProto.match(/^(.*?\\.mbtiles)\\/(\\d+)\\/(\\d+)\\/(\\d+)/);
+    if (!match) {
+        throw new Error(`Invalid mbtiles url: ${url}`);
+    }
+    const [, dbPath, zStr, xStr, yStr] = match;
+    const z = parseInt(zStr, 10);
+    const x = parseInt(xStr, 10);
+    const y = parseInt(yStr, 10);
+    return { dbPath, z, x, y };
+}
+
+/**
+ * Given a `mbtiles://` URL return a Promise that resolves with a Buffer
+ * containing the tile data.  Converts XYZ → TMS (row) index internally.
+ */
+function handleMbtilesRequest(url) {
+    return new Promise((resolve, reject) => {
+        let parsed;
+        try {
+            parsed = parseMbtilesUrl(url);
+        } catch (e) {
+            return reject(e);
+        }
+
+        const { dbPath, z, x, y } = parsed;
+        const db = getDb(dbPath);
+
+        // MBTiles spec stores rows in TMS (flipped-Y) orientation
+        const tmsY = (1 << z) - 1 - y;
+
+        db.get(
+            'SELECT tile_data FROM tiles WHERE zoom_level=? AND tile_column=? AND tile_row=?',
+            [z, x, tmsY],
+            (err, row) => {
+                if (err) return reject(err);
+                if (!row) return reject(new Error(`Tile not found ${z}/${x}/${y}`));
+                resolve(row.tile_data);
+            }
+        );
+    });
+}
+
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 6) {
