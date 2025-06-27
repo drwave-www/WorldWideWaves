@@ -41,14 +41,14 @@ async function renderMap(options) {
         // Fix sprite paths
         if (styleData.sprite) {
             const originalSprite = styleData.sprite;
-            styleData.sprite = `${path.resolve(styleDir, 'sprites/osm-liberty')}`;
+            styleData.sprite = `file://${path.resolve(styleDir, 'sprites/osm-liberty')}`;
             if (DEBUG) console.log(`Debug: Changed sprite from ${originalSprite} to ${styleData.sprite}`);
         }
         
         // Fix glyphs paths
         if (styleData.glyphs) {
             const originalGlyphs = styleData.glyphs;
-            styleData.glyphs = `${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}`;
+            styleData.glyphs = `file://${path.resolve(styleDir, 'glyphs/{fontstack}/{range}.pbf')}`;
             if (DEBUG) console.log(`Debug: Changed glyphs from ${originalGlyphs} to ${styleData.glyphs}`);
         }
         
@@ -69,7 +69,7 @@ async function renderMap(options) {
                         targetUrl = "{GEOJSON DATA}";
                     } else if (sourceId === "openmaptiles") {
                         originalUrl = source.url;
-                        source.url = `${path.resolve(mbtilesPath)}`;
+                        source.url = `mbtiles://${path.resolve(mbtilesPath)}`;
                         targetUrl = source.url;
                     } else {
                         console.log(`Unrecognized source`);
@@ -90,9 +90,10 @@ async function renderMap(options) {
             request: function(req, callback) {
                 console.log(`READ ${req.url}`)
                 try {
-                  fs.readFile(path.join(req.url), function(err, data) {
+                  filePath = path.join(req.url).replace(/mbtiles:/, "").replace(/file:/, "")
+                  fs.readFile(filePath, function(err, data) {
                     if (err) {
-                      console.error(`Error reading file ${filePath}: ${err.message}`);
+                      console.error(`Error reading file: ${err.message}`);
                     }
                     callback(err, { data: data });
                   });
