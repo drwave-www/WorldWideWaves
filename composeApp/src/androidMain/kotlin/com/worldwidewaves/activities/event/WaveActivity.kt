@@ -21,6 +21,7 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+// Debug-only utilities -------------------------------------------------------
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -70,7 +71,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.debug.SoundChoreographyTestMode
+import com.worldwidewaves.debug.SoundChoreographyTestModeOverlay
+import com.worldwidewaves.debug.SoundChoreographyTestModeToggle
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
@@ -119,9 +124,11 @@ class WaveActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
+        var isTestModeEnabled by remember { mutableStateOf(SoundChoreographyTestMode.isEnabled()) }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -150,16 +157,6 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Start event/map coordination
         ObserveEventMap(event, eventMap)
 
-        // - For manual testing purposes - very noisy
-        /*LaunchedEffect(true) {
-            while (true) {
-                delay(50)
-                scope.launch {
-                    event.warming.playCurrentSoundChoreographyTone()
-                }
-            }
-        }*/
-
         // Play the hit sound when the user has been hit
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
@@ -181,9 +178,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 BeReady(waveViewModel, observerId)
-                eventMap.Screen(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(calculatedHeight))
+                eventMap.Screen(autoMapDownload = true, Modifier.fillMaxWidth().height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
                 WaveHitCounter(waveViewModel, observerId, clock)
             }
@@ -191,6 +186,35 @@ class WaveActivity : AbstractEventWaveActivity() {
             // Pass the visibility state to WaveChoreographies for coordination
             WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.fillMaxSize().zIndex(10f))
 
+            // ----------------------------------------------------------------
+            // Test-mode UI (only visible in debug builds)
+            // ----------------------------------------------------------------
+            if (BuildConfig.DEBUG) {
+                // Toggle button to enable/disable the test overlay
+                SoundChoreographyTestModeToggle(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                        .zIndex(20f),
+                    onToggle = { enabled ->
+                        isTestModeEnabled = enabled
+                    }
+                )
+
+                // Overlay itself
+                if (isTestModeEnabled) {
+                    SoundChoreographyTestModeOverlay(
+                        event = event,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .zIndex(30f),
+                        onClose = {
+                            SoundChoreographyTestMode.setEnabled(false)
+                            isTestModeEnabled = false
+                        }
+                    )
+                }
+            }
         }
     }
 

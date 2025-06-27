@@ -96,7 +96,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
         // Screen composition
         Box(modifier = modifier.fillMaxWidth()) {
-            eventMap.Screen(modifier = Modifier.fillMaxSize())
+            eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             MapActions(eventMap, waveViewModel, observerId)
         }

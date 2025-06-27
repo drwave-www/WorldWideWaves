@@ -57,22 +57,32 @@ merge_geojsons() {
     return
   fi
 
-  # Start with a basic GeoJSON structure
-  echo '{"type":"FeatureCollection","features":[]}' > "$output_file"
-
-  # For each input file, extract the features and add them to the output
-  for input_file in "${input_files[@]}"; do
-    # Check if the file exists and is not empty
-    if [ -s "$input_file" ]; then
-      # Use jq to extract features from this file and append to the output
-      # This temporary approach merges features one by one
-      local temp_file=$(mktemp)
-      ./bin/jq -s '.[0].features = (.[0].features + .[1].features) | .[0]' "$output_file" "$input_file" > "$temp_file"
-      mv "$temp_file" "$output_file"
-    else
-      echo "Warning: File $input_file is empty or doesn't exist, skipping."
-    fi
-  done
+  # Build a single FeatureCollection containing features from every input file.
+  #
+  #  Each downloaded file from polygons.openstreetmap.fr is **not** a
+  #  FeatureCollection but a raw `MultiPolygon` geometry JSON such as:
+  #     { "type":"MultiPolygon","coordinates":[ ... ] }
+  #
+  #  We therefore need to gather all the `coordinates` arrays and wrap them
+  #  explicitly in a FeatureCollection → Feature → MultiPolygon hierarchy.
+  #
+  #  jq explanation:
+  #   -s                      : slurp all input files into a JSON array
+  #   map(.coordinates)       : keep only the coordinates array of each object
+  #   | add                   : concatenate the coordinate arrays
+  #   {type:...,features:[...]}: build the final valid GeoJSON
+  ./bin/jq -s '{
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "MultiPolygon",
+            coordinates: (map(.coordinates) | add)
+          }
+        }
+      ]
+    }' "${input_files[@]}" > "$output_file"
 }
 
 for event in $EVENTS; do # Retrieve Geojson files from OSM

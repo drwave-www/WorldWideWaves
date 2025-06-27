@@ -37,7 +37,7 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     private val clock: IClock by inject()
     private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
-    private val soundChoreographyManager: SoundChoreographyManager by inject()
+    val soundChoreographyManager: SoundChoreographyManager by inject()
 
     fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
 
@@ -52,7 +52,42 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
     fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
         choreographyManager.getCurrentWarmingSequence(event.getStartDateTime())
 
-    suspend fun playCurrentSoundChoreographyTone() =
-        soundChoreographyManager.playCurrentSoundTone(event.getStartDateTime())
+    /**
+     * Play a tone from the choreography that is active **now** and return the MIDI pitch
+     * (or `null` if nothing was played).  
+     *
+     * In debug builds we try to forward the played note information to the
+     * Sound-Choreography test-mode overlay (if present) via reflection, so that
+     * no production-code dependency is introduced.
+     */
+    suspend fun playCurrentSoundChoreographyTone(): Int? {
+        val note = soundChoreographyManager.playCurrentSoundTone(event.getStartDateTime())
+        notifyDebug(note)
+        return note
+    }
+
+    /**
+     * Same as [playCurrentSoundChoreographyTone] but allows forcing a custom
+     * `startTime` (useful for unit / UI tests that need deterministic playback).
+     */
+    suspend fun playCurrentSoundChoreographyTone(forceStartTime: Instant? = null): Int? {
+        val startTime = forceStartTime ?: event.getStartDateTime()
+        val note = soundChoreographyManager.playCurrentSoundTone(startTime)
+        notifyDebug(note)
+        return note
+    }
+
+    /**
+     * Try to inform the optional debug overlay that a note has been played.
+     * Uses reflection so that commonMain does not depend on debug-only code.
+     */
+    private fun notifyDebug(note: Int?) {
+        if (note == null) return
+        runCatching {
+            val clazz = Class.forName("com.worldwidewaves.debug.SoundChoreographyTestMode")
+            val method = clazz.getMethod("noteWasPlayed", Int::class.javaPrimitiveType)
+            method.invoke(null, note)
+        }
+    }
 
 }

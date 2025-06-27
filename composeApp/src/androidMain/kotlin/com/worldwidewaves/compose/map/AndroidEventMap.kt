@@ -29,12 +29,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,18 +58,21 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.worldwidewaves.compose.DownloadProgressIndicator
 import com.worldwidewaves.compose.ErrorMessage
+import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.map_download
 import com.worldwidewaves.shared.generated.resources.map_downloading
+import com.worldwidewaves.shared.generated.resources.map_error_download
+import com.worldwidewaves.shared.generated.resources.map_loading
+import com.worldwidewaves.shared.generated.resources.map_starting_download
 import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -118,13 +119,12 @@ class AndroidEventMap(
 
     // Map availability and download state tracking
     private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
-    private var isMapDownloading by mutableStateOf(false)
 
     /**
      * The Compose UI for the map
      */
     @Composable
-    fun Screen(modifier: Modifier) {
+    fun Screen(autoMapDownload: Boolean = false, modifier: Modifier) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val mapLibreView: MapView = rememberMapLibreViewWithLifecycle()
@@ -135,10 +135,12 @@ class AndroidEventMap(
         var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
         var isMapAvailable by remember { mutableStateOf(false) }
+        var isMapDownloading by remember { mutableStateOf(false) }
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
-            mapViewModel.checkIfMapIsAvailable(event.id)
+            // Check only – let the user trigger the download via the UI button
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
             isMapAvailable = mapAvailabilityChecker.isMapDownloaded(event.id)
         }
 
@@ -150,24 +152,11 @@ class AndroidEventMap(
                 is MapFeatureState.Installed -> {
                     isMapDownloading = false
                     isMapAvailable = true
-                    // Trigger map loading after successful download
-                    loadMap(
-                        context = context,
-                        scope = scope, 
-                        mapLibreView = mapLibreView, 
-                        hasLocationPermission = hasLocationPermission,
-                        onMapLoaded = { 
-                            isMapLoaded = true
-                            onMapLoaded()
-                        },
-                        onMapError = { mapError = true }
-                    )
                 }
                 is MapFeatureState.Failed -> {
-                    isMapDownloading = false
                     mapError = true
                 }
-                else -> isMapDownloading = false
+                else -> {}
             }
         }
 
@@ -189,11 +178,13 @@ class AndroidEventMap(
                     },
                     onMapError = { mapError = true }
                 )
+            } else if (autoMapDownload) {
+                mapViewModel.downloadMap(event.id)
             }
         }
 
         // The map view
-        BoxWithConstraints(modifier = modifier) {
+        Box(modifier = modifier) {
             // Default map image as background
             Image(
                 modifier = Modifier.fillMaxSize(),
@@ -201,42 +192,71 @@ class AndroidEventMap(
                 contentDescription = "defaultMap"
             )
 
+            // LibreMap as Android Composable - only visible when map is loaded
+            AndroidView(
+                factory = { mapLibreView },
+                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
+            )
+
             // Show appropriate UI based on map state
             when {
                 isMapLoaded -> {
                     // Map is loaded and visible, show nothing extra
                 }
-                isMapDownloading -> {
-                    // Show download progress
-                    when (val state = mapFeatureState) {
-                        is MapFeatureState.Downloading -> {
-                            DownloadProgressIndicator(
-                                progress = state.progress,
-                                message = stringResource(ShRes.string.map_downloading),
-                                onCancel = { mapViewModel.cancelDownload() }
-                            )
-                        }
-                        else -> {
-                            // Generic loading indicator for other download states
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = extendedLight.quinary.color,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(maxWidth / 3)
-                            )
+                isMapDownloading && !mapError -> {
+                    // Semi-transparent overlay for download UI
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when (val state = mapFeatureState) {
+                                    is MapFeatureState.Downloading -> {
+                                        DownloadProgressIndicator(
+                                            progress = state.progress,
+                                            message = stringResource(ShRes.string.map_downloading),
+                                            onCancel = { mapViewModel.cancelDownload() }
+                                        )
+                                    }
+                                    is MapFeatureState.Pending -> {
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_starting_download))
+                                    }
+                                    is MapFeatureState.Retrying -> {
+                                        DownloadProgressIndicator(
+                                            message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
+                                            onCancel = {
+                                                isMapDownloading = false
+                                                mapViewModel.cancelDownload()
+                                            }
+                                        )
+                                    }
+                                    else -> {
+                                        // Generic loading indicator for other download states
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_loading))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                mapError -> {
+                mapError && isMapDownloading -> {
                     // Show error with retry option
-                    ErrorMessage(
-                        message = "Failed to load map for ${event.id}",
-                        onRetry = { 
-                            mapError = false
-                            mapViewModel.downloadMap(event.id)
-                        }
-                    )
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        ErrorMessage(
+                            message = stringResource(ShRes.string.map_error_download),
+                            onRetry = {
+                                mapError = false
+                                mapViewModel.downloadMap(event.id)
+                            }
+                        )
+                    }
                 }
                 !isMapAvailable -> {
                     // Show download button overlay
@@ -244,35 +264,28 @@ class AndroidEventMap(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                            modifier = Modifier
-                                .size(width = 200.dp, height = 60.dp)
+                        Button(
+                            onClick = {
+                                // Immediately reflect downloading state for better UX
+                                mapError = false
+                                isMapDownloading = true
+                                mapViewModel.downloadMap(event.id)
+                            },
+                            modifier = Modifier.size(width = 200.dp, height = 60.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
-                            Button(
-                                onClick = { mapViewModel.downloadMap(event.id) },
-                                modifier = Modifier.fillMaxSize(),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                            ) {
-                                Text(
-                                    text = stringResource(ShRes.string.map_download),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            Text(
+                                text = stringResource(ShRes.string.map_download),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
                 }
             }
-
-            // LibreMap as Android Composable - only visible when map is loaded
-            AndroidView(
-                factory = { mapLibreView },
-                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
-            )
         }
     }
 
