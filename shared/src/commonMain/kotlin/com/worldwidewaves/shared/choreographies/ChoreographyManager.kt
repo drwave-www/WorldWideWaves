@@ -35,6 +35,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Manages choreography sequences for different phases of wave events.
@@ -59,14 +60,20 @@ class ChoreographyManager<T>(
 
     data class ResolvedSequence<T>(
         val sequence: ChoreographySequence,
-        val resolvedImages: List<T>,
+        val resolvedImage: T?,
+        val frameWidth: Int,
+        val frameHeight: Int,
+        val frameCount: Int,
         val startTime: Duration,
         val endTime: Duration
     )
 
     data class DisplayableSequence<T>(
-        val images: List<T>,
-        val timing: Duration,
+        val image: T?,
+        val frameWidth: Int,
+        val frameHeight: Int,
+        val frameCount: Int,
+        val timings: List<Duration>,
         val text: String,
         val loop: Boolean,
         val remainingDuration: Duration?
@@ -76,18 +83,27 @@ class ChoreographyManager<T>(
 
     private fun ChoreographySequence.toResolved(
         startTime: Duration = Duration.ZERO
-    ): ResolvedSequence<T> = ResolvedSequence(
-        sequence = this,
-        resolvedImages = resolveImageResources(imageResolver),
-        startTime = startTime,
-        endTime = startTime + totalDuration
-    )
+    ): ResolvedSequence<T> {
+        val resolvedImages = resolveImageResources(imageResolver)
+        return ResolvedSequence(
+            sequence = this,
+            resolvedImage = resolvedImages.firstOrNull(),
+            frameWidth = frameWidth,
+            frameHeight = frameHeight,
+            frameCount = frameCount,
+            startTime = startTime,
+            endTime = startTime + totalDuration
+        )
+    }
 
     private fun ResolvedSequence<T>.toDisplayable(
         remainingDuration: Duration? = null
     ): DisplayableSequence<T> = DisplayableSequence(
-        images = resolvedImages,
-        timing = sequence.timing,
+        image = resolvedImage,
+        frameWidth = frameWidth,
+        frameHeight = frameHeight,
+        frameCount = frameCount,
+        timings = if (sequence.timing.isNotEmpty()) sequence.timing else List(frameCount) { 1.seconds },
         text = sequence.text,
         loop = sequence.loop,
         remainingDuration = remainingDuration
