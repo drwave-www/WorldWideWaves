@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 DrWave
+# Copyright 2025 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
 # countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,11 +21,30 @@
 #
 #
 #
-### NOTICE: In non-X environments, run through xvfb-run
+
+if [ -z "$DISPLAY" ] && [ -z "$XVFB_RUNNING" ]; then
+    echo "No DISPLAY environment variable found. Checking for xvfb-run..."
+
+    if ! command -v xvfb-run &> /dev/null; then
+        echo "Error: xvfb-run is not available. Please install it or run in an X environment."
+        echo "On Ubuntu/Debian: sudo apt-get install xvfb"
+        echo "On CentOS/RHEL: sudo yum install xorg-x11-server-Xvfb"
+        exit 1
+    fi
+
+    echo "Running script through xvfb-run..."
+    export XVFB_RUNNING=1
+    exec xvfb-run -a --server-args="-screen 0 1024x768x24" "$0" "$@"
+
+    # This line should never be reached
+    echo "Error: Failed to execute xvfb-run"
+    exit 1
+fi
 
 # ---------- Vars and support functions ---------------------------------------
-cd "$(dirname "$0")" # always work from executable folder
+cd "$(dirname "$0")" || exit # always work from executable folder
 . ./libs/lib.inc.sh
+# shellcheck disable=SC2164
 cd "$(dirname "$0")" # always work from executable folder
 
 # Create necessary directories
@@ -77,14 +96,38 @@ fi
 
 # ---------- Process maps ---------------------------------------------------
 
-if [ ! -z "$1" ]; then
-    if $(exists "$1"); then
-        EVENTS=$1
-    else
-        echo -e "${RED}Unexistent event $1${NC}"
-        exit 1
+if [ $# -gt 0 ]; then
+  ALL_PARAMS="$*"
+
+  IFS=', ' read -ra EVENT_ARRAY <<< "$ALL_PARAMS"
+  VALID_EVENTS=()
+
+  for event in "${EVENT_ARRAY[@]}"; do
+    if [ -z "$event" ]; then
+      continue
     fi
+
+    if exists "$event"; then
+      VALID_EVENTS+=("$event")
+    else
+      echo "Unexistent event: $event"
+    fi
+  done
+
+  if [ ${#VALID_EVENTS[@]} -eq 0 ]; then
+    echo "No valid events provided"
+    exit 1
+  fi
+
+  EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
+    exit 1
+  fi
 fi
+
+# -----------------------------------------------------------------------------
 
 echo -e "${BLUE}Generating default map images with dimensions: ${IMAGE_WIDTH}x${IMAGE_HEIGHT}${NC}"
 echo
@@ -119,17 +162,28 @@ for event in $EVENTS; do
     # Output file path
     OUTPUT_FILE="$OUTPUT_DIR/e_map_${event}.png"
     
-    echo "Rendering map for $event (center and zoom will be auto-calculated from GeoJSON)"
+    # Detect if we have an explicit bbox in events.json.
+    BBOX_RAW=$(get_event_bbox "$event")
+    NODE_EXTRA_ARGS=""
+
+    if [ -n "$BBOX_RAW" ] && [ "$BBOX_RAW" != "null" ]; then
+        IFS=',' read -r MIN_LNG MIN_LAT MAX_LNG MAX_LAT <<< "$BBOX_RAW"
+        NODE_EXTRA_ARGS="$MIN_LNG $MIN_LAT $MAX_LNG $MAX_LAT"
+        echo "Rendering map for $event (using explicit area.bbox)"
+    else
+        echo "Rendering map for $event (bbox will be derived from GeoJSON)"
+    fi
     
     # Render the map using the Node.js script.
-    # Center and zoom are calculated automatically by the script from the GeoJSON bounds.
+    # shellcheck disable=SC2086 # intentional word-splitting for NODE_EXTRA_ARGS
     node "$NODE_SCRIPT" \
         "$GEOJSON_FILE" \
         "$MBTILES_FILE" \
         "$STYLE_DIR/mapstyle.json" \
         "$OUTPUT_FILE" \
         "$IMAGE_WIDTH" \
-        "$IMAGE_HEIGHT"
+        "$IMAGE_HEIGHT" \
+        $NODE_EXTRA_ARGS
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Successfully generated map image for $event: $OUTPUT_FILE${NC}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 DrWave
+# Copyright 2025 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
 # countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -20,9 +20,18 @@
 # limitations under the License.
 #
 
-cd "$(dirname "$0")" # always work from executable folder
+cd "$(dirname "$0")" || exit # always work from executable folder
 
 #set -x
+
+# Single line to check and lock
+(
+    flock -n 9 || { echo "Script is already running"; exit 1; }
+
+    # Your script continues here...
+    echo "Script is running with PID $$"
+
+) 9>"/tmp/$(basename "$0").lock"
 
 # ---------- Download dependencies --------------------------------------------
 
@@ -38,20 +47,44 @@ cd "$(dirname "$0")" # always work from executable folder
 
 # -----------------------------------------------------------------------------
 
-if [ ! -z "$1" ]; then
-  if $(exists $1); then
-    EVENTS=$1
-    rm -f ./data/$1.mbtiles
-  else
-    echo "Unexistent event $1"
+if [ $# -gt 0 ]; then
+  ALL_PARAMS="$*"
+
+  IFS=', ' read -ra EVENT_ARRAY <<< "$ALL_PARAMS"
+  VALID_EVENTS=()
+
+  for event in "${EVENT_ARRAY[@]}"; do
+    if [ -z "$event" ]; then
+      continue
+    fi
+
+    if exists "$event"; then
+      VALID_EVENTS+=("$event")
+    else
+      echo "Unexistent event: $event"
+    fi
+  done
+
+  if [ ${#VALID_EVENTS[@]} -eq 0 ]; then
+    echo "No valid events provided"
+    exit 1
+  fi
+
+  EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
     exit 1
   fi
 fi
+
+# -----------------------------------------------------------------------------
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
 
   echo "==> EVENT $event"
+  rm -f "./data/$event.mbtiles" # Clean previous MBTILES
 
   TYPE=$(conf $event type)
 

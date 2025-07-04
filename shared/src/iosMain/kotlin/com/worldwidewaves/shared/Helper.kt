@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,11 +21,40 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.di.IOSModule
 import com.worldwidewaves.shared.di.sharedModule
 import org.koin.core.context.startKoin
+import org.koin.core.KoinApplication
 
-fun initKoin() {
-    startKoin {
-        modules(sharedModule())
+/**
+ * Initialise Koin for iOS.
+ *
+ * Swift code calls this via `HelperKt.doInitKoin()`.
+ * We load every common module *and* the iOS-specific module only once.
+ */
+fun doInitKoin() {
+    // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
+    if (koinApp != null) return
+
+    koinApp = startKoin {
+        // `sharedModule` is already a List<Module>; add the iOS-specific one.
+        modules(sharedModule + IOSModule)
     }
 }
+
+/**
+ * Deprecated alias kept so existing Kotlin callers (if any) continue to compile.
+ */
+@Deprecated(
+    message = "Renamed to doInitKoin() to match Swift side.",
+    replaceWith = ReplaceWith("doInitKoin()")
+)
+fun initKoin() = doInitKoin()
+
+// ------------------------------------------------------------
+// Private holder to remember if Koin has already been started.
+// `KoinApplication` is available on every KMP target so we can
+// safely keep the reference here.
+// ------------------------------------------------------------
+
+private var koinApp: KoinApplication? = null

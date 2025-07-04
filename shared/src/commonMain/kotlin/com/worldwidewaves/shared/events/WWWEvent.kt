@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -25,34 +25,21 @@ import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SOON_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
-import com.worldwidewaves.shared.events.IWWWEvent.EventObservation
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.getCommunityText
+import com.worldwidewaves.shared.getCountryText
 import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.utils.updateIfChanged
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Instant
+import com.worldwidewaves.shared.getEventText
+import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -60,24 +47,19 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
-import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEvent(
 
     override val id: String,
     override val type: String,
-    override val location: String,
     override val country: String? = null,
     override val community: String? = null,
 
@@ -85,7 +67,6 @@ data class WWWEvent(
     override val date: String,
     override val startHour: String,
 
-    override val description: String,
     override  val instagramAccount: String,
     override val instagramHashtag: String,
 
@@ -122,29 +103,6 @@ data class WWWEvent(
 
     // ---------------------------
 
-    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
-
-    private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
-    override val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
-
-    private val _progression = MutableStateFlow(0.0)
-    override val progression: StateFlow<Double> = _progression.asStateFlow()
-
-    private val _isWarmingInProgress = MutableStateFlow(false)
-    override val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
-
-    private val _userIsGoingToBeHit = MutableStateFlow(false)
-    override val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
-
-    private val _userHasBeenHit = MutableStateFlow(false)
-    override val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
-
-    // --
-
-    @Transient private var observationJob: Job? = null
-
-    // ---------------------------
-
     @Transient private var _wave: WWWEventWave? = null
     override val wave: WWWEventWave
         get() = _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
@@ -160,6 +118,12 @@ data class WWWEvent(
     }
 
     @Transient override val warming = WWWEventWaveWarming(this)
+
+    // ---------------------------
+
+    @Transient var cachedObserver: WWWEventObserver? = null
+    override fun getEventObserver(): WWWEventObserver =
+        cachedObserver ?: WWWEventObserver(this).also { cachedObserver = it }
 
     // ---------------------------
 
@@ -197,6 +161,14 @@ data class WWWEvent(
     override fun getLocationImage(): Any? = getEventImageByType("location", this.id)
     override fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
     override fun getCountryImage(): Any? = getEventImageByType("country", this.country)
+    override fun getMapImage(): Any? = getEventImageByType("map", this.id)
+
+    // ---------------------------
+
+    override fun getLocation(): StringResource = getEventText("location", this.id)
+    override fun getDescription(): StringResource = getEventText("description", this.id)
+    override fun getLiteralCountry(): StringResource = getCountryText(this.country)
+    override fun getLiteralCommunity(): StringResource= getCommunityText(this.community)
 
     // ---------------------------
 
@@ -268,12 +240,12 @@ data class WWWEvent(
      */
     override fun getLiteralStartDateSimple(): String = try {
         getStartDateTime().let {
-            "${it.toLocalDateTime(getTZ()).dayOfMonth.toString().padStart(2, '0')}/${
-                it.toLocalDateTime(getTZ()).monthNumber.toString().padStart(2, '0')
+            "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
+                it.toLocalDateTime(getTZ()).month.number .toString().padStart(2, '0')
             }"
         }
-    } catch (e: Exception) {
-        "error"
+    } catch (_: Exception) {
+        "00/00"
     }
 
     /**
@@ -347,152 +319,15 @@ data class WWWEvent(
      */
     override suspend fun getAllNumbers(): WaveNumbersLiterals {
         suspend fun safeCall(block: suspend () -> String): String =
-            try { block() } catch (e: Throwable) { "error" }
+            try { block() } catch (_: Throwable) { "error" }
 
         return WaveNumbersLiterals(
             waveTimezone = safeCall { getLiteralTimezone() },
             waveSpeed = safeCall { wave.getLiteralSpeed() },
             waveStartTime = safeCall { getLiteralStartTime() },
             waveEndTime = safeCall { getLiteralEndTime() },
-            waveTotalTime = safeCall { getLiteralTotalTime() },
-            waveProgression = safeCall { wave.getLiteralProgression() }
+            waveTotalTime = safeCall { getLiteralTotalTime() }
         )
-    }
-
-    // ---------------------------
-
-    /**
-     * Starts observing the wave event if not already started.
-     *
-     * Launches a coroutine to initialize the last observed status and progression,
-     * then calls `observeWave` to begin periodic checks.
-     */
-    override fun startObservation() {
-        if (observationJob == null) {
-            coroutineScopeProvider.launchDefault {
-
-                // Initialize state with current values
-                _eventStatus.value = getStatus()
-
-                try {
-                    _progression.value = wave.getProgression()
-                } catch (e: Throwable) {
-                    Log.e(
-                        tag = WWWEventWave::class.simpleName!!,
-                        message = "Error initializing progression: $e"
-                    )
-                }
-
-                // Start observation if event is running or about to start
-                if (isRunning() || (isSoon() && isNearTime())) {
-                    observationJob = createObservationFlow()
-                        .flowOn(Dispatchers.IO)
-                        .catch { e ->
-                            Log.e("observeWave", "Error in observation flow: $e")
-                        }
-                        .onEach { (progressionValue, status) ->
-                            updateStates(progressionValue, status)
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
-                }
-            }
-        }
-    }
-
-    override fun stopObservation() {
-        coroutineScopeProvider.launchDefault {
-            try {
-                observationJob?.cancelAndJoin()
-            } catch (e: CancellationException) {
-                // Expected exception during cancellation
-            } catch (e: Exception) {
-                Log.e("stopObservation", "Error stopping observation: $e")
-            } finally {
-                observationJob = null
-            }
-        }
-    }
-
-    /**
-     * Creates a flow that periodically emits wave observations.
-     */
-    private fun createObservationFlow() = callbackFlow {
-        try {
-            while (!isDone()) {
-                // Get current state and emit it
-                val progression = wave.getProgression()
-                val status = getStatus()
-                send(EventObservation(progression, status))
-
-                // Wait for the next observation interval
-                delay(getObservationInterval())
-            }
-
-            // Final emission when event is done
-            send(EventObservation(100.0, Status.DONE))
-
-        } catch (e: Exception) {
-            Log.e("observationFlow", "Error in observation flow: $e")
-        }
-
-        // Clean up when flow is cancelled
-        awaitClose()
-    }
-
-    /**
-     * Updates all state flows based on the current event state.
-     */
-    private suspend fun updateStates(progression: Double, status: Status) {
-        // Update the main state flows
-        _progression.updateIfChanged(progression)
-        _eventStatus.updateIfChanged(status)
-
-        // Check for warming started
-        var warmingInProgress = false
-        if (warming.isUserWarmingStarted()) {
-            warmingInProgress = true
-        }
-
-        // Check if user is about to be hit
-        var userIsGoingToBeHit = false
-        val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
-        if (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) {
-            warmingInProgress = false
-            userIsGoingToBeHit = true
-        }
-
-        // Check if user has been hit
-        if (wave.hasUserBeenHitInCurrentPosition()) {
-            warmingInProgress = false
-            userIsGoingToBeHit = false
-            _userHasBeenHit.updateIfChanged(true)
-        }
-
-        _isWarmingInProgress.updateIfChanged(warmingInProgress)
-        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
-    }
-
-    /**
-     * Calculates the observation interval for the wave event.
-     *
-     * This function determines the appropriate interval for observing the wave event based on the
-     * current time, the event start time, and the time before the user is hit by the wave.
-     *
-     */
-    private suspend fun getObservationInterval(): Duration {
-        val now = clock.now()
-        val eventStartTime = getStartDateTime()
-        val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = wave.timeBeforeUserHit() ?: 1.days
-
-        return when {
-            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
-            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
-            timeBeforeEvent > 35.seconds -> 1.seconds
-            isRunning() -> 500.milliseconds
-            timeBeforeHit < 2.seconds -> 50.milliseconds // For sound accuracy
-            else -> 1.minutes // Default case, more reasonable than 1 day
-        }
     }
 
     // ---------------------------
@@ -514,9 +349,6 @@ data class WWWEvent(
             type !in listOf("city", "country", "world") ->
                 this.add("Type must be either 'city', 'country', or 'world'")
 
-            location.isEmpty() ->
-                this.add("Location is empty")
-
             type == "city" && country.isNullOrEmpty() ->
                 this.add("Country must be specified for type 'city'")
 
@@ -528,9 +360,6 @@ data class WWWEvent(
 
             !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
                 this.add("Start hour format is invalid or time is not valid")
-
-            description.isEmpty() ->
-                this.add("Description is empty")
 
             instagramAccount.isEmpty() ->
                 this.add("Instagram account is empty")

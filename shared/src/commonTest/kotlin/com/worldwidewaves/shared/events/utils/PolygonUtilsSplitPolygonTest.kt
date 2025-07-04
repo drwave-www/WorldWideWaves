@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases
 import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases.TestCasePolygon
@@ -46,17 +45,16 @@ class PolygonUtilsSplitPolygonTest {
     @Test
     fun testSplitPolygonByLongitude() = runTest {
         PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { idx, testCase ->
-            val result = testSplitPolygonCase(idx, testCase)
-            testRecomposePolygonCase(idx, testCase, result)
+            testSplitPolygonCase(idx, testCase)
         }
     }
 
-    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.PolygonSplitResult {
+    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.SplitResult {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {
-            testCase.longitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.longitudeToCut)
-            testCase.composedLongitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.composedLongitudeToCut)
+            testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
+            testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
             else -> throw IllegalArgumentException("Invalid test case, should contain either longitudeToCut or composedLongitudeToCut")
         }
 
@@ -68,25 +66,11 @@ class PolygonUtilsSplitPolygonTest {
             assertEquals(expectedPolygons.size, result.size, "${selector.name} size mismatch")
             expectedPolygons.forEachIndexed { index, expectedPolygon ->
                 assertEquals(expectedPolygon.polygon.size, result[index].size, "${selector.name} polygon $index size mismatch")
-                assertEquals(expectedPolygon.nbCutPositions,
-                    result[index].cutPositions.filter { it.cutId == result[index].cutId }.size,
-                    "${selector.name} polygon $index nb cutpositions mismatch")
                 assertTrue(areRingPolygonsEqual(expectedPolygon.polygon, result[index]), "${selector.name} polygon $index not equal to test case")
             }
         }
 
         return result
-    }
-
-    private fun testRecomposePolygonCase(idx: Int, testCase: TestCasePolygon, result: PolygonUtils.PolygonSplitResult) {
-        Napier.i("==> Testing recompose of polygon testcase $idx")
-
-        val recomposedPolygons = recomposeCutPolygons(result.left + result.right)
-
-        assertEquals(1, recomposedPolygons.size, "Recomposed polygons nb mismatch")
-        assertEquals(0, recomposedPolygons[0].cutPositions.size, "Recomposed polygons cut positions size mismatch")
-        assertEquals(testCase.recomposedPolygon.size, recomposedPolygons[0].size, "Recomposed polygons size mismatch")
-        assertTrue(areRingPolygonsEqual(testCase.recomposedPolygon, recomposedPolygons[0]), "Recomposed polygons not equal to test case")
     }
 
     // ------------------------------------------------------------------------

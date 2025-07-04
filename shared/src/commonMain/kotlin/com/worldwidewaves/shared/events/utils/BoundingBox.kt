@@ -3,7 +3,7 @@ package com.worldwidewaves.shared.events.utils
 import kotlin.math.abs
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -29,7 +29,11 @@ import kotlin.math.abs
  * Does not support International Date Line wrapping.
  *
  */
-data class BoundingBox(val sw: Position, val ne: Position) {
+class BoundingBox private constructor(val sw: Position, val ne: Position) {
+
+    operator fun component1(): Position = sw
+    operator fun component2(): Position = ne
+
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init()
@@ -38,7 +42,19 @@ data class BoundingBox(val sw: Position, val ne: Position) {
     // --- Companion object
 
     companion object {
-        fun fromPositions(positions: List<Position>): BoundingBox? {
+        fun fromCorners(sw: Position, ne: Position): BoundingBox {
+            return if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+                // Already in correct order, no need to create new objects
+                BoundingBox(sw, ne)
+            } else {
+                BoundingBox(
+                    sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
+                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init()
+                )
+            }
+        }
+
+        fun fromCorners(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
             val maxLat = positions.maxOf { it.lat }

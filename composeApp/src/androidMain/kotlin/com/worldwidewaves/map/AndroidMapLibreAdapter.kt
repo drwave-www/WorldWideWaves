@@ -1,7 +1,7 @@
 package com.worldwidewaves.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,6 +21,7 @@ package com.worldwidewaves.map
  * limitations under the License.
  */
 
+import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_COLOR
@@ -29,6 +30,7 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
 import com.worldwidewaves.shared.map.MapLibreAdapter
+import com.worldwidewaves.shared.toLatLngBounds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.maplibre.android.camera.CameraPosition
@@ -37,17 +39,24 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineDasharray
+import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 
 /**
  * MapLibre adapter that implements the PlatformMap interface
  */
-class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter {
+class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter<MapLibreMap> {
 
     // -- Public/Override properties
 
@@ -57,25 +66,33 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
 
+    override fun getWidth(): Double {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.width.toDouble()
+    }
+
+    override fun getHeight(): Double {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.height.toDouble()
+    }
+
     // -- Private properties
 
-    private var constraintHandler: MapLibreConstraintHandler? = null
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
 
     // --------------------------------
 
     private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
 
-    fun setMap(map: MapLibreMap) {
+    override fun setMap(map: MapLibreMap) {
         mapLibreMap = map
 
         // Update adapter with initial camera position
-        updateCameraInfo(map)
+        updateCameraInfo()
 
         // Set camera movement listener to update position
         map.addOnCameraIdleListener {
-            updateCameraInfo(map)
-            constrainCamera()
+            updateCameraInfo()
         }
 
         // Execute any pending callbacks
@@ -83,6 +100,11 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             callback(this)
         }
         onMapSetCallbacks.clear()
+    }
+
+    override fun setStyle(stylePath: String, callback: () -> Unit?) {
+        require(mapLibreMap != null)
+        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { style -> callback() }
     }
 
     fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
@@ -118,39 +140,69 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         }
     }
 
-    override fun setBoundsConstraints(bounds: BoundingBox) {
-        val map = mapLibreMap ?: return
-
-        constraintHandler = MapLibreConstraintHandler(bounds)
-        constraintHandler?.applyConstraints(map)
-    }
-
     override fun setMinZoomPreference(minZoom: Double) {
-        mapLibreMap?.setMinZoomPreference(minZoom)
+        require(mapLibreMap != null)
+        mapLibreMap!!.setMinZoomPreference(minZoom)
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        mapLibreMap?.setMaxZoomPreference(maxZoom)
+        require(mapLibreMap != null)
+        mapLibreMap!!.setMaxZoomPreference(maxZoom)
+    }
+
+    override fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
+        require(mapLibreMap != null)
+        mapLibreMap!!.uiSettings.setAttributionMargins(left, top, right, bottom)
     }
 
     // ------------------------------------------------------------------------
 
-    // Method to update the camera position and zoom
-    private fun updateCameraInfo(map: MapLibreMap) {
-        map.cameraPosition.target?.let { target ->
-            _currentPosition.value = Position(target.latitude, target.longitude)
-        }
-        _currentZoom.value = map.cameraPosition.zoom
+    override fun addOnCameraIdleListener(callback: () -> Unit) {
+        require(mapLibreMap != null)
+        mapLibreMap!!.addOnCameraIdleListener(callback)
     }
 
-    // Check and constrain camera if needed
-    private fun constrainCamera() {
-        mapLibreMap?.let { map ->
-            constraintHandler?.constrainCamera(map)
+    // Method to update the camera position and zoom
+    private fun updateCameraInfo() {
+        require(mapLibreMap != null)
+        mapLibreMap!!.cameraPosition.target?.let { target ->
+            _currentPosition.value = Position(target.latitude, target.longitude)
         }
+        _currentZoom.value = mapLibreMap!!.cameraPosition.zoom
     }
 
     // -- Camera animations ---------------------------------------------------
+
+    override fun getMinZoomLevel(): Double {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.minZoomLevel
+    }
+
+    override fun getCameraPosition(): Position? {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.cameraPosition.target?.let {
+            Position(
+                it.latitude,
+                it.longitude
+            )
+        }
+    }
+
+    override fun getVisibleRegion(): BoundingBox {
+        require(mapLibreMap != null)
+        return mapLibreMap!!.projection.visibleRegion.let { visibleRegion ->
+            BoundingBox.fromCorners(
+                Position(visibleRegion.latLngBounds.getLatSouth(), visibleRegion.latLngBounds.getLonWest()),
+                Position(visibleRegion.latLngBounds.getLatNorth(), visibleRegion.latLngBounds.getLonEast())
+            )
+        }
+    }
+
+    override fun moveCamera(bounds: BoundingBox) {
+        require(mapLibreMap != null)
+        val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds.toLatLngBounds(), 0)
+        mapLibreMap!!.moveCamera(cameraUpdate)
+    }
 
     override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
@@ -193,6 +245,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
+                    Log.i(::animateCameraToBounds.name, "Current Map zoom level: ${_currentZoom.value}")
                     callback?.onFinish()
                 }
                 override fun onCancel() {
@@ -200,6 +253,11 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                 }
             }
         )
+    }
+
+    override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
+        require(mapLibreMap != null)
+        mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
     }
 
     // -- Add the Wave polygons to the map
@@ -241,6 +299,35 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             } catch (e: Exception) {
                 Log.e("MapUpdate", "Error updating wave polygons", e)
             }
+        }
+    }
+
+    // --------------------------------
+
+    override fun drawOverridenBbox(bbox: BoundingBox) {
+        require(mapLibreMap != null)
+
+        mapLibreMap!!.style?.let { style ->
+            val rectangleCoordinates = listOf(
+                listOf(
+                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat),
+                    Point.fromLngLat(bbox.ne.lng, bbox.sw.lat),
+                    Point.fromLngLat(bbox.ne.lng, bbox.ne.lat),
+                    Point.fromLngLat(bbox.sw.lng, bbox.ne.lat),
+                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat)
+                )
+            )
+
+            style.addSource(GeoJsonSource("bbox-override-source", Polygon.fromLngLats(rectangleCoordinates)))
+
+            style.addLayer(LineLayer("bbox-override-line", "bbox-override-source").apply {
+                setProperties(
+                    lineColor(Color.RED),
+                    lineWidth(1f),
+                    lineOpacity(1.0f),
+                    lineDasharray(arrayOf(5f, 2f))
+                )
+            })
         }
     }
 

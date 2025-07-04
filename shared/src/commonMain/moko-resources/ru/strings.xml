@@ -1,0 +1,487 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <!-- src_hash: 58a942b5f882bb71aff38d2de8229bf4f42585a6 -->
+  <string name="empty"></string>
+  <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
+  <string name="logo_description">логотип</string>
+  <!-- src_hash: 61fc0e60ec95e42f8980a55028563ef21f93b4a7 -->
+  <string name="background_description">фон</string>
+  <!-- src_hash: 260c23d3c107c00be03123d75ba717173ab4e8f7 -->
+  <string name="instagram_logo_description">Логотип Instagram</string>
+  <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
+  <string name="tab_infos_name">О приложении</string>
+  <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
+  <string name="tab_faq_name">FAQ</string>
+  <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
+  <string name="back">Назад</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">Волна сейчас!</string>
+  <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
+  <string name="events_select_all">Все</string>
+  <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
+  <string name="events_select_starred">Избранные</string>
+  <!-- src_hash: 5097ae23854862764e5f1fd13d54f9f50a888c5e -->
+  <string name="events_select_downloaded">Загруженные</string>
+  <!-- src_hash: a792d80677e5ce46a722b25244c64040b7d2af8a -->
+  <string name="map_checking_state">Проверка статуса карты..</string>
+  <!-- src_hash: d23c5aaffa2874371f98e8c0838e7c00f19e4410 -->
+  <string name="map_download">Скачать карту</string>
+  <!-- src_hash: 6d0c25a3cbd4f6f8f4767eb665c89323faa68b05 -->
+  <string name="map_downloading">Загрузка..</string>
+  <!-- src_hash: e81121a332e731d8b2af71537baeb942c36acabc -->
+  <string name="map_starting_download">Начало загрузки..</string>
+  <!-- src_hash: 6462b24730b6834d28fbbb556f15724b2eef50f9 -->
+  <string name="map_retrying_download">Повтор загрузки</string>
+  <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
+  <string name="map_loading">Загрузка карты..</string>
+  <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
+  <string name="map_cancel_download">Отмена</string>
+  <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
+  <string name="map_retry_download">Повтор</string>
+  <!-- src_hash: df1cb247f84a5ef21df00efb2b8583598a864904 -->
+  <string name="map_error_download">Ошибка при загрузке карты</string>
+  <!-- src_hash: 8f835e0a1dc2c6e63f307394c946b73dcdbd734f -->
+  <string name="map_downloaded">Карта загружена</string>
+  <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
+  <string name="events_uninstall_map_title">Удалить карту</string>
+  <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
+  <string name="events_uninstall">Удалить</string>
+  <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
+  <string name="events_uninstall_cancel">Отмена</string>
+  <!-- src_hash: ed8a34ece8d4273d61156a1994c7203385b5436d -->
+  <string name="events_uninstall_completed">Удаление завершено</string>
+  <!-- src_hash: a15ddf81db1e785e07fab4bc2c288f5a62fae962 -->
+  <string name="events_uninstall_failed">Удаление не удалось</string>
+  <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
+  <string name="events_uninstall_map_confirmation">Вы уверены, что хотите удалить эту карту? При необходимости вы сможете скачать её снова.</string>
+  <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
+  <string name="events_cannot_uninstall_map_message">Эту карту нельзя удалить, так как она является частью базового приложения или требуется для других функций. Она будет удалена при удалении приложения.</string>
+  <!-- src_hash: 0bf7dc9508d76a25a739e81d6de9537e3beeae93 -->
+  <string name="event_done">Завершено</string>
+  <!-- src_hash: 76fc38d3011bddbd0d6ea6c913c12b89768ea175 -->
+  <string name="event_soon">скоро !</string>
+  <!-- src_hash: 7fcc365541c8136e015f6b6de62e592e8cd609f2 -->
+  <string name="event_running">идёт</string>
+  <!-- src_hash: 155d63c9d555a28cb041a7bc944bcd126028f94b -->
+  <string name="event_favorite_on">избранное включено</string>
+  <!-- src_hash: ccf841f2ea2d86c733131d78cc57b56a89ed052c -->
+  <string name="event_favorite_off">избранное выключено</string>
+  <!-- src_hash: d09e583eb6246d39ee2340b12e246596866c89e2 -->
+  <string name="event_target_wave_on">К волне</string>
+  <!-- src_hash: 2bf443288dd74a114ca76e11228daeee38988b74 -->
+  <string name="event_target_wave_off">Событие не идёт</string>
+  <!-- src_hash: 409a83af1ba070df076d65e78a69fb1ab46c745b -->
+  <string name="event_target_me_on">К моей позиции</string>
+  <!-- src_hash: 17347a1b073379a67baf79186d80d225e01c4a20 -->
+  <string name="event_target_me_off">Вы не в зоне проведения</string>
+  <!-- src_hash: fcdce8786f93cb0a785fe6ebd0a2546ece0c5da8 -->
+  <string name="events_favorites_empty">Нет избранных событий. Добавьте событие, нажав на значок звезды!</string>
+  <!-- src_hash: 479305cf78e08c6a09778809429446f92824a7b4 -->
+  <string name="events_downloaded_empty">Ещё нет загруженных событий</string>
+  <!-- src_hash: 663e59373c8e0cd7b9358c849e8155cf9b3a94a4 -->
+  <string name="events_empty">Список событий пуст</string>
+  <!-- src_hash: 64189e446905b9317177323f1da63cd54b194af1 -->
+  <string name="events_loading_error">Ошибка при загрузке событий</string>
+  <!-- src_hash: af453dedc41c38cf727bc928484385d1f5bbf0ad -->
+  <string name="geoloc_undone">Обновление местоположения..</string>
+  <!-- src_hash: f6328db0f2344b04d73ed011773813b83d534e00 -->
+  <string name="geoloc_error">Не удаётся определить местоположение</string>
+  <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
+  <string name="geoloc_yourein">ВЫ в зоне!</string>
+  <!-- src_hash: 00a98f842906831b5c3d3dfb72807ba042877e83 -->
+  <string name="geoloc_yourein_at">ВЫ НАХОДИТЕСЬ в зоне! (%1$s)</string>
+  <!-- src_hash: f64dbd0543a3f40d820d78be6ddbf1ccceb89c47 -->
+  <string name="geoloc_yourenotin">ВЫ НЕ НАХОДИТЕСЬ в зоне</string>
+  <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
+  <string name="geoloc_warm_in">ВЫ в зоне, скоро разминка!</string>
+  <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
+  <string name="ask_gps_enable">Похоже, GPS отключён. Включить?</string>
+  <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
+  <string name="yes">Да</string>
+  <!-- src_hash: 924c47189936d3b50379d50ec631597071d7f64f -->
+  <string name="no">Нет</string>
+  <!-- src_hash: 5fef7a97148e6120fd47da067da7d148791afd0a -->
+  <string name="ok">ОК</string>
+  <!-- src_hash: 38223eb4eb3385b1c5ac009bb3a4e24e0b9302d6 -->
+  <string name="error">Ошибка</string>
+  <!-- src_hash: 865342e363cd7c8c16a70cdb75fca63df10f7357 -->
+  <string name="minute_singular">%1$dмин</string>
+  <!-- src_hash: d0bbe1455e4cdc62c76636760327c0516bc1f297 -->
+  <string name="minute_plural">%1$dмин</string>
+  <!-- src_hash: 5eb9b1d6cc4a945a538da02aaaa9f84721e28738 -->
+  <string name="hour_singular">%1$dч</string>
+  <!-- src_hash: cab581c24ad8e240921309dc5498396e2a09414b -->
+  <string name="hour_plural">%1$dч</string>
+  <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
+  <string name="be_waved">участвуй в волне!</string>
+  <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
+  <string name="wave_speed">Скорость волны</string>
+  <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
+  <string name="wave_start_time">Время начала</string>
+  <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
+  <string name="wave_end_time">Время окончания</string>
+  <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
+  <string name="wave_total_time">Общее время</string>
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <string name="wave_progression">Прогресс</string>
+  <!-- src_hash: 51ea217986113f63c3c9a1c4d5ef0f0fa04ebe55 -->
+  <string name="wave_warming">Разогрев..</string>
+  <!-- src_hash: 1ecbfefa00dbbe16006a8a0fdfd076be6122b99a -->
+  <string name="test_simulation">Тестовая симуляция</string>
+  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <string name="test_simulation_started">Симуляция запущена</string>
+  <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
+  <string name="wave_be_ready">Будьте готовы!</string>
+  <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->
+  <string name="wave_done">Волна завершена!</string>
+  <!-- src_hash: d955b930c0d83bdd6cf803ffa3627d94509153c8 -->
+  <string name="wave_hit">Отлично!</string>
+  <!-- src_hash: 00589bbc02fcac8151416d6e208c27b982b47c68 -->
+  <string name="wave_is_running">Волна идёт!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">Вы знаете: если бы историю Земли рассказали в книге на 1000 страниц, человечество появилось бы лишь в последнем абзаце самой последней страницы.</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">Но эта краткая история может закончиться раньше, чем ожидается. Мы изолированы в огромной и пустынной вселенной. Мы всё разрушаем. Мы эгоистичны. Мы жестоки. Мы жадны. Мы слепы. И мы стремимся доминировать. Но мы также способны на эмпатию, создаём чудеса, мы стойки, можем быть альтруистичными.</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">Но времени у нас мало. Мы так многого добились… Мы можем построить альтернативу: сообщество прав, солидарности, демократии. Всё в наших руках!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">Присоединяйтесь к глобальному движению, к мирному пробуждению. Давайте создавать человеческие волны — свидетельство нашей подлинной человечности и мощный сигнал нашим лидерам. Объединимся в городах и странах по всему миру. Выберем мир. Выберем радость. Выберем природу. Выберем НАС.</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">А что, если одной волны достаточно, чтобы объединить нас?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves — временное мобильное приложение со смелой целью: организовать серию человеческих волн, которые прокатятся по большим городам, по разным странам. Задуманная на год инициатива призвана преодолеть физические и культурные границы, формируя чувство единства, общности и общего человеческого опыта.</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">По сути, WorldWideWaves — больше, чем приложение: это глобальное движение, созданное для того, чтобы объединять людей в проявлении солидарности и радости, на основе общих ценностей.</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">Используя технологии, WorldWideWaves позволит участникам со всего мира присоединяться к этим человеческим волнам в своих городах, создавая мощное визуальное и эмоциональное зрелище.</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">По сути, WorldWideWaves — амбициозная попытка задействовать силу технологий ради по‑настоящему благородной цели — соединить человечество в празднике единства, радости и коллективного действия. С каждой волной участники не только вносят вклад в глобальное зрелище, но и ощущают и делятся с миром глубоким воздействием единения.</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">Правила и безопасность</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">Добро пожаловать в WorldWideWaves! Мы рады, что вы присоединяетесь к глобальным событиям-волнам. Чтобы всем было безопасно и комфортно, пожалуйста, придерживайтесь следующих рекомендаций:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">Общие правила:</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">Уважение ко всем: относитесь ко всем участникам с уважением, независимо от их происхождения. Дискриминация и домогательства недопустимы.</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">Уважайте общественное пространство: держите проходы свободными, соблюдайте местные законы и указатели, не перекрывайте движение и доступ для экстренных служб.</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">Находитесь в отведённых зонах: ради вашей безопасности оставайтесь в специально обозначенных местах (если они предусмотрены).</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">Будьте ответственны: если употребляете алкоголь, делайте это умеренно и в соответствии с местными законами.</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">Минимизируйте воздействие на природу: выбрасывайте мусор в урны и не сорите, чтобы сохранять чистоту площадок.</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">Сообщайте о проблемах: если заметили что-то подозрительное или человека в бедственном положении, сразу сообщите об этом местным властям.</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">Советы по безопасности:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">Одевайтесь по погоде: носите удобную одежду и обувь, подходящие для активности и условий погоды.</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">Пейте воду: берите с собой воду и поддерживайте водный баланс, особенно в жарком климате.</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">Берегите вещи: храните личные вещи в безопасности и не берите лишние ценности.</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">Будьте с напарником: оставайтесь с друзьями или заводите новых и присматривайте друг за другом.</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">Готовность к экстренным случаям: сохраните местные номера экстренных служб и договоритесь с друзьями о месте встречи на случай, если потеряете друг друга.</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">Действия в экстренной ситуации:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">Будьте внимательны: определите ближайшие безопасные выходы и открытые пространства (например, площади, парки) и при чрезвычайной ситуации следуйте указаниям местных властей.</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">Экстренные контакты: заранее сохраните в телефоне местный номер экстренной службы и контакт близкого человека.</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">В случае ЧС: позвоните по местному номеру экстренной службы, спокойно эвакуируйтесь в безопасное открытое место, помогите другим при возможности и держите пути доступа свободными.</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">Юридическая информация:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">Отказ от ответственности: участие в событиях WorldWideWaves вы осуществляете на свой риск. Принимая участие, вы соглашаетесь отказаться от претензий к создателям приложения, связанных с возможными травмами во время события.</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">Уведомление об общественном пространстве: это публичное мероприятие, где могут вестись фото- и видеосъёмка участниками или СМИ в соответствии с местными законами. Мы не претендуем на права на ваше изображение и не контролируем съёмку третьих лиц. Если вы предпочитаете не попадать в кадр, по возможности избегайте камер.</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">Открыть FAQ</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">Почему в моём городе или стране нет события?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">Мы выбрали несколько десятков самых населённых городов мира, чтобы сделать глобальную волну значимой. Технические и операционные ограничения пока не позволяют поддерживать неограниченное число локаций. Мы стремились к широкому представлению континентов, культур и языков — оно никогда не бывает идеальным. Со временем мы надеемся добавить новые города.</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">Что это за флаги континентов?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">Мы создали оригинальные, вымышленные флаги континентов, чтобы вы могли быстрее находить города в списке и чтобы отразить дух единства, который продвигает WorldWideWaves. Эти флаги не являются официальными и существуют только в этом приложении; они не призваны оскорблять или заменять какие-либо национальные или культурные символы. Поскольку официальных флагов у географических континентов нет, мы разработали свои — для наглядности и ради интереса. Если они вам нравятся, можете их использовать.</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">Кто стоит за WorldWideWaves?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves — сугубо частная инициатива. За ней не стоит ни корпорация, ни ассоциация, ни государство. Создатели хотели предложить конструктивный способ для людей, задающихся вопросом, как они могут помочь улучшить мир и условия жизни, — попытку объединить все заинтересованные существующие прогрессивные и демократические усилия под мирным, аполитичным знаменем.</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">Это коммерческая инициатива?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">Нет. Приложение полностью бесплатное. Хотя на разработку и дизайн ушли время и средства создателей, они не получают от него прямой личной финансовой выгоды.</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">Могу ли я помочь?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">Да, волонтёры всегда приветствуются. Код приложения открыт на GitHub, с создателями можно связаться по адресу worldwidewaves@proton.me (ответ не гарантирован). Лучший способ помочь — рассказывать другим: делитесь фото и видео с событий с указанными хештегами, обращайтесь к локальным инфлюенсерам, говорите о проекте в своём сообществе и главное — присоединяйтесь к волне!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">США</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">Мексика</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">Бразилия</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">Аргентина</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">Великобритания</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">Франция</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">Германия</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">Испания</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">Италия</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">Россия</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">Турция</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">Египет</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">ЮАР</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">Кения</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">Нигерия</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">ДР Конго</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">ОАЭ</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">Индия</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">Индонезия</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">Таиланд</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">Филиппины</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">Япония</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">Южная Корея</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">Китай</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">Австралия</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">Канада</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">Перу</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">Колумбия</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">Чили</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">Иран</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">Пакистан</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">Сев. Америка</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">Юж. Америка</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">Европа</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">Африка</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">Ближний Восток</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">Азия</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">Океания</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">Нью-Йорк</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">Почувствуйте пульс Большого Яблока в День независимости, когда яркая волна прокатится мимо Times Square, Central Park и возвышающегося skyline.</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">Лос-Анджелес</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">Испытайте голливудский блеск, бризы Тихого океана и звёздное сияние L.A., пока волна освещает City of Angels в День независимости.</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">Мехико</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">Отметьте День независимости Мексики в самом сердце CDMX, где колониционное очарование встречается с современной энергией, а марьячи эхом разносится по историческим площадям.</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">Сан-Паулу</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">Пусть ритм самбы и дух Дня независимости проведут вас по шумному проспекту Paulista и оживлённым районам этого космополитического гиганта.</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">Буэнос-Айрес</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">Отпразднуйте независимость Аргентины под ритмы танго, среди величественных бульваров в европейском стиле и страстного духа портеños на берегу Рио-де-ла-Плата.</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">Лондон</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">Насладитесь мультикультурной атмосферой Notting Hill Carnival, пока волна танцует по историческим улицам, мимо знаковых двухэтажных автобусов и вечного Темзы.</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">Париж</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">В День взятия Бастилии присоединяйтесь к волне от Эйфелевой башни до Champs-Élysées, празднуя романтику и творчество Города огней.</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">Берлин</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">Ощутите объединяющий дух в День германского единства, когда волна проходит через Brandenburg Gate, граффити-покрытые стены и современную архитектуру этой яркой столицы.</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">Мадрид</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">В Национальный день Испании пусть волна зажжёт мадридские тапас-бары, величественные бульвары и художественное наследие Прадо.</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">Рим</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">В Феррагосто плывите вместе с римлянами и гостями по площадям, заполненным музыкой, фонтанами и праздничной энергией Вечного города под летним солнцем.</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">Москва</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">Окунитесь в величие Красной площади и Кремля в День России, пока волна отражает богатую имперскую историю и современный космополитический ритм города.</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">Стамбул</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">Отпразднуйте День Республики волной вдоль Bosphorus, исторических мечетей и современных площадей — Стамбул озарится концертами, флагами и фейерверками.</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">Каир</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">Отметьте Ид в Каире, когда улицы и рынки оживают огнями, сладкими ароматами и радующимися семьями — объединяющая волна пройдёт сквозь весь город.</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">Йоханнесбург</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">В День свободы присоединяйтесь к волне через «City of Gold», где современные небоскрёбы встречаются с богатым наследием стойкости и культурного разнообразия.</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">Найроби</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">Отпразднуйте День Мадарака среди оживлённых рынков и шумных улиц, где городская жизнь соседствует с воротами к удивительной природе Кении.</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">Лагос</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">Почувствуйте энергетику афробитс в День независимости Нигерии, когда волна проходит через самый населённый город Африки и его оживлённые рынки.</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">Киншаса</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">В День независимости ДР Конго присоединяйтесь к волне, бегущей по яркой столице вдоль реки Congo, наполненной музыкой и культурной гордостью.</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">Дубай</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">Отпразднуйте Национальный день ОАЭ среди футуристических небоскрёбов, пустынных пейзажей и космополитичного блеска ведущего современного мегаполиса мира.</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">Мумбаи</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">Отмечайте День независимости Индии в духе Болливуда, среди колониальной архитектуры и берегов Аравийского моря, омытых муссонами.</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">Дели</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">Почувствуйте патриотический подъём в День независимости, пока волна проходит мимо колониальных бульваров, могольских фортов и сердца столицы Индии.</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">Бангалор</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">Празднуйте свободу в «кремниевой долине» Индии, где вековые храмы соседствуют с передовыми технопарками и динамичной космополитичной публикой.</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">Джакарта</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">Отметьте День независимости Индонезии в городе контрастов — от сияющих небоскрёбов до шумных уличных рынков и объектов культурного наследия.</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">Бангкок</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">Празднуйте Национальный День отца Таиланда в честь короля Пхумипона в City of Angels: золотые храмы, плавучие рынки и яркий стрит-фуд зажгут ваши чувства.</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">Манила</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">Отметьте День независимости Филиппин в городе, где джипни проезжают мимо испано-колониальных церквей, оживлённых рынков и современных небоскрёбов.</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">Токио</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">Присоединяйтесь к миллионам вдоль реки Sumida, когда небо взрывается цветом, а летняя фестивальная атмосфера Токио создаёт идеальную сцену для яркой волны.</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">Сеул</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">Погрузитесь в празднование Gwangbokjeol, пока волна проходит мимо королевских дворцов, центров K-pop и небоскрёбов, соединяющих традиции и инновации.</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">Пекин</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">В Праздник труда пронеситесь на волне по пекинским паркам и бульварам, где миллионы гуляют, устраивают пикники и наслаждаются весенним настроением.</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">Шанхай</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">Пусть волна накроет The Bund и Nanjing Road, пока Шанхай кипит семьями, музыкой и космополитичной энергией праздников Праздника труда.</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">Гонконг</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">Ощутите подъём «Золотой недели» в Гонконге: Victoria Harbour, рынки и неоновые улицы переполняются людьми, вместе отмечающими Праздник труда.</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">Сидней</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">Поймайте волну на параде Mardi Gras в Сиднее — Oxford Street взрывается радугой, ослепительными платформами и карнавальным духом, объединяющим сотни тысяч людей.</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">Мельбурн</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">В День Кубка Мельбурна прокатитесь на волне по культурной столице, где город полон парадов, ярких толп в элегантных нарядах и духа «гонки, которая останавливает нацию».</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">Торонто</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">В День Канады окунитесь в море красного и белого, пока волна проходит мимо CN Tower, мультикультурных районов и берегов озера Онтарио.</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">Ванкувер</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">Отпразднуйте День Канады на побережье Тихого океана, среди видов «от моря к небу», зелени Stanley Park и космополитичного шарма даунтауна.</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">Чикаго</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">В День независимости насладитесь сочной пиццей и архитектурными шедеврами на берегу озера Мичиган, пока волна катится по «Windy City».</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">Сан-Франциско</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">Почувствуйте дух свободы под культовым пролетом Golden Gate Bridge, пока волна ко Дню независимости проходит через холмы, канатные трамваи и разнообразные районы.</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">Лима</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">В День независимости Перу пройдите по колониальным площадям, доинкским археологическим памятникам и ароматам всемирно известной перуанской кухни.</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">Богота</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">Отпразднуйте День независимости Колумбии среди уличного искусства, горных видов и культурного ритма районов сальсы в андинской столице.</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">Сантьяго</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">Почувствуйте патриотический подъём в День независимости Чили, пока волна петляет на фоне Анд, колониальных фасадов и современных стеклянных башен.</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">Тегеран</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">Присоединяйтесь к Sizdah Bedar в Тегеране — дню, когда семьи заполняют парки и сады пикниками, смехом и обновлением, — волна пройдёт по оживлённым гуляниям под открытым небом.</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">Карачи</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">Отметьте День независимости Пакистана на берегу Аравийского моря — через шумные базары, богатую историю и динамичную энергию крупнейшего города страны.</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">Поднимите руки!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">Хлопайте влево и вправо!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">Мельница назад!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">Вниз и вверх!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">Покажи волну!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">Скрестите руки!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">Готовьтесь к волне!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">Поднимай волну!</string>
+</resources>

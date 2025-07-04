@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.choreographies
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -25,25 +25,30 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_CHOREOGRAPHIES_CONF
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.getChoreographyText
 import com.worldwidewaves.shared.utils.ImageResolver
+import dev.icerock.moko.resources.StringResource
 import io.github.aakira.napier.Napier
-import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Manages choreography sequences for different phases of wave events.
  */
-class ChoreographyManager<T>(
+@OptIn(ExperimentalTime::class)
+open class ChoreographyManager<T>(
     coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : KoinComponent {
 
-    private val clock: IClock by inject()
+    val clock: IClock by inject()
     private val imageResolver: ImageResolver<T> by inject()
     private var definition: ChoreographyDefinition? = null
     private var resolvedSequences: ResolvedChoreography<T>? = null
@@ -59,15 +64,20 @@ class ChoreographyManager<T>(
 
     data class ResolvedSequence<T>(
         val sequence: ChoreographySequence,
-        val resolvedImages: List<T>,
+        val text: StringResource,
+        val resolvedImage: T?,
         val startTime: Duration,
         val endTime: Duration
     )
 
     data class DisplayableSequence<T>(
-        val images: List<T>,
+        val image: T?,
+        val frameWidth: Int,
+        val frameHeight: Int,
+        val frameCount: Int,
         val timing: Duration,
-        val text: String,
+        val duration: Duration,
+        val text: StringResource,
         val loop: Boolean,
         val remainingDuration: Duration?
     )
@@ -75,20 +85,33 @@ class ChoreographyManager<T>(
     // ----------------------
 
     private fun ChoreographySequence.toResolved(
-        startTime: Duration = Duration.ZERO
-    ): ResolvedSequence<T> = ResolvedSequence(
-        sequence = this,
-        resolvedImages = resolveImageResources(imageResolver),
-        startTime = startTime,
-        endTime = startTime + totalDuration
-    )
+        startTime: Duration = Duration.ZERO,
+        seqType: String,
+        seqNumber: Int? = null
+    ): ResolvedSequence<T> {
+        val resolvedImages = resolveImageResources(imageResolver)
+        Log.d("ChoreographyManager", "duration: ${duration?.inWholeSeconds}")
+        Log.d("ChoreographyManager", "startTime: ${startTime.inWholeSeconds}")
+        Log.d("ChoreographyManager", "endTime: ${(startTime + duration!!).inWholeSeconds}")
+        return ResolvedSequence(
+            sequence = this,
+            text = getChoreographyText(seqType, seqNumber),
+            resolvedImage = resolvedImages.firstOrNull(),
+            startTime = startTime,
+            endTime = startTime + duration
+        )
+    }
 
     private fun ResolvedSequence<T>.toDisplayable(
         remainingDuration: Duration? = null
     ): DisplayableSequence<T> = DisplayableSequence(
-        images = resolvedImages,
+        image = resolvedImage,
+        frameWidth = sequence.frameWidth,
+        frameHeight = sequence.frameHeight,
+        frameCount = sequence.frameCount,
         timing = sequence.timing,
-        text = sequence.text,
+        duration = sequence.duration!!,
+        text = text,
         loop = sequence.loop,
         remainingDuration = remainingDuration
     )
@@ -124,35 +147,37 @@ class ChoreographyManager<T>(
 
     private suspend fun prepareChoreography(definitionResource: String) {
         val definition = loadDefinition(definitionResource)
-        var currentOffset = Duration.ZERO
+        var startTime = Duration.ZERO
 
-        val warmingSequences = definition.warmingSequences.map { sequence ->
-            sequence.toResolved(currentOffset).also {
-                currentOffset += sequence.totalDuration
+        val warmingSequences = definition.warmingSequences.mapIndexed { i, sequence ->
+            sequence.toResolved(startTime, seqType ="warming", seqNumber = i + 1).also {
+                startTime = it.endTime
             }
         }
 
         resolvedSequences = ResolvedChoreography(
             warmingSequences = warmingSequences,
-            waitingSequence = definition.waitingSequence?.toResolved(),
-            hitSequence = definition.hitSequence?.toResolved()
+            waitingSequence = definition.waitingSequence?.toResolved(seqType ="waiting"),
+            hitSequence = definition.hitSequence?.toResolved(seqType = "hit")
         )
     }
 
     // ------------------------------------------------------------------------
 
-    fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
+    open fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
-        val totalDuration = resolved.warmingSequences.last().endTime
+        val totalTiming = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
-        val wrappedElapsedTime = if (totalDuration.isPositive()) {
-            (elapsedTime.inWholeNanoseconds % totalDuration.inWholeNanoseconds).nanoseconds
+        val wrappedElapsedTime = if (totalTiming.isPositive()) {
+            (elapsedTime.inWholeNanoseconds % totalTiming.inWholeNanoseconds).nanoseconds
                 .coerceAtLeast(Duration.ZERO)
         } else {
             Duration.ZERO
         }
+
+        Log.v("ChoreographyManager", "wrappedElapsedTime: ${wrappedElapsedTime.inWholeSeconds} seconds")
 
         val sequence = resolved.warmingSequences.find {
             wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
@@ -161,9 +186,9 @@ class ChoreographyManager<T>(
         return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
-    fun getWaitingSequence(): DisplayableSequence<T>? =
+    open fun getWaitingSequence(): DisplayableSequence<T>? =
         resolvedSequences?.waitingSequence?.toDisplayable()
 
-    fun getHitSequence(): DisplayableSequence<T>? =
+    open fun getHitSequence(): DisplayableSequence<T>? =
         resolvedSequences?.hitSequence?.toDisplayable()
 }

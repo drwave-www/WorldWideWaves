@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,12 +27,15 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.IClock
-import kotlinx.datetime.Instant
+import io.github.aakira.napier.Napier
+import kotlin.time.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     private val clock: IClock by inject()
@@ -79,14 +82,16 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     /**
      * Try to inform the optional debug overlay that a note has been played.
-     * Uses reflection so that commonMain does not depend on debug-only code.
+     *
+     * In a multiplatform context we cannot rely on JVM-only reflection APIs.  Instead
+     * we simply output the played note to the debug logger (Napier).  Platform
+     * modules that want to react to this information can intercept logs or
+     * implement their own hook in the platform-specific `SoundChoreographyManager`
+     * actual implementations.
      */
     private fun notifyDebug(note: Int?) {
-        if (note == null) return
-        runCatching {
-            val clazz = Class.forName("com.worldwidewaves.debug.SoundChoreographyTestMode")
-            val method = clazz.getMethod("noteWasPlayed", Int::class.javaPrimitiveType)
-            method.invoke(null, note)
+        note?.let {
+            Napier.d(tag = "WaveWarming", message = "Sound note played: $it")
         }
     }
 

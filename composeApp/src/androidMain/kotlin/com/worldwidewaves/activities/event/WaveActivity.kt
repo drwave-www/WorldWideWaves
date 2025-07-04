@@ -1,13 +1,11 @@
-package com.worldwidewaves.activities.event
-
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,37 +18,36 @@ package com.worldwidewaves.activities.event
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalTime::class)
+
+package com.worldwidewaves.activities.event
 
 // Debug-only utilities -------------------------------------------------------
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,24 +55,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.BuildConfig
+import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.debug.SoundChoreographyTestMode
-import com.worldwidewaves.debug.SoundChoreographyTestModeOverlay
-import com.worldwidewaves.debug.SoundChoreographyTestModeToggle
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
@@ -83,15 +77,11 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.EMPTY_COUNTER
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.generated.resources.wave_be_ready
-import com.worldwidewaves.shared.generated.resources.wave_done
-import com.worldwidewaves.shared.generated.resources.wave_hit
-import com.worldwidewaves.shared.generated.resources.wave_is_running
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -101,20 +91,15 @@ import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
-import com.worldwidewaves.viewmodels.WaveViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
@@ -124,28 +109,35 @@ class WaveActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
-        var isTestModeEnabled by remember { mutableStateOf(SoundChoreographyTestMode.isEnabled()) }
 
         // Calculate height based on aspect ratio and available width
-        val configuration = LocalConfiguration.current
-        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
-        val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-        val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-        val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
+        val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
+        val hitDateTime by event.observer.hitDateTime.collectAsState()
+        val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
+        val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
+
+        // Derive choreography active state
+        val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
+            isWarmingInProgress || isGoingToBeHit || run {
+                if (hasBeenHit) {
+                    val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
+                    secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                } else false
+            }
+        }
 
         // Construct the event Map
         val eventMap = remember(event.id) {
             AndroidEventMap(event,
-                onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(observerId, newLocation)
-                },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
                         putExtra("eventId", event.id)
@@ -155,9 +147,9 @@ class WaveActivity : AbstractEventWaveActivity() {
         }
 
         // Start event/map coordination
-        ObserveEventMap(event, eventMap)
+        ObserveEventMapProgression(event, eventMap)
 
-        // Play the hit sound when the user has been hit
+        // Play the hit sound when the user has been hit - FIXME: move in WaveProgressionObserver
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
             if (hasBeenHit && secondsSinceHit in 0.. 1 && !hasPlayedHitSound) {
@@ -167,7 +159,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         }
 
         // Always target the closest view to have user and wave in the same view
-        MapZoomAndLocationUpdate(waveViewModel, observerId, eventMap)
+        MapZoomAndLocationUpdate(event, eventMap)
 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
@@ -177,44 +169,30 @@ class WaveActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                BeReady(waveViewModel, observerId)
-                eventMap.Screen(autoMapDownload = true, Modifier.fillMaxWidth().height(calculatedHeight))
-                WaveProgressionBar(waveViewModel, observerId)
-                WaveHitCounter(waveViewModel, observerId, clock)
-            }
+                UserWaveStatusText(event)
+                eventMap.Screen(autoMapDownload = true, Modifier
+                    .fillMaxWidth()
+                    .height(calculatedHeight))
+                WaveProgressionBar(event)
 
-            // Pass the visibility state to WaveChoreographies for coordination
-            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.fillMaxSize().zIndex(10f))
-
-            // ----------------------------------------------------------------
-            // Test-mode UI (only visible in debug builds)
-            // ----------------------------------------------------------------
-            if (BuildConfig.DEBUG) {
-                // Toggle button to enable/disable the test overlay
-                SoundChoreographyTestModeToggle(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
-                        .zIndex(20f),
-                    onToggle = { enabled ->
-                        isTestModeEnabled = enabled
-                    }
-                )
-
-                // Overlay itself
-                if (isTestModeEnabled) {
-                    SoundChoreographyTestModeOverlay(
-                        event = event,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .zIndex(30f),
-                        onClose = {
-                            SoundChoreographyTestMode.setEnabled(false)
-                            isTestModeEnabled = false
-                        }
-                    )
+                if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
+                    Spacer(modifier = Modifier.weight(1f))
+                    WaveHitCounter(event)
+                    Spacer(modifier = Modifier.height(30.dp))
                 }
             }
+
+            WaveChoreographies(event, clock, Modifier.zIndex(10f))
+
+            if (isChoreographyActive) { // Ensure counter is visible when choreography is active
+                WaveHitCounter(event,
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 60.dp)
+                        .zIndex(15f)
+                )
+            }
+
         }
     }
 
@@ -223,10 +201,10 @@ class WaveActivity : AbstractEventWaveActivity() {
 // ------------------------------------------------------------------------
 
 @Composable
-fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, eventMap: AndroidEventMap) {
+fun MapZoomAndLocationUpdate(event: IWWWEvent, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
 
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
@@ -240,19 +218,19 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, e
 // ------------------------------------------------------------------------
 
 @Composable
-fun BeReady(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
 
-    val message = if (eventStatus == Status.DONE)
-        ShRes.string.wave_done
-    else if (hasBeenHit)
-        ShRes.string.wave_hit
-    else if (isInArea)
-        ShRes.string.wave_be_ready
-    else
-        ShRes.string.wave_is_running
+    val message = when {
+        eventStatus == Status.DONE -> MokoRes.strings.wave_done
+        hasBeenHit -> MokoRes.strings.wave_hit
+        isWarming && isInArea -> MokoRes.strings.wave_warming
+        isInArea -> MokoRes.strings.wave_be_ready
+        else -> MokoRes.strings.wave_is_running
+    }
 
     Box(
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
@@ -269,18 +247,18 @@ fun BeReady(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
-    val userPositionRatio by waveViewModel.getUserPositionRatioFlow(observerId).collectAsState()
-    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
+fun WaveProgressionBar(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val userPositionRatio by event.observer.userPositionRatio.collectAsState()
+    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
     val barWidth = screenWidth * 0.8f
 
-    val density = LocalDensity.current
     val triangleSize = with(density) { DIM_WAVE_TRIANGLE_SIZE.dp.toPx() }
 
     Column(
@@ -295,7 +273,7 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifie
                 .background(extendedLight.quaternary.color),
             contentAlignment = Alignment.Center
         ) {
-            WaveProgression(progression)
+            WaveProgressionFillArea(progression)
 
             Text(
                 text = "${String.format("%.1f", progression)}%",
@@ -311,7 +289,7 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifie
 }
 
 @Composable
-private fun WaveProgression(progression: Double) {
+private fun WaveProgressionFillArea(progression: Double) {
     val density = LocalDensity.current
     val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
 
@@ -340,24 +318,21 @@ private fun WaveProgression(progression: Double) {
 
 @Composable
 fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoingToBeHit: Boolean, hasBeenHit: Boolean) {
-    val normalColor = extraElementsLight
-    val alertColor = tertiaryLight
-
-    var triangleColor = normalColor
-
-    if (isGoingToBeHit) {
-        val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
-        val animatedColor by infiniteTransition.animateColor(
-            initialValue = normalColor,
-            targetValue = alertColor,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 500),
-                repeatMode = RepeatMode.Reverse
-            ), label = "BlinkingTriangleColorAnimation"
-        )
-        triangleColor = animatedColor
-    } else if (hasBeenHit) {
-        triangleColor = onQuaternaryLight
+    val triangleColor = when {
+        isGoingToBeHit -> {
+            val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
+            val animatedColor by infiniteTransition.animateColor(
+                initialValue = extraElementsLight,
+                targetValue = tertiaryLight,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 500),
+                    repeatMode = RepeatMode.Reverse
+                ), label = "BlinkingTriangleColorAnimation"
+            )
+            animatedColor
+        }
+        hasBeenHit -> onQuaternaryLight
+        else -> extraElementsLight
     }
 
     Canvas(
@@ -381,44 +356,68 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
 // ------------------------------------------------------------------------
 
 @Composable
-fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClock, modifier: Modifier = Modifier) {
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState(0.0)
-    val timeBeforeHitProgression by waveViewModel.getTimeBeforeHitFlow(observerId).collectAsState(INFINITE)
-    val userHitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
-    var timeBeforeHit by remember { mutableStateOf(INFINITE) }
-
-    // Recalculate timeBeforeHit every second until wave is progression
-    LaunchedEffect(Unit) {
-        while (progression == 0.0) {
-            delay(1000L)
-            timeBeforeHit = userHitDateTime - clock.now()
-        }
-    }
+fun WaveHitCounter(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val timeBeforeHitProgression by event.observer.timeBeforeHit.collectAsState()
+    val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val boxWidth = screenWidth * 0.5f
+    if (text != EMPTY_COUNTER) {
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val boxWidth = screenWidthDp * 0.5f
 
-    Box(
-        modifier = modifier
-            .width(boxWidth)
-            .border(2.dp, onPrimaryLight),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        Box(
+            modifier = modifier
+                .width(boxWidth)
+                .border(2.dp, onPrimaryLight),
+            contentAlignment = Alignment.Center
+        ) {
+            AutoSizeText(
+                text = text,
+                style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
+            )
+        }
     }
+}
+
+@Composable
+fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    textAlign: TextAlign,
+    maxLines: Int,
+    modifier: Modifier = Modifier
+) {
+    var fontSize by remember { mutableStateOf(style.fontSize) }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = fontSize),
+        color = color,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        softWrap = false,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.hasVisualOverflow) {
+                fontSize = fontSize * 0.9f
+            }
+        },
+        modifier = modifier
+    )
 }
 
 private fun formatDuration(duration: Duration): String {
     return when {
-        duration.isInfinite() -> "--:--"
+        duration.isInfinite() || duration < Duration.ZERO -> "--:--" // Protection
         duration < 1.hours -> {
             val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
             val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
@@ -431,183 +430,7 @@ private fun formatDuration(duration: Duration): String {
             "$hours:$minutes"
         }
 
-        else -> "--:--"
+        else -> EMPTY_COUNTER
     }
 }
 
-// ------------------------------------------------------------------------
-
-@Composable
-fun WaveChoreographies(
-    event: IWWWEvent,
-    waveViewModel: WaveViewModel,
-    observerId: String,
-    clock: IClock,
-    modifier: Modifier = Modifier
-) {
-    val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
-    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-    val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
-
-    // State to track if we should show the hit sequence
-    var showHitSequence by remember { mutableStateOf(false) }
-
-    // For warming sequences - use recomposition to update sequence
-    var warmingKey by remember { mutableIntStateOf(0) }
-
-    // Calculate and schedule the hiding of the hit sequence
-    LaunchedEffect(hasBeenHit, hitDateTime) {
-        if (hasBeenHit) {
-            val currentTime = clock.now()
-            val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
-
-            if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
-                showHitSequence = true
-
-                // Calculate remaining time to show
-                val remainingTimeMs = maxOf(0,
-                    WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
-                            (currentTime - hitDateTime).inWholeMilliseconds
-                )
-
-                // Schedule hiding after the remaining time
-                delay(remainingTimeMs)
-                showHitSequence = false
-            } else {
-                showHitSequence = false
-            }
-        } else {
-            showHitSequence = false
-        }
-    }
-
-    when {
-
-        // Show warming choreography with sequence refresh
-        isWarmingInProgress -> {
-            // Get the current sequence
-            val warmingSequence = remember(warmingKey) {
-                event.warming.getCurrentChoregraphySequence()
-            }
-
-            // When this sequence ends, request a new one
-            if (warmingSequence != null) {
-                TimedSequenceDisplay(
-                    sequence = warmingSequence,
-                    clock = clock,
-                    modifier = modifier.zIndex(10f),
-                    onSequenceComplete = { warmingKey++ }
-                )
-            }
-        }
-
-        // Show waiting choreography when going to be hit
-        isGoingToBeHit -> {
-            ChoreographyDisplay(event.wave.waitingChoregraphySequence(), clock, modifier.zIndex(10f))
-        }
-
-        // Show hit choreography when user has been hit and within time window
-        showHitSequence -> {
-            ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
-        }
-    }
-}
-
-@Composable
-fun TimedSequenceDisplay(
-    sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier,
-    onSequenceComplete: () -> Unit
-) {
-    if (sequence == null) return
-
-    ChoreographyDisplay(sequence, clock, modifier)
-
-    LaunchedEffect(sequence) {
-        delay(sequence.remainingDuration ?: sequence.timing)
-        onSequenceComplete()
-    }
-}
-
-@Composable
-fun ChoreographyDisplay(
-    sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier
-) {
-    if (sequence == null || sequence.images.isEmpty()) return
-
-    var currentImageIndex by remember { mutableIntStateOf(0) }
-    var isVisible by remember { mutableStateOf(true) }
-    val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
-
-    // Create a timer to cycle through images
-    LaunchedEffect(sequence) {
-        val startTime = clock.now()
-
-        while (this.isActive) {
-            // Check if we should stop showing the sequence
-            if (remainingTime != null) {
-                val elapsed = clock.now() - startTime
-                if (elapsed > remainingTime!!) break
-            }
-
-            delay(sequence.timing.inWholeMilliseconds)
-            isVisible = false
-
-            if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
-                currentImageIndex = (currentImageIndex + 1) % sequence.images.size
-                isVisible = true
-            } else {
-                break // Stop if we've shown all images and not looping
-            }
-        }
-    }
-
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 400.dp) // Maximum width
-                .heightIn(max = 600.dp) // Maximum height
-                .padding(24.dp) // Outer padding
-                .shadow(8.dp)
-                .background(Color.Black.copy(alpha = 0.7f))
-                .border(2.dp, Color.White, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .padding(24.dp), // Inner padding
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    this@Column.AnimatedVisibility(visible = isVisible) {
-                        Image(
-                            painter = painterResource(sequence.images[currentImageIndex]),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-
-                Text(
-                    modifier = Modifier.padding(top = 16.dp),
-                    text = sequence.text,
-                    style = quinaryColoredBoldTextStyle(24),
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}

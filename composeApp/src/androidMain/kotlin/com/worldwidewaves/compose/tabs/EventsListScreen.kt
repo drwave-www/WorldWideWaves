@@ -1,7 +1,7 @@
 package com.worldwidewaves.compose.tabs
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -22,9 +22,9 @@ package com.worldwidewaves.compose.tabs
  */
 
 import android.content.Intent
+import android.text.BidiFormatter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,14 +76,15 @@ import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COMMUNITY_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COUNTRY_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_DATE_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_LOCATION_FONSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FAVS_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_BORDER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_MAPDL_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_NOEVENTS_FONTSIZE
@@ -92,34 +94,23 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
-import com.worldwidewaves.shared.generated.resources.event_favorite_off
-import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.events_cannot_uninstall_map_message
-import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
-import com.worldwidewaves.shared.generated.resources.events_empty
-import com.worldwidewaves.shared.generated.resources.events_favorites_empty
-import com.worldwidewaves.shared.generated.resources.events_loading_error
-import com.worldwidewaves.shared.generated.resources.events_select_all
-import com.worldwidewaves.shared.generated.resources.events_select_downloaded
-import com.worldwidewaves.shared.generated.resources.events_select_starred
-import com.worldwidewaves.shared.generated.resources.events_uninstall
-import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
-import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
-import com.worldwidewaves.shared.generated.resources.events_uninstall_map_title
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.generated.resources.map_downloaded
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
+import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
+import dev.icerock.moko.resources.compose.stringResource
+import com.worldwidewaves.shared.format.DateTimeFormats
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
@@ -131,8 +122,6 @@ class EventsListScreen(
 ) : TabScreen {
     override val name = "Events"
 
-    private var starredSelected = false
-    private var downloadedSelected = false  // Add state for downloaded tab
     private var firstLaunch = true
 
     // ----------------------------
@@ -143,13 +132,26 @@ class EventsListScreen(
         val hasFavorites by viewModel.hasFavorites.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
+        // Convert to Compose state (save across config changes)
+        var starredSelected by rememberSaveable { mutableStateOf(false) }
+        var downloadedSelected by rememberSaveable { mutableStateOf(false) }
+
         if (firstLaunch) { // Select favorites at launch if any
             firstLaunch = false
             starredSelected = hasFavorites
         }
 
-        // Update filter logic to include downloaded events
-        viewModel.filterEvents(starredSelected, downloadedSelected)
+        // Trigger filtering only when toggles actually change
+        LaunchedEffect(starredSelected, downloadedSelected) {
+            viewModel.filterEvents(starredSelected, downloadedSelected)
+        }
+
+        // Re-apply filtering when map install state changes while Downloaded tab is shown
+        LaunchedEffect(mapStates, downloadedSelected) {
+            if (downloadedSelected) {
+                viewModel.filterEvents(onlyDownloaded = true)
+            }
+        }
 
         // Refresh map availability when screen resumes
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -168,25 +170,28 @@ class EventsListScreen(
         }
 
         // Pre-track all event IDs
-        LaunchedEffect(events) {
-            mapChecker.trackMaps(events.map { it.id })
+        LaunchedEffect(viewModel.originalEvents) {
+            mapChecker.trackMaps(viewModel.originalEvents.map { it.id })
             mapChecker.refreshAvailability()
         }
 
+        fun selectTab(starred: Boolean = false, downloaded: Boolean = false) {
+            starredSelected = starred
+            downloadedSelected = downloaded
+        }
+
         EventsList(
-            modifier, events, mapStates,
+            modifier = modifier,
+            events = events,
+            mapStates = mapStates,
+            starredSelected = starredSelected,
+            downloadedSelected = downloadedSelected,
             onAllEventsClicked = { selectTab() },
-            onFavoriteEventsClicked = { selectTab(starredSelected = true) },
-            onDownloadedEventsClicked = { selectTab(downloadedSelected = true) }
+            onFavoriteEventsClicked = { selectTab(starred = true) },
+            onDownloadedEventsClicked = { selectTab(downloaded = true) }
         )
     }
 
-    // New method to handle tab selection with mutual exclusion
-    private fun selectTab(starredSelected: Boolean = false, downloadedSelected: Boolean = false) {
-        this.starredSelected = starredSelected
-        this.downloadedSelected = downloadedSelected
-        viewModel.filterEvents(this.starredSelected, this.downloadedSelected)
-    }
 
     // ----------------------------
 
@@ -195,18 +200,33 @@ class EventsListScreen(
         modifier: Modifier,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
         onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit  // Add parameter for downloaded tab
+        onDownloadedEventsClicked: () -> Unit
     ) {
         Column(
             modifier = modifier
                 .fillMaxHeight()
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked, onDownloadedEventsClicked)
+            FavoritesSelector(
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected,
+                onAllEventsClicked = onAllEventsClicked,
+                onFavoriteEventsClicked = onFavoriteEventsClicked,
+                onDownloadedEventsClicked = onDownloadedEventsClicked
+            )
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
-            Events(viewModel, events, mapStates, modifier = Modifier.weight(1f))
+            Events(
+                viewModel = viewModel,
+                events = events,
+                mapStates = mapStates,
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 
@@ -214,9 +234,11 @@ class EventsListScreen(
 
     @Composable
     private fun FavoritesSelector(
-        onAllEventsCLicked: () -> Unit,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
+        onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit,  // Add parameter for downloaded tab
+        onDownloadedEventsClicked: () -> Unit,
         modifier: Modifier = Modifier
     ) {
         // Determine colors and weights based on which tab is selected
@@ -237,28 +259,28 @@ class EventsListScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1/3f),  // Each tab takes 1/3 of the width
+                    modifier = Modifier.fillMaxWidth(1/3f),
                     backgroundColor = allColor.color,
-                    onClick = onAllEventsCLicked,
+                    onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
                     fontWeight = allWeight,
-                    text = stringResource(ShRes.string.events_select_all)
+                    text = stringResource(MokoRes.strings.events_select_all)
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(0.5f),  // Takes 1/2 of the remaining 2/3
+                    modifier = Modifier.fillMaxWidth(0.5f),
                     backgroundColor = starredColor.color,
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
                     fontWeight = starredWeight,
-                    text = stringResource(ShRes.string.events_select_starred)
+                    text = stringResource(MokoRes.strings.events_select_starred)
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1f),  // Takes all remaining space
+                    modifier = Modifier.fillMaxWidth(1f),
                     backgroundColor = downloadedColor.color,
                     onClick = onDownloadedEventsClicked,
                     textColor = downloadedColor.onColor,
                     fontWeight = downloadedWeight,
-                    text = stringResource(ShRes.string.events_select_downloaded)
+                    text = stringResource(MokoRes.strings.events_select_downloaded)
                 )
             }
         }
@@ -298,6 +320,8 @@ class EventsListScreen(
         viewModel: EventsViewModel,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         val state = rememberLazyListState()
@@ -309,9 +333,8 @@ class EventsListScreen(
         ) {
             if (events.isNotEmpty()) {
                 items(events) { event ->
-                    // Get current availability state
                     val isMapInstalled = mapStates[event.id] ?: false
-                    Event(viewModel, event, isMapInstalled)
+                    Event(viewModel, event, isMapInstalled, starredSelected)
                 }
             } else {
                 item {
@@ -319,10 +342,10 @@ class EventsListScreen(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(
                             when {
-                                hasLoadingError -> ShRes.string.events_loading_error
-                                starredSelected -> ShRes.string.events_favorites_empty
-                                downloadedSelected -> ShRes.string.events_downloaded_empty  // Add message for empty downloaded
-                                else -> ShRes.string.events_empty
+                                hasLoadingError -> MokoRes.strings.events_loading_error
+                                starredSelected -> MokoRes.strings.events_favorites_empty
+                                downloadedSelected -> MokoRes.strings.events_downloaded_empty
+                                else -> MokoRes.strings.events_empty
                             }
                         ),
                         style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
@@ -335,7 +358,7 @@ class EventsListScreen(
     }
 
     @Composable
-    fun Event(viewModel: EventsViewModel, event: IWWWEvent, isMapInstalled: Boolean, modifier: Modifier = Modifier) {
+    fun Event(viewModel: EventsViewModel, event: IWWWEvent, isMapInstalled: Boolean, starredSelected: Boolean, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
         Column(modifier = modifier.clickable(
@@ -345,7 +368,7 @@ class EventsListScreen(
                 })
             }
         )) {
-            EventOverlay(viewModel, event, isMapInstalled)
+            EventOverlay(viewModel, event, isMapInstalled, starredSelected)
             EventLocationAndDate(event)
         }
     }
@@ -357,21 +380,20 @@ class EventsListScreen(
         viewModel: EventsViewModel,
         event: IWWWEvent,
         isMapInstalled: Boolean,
+        starredSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
-        val eventStatus by viewModel.getEventStatusFlow(event.id).collectAsState()
+        val eventStatus by event.observer.eventStatus.collectAsState()
 
         Box(modifier = heightModifier) {
-
-            // Main Image
             Box(modifier = heightModifier) {
                 Image(
                     modifier = modifier.fillMaxWidth(),
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.TopCenter,
                     painter = painterResource(event.getLocationImage() as DrawableResource),
-                    contentDescription = event.location
+                    contentDescription = stringResource(event.getLocation())
                 )
             }
 
@@ -379,7 +401,7 @@ class EventsListScreen(
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
             EventOverlayMapDownloaded(event.id, isMapInstalled)
-            EventOverlayFavorite(viewModel, event)
+            EventOverlayFavorite(viewModel, event, starredSelected)
         }
     }
 
@@ -404,7 +426,7 @@ class EventsListScreen(
                 EventFlag(
                     modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
                     imageResource = event.getCountryImage() as DrawableResource,
-                    contentDescription = event.community!!
+                    contentDescription = event.country!!
                 )
             }
         }
@@ -417,9 +439,7 @@ class EventsListScreen(
         contentDescription: String
     ) {
         Image(
-            modifier = modifier
-                .width(DIM_EVENTS_FLAG_WIDTH.dp)
-                .border(DIM_EVENTS_FLAG_BORDER.dp, Color.White),
+            modifier = modifier.width(DIM_EVENTS_FLAG_WIDTH.dp),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(imageResource),
             contentDescription = contentDescription
@@ -437,7 +457,12 @@ class EventsListScreen(
         val scope = rememberCoroutineScope()
 
         // Check if the map can be uninstalled
-        val canUninstall = remember(eventId) { mapChecker.canUninstallMap(eventId) }
+        // Consider it uninstallable only when the module is effectively installed *now*
+        val canUninstall = isMapInstalled
+
+        var isUninstalling by remember { mutableStateOf(false) }
+        var showUninstallResult by remember { mutableStateOf(false) }
+        var uninstallSucceeded by remember { mutableStateOf(false) }
 
         if (isMapInstalled) {
             Box(
@@ -454,40 +479,90 @@ class EventsListScreen(
                         .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
                         .clickable { showUninstallDialog = true }, // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
-                    contentDescription = stringResource(ShRes.string.map_downloaded),
+                    contentDescription = stringResource(MokoRes.strings.map_downloaded),
                 )
 
                 // Show confirmation dialog when clicked
                 if (showUninstallDialog) {
                     AlertDialog(
                         onDismissRequest = { showUninstallDialog = false },
-                        title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                        title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
                         text = {
                             if (canUninstall) {
-                                Text(stringResource(ShRes.string.events_uninstall_map_confirmation))
+                                Text(stringResource(MokoRes.strings.events_uninstall_map_confirmation))
                             } else {
-                                Text(stringResource(ShRes.string.events_cannot_uninstall_map_message))
+                                Text(stringResource(MokoRes.strings.events_cannot_uninstall_map_message))
                             }
                         },
                         confirmButton = {
-                            Button(onClick = {
+                            if (canUninstall) {
+                                Button(
+                                    enabled = !isUninstalling,
+                                    onClick = {
                                         scope.launch {
-                                            mapChecker.uninstallMap(eventId)
-                                            showUninstallDialog = false
+                                            isUninstalling = true
+                                            try {
+                                                mapChecker.uninstallMap(eventId)
+
+                                                var success = false
+                                                repeat(20) { // ~5 seconds max
+                                                    kotlinx.coroutines.delay(250)
+                                                    mapChecker.refreshAvailability()
+                                                    if (!mapChecker.isMapDownloaded(eventId)) {
+                                                        success = true
+                                                        return@repeat
+                                                    }
+                                                }
+                                                uninstallSucceeded = success
+                                            } catch (e: Exception) {
+                                                Log.e("EventOverlayMapDownloaded", "Error uninstalling map for event $eventId", e)
+                                                uninstallSucceeded = false
+                                            } finally {
+                                                isUninstalling = false
+                                                showUninstallDialog = false
+                                                showUninstallResult = true
+                                            }
                                         }
                                     }
-                            ) {
-                                Text(stringResource(ShRes.string.events_uninstall))
+                                ) {
+                                    Text(
+                                        if (isUninstalling)
+                                            "..."
+                                        else
+                                            stringResource(MokoRes.strings.events_uninstall)
+                                    )
+                                }
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showUninstallDialog = false }) {
-                                Text(stringResource(ShRes.string.events_uninstall_cancel))
+                                Text(stringResource(MokoRes.strings.events_uninstall_cancel))
                             }
                         }
                     )
                 }
             }
+        }
+
+        // Result dialog
+        if (showUninstallResult) {
+            AlertDialog(
+                onDismissRequest = { showUninstallResult = false },
+                title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
+                text = {
+                    Text(
+                        if (uninstallSucceeded)
+                            stringResource(MokoRes.strings.events_uninstall_completed)
+                        else
+                            stringResource(MokoRes.strings.events_uninstall_failed)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showUninstallResult = false }) {
+                        Text(stringResource(MokoRes.strings.ok))
+                    }
+                }
+            )
         }
     }
 
@@ -495,6 +570,7 @@ class EventsListScreen(
     private fun EventOverlayFavorite(
         viewModel: EventsViewModel,
         event: IWWWEvent,
+        starredSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
@@ -521,13 +597,13 @@ class EventsListScreen(
                             scope.launch {
                                 isFavorite = !isFavorite
                                 setEventFavorite.call(event, isFavorite)
-                                if (starredSelected) { // Refresh the list
+                                if (starredSelected) {
                                     viewModel.filterEvents(onlyFavorites = true)
                                 }
                             }
                         },
                     painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-                    contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
+                    contentDescription = stringResource(if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off),
                 )
             }
         }
@@ -536,8 +612,14 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
+    @OptIn(kotlin.time.ExperimentalTime::class)
     private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
-        val eventDate = event.getLiteralStartDateSimple()
+        val eventDate = remember(event.id) {
+            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
+        }
+        val bidi = BidiFormatter.getInstance()
+        val countryText = bidi.unicodeWrap(stringResource(event.getLiteralCountry()))
+        val communityText = bidi.unicodeWrap(stringResource(event.getLiteralCommunity()))
 
         Box(modifier = modifier) {
             Column {
@@ -547,7 +629,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = event.location.uppercase(),
+                        text = stringResource(event.getLocation()),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
                     )
                     Text(
@@ -558,11 +640,26 @@ class EventsListScreen(
                 }
 
                 // Country if present
-                Text(
-                    text = event.country?.lowercase()?.replaceFirstChar(Char::titlecaseChar) ?: "",
-                    style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
-                    modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(top = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = countryText,
+                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
+                    )
+                    Text(
+                        text = " / ",
+                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
+                    )
+                    Text(
+                        text = communityText,
+                        style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
+                        modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
+                    )
+                }
             }
         }
     }

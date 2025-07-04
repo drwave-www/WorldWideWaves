@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
@@ -121,7 +120,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         if (!boundingBoxValid) {
             updateBoundingBox()
         }
-        return BoundingBox(
+        return BoundingBox.fromCorners(
             sw = Position(minLat, minLng),
             ne = Position(maxLat, maxLng)
         )
@@ -372,9 +371,8 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         val pointsString = take(maxPointsToShow).joinToString(", ") { "(${it.lat}, ${it.lng})" }
         val pointsDisplay = if (size > maxPointsToShow) "$pointsString, ..." else pointsString
         val closedStatus = if (isNotEmpty()) ", closed=${first() == last()}" else ""
-        val cutIdStatus = if (this is CutPolygon) ", cutId=$cutId" else ""
 
-        return "Polygon(size=$size$closedStatus$cutIdStatus, points=[$pointsDisplay])"
+        return "Polygon(size=$size$closedStatus, points=[$pointsDisplay])"
     }
 
 }

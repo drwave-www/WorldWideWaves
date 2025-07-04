@@ -1,7 +1,7 @@
 package com.worldwidewaves.compose.tabs
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -45,26 +45,21 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_WIDTH
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.logo_description
-import com.worldwidewaves.shared.generated.resources.tab_faq_name
-import com.worldwidewaves.shared.generated.resources.tab_infos_name
-import com.worldwidewaves.shared.generated.resources.www_hashtag
-import com.worldwidewaves.shared.generated.resources.www_instagram
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.commonTextStyle
+import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 private val tabInfo = listOf(
-    ShRes.string.tab_infos_name,
-    ShRes.string.tab_faq_name
+    MokoRes.strings.tab_infos_name,
+    MokoRes.strings.tab_faq_name
 )
 
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
@@ -106,7 +101,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
                 )
             }
             Text(
-                text = stringResource(tabInfo[tabIndex]).uppercase(),
+                text = stringResource(tabInfo[tabIndex]),
                 style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
                     color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                     fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
@@ -132,8 +127,8 @@ fun AboutDividerLine() {
 @Composable
 fun AboutWWWSocialNetworks() {
     WWWSocialNetworks(
-        instagramAccount = stringResource(ShRes.string.www_instagram),
-        instagramHashtag = stringResource(ShRes.string.www_hashtag)
+        instagramAccount = stringResource(MokoRes.strings.www_instagram),
+        instagramHashtag = stringResource(MokoRes.strings.www_hashtag)
     )
 }
 
@@ -141,7 +136,7 @@ fun AboutWWWSocialNetworks() {
 fun AboutWWWLogo() {
     Image(
         painter = painterResource(Res.drawable.www_logo_transparent),
-        contentDescription = stringResource(Res.string.logo_description),
+        contentDescription = stringResource(MokoRes.strings.logo_description),
         modifier = Modifier
             .width(250.dp)
             .padding(top = 10.dp)

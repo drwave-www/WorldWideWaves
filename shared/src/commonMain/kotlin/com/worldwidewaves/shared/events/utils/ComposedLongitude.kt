@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -31,7 +31,6 @@ import kotlin.math.sign
 open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     private val positions = mutableListOf<Position>()
-
     private var swLat: Double = Double.POSITIVE_INFINITY
     private var swLng: Double = Double.POSITIVE_INFINITY
     private var neLat: Double = Double.NEGATIVE_INFINITY
@@ -147,19 +146,73 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         }
     }
 
+    /**
+     * Overload of [intersectWithSegment] that drops cut-tracking information.
+     *
+     * Returns the plain intersection [Position] of this composed-longitude and the provided
+     * [segment] or `null` when they do not intersect.
+     */
+    fun intersectWithSegment(segment: Segment): Position? {
+        if (positions.isEmpty()) return null
+        if (positions.size == 1) {
+            return segment.intersectWithLng(positions.first().lng)
+        }
+
+        return positions.zipWithNext { start, end ->
+            Segment(start, end)
+        }.firstNotNullOfOrNull { lineSegment ->
+            lineSegment.intersectWithSegment(segment)
+        }
+    }
+
+    /**
+     * Returns the longitude value of this composed-longitude at the given latitude, when the
+     * latitude lies on (or between vertices of) the poly-line.  For a vertical straight line
+     * the single longitude is returned.  If the latitude does not intersect the composed
+     * longitude, `null` is returned.
+     */
+    fun lngAt(lat: Double): Double? {
+        if (positions.isEmpty()) return null
+        if (positions.size == 1) return positions.first().lng
+
+        positions.zipWithNext { a, b ->
+            val minLat = minOf(a.lat, b.lat)
+            val maxLat = maxOf(a.lat, b.lat)
+            if (lat + EPSILON >= minLat && lat - EPSILON <= maxLat && abs(b.lat - a.lat) > EPSILON) {
+                val t = (lat - a.lat) / (b.lat - a.lat)
+                return a.lng + t * (b.lng - a.lng)
+            }
+        }
+        return null
+    }
+
     fun positionsBetween(minLat: Double, maxLat: Double): List<Position> =
          positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
 
     fun isValidArc(positions: List<Position> = this.positions): Boolean {
         if (positions.size <= 2) return true
+
         val differences = positions.zipWithNext { a, b -> b.lng - a.lng }
         val signs = differences.map { it.sign }
         val changes = signs.zipWithNext { a, b -> a != b }.count { it }
         val distinctSigns = signs.distinct().size
-        return changes <= 1 && distinctSigns <= 2
+
+        // For wave fronts, we need to be more permissive
+        // Wave fronts can have curved patterns due to Earth's curvature
+        // Allow more sign changes but still validate against completely chaotic patterns
+
+        // Check if the pattern is reasonable for a wave front
+        val nonZeroSigns = signs.filter { it != 0.0 }
+        val nonZeroChanges = nonZeroSigns.zipWithNext { a, b -> a != b }.count { it }
+
+        // Allow more flexibility for wave fronts:
+        // - Allow more sign changes (up to 4-5 for complex wave fronts)
+        // - Allow all 3 signs (positive, negative, zero) for curved wave fronts
+        // - But check that non-zero signs don't change too frequently
+        return changes <= 5 && distinctSigns <= 3 && nonZeroChanges <= 3
     }
 
-    fun bbox(): BoundingBox = BoundingBox(
+    fun bbox(): BoundingBox = BoundingBox.fromCorners(
         sw = Position(swLat, swLng),
         ne = Position(neLat, neLng)
     )

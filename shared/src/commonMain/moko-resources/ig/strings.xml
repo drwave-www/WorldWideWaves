@@ -1,0 +1,487 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <!-- src_hash: 58a942b5f882bb71aff38d2de8229bf4f42585a6 -->
+  <string name="empty"></string>
+  <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
+  <string name="logo_description">logo</string>
+  <!-- src_hash: 61fc0e60ec95e42f8980a55028563ef21f93b4a7 -->
+  <string name="background_description">ndabere</string>
+  <!-- src_hash: 260c23d3c107c00be03123d75ba717173ab4e8f7 -->
+  <string name="instagram_logo_description">Logo Instagram</string>
+  <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
+  <string name="tab_infos_name">Banyere</string>
+  <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
+  <string name="tab_faq_name">FAQ</string>
+  <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
+  <string name="back">Laghachi</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">Ebili Ugbu a!</string>
+  <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
+  <string name="events_select_all">Nile</string>
+  <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
+  <string name="events_select_starred">Kpakpando</string>
+  <!-- src_hash: 5097ae23854862764e5f1fd13d54f9f50a888c5e -->
+  <string name="events_select_downloaded">Ebudatara</string>
+  <!-- src_hash: a792d80677e5ce46a722b25244c64040b7d2af8a -->
+  <string name="map_checking_state">Na-enyocha ọnọdụ maapụ..</string>
+  <!-- src_hash: d23c5aaffa2874371f98e8c0838e7c00f19e4410 -->
+  <string name="map_download">Budata Maapụ</string>
+  <!-- src_hash: 6d0c25a3cbd4f6f8f4767eb665c89323faa68b05 -->
+  <string name="map_downloading">Na-ebudata..</string>
+  <!-- src_hash: e81121a332e731d8b2af71537baeb942c36acabc -->
+  <string name="map_starting_download">Na-amalite ibudata..</string>
+  <!-- src_hash: 6462b24730b6834d28fbbb556f15724b2eef50f9 -->
+  <string name="map_retrying_download">Na-anwa ibudata ọzọ</string>
+  <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
+  <string name="map_loading">Na-ebubata maapụ..</string>
+  <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
+  <string name="map_cancel_download">Kagbuo</string>
+  <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
+  <string name="map_retry_download">Nwaa ọzọ</string>
+  <!-- src_hash: df1cb247f84a5ef21df00efb2b8583598a864904 -->
+  <string name="map_error_download">Njehie na ibudata maapụ</string>
+  <!-- src_hash: 8f835e0a1dc2c6e63f307394c946b73dcdbd734f -->
+  <string name="map_downloaded">A budatala maapụ</string>
+  <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
+  <string name="events_uninstall_map_title">Wepụ Maapụ</string>
+  <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
+  <string name="events_uninstall">Wepụ</string>
+  <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
+  <string name="events_uninstall_cancel">Kagbuo</string>
+  <!-- src_hash: ed8a34ece8d4273d61156a1994c7203385b5436d -->
+  <string name="events_uninstall_completed">E wepụla</string>
+  <!-- src_hash: a15ddf81db1e785e07fab4bc2c288f5a62fae962 -->
+  <string name="events_uninstall_failed">Wepụ dara ada</string>
+  <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
+  <string name="events_uninstall_map_confirmation">Ị doro anya na ịchọrọ iwepụ maapụ a? Ị nwere ike ibudata ya ọzọ ma e mesịa ma ọ bụrụ na achọrọ.</string>
+  <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
+  <string name="events_cannot_uninstall_map_message">E nweghị ike iwepụ maapụ a n’ihi na ọ bụ akụkụ nke ngwa isi ma ọ bụ ihe ndị ọzọ na-achọ ya. A ga-ewepụ ya mgbe ị wepụrụ ngwa ahụ.</string>
+  <!-- src_hash: 0bf7dc9508d76a25a739e81d6de9537e3beeae93 -->
+  <string name="event_done">Emechara</string>
+  <!-- src_hash: 76fc38d3011bddbd0d6ea6c913c12b89768ea175 -->
+  <string name="event_soon">n'oge na-adịghị anya !</string>
+  <!-- src_hash: 7fcc365541c8136e015f6b6de62e592e8cd609f2 -->
+  <string name="event_running">na-aga</string>
+  <!-- src_hash: 155d63c9d555a28cb041a7bc944bcd126028f94b -->
+  <string name="event_favorite_on">Mmasịrị dị</string>
+  <!-- src_hash: ccf841f2ea2d86c733131d78cc57b56a89ed052c -->
+  <string name="event_favorite_off">Mmasịrị adịghị</string>
+  <!-- src_hash: d09e583eb6246d39ee2340b12e246596866c89e2 -->
+  <string name="event_target_wave_on">Gaa na ebili</string>
+  <!-- src_hash: 2bf443288dd74a114ca76e11228daeee38988b74 -->
+  <string name="event_target_wave_off">Ihe omume adịghị aga</string>
+  <!-- src_hash: 409a83af1ba070df076d65e78a69fb1ab46c745b -->
+  <string name="event_target_me_on">Gaa ebe m nọ</string>
+  <!-- src_hash: 17347a1b073379a67baf79186d80d225e01c4a20 -->
+  <string name="event_target_me_off">Ị naghị nọ n’ógbè ahụ</string>
+  <!-- src_hash: fcdce8786f93cb0a785fe6ebd0a2546ece0c5da8 -->
+  <string name="events_favorites_empty">Enweghị ihe omume e tinyeworo dịka mmasịrị; bido pịa akara kpakpando na ihe omume masịrị gị!</string>
+  <!-- src_hash: 479305cf78e08c6a09778809429446f92824a7b4 -->
+  <string name="events_downloaded_empty">Enweghị ihe omume e budatala</string>
+  <!-- src_hash: 663e59373c8e0cd7b9358c849e8155cf9b3a94a4 -->
+  <string name="events_empty">Ndepụta ihe omume efuola</string>
+  <!-- src_hash: 64189e446905b9317177323f1da63cd54b194af1 -->
+  <string name="events_loading_error">Njehie mere mgbe a na-ebubata ihe omume</string>
+  <!-- src_hash: af453dedc41c38cf727bc928484385d1f5bbf0ad -->
+  <string name="geoloc_undone">Na-emelite ọnọdụ..</string>
+  <!-- src_hash: f6328db0f2344b04d73ed011773813b83d534e00 -->
+  <string name="geoloc_error">Enweghị ike ịchọta gị</string>
+  <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
+  <string name="geoloc_yourein">Ị NỌ N’MPAGHARA!</string>
+  <!-- src_hash: 00a98f842906831b5c3d3dfb72807ba042877e83 -->
+  <string name="geoloc_yourein_at">Ị NỌ N'ÓGBÈ! (%1$s)</string>
+  <!-- src_hash: f64dbd0543a3f40d820d78be6ddbf1ccceb89c47 -->
+  <string name="geoloc_yourenotin">Ị NỌGHỊ N'ÓGBÈ</string>
+  <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
+  <string name="geoloc_warm_in">Ị NỌ N’MPAGHARA ma ị ga-eme mgbatị ọkụ!</string>
+  <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
+  <string name="ask_gps_enable">GPS gị yiri ka agbanyụrụ, ịchọrọ ịgbanye ya?</string>
+  <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
+  <string name="yes">Ee</string>
+  <!-- src_hash: 924c47189936d3b50379d50ec631597071d7f64f -->
+  <string name="no">Mba</string>
+  <!-- src_hash: 5fef7a97148e6120fd47da067da7d148791afd0a -->
+  <string name="ok">OK</string>
+  <!-- src_hash: 38223eb4eb3385b1c5ac009bb3a4e24e0b9302d6 -->
+  <string name="error">Njehie</string>
+  <!-- src_hash: 865342e363cd7c8c16a70cdb75fca63df10f7357 -->
+  <string name="minute_singular">%1$dmin</string>
+  <!-- src_hash: d0bbe1455e4cdc62c76636760327c0516bc1f297 -->
+  <string name="minute_plural">%1$dmin</string>
+  <!-- src_hash: 5eb9b1d6cc4a945a538da02aaaa9f84721e28738 -->
+  <string name="hour_singular">%1$dh</string>
+  <!-- src_hash: cab581c24ad8e240921309dc5498396e2a09414b -->
+  <string name="hour_plural">%1$dh</string>
+  <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
+  <string name="be_waved">Banye n’ebili!</string>
+  <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
+  <string name="wave_speed">Ọsọ ebili</string>
+  <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
+  <string name="wave_start_time">Oge mmalite</string>
+  <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
+  <string name="wave_end_time">Oge ngwụcha</string>
+  <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
+  <string name="wave_total_time">Oge niile</string>
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <string name="wave_progression">Ọganihu</string>
+  <!-- src_hash: 51ea217986113f63c3c9a1c4d5ef0f0fa04ebe55 -->
+  <string name="wave_warming">Na-ekwadebe..</string>
+  <!-- src_hash: 1ecbfefa00dbbe16006a8a0fdfd076be6122b99a -->
+  <string name="test_simulation">Nnwale nlereomume</string>
+  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <string name="test_simulation_started">Nlereomume amalitela</string>
+  <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
+  <string name="wave_be_ready">Dị njikere!</string>
+  <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->
+  <string name="wave_done">Ebili agwụla!</string>
+  <!-- src_hash: d955b930c0d83bdd6cf803ffa3627d94509153c8 -->
+  <string name="wave_hit">I mere nke ọma!</string>
+  <!-- src_hash: 00589bbc02fcac8151416d6e208c27b982b47c68 -->
+  <string name="wave_is_running">Na-ebili!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">Ị ma nke a: ọ bụrụ na a kọọrọ akụkọ ụwa n’akwụkwọ nwere peeji 1,000, ụmụ mmadụ ga-apụta naanị n’ahịrịokwu ikpeazụ nke peeji ikpeazụ.</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">Ma akụkọ mkpụmkpụ a nwere ike ịkwụsị tupu a tụrụ anya ya. Anyị dị naanị anyị n’etiti mbara igwe sara mbara na-adị ka ọ lụrụ aka. Anyi na-ebibi ihe niile. Anyị bụ onwe-anyị. Anyị na-adị egwu obi. Anyị nwere agụụ ọchịchọ. Anyị dị ka ìsì. Anyị na-achọ ịchị. Ma anyị nwekwara ike ịdị ebere, anyị na-emepụta ihe ịtụnanya, anyị na-aguzogide, anyị nwere ike ịdị mmadụ ọma n’efu.</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">Ma oge anyị dị ntakịrị. Anyi emeela nnukwu ọganihu.. Anyị nwere ike wuo ụzọ ọzọ: obodo nke ikike, nke ịdị n’otu, nke ọchịchị ndị mmadụ. Ọ dị n’aka anyị!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">Jikọọ na mmegharị ụwa niile, mmịfe udo. Ka anyị mepụta ebili mmadụ, akaebe nke mmadụ-ọrụ anyị n’ezie, oku siri ike nye ndị ndu anyị. Ka anyị zukọ nke ukwu n’obodo na mba, n’ụwa niile. Ka anyị họrọ udo. Ka anyị họrọ ọṅụ. Ka anyị họrọ okike. Ka anyị họrọ ANYỊ.</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">Gịnị ma ọ bụrụ na ebili otu naanị ya zuru iji kpoo anyị ọnụ?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves bụ ngwa mkpanaka na-adị obere oge nwere ọhụụ: ịhazikarị usoro ebili mmadụ na-agafe nnukwu obodo, gafee mba. A ga-eme ya n’ime otu afọ, na-achọ ịgafe ókè anụ ahụ na omenala, mee ka e nwee ịdị n’otu, obodo, na ahụmịhe mmadụ kesara ọnụ.</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">Na isi ya, WorldWideWaves abụghị naanị ngwa; ọ bụ mmegharị ụwa niile e chepụtara iji kpoo ndị mmadụ ọnụ n’ịgụnye ịdị n’otu na ọṅụ, na ụkpụrụ anyị kesara.</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">Site n’iji nkà na ụzụ mee ihe, WorldWideWaves ga-enye ndị sonyere si n’ụwa niile ohere isonye n’ebili ndị a n’obodo ha, mepụta ihe ngosi anya na mmetụta obi dị ike.</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">N’otu mkpụrụ okwu, WorldWideWaves bụ mgbalị nwere uche ukwuu iji jiri ike nkà na ụzụ rụọ ọrụ ọma n’ezie—ịjikọta mmadụ n’ememme ịdị n’otu, ọṅụ, na ime ihe ọnụ. Site n’ebili ọ bụla, ndị sonyere agaghị enwe nanị onyinye nye nnukwu ihe ngosi, ha ga-enwekwa ma kesaa n’ụwa mmetụta miri emi nke ịbụ otu.</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">Iwu &amp; Nche</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">Nnọọ na WorldWideWaves! Anyi ji ọṅụ nabata gị isonye na ihe omume ebili zuru ụwa. Iji mee ka onye obula nwee ahụmịhe dị nche na nke na-atọ ụtọ, biko soro ntuziaka ndị a:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">Iwu Izugbe:</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">Nkwanye ùgwù maka Onye Obula: Kekọrịtara ndị sonyere niile ùgwù, n’agbanyeghị ebe ha si. Biko debe nkwanye ùgwù; omume ịkpa ókè ma ọ bụ ịkpasu iwe adịghị akwado.</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">Kwanyere Ebe Ọha ùgwù: Hapụ ụzọ gafere ka mma, soro iwu na akara obodo, ma zere igbochi okporo ụzọ ma ọ bụ ụzọ mberede.</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">Nọ n’ime Mpaghara e Kpebiri: Maka nche gị, nọọ n’ime mpaghara e debere maka ihe omume ma ọ bụrụ na e nwere.</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">Jiri ezi uche mee: Ọ bụrụ na ị họrọ ịṅụ, mee ya n’otu n’otu ma soro iwu obodo.</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">Belata Mmetụta Gburugburu: Tụfuo ahihia na ihe mkpofu n’ebe e debere ma zere ịkwụpụ mkpofu ka ebe ahụ dị ọcha.</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">Kọọrọ Nsogbu: Ọ bụrụ na ị hụ ihe na-enye obi abụọ ma ọ bụ mmadụ nọ n’ọnwụnwa, gwa ndị ọchịchị obodo ozugbo.</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">Ndụmọdụ Nche:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">Yi Ihe Kwesịrị Ekwesị: Yi uwe na akpụkpọ ụkwụ dị mma kwekọrọ na ihe omume na ihu igwe.</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">Nọgide Na-anwụ Ọṅụṅụ: Were mmiri ma na-aṅụ mmiri mgbe niile, karịsịa n’ihe omume n’ebe okpomọkụ dị elu.</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">Lekọta Ihe Onwe Gị: Debe ihe onwunwe gị n’aka, zere iweta ihe bara nnukwu uru ị naghị achọ.</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">Jiri Enyi Jee: Nọnyere ndị enyi ma ọ bụ mepụta ndị ọhụrụ, lekọta onwe unu ọnụ.</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">Kwadebere maka Mberede: Chekwaa nọmba mberede obodo n’ekwentị gị ma kwurịta ebe izute ndị enyi ma ọ bụrụ na unu kewapụ.</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">Usoro Mberede:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">Jide n’aka: Chọpụta ụzọ mgbapụ kacha nso na ebe mepere emepe (dịka ogige ntụrụndụ, ọgba aghara) gbara gị gburugburu, soro ntuziaka ndị ọchịchị obodo ma ọ bụrụ na mberede emee.</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">Nkọọtụ Mberede: Chekwaa nọmba mberede obodo gị na nọmba onye gị na ya na-emekọ ihe mberede n’ekwentị tupu isonye.</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">Ma ọ bụrụ na Mberede: Kpọọ nọmba mberede obodo, gbapụta nwayọ n’ebe mepere emepe dị nche, nyere ndị ọzọ ma ọ bụrụ na i nwere ike, ma hapụ ụzọ gafere ka mma.</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">Iwu:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">Mgbaghara Ibu Ọrụ: Iso na ihe omume WorldWideWaves bụ n’ibu ọrụ gị. Site n’isonye, ị na-ekweta ịhapụ nkwupụta mgbaàmà megide ndị kere ngwa metụtara mmerụ nwere ike ime n’oge ihe omume.</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">Ozi Ebe Ọha: Nke a bụ ngagharị ọha ebe foto/filim site n’aka ndị sonyere ma ọ bụ mgbasa ozi nwere ike ime, dabere na iwu obodo. Anyị anaghị ekwu ikike n’onyonyo gị ma anyị apụghị ijidekwa ndekọ nke ndị ọzọ. Ọ bụrụ na ịchọghị ịpụta, gbalịa zere igwefoto mgbe o kwere mee.</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">Lelee FAQ</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">Gịnị kpatara na enweghị ihe omume n’obodo m ma ọ bụ mba m?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">Anyị họrọwo ọtụtụ iri n’ime obodo kacha juo ụwa mmadụ iji mepụta ebili zuru ụwa nke nwere isi. Ihe mgbochi teknụzụ na nke ọrụ ugbu a na-egbochi anyị ịkwado ebe enweghị oke. Anyị chọpụtara nnọchite anya sara mbara n’okirikiri kọntinent, omenala, na asụsụ—ihe nke na-apụtaghị nke ọma mgbe niile. Anyi nwere olileanya itinye obodo ọzọ n’oge na-abịa.</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">Gịnị bụ ọkọlọtọ kọntinent ndị a?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">Anyị kere ọkọlọtọ kọntinent ọhụrụ, nke echiche, iji nyere gị aka ịmata obodo n’ime ndepụta ngwa ngwa ma gosipụta mmụọ ịdị n’otu WorldWideWaves na-akwado. Ọkọlọtọ ndị a abụghị nke ọrụ gọọmenti ma ha dị naanị n’ime ngwa a; a na-emeghị ha iji kpasu iwe ma ọ bụ dochie akara mba ma ọ bụ omenala ọ bụla. E nweghị ọkọlọtọ ọrụ gọọmenti maka kọntinent jiogirafi, ya mere anyị chepụtara nke anyị maka doro anya na ntụrụndụ. Ọ bụrụ na ị masịrị ha, nwere onwe gị iji ha.</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">Ònye nọ n’azụ WorldWideWaves?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves bụ mgbalị onwe. Enweghị ụlọ ọrụ, òtù ma ọ bụ gọọmenti nọ n’azụ ya. Ndị kere ya chọrọ inye ụzọ bara uru maka ndị na-ajụ otú ha ga-esi nyere aka ime ka ụwa na ọnọdụ ndụ ka mma—mgbalị ịkekọrịta ọtụtụ atụmatụ na-akwado mmepe na ọchịchị ndị mmadụ n’okpuru ọkọlọtọ udo na-enweghị ndọrọ ndọrọ ọchịchị.</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">Nke a bụ mgbalị azụmahịa?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">Mba. Ngwa ahụ bụ n’efu kpamkpam. N’agbanyeghị na imewe na mmepe ya were oge na ego nke ndị kere ya, ha enwetaghị uru ego onwe ha site na ya.</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">Enwere m ike iso nyere aka?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">Ee, a na-anabata ndị ọrụụbịara oge niile. Koodu ngwa ahụ bụ open-source na GitHub, ị nwekwara ike kpọtụrụ ndị kere ya na worldwidewaves@proton.me (azịza agaghị ekwe nkwa). Uzo kacha mma isi nyere aka bụ ikwasa ozi: kesaa foto na vidio site n’ihe omume jiri hashtags a tụrụ aro, kpọtụrụ ndị nrụpụta mgbasa ozi obodo ka ha kwalite ozi ahụ, gwa obodo gị gbasara ya, ma karịchaa, banye n’ebili!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">USA</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">Mexico</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">Brazil</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">Argentina</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">United Kingdom</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">France</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">Germany</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">Spain</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">Italy</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">Russia</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">Turkey</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">Egypt</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">South Africa</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">Kenya</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">Nigeria</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">Dem. Rep. of the Congo</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">United Arab Emirates</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">India</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">Indonesia</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">Thailand</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">Philippines</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">Japan</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">South Korea</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">China</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">Australia</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">Canada</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">Peru</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">Colombia</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">Chile</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">Iran</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">Pakistan</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">North America</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">South America</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">Europe</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">Africa</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">Middle East</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">Asia</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">Oceania</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">New York</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">Nwee mmetụta obi nke Big Apple n’Ụbọchị Nnwere Onwe, ka ebili dị ndụ na-agafe Times Square, Central Park, na ahịrị ụlọ elu dị elu.</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">Los Angeles</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">Nwee ahụmịhe mmụta Hollywood, ifufe Pacific, na mma kpakpando nke L.A. n’oge ebili na-enwuputa City of Angels n’Ụbọchị Nnwere Onwe.</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">Mexico City</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">Gọzie Ụbọchị Nnwere Onwe Mexico n’etiti CDMX, ebe agwa kolonial na-ezukọta ume nke oge a, na ụda mariachi na-ada n’ogige akụkọ ihe mere eme.</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">Sao Paulo</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">Kwe ka ụda samba na mmụọ Ụbọchị Nnwere Onwe duru gị gafee Paulista Avenue juru mmadụ na mpaghara dị ndụ nke nnukwu obodo kosmopolitan a.</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">Buenos Aires</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">Kpọọ ememme Nnwere Onwe Argentina n’etiti ụda tango, boulevards ụdị Europe, na mmụọ ọkụ nke ndị porteños n’akụkụ Río de la Plata.</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">London</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">Nwee vibes ọtụtụ omenala nke Notting Hill Carnival ka ebili a na-agafe okporo ámá akụkọ ihe mere eme, bọs elu abụọ a ma ama, na Thames na-adịgide adịgide.</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">Paris</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">Na Bastille Day, soro ebili na-asọba site na Eiffel Tower ruo Champs-Élysées, na-eme ememme ịhụnanya na nka nke City of Light.</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">Berlin</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">Nwee mmụọ ijikọta na German Unity Day ka ebili na-agafe Brandenburg Gate, mgbidi jupụtara graffiti, na arụmarụ nke isi obodo a dị ndụ.</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">Madrid</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">Na Ụbọchị National Spain, ka ebili kpalie tapas bars dị ndụ Madrid, boulevards ukwu, na ihe nka nke Prado.</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">Rome</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">Na Ferragosto, soro ndị Rom na ndị ọbịa gafee piazzas jupụtara na egwu, ọdọ mmiri, na ume ezumike nke juputara n’Eternal City n’okpomọkụ ọkọchị.</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">Moscow</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">Nwee ịdị ebube Red Square na Kremlin n’Ụbọchị Russia, ka ebili na-echo akụkọ eze ukwu na mkpọtụ kosmopolitan nke oge a.</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">Istanbul</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">Kpọọ Republic Day na ebili na-asọba n’akụkụ Bosphorus, ụlọ ụka ochie, na ogige oge a, ka Istanbul jupụta na egwu, ọkọlọtọ, na anwụrụ ọkụ.</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">Cairo</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">Kpọọ Eid na Cairo ka okporo ámá na ahịa wee dị ndụ n’ọkụ ememme, isi ụtọ-atọ ụtọ, na ezinụlọ nwere ọṅụ ka ha na-emecha Ramadan na ebili jikọtara.</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">Johannesburg</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">Na Freedom Day, soro ebili gafee ‘City of Gold,’ ebe ụlọ elu oge a na-ezukọta na ihe nketa iguzosi ike n’ihe na ịdị iche iche omenala.</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">Nairobi</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">Kpọọ Madaraka Day n’etiti ahịa dị ndụ na okporo ámá juru, ebe ndụ obodo na-ezukọta na ụzọ banye n’ebe anụmanụ mara mma nke Kenya.</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">Lagos</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">Nabata ụda ike Afrobeats na Ụbọchị Nnwere Onwe Naịjịrịa, ka ebili na-agafe obodo kacha juo mmadụ na Afrika na ahịa ya juru ndụ.</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">Kinshasa</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">Na Ụbọchị Nnwere Onwe DR Congo, soro ebili na-agagharị n’ime isi obodo dị ndụ n’akụkụ Osimiri Kongo, juputara na egwu na mpako omenala.</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">Dubai</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">Kpọọ Ụbọchị Mba UAE n’etiti ụlọ elu futuristic, ala ịkpa ájá, na kosmopolitan nke metropolisi oge a kacha elu n’ụwa.</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">Mumbai</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">Cheta Nnwere Onwe India na mmụọ Bollywood, ụlọ wulite oge kolonial, na ụsọ osimiri mmiri monsoon n’akụkụ Oké Osimiri Arab.</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">Delhi</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">Nwee mmụọ ịhụ mba n’anya n’Ụbọchị Nnwere Onwe ka ebili na-asọba n’okporo boulevards oge kolonial, ụlọ mgbidi Mughal, na obi isi obodo India.</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">Bangalore</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">Kpọọ nnwere onwe na Silicon Valley nke India, ebe ụlọ arụsị narị afọ jikọtara na ogige teknụzụ ọhụrụ na ìgwè kosmopolitan na-eto.</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">Jakarta</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">Kpàà Ụbọchị Nnwere Onwe Indonesia n’obodo nke ọdịiche: site n’ụlọ elu na-enwu ruo ahịa okporo ámá juru na saịtị ihe nketa omenala.</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">Bangkok</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">Kpọọ Ụbọchị Nna Ụwa Thailand na nsọpụrụ Eze Bhumibol na City of Angels, ebe ụlọ arụsị goolu, ahịa mmiri, na nri okporo ámá dị ndụ na-akpalite mmetụta gị.</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">Manila</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">Kpọọ Ụbọchị Nnwere Onwe Philippines n’obodo ebe jeepneys na-agafe ụka kolonial Spain, ahịa dị ndụ, na ụlọ elu oge a.</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">Tokyo</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">Jikọọ nde mmadụ n’akụkụ Osimiri Sumida ka eluigwe gbaa agba, ka ikuku ememme ọkọchị Tokyo bụrụ ndabere zuru oke maka ebili na-enwu.</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">Seoul</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">Nabata ememme Gwangbokjeol ka ebili na-agafe ụlọ eze, ebe K-pop, na ahịrị ụlọ elu na-ejikọta omenala na ihe ọhụrụ.</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">Beijing</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">Na Ụbọchị Ọrụ, gawa ebili n’ime ogige na boulevards Beijing, ebe nde mmadụ na-ezukọta iji jee ije, mee picnic, ma nwee mmụọ opupu ihe ubi.</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">Shanghai</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">Kwe ka ebili gafee Bund na Nanjing Road ka Shanghai jupụta ezinụlọ, egwu, na ume kosmopolitan nke ememme Ụbọchị Ọrụ.</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">Hong Kong</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">Nwee ebili Golden Week Hong Kong, ka Victoria Harbour, ahịa, na okporo ámá neon jupụta n’otu mmadụ na-eme ememme Ụbọchị Ọrụ ọnụ.</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">Sydney</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">Gaa n’ime ebili n’oge Sydney Mardi Gras Parade, ebe Oxford Street jupụtara na agba rainbow, ụgbọ ihe ngosi na-enwu, na mmụọ kánival na-ejikọ ọtụtụ narị puku n’ememme.</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">Melbourne</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">Na Ụbọchị Melbourne Cup, gawa ebili n’etiti isi obodo omenala ka obodo jupụta na parades, ìgwè mmadụ n’uwe mara mma, na mmụọ ememme nke ‘asọmpi na-akwụsị mba’.</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">Toronto</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">Na Ụbọchị Canada, ka ebili were gị sụọ n’oké ọbara uhie na ọcha ka ọ na-agafe CN Tower, agbata obi ọtụtụ omenala, na ụsọ Lake Ontario.</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">Vancouver</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">Kpọọ Ụbọchị Canada n’akụkụ Oké Osimiri Pacific, na-agafe ebe dị n’etiti osimiri na ugwu, akwụkwọ ndụ Stanley Park, na mma kosmopolitan nke etiti obodo.</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">Chicago</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">Na Ụbọchị Nnwere Onwe, nwee ụtọ deep-dish na ihe ebube arụmarụ n’akụkụ Lake Michigan ka ebili na-agafe Windy City.</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">San Francisco</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">Nwee mmụọ nnwere onwe n’okpuru ụdọ a ma ama nke Golden Gate Bridge, ka ebili Ụbọchị Nnwere Onwe a na-agafe ugwu, ụgbọ cable, na agbata obi dị iche iche.</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">Lima</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">Na Ụbọchị Nnwere Onwe Peru, gawa ogige kolonial, saịtị tupu-Incan, na isi ụtọ nri Peru ama ama n’ụwa.</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">Bogota</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">Kpọọ Ụbọchị Nnwere Onwe Colombia n’etiti nka okporo ámá, ọhụụ ugwu, na ụda salsa n’ime agbata obi omenala nke isi obodo Andean.</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">Santiago</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">Nwee mmụọ ịhụ mba n’anya na Ụbọchị Nnwere Onwe Chile ka ebili gbagoo n’azụ ugwu Andes, façade kolonial, na ụlọ elu iko oge a.</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">Tehran</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">Jikọọ na Sizdah Bedar Tehran, ụbọchị ezinụlọ juputara n’ogige na ubi maka picnic, ọchị, na mmeghari, ka ebili gafee nnọkọ ntụrụndụ obodo ahụ.</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">Karachi</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">Kpọọ Ụbọchị Nnwere Onwe Pakistan n’akụkụ Oké Osimiri Arab, gafee ahịa juru mmadụ, akụkọ bara ụba, na ume ike nke obodo kacha ibu n’ime mba ahụ.</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">Welie aka gị!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">Tịkọọ aka ekpe na aka nri!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">Gbagoo aka azụ gburugburu!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">Gbadaa ma bilie!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">Gosi ebili!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">Gwere aka gafee!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">Kwadebere maka ebili!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">Ebili ugbu a!</string>
+</resources>

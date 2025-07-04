@@ -1,7 +1,7 @@
 package com.worldwidewaves.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -39,11 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
-import com.worldwidewaves.shared.generated.resources.ask_gps_enable
-import com.worldwidewaves.shared.generated.resources.no
-import com.worldwidewaves.shared.generated.resources.yes
-import org.jetbrains.compose.resources.stringResource
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
+import com.worldwidewaves.shared.MokoRes
+import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
 fun requestLocationPermission(): Boolean {
@@ -91,12 +88,12 @@ fun CheckGPSEnable() {
 
     if (requestLocationPermission() && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
         AlertDialog.Builder(context)
-            .setMessage(stringResource(ShRes.string.ask_gps_enable))
+            .setMessage(stringResource(MokoRes.strings.ask_gps_enable))
             .setCancelable(false)
-            .setPositiveButton(stringResource(ShRes.string.yes)) { _, _ ->
+            .setPositiveButton(stringResource(MokoRes.strings.yes)) { _, _ ->
                 startActivity(context, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
             }
-            .setNegativeButton(stringResource(ShRes.string.no)) { dialog, _ -> dialog.cancel() }
+            .setNegativeButton(stringResource(MokoRes.strings.no)) { dialog, _ -> dialog.cancel() }
             .create()
             .show()
     }

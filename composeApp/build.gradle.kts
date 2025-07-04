@@ -18,6 +18,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+    implementation(libs.j2objc.annotations)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
@@ -66,8 +67,13 @@ android {
         )
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -116,7 +122,10 @@ android {
         ":maps:android:lima_peru",
         ":maps:android:bogota_colombia",
         ":maps:android:santiago_chile",
-        ":maps:android:tehran_iran"
+        ":maps:android:tehran_iran",
+        ":maps:android:istanbul_turkey",
+        ":maps:android:karachi_pakistan",
+        ":maps:android:kinshasa_democratic_republic_of_the_congo"
     )
     dependencies {
         debugImplementation(compose.uiTooling)
@@ -141,5 +150,6 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
 }

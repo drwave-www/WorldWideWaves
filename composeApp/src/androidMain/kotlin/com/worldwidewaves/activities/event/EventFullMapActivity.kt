@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.event
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -41,31 +40,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.event_target_me_off
-import com.worldwidewaves.shared.generated.resources.event_target_me_on
-import com.worldwidewaves.shared.generated.resources.event_target_wave_off
-import com.worldwidewaves.shared.generated.resources.event_target_wave_on
 import com.worldwidewaves.shared.generated.resources.target_me_active
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.viewmodels.WaveViewModel
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
+@OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
 
     private val clock: IClock by inject()
@@ -74,7 +70,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
+        val eventStatus by event.observer.eventStatus.collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event) {
             value = event.getEndDateTime()
         }
@@ -82,23 +78,21 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Construct the event map
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
-                onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(observerId, newLocation)
-                },
                 mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true
                 )
             )
         }
 
         // Start event/map coordination
-        ObserveEventMap(event, eventMap)
+        ObserveEventMapProgression(event, eventMap)
 
         // Screen composition
-        Box(modifier = modifier.fillMaxWidth()) {
+        Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(eventMap, waveViewModel, observerId)
+            MapActions(event, eventMap, clock)
         }
     }
 
@@ -106,11 +100,12 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
 // ----------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 @Composable
-fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
-    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val isInArea by event.observer.userIsInArea.collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING
 
@@ -122,26 +117,28 @@ fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, observer
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
-                        if (isRunning) {
+                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetWave()
                             }
                         }
                     },
                 painter = painterResource(if (isRunning) ShRes.drawable.target_wave_active else ShRes.drawable.target_wave_inactive),
-                contentDescription = stringResource(if (isRunning) ShRes.string.event_target_wave_on else Res.string.event_target_wave_off)
+                contentDescription = stringResource(if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off)
             )
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetUser()
                             }
                         }
                     },
                 painter = painterResource(if (isInArea) ShRes.drawable.target_me_active else ShRes.drawable.target_me_inactive),
-                contentDescription = stringResource(if (isInArea) ShRes.string.event_target_me_on else ShRes.string.event_target_me_off)
+                contentDescription = stringResource(if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off)
             )
         }
     }

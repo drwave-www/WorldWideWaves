@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2024 DrWave
+# Copyright 2025 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
 # countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -25,16 +25,33 @@
 EVENTS_FILE=../../shared/src/commonMain/composeResources/files/events.json
 echo "--> Using events file $EVENTS_FILE"
 
+# ---------------------------------------------------------------------------
+# Detect platform (Linux vs macOS) so we fetch the right jq/yq binaries and
+# use the proper in-place syntax for `sed -i`.
+# ---------------------------------------------------------------------------
+OS_NAME="$(uname -s)"
+
+JQ_URL="https://github.com/stedolan/jq/releases/latest/download/jq-linux64"
+YQ_URL="https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64"
+SED_INPLACE_FLAG=""
+
+if [ "$OS_NAME" = "Darwin" ]; then
+  # macOS binaries
+  JQ_URL="https://github.com/stedolan/jq/releases/latest/download/jq-osx-amd64"
+  YQ_URL="https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_darwin_amd64"
+  SED_INPLACE_FLAG="''"
+fi
+
 # Download jq for JSON processing if not already present
 mkdir -p ./bin
 if [ ! -f ./bin/jq ]; then
-  wget -q https://github.com/stedolan/jq/releases/latest/download/jq-linux64 -O ./bin/jq
+  wget -q "$JQ_URL" -O ./bin/jq
   chmod +x ./bin/jq
 fi
 
 # Download yq for YAML processing if not already present
 if [ ! -f ./bin/yq ]; then
-  wget -q https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64 -O ./bin/yq
+  wget -q "$YQ_URL" -O ./bin/yq
   chmod +x ./bin/yq
 fi
 
@@ -88,7 +105,7 @@ get_event_bbox() {
   
   # If a direct bbox is specified, use that
   if [ "$direct_bbox" != "null" ] && [ -n "$direct_bbox" ]; then
-    echo "$direct_bbox"
+    adjust_bbox_to_16_9 "$direct_bbox"
     return
   fi
   
@@ -102,7 +119,94 @@ get_event_bbox() {
   fi
   
   # Use the admin IDs to get the bbox
-  ./libs/get_bbox.dep.sh "$osmAdminids" bbox
+  local calc_bbox
+  calc_bbox=$(./libs/get_bbox.dep.sh "$osmAdminids" bbox)
+  adjust_bbox_to_16_9 "$calc_bbox"
+}
+
+# -----------------------------------------------------------------------------
+# Ensure returned bbox keeps a 16:9 aspect-ratio.
+#   • If current ratio < 16/9 → expand width (keep height)
+#   • Else                  → expand height (keep width)
+# In every expansion the original box is centred in the new one.
+# -----------------------------------------------------------------------------
+# Usage: adjust_bbox_to_16_9 "minLng,minLat,maxLng,maxLat"
+# Returns: adjusted bbox string with 6-decimal precision
+adjust_bbox_to_16_9() {
+  local bbox="$1"
+  if [ -z "$bbox" ]; then
+    echo ""
+    return
+  fi
+  
+  # Print initial bbox to STDERR
+  echo "Initial bbox: $bbox" >&2
+  
+  IFS=',' read -r minLng minLat maxLng maxLat <<< "$bbox"
+  
+  # Validate numeric
+  for v in "$minLng" "$minLat" "$maxLng" "$maxLat"; do
+    if ! [[ $v =~ ^-?[0-9.]+$ ]]; then
+      echo "Invalid bbox format, returning original: $bbox" >&2
+      echo "$bbox"
+      return
+    fi
+  done
+
+  # Constants
+  local targetRatio="1.777777777" # 16/9
+
+  # Width / Height
+  local width height ratio
+  width=$(echo "$maxLng - $minLng" | bc -l)
+  height=$(echo "$maxLat - $minLat" | bc -l)
+
+  # Guard against zero height/width
+  if [ "$(echo "$height == 0" | bc)" -eq 1 ] || \
+     [ "$(echo "$width == 0"  | bc)" -eq 1 ]; then
+    echo "Zero width or height detected, returning original: $bbox" >&2
+    echo "$bbox"
+    return
+  fi
+
+  ratio=$(echo "$width / $height" | bc -l)
+  echo "Current ratio: $ratio (target: $targetRatio)" >&2
+
+  # If already ~16/9 (within 1%), keep original
+  if [ "$(echo "($ratio / $targetRatio) > 0.99 && ($ratio / $targetRatio) < 1.01" | bc -l)" -eq 1 ]; then
+    echo "Ratio already within 1% of target, no adjustment needed" >&2
+    local result
+    result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
+    echo "Final bbox: $result" >&2
+    echo "$result"
+    return
+  fi
+
+  # Expand logic
+  if [ "$(echo "$ratio < $targetRatio" | bc -l)" -eq 1 ]; then
+    # Too narrow → enlarge width
+    echo "Ratio too narrow, expanding width" >&2
+    local newWidth delta
+    newWidth=$(echo "$height * $targetRatio" | bc -l)
+    delta=$(echo "$newWidth - $width" | bc -l)
+    echo "Width expansion: $width -> $newWidth (delta: $delta)" >&2
+    minLng=$(echo "$minLng - $delta/2" | bc -l)
+    maxLng=$(echo "$maxLng + $delta/2" | bc -l)
+  else
+    # Too wide → enlarge height
+    echo "Ratio too wide, expanding height" >&2
+    local newHeight deltaH
+    newHeight=$(echo "$width / $targetRatio" | bc -l)
+    deltaH=$(echo "$newHeight - $height" | bc -l)
+    echo "Height expansion: $height → $newHeight (delta: $deltaH)" >&2
+    minLat=$(echo "$minLat - $deltaH/2" | bc -l)
+    maxLat=$(echo "$maxLat + $deltaH/2" | bc -l)
+  fi
+
+  local result
+  result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
+  echo "Final bbox: $result" >&2
+  echo "$result"
 }
 
 # Function to get the center for an event
@@ -132,6 +236,13 @@ get_event_center() {
   ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
 
+safe_replace() {
+  local pattern=$1
+  local value=$2
+  local escaped_value=$(echo "$value" | sed 's/[\/&~]/\\&/g')
+  echo "s~$pattern~$escaped_value~g"
+}
+
 # Function to replace placeholders in the template file with event configuration values
 # Usage: tpl <event_id> <template_file> <output_file>
 tpl() {
@@ -152,16 +263,15 @@ tpl() {
   # Replace placeholders with event properties and bbox/center data
   # First, handle array values specifically
   # Replace osmAdminids array elements with their values using proper array syntax
-  local osmids_count
-  osmids_count=$(./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then length else 0 end' "$EVENTS_FILE")
 
   # Then handle all other properties using the standard approach
   ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
-      sed -i \
-        -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
-        -e "s/#map.center#/$center/g" \
-        -e "s/#map.bbox#/$bbox/g" \
+      # Use portable in-place editing for both GNU and BSD sed
+      eval sed -i $SED_INPLACE_FLAG \
+        -e "\"$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")\"" \
+        -e "\"$(safe_replace "#map.center#" "$center")\"" \
+        -e "\"$(safe_replace "#map.bbox#" "$bbox")\"" \
         "$tpl_file"
     fi
   done
