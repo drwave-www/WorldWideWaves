@@ -48,7 +48,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -128,6 +130,7 @@ class WaveActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
@@ -548,22 +551,29 @@ fun ChoreographyDisplay(
 
     var currentFrameIndex by remember { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
+    
+    // Ensure a frame is shown immediately when composable is first created
+    SideEffect {
+        // This will show frame 0 immediately without waiting for the first animation cycle
+    }
 
     // Create a timer to cycle through frames
     LaunchedEffect(sequence) {
         val startTime = clock.now()
-        var elapsedTime: Duration
-
+        var nextFrameTime = startTime
+        
+        // Show first frame immediately
+        currentFrameIndex = 0
+        
         while (isActive) {
+            val now = clock.now()
+            
             // Check if we should stop showing the sequence based on total duration
-            if (remainingTime != null) {
-                elapsedTime = clock.now() - startTime
-                if (elapsedTime > remainingTime!!) {
-                    // Keep the last frame visible when duration is reached
-                    break
-                }
+            if (remainingTime != null && now - startTime > remainingTime!!) {
+                // Keep the last frame visible when duration is reached
+                break
             }
-
+            
             // Get the timing for the current frame
             val frameTiming = if (sequence.timings.isNotEmpty() && currentFrameIndex < sequence.timings.size) {
                 sequence.timings[currentFrameIndex]
@@ -571,8 +581,16 @@ fun ChoreographyDisplay(
                 1.seconds // Default timing
             }
             
-            // Wait for the current frame's duration
-            delay(frameTiming.inWholeMilliseconds)
+            // Calculate next frame time
+            nextFrameTime += frameTiming
+            
+            // Determine how long to wait until next frame
+            val delayTime = (nextFrameTime - now).coerceAtLeast(Duration.ZERO)
+            
+            // Wait for the calculated delay (might be 0 if we're behind schedule)
+            if (delayTime > Duration.ZERO) {
+                delay(delayTime.inWholeMilliseconds)
+            }
             
             // If we should continue to the next frame
             if (sequence.loop || currentFrameIndex < sequence.frameCount - 1) {
@@ -582,6 +600,13 @@ fun ChoreographyDisplay(
                 // If not looping and reached the last frame, keep showing it
                 break
             }
+        }
+    }
+    
+    // Cleanup when composable is removed from composition
+    DisposableEffect(sequence) {
+        onDispose {
+            // Nothing to clean up
         }
     }
 
@@ -623,15 +648,19 @@ fun ChoreographyDisplay(
                         Box(
                             modifier = Modifier.clipToBounds()
                         ) {
-                            Image(
-                                painter = painterResource(sequence.image!!),
-                                contentDescription = null,
-                                contentScale = ContentScale.FillHeight,
-                                modifier = Modifier
-                                    .width((sequence.frameWidth * sequence.frameCount).dp)
-                                    .height(sequence.frameHeight.dp)
-                                    .offset(x = (-sequence.frameWidth * currentFrameIndex).dp)
-                            )
+                            val imageResource = sequence.image
+                            // Draw the frame only if the drawable resource is available
+                            if (imageResource != null) {
+                                Image(
+                                    painter = painterResource(imageResource),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.FillHeight,
+                                    modifier = Modifier
+                                        .width((sequence.frameWidth * sequence.frameCount).dp)
+                                        .height(sequence.frameHeight.dp)
+                                        .offset(x = (-sequence.frameWidth * currentFrameIndex).dp)
+                                )
+                            }
                         }
                     }
                 }
