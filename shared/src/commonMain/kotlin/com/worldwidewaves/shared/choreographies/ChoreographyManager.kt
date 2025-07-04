@@ -25,6 +25,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_CHOREOGRAPHIES_CONF
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ImageResolver
 import io.github.aakira.napier.Napier
@@ -59,14 +60,18 @@ class ChoreographyManager<T>(
 
     data class ResolvedSequence<T>(
         val sequence: ChoreographySequence,
-        val resolvedImages: List<T>,
+        val resolvedImage: T?,
         val startTime: Duration,
         val endTime: Duration
     )
 
     data class DisplayableSequence<T>(
-        val images: List<T>,
+        val image: T?,
+        val frameWidth: Int,
+        val frameHeight: Int,
+        val frameCount: Int,
         val timing: Duration,
+        val duration: Duration,
         val text: String,
         val loop: Boolean,
         val remainingDuration: Duration?
@@ -76,18 +81,29 @@ class ChoreographyManager<T>(
 
     private fun ChoreographySequence.toResolved(
         startTime: Duration = Duration.ZERO
-    ): ResolvedSequence<T> = ResolvedSequence(
-        sequence = this,
-        resolvedImages = resolveImageResources(imageResolver),
-        startTime = startTime,
-        endTime = startTime + totalDuration
-    )
+    ): ResolvedSequence<T> {
+        val resolvedImages = resolveImageResources(imageResolver)
+        Log.v("ChoreographyManager", "sequence: $text")
+        Log.v("ChoreographyManager", "duration: ${duration?.inWholeSeconds}")
+        Log.v("ChoreographyManager", "startTime: ${startTime.inWholeSeconds}")
+        Log.v("ChoreographyManager", "endTime: ${(startTime + duration!!).inWholeSeconds}")
+        return ResolvedSequence(
+            sequence = this,
+            resolvedImage = resolvedImages.firstOrNull(),
+            startTime = startTime,
+            endTime = startTime + duration
+        )
+    }
 
     private fun ResolvedSequence<T>.toDisplayable(
         remainingDuration: Duration? = null
     ): DisplayableSequence<T> = DisplayableSequence(
-        images = resolvedImages,
+        image = resolvedImage,
+        frameWidth = sequence.frameWidth,
+        frameHeight = sequence.frameHeight,
+        frameCount = sequence.frameCount,
         timing = sequence.timing,
+        duration = sequence.duration!!,
         text = sequence.text,
         loop = sequence.loop,
         remainingDuration = remainingDuration
@@ -124,11 +140,11 @@ class ChoreographyManager<T>(
 
     private suspend fun prepareChoreography(definitionResource: String) {
         val definition = loadDefinition(definitionResource)
-        var currentOffset = Duration.ZERO
+        var startTime = Duration.ZERO
 
         val warmingSequences = definition.warmingSequences.map { sequence ->
-            sequence.toResolved(currentOffset).also {
-                currentOffset += sequence.totalDuration
+            sequence.toResolved(startTime).also {
+                startTime = it.endTime
             }
         }
 
@@ -145,14 +161,16 @@ class ChoreographyManager<T>(
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
-        val totalDuration = resolved.warmingSequences.last().endTime
+        val totalTiming = resolved.warmingSequences.last().endTime
         val elapsedTime = clock.now() - startTime
-        val wrappedElapsedTime = if (totalDuration.isPositive()) {
-            (elapsedTime.inWholeNanoseconds % totalDuration.inWholeNanoseconds).nanoseconds
+        val wrappedElapsedTime = if (totalTiming.isPositive()) {
+            (elapsedTime.inWholeNanoseconds % totalTiming.inWholeNanoseconds).nanoseconds
                 .coerceAtLeast(Duration.ZERO)
         } else {
             Duration.ZERO
         }
+
+        Log.v("ChoreographyManager", "wrappedElapsedTime: ${wrappedElapsedTime.inWholeSeconds} seconds")
 
         val sequence = resolved.warmingSequences.find {
             wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime

@@ -1,13 +1,14 @@
 
-- generate default map images
+- print 100% on wave screen when wave is ended
+- issue on counter at the end ? wave screen
+- put the counter a bit down, to be seen even with the choreograohies
+- review steps for choreographies
 
 - generate maps
     - miss istanbul/karachi/kinshasa
     - rome map issue
     - zoom tehran, tokyo, ... check all cities
     - delete warming zone in maps
-
-- images / flags
 
 - recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'

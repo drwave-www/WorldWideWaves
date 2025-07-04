@@ -1,37 +1,82 @@
 {
   "warming_sequences": [
     {
-      "images": ["wave_warmup_1", "wave_warmup_2", "wave_warmup_3"],
-      "timing": "PT3S",
+      "frames": "e_choreography_warming_seq_1",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 4,
+      "timing": "PT1S",
       "text": "Get ready for the wave!",
       "loop": true,
       "duration": "PT30S"
     },
     {
-      "images": ["wave_warmup_4", "wave_warmup_5", "wave_warmup_6"],
-      "timing": "PT2S",
+      "frames": "e_choreography_warming_seq_2",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 4,
+      "timing": "PT1S",
       "text": "The wave is approaching!",
       "loop": true,
       "duration": "PT20S"
     },
     {
-      "images": ["wave_warmup_7", "wave_warmup_8", "wave_warmup_9"],
+      "frames": "e_choreography_warming_seq_3",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 3,
       "timing": "PT1S",
       "text": "Almost there!",
+      "loop": true,
+      "duration": "PT10S"
+    },
+    {
+      "frames": "e_choreography_warming_seq_4",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 4,
+      "timing": "PT1S",
+      "text": "Ready to wave ?!",
+      "loop": true,
+      "duration": "PT20S"
+    },
+    {
+      "frames": "e_choreography_warming_seq_5",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 3,
+      "timing": "PT1S",
+      "text": "Can't wait!",
+      "loop": true,
+      "duration": "PT10S"
+    },
+    {
+      "frames": "e_choreography_warming_seq_6",
+      "frame_width": 450,
+      "frame_height": 900,
+      "frame_count": 3,
+      "timing": "PT1S",
+      "text": "Very soon!",
       "loop": true,
       "duration": "PT10S"
     }
   ],
   "waiting_sequence": {
-    "images": ["wave_waiting_1", "wave_waiting_2", "wave_waiting_3"],
-    "timing": "PT0.5S",
+    "frames": "e_choreography_waiting",
+    "frame_width": 450,
+    "frame_height": 900,
+    "frame_count": 4,
+    "timing": "PT2S",
     "text": "Prepare to wave!",
-    "loop": true
+    "loop": false
   },
   "hit_sequence": {
-    "images": ["wave_hit_1", "wave_hit_2", "wave_hit_3"],
-    "timing": "PT0.3S",
+    "frames": "e_choreography_hit",
+    "frame_width": 450,
+    "frame_height": 900,
+    "frame_count": 4,
+    "timing": "PT0.5S",
     "text": "Wave now!",
-    "loop": true
+    "loop": false
   }
 }

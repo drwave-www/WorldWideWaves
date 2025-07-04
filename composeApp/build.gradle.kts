@@ -116,7 +116,10 @@ android {
         ":maps:android:lima_peru",
         ":maps:android:bogota_colombia",
         ":maps:android:santiago_chile",
-        ":maps:android:tehran_iran"
+        ":maps:android:tehran_iran",
+        ":maps:android:istanbul_turkey",
+        ":maps:android:karachi_pakistan",
+        ":maps:android:kinshasa_democratic_republic_of_the_congo"
     )
     dependencies {
         debugImplementation(compose.uiTooling)

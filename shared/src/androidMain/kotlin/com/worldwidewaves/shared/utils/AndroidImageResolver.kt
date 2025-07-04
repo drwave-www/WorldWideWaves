@@ -22,52 +22,44 @@ package com.worldwidewaves.shared.utils
  */
 
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.wave_hit_1
-import com.worldwidewaves.shared.generated.resources.wave_hit_2
-import com.worldwidewaves.shared.generated.resources.wave_hit_3
-import com.worldwidewaves.shared.generated.resources.wave_waiting_1
-import com.worldwidewaves.shared.generated.resources.wave_waiting_2
-import com.worldwidewaves.shared.generated.resources.wave_waiting_3
-import com.worldwidewaves.shared.generated.resources.wave_warmup_1
-import com.worldwidewaves.shared.generated.resources.wave_warmup_2
-import com.worldwidewaves.shared.generated.resources.wave_warmup_3
-import com.worldwidewaves.shared.generated.resources.wave_warmup_4
-import com.worldwidewaves.shared.generated.resources.wave_warmup_5
-import com.worldwidewaves.shared.generated.resources.wave_warmup_6
-import com.worldwidewaves.shared.generated.resources.wave_warmup_7
-import com.worldwidewaves.shared.generated.resources.wave_warmup_8
-import com.worldwidewaves.shared.generated.resources.wave_warmup_9
+import com.worldwidewaves.shared.generated.resources.e_choreography_hit
+import com.worldwidewaves.shared.generated.resources.e_choreography_waiting
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_1
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_2
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_3
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_4
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_5
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_6
+import com.worldwidewaves.shared.generated.resources.transparent
 import org.jetbrains.compose.resources.DrawableResource
 
 object DrawableResources {
-
     // Mapping of path names to resource IDs
     private val resourceMap = mapOf(
-        "wave_warmup_1" to Res.drawable.wave_warmup_1,
-        "wave_warmup_2" to Res.drawable.wave_warmup_2,
-        "wave_warmup_3" to Res.drawable.wave_warmup_3,
-        "wave_warmup_4" to Res.drawable.wave_warmup_4,
-        "wave_warmup_5" to Res.drawable.wave_warmup_5,
-        "wave_warmup_6" to Res.drawable.wave_warmup_6,
-        "wave_warmup_7" to Res.drawable.wave_warmup_7,
-        "wave_warmup_8" to Res.drawable.wave_warmup_8,
-        "wave_warmup_9" to Res.drawable.wave_warmup_9,
-        "wave_waiting_1" to Res.drawable.wave_waiting_1,
-        "wave_waiting_2" to Res.drawable.wave_waiting_2,
-        "wave_waiting_3" to Res.drawable.wave_waiting_3,
-        "wave_hit_1" to Res.drawable.wave_hit_1,
-        "wave_hit_2" to Res.drawable.wave_hit_2,
-        "wave_hit_3" to Res.drawable.wave_hit_3
+        "e_choreography_warming_seq_1" to Res.drawable.e_choreography_warming_seq_1,
+        "e_choreography_warming_seq_2" to Res.drawable.e_choreography_warming_seq_2,
+        "e_choreography_warming_seq_3" to Res.drawable.e_choreography_warming_seq_3,
+        "e_choreography_warming_seq_4" to Res.drawable.e_choreography_warming_seq_4,
+        "e_choreography_warming_seq_5" to Res.drawable.e_choreography_warming_seq_5,
+        "e_choreography_warming_seq_6" to Res.drawable.e_choreography_warming_seq_6,
+        "e_choreography_waiting" to Res.drawable.e_choreography_waiting,
+        "e_choreography_hit" to Res.drawable.e_choreography_hit
     )
 
     // Get resource ID by path, with fallback to transparent
     fun getResource(path: String): DrawableResource? {
-        return resourceMap[path]
+        return resourceMap[path] ?: Res.drawable.transparent
     }
 }
 
+/**
+ * Implementation of ImageResolver for Android platform.
+ * Handles resolving drawable resources and extracting frames from sprite sheets.
+ */
 class AndroidImageResolver : ImageResolver<DrawableResource> {
+
     override fun resolve(path: String): DrawableResource? {
         return DrawableResources.getResource(path)
     }
+
 }

@@ -24,14 +24,12 @@ package com.worldwidewaves.activities.event
 // Debug-only utilities -------------------------------------------------------
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -64,7 +62,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -88,6 +87,7 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
@@ -124,7 +124,6 @@ class WaveActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
@@ -178,13 +177,17 @@ class WaveActivity : AbstractEventWaveActivity() {
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 BeReady(waveViewModel, observerId)
-                eventMap.Screen(autoMapDownload = true, Modifier.fillMaxWidth().height(calculatedHeight))
+                eventMap.Screen(autoMapDownload = true, Modifier
+                    .fillMaxWidth()
+                    .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
                 WaveHitCounter(waveViewModel, observerId, clock)
             }
 
             // Pass the visibility state to WaveChoreographies for coordination
-            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.fillMaxSize().zIndex(10f))
+            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier
+                .fillMaxSize()
+                .zIndex(10f))
 
             // ----------------------------------------------------------------
             // Test-mode UI (only visible in debug builds)
@@ -491,6 +494,8 @@ fun WaveChoreographies(
                 event.warming.getCurrentChoregraphySequence()
             }
 
+            Log.v("sequence", "got warming sequence: ${warmingSequence?.text}")
+
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
                 TimedSequenceDisplay(
@@ -526,7 +531,8 @@ fun TimedSequenceDisplay(
     ChoreographyDisplay(sequence, clock, modifier)
 
     LaunchedEffect(sequence) {
-        delay(sequence.remainingDuration ?: sequence.timing)
+        Log.v("sequence", "delay sequence: ${sequence.remainingDuration?.inWholeSeconds ?: sequence.duration.inWholeSeconds} seconds")
+        delay(sequence.remainingDuration ?: sequence.duration)
         onSequenceComplete()
     }
 }
@@ -537,11 +543,13 @@ fun ChoreographyDisplay(
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    if (sequence == null || sequence.images.isEmpty()) return
+    if (sequence == null || sequence.image == null) return
 
     var currentImageIndex by remember { mutableIntStateOf(0) }
-    var isVisible by remember { mutableStateOf(true) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
+
+    // Get the painter and convert to ImageBitmap
+    val painter = painterResource(sequence.image!!)
 
     // Create a timer to cycle through images
     LaunchedEffect(sequence) {
@@ -551,15 +559,13 @@ fun ChoreographyDisplay(
             // Check if we should stop showing the sequence
             if (remainingTime != null) {
                 val elapsed = clock.now() - startTime
-                if (elapsed > remainingTime!!) break
+                if (elapsed >= remainingTime!!) break
             }
 
             delay(sequence.timing.inWholeMilliseconds)
-            isVisible = false
 
-            if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
-                currentImageIndex = (currentImageIndex + 1) % sequence.images.size
-                isVisible = true
+            if (sequence.loop || currentImageIndex < sequence.frameCount - 1) {
+                currentImageIndex = (currentImageIndex + 1) % sequence.frameCount
             } else {
                 break // Stop if we've shown all images and not looping
             }
@@ -572,36 +578,62 @@ fun ChoreographyDisplay(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 400.dp) // Maximum width
-                .heightIn(max = 600.dp) // Maximum height
-                .padding(24.dp) // Outer padding
+                .widthIn(max = 400.dp)
+                .heightIn(max = 600.dp)
+                .padding(24.dp)
                 .shadow(8.dp)
                 .background(Color.Black.copy(alpha = 0.7f))
                 .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
-                .padding(24.dp), // Inner padding
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f) // Take available space but leave room for text
                 ) {
-                    this@Column.AnimatedVisibility(visible = isVisible) {
-                        Image(
-                            painter = painterResource(sequence.images[currentImageIndex]),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                    val frameWidthPx = sequence.frameWidth.toFloat()
+                    val frameHeightPx = sequence.frameHeight.toFloat()
+
+                    // Calculate scale to fit the frame within canvas bounds
+                    val scaleX = size.width / frameWidthPx
+                    val scaleY = size.height / frameHeightPx
+                    val scale = minOf(scaleX, scaleY)
+
+                    // Calculate centered position
+                    val scaledWidth = frameWidthPx * scale
+                    val scaledHeight = frameHeightPx * scale
+                    val offsetX = (size.width - scaledWidth) / 2f
+                    val offsetY = (size.height - scaledHeight) / 2f
+
+                    clipRect(
+                        left = offsetX,
+                        top = offsetY,
+                        right = offsetX + scaledWidth,
+                        bottom = offsetY + scaledHeight
+                    ) {
+                        translate(
+                            left = offsetX - (currentImageIndex * scaledWidth),
+                            top = offsetY
+                        ) {
+                            with(painter) {
+                                draw(
+                                    size = Size(
+                                        width = scaledWidth * 4, // Always 4 frames per slide
+                                        height = scaledHeight
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
 
                 Text(
-                    modifier = Modifier.padding(top = 16.dp),
                     text = sequence.text,
                     style = quinaryColoredBoldTextStyle(24),
                     color = Color.White,
