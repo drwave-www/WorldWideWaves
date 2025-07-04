@@ -24,7 +24,6 @@ package com.worldwidewaves.activities.event
 // Debug-only utilities -------------------------------------------------------
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
@@ -46,6 +45,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -529,8 +529,9 @@ fun TimedSequenceDisplay(
     ChoreographyDisplay(sequence, clock, modifier)
 
     // Use the total duration of all frames for sequence completion
-    val totalDuration = sequence.remainingDuration ?: sequence.timings.sumOf { it.inWholeMilliseconds }.milliseconds
-
+    val totalDuration = sequence.remainingDuration ?: 
+        sequence.timings.sumOf { it.inWholeMilliseconds }.milliseconds
+    
     LaunchedEffect(sequence) {
         delay(totalDuration)
         onSequenceComplete()
@@ -546,35 +547,40 @@ fun ChoreographyDisplay(
     if (sequence == null || sequence.image == null) return
 
     var currentFrameIndex by remember { mutableIntStateOf(0) }
-    var isVisible by remember { mutableStateOf(true) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Create a timer to cycle through frames
     LaunchedEffect(sequence) {
         val startTime = clock.now()
+        var elapsedTime: Duration
 
-        while (this.isActive) {
-            // Check if we should stop showing the sequence
+        while (isActive) {
+            // Check if we should stop showing the sequence based on total duration
             if (remainingTime != null) {
-                val elapsed = clock.now() - startTime
-                if (elapsed > remainingTime!!) break
+                elapsedTime = clock.now() - startTime
+                if (elapsedTime > remainingTime!!) {
+                    // Keep the last frame visible when duration is reached
+                    break
+                }
             }
 
             // Get the timing for the current frame
             val frameTiming = if (sequence.timings.isNotEmpty() && currentFrameIndex < sequence.timings.size) {
                 sequence.timings[currentFrameIndex]
             } else {
-                1.seconds
+                1.seconds // Default timing
             }
             
+            // Wait for the current frame's duration
             delay(frameTiming.inWholeMilliseconds)
-            isVisible = false
-
+            
+            // If we should continue to the next frame
             if (sequence.loop || currentFrameIndex < sequence.frameCount - 1) {
+                // Update frame index, wrapping around if looping
                 currentFrameIndex = (currentFrameIndex + 1) % sequence.frameCount
-                isVisible = true
             } else {
-                break // Stop if we've shown all frames and not looping
+                // If not looping and reached the last frame, keep showing it
+                break
             }
         }
     }
@@ -605,20 +611,22 @@ fun ChoreographyDisplay(
                         .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    this@Column.AnimatedVisibility(visible = isVisible) {
-                        // Create a Box to clip and constrain the image
+                    // Create a container for the frame with proper clipping
+                    Surface(
+                        modifier = Modifier
+                            .width(sequence.frameWidth.dp)
+                            .height(sequence.frameHeight.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        color = Color.Transparent
+                    ) {
+                        // Display the sprite sheet with proper offset to show current frame
                         Box(
-                            modifier = Modifier
-                                .width(sequence.frameWidth.dp)
-                                .height(sequence.frameHeight.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .clipToBounds()
+                            modifier = Modifier.clipToBounds()
                         ) {
-                            // Display the sprite sheet with proper offset to show current frame
                             Image(
                                 painter = painterResource(sequence.image!!),
                                 contentDescription = null,
-                                contentScale = ContentScale.None,
+                                contentScale = ContentScale.FillHeight,
                                 modifier = Modifier
                                     .width((sequence.frameWidth * sequence.frameCount).dp)
                                     .height(sequence.frameHeight.dp)
