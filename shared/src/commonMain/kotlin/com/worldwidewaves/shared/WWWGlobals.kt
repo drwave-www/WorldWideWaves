@@ -57,7 +57,7 @@ class WWWGlobals {
         val WAVE_OBSERVE_DELAY = 2.hours // hours
         val WAVE_WARMING_DURATION = 2.5.minutes
         val WAVE_WARN_BEFORE_HIT = 30.seconds
-        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 5.seconds
+        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 10.seconds
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
         const val WAVE_BACKGROUND_COLOR = "#D33682"
         const val WAVE_BACKGROUND_OPACITY = 0.5f
