@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -113,6 +115,8 @@ import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class WaveActivity : AbstractEventWaveActivity() {
@@ -124,7 +128,6 @@ class WaveActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         // States
         var hasPlayedHitSound = false
@@ -525,8 +528,11 @@ fun TimedSequenceDisplay(
 
     ChoreographyDisplay(sequence, clock, modifier)
 
+    // Use the total duration of all frames for sequence completion
+    val totalDuration = sequence.remainingDuration ?: sequence.timings.sumOf { it.inWholeMilliseconds }.milliseconds
+
     LaunchedEffect(sequence) {
-        delay(sequence.remainingDuration ?: sequence.timing)
+        delay(totalDuration)
         onSequenceComplete()
     }
 }
@@ -537,13 +543,13 @@ fun ChoreographyDisplay(
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    if (sequence == null || sequence.images.isEmpty()) return
+    if (sequence == null || sequence.image == null) return
 
-    var currentImageIndex by remember { mutableIntStateOf(0) }
+    var currentFrameIndex by remember { mutableIntStateOf(0) }
     var isVisible by remember { mutableStateOf(true) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
-    // Create a timer to cycle through images
+    // Create a timer to cycle through frames
     LaunchedEffect(sequence) {
         val startTime = clock.now()
 
@@ -554,14 +560,21 @@ fun ChoreographyDisplay(
                 if (elapsed > remainingTime!!) break
             }
 
-            delay(sequence.timing.inWholeMilliseconds)
+            // Get the timing for the current frame
+            val frameTiming = if (sequence.timings.isNotEmpty() && currentFrameIndex < sequence.timings.size) {
+                sequence.timings[currentFrameIndex]
+            } else {
+                1.seconds
+            }
+            
+            delay(frameTiming.inWholeMilliseconds)
             isVisible = false
 
-            if (sequence.loop || currentImageIndex < sequence.images.size - 1) {
-                currentImageIndex = (currentImageIndex + 1) % sequence.images.size
+            if (sequence.loop || currentFrameIndex < sequence.frameCount - 1) {
+                currentFrameIndex = (currentFrameIndex + 1) % sequence.frameCount
                 isVisible = true
             } else {
-                break // Stop if we've shown all images and not looping
+                break // Stop if we've shown all frames and not looping
             }
         }
     }
@@ -587,16 +600,31 @@ fun ChoreographyDisplay(
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     this@Column.AnimatedVisibility(visible = isVisible) {
-                        Image(
-                            painter = painterResource(sequence.images[currentImageIndex]),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        // Create a Box to clip and constrain the image
+                        Box(
+                            modifier = Modifier
+                                .width(sequence.frameWidth.dp)
+                                .height(sequence.frameHeight.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clipToBounds()
+                        ) {
+                            // Display the sprite sheet with proper offset to show current frame
+                            Image(
+                                painter = painterResource(sequence.image!!),
+                                contentDescription = null,
+                                contentScale = ContentScale.None,
+                                modifier = Modifier
+                                    .width((sequence.frameWidth * sequence.frameCount).dp)
+                                    .height(sequence.frameHeight.dp)
+                                    .offset(x = (-sequence.frameWidth * currentFrameIndex).dp)
+                            )
+                        }
                     }
                 }
 

@@ -103,7 +103,7 @@ class ChoreographyManager<T>(
         frameWidth = frameWidth,
         frameHeight = frameHeight,
         frameCount = frameCount,
-        timings = if (sequence.timing.isNotEmpty()) sequence.timing else List(frameCount) { 1.seconds },
+        timings = sequence.timing.ifEmpty { List(frameCount) { 1.seconds } },
         text = sequence.text,
         loop = sequence.loop,
         remainingDuration = remainingDuration

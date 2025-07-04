@@ -88,12 +88,11 @@ data class ChoreographySequence(
 
     // Returns resolved image resource IDs
     fun <T> resolveImageResources(resolver: ImageResolver<T>): List<T> {
-        val resolved = resolver.resolve(frames)
-            ?: resolver.resolve("transparent")
-
-        // Preserve previous contract: one entry per *visual* frame
-        return if (resolved == null) emptyList()
-        else List(frameCount) { resolved }
+        // Extract each frame from the sprite sheet
+        val resolvedFrames = (0 until frameCount).mapNotNull { frameIndex ->
+            resolver.resolve(frames)
+        }
+        
+        return resolvedFrames.ifEmpty { emptyList() }
     }
-
 }
