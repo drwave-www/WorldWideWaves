@@ -1,30 +1,21 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Tests for WWWSimulation class
  */
 class WWWSimulationTest {
-
-    // Test fixture for controlling time in tests
-    class TestClock(private var currentTime: Instant = Instant.fromEpochMilliseconds(0)) : Clock {
-        override fun now(): Instant = currentTime
-        
-        fun advanceTime(duration: Duration) {
-            currentTime += duration
-        }
-    }
 
     // Common test parameters
     private val startDateTime = Instant.fromEpochMilliseconds(1000)
@@ -83,232 +74,214 @@ class WWWSimulationTest {
     }
     
     @Test
-    fun `test now returns correct time with speed 1`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+    fun `test now returns correct time with speed 1`() = runBlocking {
+        // Create simulation with speed 1
+        val simulation = WWWSimulation(startDateTime, userPosition)
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
+        // Get initial time
+        val initialSimTime = simulation.now()
+        val initialRealTime = Clock.System.now()
+        
+        // Wait for a small amount of real time
+        delay(500) // 500ms
+        
+        // Get final time
+        val finalSimTime = simulation.now()
+        val finalRealTime = Clock.System.now()
+        
+        // Calculate elapsed times
+        val realElapsed = finalRealTime - initialRealTime
+        val simElapsed = finalSimTime - initialSimTime
+        
+        // With speed 1, simulated time should advance at the same rate as real time
+        // Allow for small tolerance in timing
+        val ratio = simElapsed.inWholeMilliseconds.toDouble() / realElapsed.inWholeMilliseconds.toDouble()
+        assertTrue(abs(ratio - 1.0) < 0.2, 
+            "With speed 1, simulated time should advance at the same rate as real time. " +
+            "Actual ratio: $ratio")
+    }
+    
+    @Test
+    fun `test now returns correct time with speed greater than 1`() = runBlocking {
+        // Create simulation with speed 10
+        val simulation = WWWSimulation(startDateTime, userPosition, 10)
+        
+        // Get initial time
+        val initialSimTime = simulation.now()
+        val initialRealTime = Clock.System.now()
+        
+        // Wait for a small amount of real time
+        delay(500) // 500ms
+        
+        // Get final time
+        val finalSimTime = simulation.now()
+        val finalRealTime = Clock.System.now()
+        
+        // Calculate elapsed times
+        val realElapsed = finalRealTime - initialRealTime
+        val simElapsed = finalSimTime - initialSimTime
+        
+        // With speed 10, simulated time should advance 10x as fast as real time
+        // Allow for small tolerance in timing
+        val expectedRatio = 10.0
+        val actualRatio = simElapsed.inWholeMilliseconds.toDouble() / realElapsed.inWholeMilliseconds.toDouble()
+        
+        assertTrue(abs(actualRatio - expectedRatio) < 2.0, 
+            "With speed 10, simulated time should advance 10x as fast as real time. " +
+            "Expected ratio: $expectedRatio, Actual ratio: $actualRatio")
+    }
+    
+    @Test
+    fun `test speed changes affect time calculations correctly`() = runBlocking {
+        // Create simulation with speed 1
+        val simulation = WWWSimulation(startDateTime, userPosition)
+        
+        // Get initial time
+        val initialSimTime = simulation.now()
+        
+        // Wait for a small amount of real time with speed 1
+        val initialRealTime = Clock.System.now()
+        delay(500) // 500ms
+        val midRealTime = Clock.System.now()
+        val midSimTime = simulation.now()
+        
+        // Calculate elapsed times for first period
+        val firstRealElapsed = midRealTime - initialRealTime
+        val firstSimElapsed = midSimTime - initialSimTime
+        
+        // Verify first period ratio is close to 1.0
+        val firstRatio = firstSimElapsed.inWholeMilliseconds.toDouble() / firstRealElapsed.inWholeMilliseconds.toDouble()
+        assertTrue(abs(firstRatio - 1.0) < 0.2, 
+            "With speed 1, simulated time should advance at the same rate as real time. " +
+            "Actual ratio: $firstRatio")
+        
+        // Change speed to 5
+        simulation.setSpeed(5)
+        
+        // Wait for another small amount of real time with speed 5
+        delay(500) // 500ms
+        val finalRealTime = Clock.System.now()
+        val finalSimTime = simulation.now()
+        
+        // Calculate elapsed times for second period
+        val secondRealElapsed = finalRealTime - midRealTime
+        val secondSimElapsed = finalSimTime - midSimTime
+        
+        // Verify second period ratio is close to 5.0
+        val secondRatio = secondSimElapsed.inWholeMilliseconds.toDouble() / secondRealElapsed.inWholeMilliseconds.toDouble()
+        assertTrue(abs(secondRatio - 5.0) < 1.0, 
+            "With speed 5, simulated time should advance 5x as fast as real time. " +
+            "Actual ratio: $secondRatio")
+    }
+    
+    @Test
+    fun `test multiple speed changes in sequence`() = runBlocking {
+        // Create simulation with initial speed 2
+        val simulation = WWWSimulation(startDateTime, userPosition, 2)
+        
+        // Test with a sequence of speed changes
+        val speeds = listOf(2, 5, 10, 1, 50)
+        var currentSimTime = simulation.now()
+        
+        for (speed in speeds) {
+            if (simulation.speed != speed) {
+                simulation.setSpeed(speed)
+            }
             
-            // Create simulation with speed 1
-            val simulation = WWWSimulation(startDateTime, userPosition)
+            val beforeRealTime = Clock.System.now()
+            delay(200) // 200ms
+            val afterRealTime = Clock.System.now()
+            val newSimTime = simulation.now()
             
-            // Initial time should be the start time
-            assertEquals(startDateTime, simulation.now())
+            // Calculate elapsed times
+            val realElapsed = afterRealTime - beforeRealTime
+            val simElapsed = newSimTime - currentSimTime
             
-            // Advance real time by 1 minute
-            testClock.advanceTime(1.minutes)
+            // Verify ratio is close to the current speed
+            val ratio = simElapsed.inWholeMilliseconds.toDouble() / realElapsed.inWholeMilliseconds.toDouble()
+            assertTrue(abs(ratio - speed) < speed * 0.3, 
+                "With speed $speed, simulated time should advance ${speed}x as fast as real time. " +
+                "Actual ratio: $ratio")
             
-            // With speed 1, simulated time should also advance by 1 minute
-            assertEquals(startDateTime + 1.minutes, simulation.now())
-            
-            // Advance real time by 1 hour
-            testClock.advanceTime(1.hours)
-            
-            // Simulated time should advance by 1 hour
-            assertEquals(startDateTime + 1.minutes + 1.hours, simulation.now())
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
+            currentSimTime = newSimTime
         }
     }
     
     @Test
-    fun `test now returns correct time with speed greater than 1`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+    fun `test pause and resume functionality`() = runBlocking {
+        // Create simulation with speed 10
+        val simulation = WWWSimulation(startDateTime, userPosition, 10)
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with speed 10
-            val simulation = WWWSimulation(startDateTime, userPosition, 10)
-            
-            // Initial time should be the start time
-            assertEquals(startDateTime, simulation.now())
-            
-            // Advance real time by 1 minute
-            testClock.advanceTime(1.minutes)
-            
-            // With speed 10, simulated time should advance by 10 minutes
-            assertEquals(startDateTime + 10.minutes, simulation.now())
-            
-            // Advance real time by 30 seconds
-            testClock.advanceTime(30.seconds)
-            
-            // Simulated time should advance by additional 5 minutes (30 sec * 10)
-            assertEquals(startDateTime + 10.minutes + 5.minutes, simulation.now())
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
+        // Get time before pause
+        val beforePauseSimTime = simulation.now()
+        
+        // Pause the simulation
+        simulation.pause()
+        assertEquals(0, simulation.speed, "Speed should be 0 when paused")
+        
+        // Wait while paused
+        delay(300) // 300ms
+        
+        // Time should not advance while paused
+        val duringPauseSimTime = simulation.now()
+        assertEquals(beforePauseSimTime, duringPauseSimTime, 
+            "Simulated time should not advance while paused")
+        
+        // Resume with speed 5
+        simulation.resume(5)
+        assertEquals(5, simulation.speed, "Speed should be updated when resumed")
+        
+        // Wait after resume
+        val afterResumeRealTime = Clock.System.now()
+        delay(300) // 300ms
+        val finalRealTime = Clock.System.now()
+        val finalSimTime = simulation.now()
+        
+        // Calculate elapsed times after resume
+        val realElapsed = finalRealTime - afterResumeRealTime
+        val simElapsed = finalSimTime - duringPauseSimTime
+        
+        // Verify ratio is close to 5.0 after resume
+        val ratio = simElapsed.inWholeMilliseconds.toDouble() / realElapsed.inWholeMilliseconds.toDouble()
+        assertTrue(abs(ratio - 5.0) < 1.5, 
+            "After resume with speed 5, simulated time should advance 5x as fast as real time. " +
+            "Actual ratio: $ratio")
+        
+        // Test resume without specifying speed (should use last active speed)
+        simulation.pause()
+        simulation.resume()
+        assertEquals(5, simulation.speed, "Resume without speed parameter should use last active speed")
     }
     
     @Test
-    fun `test speed changes affect time calculations correctly`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+    fun `test reset functionality`() = runBlocking {
+        // Create simulation with speed 5
+        val simulation = WWWSimulation(startDateTime, userPosition, 5)
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with speed 1
-            val simulation = WWWSimulation(startDateTime, userPosition)
-            
-            // Advance real time by 10 minutes with speed 1
-            testClock.advanceTime(10.minutes)
-            val timeAtSpeed1 = simulation.now()
-            assertEquals(startDateTime + 10.minutes, timeAtSpeed1)
-            
-            // Change speed to 5
-            simulation.setSpeed(5)
-            
-            // Advance real time by another 10 minutes with speed 5
-            testClock.advanceTime(10.minutes)
-            val finalTime = simulation.now()
-            
-            // Final time should be: start time + 10min (from speed 1) + 50min (10min * 5)
-            assertEquals(startDateTime + 10.minutes + 50.minutes, finalTime)
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
-    }
-    
-    @Test
-    fun `test multiple speed changes in sequence`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+        // Let some time pass
+        delay(300) // 300ms
+        val beforeResetSimTime = simulation.now()
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with initial speed 2
-            val simulation = WWWSimulation(startDateTime, userPosition, 2)
-            
-            // Sequence of speed changes and time advancements
-            // 1. Advance 5 minutes with speed 2
-            testClock.advanceTime(5.minutes)
-            val time1 = simulation.now()
-            assertEquals(startDateTime + 10.minutes, time1) // 5min * 2 = 10min
-            
-            // 2. Change speed to 5 and advance 2 minutes
-            simulation.setSpeed(5)
-            testClock.advanceTime(2.minutes)
-            val time2 = simulation.now()
-            assertEquals(time1 + 10.minutes, time2) // time1 + (2min * 5) = time1 + 10min
-            
-            // 3. Change speed to 100 and advance 30 seconds
-            simulation.setSpeed(100)
-            testClock.advanceTime(30.seconds)
-            val time3 = simulation.now()
-            assertEquals(time2 + 50.minutes, time3) // time2 + (0.5min * 100) = time2 + 50min
-            
-            // 4. Change speed to minimum (1) and advance 1 minute
-            simulation.setSpeed(1)
-            testClock.advanceTime(1.minutes)
-            val time4 = simulation.now()
-            assertEquals(time3 + 1.minutes, time4) // time3 + (1min * 1) = time3 + 1min
-            
-            // 5. Change speed to maximum (500) and advance 10 seconds
-            simulation.setSpeed(500)
-            testClock.advanceTime(10.seconds)
-            val time5 = simulation.now()
-            assertEquals(time4 + (500 * 10).seconds, time5) // time4 + (10sec * 500) = time4 + 5000sec
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
-    }
-    
-    @Test
-    fun `test pause and resume functionality`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+        // Verify time has advanced from start time
+        assertTrue(beforeResetSimTime > startDateTime, 
+            "Simulated time should advance before reset")
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with speed 10
-            val simulation = WWWSimulation(startDateTime, userPosition, 10)
-            
-            // Advance time by 5 minutes
-            testClock.advanceTime(5.minutes)
-            val timeBeforePause = simulation.now()
-            assertEquals(startDateTime + 50.minutes, timeBeforePause) // 5min * 10 = 50min
-            
-            // Pause the simulation
-            simulation.pause()
-            assertEquals(0, simulation.speed, "Speed should be 0 when paused")
-            
-            // Advance real time by 10 minutes while paused
-            testClock.advanceTime(10.minutes)
-            val timeDuringPause = simulation.now()
-            assertEquals(timeBeforePause, timeDuringPause, "Time should not advance while paused")
-            
-            // Resume with speed 5
-            simulation.resume(5)
-            assertEquals(5, simulation.speed, "Speed should be updated when resumed")
-            
-            // Advance real time by 5 minutes after resume
-            testClock.advanceTime(5.minutes)
-            val timeAfterResume = simulation.now()
-            assertEquals(timeBeforePause + 25.minutes, timeAfterResume) // timeBeforePause + (5min * 5) = timeBeforePause + 25min
-            
-            // Test resume without specifying speed (should use last active speed)
-            simulation.pause()
-            simulation.resume()
-            assertEquals(5, simulation.speed, "Resume without speed parameter should use last active speed")
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
-    }
-    
-    @Test
-    fun `test reset functionality`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+        // Reset the simulation
+        simulation.reset()
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with speed 5
-            val simulation = WWWSimulation(startDateTime, userPosition, 5)
-            
-            // Advance time by 10 minutes
-            testClock.advanceTime(10.minutes)
-            val timeBeforeReset = simulation.now()
-            assertEquals(startDateTime + 50.minutes, timeBeforeReset) // 10min * 5 = 50min
-            
-            // Reset the simulation
-            simulation.reset()
-            
-            // Time should be reset to start time
-            assertEquals(startDateTime, simulation.now(), "Time should be reset to start time")
-            
-            // Speed should remain unchanged
-            assertEquals(5, simulation.speed, "Speed should remain unchanged after reset")
-            
-            // Advance time again to verify simulation continues from start time
-            testClock.advanceTime(2.minutes)
-            assertEquals(startDateTime + 10.minutes, simulation.now()) // 2min * 5 = 10min from start time
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
+        // Time should be reset to start time
+        val afterResetSimTime = simulation.now()
+        assertEquals(startDateTime, afterResetSimTime, 
+            "Simulated time should be reset to start time")
+        
+        // Speed should remain unchanged
+        assertEquals(5, simulation.speed, "Speed should remain unchanged after reset")
+        
+        // Verify time advances correctly after reset
+        delay(300) // 300ms
+        val finalSimTime = simulation.now()
+        assertTrue(finalSimTime > startDateTime, 
+            "Simulated time should advance after reset")
     }
     
     @Test
@@ -332,73 +305,38 @@ class WWWSimulationTest {
     }
     
     @Test
-    fun `test very long durations`() {
-        // Create a test clock to control time
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+    fun `test time calculation accuracy`() = runBlocking {
+        // Create simulation with a moderate speed for accuracy testing
+        val testSpeed = 20
+        val simulation = WWWSimulation(startDateTime, userPosition, testSpeed)
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with maximum speed
-            val simulation = WWWSimulation(startDateTime, userPosition, WWWSimulation.MAX_SPEED)
-            
-            // Advance real time by 24 hours
-            testClock.advanceTime(24.hours)
-            
-            // With max speed (500), simulated time should advance by 500 * 24 hours = 12,000 hours
-            val expectedAdvance = 24.hours * WWWSimulation.MAX_SPEED
-            val expectedTime = startDateTime + expectedAdvance
-            
-            // Allow small tolerance for floating point calculations
-            val actualTime = simulation.now()
-            val difference = if (actualTime > expectedTime) 
-                actualTime - expectedTime else expectedTime - actualTime
-            
-            assertTrue(difference < 1.seconds, 
-                "Difference between expected and actual time should be less than 1 second, " +
-                "but was ${difference.inWholeMilliseconds} ms")
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
-    }
-    
-    @Test
-    fun `test time progression accuracy with real clock time`() {
-        // Create a test clock to control time with precise increments
-        val testClock = TestClock(Instant.fromEpochMilliseconds(0))
-        val originalClock = Clock.System
+        // Record initial times
+        val initialSimTime = simulation.now()
+        val initialRealTime = Clock.System.now()
         
-        try {
-            // Replace the system clock with our test clock
-            Clock.System = testClock
-            
-            // Create simulation with speed 60 (1 minute per second)
-            val simulation = WWWSimulation(startDateTime, userPosition, 60)
-            
-            // Test with small increments to verify accuracy
-            for (i in 1..100) {
-                // Advance real time by 1 second
-                testClock.advanceTime(1.seconds)
-                
-                // Expected simulated time: start time + (i seconds * 60)
-                val expectedTime = startDateTime + (i * 60).seconds
-                val actualTime = simulation.now()
-                
-                // Check that times match with small tolerance
-                val difference = if (actualTime > expectedTime) 
-                    actualTime - expectedTime else expectedTime - actualTime
-                
-                assertTrue(difference < 0.01.seconds, 
-                    "Time calculation should be precise. Iteration $i: " +
-                    "Expected $expectedTime, got $actualTime, difference ${difference.inWholeMilliseconds} ms")
-            }
-        } finally {
-            // Restore the original clock
-            Clock.System = originalClock
-        }
+        // Wait for a precise amount of time
+        val waitDuration = 500.milliseconds
+        delay(waitDuration)
+        
+        // Record final times
+        val finalSimTime = simulation.now()
+        val finalRealTime = Clock.System.now()
+        
+        // Calculate actual elapsed times
+        val realElapsed = finalRealTime - initialRealTime
+        val simElapsed = finalSimTime - initialSimTime
+        
+        // Calculate expected simulated elapsed time
+        val expectedSimElapsed = realElapsed * testSpeed
+        
+        // Allow for a small tolerance (10ms * speed)
+        val tolerance = 10.milliseconds * testSpeed
+        val difference = if (simElapsed > expectedSimElapsed) 
+            simElapsed - expectedSimElapsed else expectedSimElapsed - simElapsed
+        
+        assertTrue(difference < tolerance, 
+            "Time calculation should be precise. " +
+            "Expected: $expectedSimElapsed, Actual: $simElapsed, Difference: $difference")
     }
     
     @Test

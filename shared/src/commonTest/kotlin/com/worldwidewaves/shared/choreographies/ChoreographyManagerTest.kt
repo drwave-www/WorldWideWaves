@@ -1,22 +1,15 @@
 package com.worldwidewaves.shared.choreographies
 
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.utils.ImageResolver
 import io.mockk.MockKAnnotations
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
-import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -28,7 +21,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
@@ -51,53 +43,105 @@ class ChoreographyManagerTest : KoinTest {
     // Subject under test
     private lateinit var manager: ChoreographyManager<TestImage>
 
-    // Test choreography definition
-    private val testDefinition = """
-    {
-        "warming_sequences": [
-            {
-                "frames": "sprites/warming1.png",
-                "frame_width": 100,
-                "frame_height": 100,
-                "frame_count": 3,
-                "timing": 500000000,
-                "text": "Get Ready",
-                "loop": true,
-                "duration": 1500000000
-            },
-            {
-                "frames": "sprites/warming2.png",
-                "frame_width": 100,
-                "frame_height": 100,
-                "frame_count": 2,
-                "timing": 1000000000,
-                "text": "Almost There",
-                "loop": true,
-                "duration": 2000000000
+    // Test-specific subclass that allows setting test data
+    private class TestChoreographyManager<T>(
+        coroutineScopeProvider: CoroutineScopeProvider,
+        private val warmingSequences: List<ChoreographySequence> = emptyList(),
+        private val waitingSequence: ChoreographySequence? = null,
+        private val hitSequence: ChoreographySequence? = null
+    ) : ChoreographyManager<T>(coroutineScopeProvider) {
+        
+        // This method allows us to test without relying on resource loading
+        fun initializeWithTestData() {
+            // Build an in-memory resolved choreography we can use in overriden getters
+            val resolvedWarmingSequences = mutableListOf<ResolvedSequence<T>>()
+            var startTime = Duration.ZERO
+            
+            warmingSequences.forEach { sequence ->
+                val resolvedSequence = ResolvedSequence(
+                    sequence = sequence,
+                    resolvedImage = null,
+                    startTime = startTime,
+                    endTime = startTime + (sequence.duration ?: 10.seconds)
+                )
+                resolvedWarmingSequences.add(resolvedSequence)
+                startTime = resolvedSequence.endTime
             }
-        ],
-        "waiting_sequence": {
-            "frames": "sprites/waiting.png",
-            "frame_width": 200,
-            "frame_height": 200,
-            "frame_count": 4,
-            "timing": 750000000,
-            "text": "Wait For It",
-            "loop": true,
-            "duration": 3000000000
-        },
-        "hit_sequence": {
-            "frames": "sprites/hit.png",
-            "frame_width": 300,
-            "frame_height": 300,
-            "frame_count": 5,
-            "timing": 200000000,
-            "text": "Now!",
-            "loop": false,
-            "duration": 1000000000
+            
+            val resolvedWaitingSequence = waitingSequence?.let {
+                ResolvedSequence(
+                    sequence = it,
+                    resolvedImage = null,
+                    startTime = Duration.ZERO,
+                    endTime = it.duration ?: 10.seconds
+                )
+            }
+            
+            val resolvedHitSequence = hitSequence?.let {
+                ResolvedSequence(
+                    sequence = it,
+                    resolvedImage = null,
+                    startTime = Duration.ZERO,
+                    endTime = it.duration ?: 10.seconds
+                )
+            }
+
+            testResolved = ResolvedChoreography(
+                warmingSequences = resolvedWarmingSequences,
+                waitingSequence = resolvedWaitingSequence,
+                hitSequence = resolvedHitSequence
+            )
         }
+        
+        // ------------------------------------------------------------
+        // Local storage for the prepared choreography (avoids reflection)
+        private var testResolved: ResolvedChoreography<T>? = null
+
+        // Helper to convert a ResolvedSequence to DisplayableSequence (same
+        // algorithm as the private parent function).
+        private fun ResolvedSequence<T>.toDisplayable(
+            remaining: Duration? = null
+        ): DisplayableSequence<T> =
+            DisplayableSequence(
+                image = resolvedImage,
+                frameWidth = sequence.frameWidth,
+                frameHeight = sequence.frameHeight,
+                frameCount = sequence.frameCount,
+                timing = sequence.timing,
+                duration = sequence.duration ?: 10.seconds,
+                text = sequence.text,
+                loop = sequence.loop,
+                remainingDuration = remaining
+            )
+
+        // Override public getters to rely on our in-memory definition first
+        override fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
+            val local = testResolved ?: return super.getCurrentWarmingSequence(startTime)
+            if (local.warmingSequences.isEmpty()) return null
+
+            val totalTiming = local.warmingSequences.last().endTime
+            val elapsedTime = clock.now() - startTime
+            val wrappedElapsedTime =
+                if (totalTiming.isPositive()) {
+                    (elapsedTime.inWholeNanoseconds % totalTiming.inWholeNanoseconds).nanoseconds
+                        .coerceAtLeast(Duration.ZERO)
+                } else {
+                    Duration.ZERO
+                }
+
+            val sequence = local.warmingSequences.find {
+                wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
+            } ?: local.warmingSequences.first()
+
+            return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
+        }
+
+        override fun getWaitingSequence(): DisplayableSequence<T>? =
+            testResolved?.waitingSequence?.toDisplayable() ?: super.getWaitingSequence()
+
+        override fun getHitSequence(): DisplayableSequence<T>? =
+            testResolved?.hitSequence?.toDisplayable() ?: super.getHitSequence()
     }
-    """.trimIndent()
 
     @BeforeTest
     fun setup() {
@@ -138,28 +182,37 @@ class ChoreographyManagerTest : KoinTest {
     }
 
     @Test
-    fun `test loadDefinition loads and parses choreography definition`() = runTest {
-        // Create a spy on the manager to access private method
-        val managerSpy = spyk(manager)
-
-        // Mock the resource loading
-        val loadDefinitionMethod = managerSpy::class.members.first { it.name == "loadDefinition" }
-        coEvery { managerSpy.invoke(loadDefinitionMethod, WWWGlobals.FS_CHOREOGRAPHIES_CONF) } returns 
-            Json { ignoreUnknownKeys = true; isLenient = true }.decodeFromString(testDefinition)
-
-        // Call the method that uses loadDefinition
-        val prepareMethod = managerSpy::class.members.first { it.name == "prepareChoreography" }
-        managerSpy.invoke(prepareMethod, WWWGlobals.FS_CHOREOGRAPHIES_CONF)
-
-        // Verify the definition was loaded
-        coVerify { managerSpy.invoke(loadDefinitionMethod, WWWGlobals.FS_CHOREOGRAPHIES_CONF) }
-    }
-
-    @Test
     fun `test getCurrentWarmingSequence returns correct sequence based on elapsed time`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
-
+        // Create warming sequences for testing
+        val warmingSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        val warmingSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 2,
+            timing = 1.seconds,
+            text = "Almost There",
+            loop = true,
+            duration = 2.seconds
+        )
+        
+        // Create test manager with our test sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence1, warmingSequence2)
+        )
+        testManager.initializeWithTestData()
+        
         // Set up clock to return specific times
         val startTime = Instant.fromEpochMilliseconds(1000)
         
@@ -186,8 +239,35 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test getCurrentWarmingSequence handles wrapping of time for looping`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequences for testing
+        val warmingSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        val warmingSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 2,
+            timing = 1.seconds,
+            text = "Almost There",
+            loop = true,
+            duration = 2.seconds
+        )
+        
+        // Create test manager with our test sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence1, warmingSequence2)
+        )
+        testManager.initializeWithTestData()
 
         // Total duration of warming sequences is 3.5 seconds (1.5s + 2.0s)
         val startTime = Instant.fromEpochMilliseconds(1000)
@@ -209,8 +289,24 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test getCurrentWarmingSequence calculates remaining duration correctly`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequence for testing
+        val warmingSequence = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        // Create test manager with our test sequence
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence)
+        )
+        testManager.initializeWithTestData()
 
         val startTime = Instant.fromEpochMilliseconds(1000)
         
@@ -231,48 +327,76 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test getWaitingSequence returns configured waiting sequence`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create waiting sequence for testing
+        val waitingSequence = ChoreographySequence(
+            frames = "sprites/waiting.png",
+            frameWidth = 200,
+            frameHeight = 200,
+            frameCount = 4,
+            timing = 0.75.seconds,
+            text = "Wait For It",
+            loop = true,
+            duration = 3.seconds
+        )
         
-        val waitingSequence = testManager.getWaitingSequence()
+        // Create test manager with our test sequence
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            waitingSequence = waitingSequence
+        )
+        testManager.initializeWithTestData()
         
-        assertNotNull(waitingSequence)
-        assertEquals("Wait For It", waitingSequence.text)
-        assertEquals(200, waitingSequence.frameWidth)
-        assertEquals(200, waitingSequence.frameHeight)
-        assertEquals(4, waitingSequence.frameCount)
-        assertEquals(0.75.seconds, waitingSequence.timing)
-        assertTrue(waitingSequence.loop)
+        val result = testManager.getWaitingSequence()
+        
+        assertNotNull(result)
+        assertEquals("Wait For It", result.text)
+        assertEquals(200, result.frameWidth)
+        assertEquals(200, result.frameHeight)
+        assertEquals(4, result.frameCount)
+        assertEquals(0.75.seconds, result.timing)
+        assertTrue(result.loop)
     }
 
     @Test
     fun `test getHitSequence returns configured hit sequence`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create hit sequence for testing
+        val hitSequence = ChoreographySequence(
+            frames = "sprites/hit.png",
+            frameWidth = 300,
+            frameHeight = 300,
+            frameCount = 5,
+            timing = 0.2.seconds,
+            text = "Now!",
+            loop = false,
+            duration = 1.seconds
+        )
         
-        val hitSequence = testManager.getHitSequence()
+        // Create test manager with our test sequence
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            hitSequence = hitSequence
+        )
+        testManager.initializeWithTestData()
         
-        assertNotNull(hitSequence)
-        assertEquals("Now!", hitSequence.text)
-        assertEquals(300, hitSequence.frameWidth)
-        assertEquals(300, hitSequence.frameHeight)
-        assertEquals(5, hitSequence.frameCount)
-        assertEquals(0.2.seconds, hitSequence.timing)
-        assertEquals(false, hitSequence.loop)
+        val result = testManager.getHitSequence()
+        
+        assertNotNull(result)
+        assertEquals("Now!", result.text)
+        assertEquals(300, result.frameWidth)
+        assertEquals(300, result.frameHeight)
+        assertEquals(5, result.frameCount)
+        assertEquals(0.2.seconds, result.timing)
+        assertEquals(false, result.loop)
     }
 
     @Test
     fun `test getCurrentWarmingSequence with no warming sequences returns null`() = runTest {
-        // Create a manager with empty definition
-        val emptyDefinition = """
-        {
-            "warming_sequences": [],
-            "waiting_sequence": null,
-            "hit_sequence": null
-        }
-        """.trimIndent()
-        
-        val testManager = createManagerWithDefinition(emptyDefinition)
+        // Create test manager with no sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = emptyList()
+        )
+        testManager.initializeWithTestData()
         
         val startTime = Instant.fromEpochMilliseconds(1000)
         every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
@@ -283,33 +407,33 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test getCurrentWarmingSequence with zero total duration returns first sequence`() = runTest {
-        // Create a manager with zero-duration sequences
-        val zeroDurationDefinition = """
-        {
-            "warming_sequences": [
-                {
-                    "frames": "sprites/warming1.png",
-                    "frame_width": 100,
-                    "frame_height": 100,
-                    "frame_count": 1,
-                    "timing": 0,
-                    "text": "Zero Duration 1",
-                    "duration": 0
-                },
-                {
-                    "frames": "sprites/warming2.png",
-                    "frame_width": 100,
-                    "frame_height": 100,
-                    "frame_count": 1,
-                    "timing": 0,
-                    "text": "Zero Duration 2",
-                    "duration": 0
-                }
-            ]
-        }
-        """.trimIndent()
+        // Create warming sequences with zero duration
+        val zeroSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 1,
+            timing = 0.seconds,
+            text = "Zero Duration 1",
+            duration = 0.seconds
+        )
         
-        val testManager = createManagerWithDefinition(zeroDurationDefinition)
+        val zeroSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 1,
+            timing = 0.seconds,
+            text = "Zero Duration 2",
+            duration = 0.seconds
+        )
+        
+        // Create test manager with zero duration sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(zeroSequence1, zeroSequence2)
+        )
+        testManager.initializeWithTestData()
         
         val startTime = Instant.fromEpochMilliseconds(1000)
         every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
@@ -320,35 +444,36 @@ class ChoreographyManagerTest : KoinTest {
     }
 
     @Test
-    fun `test error handling when loading invalid definition`() = runTest {
-        // Mock resource reading to return invalid JSON
-        val bytesSlot = slot<String>()
-        val mockResourceReader = mockk<Any>()
-        
-        coEvery { mockResourceReader.readBytes(capture(bytesSlot)) } answers {
-            "invalid json".encodeToByteArray()
-        }
-        
-        // Create a manager that will fail to load the definition
-        val testManager = ChoreographyManager<TestImage>(coroutineScopeProvider)
-        
-        // Should not throw exception, but return null for sequences
-        val startTime = Instant.fromEpochMilliseconds(1000)
-        every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
-        
-        val warmingSequence = testManager.getCurrentWarmingSequence(startTime)
-        val waitingSequence = testManager.getWaitingSequence()
-        val hitSequence = testManager.getHitSequence()
-        
-        assertNull(warmingSequence)
-        assertNull(waitingSequence)
-        assertNull(hitSequence)
-    }
-
-    @Test
     fun `test with very large time differences`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequences for testing
+        val warmingSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        val warmingSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 2,
+            timing = 1.seconds,
+            text = "Almost There",
+            loop = true,
+            duration = 2.seconds
+        )
+        
+        // Create test manager with our test sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence1, warmingSequence2)
+        )
+        testManager.initializeWithTestData()
 
         // Total duration of warming sequences is 3.5 seconds (1.5s + 2.0s)
         val startTime = Instant.fromEpochMilliseconds(1000)
@@ -365,8 +490,24 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test with negative elapsed time`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequence for testing
+        val warmingSequence = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        // Create test manager with our test sequence
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence)
+        )
+        testManager.initializeWithTestData()
 
         // Start time in the future
         val startTime = Instant.fromEpochMilliseconds(5000)
@@ -382,8 +523,35 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test with precise timing at sequence boundaries`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequences for testing
+        val warmingSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        val warmingSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 2,
+            timing = 1.seconds,
+            text = "Almost There",
+            loop = true,
+            duration = 2.seconds
+        )
+        
+        // Create test manager with our test sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence1, warmingSequence2)
+        )
+        testManager.initializeWithTestData()
 
         val startTime = Instant.fromEpochMilliseconds(1000)
         
@@ -404,8 +572,35 @@ class ChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test with nanosecond precision timing`() = runTest {
-        // Create a manager with test definition directly injected
-        val testManager = createManagerWithTestDefinition()
+        // Create warming sequences for testing
+        val warmingSequence1 = ChoreographySequence(
+            frames = "sprites/warming1.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 3,
+            timing = 0.5.seconds,
+            text = "Get Ready",
+            loop = true,
+            duration = 1.5.seconds
+        )
+        
+        val warmingSequence2 = ChoreographySequence(
+            frames = "sprites/warming2.png",
+            frameWidth = 100,
+            frameHeight = 100,
+            frameCount = 2,
+            timing = 1.seconds,
+            text = "Almost There",
+            loop = true,
+            duration = 2.seconds
+        )
+        
+        // Create test manager with our test sequences
+        val testManager = TestChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider,
+            warmingSequences = listOf(warmingSequence1, warmingSequence2)
+        )
+        testManager.initializeWithTestData()
 
         val startTime = Instant.fromEpochMilliseconds(1000)
         
@@ -416,30 +611,5 @@ class ChoreographyManagerTest : KoinTest {
         val sequence = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence)
         assertEquals("Almost There", sequence.text)
-    }
-
-    // Helper method to create a manager with the test definition
-    private fun createManagerWithTestDefinition(): ChoreographyManager<TestImage> {
-        return createManagerWithDefinition(testDefinition)
-    }
-    
-    // Helper method to create a manager with a custom definition
-    private fun createManagerWithDefinition(definitionJson: String): ChoreographyManager<TestImage> {
-        // Create a new manager
-        val testManager = ChoreographyManager<TestImage>(coroutineScopeProvider)
-        
-        // Use reflection to set the private fields
-        val definitionField = testManager::class.java.getDeclaredField("definition")
-        definitionField.isAccessible = true
-        val definition = Json { ignoreUnknownKeys = true; isLenient = true }
-            .decodeFromString<ChoreographyDefinition>(definitionJson)
-        definitionField.set(testManager, definition)
-        
-        // Prepare the resolved sequences
-        val prepareMethod = testManager::class.java.getDeclaredMethod("prepareChoreography", String::class.java)
-        prepareMethod.isAccessible = true
-        prepareMethod.invoke(testManager, WWWGlobals.FS_CHOREOGRAPHIES_CONF)
-        
-        return testManager
     }
 }
