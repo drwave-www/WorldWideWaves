@@ -22,7 +22,8 @@
 
         <activity
             android:name=".activities.MainActivity"
-            android:exported="false">
+            android:exported="true"
+            android:theme="@style/Theme.WorldWideWaves.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
