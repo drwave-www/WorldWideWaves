@@ -4,11 +4,11 @@
       "frames": "e_choreography_warming_seq_1",
       "frame_width": 450,
       "frame_height": 900,
-      "frame_count": 4,
+      "frame_count": 3,
       "timing": "PT1S",
-      "text": "Get ready for the wave!",
+      "text": "Raise your hands!",
       "loop": true,
-      "duration": "PT30S"
+      "duration": "PT25S"
     },
     {
       "frames": "e_choreography_warming_seq_2",
@@ -16,9 +16,9 @@
       "frame_height": 900,
       "frame_count": 4,
       "timing": "PT1S",
-      "text": "The wave is approaching!",
+      "text": "Clap left and right!",
       "loop": true,
-      "duration": "PT20S"
+      "duration": "PT25S"
     },
     {
       "frames": "e_choreography_warming_seq_3",
@@ -26,9 +26,9 @@
       "frame_height": 900,
       "frame_count": 3,
       "timing": "PT1S",
-      "text": "Almost there!",
+      "text": "Back windmill!",
       "loop": true,
-      "duration": "PT10S"
+      "duration": "PT25S"
     },
     {
       "frames": "e_choreography_warming_seq_4",
@@ -36,9 +36,9 @@
       "frame_height": 900,
       "frame_count": 4,
       "timing": "PT1S",
-      "text": "Ready to wave ?!",
+      "text": "Go down and up!",
       "loop": true,
-      "duration": "PT20S"
+      "duration": "PT25S"
     },
     {
       "frames": "e_choreography_warming_seq_5",
@@ -46,26 +46,26 @@
       "frame_height": 900,
       "frame_count": 3,
       "timing": "PT1S",
-      "text": "Can't wait!",
+      "text": "Show the wave!",
       "loop": true,
-      "duration": "PT10S"
+      "duration": "PT25S"
     },
     {
       "frames": "e_choreography_warming_seq_6",
       "frame_width": 450,
       "frame_height": 900,
-      "frame_count": 3,
+      "frame_count": 2,
       "timing": "PT1S",
-      "text": "Very soon!",
+      "text": "Cross arms!",
       "loop": true,
-      "duration": "PT10S"
+      "duration": "PT25S"
     }
   ],
   "waiting_sequence": {
     "frames": "e_choreography_waiting",
     "frame_width": 450,
     "frame_height": 900,
-    "frame_count": 4,
+    "frame_count": 3,
     "timing": "PT2S",
     "text": "Prepare to wave!",
     "loop": false
@@ -74,8 +74,8 @@
     "frames": "e_choreography_hit",
     "frame_width": 450,
     "frame_height": 900,
-    "frame_count": 4,
-    "timing": "PT0.5S",
+    "frame_count": 3,
+    "timing": "PT0.3S",
     "text": "Wave now!",
     "loop": false
   }

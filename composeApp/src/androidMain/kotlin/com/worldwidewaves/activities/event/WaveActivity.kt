@@ -35,6 +35,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -82,6 +83,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_FONTS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.EMPTY_COUNTER
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -194,7 +196,9 @@ class WaveActivity : AbstractEventWaveActivity() {
 
                 // Only show WaveHitCounter here when choreography is NOT active
                 if (!isChoreographyActive) {
+                    Spacer(modifier = Modifier.weight(1f))
                     WaveHitCounter(waveViewModel, observerId, clock)
+                    Spacer(modifier = Modifier.height(60.dp))
                 }
             }
 
@@ -425,22 +429,24 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val boxWidth = screenWidth * 0.5f
+    if (text != EMPTY_COUNTER) { // Decision to not show the empty counter
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp.dp
+        val boxWidth = screenWidth * 0.5f
 
-    Box(
-        modifier = modifier
-            .width(boxWidth)
-            .border(2.dp, onPrimaryLight),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        Box(
+            modifier = modifier
+                .width(boxWidth)
+                .border(2.dp, onPrimaryLight),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -459,7 +465,7 @@ private fun formatDuration(duration: Duration): String {
             "$hours:$minutes"
         }
 
-        else -> "--:--"
+        else -> EMPTY_COUNTER
     }
 }
 
@@ -526,7 +532,7 @@ fun WaveChoreographies(
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
                     clock = clock,
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth()
                         .padding(bottom = 120.dp), // Leave space for counter
                     onSequenceComplete = { warmingKey++ }
@@ -596,18 +602,22 @@ fun ChoreographyDisplay(
 
         while (this.isActive) {
             // Check if we should stop showing the sequence
+            val elapsed = clock.now() - startTime
             if (remainingTime != null) {
-                val elapsed = clock.now() - startTime
                 if (elapsed >= remainingTime!!) break
+            } else if (elapsed >= sequence.duration) {
+                break
             }
 
             delay(sequence.timing.inWholeMilliseconds)
 
-            if (sequence.loop || currentImageIndex < sequence.frameCount - 1) {
+            // Only advance frame if we haven't reached the last frame or if looping
+            if (sequence.loop) {
                 currentImageIndex = (currentImageIndex + 1) % sequence.frameCount
-            } else {
-                break // Stop if we've shown all images and not looping
+            } else if (currentImageIndex < sequence.frameCount - 1) {
+                currentImageIndex++
             }
+            // If not looping and at last frame, keep showing it until duration ends
         }
     }
 

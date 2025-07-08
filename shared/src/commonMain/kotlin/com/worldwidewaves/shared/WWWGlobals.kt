@@ -180,6 +180,8 @@ class WWWGlobals {
         const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
         const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_MEDIUM_FONTSIZE
         const val DIM_EVENTS_EVENT_COMMUNITY_FONSIZE = DIM_DEFAULT_FONTSIZE
+
+        const val EMPTY_COUNTER = "--:--"
     }
 
 }
