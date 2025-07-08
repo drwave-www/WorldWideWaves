@@ -11,10 +11,10 @@
     <!-- Splash Screen theme -->
     <style name="Theme.WorldWideWaves.Splash" parent="Theme.SplashScreen">
         <!-- Set the splash screen background to match your current background -->
-        <item name="windowSplashScreenBackground">@android:color/black</item>
+        <item name="windowSplashScreenBackground">#011026</item>
         
         <!-- Use the logo as the splash screen icon -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/www_logo_transparent</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/www_simple_logo_transparent</item>
         
         <!-- Configure animation duration -->
         <item name="windowSplashScreenAnimationDuration">50</item>

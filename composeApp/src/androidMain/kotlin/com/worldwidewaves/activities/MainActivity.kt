@@ -115,7 +115,6 @@ open class MainActivity : AppCompatActivity() {
          * Official Android 12+ splash-screen installation
          * The splash remains until BOTH: min duration elapsed AND data loaded.
          * ------------------------------------------------------------------- */
-
         val splashScreen = installSplashScreen()
 
         // Record start time to enforce minimum duration
