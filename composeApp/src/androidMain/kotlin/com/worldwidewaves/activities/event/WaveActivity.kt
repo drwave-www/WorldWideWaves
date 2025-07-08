@@ -139,6 +139,16 @@ class WaveActivity : AbstractEventWaveActivity() {
         val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
         val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
 
+        // Derive choreography active state
+        val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
+            isWarmingInProgress || isGoingToBeHit || run {
+                if (hasBeenHit) {
+                    val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
+                    secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                } else false
+            }
+        }
+
         // Construct the event Map
         val eventMap = remember(event.id) {
             AndroidEventMap(event,
@@ -181,13 +191,28 @@ class WaveActivity : AbstractEventWaveActivity() {
                     .fillMaxWidth()
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
-                WaveHitCounter(waveViewModel, observerId, clock)
+
+                // Only show WaveHitCounter here when choreography is NOT active
+                if (!isChoreographyActive) {
+                    WaveHitCounter(waveViewModel, observerId, clock)
+                }
             }
 
-            // Pass the visibility state to WaveChoreographies for coordination
             WaveChoreographies(event, waveViewModel, observerId, clock, Modifier
-                .fillMaxSize()
                 .zIndex(10f))
+
+            // Position WaveHitCounter at bottom when choreography is active
+            if (isChoreographyActive) {
+                WaveHitCounter(
+                    waveViewModel,
+                    observerId,
+                    clock,
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 60.dp)
+                        .zIndex(15f)
+                )
+            }
 
             // ----------------------------------------------------------------
             // Test-mode UI (only visible in debug builds)
@@ -485,8 +510,8 @@ fun WaveChoreographies(
         }
     }
 
+    // Only show choreography content in the center, leaving bottom space free
     when {
-
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
             // Get the current sequence
@@ -501,7 +526,9 @@ fun WaveChoreographies(
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
                     clock = clock,
-                    modifier = modifier.zIndex(10f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 120.dp), // Leave space for counter
                     onSequenceComplete = { warmingKey++ }
                 )
             }
@@ -509,12 +536,24 @@ fun WaveChoreographies(
 
         // Show waiting choreography when going to be hit
         isGoingToBeHit -> {
-            ChoreographyDisplay(event.wave.waitingChoregraphySequence(), clock, modifier.zIndex(10f))
+            ChoreographyDisplay(
+                event.wave.waitingChoregraphySequence(),
+                clock,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 120.dp) // Leave space for counter
+            )
         }
 
         // Show hit choreography when user has been hit and within time window
         showHitSequence -> {
-            ChoreographyDisplay(event.wave.hitChoregraphySequence(), clock, modifier.zIndex(10f))
+            ChoreographyDisplay(
+                event.wave.hitChoregraphySequence(),
+                clock,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 120.dp) // Leave space for counter
+            )
         }
     }
 }
@@ -572,6 +611,7 @@ fun ChoreographyDisplay(
         }
     }
 
+    // Position the choreography in the center without taking full screen space
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
