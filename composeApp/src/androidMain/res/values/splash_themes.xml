@@ -16,11 +16,8 @@
         <!-- Use the logo as the splash screen icon -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/www_logo_transparent</item>
         
-        <!-- Position the logo at the bottom of the screen -->
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        
         <!-- Configure animation duration -->
-        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenAnimationDuration">50</item>
         
         <!-- Set the theme used after splash screen appears -->
         <item name="postSplashScreenTheme">@style/Theme.WorldWideWaves</item>
