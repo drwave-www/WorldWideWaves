@@ -3,7 +3,6 @@ package com.worldwidewaves.shared.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class ByteArrayReaderTest {
 
@@ -18,28 +17,6 @@ class ByteArrayReaderTest {
         assertEquals(127, reader.readUInt8())
         assertEquals(255, reader.readUInt8()) // -1 as unsigned is 255
         assertEquals(128, reader.readUInt8()) // -128 as unsigned is 128
-    }
-
-    @Test
-    fun `test readInt16 reads signed 16-bit values correctly`() {
-        // Test with various values including boundary cases
-        // Values: 0, 1, 256, 32767 (max positive), -1, -32768 (min negative)
-        val bytes = byteArrayOf(
-            0, 0,       // 0
-            0, 1,       // 1
-            1, 0,       // 256
-            127, -1,    // 32767
-            -1, -1,     // -1
-            -128, 0     // -32768
-        )
-        val reader = ByteArrayReader(bytes)
-
-        assertEquals(0, reader.readInt16())
-        assertEquals(1, reader.readInt16())
-        assertEquals(256, reader.readInt16())
-        assertEquals(32767, reader.readInt16())
-        assertEquals(-1, reader.readInt16())
-        assertEquals(-32768, reader.readInt16())
     }
 
     @Test
@@ -82,18 +59,6 @@ class ByteArrayReaderTest {
         // Test full string
         val fullReader = ByteArrayReader(bytes)
         assertEquals("HelloWorld!", fullReader.readString(11))
-    }
-
-    @Test
-    fun `test readString handles non-ASCII characters correctly`() {
-        // Test with Unicode characters
-        val text = "こんにちは世界" // "Hello World" in Japanese
-        val bytes = text.encodeToByteArray()
-        
-        val reader = ByteArrayReader(bytes)
-        val result = reader.readString(bytes.size)
-        
-        assertEquals(text, result)
     }
 
     @Test

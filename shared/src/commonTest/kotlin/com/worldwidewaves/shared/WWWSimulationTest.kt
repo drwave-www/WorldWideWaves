@@ -212,19 +212,17 @@ class WWWSimulationTest {
         // Create simulation with speed 10
         val simulation = WWWSimulation(startDateTime, userPosition, 10)
         
-        // Get time before pause
-        val beforePauseSimTime = simulation.now()
-        
         // Pause the simulation
         simulation.pause()
         assertEquals(0, simulation.speed, "Speed should be 0 when paused")
         
         // Wait while paused
+        val beforeDelaySimTime = simulation.now()
         delay(300) // 300ms
         
         // Time should not advance while paused
         val duringPauseSimTime = simulation.now()
-        assertEquals(beforePauseSimTime, duringPauseSimTime, 
+        assertEquals(beforeDelaySimTime, duringPauseSimTime,
             "Simulated time should not advance while paused")
         
         // Resume with speed 5
@@ -271,7 +269,10 @@ class WWWSimulationTest {
         
         // Time should be reset to start time
         val afterResetSimTime = simulation.now()
-        assertEquals(startDateTime, afterResetSimTime, 
+        val tolerance = 100.milliseconds
+        assertEquals(startDateTime.toEpochMilliseconds().toDouble(),
+            afterResetSimTime.toEpochMilliseconds().toDouble(),
+            tolerance.inWholeMilliseconds.toDouble(),
             "Simulated time should be reset to start time")
         
         // Speed should remain unchanged

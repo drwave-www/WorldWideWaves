@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
@@ -28,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 class ChoreographyManagerTest : KoinTest {
 
     // Test image type for the generic manager
-    private class TestImage(val path: String)
+    private class TestImage()
 
     // Mocked dependencies
     @MockK
@@ -58,7 +59,7 @@ class ChoreographyManagerTest : KoinTest {
             var startTime = Duration.ZERO
             
             warmingSequences.forEach { sequence ->
-                val resolvedSequence = ResolvedSequence(
+                val resolvedSequence: ResolvedSequence<T> = ResolvedSequence(
                     sequence = sequence,
                     resolvedImage = null,
                     startTime = startTime,
@@ -68,7 +69,7 @@ class ChoreographyManagerTest : KoinTest {
                 startTime = resolvedSequence.endTime
             }
             
-            val resolvedWaitingSequence = waitingSequence?.let {
+            val resolvedWaitingSequence: ResolvedSequence<T>? = waitingSequence?.let {
                 ResolvedSequence(
                     sequence = it,
                     resolvedImage = null,
@@ -77,7 +78,7 @@ class ChoreographyManagerTest : KoinTest {
                 )
             }
             
-            val resolvedHitSequence = hitSequence?.let {
+            val resolvedHitSequence: ResolvedSequence<T>? = hitSequence?.let {
                 ResolvedSequence(
                     sequence = it,
                     resolvedImage = null,
@@ -164,7 +165,7 @@ class ChoreographyManagerTest : KoinTest {
         every { clock.now() } returns Instant.fromEpochMilliseconds(0)
 
         // Setup default image resolver behavior
-        every { imageResolver.resolve(any()) } returns TestImage("test-path")
+        every { imageResolver.resolve(any()) } returns TestImage()
 
         // Create manager with mocked dependencies
         manager = ChoreographyManager(coroutineScopeProvider)

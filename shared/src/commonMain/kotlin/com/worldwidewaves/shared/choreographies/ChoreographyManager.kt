@@ -40,11 +40,11 @@ import kotlin.time.Duration.Companion.nanoseconds
 /**
  * Manages choreography sequences for different phases of wave events.
  */
-class ChoreographyManager<T>(
+open class ChoreographyManager<T>(
     coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : KoinComponent {
 
-    private val clock: IClock by inject()
+    val clock: IClock by inject()
     private val imageResolver: ImageResolver<T> by inject()
     private var definition: ChoreographyDefinition? = null
     private var resolvedSequences: ResolvedChoreography<T>? = null
@@ -157,7 +157,7 @@ class ChoreographyManager<T>(
 
     // ------------------------------------------------------------------------
 
-    fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
+    open fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
@@ -179,9 +179,9 @@ class ChoreographyManager<T>(
         return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
-    fun getWaitingSequence(): DisplayableSequence<T>? =
+    open fun getWaitingSequence(): DisplayableSequence<T>? =
         resolvedSequences?.waitingSequence?.toDisplayable()
 
-    fun getHitSequence(): DisplayableSequence<T>? =
+    open fun getHitSequence(): DisplayableSequence<T>? =
         resolvedSequences?.hitSequence?.toDisplayable()
 }

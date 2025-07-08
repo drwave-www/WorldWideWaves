@@ -4,7 +4,6 @@ import com.worldwidewaves.shared.utils.ImageResolver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -390,10 +389,10 @@ class ChoreographySequenceTest {
             "frame_width": 300,
             "frame_height": 400,
             "frame_count": 6,
-            "timing": 500000000,
+            "timing": "PT0.5S",
             "text": "Loaded from JSON",
             "loop": false,
-            "duration": 3000000000
+            "duration": "PT3S"
         }
         """.trimIndent()
         
@@ -421,7 +420,7 @@ class ChoreographySequenceTest {
             "frames": "sprites/minimal_json.png",
             "frame_width": 200,
             "frame_height": 200,
-            "timing": 1000000000
+            "timing": "PT1S"
         }
         """.trimIndent()
         

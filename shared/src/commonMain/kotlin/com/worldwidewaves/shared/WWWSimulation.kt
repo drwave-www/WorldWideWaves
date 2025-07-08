@@ -28,7 +28,7 @@ import kotlinx.datetime.Instant
 class WWWSimulation(
     private val startDateTime: Instant,
     private val userPosition: Position,
-    initialSpeed: Int = 1
+    private var initialSpeed: Int = 1
 ) {
     companion object {
         const val MIN_SPEED = 1
@@ -73,6 +73,7 @@ class WWWSimulation(
             simulatedTime = currentSimulatedTime
         )
 
+        initialSpeed = _speed
         return _speed
     }
 
@@ -146,13 +147,14 @@ class WWWSimulation(
      * Resume the simulation with the specified speed.
      * @param resumeSpeed The speed to resume at (defaults to last active speed)
      */
-    fun resume(resumeSpeed: Int = _speed.takeIf { it > 0 } ?: 1) {
+    fun resume(resumeSpeed: Int = initialSpeed.takeIf { it > 0 } ?: 1) {
         // Only update the real time in the checkpoint, keep simulated time as is
         lastCheckpoint = TimeCheckpoint(
             realTime = Clock.System.now(),
             simulatedTime = lastCheckpoint.simulatedTime
         )
         _speed = validateSpeed(resumeSpeed)
+        initialSpeed = _speed
     }
 
 }

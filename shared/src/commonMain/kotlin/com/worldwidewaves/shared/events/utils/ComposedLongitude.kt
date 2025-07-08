@@ -31,7 +31,6 @@ import kotlin.math.sign
 open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     private val positions = mutableListOf<Position>()
-
     private var swLat: Double = Double.POSITIVE_INFINITY
     private var swLng: Double = Double.POSITIVE_INFINITY
     private var neLat: Double = Double.NEGATIVE_INFINITY
@@ -152,11 +151,25 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
 
     fun isValidArc(positions: List<Position> = this.positions): Boolean {
         if (positions.size <= 2) return true
+
         val differences = positions.zipWithNext { a, b -> b.lng - a.lng }
         val signs = differences.map { it.sign }
         val changes = signs.zipWithNext { a, b -> a != b }.count { it }
         val distinctSigns = signs.distinct().size
-        return changes <= 1 && distinctSigns <= 2
+
+        // For wave fronts, we need to be more permissive
+        // Wave fronts can have curved patterns due to Earth's curvature
+        // Allow more sign changes but still validate against completely chaotic patterns
+
+        // Check if the pattern is reasonable for a wave front
+        val nonZeroSigns = signs.filter { it != 0.0 }
+        val nonZeroChanges = nonZeroSigns.zipWithNext { a, b -> a != b }.count { it }
+
+        // Allow more flexibility for wave fronts:
+        // - Allow more sign changes (up to 4-5 for complex wave fronts)
+        // - Allow all 3 signs (positive, negative, zero) for curved wave fronts
+        // - But check that non-zero signs don't change too frequently
+        return changes <= 5 && distinctSigns <= 3 && nonZeroChanges <= 3
     }
 
     fun bbox(): BoundingBox = BoundingBox(

@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -32,8 +33,8 @@ import okio.Path.Companion.toPath
 // ----------------------------
 
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
-
-private lateinit var dataStore: DataStore<Preferences>
+@VisibleForTesting
+public lateinit var dataStore: DataStore<Preferences>
 private val lock = SynchronizedObject()
 
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {

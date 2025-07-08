@@ -123,8 +123,10 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
         val minLatSpan = visibleRegionPadding.latPadding * 0.2
         val minLngSpan = visibleRegionPadding.lngPadding * 0.2
 
-        val finalNorth = max(safeNorth, safeSouth + minLatSpan)
-        val finalEast = max(safeEast, safeWest + minLngSpan)
+        // val finalNorth = max(safeNorth, safeSouth + minLatSpan)
+        // val finalEast = max(safeEast, safeWest + minLngSpan)
+        val finalNorth = min(mapBounds.northeast.latitude, max(safeNorth, safeSouth + minLatSpan))
+        val finalEast = min(mapBounds.northeast.longitude, max(safeEast, safeWest + minLngSpan))
 
         return BoundingBox(
             Position(safeSouth, safeWest),

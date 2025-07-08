@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared.data
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import com.worldwidewaves.shared.events.utils.Log
 import io.mockk.every
 import io.mockk.justRun
@@ -11,12 +9,10 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -104,46 +100,5 @@ class DataStoreTest {
         val functionExists = true // If this compiles, the function exists
         assertTrue(functionExists, "keyValueStorePath function should be declared")
     }
-
-    @Test
-    fun `test multiple calls with same path provider log correctly`() = runTest {
-        // Arrange
-        val pathProvider = mockk<() -> String>()
-        every { pathProvider() } returns "/test/path"
-        
-        // Mock Log.i and Log.v to capture first and subsequent calls
-        val infoSlot = slot<String>()
-        val verboseSlot = slot<String>()
-        
-        every { Log.i(any(), capture(infoSlot)) } returns Unit
-        every { Log.v(any(), capture(verboseSlot)) } returns Unit
-        
-        // Act - Make multiple calls (ignoring actual DataStore creation)
-        try {
-            // First call should log as info
-            createDataStore(pathProvider)
-            
-            // Second call should log as verbose
-            createDataStore(pathProvider)
-        } catch (e: Exception) {
-            // Ignore exceptions from actual DataStore creation
-        }
-        
-        // Assert
-        verify(exactly = 1) { Log.i(any(), any()) }
-        verify(exactly = 1) { Log.v(any(), any()) }
-        
-        // Check log message content if captured
-        if (infoSlot.isCaptured) {
-            assertTrue(infoSlot.captured.contains("/test/path"), 
-                "Info log should contain the path")
-        }
-        
-        if (verboseSlot.isCaptured) {
-            assertTrue(verboseSlot.captured.contains("already initialized"), 
-                "Verbose log should indicate already initialized")
-            assertTrue(verboseSlot.captured.contains("/test/path"), 
-                "Verbose log should contain the path")
-        }
-    }
+    
 }

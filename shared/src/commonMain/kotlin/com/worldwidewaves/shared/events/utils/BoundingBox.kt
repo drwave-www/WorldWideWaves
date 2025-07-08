@@ -30,6 +30,7 @@ import kotlin.math.abs
  *
  */
 data class BoundingBox(val sw: Position, val ne: Position) {
+
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
         ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init()

@@ -61,12 +61,23 @@ class WWWEventTest {
 
     @BeforeTest
     fun setUp() {
-        startKoin { modules(module { single { mockClock } }) }
-    }
+        // Stop Koin if it's already running to ensure clean state
+        try {
+            stopKoin()
+        } catch (e: Exception) {
+            // Ignore if Koin wasn't started
+        }
+
+        // Now start Koin with fresh modules
+        startKoin { modules(module { single { mockClock } }) }    }
 
     @AfterTest
     fun tearDown() {
-        stopKoin()
+        try {
+            stopKoin()
+        } catch (e: Exception) {
+            // Ignore if Koin wasn't started
+        }
     }
 
     @Test

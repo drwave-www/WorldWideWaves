@@ -2,13 +2,10 @@ package com.worldwidewaves.shared.utils
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -237,6 +234,8 @@ class HelpersTest {
                 emissionCount++
             }
         }
+
+        runCurrent()
         
         // Initial emission
         assertEquals(1, emissionCount, "Should have initial emission")
@@ -251,6 +250,8 @@ class HelpersTest {
         
         // One real update
         flow.updateIfChanged(1)
+        runCurrent()
+
         assertEquals(2, emissionCount, "Should have one additional emission after value change")
         
         job.cancel()
