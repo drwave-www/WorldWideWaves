@@ -64,6 +64,19 @@ kotlin {
             implementation(libs.koin.test)
             implementation(libs.mockk.common.v1120)
         }
+
+        /*
+         * Allow build scripts to skip compiling `commonTest` sources (useful when running
+         * only a specific Android‐unit test and legacy common tests no longer compile).
+         *
+         *   ./gradlew :shared:testDebugUnitTest -PdisableCommonTest
+         */
+        if (project.hasProperty("disableCommonTest")) {
+            named("commonTest") {
+                kotlin.setSrcDirs(emptySet<String>())
+                resources.setSrcDirs(emptySet<String>())
+            }
+        }
     }
 }
 
