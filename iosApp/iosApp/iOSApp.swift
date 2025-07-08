@@ -19,12 +19,22 @@
  * limitations under the License.
  */
 import SwiftUI
+import Shared
 
 @main
 struct iOSApp: App {
+    /// Controls the transition from the splash screen to the main UI.
+    @State private var isSplashCompleted = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if isSplashCompleted {
+                // Main application view (tab-based)
+                MainView()
+            } else {
+                // Splash screen – will set `isSplashCompleted` to true when finished
+                SplashView(isActive: $isSplashCompleted)
+            }
         }
     }
 }
