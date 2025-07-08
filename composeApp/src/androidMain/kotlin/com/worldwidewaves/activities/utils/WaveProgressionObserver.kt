@@ -23,11 +23,12 @@ package com.worldwidewaves.activities.utils
 import android.content.Context
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
@@ -44,7 +45,6 @@ class WaveProgressionObserver(
 
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
-    private var lastWavePolygons: List<org.maplibre.geojson.Polygon> = emptyList()
 
     fun startObservation() {
         val eventMap = eventMap ?: return
@@ -136,20 +136,12 @@ class WaveProgressionObserver(
 
         val polygons = withContext(Dispatchers.Default) {
             event.wave
-                .getWavePolygons()
+                .getWavePolygons(null, WaveMode.ADD)
                 ?.traversedPolygons
                 ?.map { it.toMapLibrePolygon() }
                 ?: emptyList()
         }
 
-        if (polygons.isEmpty()) {
-            if (lastWavePolygons.isNotEmpty()) {
-                eventMap.updateWavePolygons(context, lastWavePolygons, false)
-            }
-            return
-        } else {
-            lastWavePolygons = polygons
-            eventMap.updateWavePolygons(context, polygons, true)
-        }
+        eventMap.updateWavePolygons(context, polygons, true)
     }
 }

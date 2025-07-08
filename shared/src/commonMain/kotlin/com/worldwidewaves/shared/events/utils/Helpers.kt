@@ -26,7 +26,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.readGeoJson
 import io.github.aakira.napier.Napier
@@ -41,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -49,7 +49,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import kotlin.time.Clock
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -68,9 +67,10 @@ interface IClock {
 
     companion object {
         fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
-            // Delegate to shared, locale-aware formatter so both Android & iOS
-            // use the same logic (12/24 h handled per platform conventions).
-            return DateTimeFormats.timeShort(instant, timeZone)
+            val localDateTime = instant.toLocalDateTime(timeZone)
+            val hour = localDateTime.hour.toString().padStart(2, '0')
+            val minute = localDateTime.minute.toString().padStart(2, '0')
+            return "$hour:$minute"
         }
     }
 }
@@ -101,7 +101,7 @@ class SystemClock : IClock, KoinComponent {
                 Napier.w("${SystemClock::class.simpleName}: Simulation speed is ${simulation.speed}, using 1.0 instead")
                 1.0
             }
-            val adjustedDuration = maxOf(duration / speed.toDouble(), 50.milliseconds) // Minimum 50 ms
+            val adjustedDuration = duration / speed.toDouble()
             kotlinx.coroutines.delay(adjustedDuration)
         } else {
             kotlinx.coroutines.delay(duration)

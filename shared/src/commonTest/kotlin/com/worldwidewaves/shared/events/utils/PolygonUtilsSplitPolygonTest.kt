@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases
 import com.worldwidewaves.shared.events.utils.polygon_testcases.PolygonUtilsTestCases.TestCasePolygon
@@ -45,11 +46,12 @@ class PolygonUtilsSplitPolygonTest {
     @Test
     fun testSplitPolygonByLongitude() = runTest {
         PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { idx, testCase ->
-            testSplitPolygonCase(idx, testCase)
+            val result = testSplitPolygonCase(idx, testCase)
+            testRecomposePolygonCase(idx, testCase, result)
         }
     }
 
-    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.SplitResult {
+    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.PolygonSplitResult {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {
@@ -66,11 +68,25 @@ class PolygonUtilsSplitPolygonTest {
             assertEquals(expectedPolygons.size, result.size, "${selector.name} size mismatch")
             expectedPolygons.forEachIndexed { index, expectedPolygon ->
                 assertEquals(expectedPolygon.polygon.size, result[index].size, "${selector.name} polygon $index size mismatch")
+                assertEquals(expectedPolygon.nbCutPositions,
+                    result[index].cutPositions.filter { it.cutId == result[index].cutId }.size,
+                    "${selector.name} polygon $index nb cutpositions mismatch")
                 assertTrue(areRingPolygonsEqual(expectedPolygon.polygon, result[index]), "${selector.name} polygon $index not equal to test case")
             }
         }
 
         return result
+    }
+
+    private fun testRecomposePolygonCase(idx: Int, testCase: TestCasePolygon, result: PolygonUtils.PolygonSplitResult) {
+        Napier.i("==> Testing recompose of polygon testcase $idx")
+
+        val recomposedPolygons = recomposeCutPolygons(result.left + result.right)
+
+        assertEquals(1, recomposedPolygons.size, "Recomposed polygons nb mismatch")
+        assertEquals(0, recomposedPolygons[0].cutPositions.size, "Recomposed polygons cut positions size mismatch")
+        assertEquals(testCase.recomposedPolygon.size, recomposedPolygons[0].size, "Recomposed polygons size mismatch")
+        assertTrue(areRingPolygonsEqual(testCase.recomposedPolygon, recomposedPolygons[0]), "Recomposed polygons not equal to test case")
     }
 
     // ------------------------------------------------------------------------

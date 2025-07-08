@@ -55,7 +55,6 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -69,6 +68,40 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
+import com.worldwidewaves.shared.generated.resources.faq
+import com.worldwidewaves.shared.generated.resources.faq_access
+import com.worldwidewaves.shared.generated.resources.faq_answer_1
+import com.worldwidewaves.shared.generated.resources.faq_answer_2
+import com.worldwidewaves.shared.generated.resources.faq_answer_3
+import com.worldwidewaves.shared.generated.resources.faq_answer_4
+import com.worldwidewaves.shared.generated.resources.faq_answer_5
+import com.worldwidewaves.shared.generated.resources.faq_question_1
+import com.worldwidewaves.shared.generated.resources.faq_question_2
+import com.worldwidewaves.shared.generated.resources.faq_question_3
+import com.worldwidewaves.shared.generated.resources.faq_question_4
+import com.worldwidewaves.shared.generated.resources.faq_question_5
+import com.worldwidewaves.shared.generated.resources.warn_emergency_item_1
+import com.worldwidewaves.shared.generated.resources.warn_emergency_item_2
+import com.worldwidewaves.shared.generated.resources.warn_emergency_item_3
+import com.worldwidewaves.shared.generated.resources.warn_emergency_title
+import com.worldwidewaves.shared.generated.resources.warn_general_item_1
+import com.worldwidewaves.shared.generated.resources.warn_general_item_2
+import com.worldwidewaves.shared.generated.resources.warn_general_item_3
+import com.worldwidewaves.shared.generated.resources.warn_general_item_4
+import com.worldwidewaves.shared.generated.resources.warn_general_item_5
+import com.worldwidewaves.shared.generated.resources.warn_general_item_6
+import com.worldwidewaves.shared.generated.resources.warn_general_title
+import com.worldwidewaves.shared.generated.resources.warn_legal_item_1
+import com.worldwidewaves.shared.generated.resources.warn_legal_item_2
+import com.worldwidewaves.shared.generated.resources.warn_legal_title
+import com.worldwidewaves.shared.generated.resources.warn_rules_security_text
+import com.worldwidewaves.shared.generated.resources.warn_rules_security_title
+import com.worldwidewaves.shared.generated.resources.warn_safety_item_1
+import com.worldwidewaves.shared.generated.resources.warn_safety_item_2
+import com.worldwidewaves.shared.generated.resources.warn_safety_item_3
+import com.worldwidewaves.shared.generated.resources.warn_safety_item_4
+import com.worldwidewaves.shared.generated.resources.warn_safety_item_5
+import com.worldwidewaves.shared.generated.resources.warn_safety_title
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.commonTextStyle
@@ -76,44 +109,45 @@ import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 val rules_hierarchy = mapOf(
-    MokoRes.strings.warn_general_title to listOf(
-        MokoRes.strings.warn_general_item_1,
-        MokoRes.strings.warn_general_item_2,
-        MokoRes.strings.warn_general_item_3,
-        MokoRes.strings.warn_general_item_4,
-        MokoRes.strings.warn_general_item_5,
-        MokoRes.strings.warn_general_item_6
+    ShRes.string.warn_general_title to listOf(
+        ShRes.string.warn_general_item_1,
+        ShRes.string.warn_general_item_2,
+        ShRes.string.warn_general_item_3,
+        ShRes.string.warn_general_item_4,
+        ShRes.string.warn_general_item_5,
+        ShRes.string.warn_general_item_6
     ),
-    MokoRes.strings.warn_safety_title to listOf(
-        MokoRes.strings.warn_safety_item_1,
-        MokoRes.strings.warn_safety_item_2,
-        MokoRes.strings.warn_safety_item_3,
-        MokoRes.strings.warn_safety_item_4,
-        MokoRes.strings.warn_safety_item_5
+    ShRes.string.warn_safety_title to listOf(
+        ShRes.string.warn_safety_item_1,
+        ShRes.string.warn_safety_item_2,
+        ShRes.string.warn_safety_item_3,
+        ShRes.string.warn_safety_item_4,
+        ShRes.string.warn_safety_item_5
     ),
-    MokoRes.strings.warn_emergency_title to listOf(
-        MokoRes.strings.warn_emergency_item_1,
-        MokoRes.strings.warn_emergency_item_2,
-        MokoRes.strings.warn_emergency_item_3
+    ShRes.string.warn_emergency_title to listOf(
+        ShRes.string.warn_emergency_item_1,
+        ShRes.string.warn_emergency_item_2,
+        ShRes.string.warn_emergency_item_3
     ),
-    MokoRes.strings.warn_legal_title to listOf(
-        MokoRes.strings.warn_legal_item_1,
-        MokoRes.strings.warn_legal_item_2
+    ShRes.string.warn_legal_title to listOf(
+        ShRes.string.warn_legal_item_1,
+        ShRes.string.warn_legal_item_2
     )
 )
 
 val faq_contents = listOf(
-    Pair(MokoRes.strings.faq_question_1, MokoRes.strings.faq_answer_1),
-    Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
-    Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
-    Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5)
+    Pair(ShRes.string.faq_question_1, ShRes.string.faq_answer_1),
+    Pair(ShRes.string.faq_question_2, ShRes.string.faq_answer_2),
+    Pair(ShRes.string.faq_question_3, ShRes.string.faq_answer_3),
+    Pair(ShRes.string.faq_question_4, ShRes.string.faq_answer_4),
+    Pair(ShRes.string.faq_question_5, ShRes.string.faq_answer_5)
 )
 
 // ----------------------------
@@ -155,7 +189,7 @@ class AboutFaqScreen : TabScreen {
                         // Save the position of the FAQ section
                         scrollToFAQPosition = coordinates.positionInRoot().y
                     },
-                    text = stringResource(MokoRes.strings.faq),
+                    text = stringResource(ShRes.string.faq),
                     style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE)
                 )
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
@@ -184,7 +218,7 @@ class AboutFaqScreen : TabScreen {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
-                text = stringResource(MokoRes.strings.warn_rules_security_title),
+                text = stringResource(ShRes.string.warn_rules_security_title),
                 style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
                     textAlign = TextAlign.Start
                 )
@@ -193,7 +227,7 @@ class AboutFaqScreen : TabScreen {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = scrollToFAQPosition),
-                text = stringResource(MokoRes.strings.faq_access),
+                text = stringResource(ShRes.string.faq_access),
                 style = quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
                     textDecoration = TextDecoration.Underline,
                     textAlign = TextAlign.End
@@ -202,7 +236,7 @@ class AboutFaqScreen : TabScreen {
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
         Text(
-            text = stringResource(MokoRes.strings.warn_rules_security_text),
+            text = stringResource(ShRes.string.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
             style = commonTextStyle().copy(textAlign = TextAlign.Justify)
         )
@@ -251,8 +285,8 @@ class AboutFaqScreen : TabScreen {
     @Composable
     private fun FAQItem(
         itemIndex: Int,
-        questionResource: StringResource,
-        answerResource: StringResource,
+        question: StringResource,
+        answer: StringResource,
         expandedFaqItem: Int,
         onExpand: (Int) -> Unit
     ) {
@@ -265,13 +299,13 @@ class AboutFaqScreen : TabScreen {
             }
         ) {
             Text(
-                text = stringResource(questionResource),
+                text = stringResource(question),
                 style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE)
             )
             if (expandedFaqItem == itemIndex) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = stringResource(answerResource),
+                    text = stringResource(answer),
                     style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
                 )
             }

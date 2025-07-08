@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.events.utils.PolygonUtils.CutPolygon
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
@@ -371,8 +372,9 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         val pointsString = take(maxPointsToShow).joinToString(", ") { "(${it.lat}, ${it.lng})" }
         val pointsDisplay = if (size > maxPointsToShow) "$pointsString, ..." else pointsString
         val closedStatus = if (isNotEmpty()) ", closed=${first() == last()}" else ""
+        val cutIdStatus = if (this is CutPolygon) ", cutId=$cutId" else ""
 
-        return "Polygon(size=$size$closedStatus, points=[$pointsDisplay])"
+        return "Polygon(size=$size$closedStatus$cutIdStatus, points=[$pointsDisplay])"
     }
 
 }

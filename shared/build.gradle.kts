@@ -7,7 +7,6 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.icerock.moko.multiplatform)
 }
 
 kotlin {
@@ -63,19 +62,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
             implementation(libs.mockk.common.v1120)
-        }
-
-        /*
-         * Allow build scripts to skip compiling `commonTest` sources (useful when running
-         * only a specific Android‐unit test and legacy common tests no longer compile).
-         *
-         *   ./gradlew :shared:testDebugUnitTest -PdisableCommonTest
-         */
-        if (project.hasProperty("disableCommonTest")) {
-            named("commonTest") {
-                kotlin.setSrcDirs(emptySet<String>())
-                resources.setSrcDirs(emptySet<String>())
-            }
         }
     }
 }
@@ -142,16 +128,7 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.feature.delivery.ktx)
     // MockK is only needed for unit tests; keep it out of the runtime classpath.
-    commonMainApi(libs.icerock.moko.resources)
-    commonMainApi(libs.icerock.moko.resources.compose)
     testImplementation(libs.mockk.android.v1120)
-}
-
-multiplatformResources {
-    resourcesPackage.set("com.worldwidewaves.shared")
-    resourcesClassName.set("MokoRes")
-    iosBaseLocalizationRegion.set("en")
-
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

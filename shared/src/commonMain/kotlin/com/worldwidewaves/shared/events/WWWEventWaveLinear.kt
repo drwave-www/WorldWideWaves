@@ -26,7 +26,8 @@ import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.EarthAdaptedSpeedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.MutableArea
-import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitResult
+import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
+import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
@@ -57,8 +58,10 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    override suspend fun getWavePolygons(): WavePolygons? {
+    override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
         if(!event.isRunning()) return null
+
+        require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
         if (elapsedTime <= 0.seconds) return null
@@ -69,16 +72,38 @@ data class WWWEventWaveLinear(
 
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
+        val addedTraversedPolygons : MutableArea = mutableListOf()
 
-        val areaPolygons = event.area.getPolygons()
-        val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
-        traversedPolygons.addAll(traversed)
-        remainingPolygons.addAll(remaining)
+        if (lastWaveState == null) {
+            val areaPolygons = event.area.getPolygons()
+            val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
+            traversedPolygons.addAll(traversed)
+            remainingPolygons.addAll(remaining)
+        } else {
+            val (newTraversed, remaining) = splitAreaToWave(lastWaveState.remainingPolygons, composedLongitude)
+            when(mode) {
+                WaveMode.ADD -> { // Add new traversed polygons without reconstruction
+                    remainingPolygons.addAll(remaining)
+                    traversedPolygons.addAll(lastWaveState.traversedPolygons)
+                    traversedPolygons.addAll(newTraversed)
+                    addedTraversedPolygons.addAll(newTraversed)
+                }
+                WaveMode.RECOMPOSE -> { // Recompose the remaining polygons on CutPositions
+                    remainingPolygons.addAll(remaining)
+                    traversedPolygons.addAll(
+                        recomposeCutPolygons(
+                            lastWaveState.traversedPolygons +  newTraversed
+                        )
+                    )
+                }
+            }
+        }
 
         return if (traversedPolygons.isNotEmpty() || remainingPolygons.isNotEmpty()) WavePolygons(
             clock.now(),
             traversedPolygons,
-            remainingPolygons
+            remainingPolygons,
+            addedTraversedPolygons.ifEmpty { null }
         ) else null
     }
 
@@ -95,12 +120,12 @@ data class WWWEventWaveLinear(
         if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
         val splitResults = areaPolygons.map { splitByLongitude(it, composedLongitude) }
 
-        fun flattenNonEmptyPolygons(selector: (SplitResult) -> Area) =
+        fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
             splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()
 
         val (traversed, remaining) = when (direction) {
-            Direction.WEST -> Pair(SplitResult::right, SplitResult::left)
-            Direction.EAST -> Pair(SplitResult::left, SplitResult::right)
+            Direction.WEST -> Pair(PolygonSplitResult::right, PolygonSplitResult::left)
+            Direction.EAST -> Pair(PolygonSplitResult::left, PolygonSplitResult::right)
         }
 
         return Pair(flattenNonEmptyPolygons(traversed), flattenNonEmptyPolygons(remaining))
@@ -142,7 +167,7 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userHitDateTime(): Instant? {
-        val userPosition = getUserPosition() ?: return null // FIXME / Check
+        val userPosition = getUserPosition() ?: return null
         if (!event.area.isPositionWithin(userPosition)) return null
 
         // Check if we have a cached result for a nearby position
@@ -193,7 +218,7 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userPositionToWaveRatio(): Double? {
-        val userPosition = getUserPosition() ?: return null // FIXME / Check
+        val userPosition = getUserPosition() ?: return null
 
         if (!event.area.isPositionWithin(userPosition)) {
             return null

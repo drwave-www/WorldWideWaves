@@ -47,7 +47,6 @@ import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
@@ -55,15 +54,17 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.background_description
+import com.worldwidewaves.shared.generated.resources.logo_description
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.AppTheme
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -206,14 +207,14 @@ open class MainActivity : AppCompatActivity() {
         Box {
             Image(
                 painter = painterResource(ShRes.drawable.background),
-                contentDescription = stringResource(MokoRes.strings.background_description),
+                contentDescription = stringResource(ShRes.string.background_description),
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
                     .fillMaxSize()
             )
             Image(
                 painter = painterResource(ShRes.drawable.www_logo_transparent),
-                contentDescription = stringResource(MokoRes.strings.logo_description),
+                contentDescription = stringResource(ShRes.string.logo_description),
                 modifier = Modifier
                     .align(androidx.compose.ui.Alignment.BottomCenter)
                     .padding(bottom = DIM_DEFAULT_INT_PADDING.dp) // original SplashActivity padding

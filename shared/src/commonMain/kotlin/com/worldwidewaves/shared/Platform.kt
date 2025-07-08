@@ -1,5 +1,16 @@
 package com.worldwidewaves.shared
 
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlin.time.ExperimentalTime
+
 /*
  * Copyright 2025 DrWave
  *
@@ -20,17 +31,6 @@ package com.worldwidewaves.shared
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WWWPlatform(val name: String) {
@@ -91,6 +91,9 @@ class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvi
 }
 
 // ---------------------------
+
+expect fun getEventImage(type: String, id: String): Any?
+
 expect suspend fun readGeoJson(eventId: String): String?
 expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
 

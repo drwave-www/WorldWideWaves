@@ -8,7 +8,6 @@ plugins {
     kotlin("plugin.serialization") version "2.0.0"
     alias(libs.plugins.android.dynamic.feature) apply false
     alias(libs.plugins.licenseReport) apply false
-    alias(libs.plugins.icerock.moko.multiplatform) apply false
 }
 
 subprojects {
