@@ -2,14 +2,12 @@
   {
     "id": "new_york_usa",
     "type": "city",
-    "location": "New York",
     "country": "usa",
     "community": "north_america",
     "timeZone": "America/New_York",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "description": "Feel the pulse of the Big Apple on Independence Day, as a vibrant wave sweeps past Times Square, Central Park, and the towering skyline.",
-    "instagramAccount": "worldwidewaves.newyork",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavenewyork",
     "wavedef": {
       "linear": {
@@ -24,14 +22,12 @@
   {
     "id": "los_angeles_usa",
     "type": "city",
-    "location": "Los Angeles",
     "country": "usa",
     "community": "north_america",
     "timeZone": "America/Los_Angeles",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "description": "Experience Hollywood glamour, Pacific breezes, and the star-studded allure of L.A. during a wave that lights up the City of Angels on Independence Day.",
-    "instagramAccount": "worldwidewaves.losangeles",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelosangeles",
     "wavedef": {
       "linear": {
@@ -46,14 +42,12 @@
   {
     "id": "mexico_city_mexico",
     "type": "city",
-    "location": "Mexico City",
     "country": "mexico",
     "community": "north_america",
     "timeZone": "America/Mexico_City",
     "date": "2026-09-15",
     "startHour": "20:30",
-    "description": "Honor Mexican Independence Day in the heart of CDMX, where colonial charm meets modern energy, and mariachi melodies echo through historic plazas.",
-    "instagramAccount": "worldwidewaves.mexicocity",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavemexicocity",
     "wavedef": {
       "linear": {
@@ -68,14 +62,12 @@
   {
     "id": "sao_paulo_brazil",
     "type": "city",
-    "location": "Sao Paulo",
     "country": "brazil",
     "community": "south_america",
     "timeZone": "America/Sao_Paulo",
     "date": "2026-09-07",
     "startHour": "18:00",
-    "description": "Let the rhythm of samba and the spirit of Independence Day carry you through bustling Paulista Avenue and the vibrant neighborhoods of this cosmopolitan giant.",
-    "instagramAccount": "worldwidewaves.saopaulo",
+    "instagramAccount": "worldwidewaves_pt",
     "instagramHashtag": "#wavesaopaulo",
     "wavedef": {
       "linear": {
@@ -90,14 +82,12 @@
   {
     "id": "buenos_aires_argentina",
     "type": "city",
-    "location": "Buenos Aires",
     "country": "argentina",
     "community": "south_america",
     "timeZone": "America/Argentina/Buenos_Aires",
     "date": "2026-07-09",
     "startHour": "18:00",
-    "description": "Celebrate Argentina's Independence amid tango beats, grand European-style boulevards, and the passionate spirit of porteños along the Río de la Plata.",
-    "instagramAccount": "worldwidewaves.buenosaires",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavebuenosaires",
     "wavedef": {
       "linear": {
@@ -112,14 +102,12 @@
   {
     "id": "london_england",
     "type": "city",
-    "location": "London",
     "country": "england",
     "community": "europe",
     "timeZone": "Europe/London",
     "date": "2026-08-31",
     "startHour": "15:00",
-    "description": "Revel in the multicultural vibes of Notting Hill Carnival as this wave dances through historic streets, iconic double-decker buses, and the timeless Thames.",
-    "instagramAccount": "worldwidewaves.london",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelondon",
     "wavedef": {
       "linear": {
@@ -134,14 +122,12 @@
   {
     "id": "paris_france",
     "type": "city",
-    "location": "Paris",
     "country": "france",
     "community": "europe",
     "timeZone": "Europe/Paris",
     "date": "2026-07-14",
     "startHour": "18:00",
-    "description": "On Bastille Day, join a wave that flows from the Eiffel Tower to the Champs-Élysées, celebrating the romance and artistic flair of the City of Light.",
-    "instagramAccount": "worldwidewaves.paris",
+    "instagramAccount": "worldwidewaves_fr",
     "instagramHashtag": "#waveparis",
     "wavedef": {
       "linear": {
@@ -156,14 +142,12 @@
   {
     "id": "berlin_germany",
     "type": "city",
-    "location": "Berlin",
     "country": "germany",
     "community": "europe",
     "timeZone": "Europe/Berlin",
     "date": "2026-10-03",
     "startHour": "18:00",
-    "description": "Feel the unifying spirit on German Unity Day as the wave traverses the Brandenburg Gate, graffiti-strewn walls, and modern architecture of this vibrant capital.",
-    "instagramAccount": "worldwidewaves.berlin",
+    "instagramAccount": "worldwidewaves_de",
     "instagramHashtag": "#waveberlin",
     "wavedef": {
       "linear": {
@@ -178,14 +162,12 @@
   {
     "id": "madrid_spain",
     "type": "city",
-    "location": "Madrid",
     "country": "spain",
     "community": "europe",
     "timeZone": "Europe/Madrid",
     "date": "2026-10-12",
     "startHour": "18:00",
-    "description": "On Spain's National Day, let the wave ignite Madrid’s lively tapas bars, grand boulevards, and the artistic legacy of the Prado.",
-    "instagramAccount": "worldwidewaves.madrid",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavemadrid",
     "wavedef": {
       "linear": {
@@ -200,14 +182,12 @@
   {
     "id": "rome_italy",
     "type": "city",
-    "location": "Rome",
     "country": "italy",
     "community": "europe",
     "timeZone": "Europe/Rome",
     "date": "2026-08-15",
     "startHour": "17:00",
-    "description": "On Ferragosto, flow with Romans and visitors alike through piazzas alive with music, fountains, and the holiday energy that fills the Eternal City under the summer sun.",
-    "instagramAccount": "worldwidewaves.rome",
+    "instagramAccount": "worldwidewaves_it",
     "instagramHashtag": "#waverome",
     "wavedef": {
       "linear": {
@@ -222,14 +202,12 @@
   {
     "id": "moscow_russia",
     "type": "city",
-    "location": "Moscow",
     "country": "russia",
     "community": "europe",
     "timeZone": "Europe/Moscow",
     "date": "2026-06-12",
     "startHour": "18:00",
-    "description": "Soak in the grandeur of Red Square and the Kremlin on Russia Day, as the wave echoes the city’s rich imperial history and modern cosmopolitan buzz.",
-    "instagramAccount": "worldwidewaves.moscow",
+    "instagramAccount": "worldwidewaves_ru",
     "instagramHashtag": "#wavemoscow",
     "wavedef": {
       "linear": {
@@ -244,14 +222,12 @@
   {
     "id": "istanbul_turkey",
     "type": "city",
-    "location": "Istanbul",
     "country": "turkey",
     "community": "europe",
     "timeZone": "Europe/Istanbul",
     "date": "2026-10-29",
     "startHour": "17:00",
-    "description": "Celebrate Republic Day with a wave that glides past the Bosphorus, historic mosques, and modern squares, as Istanbul lights up with concerts, flags, and fireworks.",
-    "instagramAccount": "worldwidewaves.istanbul",
+    "instagramAccount": "worldwidewaves_tr",
     "instagramHashtag": "#waveistanbul",
     "wavedef": {
       "linear": {
@@ -266,14 +242,12 @@
   {
     "id": "cairo_egypt",
     "type": "city",
-    "location": "Cairo",
     "country": "egypt",
     "community": "africa",
     "timeZone": "Africa/Cairo",
     "date": "2026-03-21",
     "startHour": "17:00",
-    "description": "Celebrate Eid in Cairo as streets and markets come alive with festive lights, sweet aromas, and joyous families marking the end of Ramadan with a unifying wave.",
-    "instagramAccount": "worldwidewaves.cairo",
+    "instagramAccount": "worldwidewaves_ar",
     "instagramHashtag": "#wavecairo",
     "wavedef": {
       "linear": {
@@ -288,14 +262,12 @@
   {
     "id": "johannesburg_south_africa",
     "type": "city",
-    "location": "Johannesburg",
     "country": "south_africa",
     "community": "africa",
     "timeZone": "Africa/Johannesburg",
     "date": "2026-04-27",
     "startHour": "18:00",
-    "description": "On Freedom Day, join the wave through the ‘City of Gold,’ where modern skyscrapers meet a rich heritage of resilience and cultural diversity.",
-    "instagramAccount": "worldwidewaves.johannesburg",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavejohannesburg",
     "wavedef": {
       "linear": {
@@ -310,14 +282,12 @@
   {
     "id": "nairobi_kenya",
     "type": "city",
-    "location": "Nairobi",
     "country": "kenya",
     "community": "africa",
     "timeZone": "Africa/Nairobi",
     "date": "2026-06-01",
     "startHour": "18:00",
-    "description": "Celebrate Madaraka Day amid the lively markets and bustling streets, where urban life converges with the gateway to Kenya's stunning wildlife.",
-    "instagramAccount": "worldwidewaves.nairobi",
+    "instagramAccount": "worldwidewaves_sw",
     "instagramHashtag": "#wavenairobi",
     "wavedef": {
       "linear": {
@@ -332,14 +302,12 @@
   {
     "id": "lagos_nigeria",
     "type": "city",
-    "location": "Lagos",
     "country": "nigeria",
     "community": "africa",
     "timeZone": "Africa/Lagos",
     "date": "2026-10-01",
     "startHour": "18:00",
-    "description": "Embrace the energetic rhythms of Afrobeats on Nigeria’s Independence Day, as the wave surges through Africa's most populous city and its lively markets.",
-    "instagramAccount": "worldwidewaves.lagos",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelagos",
     "wavedef": {
       "linear": {
@@ -354,14 +322,12 @@
   {
     "id": "kinshasa_democratic_republic_of_the_congo",
     "type": "city",
-    "location": "Kinshasa",
     "country": "democratic_republic_of_the_congo",
     "community": "africa",
     "timeZone": "Africa/Kinshasa",
     "date": "2026-06-30",
     "startHour": "18:00",
-    "description": "On DR Congo’s Independence Day, join a wave rippling through the vibrant capital along the Congo River, brimming with music and cultural pride.",
-    "instagramAccount": "worldwidewaves.kinshasa",
+    "instagramAccount": "worldwidewaves_fr",
     "instagramHashtag": "#wavekinshasa",
     "wavedef": {
       "linear": {
@@ -376,14 +342,12 @@
   {
     "id": "dubai_united_arab_emirates",
     "type": "city",
-    "location": "Dubai",
     "country": "united_arab_emirates",
     "community": "middle_east",
     "timeZone": "Asia/Dubai",
     "date": "2026-12-02",
     "startHour": "18:00",
-    "description": "Celebrate UAE National Day surrounded by futuristic skyscrapers, desert landscapes, and the cosmopolitan flair of the world's leading modern metropolis.",
-    "instagramAccount": "worldwidewaves.dubai",
+    "instagramAccount": "worldwidewaves_ar",
     "instagramHashtag": "#wavedubai",
     "wavedef": {
       "linear": {
@@ -398,14 +362,12 @@
   {
     "id": "mumbai_india",
     "type": "city",
-    "location": "Mumbai",
     "country": "india",
     "community": "asia",
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "description": "Commemorate India's Independence with the spirit of Bollywood, colonial-era architecture, and the monsoon-kissed shores along the Arabian Sea.",
-    "instagramAccount": "worldwidewaves.mumbai",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavemumbai",
     "wavedef": {
       "linear": {
@@ -415,19 +377,17 @@
       }
     },
     "area": { "osmAdminids": [7964375] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "delhi_india",
     "type": "city",
-    "location": "Delhi",
     "country": "india",
     "community": "asia",
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "description": "Feel the patriotic fervor on Independence Day as the wave sweeps past colonial-era boulevards, Mughal forts, and the heartbeat of India’s capital.",
-    "instagramAccount": "worldwidewaves.delhi",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavedelhi",
     "wavedef": {
       "linear": {
@@ -437,19 +397,17 @@
       }
     },
     "area": { "osmAdminids": [1942586] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "bangalore_india",
     "type": "city",
-    "location": "Bangalore",
     "country": "india",
     "community": "asia",
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "description": "Celebrate freedom in the Silicon Valley of India, where centuries-old temples meet cutting-edge tech parks and a thriving cosmopolitan crowd.",
-    "instagramAccount": "worldwidewaves.bangalore",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavebangalore",
     "wavedef": {
       "linear": {
@@ -459,19 +417,17 @@
       }
     },
     "area": { "osmAdminids": [2020589] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "jakarta_indonesia",
     "type": "city",
-    "location": "Jakarta",
     "country": "indonesia",
     "community": "asia",
     "timeZone": "Asia/Jakarta",
     "date": "2026-08-17",
     "startHour": "18:00",
-    "description": "Mark Indonesia's Independence Day in a city of contrasts, from its gleaming skyscrapers to bustling street markets and cultural heritage sites.",
-    "instagramAccount": "worldwidewaves.jakarta",
+    "instagramAccount": "worldwidewaves_id",
     "instagramHashtag": "#wavejakarta",
     "wavedef": {
       "linear": {
@@ -486,14 +442,12 @@
   {
     "id": "bangkok_thailand",
     "type": "city",
-    "location": "Bangkok",
     "country": "thailand",
     "community": "asia",
     "timeZone": "Asia/Bangkok",
     "date": "2026-12-05",
     "startHour": "16:00",
-    "description": "Celebrate Thailand’s National Father’s Day honoring King Bhumibol in the City of Angels, where golden temples, floating markets, and vibrant street food ignite your senses.",
-    "instagramAccount": "worldwidewaves.bangkok",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavebangkok",
     "wavedef": {
       "linear": {
@@ -508,14 +462,12 @@
   {
     "id": "manila_philippines",
     "type": "city",
-    "location": "Manila",
     "country": "philippines",
     "community": "asia",
     "timeZone": "Asia/Manila",
     "date": "2026-06-12",
     "startHour": "18:00",
-    "description": "Celebrate Philippine Independence Day in a city where jeepneys traverse Spanish-colonial churches, lively markets, and modern skyscrapers.",
-    "instagramAccount": "worldwidewaves.manila",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavemanila",
     "wavedef": {
       "linear": {
@@ -525,19 +477,17 @@
       }
     },
     "area": { "osmAdminids": [103703], "bbox": "120.940178,14.550825,121.027467,14.641119" },
-    "map": { "minZoom": 7, "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "ph", "zone": "asia/philippines" }
   },
   {
     "id": "tokyo_japan",
     "type": "city",
-    "location": "Tokyo",
     "country": "japan",
     "community": "asia",
     "timeZone": "Asia/Tokyo",
     "date": "2026-07-25",
     "startHour": "18:00",
-    "description": "Join millions along the Sumida River as the sky explodes in color, and Tokyo’s summer festival atmosphere sets the perfect stage for a dazzling wave.",
-    "instagramAccount": "worldwidewaves.tokyo",
+    "instagramAccount": "worldwidewaves_ja",
     "instagramHashtag": "#wavetokyo",
     "wavedef": {
       "linear": {
@@ -552,14 +502,12 @@
   {
     "id": "seoul_south_korea",
     "type": "city",
-    "location": "Seoul",
     "country": "south_korea",
     "community": "asia",
     "timeZone": "Asia/Seoul",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "description": "Soak in Gwangbokjeol celebrations as the wave passes royal palaces, K-pop hubs, and a skyline that merges tradition with modern innovation.",
-    "instagramAccount": "worldwidewaves.seoul",
+    "instagramAccount": "worldwidewaves_ko",
     "instagramHashtag": "#waveseoul",
     "wavedef": {
       "linear": {
@@ -574,14 +522,12 @@
   {
     "id": "beijing_china",
     "type": "city",
-    "location": "Beijing",
     "country": "china",
     "community": "asia",
     "timeZone": "Asia/Shanghai",
     "date": "2026-05-01",
     "startHour": "12:00",
-    "description": "On Labour Day, ride a wave through Beijing’s parks and boulevards, where millions gather to stroll, picnic, and enjoy the spring holiday spirit.",
-    "instagramAccount": "worldwidewaves.beijing",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#wavebeijing",
     "wavedef": {
       "linear": {
@@ -596,14 +542,12 @@
   {
     "id": "shanghai_china",
     "type": "city",
-    "location": "Shanghai",
     "country": "china",
     "community": "asia",
     "timeZone": "Asia/Shanghai",
     "date": "2026-05-01",
     "startHour": "14:00",
-    "description": "Let the wave sweep across the Bund and Nanjing Road as Shanghai buzzes with families, music, and the cosmopolitan energy of Labour Day festivities.",
-    "instagramAccount": "worldwidewaves.shanghai",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#waveshanghai",
     "wavedef": {
       "linear": {
@@ -618,14 +562,12 @@
   {
     "id": "hong_kong_china",
     "type": "city",
-    "location": "Hong Kong",
     "country": "china",
     "community": "asia",
     "timeZone": "Asia/Hong_Kong",
     "date": "2026-05-01",
     "startHour": "17:00",
-    "description": "Feel the surge of Hong Kong’s Golden Week, as Victoria Harbour, markets, and neon streets overflow with people celebrating Labour Day together.",
-    "instagramAccount": "worldwidewaves.hongkong",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#wavehongkong",
     "wavedef": {
       "linear": {
@@ -640,14 +582,12 @@
   {
     "id": "sydney_australia",
     "type": "city",
-    "location": "Sydney",
     "country": "australia",
     "community": "oceania",
     "timeZone": "Australia/Sydney",
     "date": "2026-02-28",
     "startHour": "19:00",
-    "description": "Ride the wave through Sydney’s Mardi Gras Parade, where Oxford Street bursts with rainbow colors, dazzling floats, and a carnival spirit that unites hundreds of thousands in celebration.",
-    "instagramAccount": "worldwidewaves.sydney",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavesydney",
     "wavedef": {
       "linear": {
@@ -662,14 +602,12 @@
   {
     "id": "melbourne_australia",
     "type": "city",
-    "location": "Melbourne",
     "country": "australia",
     "community": "oceania",
     "timeZone": "Australia/Melbourne",
     "date": "2026-11-03",
     "startHour": "13:00",
-    "description": "On Melbourne Cup Day, ride a wave through the cultural capital as the city brims with parades, vibrant crowds in elegant attire, and the festive spirit of 'the race that stops a nation'.",
-    "instagramAccount": "worldwidewaves.melbourne",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavemelbourne",
     "wavedef": {
       "linear": {
@@ -684,14 +622,12 @@
   {
     "id": "toronto_canada",
     "type": "city",
-    "location": "Toronto",
     "country": "canada",
     "community": "north_america",
     "timeZone": "America/Toronto",
     "date": "2026-07-01",
     "startHour": "18:00",
-    "description": "On Canada Day, be swept up in a sea of red and white as the wave courses past the CN Tower, multicultural neighborhoods, and the shores of Lake Ontario.",
-    "instagramAccount": "worldwidewaves.toronto",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavetoronto",
     "wavedef": {
       "linear": {
@@ -706,14 +642,12 @@
   {
     "id": "vancouver_canada",
     "type": "city",
-    "location": "Vancouver",
     "country": "canada",
     "community": "north_america",
     "timeZone": "America/Vancouver",
     "date": "2026-07-01",
     "startHour": "18:00",
-    "description": "Celebrate Canada Day along the Pacific Coast, weaving through sea-to-sky scenery, Stanley Park’s greenery, and the cosmopolitan charm of downtown.",
-    "instagramAccount": "worldwidewaves.vancouver",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavevancouver",
     "wavedef": {
       "linear": {
@@ -728,14 +662,12 @@
   {
     "id": "chicago_usa",
     "type": "city",
-    "location": "Chicago",
     "country": "usa",
     "community": "north_america",
     "timeZone": "America/Chicago",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "description": "On Independence Day, enjoy deep-dish delights and the architectural marvels along Lake Michigan as the wave rolls through the Windy City.",
-    "instagramAccount": "worldwidewaves.chicago",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavechicago",
     "wavedef": {
       "linear": {
@@ -750,14 +682,12 @@
   {
     "id": "san_francisco_usa",
     "type": "city",
-    "location": "San Francisco",
     "country": "usa",
     "community": "north_america",
     "timeZone": "America/Los_Angeles",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "description": "Feel the spirit of freedom under the Golden Gate Bridge’s iconic span, as this Independence Day wave travels through hills, cable cars, and diverse neighborhoods.",
-    "instagramAccount": "worldwidewaves.sanfrancisco",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavesanfrancisco",
     "wavedef": {
       "linear": {
@@ -772,14 +702,12 @@
   {
     "id": "lima_peru",
     "type": "city",
-    "location": "Lima",
     "country": "peru",
     "community": "south_america",
     "timeZone": "America/Lima",
     "date": "2026-07-28",
     "startHour": "18:00",
-    "description": "On Peru's Independence Day, traverse colonial plazas, pre-Incan archaeological sites, and the savory aromas of world-renowned Peruvian cuisine.",
-    "instagramAccount": "worldwidewaves.lima",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavelima",
     "wavedef": {
       "linear": {
@@ -794,14 +722,12 @@
   {
     "id": "bogota_colombia",
     "type": "city",
-    "location": "Bogota",
     "country": "colombia",
     "community": "south_america",
     "timeZone": "America/Bogota",
     "date": "2026-07-20",
     "startHour": "18:00",
-    "description": "Celebrate Colombia's Independence among street art, mountain views, and the cultural beat of salsa-infused neighborhoods in the Andean capital.",
-    "instagramAccount": "worldwidewaves.bogota",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavebogota",
     "wavedef": {
       "linear": {
@@ -816,14 +742,12 @@
   {
     "id": "santiago_chile",
     "type": "city",
-    "location": "Santiago",
     "country": "chile",
     "community": "south_america",
     "timeZone": "America/Santiago",
     "date": "2026-09-18",
     "startHour": "18:00",
-    "description": "Feel the patriotic fervor on Chile’s Independence Day as the wave meanders through the Andes backdrop, colonial facades, and modern glass towers.",
-    "instagramAccount": "worldwidewaves.santiago",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavesantiago",
     "wavedef": {
       "linear": {
@@ -838,14 +762,12 @@
   {
     "id": "tehran_iran",
     "type": "city",
-    "location": "Tehran",
     "country": "iran",
     "community": "middle_east",
     "timeZone": "Asia/Tehran",
     "date": "2026-04-02",
     "startHour": "15:00",
-    "description": "Join Tehran’s Sizdah Bedar, the day when families flood parks and gardens for picnics, laughter, and renewal, as a wave sweeps across the city’s lively outdoor gatherings.",
-    "instagramAccount": "worldwidewaves.tehran",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavetehran",
     "wavedef": {
       "linear": {
@@ -860,14 +782,12 @@
   {
     "id": "karachi_pakistan",
     "type": "city",
-    "location": "Karachi",
     "country": "pakistan",
     "community": "asia",
     "timeZone": "Asia/Karachi",
     "date": "2026-08-14",
     "startHour": "15:00",
-    "description": "Celebrate Pakistan’s Independence Day along the Arabian Sea, through bustling bazaars, rich history, and the dynamic energy of the nation’s largest city.",
-    "instagramAccount": "worldwidewaves.karachi",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavekarachi",
     "wavedef": {
       "linear": {

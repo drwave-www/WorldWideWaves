@@ -1,18 +1,10 @@
 
 TODAY :
 
-- Github Actions compilation : check
-
 - Production:
-    - Fill-in FAQ Contents
     - licences / tools mentions
 
-- manage with translations
-    - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
-    - https://phrase.com/blog/posts/kotlin-multiplatform-mobile-i18n-android-ios/
-    - manage with translation of events contents (description, location, etc, ...)
-
-- faire un script de generation des images d'event, cf scripts/images
+- translations: ar, ko, zh, ...
 
 - erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
                  --> Beijing ??
@@ -21,12 +13,14 @@ TODAY :
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
+- PLAY STORE UPLOAD
+
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
 
 ---------------------------------------------
 
-- PDF + Message + Planif presentation
+- PDF + Message + Planif presentation + faire qques modifs sur la video 1 (rempl visuels au debut, quote plus longue a la fin, ..)
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
 
 ---------------------------------------------

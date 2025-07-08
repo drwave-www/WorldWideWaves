@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.icerock.moko.multiplatform)
 }
 
 kotlin {
@@ -128,7 +129,16 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.feature.delivery.ktx)
     // MockK is only needed for unit tests; keep it out of the runtime classpath.
+    commonMainApi(libs.icerock.moko.resources)
+    commonMainApi(libs.icerock.moko.resources.compose)
     testImplementation(libs.mockk.android.v1120)
+}
+
+multiplatformResources {
+    resourcesPackage.set("com.worldwidewaves.shared")
+    resourcesClassName.set("MokoRes")
+    iosBaseLocalizationRegion.set("en")
+
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

@@ -1,0 +1,463 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <!-- src_hash: 58a942b5f882bb71aff38d2de8229bf4f42585a6 -->
+  <string name="empty"></string>
+  <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
+  <string name="logo_description">logo</string>
+  <!-- src_hash: 261f676de9b71d385c64b9d08a86b1ea1e10e90b -->
+  <string name="background_description">background</string>
+  <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
+  <string name="tab_infos_name">Tungkol</string>
+  <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
+  <string name="tab_faq_name">FAQ</string>
+  <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
+  <string name="back">Bumalik</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">Mag-wave na!</string>
+  <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
+  <string name="events_select_all">Lahat</string>
+  <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
+  <string name="events_select_starred">Paborito</string>
+  <!-- src_hash: 5097ae23854862764e5f1fd13d54f9f50a888c5e -->
+  <string name="events_select_downloaded">Na-download</string>
+  <!-- src_hash: a792d80677e5ce46a722b25244c64040b7d2af8a -->
+  <string name="map_checking_state">Sinusuri ang status ng mapa..</string>
+  <!-- src_hash: d23c5aaffa2874371f98e8c0838e7c00f19e4410 -->
+  <string name="map_download">I-download ang Mapa</string>
+  <!-- src_hash: 6d0c25a3cbd4f6f8f4767eb665c89323faa68b05 -->
+  <string name="map_downloading">Nagda-download..</string>
+  <!-- src_hash: e81121a332e731d8b2af71537baeb942c36acabc -->
+  <string name="map_starting_download">Sinisimulan ang download..</string>
+  <!-- src_hash: 6462b24730b6834d28fbbb556f15724b2eef50f9 -->
+  <string name="map_retrying_download">Ulitin ang download</string>
+  <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
+  <string name="map_loading">Naglo-load ng mapa..</string>
+  <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
+  <string name="map_cancel_download">Kanselahin</string>
+  <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
+  <string name="map_retry_download">Subukang muli</string>
+  <!-- src_hash: df1cb247f84a5ef21df00efb2b8583598a864904 -->
+  <string name="map_error_download">Error sa pag-download ng mapa</string>
+  <!-- src_hash: 8f835e0a1dc2c6e63f307394c946b73dcdbd734f -->
+  <string name="map_downloaded">Na-download na ang mapa</string>
+  <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
+  <string name="events_uninstall_map_title">I-uninstall ang Mapa</string>
+  <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
+  <string name="events_uninstall">I-uninstall</string>
+  <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
+  <string name="events_uninstall_cancel">Kanselahin</string>
+  <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
+  <string name="events_uninstall_map_confirmation">Sigurado ka bang gusto mong i-uninstall ang mapang ito? Maaari mo itong i-download muli kung kailangan.</string>
+  <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
+  <string name="events_cannot_uninstall_map_message">Hindi ma-uninstall ang mapang ito dahil bahagi ito ng base app o kailangan ng ibang feature. Tatanggalin ito kapag in-uninstall mo ang app.</string>
+  <!-- src_hash: 0bf7dc9508d76a25a739e81d6de9537e3beeae93 -->
+  <string name="event_done">Tapos na</string>
+  <!-- src_hash: 76fc38d3011bddbd0d6ea6c913c12b89768ea175 -->
+  <string name="event_soon">malapit na !</string>
+  <!-- src_hash: 7fcc365541c8136e015f6b6de62e592e8cd609f2 -->
+  <string name="event_running">isinasagawa</string>
+  <!-- src_hash: 155d63c9d555a28cb041a7bc944bcd126028f94b -->
+  <string name="event_favorite_on">naka-on ang paborito</string>
+  <!-- src_hash: ccf841f2ea2d86c733131d78cc57b56a89ed052c -->
+  <string name="event_favorite_off">naka-off ang paborito</string>
+  <!-- src_hash: d09e583eb6246d39ee2340b12e246596866c89e2 -->
+  <string name="event_target_wave_on">Itutok sa wave</string>
+  <!-- src_hash: 2bf443288dd74a114ca76e11228daeee38988b74 -->
+  <string name="event_target_wave_off">Hindi isinasagawa ang event</string>
+  <!-- src_hash: 409a83af1ba070df076d65e78a69fb1ab46c745b -->
+  <string name="event_target_me_on">Itutok sa akin</string>
+  <!-- src_hash: 17347a1b073379a67baf79186d80d225e01c4a20 -->
+  <string name="event_target_me_off">Wala ka sa lugar</string>
+  <!-- src_hash: fcdce8786f93cb0a785fe6ebd0a2546ece0c5da8 -->
+  <string name="events_favorites_empty">Wala pang naidagdag na paboritong event. Simulang i-tap ang icon na bituin sa paborito mong event!</string>
+  <!-- src_hash: 479305cf78e08c6a09778809429446f92824a7b4 -->
+  <string name="events_downloaded_empty">Wala pang na-download na event</string>
+  <!-- src_hash: 663e59373c8e0cd7b9358c849e8155cf9b3a94a4 -->
+  <string name="events_empty">Walang event sa listahan</string>
+  <!-- src_hash: 64189e446905b9317177323f1da63cd54b194af1 -->
+  <string name="events_loading_error">Nagkaproblema sa pag-load ng mga event</string>
+  <!-- src_hash: af453dedc41c38cf727bc928484385d1f5bbf0ad -->
+  <string name="geoloc_undone">Ina-update ang lokasyon..</string>
+  <!-- src_hash: f6328db0f2344b04d73ed011773813b83d534e00 -->
+  <string name="geoloc_error">Hindi matukoy ang iyong lokasyon</string>
+  <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
+  <string name="geoloc_yourein">NASA LOOB KA NG LUGAR!</string>
+  <!-- src_hash: 7e34ceee47862c755aad525412ae784314b4da22 -->
+  <string name="geoloc_yourenotin">HINDI KA NASA LOOB NG LUGAR</string>
+  <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
+  <string name="geoloc_warm_in">NASA LOOB KA NG LUGAR at magwa-warm-up!</string>
+  <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
+  <string name="ask_gps_enable">Mukhang naka-disable ang iyong GPS, gusto mo ba itong i-enable?</string>
+  <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
+  <string name="yes">Oo</string>
+  <!-- src_hash: 42febde652f67df0a9f5863acff108c65b0721ba -->
+  <string name="no">Hindi</string>
+  <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
+  <string name="be_waved">sumabay sa wave!</string>
+  <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
+  <string name="wave_speed">Bilis ng wave</string>
+  <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
+  <string name="wave_start_time">Oras ng simula</string>
+  <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
+  <string name="wave_end_time">Oras ng pagtatapos</string>
+  <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
+  <string name="wave_total_time">Kabuuang oras</string>
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <string name="wave_progression">Pag-usad</string>
+  <!-- src_hash: 1d840cbc39e4fc3d5163f8c8e7b0ece9a9a6c022 -->
+  <string name="wave_warming">Nagwa-warm-up..</string>
+  <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
+  <string name="wave_be_ready">Maghanda!</string>
+  <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->
+  <string name="wave_done">Tapos na ang wave!</string>
+  <!-- src_hash: d955b930c0d83bdd6cf803ffa3627d94509153c8 -->
+  <string name="wave_hit">Magaling!</string>
+  <!-- src_hash: 00589bbc02fcac8151416d6e208c27b982b47c68 -->
+  <string name="wave_is_running">Nagwa-wave!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">Alam mo ito : kung ikukuwento ang kasaysayan ng Daigdig sa isang aklat na 1,000 pahina, lilitaw lang ang sangkatauhan sa huling talata ng pinakahuling pahina.</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">Ngunit maaaring matapos ang maikling kuwentong ito nang mas maaga kaysa inaasahan. Nasa pagkakahiwalay tayo sa isang napakalawak at tigang na sansinukob. Sinisira natin ang lahat. Makasarili tayo. Malupit tayo. Sakim tayo. Bulag tayo. At naghahangad tayong mangibabaw. Ngunit kaya rin nating umunawa at makiramdam, lumikhâ ng mga kababalaghan, manatiling matatag, at maging para sa kapwa.</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">Ngunit kaunti na ang oras. Napakalayo na ng ating narating.. Maaari tayong bumuo ng alternatibo : isang pamayanang nakabatay sa karapatan, pagkakaisa, at demokrasya. Nasa atin ang pasya!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">Sumali sa isang pandaigdigang kilusan, isang payapang paggising. Lumikha tayo ng mga human wave, isang patunay ng ating tunay na pagkatao, isang matibay na panawagan sa ating mga pinuno. Magtipon tayo sa mga lungsod at bansa, sa buong mundo. Piliin natin ang kapayapaan. Piliin natin ang saya. Piliin natin ang kalikasan. Piliin natin ang TAYO.</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">Paano kung sapat na ang isang wave para pag-isahin tayo?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">Ang WorldWideWaves ay isang panandaliang mobile app na may bisyong mag-orchestrate ng serye ng mga human wave na aalon sa malalaking lungsod, tawid-bansa. Nakaplanong maganap sa loob ng isang taon, layon nitong lampasan ang pisikal at kultural na hangganan, upang isulong ang diwa ng pagkakaisa, komunidad, at magkatuwang na karanasan.</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">Sa kaibuturan, higit pa sa app ang WorldWideWaves—isa itong pandaigdigang kilusan na dinisenyo upang pagtipunin ang mga tao sa pagpapakita ng pagkakaisa at saya, na may magkakaparehong pagpapahalaga.</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">Sa tulong ng teknolohiya, pahihintulutan ng WorldWideWaves ang mga lumalahok mula sa iba’t ibang panig ng mundo na sumali sa mga human wave sa kani-kanilang lungsod, at lumikha ng makapangyarihang biswal at emosyonal na tanawin.</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">Sa diwa, isang ambisyosong pagsusumikap ang WorldWideWaves na gamitin ang kapangyarihan ng teknolohiya para sa tunay na marangal na adhikain—pag-ugnayin ang sangkatauhan sa pagdiriwang ng pagkakaisa, saya, at sama-samang pagkilos. Sa bawat wave, hindi lamang sila makakatulong sa isang pandaigdigang tagpo, kundi madarama at maibabahagi sa mundo ang malalim na epekto ng pag-iisa.</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">Mga Tuntunin at Seguridad</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">Maligayang pagdating sa WorldWideWaves! Nasasabik kaming makasama ka sa mga global wave event. Para masiguro ang ligtas at kasiya-siyang karanasan ng lahat, pakisunod ang mga gabay na ito:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">Pangkalahatang Tuntunin :</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">Paggalang sa Lahat: Igalang ang lahat ng kalahok, anuman ang kanilang pinagmulan. Panatilihin ang paggalang sa lahat ng dumalo; hindi katanggap-tanggap ang diskriminasyon o pangha-harass.</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">Igalang ang Espasyo Publiko: Panatilihing maluwag ang mga daanan, sumunod sa mga lokal na batas at karatula, at iwasang hadlangan ang trapiko o daanan ng emerhensiya.</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">Manatili sa Itinalagang Lugar: Para sa inyong kaligtasan, manatili lamang sa mga lugar na nakalaan para sa event, kung mayroon.</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">Maging Responsable: Kung iinom, gawin ito nang katamtaman at alinsunod sa lokal na batas.</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">Bawasan ang Epekto sa Kapaligiran: Itapon ang lahat ng basura sa tamang lalagyan at iwasang magkalat upang panatilihing malinis ang mga lugar.</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">Iulat ang Alalahanin: Kung may makita kang kahina-hinala o may taong nahihirapan, agad itong iulat sa lokal na awtoridad.</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">Mga Tip sa Kaligtasan:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">Magdamit nang Angkop: Magsuot ng komportableng damit at sapatos na angkop sa aktibidad at sa panahon.</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">Uminom ng Tubig: Magdala ng tubig at manatiling hydrated, lalo na sa maiinit na event.</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">Ingat sa Iyong Mga Gamit: Panatilihing ligtas ang personal na gamit at iwasang magdala ng mamahaling bagay na hindi kailangan.</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">Buddy System: Manatili kasama ang mga kaibigan o makipagkaibigan, at bantayan ang kaligtasan ng isa’t isa.</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">Handa sa Emerhensiya: I-save ang mga lokal na emergency number sa iyong telepono at magtakda ng tagpuan kasama ang mga kaibigan sakaling magkahiwalay.</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">Mga Proseso sa Emerhensiya:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">Maging Alisto: Tukuyin ang pinakamalapit na ligtas na labasan at mga bukas na espasyo (hal., liwasan, parke) sa paligid, at sundin ang tagubilin ng lokal na awtoridad kung may emerhensiya.</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">Mga Contact sa Emerhensiya: I-save ang lokal na emergency number para sa iyong lokasyon at isang personal na emergency contact sa iyong telepono bago ka sumali.</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">Kung Sakaling May Emerhensiya: Tawagan ang lokal na emergency number, lumikas nang mahinahon sa isang ligtas na bukas na lugar, tumulong sa iba kung kaya, at panatilihing maluwag ang mga daanan.</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">Legal:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">Pagwawaksi ng Pananagutan: Ang paglahok sa mga kaganapan ng WorldWideWaves ay nasa iyong sariling panganib. Sa paglahok, sumasang-ayon kang isantabi ang anumang paghahabol laban sa mga gumawa ng app kaugnay ng mga pinsalang maaaring mangyari sa event.</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">Paalala sa Espasyo Publiko: Ito ay publikong pagtitipon kung saan maaaring maganap ang pagkuha ng larawan/bidyo ng mga dumalo o media, ayon sa lokal na batas. Wala kaming inaangking karapatan sa iyong imahe at hindi namin makokontrol ang mga rekord ng ikatlong partido. Kung ayaw mong lumabas, iwasan ang mga kamera kung maaari.</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">Buksan ang FAQ</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">Bakit walang event sa aking lungsod o bansa?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">Pinili namin ang ilang dosenang pinakamataong lungsod sa mundo upang makabuo ng makahulugang global wave. Pinipigil muna kami ng teknikal at operasyonal na limitasyon na suportahan ang walang-hanggang dami ng lokasyon. Sinikap naming magkaroon ng malawak na representasyon sa mga kontinente, kultura, at wika—na kailanman ay hindi magiging perpekto. Umaasa kaming makapagdagdag pa ng mga lungsod sa paglipas ng panahon.</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">Ano ang mga bandilang ito ng mga kontinente?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">Lumikha kami ng mga orihinal, kathang-isip na bandila ng kontinente upang mabilis mong matukoy ang mga lungsod sa listahan at upang ipakita ang diwa ng pagkakaisa na itinataguyod ng WorldWideWaves. Hindi opisyal ang mga bandilang ito at sa app lamang umiiral; hindi ito nilalayong mang-insulto o pumalit sa anumang pambansa o kultural na simbolo. Dahil walang opisyal na bandila ang mga heograpikong kontinente, nagdisenyo kami ng sarili para sa linaw at saya. Kung gusto mo sila, malayang gamitin.</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">Sino ang nasa likod ng WorldWideWaves?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">Ganap na pribadong inisyatiba ang WorldWideWaves. Walang korporasyon, asosasyon, o pamahalaan sa likod nito. Nais ng mga lumikha na mag-alok ng konstruktibong paraan para sa mga taong nagtatanong kung paano sila makatutulong sa pagpapabuti ng mundo at ng pamumuhay—isang pagtatangkang pag-isahin ang mga umiiral na progresibo at demokratikong pagsisikap sa ilalim ng payapa, apolitikal na bandila.</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">Komersyal ba ito?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">Hindi. Libre nang buo ang app. Bagama’t nangailangan ng oras at pera mula sa mga lumikha ang disenyo at pag-develop nito, wala silang direktang personal na pakinabang na pinansyal mula rito.</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">Maaari ba akong makatulong sa pagsisikap na ito?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">Oo, laging bukas ang mga boluntaryo. Open-source ang code ng app sa GitHub, at maaari mong kontakin ang mga lumikha sa worldwidewaves@proton.me (walang garantiyang masasagot). Pinakamainam na tulong ang pagpapalaganap: ibahagi ang mga larawan at bidyo mula sa mga event gamit ang mungkahing hashtag, kontakin ang mga lokal na influencer para palakasin ang mensahe, pag-usapan ito sa iyong komunidad, at higit sa lahat, sumali sa wave!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">USA</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">Mexico</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">Brazil</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">Argentina</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">United Kingdom</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">France</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">Alemanya</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">Espanya</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">Italya</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">Rusya</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">Turkiya</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">Ehipto</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">Timog Aprika</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">Kenya</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">Nigeria</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">Dem. Rep. of the Congo</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">United Arab Emirates</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">India</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">Indonesia</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">Tailandya</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">Pilipinas</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">Japan</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">Timog Korea</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">Tsina</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">Australia</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">Canada</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">Peru</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">Colombia</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">Chile</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">Iran</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">Pakistan</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">Hilagang Amerika</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">Timog Amerika</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">Europa</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">Aprika</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">Gitnang Silangan</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">Asya</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">Oceania</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">New York</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">Damdamin ang pintig ng Big Apple sa Independence Day, habang dumaraan ang masiglang wave sa Times Square, Central Park, at sa nagtatayugang skyline.</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">Los Angeles</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">Danasan ang kinang ng Hollywood, simoy ng Pasipiko, at kaakit-akit na alindog ng L.A. sa wave na nagliliwanag sa City of Angels sa Independence Day.</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">Mexico City</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">Igalang ang Mexican Independence Day sa puso ng CDMX, kung saan nagsasanib ang kolonyal na alindog at makabagong sigla, at umuugong ang tugtog ng mariachi sa makasaysayang mga plaza.</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">Sao Paulo</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">Hayaan ang ritmo ng samba at diwa ng Independence Day na maghatid sa iyo sa mataong Paulista Avenue at makukulay na kapitbahayan ng higanteng kosmopolitan na ito.</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">Buenos Aires</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">Ipagdiwang ang kalayaan ng Argentina sa saliw ng tango, malalapad na boulevard na Europeo ang dating, at ang masidhing diwa ng mga porteño sa kahabaan ng Río de la Plata.</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">London</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">Magdiwang sa multikultural na vibes ng Notting Hill Carnival habang sumasayaw ang wave sa makasaysayang lansangan, mga ikonikong double-decker bus, at ang walang-kupas na Thames.</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">Paris</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">Sa Bastille Day, sumali sa wave na dumadaloy mula Eiffel Tower hanggang Champs-Élysées, na nagdiriwang ng romansa at likhang-sining ng City of Light.</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">Berlin</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">Damdamin ang nagbubuklod na diwa sa German Unity Day habang tinatahak ng wave ang Brandenburg Gate, mga pader na puno ng graffiti, at modernong arkitektura ng masiglang kabiserang ito.</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">Madrid</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">Sa Spain’s National Day, hayaang sindihan ng wave ang masiglang mga tapas bar ng Madrid, malalapad na boulevard, at ang pamana ng sining ng Prado.</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">Rome</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">Sa Ferragosto, sumabay sa mga Romano at bisita sa mga piazza na buhay sa musika, mga bukal, at sigla ng pista na bumabalot sa Eternal City sa ilalim ng araw ng tag-init.</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">Moscow</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">Lasapin ang karangyaan ng Red Square at ng Kremlin sa Russia Day, habang ang wave ay sumasalamin sa mayamang imperyal na kasaysayan at modernong kosmopolitan na sigla ng lungsod.</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">Istanbul</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">Ipagdiwang ang Republic Day sa wave na dumudulas sa Bosphorus, makasaysayang mga mosque, at modernong mga liwasan, habang nagliliwanag ang Istanbul sa mga konsiyerto, watawat, at paputok.</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">Cairo</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">Ipagdiwang ang Eid sa Cairo habang ang mga kalye at pamilihan ay nabubuhay sa mga ilaw, matatamis na halimuyak, at masayang pamilyang nagtatapos ng Ramadan sa nagkakaisang wave.</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">Johannesburg</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">Sa Freedom Day, sumali sa wave sa ‘City of Gold,’ kung saan nagtatagpo ang modernong skyscraper at mayamang pamana ng katatagan at kultural na pagkakaiba-iba.</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">Nairobi</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">Ipagdiwang ang Madaraka Day sa gitna ng masisiglang pamilihan at abalang lansangan, kung saan nagsasalubong ang buhay-lungsod at ang lagusan patungo sa kamangha-manghang wildlife ng Kenya.</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">Lagos</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">Yakapin ang masiglang himig ng Afrobeats sa Independence Day ng Nigeria, habang rumaragasa ang wave sa pinaka-mataong lungsod ng Aprika at masisiglang pamilihan nito.</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">Kinshasa</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">Sa Independence Day ng DR Congo, sumali sa wave na kumakabog sa masiglang kabisera sa kahabaan ng Congo River, hitik sa musika at pagmamalaking kultural.</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">Dubai</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">Ipagdiwang ang UAE National Day na napapaligiran ng makabagong mga skyscraper, tanawing disyerto, at kosmopolitan na kariktan ng nangungunang modernong metropolis ng mundo.</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">Mumbai</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">Alalahanin ang Araw ng Kalayaan ng India sa diwa ng Bollywood, arkitekturang kolonyal, at mga baybaying hinahaplos ng monsoon sa kahabaan ng Arabian Sea.</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">Delhi</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">Damdamin ang diwang makabayan sa Independence Day habang dumaraan ang wave sa mga boulevard na kolonyal, mga kuta ng Mughal, at pintig ng kabisera ng India.</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">Bangalore</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">Ipagdiwang ang kalayaan sa Silicon Valley ng India, kung saan nagsasalubong ang mga templong daan-daang taon at makabagong mga tech park at masiglang kosmopolitan na madla.</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">Jakarta</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">Igunita ang Independence Day ng Indonesia sa lungsod ng mga kabalintunaan—mula sa kislap ng mga skyscraper hanggang sa abalang pamilihan at pamanang kultural.</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">Bangkok</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">Ipagdiwang ang Thailand’s National Father’s Day bilang parangal kay Haring Bhumibol sa City of Angels, kung saan ginintuang mga templo, floating market, at makulay na street food ang pumupukaw sa iyong pandama.</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">Manila</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">Ipagdiwang ang Araw ng Kalayaan ng Pilipinas sa lungsod kung saan ang mga jeepney’y tumatahak sa mga Simbahang kolonyal na Kastila, masisiglang pamilihan, at modernong skyscraper.</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">Tokyo</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">Sumama sa milyun-milyon sa kahabaan ng Sumida River habang sumasabog sa kulay ang langit, at ang summer festival vibe ng Tokyo ang nagtatanghal ng nakakasilaw na wave.</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">Seoul</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">Damdamin ang Gwangbokjeol habang dumaraan ang wave sa mga palasyong hari, mga sentro ng K-pop, at skyline na pinagdudugtong ang tradisyon at makabagong inobasyon.</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">Beijing</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">Sa Labour Day, sakyan ang wave sa mga parke at boulevard ng Beijing, kung saan milyon-milyon ang naglalakad, nagpi-picnic, at ninanamnam ang diwa ng bakasyon sa tagsibol.</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">Shanghai</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">Hayaan ang wave na umalpas sa Bund at Nanjing Road habang nag-iingay ang Shanghai sa mga pamilya, musika, at kosmopolitan na enerhiya ng mga pagdiriwang ng Labour Day.</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">Hong Kong</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">Damdamin ang bugso ng Golden Week ng Hong Kong, habang ang Victoria Harbour, mga pamilihan, at neon na lansangan ay umaapaw sa mga taong magkakasamang nagdiriwang ng Labour Day.</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">Sydney</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">Sakyan ang wave sa Mardi Gras Parade ng Sydney, kung saan sumasabog sa bahagharing kulay, nagniningning na mga float, at karnabal na diwa ang Oxford Street na nagkakaisa sa daan-daang libo.</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">Melbourne</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">Sa Melbourne Cup Day, sakyan ang wave sa kulturang kabisera habang napupuno ang lungsod ng mga parada, masisiglang tao sa elegante nilang kasuotan, at ng masayang diwa ng ‘the race that stops a nation’.</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">Toronto</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">Sa Canada Day, tangayin ng dagat ng pula at puti habang dumaraan ang wave sa CN Tower, multikultural na mga kapitbahayan, at baybayin ng Lake Ontario.</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">Vancouver</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">Ipagdiwang ang Canada Day sa baybayin ng Pasipiko, hinahabi ang tanawing dagat-hanggang-langit, luntiang Stanley Park, at kosmopolitan na alindog ng downtown.</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">Chicago</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">Sa Independence Day, namnamin ang deep-dish at ang mga kahanga-hangang arkitektura sa tabi ng Lake Michigan habang gumugulong ang wave sa Windy City.</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">San Francisco</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">Damdamin ang diwa ng kalayaan sa ilalim ng ikonikong lawit ng Golden Gate Bridge, habang ang Independence Day wave na ito’y naglalakbay sa mga burol, cable car, at sari-saring kapitbahayan.</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">Lima</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">Sa Araw ng Kalayaan ng Peru, tumawid sa mga kolonyal na plaza, pre-Incan na pook arkeolohikal, at sa masasarap na amoy ng bantog na lutuing Peruvian.</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">Bogota</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">Ipagdiwang ang Araw ng Kalayaan ng Colombia sa gitna ng street art, tanawing bundok, at kumpas ng kulturang salsa sa kabiserang Andean.</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">Santiago</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">Damdamin ang diwang makabayan sa Araw ng Kalayaan ng Chile habang paikot na dumaraan ang wave sa likod-tanaw ng Andes, mga kolonyal na harapan, at modernong salaming tore.</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">Tehran</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">Sumali sa Sizdah Bedar ng Tehran, ang araw na pumupuno ang mga pamilya sa mga parke at hardin para sa piknik, tawanan, at pagbabagong-sigla, habang ang wave ay dumadaluyong sa masisiglang pagtitipon sa labas.</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">Karachi</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">Ipagdiwang ang Independence Day ng Pakistan sa kahabaan ng Arabian Sea—sa masisiglang bazaar, mayamang kasaysayan, at dinamiko’t masiglang enerhiya ng pinakamalaking lungsod ng bansa.</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">Itaas ang mga kamay!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">Pumalakpak sa kaliwa at kanan!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">Windmill paatras!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">Baba, taas!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">Ipakita ang wave!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">I-krus ang mga braso!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">Maghanda para mag-wave!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">Mag-wave na!</string>
+</resources>
