@@ -4,16 +4,16 @@
     <item>
         <bitmap
             android:src="@drawable/splash_background"
-            android:gravity="center"
+            android:gravity="fill"
             android:tileMode="disabled" />
     </item>
     
     <!-- Logo layer positioned at the bottom center -->
-    <item android:gravity="bottom|center_horizontal">
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:bottom="24dp">
         <bitmap
-            android:src="@drawable/splash_icon"
+            android:src="@drawable/splash_logo"
             android:gravity="bottom|center_horizontal" />
-        <!-- Adding bottom padding to match the current design -->
-        <inset android:bottomMargin="24dp" />
     </item>
 </layer-list>

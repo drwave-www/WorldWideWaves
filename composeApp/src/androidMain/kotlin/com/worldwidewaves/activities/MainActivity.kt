@@ -22,8 +22,12 @@ package com.worldwidewaves.activities
  */
 
 import android.os.Bundle
+import android.os.Build
+import android.view.View
+import android.view.WindowInsets
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
@@ -46,6 +50,8 @@ import com.worldwidewaves.shared.generated.resources.settings_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.theme.AppTheme
+import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
+import com.worldwidewaves.shared.events.WWWEvents
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -65,6 +71,11 @@ open class MainActivity : AppCompatActivity() {
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val settingsScreen: SettingsScreen by inject()
+    private val events: WWWEvents by inject()
+
+    /** Flag updated when `events.loadEvents()` finishes. */
+    @Volatile
+    private var isDataLoaded: Boolean = false
 
     protected val tabManager = TabManager(
         listOf(
@@ -79,9 +90,37 @@ open class MainActivity : AppCompatActivity() {
     // ----------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        /* ---------------------------------------------------------------------
+         * Official Android 12+ splash-screen installation
+         * The splash remains until BOTH: min duration elapsed AND data loaded.
+         * ------------------------------------------------------------------- */
+
+        val splashScreen = installSplashScreen()
+
+        // Record start time to enforce minimum duration
+        val startTime = System.currentTimeMillis()
+
+        splashScreen.setKeepOnScreenCondition {
+            val elapsed = System.currentTimeMillis() - startTime
+            !isDataLoaded || elapsed < CONST_SPLASH_MIN_DURATION.inWholeMilliseconds
+        }
+
         super.onCreate(savedInstanceState)
 
         setStatusBarColor(window)
+
+        /* Hide system UI like old SplashActivity */
+        window.decorView.post {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.hide(WindowInsets.Type.statusBars())
+                window.insetsController?.hide(WindowInsets.Type.navigationBars())
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility =
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+            }
+        }
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
 
         setContent {
             AppTheme {
@@ -90,6 +129,9 @@ open class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        /* Begin loading events – when done, flag so splash can disappear */
+        events.loadEvents(onTermination = { isDataLoaded = true })
     }
 
     // ----------------------------
