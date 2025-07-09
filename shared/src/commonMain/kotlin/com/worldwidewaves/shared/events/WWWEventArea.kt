@@ -141,7 +141,7 @@ data class WWWEventArea(
      * Falls back to the center of the area if no valid position is found.
      */
     suspend fun generateRandomPositionInArea(): Position {
-        var bbox = event.area.bbox()
+        val bbox = bbox()
         val maxAttempts = 50
         var attempts = 0
         var shrinkFactor = 1.0
