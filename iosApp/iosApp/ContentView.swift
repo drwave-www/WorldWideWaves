@@ -31,7 +31,8 @@ struct ContentView: View {
     }
     
     var body: some View {
-        let events : Array<WWWEvent> = self.wwwEvents.events()
+        // `list()` returns `[any IWWWEvent]`, not a concrete `WWWEvent` array.
+        let events: [any IWWWEvent] = self.wwwEvents.list()
 
         List(events, id: \.id) { event in
             Text(event.location)

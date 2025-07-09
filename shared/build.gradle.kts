@@ -26,6 +26,21 @@ kotlin {
             isStatic = true
         }
     }
+
+    /*
+     * Suppress the Kotlin  expect/actual Beta warnings (KT-61573) that are
+     * currently produced for `expect` / `actual` classes, objects, etc.
+     * The flag is applied to every compilation task for every target.
+     */
+    targets.configureEach {
+        compilations.configureEach {
+            // NB: `compilerOptions.configure {}` works for Kotlin 1.9.x-2.0
+            compilerOptions.configure {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
+        }
+    }
+
     sourceSets {
         named("commonMain") {
             resources.srcDirs("composeResources")

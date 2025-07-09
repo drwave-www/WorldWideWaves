@@ -23,8 +23,12 @@ package com.worldwidewaves.shared.utils
 
 import io.github.aakira.napier.Napier
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import platform.CoreGraphics.CGRectMake
-import platform.Foundation.NSBundle
+import platform.CoreGraphics.CGSizeMake
+import platform.UIKit.UIGraphicsBeginImageContext
+import platform.UIKit.UIGraphicsEndImageContext
+import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
 import platform.UIKit.UIImage
 
 @OptIn(ExperimentalForeignApi::class)
@@ -77,29 +81,31 @@ class IOSImageResolver : ImageResolver<UIImage> {
             // Load the full sprite sheet image
             val fullImage = resolve(path) ?: return null
             
-            // Get the CGImage from the UIImage
-            val cgImage = fullImage.CGImage ?: run {
-                Napier.e("Failed to get CGImage from UIImage for $path")
-                return null
-            }
-            
             // Calculate the frame rectangle
             val x = frameIndex * frameWidth.toDouble()
             val y = 0.0
             val width = frameWidth.toDouble()
             val height = frameHeight.toDouble()
             
-            // Create a CGRect for the frame
-            val frameRect = CGRectMake(x, y, width, height)
+            // Begin a new image context with the size of our desired frame
+            UIGraphicsBeginImageContext(CGSizeMake(width, height))
             
-            // Extract the frame as a new CGImage
-            val frameCGImage = cgImage.cropping(to = frameRect) ?: run {
-                Napier.e("Failed to create frame CGImage for $path at index $frameIndex")
-                return null
+            // Extract the CValue<CGSize> into concrete width / height values
+            val (imgWidth, imgHeight) = fullImage.size.useContents { width to height }
+            
+            // Draw the full image at a negative offset so only the desired portion appears in the context
+            fullImage.drawInRect(CGRectMake(-x, -y, imgWidth, imgHeight))
+            
+            // Get the cropped image from the context
+            val croppedImage = UIGraphicsGetImageFromCurrentImageContext()
+            
+            // End the image context
+            UIGraphicsEndImageContext()
+            
+            return croppedImage ?: run {
+                Napier.e("Failed to create cropped image for $path at index $frameIndex")
+                null
             }
-            
-            // Create a new UIImage from the frame CGImage
-            return UIImage.imageWithCGImage(frameCGImage)
         } catch (e: Exception) {
             Napier.e("Error extracting frame from $path at index $frameIndex: ${e.message}")
             return null
