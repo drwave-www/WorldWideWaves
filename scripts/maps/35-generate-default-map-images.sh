@@ -21,7 +21,25 @@
 #
 #
 #
-### NOTICE: In non-X environments, run through xvfb-run
+
+if [ -z "$DISPLAY" ] && [ -z "$XVFB_RUNNING" ]; then
+    echo "No DISPLAY environment variable found. Checking for xvfb-run..."
+
+    if ! command -v xvfb-run &> /dev/null; then
+        echo "Error: xvfb-run is not available. Please install it or run in an X environment."
+        echo "On Ubuntu/Debian: sudo apt-get install xvfb"
+        echo "On CentOS/RHEL: sudo yum install xorg-x11-server-Xvfb"
+        exit 1
+    fi
+
+    echo "Running script through xvfb-run..."
+    export XVFB_RUNNING=1
+    exec xvfb-run -a --server-args="-screen 0 1024x768x24" "$0" "$@"
+
+    # This line should never be reached
+    echo "Error: Failed to execute xvfb-run"
+    exit 1
+fi
 
 # ---------- Vars and support functions ---------------------------------------
 cd "$(dirname "$0")" # always work from executable folder
