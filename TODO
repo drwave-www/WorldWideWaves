@@ -1,5 +1,4 @@
 
-
 - generate maps
     - miss istanbul/karachi/kinshasa
     - rome map issue
@@ -10,14 +9,6 @@
    - paris, wave, puis go back to paris : 'you are NOT in the area'
 - tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
-
----------------------------------------------
-
- - adapt wave behavior on countries and the world (linear split, ...)
-     --> add end date additionally to end hour for countries and the world
-     --> add 'wave hours', so countries and the world can have several waves over days during the process
-
-- PDF + Message + Planif presentation mi-juin
 
 ---------------------------------------------
 
@@ -41,6 +32,10 @@ Avril second part:
     - Fill-in FAQ Contents
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - licences / tools mentions
+
+---------------------------------------------
+
+- PDF + Message + Planif presentation
 
 ---------------------------------------------
 First push prive Play Store
@@ -75,6 +70,10 @@ START IOS
 - config parameters de l'app (?)
 
 - IMOORTANT: World Map system
+
+ - adapt wave behavior on countries and the world (linear split, ...)
+     --> add end date additionally to end hour for countries and the world
+     --> add 'wave hours', so countries and the world can have several waves over days during the process
 
 Debug:
 - Implement a way to deeply simulate events & geolocation
