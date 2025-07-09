@@ -21,8 +21,10 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.annotation.UiThread
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
+import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -31,7 +33,7 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(private val mapBounds: BoundingBox) {
+class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
@@ -39,6 +41,8 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
     )
 
     private var visibleRegionPadding = VisibleRegionPadding()
+    private var constraintBounds: BoundingBox? = null
+    private var constraintsApplied = false
 
     fun setVisibleRegionPadding(padding: VisibleRegionPadding) {
         visibleRegionPadding = padding
@@ -46,6 +50,133 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
 
     fun calculateConstraintBounds(): BoundingBox {
         return calculatePaddedBounds(visibleRegionPadding)
+    }
+
+    /**
+     * Apply constraints to a MapLibre map
+     */
+    @UiThread
+    fun applyConstraints() {
+        // Calculate visible region padding from the map
+        updateVisibleRegionPadding()
+
+        // Apply the constraints with the current padding
+        applyConstraintsWithPadding()
+
+        // Set up camera movement listener to update constraints on zoom changes
+        mapLibreAdapter.addOnCameraIdleListener {
+            val newPadding = calculateVisibleRegionPadding()
+
+            if (hasSignificantPaddingChange(
+                VisibleRegionPadding(
+                        newPadding.latPadding,
+                        newPadding.lngPadding
+                    )
+                )) {
+                    setVisibleRegionPadding(
+                        VisibleRegionPadding(
+                        newPadding.latPadding,
+                        newPadding.lngPadding
+                    )
+                )
+                applyConstraintsWithPadding()
+            }
+        }
+
+        constraintsApplied = true
+    }
+
+    /**
+     * Apply constraints based on the current padding
+     */
+    private fun applyConstraintsWithPadding() {
+        try {
+            // Get platform-independent bounds from the constraint manager
+            val paddedBounds = calculateConstraintBounds()
+            constraintBounds = paddedBounds
+
+            // Apply constraints to the map
+            mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
+
+            // Also set min zoom
+            val minZoom = mapLibreAdapter.getMinZoomLevel()
+            mapLibreAdapter.setMinZoomPreference(minZoom)
+
+            // Check if our constrained area is too small for the current view
+            val currentPosition = mapLibreAdapter.getCameraPosition()?.let {
+                Position(
+                    it.latitude,
+                    it.longitude
+                )
+            }
+
+            if (!isValidBounds(paddedBounds, currentPosition)) {
+                // If bounds are too small, calculate safer bounds centered around current position
+                currentPosition?.let {
+                    val safeBounds = calculateSafeBounds(it)
+                    fitMapToBounds(safeBounds)
+                }
+            }
+        } catch (e: Exception) {
+            Napier.e("Error applying constraints: ${e.message}")
+        }
+    }
+
+    /**
+     * Constrain the camera to the valid bounds if needed
+     */
+    fun constrainCamera() {
+        val target = mapLibreAdapter.getCameraPosition() ?: return
+        if (constraintBounds != null && !isCameraWithinConstraints(target)) {
+            val mapPosition = Position(target.latitude, target.longitude)
+            val constraintBoundsMapped = constraintBounds?.let { bounds ->
+                BoundingBox(
+                    Position(bounds.southwest.latitude, bounds.southwest.longitude),
+                    Position(bounds.northeast.latitude, bounds.northeast.longitude)
+                )
+            }
+
+            constraintBoundsMapped?.let { bounds ->
+                val nearestValid = getNearestValidPoint(mapPosition, bounds)
+                mapLibreAdapter.animateCamera(Position(nearestValid.latitude, nearestValid.longitude))
+            }
+        }
+    }
+
+    /**
+     * Checks if camera is within the constraint bounds
+     */
+    private fun isCameraWithinConstraints(cameraPosition: Position): Boolean =
+        constraintBounds?.contains(cameraPosition) ?: false
+
+    /**
+     * Moves the camera to fit specified bounds
+     */
+    private fun fitMapToBounds(bounds: BoundingBox) {
+        mapLibreAdapter.moveCamera(bounds)
+    }
+
+    /**
+     * Updates visible region padding from the map
+     */
+    private fun updateVisibleRegionPadding() {
+        val padding = calculateVisibleRegionPadding()
+        setVisibleRegionPadding(
+            VisibleRegionPadding(padding.latPadding, padding.lngPadding)
+        )
+    }
+
+    private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
+        // Get the visible region from the current map view
+        val visibleRegion = mapLibreAdapter.getVisibleRegion()
+
+        // Calculate padding as half the visible region dimensions
+        val latPadding = (visibleRegion.northLatitude -
+                visibleRegion.southLatitude) / 2.0
+        val lngPadding = (visibleRegion.eastLongitude -
+                visibleRegion.westLongitude) / 2.0
+
+        return VisibleRegionPadding(latPadding, lngPadding)
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {

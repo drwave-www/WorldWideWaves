@@ -62,6 +62,7 @@ abstract class AbstractEventMap(
     abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Class variables
+    private var constraintManager: MapConstraintManager? = null // Map constraint manager
     private var screenHeight: Double = 800.0
     private var screenWidth: Double = 600.0
     private var userHasBeenLocated = false
@@ -85,7 +86,9 @@ abstract class AbstractEventMap(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        mapLibreAdapter.setBoundsConstraints(event.area.bbox()) // Apply constraints first
+        // Apply bounding constraints
+        constraintManager = MapConstraintManager(event.area.bbox(), mapLibreAdapter)
+        constraintManager?.applyConstraints()
 
         val (sw, ne) = event.area.bbox()
         val eventMapWidth = ne.lng - sw.lng
@@ -207,6 +210,9 @@ abstract class AbstractEventMap(
 
         // Set the max zoom level from the event configuration
         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+
+        // Apply bounds constraints if required
+        mapLibreAdapter.addOnCameraIdleListener { constraintManager?.applyConstraints() }
 
         // Configure initial camera position
         scope.launch {

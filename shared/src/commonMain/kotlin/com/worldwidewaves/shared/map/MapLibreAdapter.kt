@@ -32,12 +32,21 @@ interface MapLibreAdapter {
     val currentPosition: StateFlow<Position?>
     val currentZoom: StateFlow<Double>
 
-    fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback? = null)
+    fun getCameraPosition() : Position?
+    fun getVisibleRegion() : BoundingBox
+    fun moveCamera(bounds: BoundingBox)
+    fun animateCamera(position: Position, zoom: Double? = null, callback: MapCameraCallback? = null)
     fun animateCameraToBounds(bounds: BoundingBox, padding: Int = 0, callback: MapCameraCallback? = null)
-    fun setBoundsConstraints(bounds: BoundingBox)
+    fun setBoundsForCameraTarget(constraintBounds: BoundingBox)
+
+    fun getMinZoomLevel() : Double
     fun setMinZoomPreference(minZoom: Double)
     fun setMaxZoomPreference(maxZoom: Double)
+
     fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)
+
     fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?)
+    fun addOnCameraIdleListener(function: () -> Unit)
+
 }
 
