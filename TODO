@@ -5,6 +5,31 @@
     - zoom tehran, tokyo, ... check all cities
     - delete warming zone in maps
 
+check bboxes on :
+- manilla
+- san francisco
+- shangai
+- karashi
+- lagos
+
+- apply bbox visualisation on static map
+
+rgenerate:
+- tehran
+- karashi
+- lagos
+- rome
+
+strange geojson on:
+- tokyo
+
+- missing parts for correct map ratio with less zoom possible ?
+
+issues (seen on klinshasa) :
+    - pb de wave dessin sur kinshasa ?
+    - pb de compteur aussi ??
+    - zoom trop eleve vs geojson ?
+
 - autozoom in wave screen is not enough zoomed (test: sydney)
 
 - recalcul de 'in the area' apres init du gps :

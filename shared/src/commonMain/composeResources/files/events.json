@@ -217,7 +217,7 @@
       }
     },
     "area": { "osmAdminids": [119515] },
-    "map": { "minZoom": 9, "maxZoom": 17, "language": "it", "zone": "europe/italy" }
+    "map": { "minZoom": 8, "maxZoom": 17, "language": "it", "zone": "europe/italy" }
   },
   {
     "id": "moscow_russia",
@@ -349,7 +349,7 @@
       }
     },
     "area": { "osmAdminids": [3718182], "bbox": "3.196678,6.371119,3.598022,6.642783" },
-    "map": { "minZoom": 9, "maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
+    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
   },
   {
     "id": "kinshasa_democratic_republic_of_the_congo",
@@ -855,7 +855,7 @@
       }
     },
     "area": { "osmAdminids": [6663864] },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "fa", "zone": "asia/iran" }
+    "map": { "minZoom": 8, "maxZoom": 18, "language": "fa", "zone": "asia/iran" }
   },
   {
     "id": "karachi_pakistan",
@@ -877,6 +877,6 @@
       }
     },
     "area": { "osmAdminids": [6080948], "bbox": "66.410294,24.638185,67.582397,25.237770" },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "ur", "zone": "asia/pakistan" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "ur", "zone": "asia/pakistan" }
   }
 ]

@@ -85,7 +85,6 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
@@ -490,8 +489,6 @@ fun WaveChoreographies(
                 event.warming.getCurrentChoregraphySequence()
             }
 
-            Log.v("sequence", "got warming sequence: ${warmingSequence?.text}")
-
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
                 TimedSequenceDisplay(
@@ -541,7 +538,6 @@ fun TimedSequenceDisplay(
     ChoreographyDisplay(sequence, clock, modifier)
 
     LaunchedEffect(sequence) {
-        Log.v("sequence", "delay sequence: ${sequence.remainingDuration?.inWholeSeconds ?: sequence.duration.inWholeSeconds} seconds")
         delay(sequence.remainingDuration ?: sequence.duration)
         onSequenceComplete()
     }

@@ -193,6 +193,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
+                    Log.i(::animateCameraToBounds.name, "Current Map zoom level: ${_currentZoom.value}")
                     callback?.onFinish()
                 }
                 override fun onCancel() {
