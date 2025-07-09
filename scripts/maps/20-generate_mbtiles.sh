@@ -60,7 +60,6 @@ if [ $# -gt 0 ]; then
 
     if exists "$event"; then
       VALID_EVENTS+=("$event")
-      rm -f "./data/$event.mbtiles"
     else
       echo "Unexistent event: $event"
     fi
@@ -72,12 +71,20 @@ if [ $# -gt 0 ]; then
   fi
 
   EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
+    exit 1
+  fi
 fi
+
+# -----------------------------------------------------------------------------
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
                          # EVENTS is defined in lib.inc.sh
 
   echo "==> EVENT $event"
+  rm -f "./data/$event.mbtiles" # Clean previous MBTILES
 
   TYPE=$(conf $event type)
 

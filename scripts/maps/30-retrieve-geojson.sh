@@ -59,7 +59,14 @@ if [ $# -gt 0 ]; then
   fi
 
   EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
+    exit 1
+  fi
 fi
+
+# -----------------------------------------------------------------------------
 
 # Function to merge multiple GeoJSON files into one
 # Usage: merge_geojsons <output_file> <input_file1> [<input_file2> ...]

@@ -23,7 +23,7 @@
 DEST_DIR=../../maps/android/
 GRADLE_SETTINGS=../../settings.gradle.kts
 
-cd "$(dirname "$0")" # always work from executable folder
+cd "$(dirname "$0")" || exit # always work from executable folder
 
 #set -x
 
@@ -60,7 +60,14 @@ if [ $# -gt 0 ]; then
   fi
 
   EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
+    exit 1
+  fi
 fi
+
+# -----------------------------------------------------------------------------
 
 for event in $EVENTS; do # Retrieve Geojson files from OSM
   echo "==> EVENT $event"
@@ -96,7 +103,7 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
   [ ! -f "$DEST_DIR_MODULE/.gitignore" ] && echo "/build" > "$DEST_DIR_MODULE/.gitignore"
 
   INCLUDE_GRADLE='include(":maps:android:'$event'")'
-  grep "$INCLUDE_GRADLE" "$GRADLE_SETTINGS" 2>&1 >/dev/null
+  grep "$INCLUDE_GRADLE" "$GRADLE_SETTINGS" >/dev/null 2>&1
   [ "$?" != 0 ] && echo "$INCLUDE_GRADLE" >> "$GRADLE_SETTINGS"
 
 done

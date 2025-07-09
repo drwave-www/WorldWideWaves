@@ -44,6 +44,7 @@ fi
 # ---------- Vars and support functions ---------------------------------------
 cd "$(dirname "$0")" || exit # always work from executable folder
 . ./libs/lib.inc.sh
+# shellcheck disable=SC2164
 cd "$(dirname "$0")" # always work from executable folder
 
 # Create necessary directories
@@ -119,7 +120,14 @@ if [ $# -gt 0 ]; then
   fi
 
   EVENTS="${VALID_EVENTS[*]}"
+else
+  if [ -z "$EVENTS" ]; then
+    echo "No events available"
+    exit 1
+  fi
 fi
+
+# -----------------------------------------------------------------------------
 
 echo -e "${BLUE}Generating default map images with dimensions: ${IMAGE_WIDTH}x${IMAGE_HEIGHT}${NC}"
 echo
