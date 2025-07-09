@@ -19,7 +19,7 @@
       }
     },
     "area": { "osmAdminids": [175905] },
-    "map": { "minZoom": 8, "maxZoom": 18, "language": "en", "zone": "north-america/us/new-york" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "en", "zone": "north-america/us/new-york" }
   },
   {
     "id": "los_angeles_usa",
@@ -63,7 +63,7 @@
       }
     },
     "area": { "osmAdminids": [17483459] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "es", "zone": "north-america/mexico" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "es", "zone": "north-america/mexico" }
   },
   {
     "id": "sao_paulo_brazil",
@@ -107,7 +107,7 @@
       }
     },
     "area": { "osmAdminids": [1224652] },
-    "map": { "minZoom": 9, "maxZoom": 17, "language": "es", "zone": "south-america/argentina" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "es", "zone": "south-america/argentina" }
   },
   {
     "id": "london_england",
@@ -129,7 +129,7 @@
       }
     },
     "area": { "osmAdminids": [17624136, 17624135] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "europe/great-britain" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "europe/great-britain" }
   },
   {
     "id": "paris_france",
@@ -151,7 +151,7 @@
       }
     },
     "area": { "osmAdminids": [71525] },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "fr", "zone": "europe/france/ile-de-france" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "fr", "zone": "europe/france/ile-de-france" }
   },
   {
     "id": "berlin_germany",
@@ -173,7 +173,7 @@
       }
     },
     "area": { "osmAdminids": [62422] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "de", "zone": "europe/germany/berlin" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "de", "zone": "europe/germany/berlin" }
   },
   {
     "id": "madrid_spain",
@@ -195,7 +195,7 @@
       }
     },
     "area": { "osmAdminids": [5326784] },
-    "map": { "minZoom": 8, "maxZoom": 18, "language": "es", "zone": "europe/spain" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "es", "zone": "europe/spain" }
   },
   {
     "id": "rome_italy",
@@ -217,7 +217,7 @@
       }
     },
     "area": { "osmAdminids": [119515] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "it", "zone": "europe/italy" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "it", "zone": "europe/italy" }
   },
   {
     "id": "moscow_russia",
@@ -283,7 +283,7 @@
       }
     },
     "area": { "osmAdminids": [4103336] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "ar", "zone": "africa/egypt" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "ar", "zone": "africa/egypt" }
   },
   {
     "id": "johannesburg_south_africa",
@@ -327,7 +327,7 @@
       }
     },
     "area": { "osmAdminids": [9721587] },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "sw", "zone": "africa/kenya" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "sw", "zone": "africa/kenya" }
   },
   {
     "id": "lagos_nigeria",
@@ -349,7 +349,7 @@
       }
     },
     "area": { "osmAdminids": [3718182], "bbox": "3.196678,6.371119,3.598022,6.642783" },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "africa/nigeria" }
   },
   {
     "id": "kinshasa_democratic_republic_of_the_congo",
@@ -371,7 +371,7 @@
       }
     },
     "area": { "osmAdminids": [5646651], "bbox": "15.222416,-4.377576,15.368929,-4.294815" },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "fr", "zone": "africa/congo-democratic-republic" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "fr", "zone": "africa/congo-democratic-republic" }
   },
   {
     "id": "dubai_united_arab_emirates",
@@ -415,7 +415,7 @@
       }
     },
     "area": { "osmAdminids": [7964375] },
-    "map": { "minZoom": 9, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
   },
   {
     "id": "delhi_india",
@@ -437,7 +437,7 @@
       }
     },
     "area": { "osmAdminids": [1942586] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
   },
   {
     "id": "bangalore_india",
@@ -459,7 +459,7 @@
       }
     },
     "area": { "osmAdminids": [2020589] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
   },
   {
     "id": "jakarta_indonesia",
@@ -481,7 +481,7 @@
       }
     },
     "area": { "osmAdminids": [5802438, 7626002, 7626001, 5802441, 7625977 ] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "id", "zone": "asia/indonesia" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "id", "zone": "asia/indonesia" }
   },
   {
     "id": "bangkok_thailand",
@@ -525,7 +525,7 @@
       }
     },
     "area": { "osmAdminids": [103703], "bbox": "120.940178,14.550825,121.027467,14.641119" },
-    "map": { "minZoom": 10, "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
   },
   {
     "id": "tokyo_japan",
@@ -569,7 +569,7 @@
       }
     },
     "area": { "osmAdminids": [2297418] },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "ko", "zone": "asia/south-korea" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "ko", "zone": "asia/south-korea" }
   },
   {
     "id": "beijing_china",
@@ -635,7 +635,7 @@
       }
     },
     "area": { "osmAdminids": [10264792] },
-    "map": { "minZoom": 10, "maxZoom": 18, "language": "zh", "zone": "asia/china/hong-kong" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "zh", "zone": "asia/china/hong-kong" }
   },
   {
     "id": "sydney_australia",
@@ -701,7 +701,7 @@
       }
     },
     "area": { "osmAdminids": [324211] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "north-america/canada" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "north-america/canada" }
   },
   {
     "id": "vancouver_canada",
@@ -723,7 +723,7 @@
       }
     },
     "area": { "osmAdminids": [1852574] },
-    "map": { "minZoom": 9, "maxZoom": 17, "language": "en", "zone": "north-america/canada" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "north-america/canada" }
   },
   {
     "id": "chicago_usa",
@@ -745,7 +745,7 @@
       }
     },
     "area": { "osmAdminids": [122604] },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "en", "zone": "north-america/us/illinois" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "north-america/us/illinois" }
   },
   {
     "id": "san_francisco_usa",
@@ -767,7 +767,7 @@
       }
     },
     "area": { "osmAdminids": [111968], "bbox": "-122.539501,37.70559,-122.343807,37.833685" },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "en", "zone": "north-america/us/california" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "en", "zone": "north-america/us/california" }
   },
   {
     "id": "lima_peru",
@@ -789,7 +789,7 @@
       }
     },
     "area": { "osmAdminids": [1944756] },
-    "map": { "minZoom": 11, "maxZoom": 18, "language": "es", "zone": "south-america/peru" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "es", "zone": "south-america/peru" }
   },
   {
     "id": "bogota_colombia",
@@ -811,7 +811,7 @@
       }
     },
     "area": { "osmAdminids": [7426387] },
-    "map": { "minZoom": 8, "maxZoom": 18, "language": "es", "zone": "south-america/colombia" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "es", "zone": "south-america/colombia" }
   },
   {
     "id": "santiago_chile",
@@ -832,8 +832,8 @@
         "approxDuration": 98
       }
     },
-    "area": { "osmAdminids": [164609], "bbox": "-70.954514,-33.589647,-70.368462,-33.312647" },
-    "map": { "minZoom": 9, "maxZoom": 18, "language": "es", "zone": "south-america/chile" }
+    "area": { "osmAdminids": [1674530], "bbox": "-70.821661,-33.62747,-70.476965,-33.347121" },
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "es", "zone": "south-america/chile" }
   },
   {
     "id": "tehran_iran",
@@ -855,7 +855,7 @@
       }
     },
     "area": { "osmAdminids": [6663864] },
-    "map": { "minZoom": 8, "maxZoom": 18, "language": "fa", "zone": "asia/iran" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "fa", "zone": "asia/iran" }
   },
   {
     "id": "karachi_pakistan",

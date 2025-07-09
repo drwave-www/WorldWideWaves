@@ -105,7 +105,7 @@ get_event_bbox() {
   
   # If a direct bbox is specified, use that
   if [ "$direct_bbox" != "null" ] && [ -n "$direct_bbox" ]; then
-    echo "$direct_bbox"
+    adjust_bbox_to_16_9 "$direct_bbox"
     return
   fi
   
@@ -119,7 +119,77 @@ get_event_bbox() {
   fi
   
   # Use the admin IDs to get the bbox
-  ./libs/get_bbox.dep.sh "$osmAdminids" bbox
+  local calc_bbox
+  calc_bbox=$(./libs/get_bbox.dep.sh "$osmAdminids" bbox)
+  adjust_bbox_to_16_9 "$calc_bbox"
+}
+
+# -----------------------------------------------------------------------------
+# Ensure returned bbox keeps a 16:9 aspect-ratio.
+#   • If current ratio < 16/9 → expand width (keep height)
+#   • Else                  → expand height (keep width)
+# In every expansion the original box is centred in the new one.
+# -----------------------------------------------------------------------------
+# Usage: adjust_bbox_to_16_9 "minLng,minLat,maxLng,maxLat"
+# Returns: adjusted bbox string with 6-decimal precision
+adjust_bbox_to_16_9() {
+  local bbox="$1"
+  if [ -z "$bbox" ]; then
+    echo ""
+    return
+  fi
+
+  IFS=',' read -r minLng minLat maxLng maxLat <<< "$bbox"
+
+  # Validate numeric
+  for v in "$minLng" "$minLat" "$maxLng" "$maxLat"; do
+    if ! [[ $v =~ ^-?[0-9.]+$ ]]; then
+      echo "$bbox"
+      return
+    fi
+  done
+
+  # Constants
+  local targetRatio="1.777777777" # 16/9
+
+  # Width / Height
+  local width height ratio
+  width=$(echo "$maxLng - $minLng" | bc -l)
+  height=$(echo "$maxLat - $minLat" | bc -l)
+
+  # Guard against zero height/width
+  if [ "$(echo "$height == 0" | bc)" -eq 1 ] || \
+     [ "$(echo "$width == 0"  | bc)" -eq 1 ]; then
+    echo "$bbox"
+    return
+  fi
+
+  ratio=$(echo "$width / $height" | bc -l)
+
+  # If already ~16/9 (within 1%), keep original
+  if [ "$(echo "($ratio / $targetRatio) > 0.99 && ($ratio / $targetRatio) < 1.01" | bc -l)" -eq 1 ]; then
+    printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
+    return
+  fi
+
+  # Expand logic
+  if [ "$(echo "$ratio < $targetRatio" | bc -l)" -eq 1 ]; then
+    # Too narrow → enlarge width
+    local newWidth delta
+    newWidth=$(echo "$height * $targetRatio" | bc -l)
+    delta=$(echo "$newWidth - $width" | bc -l)
+    minLng=$(echo "$minLng - $delta/2" | bc -l)
+    maxLng=$(echo "$maxLng + $delta/2" | bc -l)
+  else
+    # Too wide → enlarge height
+    local newHeight deltaH
+    newHeight=$(echo "$width / $targetRatio" | bc -l)
+    deltaH=$(echo "$newHeight - $height" | bc -l)
+    minLat=$(echo "$minLat - $deltaH/2" | bc -l)
+    maxLat=$(echo "$maxLat + $deltaH/2" | bc -l)
+  fi
+
+  printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
 }
 
 # Function to get the center for an event
@@ -169,8 +239,6 @@ tpl() {
   # Replace placeholders with event properties and bbox/center data
   # First, handle array values specifically
   # Replace osmAdminids array elements with their values using proper array syntax
-  local osmids_count
-  osmids_count=$(./bin/jq -r --arg event "$event" '.[] | select(.id == $event) | .area.osmAdminids | if type=="array" then length else 0 end' "$EVENTS_FILE")
 
   # Then handle all other properties using the standard approach
   ./bin/jq -r 'paths | map(tostring) | join(".")' "$EVENTS_FILE" | grep -v '\[[0-9]\]' | grep -v '[0-9]$' | sed -e 's/^[0-9\.]*\.*//' | sort | uniq | while read -r prop; do
