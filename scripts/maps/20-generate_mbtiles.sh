@@ -24,6 +24,15 @@ cd "$(dirname "$0")" || exit # always work from executable folder
 
 #set -x
 
+# Single line to check and lock
+(
+    flock -n 9 || { echo "Script is already running"; exit 1; }
+
+    # Your script continues here...
+    echo "Script is running with PID $$"
+
+) 9>"/tmp/$(basename "$0").lock"
+
 # ---------- Download dependencies --------------------------------------------
 
 # Download OpenMapTiles to generate events maps -------------------------------
