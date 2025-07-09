@@ -57,7 +57,8 @@ data class WWWEventWaveLinear(
     // ---------------------------
 
     override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
-        require(event.isRunning()) { "Event must be running to request the wave polygons" }
+        if(!event.isRunning()) return null
+
         require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()

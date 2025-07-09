@@ -20,6 +20,8 @@ issues (seen on klinshasa) :
 
 - autozoom in wave screen is not enough zoomed (test: sydney)
 
+- on full map, do not show the default static map in small, but show it in big, zoomed for height
+
 - recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
 - tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming

@@ -109,7 +109,7 @@ abstract class AbstractEventMap(
             Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
         }
 
-        val bounds = BoundingBox(
+        val bounds = BoundingBox.create(
             Position(newSwLat, newSwLng),
             Position(newNeLat, newNeLng)
         )
@@ -175,7 +175,7 @@ abstract class AbstractEventMap(
         val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
-        val newBounds = BoundingBox(
+        val newBounds = BoundingBox.create(
             Position(
                 maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
                 maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng)
@@ -212,7 +212,7 @@ abstract class AbstractEventMap(
         mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
         // Apply bounds constraints if required
-        mapLibreAdapter.addOnCameraIdleListener { constraintManager?.applyConstraints() }
+        mapLibreAdapter.addOnCameraIdleListener { constraintManager?.constrainCamera() }
 
         // Configure initial camera position
         scope.launch {

@@ -29,7 +29,10 @@ import kotlin.math.abs
  * Does not support International Date Line wrapping.
  *
  */
-data class BoundingBox(val sw: Position, val ne: Position) {
+class BoundingBox private constructor(val sw: Position, val ne: Position) {
+
+    operator fun component1(): Position = sw
+    operator fun component2(): Position = ne
 
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
@@ -39,6 +42,18 @@ data class BoundingBox(val sw: Position, val ne: Position) {
     // --- Companion object
 
     companion object {
+        fun create(sw: Position, ne: Position): BoundingBox {
+            return if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+                // Already in correct order, no need to create new objects
+                BoundingBox(sw, ne)
+            } else {
+                BoundingBox(
+                    sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
+                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init()
+                )
+            }
+        }
+
         fun fromPositions(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
