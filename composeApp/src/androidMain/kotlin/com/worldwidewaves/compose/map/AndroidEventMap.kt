@@ -79,6 +79,7 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -98,6 +99,13 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineDasharray
+import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 import java.io.File
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -318,6 +326,10 @@ class AndroidEventMap(
                                     setupMapLocationComponent(map, context, style)
                                 }
 
+                                if (event.area.bboxIsOverride) {
+                                    drawBboxIfOverrides(scope, style)
+                                }
+
                                 // Initialize view and setup listeners
                                 setupMap(
                                     scope, map.width.toDouble(), map.height.toDouble(),
@@ -333,6 +345,44 @@ class AndroidEventMap(
                     onMapError()
                 }
             }
+        }
+    }
+
+    private fun drawBboxIfOverrides(
+        scope: CoroutineScope,
+        style: Style
+    ) {
+        scope.launch {
+            val bbox = event.area.bbox()
+
+            val rectangleCoordinates = listOf(
+                listOf(
+                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat),
+                    Point.fromLngLat(bbox.ne.lng, bbox.sw.lat),
+                    Point.fromLngLat(bbox.ne.lng, bbox.ne.lat),
+                    Point.fromLngLat(bbox.sw.lng, bbox.ne.lat),
+                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat)
+                )
+            )
+
+            val geoJsonSource = GeoJsonSource(
+                "bbox-override-source",
+                Polygon.fromLngLats(rectangleCoordinates)
+            )
+            style.addSource(geoJsonSource)
+
+            val lineLayer = LineLayer(
+                "bbox-override-line",
+                "bbox-override-source"
+            ).apply {
+                setProperties(
+                    lineColor(Color.RED),
+                    lineWidth(1f),
+                    lineOpacity(1.0f),
+                    lineDasharray(arrayOf(5f, 2f))
+                )
+            }
+            style.addLayer(lineLayer)
         }
     }
 

@@ -7,8 +7,7 @@ regenerate (zooms): ALL
 - rome
 - tokyo
 
-- area: adapt the geojson to be cut on bbox if exists
-   - INSTEAD: add an optional thin bbox layer if it exists
+- area: add an optional thin bbox layer if it exists
    - look at bboxIsOverride when refactoring by factory will have been done
 
 - wave on tokyo does not work
@@ -24,6 +23,7 @@ issues (seen on klinshasa) :
 
 - recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
+
 - tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
 
@@ -53,6 +53,7 @@ Avril second part:
 ---------------------------------------------
 
 - PDF + Message + Planif presentation
+   -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
 
 ---------------------------------------------
 First push prive Play Store
@@ -69,6 +70,8 @@ First push prive Play Store
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation requests
     - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
+    - loadMap of AndroidEventMap is ugly, refactor it
+        -> move stuff in AbstractEventMap and rely on the MapLibreAdapter interface as possible
 
 ---------------------------------------------
 START IOS
