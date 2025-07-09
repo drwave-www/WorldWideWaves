@@ -36,8 +36,10 @@ mkdir -p $DEST_DIR
 
 # -----------------------------------------------------------------------------
 
-if [ ! -z "$1" ]; then
-  IFS=', ' read -ra EVENT_ARRAY <<< "$1"
+if [ $# -gt 0 ]; then
+  ALL_PARAMS="$*"
+
+  IFS=', ' read -ra EVENT_ARRAY <<< "$ALL_PARAMS"
   VALID_EVENTS=()
 
   for event in "${EVENT_ARRAY[@]}"; do
@@ -45,10 +47,10 @@ if [ ! -z "$1" ]; then
       continue
     fi
 
-    if $(exists "$event"); then
+    if exists "$event"; then
       VALID_EVENTS+=("$event")
     else
-      echo "Unexistent event(s): ${INVALID_EVENTS[*]}"
+      echo "Unexistent event: $event"
     fi
   done
 
