@@ -119,17 +119,32 @@ for event in $EVENTS; do
     # Output file path
     OUTPUT_FILE="$OUTPUT_DIR/e_map_${event}.png"
     
-    echo "Rendering map for $event (center and zoom will be auto-calculated from GeoJSON)"
+    # ----------------------------------------------------------------------
+    # Detect if we have an explicit bbox in events.json.  If found, pass the
+    # four bbox values directly to the renderer (minLng minLat maxLng maxLat)
+    # so that render-map.js can bypass getGeojsonBounds().
+    # ----------------------------------------------------------------------
+    BBOX_RAW=$(get_event_bbox "$event")
+    NODE_EXTRA_ARGS=""
+
+    if [ -n "$BBOX_RAW" ] && [ "$BBOX_RAW" != "null" ]; then
+        IFS=',' read -r MIN_LNG MIN_LAT MAX_LNG MAX_LAT <<< "$BBOX_RAW"
+        NODE_EXTRA_ARGS="\"$MIN_LNG\" \"$MIN_LAT\" \"$MAX_LNG\" \"$MAX_LAT\""
+        echo "Rendering map for $event (using explicit area.bbox)"
+    else
+        echo "Rendering map for $event (bbox will be derived from GeoJSON)"
+    fi
     
     # Render the map using the Node.js script.
-    # Center and zoom are calculated automatically by the script from the GeoJSON bounds.
+    # shellcheck disable=SC2086 # intentional word-splitting for NODE_EXTRA_ARGS
     node "$NODE_SCRIPT" \
         "$GEOJSON_FILE" \
         "$MBTILES_FILE" \
         "$STYLE_DIR/mapstyle.json" \
         "$OUTPUT_FILE" \
         "$IMAGE_WIDTH" \
-        "$IMAGE_HEIGHT"
+        "$IMAGE_HEIGHT" \
+        $NODE_EXTRA_ARGS
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Successfully generated map image for $event: $OUTPUT_FILE${NC}"

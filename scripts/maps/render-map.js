@@ -22,7 +22,8 @@ async function renderMap(options) {
         width,
         height,
         center,
-        zoom
+        zoom,
+        bbox       // <- optional [minLng,minLat,maxLng,maxLat]
     } = options;
 
     if (DEBUG) console.log(`Debug: Starting map rendering with options:`, JSON.stringify(options, null, 2));
@@ -32,9 +33,18 @@ async function renderMap(options) {
         if (DEBUG) console.log(`Debug: Reading GeoJSON from ${geojsonPath}`);
         const geojsonData = await fs.readJson(geojsonPath);
 
-        // Calculate BBox and Center from GeoJSON
-        const geojsonBbox = getGeojsonBounds(geojsonData);
-        if (DEBUG) console.log(`Debug: Calculated GeoJSON bbox: ${geojsonBbox}`);
+        /* ------------------------------------------------------------------
+         * Bounds: prefer explicit bbox (from configuration) over GeoJSON.
+         * ------------------------------------------------------------------ */
+        let geojsonBbox = null;
+
+        if (Array.isArray(bbox) && bbox.length === 4) {
+            geojsonBbox = bbox.map(Number);
+            if (DEBUG) console.log(`Debug: Using provided bbox override: ${geojsonBbox}`);
+        } else {
+            geojsonBbox = getGeojsonBounds(geojsonData);
+            if (DEBUG) console.log(`Debug: Calculated GeoJSON bbox: ${geojsonBbox}`);
+        }
 
         // ------------------------------------------------------------------
         // Validate bounds – empty GeoJSON returns infinities
@@ -48,12 +58,17 @@ async function renderMap(options) {
             );
         }
 
-        let effectiveCenter = hasValidBounds
-            ? [
-                  (geojsonBbox[0] + geojsonBbox[2]) / 2,
-                  (geojsonBbox[1] + geojsonBbox[3]) / 2,
-              ]
-            : getHintCenterFromFilename(geojsonPath);
+        /* ------------------------------------------------------------------
+         * Determine center:
+         *   1. Explicit center provided on CLI
+         *   2. Derive from bbox (explicit or geojson)
+         *   3. Fallback hint from filename
+         * ------------------------------------------------------------------ */
+        let effectiveCenter = [
+            (geojsonBbox[0] + geojsonBbox[2]) / 2,
+            (geojsonBbox[1] + geojsonBbox[3]) / 2,
+        ];
+
         if (center && center.length === 2 && !isNaN(center[0]) && !isNaN(center[1])) {
             effectiveCenter = center;
             if (DEBUG) console.log(`Debug: Using provided center override: ${effectiveCenter}`);
@@ -449,7 +464,12 @@ function handleMbtilesRequest(url) {
 // Parse command line arguments
 const args = process.argv.slice(2);
 if (args.length < 6) {
-    console.error('Usage: node render-map.js <geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> [<centerLng> <centerLat> [<zoom>]]');
+    console.error(
+        'Usage: node render-map.js ' +
+        '<geojsonPath> <mbtilesPath> <stylePath> <outputPath> <width> <height> ' +
+        '[<centerLng> <centerLat> [<zoom>]] | ' +
+        '[<minLng> <minLat> <maxLng> <maxLat>]'
+    );
     process.exit(1);
 }
 
@@ -460,13 +480,31 @@ const outputPath = args[3];
 const width = parseInt(args[4], 10);
 const height = parseInt(args[5], 10);
 
-// Center and zoom are now optional
-const centerLng = (args[6] && !isNaN(parseFloat(args[6]))) ? parseFloat(args[6]) : null;
-const centerLat = (args[7] && !isNaN(parseFloat(args[7]))) ? parseFloat(args[7]) : null;
-const center = (centerLng !== null && centerLat !== null) ? [centerLng, centerLat] : null;
+/* -------------------------------------------------------------------------- */
+/* ------------------------  Optional argument parsing  --------------------- */
+/* -------------------------------------------------------------------------- */
 
-// If zoom is not provided or is invalid, set to -1 to trigger auto-calculation
-const zoom = (args[8] && !isNaN(parseFloat(args[8]))) ? parseFloat(args[8]) : -1;
+function isNumeric(v) {
+    return v !== undefined && v !== null && !isNaN(parseFloat(v));
+}
+
+const remaining = args.slice(6);          // after the 6 mandatory params
+let center = null;
+let zoom   = -1;                          // auto-calc by default
+let bbox   = null;
+
+// Detect “bbox mode” – exactly 4 numeric values
+if (remaining.length === 4 && remaining.every(isNumeric)) {
+    bbox = remaining.map(Number);         // [minLng,minLat,maxLng,maxLat]
+} else {
+    // Legacy center/zoom mode
+    if (remaining.length >= 2 && isNumeric(remaining[0]) && isNumeric(remaining[1])) {
+        center = [parseFloat(remaining[0]), parseFloat(remaining[1])];
+    }
+    if (remaining.length >= 3 && isNumeric(remaining[2])) {
+        zoom = parseFloat(remaining[2]);
+    }
+}
 
 renderMap({
     geojsonPath,
@@ -476,7 +514,8 @@ renderMap({
     width,
     height,
     center,
-    zoom
+    zoom,
+    bbox
 }).then(success => {
     process.exit(success ? 0 : 1);
 });
