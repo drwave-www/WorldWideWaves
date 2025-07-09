@@ -502,7 +502,7 @@
         "approxDuration": 220
       }
     },
-    "area": { "osmAdminids": [92277], "bbox": "99.833794,13.292753,101.005898,13.938075" },
+    "area": { "osmAdminids": [92277], "bbox": "100.327877,13.476602,100.938604,13.942225" },
     "map": { "minZoom": 7, "maxZoom": 18, "language": "th", "zone": "asia/thailand" }
   },
   {
@@ -524,7 +524,7 @@
         "approxDuration": 105
       }
     },
-    "area": { "osmAdminids": [103703], "bbox": "120.826178,14.522368,121.119204,14.683002" },
+    "area": { "osmAdminids": [103703], "bbox": "120.940178,14.550825,121.027467,14.641119" },
     "map": { "minZoom": 10, "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
   },
   {
@@ -590,7 +590,7 @@
         "approxDuration": 592
       }
     },
-    "area": { "osmAdminids": [912940] },
+    "area": { "osmAdminids": [912940], "bbox": "115.3742,39.4102,117.544,41.0596" },
     "map": { "minZoom": 6, "maxZoom": 16, "language": "zh", "zone": "asia/china" }
   },
   {
@@ -612,7 +612,7 @@
         "approxDuration": 355
       }
     },
-    "area": { "osmAdminids": [913067], "bbox": "119.204407,30.279516,123.892822,32.545934" },
+    "area": { "osmAdminids": [913067], "bbox": "120.8079,30.6693,122.129,31.9083" },
     "map": { "minZoom": 6, "maxZoom": 16, "language": "zh", "zone": "asia/china" }
   },
   {
@@ -766,7 +766,7 @@
         "approxDuration": 261
       }
     },
-    "area": { "osmAdminids": [111968], "bbox": "-122.747326,37.692107,-122.161274,37.954350" },
+    "area": { "osmAdminids": [111968], "bbox": "-122.539501,37.70559,-122.343807,37.833685" },
     "map": { "minZoom": 9, "maxZoom": 18, "language": "en", "zone": "north-america/us/california" }
   },
   {
@@ -876,7 +876,7 @@
         "approxDuration": 277
       }
     },
-    "area": { "osmAdminids": [6080948], "bbox": "66.410294,24.638185,67.582397,25.237770" },
+    "area": { "osmAdminids": [6080948], "bbox": "66.650232,24.722919,67.539438,25.171486" },
     "map": { "minZoom": 7, "maxZoom": 18, "language": "ur", "zone": "asia/pakistan" }
   }
 ]

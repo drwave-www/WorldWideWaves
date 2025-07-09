@@ -1,24 +1,19 @@
 
-- generate maps
-    - miss istanbul/karachi/kinshasa
-    - rome map issue
-    - zoom tehran, tokyo, ... check all cities
-    - delete warming zone in maps
 
-check bboxes on :
-- manilla
-- san francisco
-- shangai
-- karashi
-- lagos
+admin/bbox:
+- santiago
 
-regenerate:
+regenerate (zooms):
 - tehran
 - karashi
 - lagos
 - rome
+- tokyo
 
-- wave on tokyo does not work ?
+- area: adapt the geojson to be cut on bbox if exists
+   - INSTEAD: add an optional thin bbox layer if it exists
+
+- wave on tokyo does not work
 
 - missing parts for correct map ratio with less zoom possible ?
 
