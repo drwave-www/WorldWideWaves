@@ -19,13 +19,9 @@
 
 - PDF + Message + Planif presentation mi-juin
 
-- RAF: images et vraie choregraphie !! --> Delphine ?
-
 ---------------------------------------------
 
 Avril second part:
-
-- replace splashscreen Android 12 : https://developer.android.com/develop/ui/views/launch/splash-screen
 
 - Packaging :
     - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
@@ -45,8 +41,6 @@ Avril second part:
     - Fill-in FAQ Contents
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - licences / tools mentions
-
-- ------>>>> add missing tests in SHARED <<<<------
 
 ---------------------------------------------
 First push prive Play Store
