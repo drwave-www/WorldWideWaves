@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.utils
 import io.github.aakira.napier.Napier
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRectMake
+import platform.CoreGraphics.CGImageCreateWithImageInRect
 import platform.Foundation.NSBundle
 import platform.UIKit.UIImage
 
@@ -60,7 +61,8 @@ class IOSImageResolver : ImageResolver<UIImage> {
      * @param frameCount The total number of frames in the sprite sheet.
      * @return The UIImage for the specific frame, or null if extraction fails.
      */
-    override fun resolveFrame(
+    @OptIn(ExperimentalForeignApi::class)
+    fun resolveFrame(
         path: String,
         frameIndex: Int,
         frameWidth: Int,
@@ -92,7 +94,7 @@ class IOSImageResolver : ImageResolver<UIImage> {
             val frameRect = CGRectMake(x, y, width, height)
             
             // Extract the frame as a new CGImage
-            val frameCGImage = cgImage.createWithImageInRect(frameRect) ?: run {
+            val frameCGImage = CGImageCreateWithImageInRect(cgImage, frameRect) ?: run {
                 Napier.e("Failed to create frame CGImage for $path at index $frameIndex")
                 return null
             }

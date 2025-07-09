@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.choreographies
+package com.worldwidewaves.shared.sound
 
 /*
  * Copyright 2024 DrWave
@@ -21,78 +21,46 @@ package com.worldwidewaves.shared.choreographies
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.sound.AudioBuffer
-import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.shared.sound.VolumeController
-import platform.AVFAudio.AVAudioEngine
-import kotlin.time.Duration
-import platform.AVFoundation.*
-import platform.Foundation.*
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.delay
+import platform.AVFAudio.AVAudioEngine
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryOptionMixWithOthers
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.outputVolume
 import platform.AVFAudio.setActive
-
-/**
- * iOS implementation of AudioBuffer
- */
-actual object AudioBufferFactory {
-    actual fun createFromSamples(
-        samples: DoubleArray,
-        sampleRate: Int,
-        bitsPerSample: Int,
-        channels: Int
-    ): AudioBuffer {
-        return IOSAudioBuffer(samples, sampleRate, bitsPerSample, channels)
-    }
-}
-
-/**
- * iOS-specific audio buffer implementation
- */
-class IOSAudioBuffer(
-    samples: DoubleArray,
-    override val sampleRate: Int,
-    bitsPerSample: Int,
-    channels: Int
-) : AudioBuffer {
-
-    private val buffer: ByteArray = when (bitsPerSample) {
-        8 ->  convert8Bit(samples)
-        16 -> convert16Bit(samples)
-        else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
-    }
-    override val sampleCount: Int = samples.size
-
-    // Conversion methods same as Android implementation
-
-    override fun getRawBuffer(): ByteArray = buffer
-}
+import kotlin.time.Duration
 
 /**
  * iOS implementation of SoundPlayer using AVAudioEngine
  */
+@OptIn(ExperimentalForeignApi::class)
 class IOSSoundPlayer : SoundPlayer, VolumeController {
     private val audioSession = AVAudioSession.sharedInstance()
     private val audioEngine = AVAudioEngine()
 
     init {
-        // Initialize audio session
+        setupAudioSession()
+        setupAudioEngine()
+    }
+    
+    @OptIn(ExperimentalForeignApi::class)
+    private fun setupAudioSession() {
         audioSession.setCategory(
             AVAudioSessionCategoryPlayback,
-            withOptions = setOf(AVAudioSessionCategoryOptionMixWithOthers),
-            error = null
+            AVAudioSessionCategoryOptionMixWithOthers,
+            null
         )
         audioSession.setActive(true, null)
-
-        // Initialize audio engine
+    }
+    
+    @OptIn(ExperimentalForeignApi::class)
+    private fun setupAudioEngine() {
         audioEngine.prepare()
         audioEngine.startAndReturnError(null)
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     override fun getCurrentVolume(): Float {
         return audioSession.outputVolume()
     }
@@ -101,9 +69,6 @@ class IOSSoundPlayer : SoundPlayer, VolumeController {
         // Note: iOS doesn't allow direct volume control from apps
         // This requires special entitlements or using MPVolumeView
         println("Volume control on iOS requires user interaction")
-
-        // For volume control, you should present a volume view to the user:
-        // MPVolumeView solution would go here in Swift/Objective-C interop
     }
 
     override suspend fun playTone(
@@ -112,23 +77,16 @@ class IOSSoundPlayer : SoundPlayer, VolumeController {
         duration: Duration,
         waveform: SoundPlayer.Waveform
     ) {
-        // Save current volume (though we can't directly change it on iOS)
-        val originalVolume = getCurrentVolume()
-
         try {
-            // iOS requires user interaction for volume changes, so we'll just
-            // play at maximum amplitude instead
-
-            // Play tone at full amplitude
-            playTone(frequency, 1.0, duration, waveform)
-
-            // Wait for completion
-            delay(duration + 100.milliseconds)
-        } finally {
-            // Volume restoration not needed on iOS as we can't change it directly
+            // Implementation would use AVAudioSourceNode to generate tones
+            // For now, we'll just simulate the tone playback with a delay
+            delay(duration)
+        } catch (e: Exception) {
+            println("Error playing tone: ${e.message}")
         }
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     override fun release() {
         audioEngine.stop()
         audioSession.setActive(false, null)

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.di
 
 import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.shared.choreographies.IOSSoundPlayer
+import com.worldwidewaves.shared.sound.IOSSoundPlayer
 import com.worldwidewaves.shared.utils.IOSImageResolver
 import com.worldwidewaves.shared.utils.ImageResolver
 import org.koin.dsl.module

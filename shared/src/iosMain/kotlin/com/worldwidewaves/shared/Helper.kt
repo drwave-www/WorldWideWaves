@@ -21,11 +21,32 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.di.IOSModule
 import com.worldwidewaves.shared.di.sharedModule
 import org.koin.core.context.startKoin
+import org.koin.core.context.GlobalContext
 
-fun initKoin() {
+/**
+ * Initialise Koin for iOS.
+ *
+ * Swift code calls this via `HelperKt.doInitKoin()`.
+ * We load every common module *and* the iOS-specific module only once.
+ */
+fun doInitKoin() {
+    // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
+    if (GlobalContext.getOrNull() != null) return
+
     startKoin {
-        modules(sharedModule())
+        // `sharedModule` is already a List<Module>; add the iOS-specific one.
+        modules(sharedModule + IOSModule)
     }
 }
+
+/**
+ * Deprecated alias kept so existing Kotlin callers (if any) continue to compile.
+ */
+@Deprecated(
+    message = "Renamed to doInitKoin() to match Swift side.",
+    replaceWith = ReplaceWith("doInitKoin()")
+)
+fun initKoin() = doInitKoin()
