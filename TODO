@@ -1,19 +1,42 @@
 
-TODAY :
 
-- erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
-                 --> Beijing ??
-   --> Add logs in splitLongitude (nb of polygons original/left/right)
-   ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
+regenerate (zooms): ALL
+- tehran
+- karashi
+- lagos
+- rome
+- tokyo
 
-- !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+- area: adapt the geojson to be cut on bbox if exists
+   - INSTEAD: add an optional thin bbox layer if it exists
+   - look at bboxIsOverride when refactoring by factory will have been done
 
-- boutons de focus large map (user/wave) ne fonctionnent pas correctement
+- wave on tokyo does not work
 
-- Github Actions compilation : check
+issues (seen on klinshasa) :
+    - pb de wave dessin sur kinshasa ?
+    - pb de compteur aussi ??
+    - zoom trop eleve vs geojson ?
+
+- autozoom in wave screen is not enough zoomed (test: sydney)
+
+- recalcul de 'in the area' apres init du gps :
+   - paris, wave, puis go back to paris : 'you are NOT in the area'
+- tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+  et des numbers, du compteur de l'ecran wave
+
+---------------------------------------------
+
+Avril second part:
 
 - Packaging :
-    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+    - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
+
+- Limit size taken by events in cached WWWEvents : clean on request after a certain size
+
+------
 
 - manage with translations
     - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
@@ -22,24 +45,28 @@ TODAY :
 
 - Production:
     - Fill-in FAQ Contents
-    - licences / tools mentions
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
-    - what happens if I want to force the update of a downloaded map ?
+    - licences / tools mentions
 
 ---------------------------------------------
-
-- refaire les visuels : villes et choregraphies, avec un meilleur generateur IA, cf scripts/images
 
 - PDF + Message + Planif presentation
-   -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
 
 ---------------------------------------------
+First push prive Play Store
+---------------------------------------------
 
-- Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
+- OPTIM: Wave split en tenant en compte les noeuds deja splites
+
+- add tests for all missing functions
+    - caching mechanism
+    - download of app features on app update / feature update
+- Add a full test for event behavior AND wave progression using listeners
 
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation requests
+    - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
 
 ---------------------------------------------
 START IOS

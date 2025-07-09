@@ -66,9 +66,8 @@ android {
         )
     }
     buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+        getByName("release") {
+            isMinifyEnabled = false
         }
     }
     compileOptions {
@@ -145,6 +144,6 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
-    implementation(libs.androidx.core.splashscreen)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.feature.delivery.ktx)
 }

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -30,18 +30,16 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 // ---------------------------
 
-@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
@@ -59,8 +57,7 @@ data class WWWEventWaveLinear(
     // ---------------------------
 
     override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
-        if(!event.isRunning()) return null
-
+        require(event.isRunning()) { "Event must be running to request the wave polygons" }
         require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
@@ -118,7 +115,7 @@ data class WWWEventWaveLinear(
         composedLongitude: ComposedLongitude
     ) : Pair<Area, Area> {
         if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
-        val splitResults = areaPolygons.map { splitByLongitude(it, composedLongitude) }
+        val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
 
         fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
             splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()
@@ -144,11 +141,6 @@ data class WWWEventWaveLinear(
      */
     override suspend fun getWaveDuration(): Duration = cachedWaveDuration ?: run {
         val bbox = bbox()
-
-        if (bbox.minLongitude == 0.0 && bbox.maxLongitude == 0.0) { // If map has not been loaded yet
-            return event.wave.getApproxDuration()
-        }
-
         val longestLat = bbox.latitudeOfWidestPart()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
         val durationInSeconds = maxEastWestDistance / speed

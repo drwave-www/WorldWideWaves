@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.map
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -28,16 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Map interface that platform-specific implementations must implement
  */
-interface MapLibreAdapter<T> {
-
-    fun setMap(map: T)
-    fun setStyle(stylePath: String, callback: () -> Unit?)
-
+interface MapLibreAdapter {
     val currentPosition: StateFlow<Position?>
     val currentZoom: StateFlow<Double>
-
-    fun getWidth() : Double
-    fun getHeight() : Double
 
     fun getCameraPosition() : Position?
     fun getVisibleRegion() : BoundingBox
@@ -49,14 +42,11 @@ interface MapLibreAdapter<T> {
     fun getMinZoomLevel() : Double
     fun setMinZoomPreference(minZoom: Double)
     fun setMaxZoomPreference(maxZoom: Double)
-    fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int)
 
     fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)
 
     fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?)
-    fun addOnCameraIdleListener(callback: () -> Unit)
-
-    fun drawOverridenBbox(bbox: BoundingBox)
+    fun addOnCameraIdleListener(function: () -> Unit)
 
 }
 

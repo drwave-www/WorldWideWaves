@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -134,37 +134,34 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun splitByLongitude(polygon: Polygon, lngToCut: Double): PolygonSplitResult =
-        splitByLongitude(polygon,ComposedLongitude.fromLongitude(lngToCut))
+    fun Polygon.splitByLongitude(lngToCut: Double): PolygonSplitResult =
+        splitByLongitude(ComposedLongitude.fromLongitude(lngToCut))
 
-    fun splitByLongitude(polygon: Polygon, lngToCut: ComposedLongitude): PolygonSplitResult {
-        val workingPolygon = Polygon()
-        workingPolygon.addAll(polygon)
-        workingPolygon.close().pop() // Ensure the polygon is closed and remove the last point
+    fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
+        this.close().pop() // Ensure the polygon is closed and remove the last point
+                           // FIXME: this is problematic - not thread safe - but skip copy
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)
 
-        require(workingPolygon.isNotEmpty() && workingPolygon.size >= 3) {
-            return PolygonSplitResult.empty(cutId).also { workingPolygon.close() }
-        }
+        require(isNotEmpty() && size >= 3) { return PolygonSplitResult.empty(cutId).also { close() } }
 
         val leftSide =  mutableListOf<LeftCutPolygon>()
         val rightSide = mutableListOf<RightCutPolygon>()
         val currentLeft = LeftCutPolygon(cutId)
         val currentRight = RightCutPolygon(cutId)
 
-        val minLongitude = workingPolygon.bbox().minLongitude
-        val maxLongitude = workingPolygon.bbox().maxLongitude
+        val minLongitude = bbox().minLongitude
+        val maxLongitude = bbox().maxLongitude
 
         val lngBbox = lngToCut.bbox()
 
         return when {
-            lngBbox.minLongitude > maxLongitude -> fromSinglePolygon(workingPolygon, cutId, LEFT)
-            lngBbox.maxLongitude < minLongitude -> fromSinglePolygon(workingPolygon, cutId, RIGHT)
+            lngBbox.maxLongitude > maxLongitude -> fromSinglePolygon(this, cutId, LEFT)
+            lngBbox.minLongitude < minLongitude -> fromSinglePolygon(this, cutId, RIGHT)
             else -> { // Separate the polygon into two parts based on the cut longitude
 
-                val iterator = if (workingPolygon.isClockwise()) workingPolygon.reverseLoopIterator() else workingPolygon.loopIterator()
-                var stopPoint = if (workingPolygon.isClockwise()) workingPolygon.first()!! else workingPolygon.last()!! // Security stop
+                val iterator = if (isClockwise()) reverseLoopIterator() else loopIterator()
+                var stopPoint = if (isClockwise()) first()!! else last()!! // Security stop
                 var prev : Position? = null
 
                 while (iterator.hasNext()) { // Anti-Clockwise loop
@@ -228,7 +225,7 @@ object PolygonUtils {
                 return PolygonSplitResult(cutId,
                     completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, leftSide, currentLeft)),
                     completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, rightSide, currentRight))
-                ).also { workingPolygon.close() }
+                ).also { close() }
             }
         }
     }
@@ -283,8 +280,6 @@ object PolygonUtils {
         polygon.clear().add(lastPoint!!)
     }
 
-    // ------------------------------------------------------------------------
-
     /**
      * Reconstructs the side polygons from the given list of poly-lines.
      *
@@ -292,7 +287,6 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
             .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
@@ -310,7 +304,6 @@ object PolygonUtils {
      * and a new polygon is started.
      *
      */
-    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
@@ -349,7 +342,6 @@ object PolygonUtils {
      * them into a single polygon.
      *
      */
-    @Deprecated("Algorithm not reliable yet")
     fun recomposeCutPolygons(polygons: Area): Area {
         val recomposedPolygons = mutableListOf<Polygon>()
 
@@ -450,7 +442,7 @@ object PolygonUtils {
             )
         }
 
-        return BoundingBox.fromCorners(
+        return BoundingBox(
             sw = Position(minLat, minLng),
             ne = Position(maxLat, maxLng)
         )

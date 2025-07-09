@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -55,8 +55,8 @@ class PolygonUtilsSplitPolygonTest {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {
-            testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
-            testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
+            testCase.longitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.longitudeToCut)
+            testCase.composedLongitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.composedLongitudeToCut)
             else -> throw IllegalArgumentException("Invalid test case, should contain either longitudeToCut or composedLongitudeToCut")
         }
 

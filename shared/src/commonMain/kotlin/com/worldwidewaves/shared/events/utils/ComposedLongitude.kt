@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -172,7 +172,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return changes <= 5 && distinctSigns <= 3 && nonZeroChanges <= 3
     }
 
-    fun bbox(): BoundingBox = BoundingBox.fromCorners(
+    fun bbox(): BoundingBox = BoundingBox(
         sw = Position(swLat, swLng),
         ne = Position(neLat, neLng)
     )

@@ -9,17 +9,16 @@ import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -43,7 +42,6 @@ import kotlin.time.ExperimentalTime
  * Manages musical choreography for the wave experience,
  * allowing each device to play one note from a collective melody when hit arrives.
  */
-@OptIn(ExperimentalTime::class)
 class SoundChoreographyManager(
     coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : KoinComponent {

@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.event
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -57,15 +58,14 @@ import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
-@OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
 
     private val clock: IClock by inject()
@@ -74,7 +74,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        val eventStatus by event.observer.eventStatus.collectAsState()
+        val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event) {
             value = event.getEndDateTime()
         }
@@ -82,21 +82,23 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Construct the event map
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
+                onLocationUpdate = { newLocation ->
+                    waveViewModel.updateUserLocation(observerId, newLocation)
+                },
                 mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW,
-                    autoTargetUserOnFirstLocation = true
+                    initialCameraPosition = MapCameraPosition.WINDOW
                 )
             )
         }
 
         // Start event/map coordination
-        ObserveEventMapProgression(event, eventMap)
+        ObserveEventMap(event, eventMap)
 
         // Screen composition
-        Box(modifier = modifier.fillMaxSize()) {
+        Box(modifier = modifier.fillMaxWidth()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(event, eventMap, clock)
+            MapActions(eventMap, waveViewModel, observerId)
         }
     }
 
@@ -104,12 +106,11 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
 // ----------------------------------------------------------------------------
 
-@OptIn(ExperimentalTime::class)
 @Composable
-fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modifier: Modifier = Modifier) {
+fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by event.observer.userIsInArea.collectAsState()
+    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
+    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING
 
@@ -121,8 +122,7 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modif
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
-                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                            eventMap.markUserInteracted()
+                        if (isRunning) {
                             scope.launch {
                                 eventMap.targetWave()
                             }
@@ -135,7 +135,6 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modif
                 modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
-                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetUser()
                             }

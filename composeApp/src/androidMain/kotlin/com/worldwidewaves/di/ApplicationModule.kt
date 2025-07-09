@@ -2,21 +2,23 @@ package com.worldwidewaves.di
 
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
+import com.worldwidewaves.compose.tabs.SettingsScreen
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.viewmodels.EventsViewModel
+import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -40,7 +42,9 @@ val applicationModule = module {
     single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
     viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
+    viewModel { WaveViewModel(platform = get()) }
 
+    single { SettingsScreen() }
     single { AboutScreen(get(), get()) }
     single { AboutInfoScreen() }
     single { AboutFaqScreen() }

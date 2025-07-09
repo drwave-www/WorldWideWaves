@@ -23,25 +23,21 @@ package com.worldwidewaves.activities.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.worldwidewaves.activities.utils.WaveProgressionObserver
+import com.worldwidewaves.activities.utils.WaveObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.di.CloseableCoroutineScope
-import org.koin.android.ext.android.inject
+import com.worldwidewaves.viewmodels.WaveViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.UUID
 
 abstract class AbstractEventWaveActivity(
     activateInfiniteScroll : Boolean = true
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
 
-    /**
-     * Application-level CoroutineScope (stays alive as long as the process lives)
-     * Injected from DI to avoid cancelling jobs when the Composable scope disappears.
-     */
-    private val appScope: CloseableCoroutineScope by inject()
-
-    private var waveProgressionObserver: WaveProgressionObserver? = null
+    protected val waveViewModel: WaveViewModel by viewModel()
+    private var waveObserver: WaveObserver? = null
 
     private var _eventMap : AndroidEventMap? = null
 
@@ -54,35 +50,29 @@ abstract class AbstractEventWaveActivity(
         super.onResume()
 
         // Restart observation when activity is visible
-        waveProgressionObserver?.startObservation()
+        waveObserver?.startObservation()
     }
 
     override fun onPause() {
         // Stop observation when activity is not visible
-        // Only pause to keep the same StateFlow instances alive for UI collectors
-        waveProgressionObserver?.pauseObservation()
+        waveObserver?.stopObservation()
         super.onPause()
     }
 
     // ------------------------------------------------------------------------
 
     @Composable
-    protected fun ObserveEventMapProgression(event: IWWWEvent, eventMap: AndroidEventMap) {
+    protected fun ObserveEventMap(event: IWWWEvent, eventMap: AndroidEventMap) {
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
 
         _eventMap = eventMap
 
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {
-            if (waveProgressionObserver == null) {
-                waveProgressionObserver = WaveProgressionObserver(
-                    context = context,
-                    scope = appScope,
-                    eventMap = eventMap,
-                    event = event,
-                    observerId = observerId
-                )
-                waveProgressionObserver!!.startObservation()
+            if (waveObserver == null) {
+                waveObserver = WaveObserver(context, scope, eventMap, event, waveViewModel, observerId)
+                waveObserver!!.startObservation()
             }
         }
     }
@@ -90,8 +80,8 @@ abstract class AbstractEventWaveActivity(
     // ------------------------------------------------------------------------
 
     override fun onDestroy() {
-        waveProgressionObserver?.stopObservation()
-        waveProgressionObserver = null
+        waveObserver?.stopObservation()
+        waveObserver = null
         super.onDestroy()
     }
 

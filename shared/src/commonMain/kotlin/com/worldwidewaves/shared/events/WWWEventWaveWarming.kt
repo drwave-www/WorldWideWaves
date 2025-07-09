@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -28,14 +28,12 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Napier
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
 class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     private val clock: IClock by inject()

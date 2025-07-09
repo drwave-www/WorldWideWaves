@@ -1,7 +1,7 @@
 package com.worldwidewaves.utils
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -33,7 +33,6 @@ import org.maplibre.android.location.engine.LocationEngineCallback
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
-import kotlin.time.ExperimentalTime
 
 /**
  * `WWWSimulationEnabledLocationEngine` is a custom implementation of `MapLibreFusedLocationEngineImpl`
@@ -44,7 +43,6 @@ import kotlin.time.ExperimentalTime
  * default location engine behavior.
  *
  */
-@OptIn(ExperimentalTime::class)
 class WWWSimulationEnabledLocationEngine(
     context: Context
 ) : KoinComponent, MapLibreFusedLocationEngineImpl(context) {

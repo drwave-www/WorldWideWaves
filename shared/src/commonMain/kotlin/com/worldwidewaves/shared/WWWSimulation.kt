@@ -1,12 +1,11 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.Position
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -26,7 +25,6 @@ import kotlin.time.Instant
  * limitations under the License.
  */
 
-@OptIn(ExperimentalTime::class)
 class WWWSimulation(
     private val startDateTime: Instant,
     private val userPosition: Position,

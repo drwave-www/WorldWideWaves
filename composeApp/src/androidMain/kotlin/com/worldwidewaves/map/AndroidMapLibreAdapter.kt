@@ -1,7 +1,7 @@
 package com.worldwidewaves.map
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,7 +21,6 @@ package com.worldwidewaves.map
  * limitations under the License.
  */
 
-import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.toColorInt
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_COLOR
@@ -39,24 +38,17 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.FillLayer
-import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory
-import org.maplibre.android.style.layers.PropertyFactory.lineColor
-import org.maplibre.android.style.layers.PropertyFactory.lineDasharray
-import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
-import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 
 /**
  * MapLibre adapter that implements the PlatformMap interface
  */
-class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter<MapLibreMap> {
+class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter {
 
     // -- Public/Override properties
 
@@ -66,16 +58,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
 
-    override fun getWidth(): Double {
-        require(mapLibreMap != null)
-        return mapLibreMap!!.width.toDouble()
-    }
-
-    override fun getHeight(): Double {
-        require(mapLibreMap != null)
-        return mapLibreMap!!.height.toDouble()
-    }
-
     // -- Private properties
 
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
@@ -84,7 +66,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
 
-    override fun setMap(map: MapLibreMap) {
+    fun setMap(map: MapLibreMap) {
         mapLibreMap = map
 
         // Update adapter with initial camera position
@@ -100,11 +82,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             callback(this)
         }
         onMapSetCallbacks.clear()
-    }
-
-    override fun setStyle(stylePath: String, callback: () -> Unit?) {
-        require(mapLibreMap != null)
-        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { style -> callback() }
     }
 
     fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
@@ -141,25 +118,18 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     }
 
     override fun setMinZoomPreference(minZoom: Double) {
-        require(mapLibreMap != null)
-        mapLibreMap!!.setMinZoomPreference(minZoom)
+        mapLibreMap?.setMinZoomPreference(minZoom)
     }
 
     override fun setMaxZoomPreference(maxZoom: Double) {
-        require(mapLibreMap != null)
-        mapLibreMap!!.setMaxZoomPreference(maxZoom)
-    }
-
-    override fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        require(mapLibreMap != null)
-        mapLibreMap!!.uiSettings.setAttributionMargins(left, top, right, bottom)
+        mapLibreMap?.setMaxZoomPreference(maxZoom)
     }
 
     // ------------------------------------------------------------------------
 
-    override fun addOnCameraIdleListener(callback: () -> Unit) {
+    override fun addOnCameraIdleListener(function: () -> Unit) {
         require(mapLibreMap != null)
-        mapLibreMap!!.addOnCameraIdleListener(callback)
+        mapLibreMap!!.addOnCameraIdleListener(function)
     }
 
     // Method to update the camera position and zoom
@@ -191,7 +161,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun getVisibleRegion(): BoundingBox {
         require(mapLibreMap != null)
         return mapLibreMap!!.projection.visibleRegion.let { visibleRegion ->
-            BoundingBox.fromCorners(
+            BoundingBox(
                 Position(visibleRegion.latLngBounds.getLatSouth(), visibleRegion.latLngBounds.getLonWest()),
                 Position(visibleRegion.latLngBounds.getLatNorth(), visibleRegion.latLngBounds.getLonEast())
             )
@@ -299,35 +269,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             } catch (e: Exception) {
                 Log.e("MapUpdate", "Error updating wave polygons", e)
             }
-        }
-    }
-
-    // --------------------------------
-
-    override fun drawOverridenBbox(bbox: BoundingBox) {
-        require(mapLibreMap != null)
-
-        mapLibreMap!!.style?.let { style ->
-            val rectangleCoordinates = listOf(
-                listOf(
-                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat),
-                    Point.fromLngLat(bbox.ne.lng, bbox.sw.lat),
-                    Point.fromLngLat(bbox.ne.lng, bbox.ne.lat),
-                    Point.fromLngLat(bbox.sw.lng, bbox.ne.lat),
-                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat)
-                )
-            )
-
-            style.addSource(GeoJsonSource("bbox-override-source", Polygon.fromLngLats(rectangleCoordinates)))
-
-            style.addLayer(LineLayer("bbox-override-line", "bbox-override-source").apply {
-                setProperties(
-                    lineColor(Color.RED),
-                    lineWidth(1f),
-                    lineOpacity(1.0f),
-                    lineDasharray(arrayOf(5f, 2f))
-                )
-            })
         }
     }
 
