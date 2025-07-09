@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -33,7 +33,7 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter) {
+class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter<*>) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
@@ -130,7 +130,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)
             val constraintBoundsMapped = constraintBounds?.let { bounds ->
-                BoundingBox(
+                BoundingBox.fromCorners(
                     Position(bounds.southwest.latitude, bounds.southwest.longitude),
                     Position(bounds.northeast.latitude, bounds.northeast.longitude)
                 )
@@ -180,7 +180,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
-        return BoundingBox(
+        return BoundingBox.fromCorners(
             Position(
                 mapBounds.southwest.latitude + padding.latPadding,
                 mapBounds.southwest.longitude + padding.lngPadding
@@ -259,7 +259,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
         val finalNorth = min(mapBounds.northeast.latitude, max(safeNorth, safeSouth + minLatSpan))
         val finalEast = min(mapBounds.northeast.longitude, max(safeEast, safeWest + minLngSpan))
 
-        return BoundingBox(
+        return BoundingBox.fromCorners(
             Position(safeSouth, safeWest),
             Position(finalNorth, finalEast)
         )
@@ -276,8 +276,8 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
     }
 
     fun getNearestValidPoint(point: Position, bounds: BoundingBox): Position {
-        val lat = point.latitude.coerceIn(bounds.southwest.latitude, bounds.northeast.latitude)
-        val lng = point.longitude.coerceIn(bounds.southwest.longitude, bounds.northeast.longitude)
+        val lat = point.latitude.coerceIn(bounds.minLatitude, bounds.maxLatitude)
+        val lng = point.longitude.coerceIn(bounds.minLongitude, bounds.maxLongitude)
         return Position(lat, lng)
     }
 }

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.choreographies
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -29,17 +29,19 @@ import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ImageResolver
 import io.github.aakira.napier.Napier
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.ExperimentalTime
 
 /**
  * Manages choreography sequences for different phases of wave events.
  */
+@OptIn(ExperimentalTime::class)
 open class ChoreographyManager<T>(
     coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
 ) : KoinComponent {

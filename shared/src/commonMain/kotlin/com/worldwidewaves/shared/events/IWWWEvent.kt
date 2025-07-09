@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -22,20 +22,24 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.serialization.Transient
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 interface IWWWEvent : DataValidator {
 
-    data class EventObservation(
-        val progression: Double,
-        val status: Status
+    data class WaveNumbersLiterals(
+        val waveTimezone: String = "",
+        val waveSpeed: String = "..",
+        val waveStartTime: String = "..",
+        val waveEndTime: String = "..",
+        val waveTotalTime: String = "..",
     )
 
     val id: String
@@ -101,16 +105,11 @@ interface IWWWEvent : DataValidator {
 
     suspend fun getAllNumbers(): WaveNumbersLiterals
 
-    val eventStatus: StateFlow<Status>
-    val progression: StateFlow<Double>
-    val isWarmingInProgress: StateFlow<Boolean>
-    val userIsGoingToBeHit: StateFlow<Boolean>
-    val userHasBeenHit: StateFlow<Boolean>
-
     // ---------------------------
 
-    fun startObservation()
-    fun stopObservation()
+    @Transient val observer: WWWEventObserver
+        get() = getEventObserver()
+    fun getEventObserver(): WWWEventObserver
 
 }
 

@@ -1,7 +1,7 @@
 package com.worldwidewaves.compose.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,6 +80,7 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -111,7 +113,7 @@ class AndroidEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig()
-) : KoinComponent, AbstractEventMap(event, mapConfig, onLocationUpdate) {
+) : KoinComponent, AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate) {
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
@@ -189,7 +191,8 @@ class AndroidEventMap(
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(getEventImage("map", event.id) as DrawableResource),
-                contentDescription = "defaultMap"
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop
             )
 
             // LibreMap as Android Composable - only visible when map is loaded
@@ -294,7 +297,7 @@ class AndroidEventMap(
      */
     private fun loadMap(
         context: Context,
-        scope: kotlinx.coroutines.CoroutineScope,
+        scope: CoroutineScope,
         mapLibreView: MapView,
         hasLocationPermission: Boolean,
         onMapLoaded: () -> Unit,
@@ -304,29 +307,22 @@ class AndroidEventMap(
             withContext(Dispatchers.IO) { // IO actions
                 event.map.getStyleUri()?.let {
                     val uri = Uri.fromFile(File(it))
-
-                    scope.launch { // UI actions
+                    scope.launch { // Required -- UI actions
                         mapLibreView.getMapAsync { map ->
-                            map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
-                                map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-
-                                // Provide Adapter with Android MapLibre instance
-                                mapLibreAdapter.setMap(map)
-
-                                // Initialize location provider if we have permission
-                                if (hasLocationPermission) {
-                                    setupMapLocationComponent(map, context, style)
-                                }
-
-                                // Initialize view and setup listeners
-                                setupMap(
-                                    scope, map.width.toDouble(), map.height.toDouble(),
-                                    onMapLoaded = onMapLoaded,
-                                    onMapClick = { _, _ ->
-                                        onMapClick?.invoke()
+                            // Setup Map
+                            this@AndroidEventMap.setupMap(
+                                map, scope,uri.toString(),
+                                onMapLoaded = {
+                                    // Initialize location provider if we have permission
+                                    if (hasLocationPermission) {
+                                        setupMapLocationComponent(map, context)
                                     }
-                                )
-                            }
+                                    onMapLoaded()
+                                },
+                                onMapClick = { _, _ ->
+                                    onMapClick?.invoke()
+                                }
+                            )
                         }
                     }
                 } ?: run {
@@ -342,13 +338,15 @@ class AndroidEventMap(
      * Sets up the Android location component
      */
     @SuppressLint("MissingPermission")
-    private fun setupMapLocationComponent(map: MapLibreMap, context: Context, style: Style) {
-        // Activate location component
-        map.locationComponent.activateLocationComponent(
-            buildLocationComponentActivationOptions(context, style)
-        )
-        map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+    private fun setupMapLocationComponent(map: MapLibreMap, context: Context) {
+        map.style?.let { style ->
+            // Activate location component
+            map.locationComponent.activateLocationComponent(
+                buildLocationComponentActivationOptions(context, style)
+            )
+            map.locationComponent.isLocationComponentEnabled = true
+            map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+        }
     }
 
     /**

@@ -6,13 +6,13 @@ import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -32,6 +32,7 @@ import kotlinx.datetime.toLocalDateTime
  * limitations under the License.
  */
 
+@OptIn(ExperimentalTime::class)
 class WWWPlatform(val name: String) {
 
     private var _simulation : WWWSimulation? = null
@@ -54,9 +55,8 @@ class WWWPlatform(val name: String) {
     // -------------------------------------------------------------------- //
 
     init {
-        val instant = Instant.parse("2024-07-14T16:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
-        val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
+        val now = LocalDateTime(2026, 7, 14, 17, 50).toInstant(timeZone)
         setSimulation(
             WWWSimulation(
                 now,

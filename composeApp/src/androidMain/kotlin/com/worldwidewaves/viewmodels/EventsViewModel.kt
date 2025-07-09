@@ -1,7 +1,7 @@
 package com.worldwidewaves.viewmodels
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,27 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.worldwidewaves.BuildConfig
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for managing event data.
@@ -41,6 +42,7 @@ import kotlinx.coroutines.sync.withLock
  * `StateFlow`, and provides filtering functionality for displaying all events or only
  * favorite events.
  */
+@OptIn(ExperimentalTime::class)
 class EventsViewModel(
     private val wwwEvents: WWWEvents,
     private val mapChecker: MapAvailabilityChecker,
@@ -48,9 +50,7 @@ class EventsViewModel(
 ) : ViewModel() {
 
     private val originalEventsMutex = Mutex()
-    private var originalEvents: List<IWWWEvent> = emptyList()
-    private val eventObservationJobs = mutableMapOf<String, Job>()
-    private val eventStatusFlowCache = mutableMapOf<String, StateFlow<IWWWEvent.Status>>()
+    var originalEvents: List<IWWWEvent> = emptyList()
 
     // State flows
     private val _hasFavorites = MutableStateFlow(false)
@@ -61,9 +61,6 @@ class EventsViewModel(
 
     private val _loadingError = MutableStateFlow(false)
     val hasLoadingError: StateFlow<Boolean> = _loadingError.asStateFlow()
-
-    // Event status mapping
-    private val _eventStatusMap = MutableStateFlow<Map<String, IWWWEvent.Status>>(emptyMap())
 
     // Exception handler for coroutines
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -77,39 +74,9 @@ class EventsViewModel(
 
     init {
         loadEvents()
-        observeSimulationChanges()
     }
 
     // ---------------------------
-
-    /**
-     * Observe simulation change counter from [WWWPlatform] and restart
-     * event observations whenever the simulation context is modified.
-     */
-    private fun observeSimulationChanges() { // Hack for simulation handling on non-observed events
-        platform.simulationChanged
-            .onEach { changeCount ->
-                if (changeCount > 0) {
-                    Log.d(::EventsViewModel.name, "Simulation changed ($changeCount), restarting observations")
-                    restartEventObservations()
-                }
-            }
-            .flowOn(Dispatchers.Default)
-            .launchIn(viewModelScope)
-    }
-
-    /**
-     * Restart observations for all currently loaded events, respecting mutex protection.
-     */
-    private fun restartEventObservations() {
-        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
-            originalEventsMutex.withLock {
-                if (originalEvents.isNotEmpty()) {
-                    startObservingEvents(originalEvents)
-                }
-            }
-        }
-    }
 
     /**
      * Load events from the data source
@@ -124,13 +91,14 @@ class EventsViewModel(
                     }
                 )
 
-                // Collect the events flow
+                // Collect the events flow and process events list
                 wwwEvents.flow()
                     .onEach { eventsList ->
                         processEventsList(eventsList)
                     }
                     .flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
+
             } catch (e: Exception) {
                 Log.e(::EventsViewModel.name, "Failed to load events", e)
                 _loadingError.value = true
@@ -154,21 +122,47 @@ class EventsViewModel(
         _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
 
         // Start observing all events
-        startObservingEvents(sortedEvents)
+        sortedEvents.forEach { event ->
+
+            // Start event observation
+            event.observer.startObservation()
+
+            // Setup simulation speed listeners on DEBUG mode
+            monitorSimulatedSpeed(event)
+        }
+
     }
 
-    // ---------------------------
+    /**
+     * Monitor simulation speed during event phases (DEBUG mode only)
+     */
+    private fun monitorSimulatedSpeed(event: IWWWEvent) {
+        if (BuildConfig.DEBUG) {
+            val scope = CoroutineScope(Dispatchers.Default)
+            var backupSimulationSpeed = 1
 
-    fun getEventStatusFlow(eventId: String): StateFlow<IWWWEvent.Status> {
-        return eventStatusFlowCache.getOrPut(eventId) {
-            _eventStatusMap
-                .map { statusMap -> statusMap[eventId] ?: IWWWEvent.Status.UNDEFINED }
-                .flowOn(Dispatchers.Default)
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.Lazily,
-                    initialValue = _eventStatusMap.value[eventId] ?: IWWWEvent.Status.UNDEFINED
-                )
+            // Handle warming started
+            scope.launch {
+                event.observer.isWarmingInProgress.collect { isWarmingStarted ->
+                    if (isWarmingStarted) {
+                        backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                        platform.getSimulation()?.setSpeed(1)
+                    }
+                }
+            }
+
+            // Handle user has been hit
+            scope.launch {
+                event.observer.userHasBeenHit.collect { hasBeenHit ->
+                    if (hasBeenHit) {
+                        // Restore simulation speed after a delay
+                        launch {
+                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -181,6 +175,7 @@ class EventsViewModel(
         onlyFavorites: Boolean = false,
         onlyDownloaded: Boolean = false
     ) {
+        mapChecker.refreshAvailability()
         viewModelScope.launch {
             _events.value = originalEvents.filter { event ->
                 when {
@@ -192,83 +187,4 @@ class EventsViewModel(
         }
     }
 
-    // ---------------------------
-
-    /**
-     * Start observing status for a list of events
-     */
-    private suspend fun startObservingEvents(events: List<IWWWEvent>) {
-        // Cancel any existing observation jobs first
-        cancelEventObservations()
-
-        // Build a new status map with initial values
-        val initialStatusMap = events.associate { event ->
-            event.id to (
-                    try {
-                        event.getStatus()
-                    } catch (e: Exception) {
-                        Log.e(::EventsViewModel.name, "Error getting status for event ${event.id}", e)
-                        IWWWEvent.Status.UNDEFINED
-                    }
-                    )
-        }.toMutableMap()
-
-        // Update the status map
-        _eventStatusMap.value = initialStatusMap
-
-        // Clear the status flow cache as the events list changed
-        eventStatusFlowCache.clear()
-
-        // Start observation for each event
-        events.forEach { event ->
-            startEventObservation(event)
-        }
-    }
-
-    /**
-     * Start observation for a single event
-     */
-    private fun startEventObservation(event: IWWWEvent) {
-        // Start the event's observation
-        event.startObservation()
-
-        // Create a job to collect the event's status changes
-        val job = event.eventStatus
-            .onEach { status ->
-                try {
-                    // Update our status map when the event's status changes
-                    val updatedMap = _eventStatusMap.value.toMutableMap()
-                    updatedMap[event.id] = status
-                    _eventStatusMap.value = updatedMap
-                } catch (e: Exception) {
-                    Log.e(::EventsViewModel.name, "Error updating status for event ${event.id}: ${e.message}", e)
-                }
-            }
-            .flowOn(Dispatchers.Default)
-            .launchIn(viewModelScope)
-
-        // Store the job for cancellation
-        eventObservationJobs[event.id] = job
-    }
-
-    /**
-     * Cancel all event observations
-     */
-    private fun cancelEventObservations() {
-        eventObservationJobs.forEach { (_, job) ->
-            job.cancel()
-        }
-        eventObservationJobs.clear()
-
-        originalEvents.forEach { event ->
-            event.stopObservation()
-        }
-    }
-
-    // ----------------------------
-
-    override fun onCleared() {
-        super.onCleared()
-        cancelEventObservations()
-    }
 }

@@ -1,28 +1,29 @@
 
+TODAY :
 
-regenerate (zooms): ALL
-- tehran
-- karashi
-- lagos
-- rome
-- tokyo
+- erreurs cartes : Jakarta, London
 
-- area: adapt the geojson to be cut on bbox if exists
-   - INSTEAD: add an optional thin bbox layer if it exists
-   - look at bboxIsOverride when refactoring by factory will have been done
+- erreurs wave : Dubai / Moscow / Shanghai / Tokyo
 
-- wave on tokyo does not work
+- !!!!!!! NOW :
+    - numbers ne se mettent pas a jour qd on switch de full a event
+    - plus de fleche sur wavescreen (you are IN / you are NOT IN ne fonctionne pas non plus)
+    --> p-e du a la modif dans stopObservation qui ne nettoie plus les flux ??
 
-issues (seen on klinshasa) :
-    - pb de wave dessin sur kinshasa ?
-    - pb de compteur aussi ??
-    - zoom trop eleve vs geojson ?
+- ==> autozoom in wave screen is not enough zoomed (test: sydney)
 
-- autozoom in wave screen is not enough zoomed (test: sydney)
-
-- recalcul de 'in the area' apres init du gps :
+- !! recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
-- tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+
+- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
+
+- GPS refresh (simulation + capteur active)
+
+- issue on large map zoom ? (ex: beijing)
+
+- !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+
+- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
 
 ---------------------------------------------
@@ -30,11 +31,12 @@ issues (seen on klinshasa) :
 Avril second part:
 
 - Packaging :
-    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - FIRST UPLOAD
+    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
-- Limit size taken by events in cached WWWEvents : clean on request after a certain size
+- Limit size taken by events in cached WWWEvents : clean on request after a certain size ==> Limit to 3 downloaded maps
 
 ------
 
@@ -45,28 +47,21 @@ Avril second part:
 
 - Production:
     - Fill-in FAQ Contents
-    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - licences / tools mentions
+    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
 
 ---------------------------------------------
 
 - PDF + Message + Planif presentation
+   -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
 
 ---------------------------------------------
-First push prive Play Store
----------------------------------------------
 
-- OPTIM: Wave split en tenant en compte les noeuds deja splites
-
-- add tests for all missing functions
-    - caching mechanism
-    - download of app features on app update / feature update
-- Add a full test for event behavior AND wave progression using listeners
+- Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation requests
-    - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
 
 ---------------------------------------------
 START IOS

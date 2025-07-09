@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -39,8 +39,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
@@ -49,6 +47,10 @@ import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
@@ -58,8 +60,10 @@ interface DataValidator {
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 interface IClock {
     fun now(): Instant
+    suspend fun delay(duration: Duration): Unit
 
     companion object {
         fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
@@ -71,6 +75,7 @@ interface IClock {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 class SystemClock : IClock, KoinComponent {
     private var platform : WWWPlatform? = null
 
@@ -87,6 +92,22 @@ class SystemClock : IClock, KoinComponent {
             Clock.System.now()
         }
     }
+
+    override suspend fun delay(duration: Duration): Unit {
+        val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
+
+        if (simulation != null) {
+            val speed = simulation.speed.takeIf { it > 0.0 } ?: run {
+                Napier.w("${SystemClock::class.simpleName}: Simulation speed is ${simulation.speed}, using 1.0 instead")
+                1.0
+            }
+            val adjustedDuration = duration / speed.toDouble()
+            kotlinx.coroutines.delay(adjustedDuration)
+        } else {
+            kotlinx.coroutines.delay(duration)
+        }
+    }
+
 }
 
 // ---------------------------
