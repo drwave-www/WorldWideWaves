@@ -39,13 +39,28 @@ cd "$(dirname "$0")" # always work from executable folder
 # -----------------------------------------------------------------------------
 
 if [ ! -z "$1" ]; then
-  if $(exists $1); then
-    EVENTS=$1
-    rm -f ./data/$1.mbtiles
-  else
-    echo "Unexistent event $1"
+  IFS=', ' read -ra EVENT_ARRAY <<< "$1"
+  VALID_EVENTS=()
+
+  for event in "${EVENT_ARRAY[@]}"; do
+    if [ -z "$event" ]; then
+      continue
+    fi
+
+    if $(exists "$event"); then
+      VALID_EVENTS+=("$event")
+      rm -f "./data/$event.mbtiles"
+    else
+      echo "Unexistent event(s): ${INVALID_EVENTS[*]}"
+    fi
+  done
+
+  if [ ${#VALID_EVENTS[@]} -eq 0 ]; then
+    echo "No valid events provided"
     exit 1
   fi
+
+  EVENTS="${VALID_EVENTS[*]}"
 fi
 
 for event in $EVENTS; do # Generate MBTILES files from PBF area files 
