@@ -493,22 +493,9 @@ let center = null;
 let zoom   = -1;                          // auto-calc by default
 let bbox   = null;
 
-/* --------------------------------------------------------------------------
- * Debug: inspect CLI optional arguments
- * -------------------------------------------------------------------------- */
-if (DEBUG) {
-    console.log('Debug: Remaining CLI args:', remaining);
-    console.log(
-        'Debug: isNumeric flags:',
-        remaining.map(v => `${v}:${isNumeric(v)}`)
-    );
-    console.log('Debug: remaining.length =', remaining.length);
-}
-
 // Detect “bbox mode” – exactly 4 numeric values
 if (remaining.length === 4 && remaining.every(isNumeric)) {
     bbox = remaining.map(Number);         // [minLng,minLat,maxLng,maxLat]
-    if (DEBUG) console.log('Debug: Detected bbox mode. Parsed bbox =', bbox);
 } else {
     // Legacy center/zoom mode
     if (remaining.length >= 2 && isNumeric(remaining[0]) && isNumeric(remaining[1])) {
@@ -517,7 +504,6 @@ if (remaining.length === 4 && remaining.every(isNumeric)) {
     if (remaining.length >= 3 && isNumeric(remaining[2])) {
         zoom = parseFloat(remaining[2]);
     }
-    if (DEBUG) console.log('Debug: Detected center/zoom mode.', { center, zoom });
 }
 
 renderMap({

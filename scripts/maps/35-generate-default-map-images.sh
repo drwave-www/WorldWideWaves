@@ -154,17 +154,13 @@ for event in $EVENTS; do
     # Output file path
     OUTPUT_FILE="$OUTPUT_DIR/e_map_${event}.png"
     
-    # ----------------------------------------------------------------------
-    # Detect if we have an explicit bbox in events.json.  If found, pass the
-    # four bbox values directly to the renderer (minLng minLat maxLng maxLat)
-    # so that render-map.js can bypass getGeojsonBounds().
-    # ----------------------------------------------------------------------
+    # Detect if we have an explicit bbox in events.json.
     BBOX_RAW=$(get_event_bbox "$event")
     NODE_EXTRA_ARGS=""
 
     if [ -n "$BBOX_RAW" ] && [ "$BBOX_RAW" != "null" ]; then
         IFS=',' read -r MIN_LNG MIN_LAT MAX_LNG MAX_LAT <<< "$BBOX_RAW"
-        NODE_EXTRA_ARGS="\"$MIN_LNG\" \"$MIN_LAT\" \"$MAX_LNG\" \"$MAX_LAT\""
+        NODE_EXTRA_ARGS="$MIN_LNG $MIN_LAT $MAX_LNG $MAX_LAT"
         echo "Rendering map for $event (using explicit area.bbox)"
     else
         echo "Rendering map for $event (bbox will be derived from GeoJSON)"
