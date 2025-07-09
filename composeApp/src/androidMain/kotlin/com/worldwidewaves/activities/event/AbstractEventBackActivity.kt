@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.event
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -24,6 +24,7 @@ package com.worldwidewaves.activities.event
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -57,6 +58,7 @@ import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
@@ -66,6 +68,7 @@ abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
 ) : MainActivity() {
 
+    private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
 
@@ -169,7 +172,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // Main activity UI building method to be implemented ---------------------
+    // Main activity UI building methode to be implemented --------------------
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 

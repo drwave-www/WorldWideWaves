@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -32,8 +32,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -42,8 +40,6 @@ import kotlin.jvm.JvmOverloads
 // ---------------------------
 
 class WWWEvents : KoinComponent {
-
-    private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
@@ -79,22 +75,15 @@ class WWWEvents : KoinComponent {
         onLoadingError?.let { addOnEventsErrorListener(it) }
         onTermination?.let { addOnTerminationListener(it) }
 
-        // Launch a coroutine to handle the mutex-protected loading
-        coroutineScopeProvider.launchIO {
-            loadingMutex.withLock {
-                // Double-check if events are already loaded after acquiring the lock
-                if (!eventsLoaded && loadingError == null) {
-                    currentLoadJob = loadEventsJob()
-                    currentLoadJob?.join() // Wait for the loading job to complete
-                }
-            }
+        if (!eventsLoaded) {
+            currentLoadJob?.cancel() // Cancel any ongoing load job
+            currentLoadJob = loadEventsJob()
         }
     }
 
     fun cancelLoading() {
         currentLoadJob?.cancel()
         currentLoadJob = null
-        loadingError = null
     }
 
     /**

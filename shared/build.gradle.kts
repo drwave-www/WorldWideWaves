@@ -100,14 +100,6 @@ android {
         implementation(libs.maplibre.android)
     }
 
-    /*
-     * Configure the Android test runner so that common JVM tests can be executed
-     * directly from Android Studio (Run/Debug-gutter icon or context menu).
-     */
-    testOptions {
-        unitTests.isReturnDefaultValues = true
-        unitTests.isIncludeAndroidResources = true
-    }
 }
 
 compose.resources {

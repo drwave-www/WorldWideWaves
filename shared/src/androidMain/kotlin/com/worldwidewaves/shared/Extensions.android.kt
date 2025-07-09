@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -26,11 +26,10 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.events.utils.close
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.geojson.Point
-import kotlin.time.ExperimentalTime
 
 /**
  * Converts a `BoundingBox` to a `LatLngBounds`.
@@ -45,7 +44,6 @@ fun BoundingBox.toLatLngBounds(): LatLngBounds = LatLngBounds.Builder()
         .include(LatLng(this.ne.lat, this.ne.lng)) // Northeast corner
         .build()
 
-@OptIn(ExperimentalTime::class)
 fun Position.toLocation(now: Instant): Location {
         val location = Location("custom_provider")
         location.latitude = this.lat

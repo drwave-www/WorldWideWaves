@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2025 DrWave
+# Copyright 2024 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
 # countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -138,16 +138,12 @@ adjust_bbox_to_16_9() {
     echo ""
     return
   fi
-  
-  # Print initial bbox to STDERR
-  echo "Initial bbox: $bbox" >&2
-  
+
   IFS=',' read -r minLng minLat maxLng maxLat <<< "$bbox"
-  
+
   # Validate numeric
   for v in "$minLng" "$minLat" "$maxLng" "$maxLat"; do
     if ! [[ $v =~ ^-?[0-9.]+$ ]]; then
-      echo "Invalid bbox format, returning original: $bbox" >&2
       echo "$bbox"
       return
     fi
@@ -164,49 +160,36 @@ adjust_bbox_to_16_9() {
   # Guard against zero height/width
   if [ "$(echo "$height == 0" | bc)" -eq 1 ] || \
      [ "$(echo "$width == 0"  | bc)" -eq 1 ]; then
-    echo "Zero width or height detected, returning original: $bbox" >&2
     echo "$bbox"
     return
   fi
 
   ratio=$(echo "$width / $height" | bc -l)
-  echo "Current ratio: $ratio (target: $targetRatio)" >&2
 
   # If already ~16/9 (within 1%), keep original
   if [ "$(echo "($ratio / $targetRatio) > 0.99 && ($ratio / $targetRatio) < 1.01" | bc -l)" -eq 1 ]; then
-    echo "Ratio already within 1% of target, no adjustment needed" >&2
-    local result
-    result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
-    echo "Final bbox: $result" >&2
-    echo "$result"
+    printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
     return
   fi
 
   # Expand logic
   if [ "$(echo "$ratio < $targetRatio" | bc -l)" -eq 1 ]; then
     # Too narrow → enlarge width
-    echo "Ratio too narrow, expanding width" >&2
     local newWidth delta
     newWidth=$(echo "$height * $targetRatio" | bc -l)
     delta=$(echo "$newWidth - $width" | bc -l)
-    echo "Width expansion: $width -> $newWidth (delta: $delta)" >&2
     minLng=$(echo "$minLng - $delta/2" | bc -l)
     maxLng=$(echo "$maxLng + $delta/2" | bc -l)
   else
     # Too wide → enlarge height
-    echo "Ratio too wide, expanding height" >&2
     local newHeight deltaH
     newHeight=$(echo "$width / $targetRatio" | bc -l)
     deltaH=$(echo "$newHeight - $height" | bc -l)
-    echo "Height expansion: $height → $newHeight (delta: $deltaH)" >&2
     minLat=$(echo "$minLat - $deltaH/2" | bc -l)
     maxLat=$(echo "$maxLat + $deltaH/2" | bc -l)
   fi
 
-  local result
-  result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
-  echo "Final bbox: $result" >&2
-  echo "$result"
+  printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
 }
 
 # Function to get the center for an event
@@ -236,13 +219,6 @@ get_event_center() {
   ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
 
-safe_replace() {
-  local pattern=$1
-  local value=$2
-  local escaped_value=$(echo "$value" | sed 's/[\/&~]/\\&/g')
-  echo "s~$pattern~$escaped_value~g"
-}
-
 # Function to replace placeholders in the template file with event configuration values
 # Usage: tpl <event_id> <template_file> <output_file>
 tpl() {
@@ -269,9 +245,9 @@ tpl() {
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
       # Use portable in-place editing for both GNU and BSD sed
       eval sed -i $SED_INPLACE_FLAG \
-        -e "\"$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")\"" \
-        -e "\"$(safe_replace "#map.center#" "$center")\"" \
-        -e "\"$(safe_replace "#map.bbox#" "$bbox")\"" \
+        -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
+        -e "s/#map.center#/$center/g" \
+        -e "s/#map.bbox#/$bbox/g" \
         "$tpl_file"
     fi
   done

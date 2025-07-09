@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.di
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -23,9 +23,9 @@ package com.worldwidewaves.shared.di
 
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.data.createDataStore
-import org.koin.core.KoinApplication
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.koin.test.check.checkModules
 import kotlin.test.Test
 
 class KoinTest : KoinTest {
@@ -37,7 +37,7 @@ class KoinTest : KoinTest {
             single { createDataStore { "/fake/path" } }
         }
 
-        fun KoinApplication.() {
+        checkModules {
             modules(sharedModule + testPlatformModule)
         }
     }

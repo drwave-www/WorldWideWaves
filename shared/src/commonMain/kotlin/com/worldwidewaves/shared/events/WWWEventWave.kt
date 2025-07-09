@@ -11,6 +11,7 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Napier
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.DrawableResource
@@ -20,12 +21,10 @@ import org.koin.core.component.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import kotlin.time.toDuration
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -45,14 +44,21 @@ import kotlin.time.toDuration
  * limitations under the License.
  */
 
-@OptIn(ExperimentalTime::class)
 @Serializable
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
     enum class Direction { WEST, EAST }
     enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
 
-    @OptIn(ExperimentalTime::class)
+    data class WaveNumbersLiterals(
+        val waveTimezone: String = "",
+        val waveSpeed: String = "..",
+        val waveStartTime: String = "..",
+        val waveEndTime: String = "..",
+        val waveTotalTime: String = "..",
+        val waveProgression: String = ".."
+    )
+
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
@@ -160,9 +166,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     /**
      * Retrieves the literal progression of the event as a percentage string.
      */
-    suspend fun getLiteralProgression(): String = getLiteralFromProgression(getProgression())
-    fun getLiteralFromProgression(progression: Double): String =
-        if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
+    suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.

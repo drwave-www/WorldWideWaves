@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.map
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -52,17 +52,16 @@ enum class MapCameraPosition {
 /**
  * Abstract base class for EventMap functionality that's shared across platforms
  */
-abstract class AbstractEventMap<T>(
+abstract class AbstractEventMap(
     protected val event: IWWWEvent,
     protected val mapConfig: EventMapConfig = EventMapConfig(),
     private val onLocationUpdate: (Position) -> Unit
 ) {
     // Properties that must be implemented by platform-specific subclasses
-    abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
+    abstract val mapLibreAdapter: MapLibreAdapter // MapLibre is native map library
     abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Class variables
-    private var constraintManager: MapConstraintManager? = null // Map constraint manager
     private var screenHeight: Double = 800.0
     private var screenWidth: Double = 600.0
     private var userHasBeenLocated = false
@@ -86,9 +85,7 @@ abstract class AbstractEventMap<T>(
      * Adjusts the camera to fit the bounds of the event map with proper aspect ratio
      */
     suspend fun moveToWindowBounds(onComplete: () -> Unit = {}) {
-        // Apply bounding constraints
-        constraintManager = MapConstraintManager(event.area.bbox(), mapLibreAdapter)
-        constraintManager?.applyConstraints()
+        mapLibreAdapter.setBoundsConstraints(event.area.bbox()) // Apply constraints first
 
         val (sw, ne) = event.area.bbox()
         val eventMapWidth = ne.lng - sw.lng
@@ -109,7 +106,7 @@ abstract class AbstractEventMap<T>(
             Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
         }
 
-        val bounds = BoundingBox.fromCorners(
+        val bounds = BoundingBox(
             Position(newSwLat, newSwLng),
             Position(newNeLat, newNeLng)
         )
@@ -165,7 +162,7 @@ abstract class AbstractEventMap<T>(
         val wavePosition = Position(userPosition.latitude, closestWaveLongitude)
 
         // Create the bounds containing user and wave positions
-        val bounds = BoundingBox.fromCorners(listOf(userPosition, wavePosition)) ?: return
+        val bounds = BoundingBox.fromPositions(listOf(userPosition, wavePosition)) ?: return
 
         // Get the area's bounding box
         val areaBbox = event.area.bbox()
@@ -175,7 +172,7 @@ abstract class AbstractEventMap<T>(
         val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
-        val newBounds = BoundingBox.fromCorners(
+        val newBounds = BoundingBox(
             Position(
                 maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
                 maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng)
@@ -195,68 +192,48 @@ abstract class AbstractEventMap<T>(
      * Sets up the map with initial configuration
      */
     fun setupMap(
-        map: T,
         scope: CoroutineScope,
-        stylePath: String,
+        screenWidth: Double,
+        screenHeight: Double,
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null
     ) {
-        // Pass the map to the adapter
-        mapLibreAdapter.setMap(map)
-
         // Set screen dimensions
-        this.screenWidth = mapLibreAdapter.getWidth()
-        this.screenHeight = mapLibreAdapter.getHeight()
+        this.screenWidth = screenWidth
+        this.screenHeight = screenHeight
 
-        mapLibreAdapter.setStyle(stylePath) {
+        // Set the click listener - platform-specific
+        mapLibreAdapter.setOnMapClickListener(onMapClick)
 
-            // Set Attribution margins to 0
-            mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
+        // Set the max zoom level from the event configuration
+        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
-            // Add an explicit zone if area bbox has been overridden regarding the GEOJson standard area
-            if (event.area.bboxIsOverride) {
-                scope.launch {
-                    mapLibreAdapter.drawOverridenBbox(event.area.bbox())
-                }
+        // Configure initial camera position
+        scope.launch {
+            when (mapConfig.initialCameraPosition) {
+                MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
+                MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
+                MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
+            }
+        }
+
+        // Start location updates
+        locationProvider?.startLocationUpdates { mapPosition ->
+
+            // Target user, the first time only
+            if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                targetUser()
+                userHasBeenLocated = true
             }
 
-            // Set the click listener - platform-specific
-            mapLibreAdapter.setOnMapClickListener(onMapClick)
+            if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
+                // Allow the wave to know the current location of the user for computations
+                event.wave.setPositionRequester { mapPosition }
 
-            // Set the max zoom level from the event configuration
-            mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+                // Notify caller
+                onLocationUpdate(mapPosition)
 
-            // Apply bounds constraints if required
-            mapLibreAdapter.addOnCameraIdleListener { constraintManager?.constrainCamera() }
-
-            // Configure initial camera position
-            scope.launch {
-                when (mapConfig.initialCameraPosition) {
-                    MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
-                    MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
-                    MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
-                }
-            }
-
-            // Start location updates
-            locationProvider?.startLocationUpdates { mapPosition ->
-
-                // Target user, the first time only
-                if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                    targetUser()
-                    userHasBeenLocated = true
-                }
-
-                if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
-                    // Allow the wave to know the current location of the user for computations
-                    event.wave.setPositionRequester { mapPosition }
-
-                    // Notify caller
-                    onLocationUpdate(mapPosition)
-
-                    // Save current known position on map
-                    lastKnownPosition = mapPosition
-                }
+                lastKnownPosition = mapPosition
             }
         }
     }
