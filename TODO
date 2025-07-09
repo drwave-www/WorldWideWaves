@@ -12,16 +12,13 @@ check bboxes on :
 - karashi
 - lagos
 
-- apply bbox visualisation on static map
-
-rgenerate:
+regenerate:
 - tehran
 - karashi
 - lagos
 - rome
 
-strange geojson on:
-- tokyo
+- wave on tokyo does not work ?
 
 - missing parts for correct map ratio with less zoom possible ?
 
