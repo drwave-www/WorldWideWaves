@@ -50,7 +50,7 @@ class WWWSimulationEnabledLocationEngine(
     private val platform: WWWPlatform by KoinJavaComponent.inject(WWWPlatform::class.java)
 
     private fun getSimulatedLocation(): Location? {
-        return if (platform.isUnderSimulation()) {
+        return if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
             simulation.getUserPosition().toLocation(simulation.now())
         } else null

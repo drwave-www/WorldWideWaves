@@ -41,7 +41,7 @@ import org.koin.dsl.module
 val applicationModule = module {
     single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
-    viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get()) }
+    viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
     viewModel { WaveViewModel(platform = get()) }
 
     single { SettingsScreen() }

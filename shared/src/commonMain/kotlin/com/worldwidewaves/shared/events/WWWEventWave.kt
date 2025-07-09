@@ -116,7 +116,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         try { platform = get() } catch (e: Exception) {
             Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
         }
-        return if (platform?.isUnderSimulation() == true) {
+        return if (platform?.isOnSimulation() == true) {
             platform.getSimulation()!!.getUserPosition()
         } else {
             positionRequester?.invoke()

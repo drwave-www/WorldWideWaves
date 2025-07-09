@@ -41,6 +41,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.math.abs
+import kotlin.random.Random
 
 // ---------------------------
 
@@ -130,6 +131,41 @@ data class WWWEventArea(
 
     private fun isPositionWithinEpsilon(pos1: Position, pos2: Position): Boolean {
         return abs(pos1.lat - pos2.lat) < positionEpsilon && abs(pos1.lng - pos2.lng) < positionEpsilon
+    }
+
+    // ---------------------------
+
+    /**
+     * Generates a random position within the event area.
+     * Makes multiple attempts to find a valid position within the area.
+     * Falls back to the center of the area if no valid position is found.
+     */
+    suspend fun generateRandomPositionInArea(): Position {
+        var bbox = event.area.bbox()
+        val maxAttempts = 50
+        var attempts = 0
+        var shrinkFactor = 1.0
+
+        while (attempts < maxAttempts && shrinkFactor > 0.1) {
+            val center = event.area.getCenter()
+            val latRange = (bbox.ne.lat - bbox.sw.lat) * shrinkFactor
+            val lngRange = (bbox.ne.lng - bbox.sw.lng) * shrinkFactor
+
+            repeat(20) { // Try 20 times with current shrink factor
+                val randomLat = center.lat + (Random.nextDouble() - 0.5) * latRange
+                val randomLng = center.lng + (Random.nextDouble() - 0.5) * lngRange
+                val position = Position(randomLat, randomLng)
+
+                if (event.area.isPositionWithin(position)) {
+                    return position
+                }
+            }
+
+            shrinkFactor *= 0.8 // Shrink the sampling area
+            attempts++
+        }
+
+        return event.area.getCenter()
     }
 
     // ---------------------------

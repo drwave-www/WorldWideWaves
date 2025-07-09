@@ -197,7 +197,7 @@ class EventsListScreen(
         mapStates: Map<String, Boolean>,
         onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit  // Add parameter for downloaded tab
+        onDownloadedEventsClicked: () -> Unit  // Add parameter for downloaded tab){}
     ) {
         Column(
             modifier = modifier

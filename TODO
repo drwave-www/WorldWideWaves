@@ -5,6 +5,8 @@
     - zoom tehran, tokyo, ... check all cities
     - delete warming zone in maps
 
+- autozoom in wave screen is not enough zoomed (test: sydney)
+
 - recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
 - tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming

@@ -81,7 +81,7 @@ class SystemClock : IClock, KoinComponent {
     }
 
     override fun now(): Instant {
-        return if (platform?.isUnderSimulation() == true) {
+        return if (platform?.isOnSimulation() == true) {
             platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()

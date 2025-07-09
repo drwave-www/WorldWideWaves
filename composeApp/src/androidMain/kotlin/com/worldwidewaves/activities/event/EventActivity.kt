@@ -22,8 +22,11 @@ package com.worldwidewaves.activities.event
  */
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +36,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,8 +53,10 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -55,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
 import com.worldwidewaves.compose.EventOverlayDone
@@ -78,6 +90,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -92,27 +106,32 @@ import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
+import com.worldwidewaves.theme.onPrimaryLight
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import kotlin.time.Duration.Companion.minutes
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class EventActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
+    private val platform: WWWPlatform by inject()
 
     // ------------------------------------------------------------------------
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
+        val scope = rememberCoroutineScope()
         val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
-        val endDateTime = remember(event) { mutableStateOf<Instant?>(null) }
+        val endDateTime = remember { mutableStateOf<Instant?>(null) }
 
         LaunchedEffect(event) {
             endDateTime.value = event.getEndDateTime()
@@ -140,21 +159,83 @@ class EventActivity : AbstractEventWaveActivity() {
         ObserveEventMap(event, eventMap)
 
         // Screen composition
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp)
-        ) {
-            EventOverlay(event, waveViewModel, observerId)
-            EventDescription(event)
-            DividerLine()
-            ButtonWave(event.id, eventStatus, endDateTime.value, clock)
-            eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            NotifyAreaUserPosition(waveViewModel, observerId)
-            EventNumbers(waveViewModel, observerId)
-            WWWEventSocialNetworks(event)
+        Box {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                EventOverlay(event, waveViewModel, observerId)
+                EventDescription(event)
+                DividerLine()
+                
+                // Wave button row with relative positioning for test button
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    ButtonWave(
+                        event.id, 
+                        eventStatus, 
+                        endDateTime.value, 
+                        clock,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                    
+                    // Debug test button
+                    if (BuildConfig.DEBUG) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 16.dp)
+                                .offset(y = (-8).dp)
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(onPrimaryLight)
+                                .clickable {
+                                    scope.launch {
+                                        // Generate random position within event area
+                                        val position = event.area.generateRandomPositionInArea()
+                                        
+                                        // Calculate time 5 minutes before event start
+                                        val simulationTime = event.getStartDateTime() - 5.minutes
+
+                                        // Reset any existing simulation
+                                        platform.disableSimulation()
+                                        
+                                        // Create new simulation with the calculated time and position
+                                        val simulation = WWWSimulation(
+                                            startDateTime = simulationTime,
+                                            userPosition = position,
+                                            initialSpeed = 50 // Use current default speed
+                                        )
+                                        
+                                        // Set the simulation
+                                        platform.setSimulation(simulation)
+                                        
+                                        // Show feedback
+                                        Toast.makeText(
+                                            context,
+                                            "Simulation Started",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Timer,
+                                contentDescription = "Test Simulation",
+                                tint = Color.Red,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+                
+                eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
+                NotifyAreaUserPosition(waveViewModel, observerId)
+                EventNumbers(waveViewModel, observerId)
+                WWWEventSocialNetworks(event)
+            }
         }
     }
-
 }
 
 // ----------------------------------------------------------------------------

@@ -71,11 +71,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.debug.SoundChoreographyTestMode
-import com.worldwidewaves.debug.SoundChoreographyTestModeOverlay
-import com.worldwidewaves.debug.SoundChoreographyTestModeToggle
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
@@ -129,7 +125,6 @@ class WaveActivity : AbstractEventWaveActivity() {
 
         // States
         var hasPlayedHitSound = false
-        var isTestModeEnabled by remember { mutableStateOf(SoundChoreographyTestMode.isEnabled()) }
 
         // Calculate height based on aspect ratio and available width
         val configuration = LocalConfiguration.current
@@ -194,18 +189,16 @@ class WaveActivity : AbstractEventWaveActivity() {
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
 
-                // Only show WaveHitCounter here when choreography is NOT active
                 if (!isChoreographyActive) {
                     Spacer(modifier = Modifier.weight(1f))
                     WaveHitCounter(waveViewModel, observerId, clock)
-                    Spacer(modifier = Modifier.height(60.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
                 }
             }
 
             WaveChoreographies(event, waveViewModel, observerId, clock, Modifier
                 .zIndex(10f))
 
-            // Position WaveHitCounter at bottom when choreography is active
             if (isChoreographyActive) {
                 WaveHitCounter(
                     waveViewModel,
@@ -219,34 +212,6 @@ class WaveActivity : AbstractEventWaveActivity() {
             }
 
             // ----------------------------------------------------------------
-            // Test-mode UI (only visible in debug builds)
-            // ----------------------------------------------------------------
-            if (BuildConfig.DEBUG) {
-                // Toggle button to enable/disable the test overlay
-                SoundChoreographyTestModeToggle(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
-                        .zIndex(20f),
-                    onToggle = { enabled ->
-                        isTestModeEnabled = enabled
-                    }
-                )
-
-                // Overlay itself
-                if (isTestModeEnabled) {
-                    SoundChoreographyTestModeOverlay(
-                        event = event,
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .zIndex(30f),
-                        onClose = {
-                            SoundChoreographyTestMode.setEnabled(false)
-                            isTestModeEnabled = false
-                        }
-                    )
-                }
-            }
         }
     }
 

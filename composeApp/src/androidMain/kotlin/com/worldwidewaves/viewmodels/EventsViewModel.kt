@@ -13,6 +13,7 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -42,7 +43,8 @@ import kotlinx.coroutines.sync.withLock
  */
 class EventsViewModel(
     private val wwwEvents: WWWEvents,
-    private val mapChecker: MapAvailabilityChecker
+    private val mapChecker: MapAvailabilityChecker,
+    private val platform: WWWPlatform
 ) : ViewModel() {
 
     private val originalEventsMutex = Mutex()
@@ -75,9 +77,39 @@ class EventsViewModel(
 
     init {
         loadEvents()
+        observeSimulationChanges()
     }
 
     // ---------------------------
+
+    /**
+     * Observe simulation change counter from [WWWPlatform] and restart
+     * event observations whenever the simulation context is modified.
+     */
+    private fun observeSimulationChanges() { // Hack for simulation handling on non-observed events
+        platform.simulationChanged
+            .onEach { changeCount ->
+                if (changeCount > 0) {
+                    Log.d(::EventsViewModel.name, "Simulation changed ($changeCount), restarting observations")
+                    restartEventObservations()
+                }
+            }
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
+    }
+
+    /**
+     * Restart observations for all currently loaded events, respecting mutex protection.
+     */
+    private fun restartEventObservations() {
+        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
+            originalEventsMutex.withLock {
+                if (originalEvents.isNotEmpty()) {
+                    startObservingEvents(originalEvents)
+                }
+            }
+        }
+    }
 
     /**
      * Load events from the data source
