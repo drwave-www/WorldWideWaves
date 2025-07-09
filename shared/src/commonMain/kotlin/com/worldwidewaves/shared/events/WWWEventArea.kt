@@ -60,6 +60,10 @@ data class WWWEventArea(
 
     // ---------------------------
 
+    val bboxIsOverride: Boolean by lazy { parseBboxString() != null }
+
+    // ---------------------------
+
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 

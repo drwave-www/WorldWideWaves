@@ -1,9 +1,6 @@
 
 
-admin/bbox:
-- santiago
-
-regenerate (zooms):
+regenerate (zooms): ALL
 - tehran
 - karashi
 - lagos
@@ -12,10 +9,9 @@ regenerate (zooms):
 
 - area: adapt the geojson to be cut on bbox if exists
    - INSTEAD: add an optional thin bbox layer if it exists
+   - look at bboxIsOverride when refactoring by factory will have been done
 
 - wave on tokyo does not work
-
-- missing parts for correct map ratio with less zoom possible ?
 
 issues (seen on klinshasa) :
     - pb de wave dessin sur kinshasa ?
