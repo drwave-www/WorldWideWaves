@@ -61,10 +61,15 @@ import com.worldwidewaves.compose.DownloadProgressIndicator
 import com.worldwidewaves.compose.ErrorMessage
 import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.generated.resources.map_download
+import com.worldwidewaves.shared.generated.resources.map_downloading
+import com.worldwidewaves.shared.generated.resources.map_error_download
+import com.worldwidewaves.shared.generated.resources.map_loading
+import com.worldwidewaves.shared.generated.resources.map_starting_download
+import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
@@ -75,13 +80,13 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.inject
 import org.maplibre.android.MapLibre
@@ -97,6 +102,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.geojson.Polygon
 import java.io.File
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 /**
  * Android-specific implementation of the EventMap
@@ -184,7 +190,7 @@ class AndroidEventMap(
             // Default map image as background
             Image(
                 modifier = Modifier.fillMaxSize(),
-                painter = painterResource(event.getMapImage() as DrawableResource),
+                painter = painterResource(getEventImage("map", event.id) as DrawableResource),
                 contentDescription = "defaultMap",
                 contentScale = ContentScale.Crop
             )
@@ -218,16 +224,16 @@ class AndroidEventMap(
                                     is MapFeatureState.Downloading -> {
                                         DownloadProgressIndicator(
                                             progress = state.progress,
-                                            message = stringResource(MokoRes.strings.map_downloading),
+                                            message = stringResource(ShRes.string.map_downloading),
                                             onCancel = { mapViewModel.cancelDownload() }
                                         )
                                     }
                                     is MapFeatureState.Pending -> {
-                                        LoadingIndicator(message = stringResource(MokoRes.strings.map_starting_download))
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_starting_download))
                                     }
                                     is MapFeatureState.Retrying -> {
                                         DownloadProgressIndicator(
-                                            message = "${stringResource(MokoRes.strings.map_retrying_download)} (${state.attempt}/${state.maxAttempts})...",
+                                            message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
                                             onCancel = {
                                                 isMapDownloading = false
                                                 mapViewModel.cancelDownload()
@@ -236,7 +242,7 @@ class AndroidEventMap(
                                     }
                                     else -> {
                                         // Generic loading indicator for other download states
-                                        LoadingIndicator(message = stringResource(MokoRes.strings.map_loading))
+                                        LoadingIndicator(message = stringResource(ShRes.string.map_loading))
                                     }
                                 }
                             }
@@ -247,7 +253,7 @@ class AndroidEventMap(
                     // Show error with retry option
                     Surface(modifier = Modifier.fillMaxSize()) {
                         ErrorMessage(
-                            message = stringResource(MokoRes.strings.map_error_download),
+                            message = stringResource(ShRes.string.map_error_download),
                             onRetry = {
                                 mapError = false
                                 mapViewModel.downloadMap(event.id)
@@ -275,7 +281,7 @@ class AndroidEventMap(
                             )
                         ) {
                             Text(
-                                text = stringResource(MokoRes.strings.map_download),
+                                text = stringResource(ShRes.string.map_download),
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )

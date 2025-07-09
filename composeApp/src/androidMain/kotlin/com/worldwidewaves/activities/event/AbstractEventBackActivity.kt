@@ -30,17 +30,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,18 +48,19 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
@@ -133,29 +129,17 @@ abstract class AbstractEventBackActivity(
                     )
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Row(
+                    Text(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .clickable { finish() },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(MokoRes.strings.back),
-                            modifier = Modifier
-                                .size(20.dp)
-                                .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
-                        )
-                    }
+                            .clickable(onClick = { finish() }),
+                        text = "< " + stringResource(ShRes.string.back),
+                        style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
+                    )
                     if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
-                            text = stringResource(selectedEvent!!.getLocation()),
+                            text = selectedEvent!!.location.uppercase(),
                             style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )

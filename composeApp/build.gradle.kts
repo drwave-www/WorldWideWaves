@@ -18,7 +18,6 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-    implementation(libs.j2objc.annotations)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
@@ -70,10 +69,6 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
     }
     compileOptions {

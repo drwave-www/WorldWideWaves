@@ -6,6 +6,7 @@
       "frame_height": 900,
       "frame_count": 3,
       "timing": "PT1S",
+      "text": "Raise your hands!",
       "loop": true,
       "duration": "PT25S"
     },
@@ -15,6 +16,7 @@
       "frame_height": 900,
       "frame_count": 4,
       "timing": "PT1S",
+      "text": "Clap left and right!",
       "loop": true,
       "duration": "PT25S"
     },
@@ -24,6 +26,7 @@
       "frame_height": 900,
       "frame_count": 3,
       "timing": "PT1S",
+      "text": "Back windmill!",
       "loop": true,
       "duration": "PT25S"
     },
@@ -33,6 +36,7 @@
       "frame_height": 900,
       "frame_count": 4,
       "timing": "PT1S",
+      "text": "Go down and up!",
       "loop": true,
       "duration": "PT25S"
     },
@@ -42,6 +46,7 @@
       "frame_height": 900,
       "frame_count": 3,
       "timing": "PT1S",
+      "text": "Show the wave!",
       "loop": true,
       "duration": "PT25S"
     },
@@ -51,6 +56,7 @@
       "frame_height": 900,
       "frame_count": 2,
       "timing": "PT1S",
+      "text": "Cross arms!",
       "loop": true,
       "duration": "PT25S"
     }
@@ -61,6 +67,7 @@
     "frame_height": 900,
     "frame_count": 3,
     "timing": "PT2S",
+    "text": "Prepare to wave!",
     "loop": false
   },
   "hit_sequence": {
@@ -69,6 +76,7 @@
     "frame_height": 900,
     "frame_count": 3,
     "timing": "PT0.3S",
+    "text": "Wave now!",
     "loop": false
   }
 }

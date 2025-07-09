@@ -65,6 +65,7 @@ data class ChoreographySequence(
      * If empty, a default of 1 second per frame will be assumed.
      */
     val timing: Duration,
+    val text: String = "", // Text to display with the sequence
     val loop: Boolean = true, // Whether to loop the sequence
     val duration: Duration? = 10.seconds // Total duration for this sequence
 ) {

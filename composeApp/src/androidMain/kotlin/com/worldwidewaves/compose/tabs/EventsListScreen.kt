@@ -22,7 +22,6 @@ package com.worldwidewaves.compose.tabs
  */
 
 import android.content.Intent
-import android.text.BidiFormatter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,7 +75,6 @@ import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -96,8 +94,23 @@ import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
+import com.worldwidewaves.shared.generated.resources.event_favorite_off
+import com.worldwidewaves.shared.generated.resources.event_favorite_on
+import com.worldwidewaves.shared.generated.resources.events_cannot_uninstall_map_message
+import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
+import com.worldwidewaves.shared.generated.resources.events_empty
+import com.worldwidewaves.shared.generated.resources.events_favorites_empty
+import com.worldwidewaves.shared.generated.resources.events_loading_error
+import com.worldwidewaves.shared.generated.resources.events_select_all
+import com.worldwidewaves.shared.generated.resources.events_select_downloaded
+import com.worldwidewaves.shared.generated.resources.events_select_starred
+import com.worldwidewaves.shared.generated.resources.events_uninstall
+import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
+import com.worldwidewaves.shared.generated.resources.events_uninstall_map_title
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.shared.generated.resources.map_downloaded
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
@@ -105,12 +118,10 @@ import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
-import dev.icerock.moko.resources.compose.stringResource
-import com.worldwidewaves.shared.format.DateTimeFormats
-import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
@@ -264,7 +275,7 @@ class EventsListScreen(
                     onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
                     fontWeight = allWeight,
-                    text = stringResource(MokoRes.strings.events_select_all)
+                    text = stringResource(ShRes.string.events_select_all)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(0.5f),
@@ -272,7 +283,7 @@ class EventsListScreen(
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
                     fontWeight = starredWeight,
-                    text = stringResource(MokoRes.strings.events_select_starred)
+                    text = stringResource(ShRes.string.events_select_starred)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(1f),
@@ -280,7 +291,7 @@ class EventsListScreen(
                     onClick = onDownloadedEventsClicked,
                     textColor = downloadedColor.onColor,
                     fontWeight = downloadedWeight,
-                    text = stringResource(MokoRes.strings.events_select_downloaded)
+                    text = stringResource(ShRes.string.events_select_downloaded)
                 )
             }
         }
@@ -342,10 +353,10 @@ class EventsListScreen(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(
                             when {
-                                hasLoadingError -> MokoRes.strings.events_loading_error
-                                starredSelected -> MokoRes.strings.events_favorites_empty
-                                downloadedSelected -> MokoRes.strings.events_downloaded_empty
-                                else -> MokoRes.strings.events_empty
+                                hasLoadingError -> ShRes.string.events_loading_error
+                                starredSelected -> ShRes.string.events_favorites_empty
+                                downloadedSelected -> ShRes.string.events_downloaded_empty
+                                else -> ShRes.string.events_empty
                             }
                         ),
                         style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
@@ -393,7 +404,7 @@ class EventsListScreen(
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.TopCenter,
                     painter = painterResource(event.getLocationImage() as DrawableResource),
-                    contentDescription = stringResource(event.getLocation())
+                    contentDescription = event.location
                 )
             }
 
@@ -479,19 +490,19 @@ class EventsListScreen(
                         .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
                         .clickable { showUninstallDialog = true }, // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
-                    contentDescription = stringResource(MokoRes.strings.map_downloaded),
+                    contentDescription = stringResource(ShRes.string.map_downloaded),
                 )
 
                 // Show confirmation dialog when clicked
                 if (showUninstallDialog) {
                     AlertDialog(
                         onDismissRequest = { showUninstallDialog = false },
-                        title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
+                        title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
                         text = {
                             if (canUninstall) {
-                                Text(stringResource(MokoRes.strings.events_uninstall_map_confirmation))
+                                Text(stringResource(ShRes.string.events_uninstall_map_confirmation))
                             } else {
-                                Text(stringResource(MokoRes.strings.events_cannot_uninstall_map_message))
+                                Text(stringResource(ShRes.string.events_cannot_uninstall_map_message))
                             }
                         },
                         confirmButton = {
@@ -529,14 +540,14 @@ class EventsListScreen(
                                         if (isUninstalling)
                                             "..."
                                         else
-                                            stringResource(MokoRes.strings.events_uninstall)
+                                            stringResource(ShRes.string.events_uninstall)
                                     )
                                 }
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showUninstallDialog = false }) {
-                                Text(stringResource(MokoRes.strings.events_uninstall_cancel))
+                                Text(stringResource(ShRes.string.events_uninstall_cancel))
                             }
                         }
                     )
@@ -548,18 +559,18 @@ class EventsListScreen(
         if (showUninstallResult) {
             AlertDialog(
                 onDismissRequest = { showUninstallResult = false },
-                title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
+                title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
                 text = {
                     Text(
                         if (uninstallSucceeded)
-                            stringResource(MokoRes.strings.events_uninstall_completed)
+                            "Uninstall completed"
                         else
-                            stringResource(MokoRes.strings.events_uninstall_failed)
+                            "Uninstall failed"
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = { showUninstallResult = false }) {
-                        Text(stringResource(MokoRes.strings.ok))
+                        Text("OK")
                     }
                 }
             )
@@ -603,7 +614,7 @@ class EventsListScreen(
                             }
                         },
                     painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-                    contentDescription = stringResource(if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off),
+                    contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
                 )
             }
         }
@@ -612,14 +623,8 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
-    @OptIn(kotlin.time.ExperimentalTime::class)
     private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
-        val eventDate = remember(event.id) {
-            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
-        }
-        val bidi = BidiFormatter.getInstance()
-        val countryText = bidi.unicodeWrap(stringResource(event.getLiteralCountry()))
-        val communityText = bidi.unicodeWrap(stringResource(event.getLiteralCommunity()))
+        val eventDate = event.getLiteralStartDateSimple()
 
         Box(modifier = modifier) {
             Column {
@@ -629,7 +634,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = stringResource(event.getLocation()),
+                        text = event.location.uppercase(),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
                     )
                     Text(
@@ -645,7 +650,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = countryText,
+                        text = event.getLiteralCountry(),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
@@ -655,7 +660,7 @@ class EventsListScreen(
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
                     Text(
-                        text = communityText,
+                        text = event.getLiteralCommunity(),
                         style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
