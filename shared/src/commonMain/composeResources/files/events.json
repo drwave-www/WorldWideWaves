@@ -547,7 +547,7 @@
       }
     },
     "area": { "osmAdminids": [1543125], "bbox": "138.822556,35.450628,139.994659,35.989700" },
-    "map": { "minZoom": 8, "maxZoom": 17, "language": "ja", "zone": "asia/japan" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "ja", "zone": "asia/japan" }
   },
   {
     "id": "seoul_south_korea",
