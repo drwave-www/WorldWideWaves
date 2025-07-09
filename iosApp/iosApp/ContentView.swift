@@ -31,14 +31,64 @@ struct ContentView: View {
     }
     
     var body: some View {
-        // `list()` returns `[any IWWWEvent]`, not a concrete `WWWEvent` array.
-        let events: [any IWWWEvent] = self.wwwEvents.list()
-
-        List(events, id: \.id) { event in
-            Text(event.location)
+        Group {
+            if isLoading {
+                ProgressView("Loading events…")
+            } else if let error = errorMessage {
+                VStack(spacing: 8) {
+                    Text("Failed to load events")
+                        .font(.headline)
+                    Text(error)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                }
+                .padding()
+            } else {
+                List(events, id: \.id) { event in
+                    Text(event.location)
+                }
+            }
+        }
+        .onAppear {
+            // Trigger loading only if we have no events yet and we're not already loading.
+            if events.isEmpty && !isLoading {
+                loadEvents()
+            }
         }
     }
     
+    // MARK: - Private state & helpers
+
+    @State
+    private var events: [any IWWWEvent] = []
+    
+    @State
+    private var isLoading: Bool = false
+    
+    @State
+    private var errorMessage: String? = nil
+    
+    /// Loads events using the shared `WWWEvents` instance.
+    private func loadEvents() {
+        // Set initial loading state
+        isLoading = true
+        errorMessage = nil
+        
+        _ = wwwEvents.loadEvents(
+            onLoaded: {
+                DispatchQueue.main.async {
+                    self.events = self.wwwEvents.list()
+                    self.isLoading = false
+                }
+            },
+            onLoadingError: { error in
+                DispatchQueue.main.async {
+                    self.errorMessage = error.message ?? "Unknown error"
+                    self.isLoading = false
+                }
+            }
+        )
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
