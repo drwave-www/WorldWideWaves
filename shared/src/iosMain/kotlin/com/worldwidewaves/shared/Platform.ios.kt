@@ -47,8 +47,7 @@ fun initKoinIOS() {
  * Platform descriptor for iOS.  
  * Simply instantiate the common `WWWPlatform` with the device name/version.
  */
-actual fun getPlatform(): WWWPlatform =
-    WWWPlatform("${UIDevice.currentDevice.systemName()} ${UIDevice.currentDevice.systemVersion}")
+
 
 actual fun getEventImage(type: String, id: String): Any? {
     TODO("Not yet implemented")

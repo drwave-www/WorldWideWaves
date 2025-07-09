@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.utils
 import io.github.aakira.napier.Napier
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGImageCreateWithImageInRect
 import platform.Foundation.NSBundle
 import platform.UIKit.UIImage
 
@@ -94,7 +93,7 @@ class IOSImageResolver : ImageResolver<UIImage> {
             val frameRect = CGRectMake(x, y, width, height)
             
             // Extract the frame as a new CGImage
-            val frameCGImage = CGImageCreateWithImageInRect(cgImage, frameRect) ?: run {
+            val frameCGImage = cgImage.cropping(to = frameRect) ?: run {
                 Napier.e("Failed to create frame CGImage for $path at index $frameIndex")
                 return null
             }
