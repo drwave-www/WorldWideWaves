@@ -180,7 +180,7 @@ data class WWWEventArea(
                 // Parse the string "minLng, minLat, maxLng, maxLat"
                 val coordinates = bbox.split(",").map { it.trim().toDouble() }
                 if (coordinates.size >= 4) {
-                    return BoundingBox.fromPositions(
+                    return BoundingBox.fromCorners(
                         sw = Position(lat = coordinates[1], lng = coordinates[0]),
                         ne = Position(lat = coordinates[3], lng = coordinates[2])
                     )
@@ -208,7 +208,7 @@ data class WWWEventArea(
         return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
-            } ?: BoundingBox.fromPositions(Position(0.0, 0.0), Position(0.0, 0.0))
+            } ?: BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
     }
 
     /**

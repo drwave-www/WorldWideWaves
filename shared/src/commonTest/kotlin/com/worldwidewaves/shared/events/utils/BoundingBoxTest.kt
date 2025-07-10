@@ -74,7 +74,7 @@ class BoundingBoxTest {
     fun testBoundingBoxInitialization() {
         val sw = Position(0.0, 0.0)
         val ne = Position(1.0, 1.0)
-        val bbox = BoundingBox.fromPositions(sw, ne)
+        val bbox = BoundingBox.fromCorners(sw, ne)
         assertEquals(sw, bbox.sw)
         assertEquals(ne, bbox.ne)
     }
@@ -279,7 +279,7 @@ class BoundingBoxTest {
             Position(1.0, 1.0),
             Position(-1.0, -1.0)
         )
-        val bbox = BoundingBox.fromPositions(positions)
+        val bbox = BoundingBox.fromCorners(positions)
         assertEquals(-1.0, bbox?.minLatitude)
         assertEquals(-1.0, bbox?.minLongitude)
         assertEquals(1.0, bbox?.maxLatitude)
@@ -288,7 +288,7 @@ class BoundingBoxTest {
 
     @Test
     fun `fromPositions should return null for empty list`() {
-        val bbox = BoundingBox.fromPositions(emptyList())
+        val bbox = BoundingBox.fromCorners(emptyList())
         assertNull(bbox)
     }
 

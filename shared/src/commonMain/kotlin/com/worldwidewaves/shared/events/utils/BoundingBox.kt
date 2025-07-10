@@ -42,7 +42,7 @@ class BoundingBox private constructor(val sw: Position, val ne: Position) {
     // --- Companion object
 
     companion object {
-        fun fromPositions(sw: Position, ne: Position): BoundingBox {
+        fun fromCorners(sw: Position, ne: Position): BoundingBox {
             return if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
                 // Already in correct order, no need to create new objects
                 BoundingBox(sw, ne)
@@ -54,7 +54,7 @@ class BoundingBox private constructor(val sw: Position, val ne: Position) {
             }
         }
 
-        fun fromPositions(positions: List<Position>): BoundingBox? {
+        fun fromCorners(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
             val maxLat = positions.maxOf { it.lat }

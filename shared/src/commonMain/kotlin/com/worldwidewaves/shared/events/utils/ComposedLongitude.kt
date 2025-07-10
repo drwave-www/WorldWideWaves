@@ -172,7 +172,7 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return changes <= 5 && distinctSigns <= 3 && nonZeroChanges <= 3
     }
 
-    fun bbox(): BoundingBox = BoundingBox.fromPositions(
+    fun bbox(): BoundingBox = BoundingBox.fromCorners(
         sw = Position(swLat, swLng),
         ne = Position(neLat, neLng)
     )

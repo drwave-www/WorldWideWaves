@@ -13,22 +13,22 @@ class MapConstraintManagerTest {
     val mockMapLibreAdapter : MapLibreAdapter<*> = mockk()
 
     // Test fixtures with realistic map bounds
-    private val sanFranciscoBounds = BoundingBox.fromPositions(
+    private val sanFranciscoBounds = BoundingBox.fromCorners(
         Position(37.7079, -122.5181),  // Southwest corner
         Position(37.8199, -122.3786)   // Northeast corner
     )
     
-    private val tokyoBounds = BoundingBox.fromPositions(
+    private val tokyoBounds = BoundingBox.fromCorners(
         Position(35.5979, 139.6823),  // Southwest corner
         Position(35.7185, 139.8628)   // Northeast corner
     )
     
-    private val smallIslandBounds = BoundingBox.fromPositions(
+    private val smallIslandBounds = BoundingBox.fromCorners(
         Position(-0.01, -0.01),  // Very small area
         Position(0.01, 0.01)
     )
     
-    private val worldBounds = BoundingBox.fromPositions(
+    private val worldBounds = BoundingBox.fromCorners(
         Position(-90.0, -180.0),  // Full world
         Position(90.0, 180.0)
     )
@@ -79,7 +79,7 @@ class MapConstraintManagerTest {
         )
         
         // Valid bounds that contain the center position
-        val validBounds = BoundingBox.fromPositions(
+        val validBounds = BoundingBox.fromCorners(
             Position(center.latitude - 0.01, center.longitude - 0.01),
             Position(center.latitude + 0.01, center.longitude + 0.01)
         )
@@ -100,7 +100,7 @@ class MapConstraintManagerTest {
         )
         
         // Bounds that are too small (less than 10% of padding)
-        val tooSmallBounds = BoundingBox.fromPositions(
+        val tooSmallBounds = BoundingBox.fromCorners(
             Position(center.latitude - 0.001, center.longitude - 0.001),
             Position(center.latitude + 0.001, center.longitude + 0.001)
         )
@@ -119,7 +119,7 @@ class MapConstraintManagerTest {
         )
         
         // Bounds that don't contain the position
-        val boundsNotContainingPosition = BoundingBox.fromPositions(
+        val boundsNotContainingPosition = BoundingBox.fromCorners(
             Position(sanFranciscoBounds.southwest.latitude, sanFranciscoBounds.southwest.longitude),
             Position(sanFranciscoBounds.northeast.latitude - 0.1, sanFranciscoBounds.northeast.longitude - 0.1)
         )
@@ -140,7 +140,7 @@ class MapConstraintManagerTest {
         )
         
         // Bounds that don't contain the position but are close
-        val boundsNearPosition = BoundingBox.fromPositions(
+        val boundsNearPosition = BoundingBox.fromCorners(
             Position(sanFranciscoBounds.southwest.latitude, sanFranciscoBounds.southwest.longitude),
             Position(sanFranciscoBounds.northeast.latitude, sanFranciscoBounds.northeast.longitude)
         )
