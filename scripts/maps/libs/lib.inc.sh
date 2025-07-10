@@ -219,6 +219,13 @@ get_event_center() {
   ./libs/get_bbox.dep.sh "$osmAdminids" center
 }
 
+safe_replace() {
+  local pattern=$1
+  local value=$2
+  local escaped_value=$(echo "$value" | sed 's/[\/&~]/\\&/g')
+  echo "s~$pattern~$escaped_value~g"
+}
+
 # Function to replace placeholders in the template file with event configuration values
 # Usage: tpl <event_id> <template_file> <output_file>
 tpl() {
@@ -245,9 +252,9 @@ tpl() {
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
       # Use portable in-place editing for both GNU and BSD sed
       eval sed -i $SED_INPLACE_FLAG \
-        -e "s/#${prop}#/$(conf "$event" "$prop" | sed 's/\//\\\//g')/g" \
-        -e "s/#map.center#/$center/g" \
-        -e "s/#map.bbox#/$bbox/g" \
+        -e "$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")" \
+        -e "$(safe_replace "#map.center#" "$center")" \
+        -e "$(safe_replace "#map.bbox#" "$bbox")" \
         "$tpl_file"
     fi
   done
