@@ -130,7 +130,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)
             val constraintBoundsMapped = constraintBounds?.let { bounds ->
-                BoundingBox.create(
+                BoundingBox.fromPositions(
                     Position(bounds.southwest.latitude, bounds.southwest.longitude),
                     Position(bounds.northeast.latitude, bounds.northeast.longitude)
                 )
@@ -180,7 +180,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
     }
 
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
-        return BoundingBox.create(
+        return BoundingBox.fromPositions(
             Position(
                 mapBounds.southwest.latitude + padding.latPadding,
                 mapBounds.southwest.longitude + padding.lngPadding
@@ -259,7 +259,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
         val finalNorth = min(mapBounds.northeast.latitude, max(safeNorth, safeSouth + minLatSpan))
         val finalEast = min(mapBounds.northeast.longitude, max(safeEast, safeWest + minLngSpan))
 
-        return BoundingBox.create(
+        return BoundingBox.fromPositions(
             Position(safeSouth, safeWest),
             Position(finalNorth, finalEast)
         )

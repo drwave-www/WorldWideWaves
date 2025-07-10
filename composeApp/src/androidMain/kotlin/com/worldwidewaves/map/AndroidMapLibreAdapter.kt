@@ -191,7 +191,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun getVisibleRegion(): BoundingBox {
         require(mapLibreMap != null)
         return mapLibreMap!!.projection.visibleRegion.let { visibleRegion ->
-            BoundingBox.create(
+            BoundingBox.fromPositions(
                 Position(visibleRegion.latLngBounds.getLatSouth(), visibleRegion.latLngBounds.getLonWest()),
                 Position(visibleRegion.latLngBounds.getLatNorth(), visibleRegion.latLngBounds.getLonEast())
             )

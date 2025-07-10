@@ -121,7 +121,7 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         if (!boundingBoxValid) {
             updateBoundingBox()
         }
-        return BoundingBox.create(
+        return BoundingBox.fromPositions(
             sw = Position(minLat, minLng),
             ne = Position(maxLat, maxLng)
         )

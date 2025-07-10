@@ -74,7 +74,7 @@ class BoundingBoxTest {
     fun testBoundingBoxInitialization() {
         val sw = Position(0.0, 0.0)
         val ne = Position(1.0, 1.0)
-        val bbox = BoundingBox(sw, ne)
+        val bbox = BoundingBox.fromPositions(sw, ne)
         assertEquals(sw, bbox.sw)
         assertEquals(ne, bbox.ne)
     }

@@ -109,7 +109,7 @@ abstract class AbstractEventMap<T>(
             Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
         }
 
-        val bounds = BoundingBox.create(
+        val bounds = BoundingBox.fromPositions(
             Position(newSwLat, newSwLng),
             Position(newNeLat, newNeLng)
         )
@@ -175,7 +175,7 @@ abstract class AbstractEventMap<T>(
         val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
-        val newBounds = BoundingBox.create(
+        val newBounds = BoundingBox.fromPositions(
             Position(
                 maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
                 maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng)

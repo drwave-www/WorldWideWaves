@@ -442,7 +442,7 @@ object PolygonUtils {
             )
         }
 
-        return BoundingBox.create(
+        return BoundingBox.fromPositions(
             sw = Position(minLat, minLng),
             ne = Position(maxLat, maxLng)
         )

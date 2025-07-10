@@ -42,7 +42,7 @@ class BoundingBox private constructor(val sw: Position, val ne: Position) {
     // --- Companion object
 
     companion object {
-        fun create(sw: Position, ne: Position): BoundingBox {
+        fun fromPositions(sw: Position, ne: Position): BoundingBox {
             return if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
                 // Already in correct order, no need to create new objects
                 BoundingBox(sw, ne)

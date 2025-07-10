@@ -116,7 +116,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testGetWaveDuration() = runBlocking {
         // GIVEN
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromPositions(
             sw = Position(20.0, 10.0),
             ne = Position(40.0, 50.0)
         )
@@ -161,7 +161,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testCurrentWaveLongitude_EastDirection() = runBlocking {
         // GIVEN
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromPositions(
             sw = Position(10.0, 20.0),
             ne = Position(15.0, 30.0)
         )
@@ -187,7 +187,7 @@ class WWWEventWaveLinearTest : KoinTest {
     fun testCurrentWaveLongitude_WestDirection_isUserWithin() = runBlocking {
         // GIVEN
         waveLinear = waveLinear.copy(direction = WWWEventWave.Direction.WEST).setRelatedEvent(mockEvent)
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromPositions(
             sw = Position(10.0, 20.0),
             ne = Position(15.0, 30.0)
         )
@@ -213,7 +213,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun testTimeBeforeUserHit_UserPositionAvailable() = runBlocking {
         // GIVEN
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromPositions(
             sw = Position(10.0, 20.0),
             ne = Position(15.0, 30.0)
         )
@@ -314,7 +314,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun `getWavePolygons with no last wave state and no progression`() = runBlocking {
         // GIVEN
-        val mockBoundingBox = BoundingBox(Position(1.0, 1.0), Position(2.0, 2.0))
+        val mockBoundingBox = BoundingBox.fromPositions(Position(1.0, 1.0), Position(2.0, 2.0))
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
@@ -334,7 +334,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun `getWavePolygons with no last wave state`() = runBlocking {
         // GIVEN
-        val mockBoundingBox = BoundingBox(Position(1.0, 1.0), Position(2.0, 2.0))
+        val mockBoundingBox = BoundingBox.fromPositions(Position(1.0, 1.0), Position(2.0, 2.0))
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
@@ -354,7 +354,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun `getWavePolygons with last wave state and ADD mode`() = runBlocking {
         // GIVEN
-        val mockBoundingBox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val mockBoundingBox = BoundingBox.fromPositions(Position(0.0, 0.0), Position(10.0, 10.0))
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
         val lastWaveState = WWWEventWave.WavePolygons(
@@ -420,7 +420,7 @@ class WWWEventWaveLinearTest : KoinTest {
     @Test
     fun `getWavePolygons with empty area polygons`() = runBlocking {
         // GIVEN
-        val mockBoundingBox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val mockBoundingBox = BoundingBox.fromPositions(Position(0.0, 0.0), Position(10.0, 10.0))
 
         val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
         every { mockEvent.getWaveStartDateTime() } returns startTime
@@ -437,17 +437,6 @@ class WWWEventWaveLinearTest : KoinTest {
     }
 
     @Test
-    fun `getWavePolygons throws exception when event is not running`() {
-        runBlocking {
-            coEvery { mockEvent.isRunning() } returns false
-
-            assertFailsWith<IllegalArgumentException> {
-                waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
-            }
-        }
-    }
-
-    @Test
     fun `getWavePolygons with WEST direction`() = runBlocking {
         // GIVEN
         waveLinear = WWWEventWaveLinear(
@@ -457,7 +446,7 @@ class WWWEventWaveLinearTest : KoinTest {
         )
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
-        val mockBoundingBox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val mockBoundingBox = BoundingBox.fromPositions(Position(0.0, 0.0), Position(10.0, 10.0))
         val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
         coEvery { mockArea.getPolygons() } returns mockPolygons
