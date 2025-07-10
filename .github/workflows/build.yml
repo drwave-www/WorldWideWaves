@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload Test Results
         if: always() # Always run this step to upload results even if tests fail
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: shared-module-test-results
           path: shared/build/test-results/
