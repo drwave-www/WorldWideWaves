@@ -8,20 +8,21 @@ regenerate (zooms): ALL
 
 - wave on tokyo does not work
 
-issues (seen on klinshasa) :
+issues (seen on kinshasa) :
     - pb de wave dessin sur kinshasa ?
     - pb de compteur aussi ??
     - zoom trop eleve vs geojson ?
 
-- autozoom in wave screen is not enough zoomed (test: sydney)
+- ==> autozoom in wave screen is not enough zoomed (test: sydney)
+- ==> on full map, do not show the default static map in small, but show it in big, zoomed for height
 
-- on full map, do not show the default static map in small, but show it in big, zoomed for height
-
-- recalcul de 'in the area' apres init du gps :
+- !! recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
 
-- tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
+
+  - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
 ---------------------------------------------
 
@@ -43,24 +44,22 @@ Avril second part:
 
 - Production:
     - Fill-in FAQ Contents
-    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - licences / tools mentions
+    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
 
+---------------------------------------------
+First push prive Play Store
 ---------------------------------------------
 
 - PDF + Message + Planif presentation
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
 
 ---------------------------------------------
-First push prive Play Store
----------------------------------------------
 
-- OPTIM: Wave split en tenant en compte les noeuds deja splites
-
-- add tests for all missing functions
+- Shared: add tests for all missing functions
     - caching mechanism
     - download of app features on app update / feature update
-- Add a full test for event behavior AND wave progression using listeners
+- Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
