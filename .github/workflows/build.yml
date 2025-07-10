@@ -48,3 +48,33 @@ jobs:
 
      - name: Build app
        run: xcodebuild -workspace iosApp/iosApp.xcodeproj/project.xcworkspace -configuration Debug -scheme iosApp -sdk iphonesimulator
+
+  test_shared_module: # New job for shared module tests
+    name: Test Shared KMP Module
+    runs-on: ubuntu-latest # Or macos-latest if you have macOS specific tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run tests for shared module (all targets)
+        run: ./gradlew :shared:cleanTestDebugUnitTest :shared:testDebugUnitTest --tests "com.worldwidewaves.shared.*" --stacktrace
+
+      - name: Upload Test Results
+        if: always() # Always run this step to upload results even if tests fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: shared-module-test-results
+          path: shared/build/test-results/
+          retention-days: 7
