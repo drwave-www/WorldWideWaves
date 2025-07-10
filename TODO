@@ -1,14 +1,10 @@
 
-
 regenerate (zooms): ALL
 - tehran
 - karashi
 - lagos
 - rome
 - tokyo
-
-- area: add an optional thin bbox layer if it exists
-   - look at bboxIsOverride when refactoring by factory will have been done
 
 - wave on tokyo does not work
 
