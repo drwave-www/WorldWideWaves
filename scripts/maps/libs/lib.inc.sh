@@ -252,9 +252,9 @@ tpl() {
     if [ -n "$prop" ] && [ "$(conf "$event" "$prop" | wc -l)" = "1" ]; then
       # Use portable in-place editing for both GNU and BSD sed
       eval sed -i $SED_INPLACE_FLAG \
-        -e "$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")" \
-        -e "$(safe_replace "#map.center#" "$center")" \
-        -e "$(safe_replace "#map.bbox#" "$bbox")" \
+        -e "\"$(safe_replace "#${prop}#" "$(conf "$event" "$prop")")\"" \
+        -e "\"$(safe_replace "#map.center#" "$center")\"" \
+        -e "\"$(safe_replace "#map.bbox#" "$bbox")\"" \
         "$tpl_file"
     fi
   done
