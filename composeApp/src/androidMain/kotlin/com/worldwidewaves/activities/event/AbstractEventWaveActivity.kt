@@ -25,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.worldwidewaves.activities.utils.WaveObserver
+import com.worldwidewaves.activities.utils.WaveProgressionObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.viewmodels.WaveViewModel
@@ -37,7 +37,7 @@ abstract class AbstractEventWaveActivity(
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
 
     protected val waveViewModel: WaveViewModel by viewModel()
-    private var waveObserver: WaveObserver? = null
+    private var waveProgressionObserver: WaveProgressionObserver? = null
 
     private var _eventMap : AndroidEventMap? = null
 
@@ -50,19 +50,19 @@ abstract class AbstractEventWaveActivity(
         super.onResume()
 
         // Restart observation when activity is visible
-        waveObserver?.startObservation()
+        waveProgressionObserver?.startObservation()
     }
 
     override fun onPause() {
         // Stop observation when activity is not visible
-        waveObserver?.stopObservation()
+        waveProgressionObserver?.stopObservation()
         super.onPause()
     }
 
     // ------------------------------------------------------------------------
 
     @Composable
-    protected fun ObserveEventMap(event: IWWWEvent, eventMap: AndroidEventMap) {
+    protected fun ObserveEventMapProgression(event: IWWWEvent, eventMap: AndroidEventMap) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
 
@@ -70,9 +70,9 @@ abstract class AbstractEventWaveActivity(
 
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {
-            if (waveObserver == null) {
-                waveObserver = WaveObserver(context, scope, eventMap, event, waveViewModel, observerId)
-                waveObserver!!.startObservation()
+            if (waveProgressionObserver == null) {
+                waveProgressionObserver = WaveProgressionObserver(context, scope, eventMap, event, waveViewModel, observerId)
+                waveProgressionObserver!!.startObservation()
             }
         }
     }
@@ -80,8 +80,8 @@ abstract class AbstractEventWaveActivity(
     // ------------------------------------------------------------------------
 
     override fun onDestroy() {
-        waveObserver?.stopObservation()
-        waveObserver = null
+        waveProgressionObserver?.stopObservation()
+        waveProgressionObserver = null
         super.onDestroy()
     }
 

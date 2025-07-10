@@ -92,7 +92,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         }
 
         // Start event/map coordination
-        ObserveEventMap(event, eventMap)
+        ObserveEventMapProgression(event, eventMap)
 
         // Screen composition
         Box(modifier = modifier.fillMaxWidth()) {

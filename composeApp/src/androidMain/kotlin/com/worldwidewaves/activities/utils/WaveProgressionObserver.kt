@@ -1,15 +1,3 @@
-package com.worldwidewaves.activities.utils
-
-import android.content.Context
-import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.toMapLibrePolygon
-import com.worldwidewaves.viewmodels.WaveViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
-
 /*
  * Copyright 2024 DrWave
  *
@@ -30,11 +18,22 @@ import kotlinx.coroutines.launch
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.worldwidewaves.activities.utils
+
+import android.content.Context
+import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.toMapLibrePolygon
+import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 
 /**
  * Coordination of map, event and viewmodel during wave observation
  */
-class WaveObserver(
+class WaveProgressionObserver(
     private val context: Context,
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,

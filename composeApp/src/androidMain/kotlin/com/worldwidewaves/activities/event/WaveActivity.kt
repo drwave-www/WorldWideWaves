@@ -1,5 +1,3 @@
-package com.worldwidewaves.activities.event
-
 /*
  * Copyright 2024 DrWave
  *
@@ -7,7 +5,7 @@ package com.worldwidewaves.activities.event
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +18,7 @@ package com.worldwidewaves.activities.event
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.worldwidewaves.activities.event
 
 // Debug-only utilities -------------------------------------------------------
 import android.annotation.SuppressLint
@@ -39,17 +38,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,20 +53,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
@@ -81,7 +75,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FON
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.EMPTY_COUNTER
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -100,10 +93,7 @@ import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
@@ -160,9 +150,9 @@ class WaveActivity : AbstractEventWaveActivity() {
         }
 
         // Start event/map coordination
-        ObserveEventMap(event, eventMap)
+        ObserveEventMapProgression(event, eventMap)
 
-        // Play the hit sound when the user has been hit
+        // Play the hit sound when the user has been hit - FIXME: move in WaveProgressionObserver
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
             if (hasBeenHit && secondsSinceHit in 0.. 1 && !hasPlayedHitSound) {
@@ -182,27 +172,23 @@ class WaveActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                BeReady(waveViewModel, observerId)
+                UserWaveStatusText(waveViewModel, observerId)
                 eventMap.Screen(autoMapDownload = true, Modifier
                     .fillMaxWidth()
                     .height(calculatedHeight))
                 WaveProgressionBar(waveViewModel, observerId)
 
-                if (!isChoreographyActive) {
+                if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
                     Spacer(modifier = Modifier.weight(1f))
                     WaveHitCounter(waveViewModel, observerId, clock)
                     Spacer(modifier = Modifier.height(30.dp))
                 }
             }
 
-            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier
-                .zIndex(10f))
+            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.zIndex(10f))
 
-            if (isChoreographyActive) {
-                WaveHitCounter(
-                    waveViewModel,
-                    observerId,
-                    clock,
+            if (isChoreographyActive) { // Ensure counter is visible when choreography is active
+                WaveHitCounter(waveViewModel, observerId, clock,
                     Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp)
@@ -210,7 +196,6 @@ class WaveActivity : AbstractEventWaveActivity() {
                 )
             }
 
-            // ----------------------------------------------------------------
         }
     }
 
@@ -236,19 +221,17 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, e
 // ------------------------------------------------------------------------
 
 @Composable
-fun BeReady(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+fun UserWaveStatusText(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
     val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
     val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
     val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
 
-    val message = if (eventStatus == Status.DONE)
-        ShRes.string.wave_done
-    else if (hasBeenHit)
-        ShRes.string.wave_hit
-    else if (isInArea)
-        ShRes.string.wave_be_ready
-    else
-        ShRes.string.wave_is_running
+    val message = when {
+        eventStatus == Status.DONE -> ShRes.string.wave_done
+        hasBeenHit -> ShRes.string.wave_hit
+        isInArea -> ShRes.string.wave_be_ready
+        else -> ShRes.string.wave_is_running
+    }
 
     Box(
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
@@ -291,7 +274,7 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifie
                 .background(extendedLight.quaternary.color),
             contentAlignment = Alignment.Center
         ) {
-            WaveProgression(progression)
+            WaveProgressionFillArea(progression)
 
             Text(
                 text = "${String.format("%.1f", progression)}%",
@@ -307,7 +290,7 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifie
 }
 
 @Composable
-private fun WaveProgression(progression: Double) {
+private fun WaveProgressionFillArea(progression: Double) {
     val density = LocalDensity.current
     val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
 
@@ -336,24 +319,21 @@ private fun WaveProgression(progression: Double) {
 
 @Composable
 fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoingToBeHit: Boolean, hasBeenHit: Boolean) {
-    val normalColor = extraElementsLight
-    val alertColor = tertiaryLight
-
-    var triangleColor = normalColor
-
-    if (isGoingToBeHit) {
-        val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
-        val animatedColor by infiniteTransition.animateColor(
-            initialValue = normalColor,
-            targetValue = alertColor,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 500),
-                repeatMode = RepeatMode.Reverse
-            ), label = "BlinkingTriangleColorAnimation"
-        )
-        triangleColor = animatedColor
-    } else if (hasBeenHit) {
-        triangleColor = onQuaternaryLight
+    val triangleColor = when {
+        isGoingToBeHit -> {
+            val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
+            val animatedColor by infiniteTransition.animateColor(
+                initialValue = extraElementsLight,
+                targetValue = tertiaryLight,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 500),
+                    repeatMode = RepeatMode.Reverse
+                ), label = "BlinkingTriangleColorAnimation"
+            )
+            animatedColor
+        }
+        hasBeenHit -> onQuaternaryLight
+        else -> extraElementsLight
     }
 
     Canvas(
@@ -416,7 +396,7 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
 
 private fun formatDuration(duration: Duration): String {
     return when {
-        duration.isInfinite() -> "--:--"
+        duration.isInfinite() || duration < Duration.ZERO -> "--:--" // Protection
         duration < 1.hours -> {
             val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
             val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
@@ -433,224 +413,3 @@ private fun formatDuration(duration: Duration): String {
     }
 }
 
-// ------------------------------------------------------------------------
-
-@Composable
-fun WaveChoreographies(
-    event: IWWWEvent,
-    waveViewModel: WaveViewModel,
-    observerId: String,
-    clock: IClock,
-    modifier: Modifier = Modifier
-) {
-    val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
-    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-    val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
-
-    // State to track if we should show the hit sequence
-    var showHitSequence by remember { mutableStateOf(false) }
-
-    // For warming sequences - use recomposition to update sequence
-    var warmingKey by remember { mutableIntStateOf(0) }
-
-    // Calculate and schedule the hiding of the hit sequence
-    LaunchedEffect(hasBeenHit, hitDateTime) {
-        if (hasBeenHit) {
-            val currentTime = clock.now()
-            val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
-
-            if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
-                showHitSequence = true
-
-                // Calculate remaining time to show
-                val remainingTimeMs = maxOf(0,
-                    WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
-                            (currentTime - hitDateTime).inWholeMilliseconds
-                )
-
-                // Schedule hiding after the remaining time
-                delay(remainingTimeMs)
-                showHitSequence = false
-            } else {
-                showHitSequence = false
-            }
-        } else {
-            showHitSequence = false
-        }
-    }
-
-    // Only show choreography content in the center, leaving bottom space free
-    when {
-        // Show warming choreography with sequence refresh
-        isWarmingInProgress -> {
-            // Get the current sequence
-            val warmingSequence = remember(warmingKey) {
-                event.warming.getCurrentChoregraphySequence()
-            }
-
-            // When this sequence ends, request a new one
-            if (warmingSequence != null) {
-                TimedSequenceDisplay(
-                    sequence = warmingSequence,
-                    clock = clock,
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 120.dp), // Leave space for counter
-                    onSequenceComplete = { warmingKey++ }
-                )
-            }
-        }
-
-        // Show waiting choreography when going to be hit
-        isGoingToBeHit -> {
-            ChoreographyDisplay(
-                event.wave.waitingChoregraphySequence(),
-                clock,
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 120.dp) // Leave space for counter
-            )
-        }
-
-        // Show hit choreography when user has been hit and within time window
-        showHitSequence -> {
-            ChoreographyDisplay(
-                event.wave.hitChoregraphySequence(),
-                clock,
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 120.dp) // Leave space for counter
-            )
-        }
-    }
-}
-
-@Composable
-fun TimedSequenceDisplay(
-    sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier,
-    onSequenceComplete: () -> Unit
-) {
-    if (sequence == null) return
-
-    ChoreographyDisplay(sequence, clock, modifier)
-
-    LaunchedEffect(sequence) {
-        delay(sequence.remainingDuration ?: sequence.duration)
-        onSequenceComplete()
-    }
-}
-
-@Composable
-fun ChoreographyDisplay(
-    sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier
-) {
-    if (sequence == null || sequence.image == null) return
-
-    var currentImageIndex by remember { mutableIntStateOf(0) }
-    val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
-
-    // Get the painter and convert to ImageBitmap
-    val painter = painterResource(sequence.image!!)
-
-    // Create a timer to cycle through images
-    LaunchedEffect(sequence) {
-        val startTime = clock.now()
-
-        while (this.isActive) {
-            // Check if we should stop showing the sequence
-            val elapsed = clock.now() - startTime
-            if (remainingTime != null) {
-                if (elapsed >= remainingTime!!) break
-            } else if (elapsed >= sequence.duration) {
-                break
-            }
-
-            delay(sequence.timing.inWholeMilliseconds)
-
-            // Only advance frame if we haven't reached the last frame or if looping
-            if (sequence.loop) {
-                currentImageIndex = (currentImageIndex + 1) % sequence.frameCount
-            } else if (currentImageIndex < sequence.frameCount - 1) {
-                currentImageIndex++
-            }
-            // If not looping and at last frame, keep showing it until duration ends
-        }
-    }
-
-    // Position the choreography in the center without taking full screen space
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 400.dp)
-                .heightIn(max = 600.dp)
-                .padding(24.dp)
-                .shadow(8.dp)
-                .background(Color.Black.copy(alpha = 0.7f))
-                .border(2.dp, Color.White, RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f) // Take available space but leave room for text
-                ) {
-                    val frameWidthPx = sequence.frameWidth.toFloat()
-                    val frameHeightPx = sequence.frameHeight.toFloat()
-
-                    // Calculate scale to fit the frame within canvas bounds
-                    val scaleX = size.width / frameWidthPx
-                    val scaleY = size.height / frameHeightPx
-                    val scale = minOf(scaleX, scaleY)
-
-                    // Calculate centered position
-                    val scaledWidth = frameWidthPx * scale
-                    val scaledHeight = frameHeightPx * scale
-                    val offsetX = (size.width - scaledWidth) / 2f
-                    val offsetY = (size.height - scaledHeight) / 2f
-
-                    clipRect(
-                        left = offsetX,
-                        top = offsetY,
-                        right = offsetX + scaledWidth,
-                        bottom = offsetY + scaledHeight
-                    ) {
-                        translate(
-                            left = offsetX - (currentImageIndex * scaledWidth),
-                            top = offsetY
-                        ) {
-                            with(painter) {
-                                draw(
-                                    size = Size(
-                                        width = scaledWidth * 4, // Always 4 frames per slide
-                                        height = scaledHeight
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Text(
-                    text = sequence.text,
-                    style = quinaryColoredBoldTextStyle(24),
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}

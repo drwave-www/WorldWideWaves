@@ -156,7 +156,7 @@ class EventActivity : AbstractEventWaveActivity() {
         }
 
         // Start event/map coordination
-        ObserveEventMap(event, eventMap)
+        ObserveEventMapProgression(event, eventMap)
 
         // Screen composition
         Box {
