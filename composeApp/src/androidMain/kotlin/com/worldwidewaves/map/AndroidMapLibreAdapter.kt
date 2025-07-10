@@ -318,24 +318,16 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                 )
             )
 
-            val geoJsonSource = GeoJsonSource(
-                "bbox-override-source",
-                Polygon.fromLngLats(rectangleCoordinates)
-            )
-            style.addSource(geoJsonSource)
+            style.addSource(GeoJsonSource("bbox-override-source", Polygon.fromLngLats(rectangleCoordinates)))
 
-            val lineLayer = LineLayer(
-                "bbox-override-line",
-                "bbox-override-source"
-            ).apply {
+            style.addLayer(LineLayer("bbox-override-line", "bbox-override-source").apply {
                 setProperties(
                     lineColor(Color.RED),
                     lineWidth(1f),
                     lineOpacity(1.0f),
                     lineDasharray(arrayOf(5f, 2f))
                 )
-            }
-            style.addLayer(lineLayer)
+            })
         }
     }
 
