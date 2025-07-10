@@ -33,7 +33,7 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter) {
+class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter<*>) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,

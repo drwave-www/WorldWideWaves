@@ -172,7 +172,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // Main activity UI building methode to be implemented --------------------
+    // Main activity UI building method to be implemented ---------------------
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 

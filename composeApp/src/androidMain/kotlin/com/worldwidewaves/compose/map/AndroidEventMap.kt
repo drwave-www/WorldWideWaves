@@ -99,13 +99,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.LineLayer
-import org.maplibre.android.style.layers.PropertyFactory.lineColor
-import org.maplibre.android.style.layers.PropertyFactory.lineDasharray
-import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
-import org.maplibre.android.style.layers.PropertyFactory.lineWidth
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 import java.io.File
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -119,7 +112,7 @@ class AndroidEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig()
-) : KoinComponent, AbstractEventMap(event, mapConfig, onLocationUpdate) {
+) : KoinComponent, AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate) {
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
@@ -302,7 +295,7 @@ class AndroidEventMap(
      */
     private fun loadMap(
         context: Context,
-        scope: kotlinx.coroutines.CoroutineScope,
+        scope: CoroutineScope,
         mapLibreView: MapView,
         hasLocationPermission: Boolean,
         onMapLoaded: () -> Unit,
@@ -312,33 +305,22 @@ class AndroidEventMap(
             withContext(Dispatchers.IO) { // IO actions
                 event.map.getStyleUri()?.let {
                     val uri = Uri.fromFile(File(it))
-
-                    scope.launch { // UI actions
+                    scope.launch { // Required -- UI actions
                         mapLibreView.getMapAsync { map ->
-                            map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
-                                map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-
-                                // Provide Adapter with Android MapLibre instance
-                                mapLibreAdapter.setMap(map)
-
-                                // Initialize location provider if we have permission
-                                if (hasLocationPermission) {
-                                    setupMapLocationComponent(map, context, style)
-                                }
-
-                                if (event.area.bboxIsOverride) {
-                                    drawBboxIfOverrides(scope, style)
-                                }
-
-                                // Initialize view and setup listeners
-                                setupMap(
-                                    scope, map.width.toDouble(), map.height.toDouble(),
-                                    onMapLoaded = onMapLoaded,
-                                    onMapClick = { _, _ ->
-                                        onMapClick?.invoke()
+                            // Setup Map
+                            this@AndroidEventMap.setupMap(
+                                map, scope,uri.toString(),
+                                onMapLoaded = {
+                                    // Initialize location provider if we have permission
+                                    if (hasLocationPermission) {
+                                        setupMapLocationComponent(map, context)
                                     }
-                                )
-                            }
+                                    onMapLoaded()
+                                },
+                                onMapClick = { _, _ ->
+                                    onMapClick?.invoke()
+                                }
+                            )
                         }
                     }
                 } ?: run {
@@ -348,57 +330,21 @@ class AndroidEventMap(
         }
     }
 
-    private fun drawBboxIfOverrides(
-        scope: CoroutineScope,
-        style: Style
-    ) {
-        scope.launch {
-            val bbox = event.area.bbox()
-
-            val rectangleCoordinates = listOf(
-                listOf(
-                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat),
-                    Point.fromLngLat(bbox.ne.lng, bbox.sw.lat),
-                    Point.fromLngLat(bbox.ne.lng, bbox.ne.lat),
-                    Point.fromLngLat(bbox.sw.lng, bbox.ne.lat),
-                    Point.fromLngLat(bbox.sw.lng, bbox.sw.lat)
-                )
-            )
-
-            val geoJsonSource = GeoJsonSource(
-                "bbox-override-source",
-                Polygon.fromLngLats(rectangleCoordinates)
-            )
-            style.addSource(geoJsonSource)
-
-            val lineLayer = LineLayer(
-                "bbox-override-line",
-                "bbox-override-source"
-            ).apply {
-                setProperties(
-                    lineColor(Color.RED),
-                    lineWidth(1f),
-                    lineOpacity(1.0f),
-                    lineDasharray(arrayOf(5f, 2f))
-                )
-            }
-            style.addLayer(lineLayer)
-        }
-    }
-
     // ------------------------------------------------------------------------
 
     /**
      * Sets up the Android location component
      */
     @SuppressLint("MissingPermission")
-    private fun setupMapLocationComponent(map: MapLibreMap, context: Context, style: Style) {
-        // Activate location component
-        map.locationComponent.activateLocationComponent(
-            buildLocationComponentActivationOptions(context, style)
-        )
-        map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+    private fun setupMapLocationComponent(map: MapLibreMap, context: Context) {
+        map.style?.let { style ->
+            // Activate location component
+            map.locationComponent.activateLocationComponent(
+                buildLocationComponentActivationOptions(context, style)
+            )
+            map.locationComponent.isLocationComponentEnabled = true
+            map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+        }
     }
 
     /**

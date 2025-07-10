@@ -52,13 +52,13 @@ enum class MapCameraPosition {
 /**
  * Abstract base class for EventMap functionality that's shared across platforms
  */
-abstract class AbstractEventMap(
+abstract class AbstractEventMap<T>(
     protected val event: IWWWEvent,
     protected val mapConfig: EventMapConfig = EventMapConfig(),
     private val onLocationUpdate: (Position) -> Unit
 ) {
     // Properties that must be implemented by platform-specific subclasses
-    abstract val mapLibreAdapter: MapLibreAdapter // MapLibre is native map library
+    abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
     abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
 
     // Class variables
@@ -195,51 +195,68 @@ abstract class AbstractEventMap(
      * Sets up the map with initial configuration
      */
     fun setupMap(
+        map: T,
         scope: CoroutineScope,
-        screenWidth: Double,
-        screenHeight: Double,
+        stylePath: String,
         onMapLoaded: () -> Unit = {},
         onMapClick: ((Double, Double) -> Unit)? = null
     ) {
+        // Pass the map to the adapter
+        mapLibreAdapter.setMap(map)
+
         // Set screen dimensions
-        this.screenWidth = screenWidth
-        this.screenHeight = screenHeight
+        this.screenWidth = mapLibreAdapter.getWidth()
+        this.screenHeight = mapLibreAdapter.getHeight()
 
-        // Set the click listener - platform-specific
-        mapLibreAdapter.setOnMapClickListener(onMapClick)
+        mapLibreAdapter.setStyle(stylePath) {
 
-        // Set the max zoom level from the event configuration
-        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+            // Set Attribution margins to 0
+            mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
 
-        // Apply bounds constraints if required
-        mapLibreAdapter.addOnCameraIdleListener { constraintManager?.constrainCamera() }
-
-        // Configure initial camera position
-        scope.launch {
-            when (mapConfig.initialCameraPosition) {
-                MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
-                MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
-                MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
-            }
-        }
-
-        // Start location updates
-        locationProvider?.startLocationUpdates { mapPosition ->
-
-            // Target user, the first time only
-            if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                targetUser()
-                userHasBeenLocated = true
+            // Add an explicit zone if area bbox has been overridden regarding the GEOJson standard area
+            if (event.area.bboxIsOverride) {
+                scope.launch {
+                    mapLibreAdapter.drawOverridenBbox(event.area.bbox())
+                }
             }
 
-            if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
-                // Allow the wave to know the current location of the user for computations
-                event.wave.setPositionRequester { mapPosition }
+            // Set the click listener - platform-specific
+            mapLibreAdapter.setOnMapClickListener(onMapClick)
 
-                // Notify caller
-                onLocationUpdate(mapPosition)
+            // Set the max zoom level from the event configuration
+            mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
 
-                lastKnownPosition = mapPosition
+            // Apply bounds constraints if required
+            mapLibreAdapter.addOnCameraIdleListener { constraintManager?.constrainCamera() }
+
+            // Configure initial camera position
+            scope.launch {
+                when (mapConfig.initialCameraPosition) {
+                    MapCameraPosition.DEFAULT_CENTER -> moveToCenter(onMapLoaded)
+                    MapCameraPosition.BOUNDS -> moveToMapBounds(onMapLoaded)
+                    MapCameraPosition.WINDOW -> moveToWindowBounds(onMapLoaded)
+                }
+            }
+
+            // Start location updates
+            locationProvider?.startLocationUpdates { mapPosition ->
+
+                // Target user, the first time only
+                if (!userHasBeenLocated && mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
+                    targetUser()
+                    userHasBeenLocated = true
+                }
+
+                if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
+                    // Allow the wave to know the current location of the user for computations
+                    event.wave.setPositionRequester { mapPosition }
+
+                    // Notify caller
+                    onLocationUpdate(mapPosition)
+
+                    // Save current known position on map
+                    lastKnownPosition = mapPosition
+                }
             }
         }
     }

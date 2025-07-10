@@ -28,9 +28,16 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Map interface that platform-specific implementations must implement
  */
-interface MapLibreAdapter {
+interface MapLibreAdapter<T> {
+
+    fun setMap(map: T)
+    fun setStyle(stylePath: String, callback: () -> Unit?)
+
     val currentPosition: StateFlow<Position?>
     val currentZoom: StateFlow<Double>
+
+    fun getWidth() : Double
+    fun getHeight() : Double
 
     fun getCameraPosition() : Position?
     fun getVisibleRegion() : BoundingBox
@@ -42,11 +49,14 @@ interface MapLibreAdapter {
     fun getMinZoomLevel() : Double
     fun setMinZoomPreference(minZoom: Double)
     fun setMaxZoomPreference(maxZoom: Double)
+    fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int)
 
     fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)
 
     fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?)
-    fun addOnCameraIdleListener(function: () -> Unit)
+    fun addOnCameraIdleListener(callback: () -> Unit)
+
+    fun drawOverridenBbox(bbox: BoundingBox)
 
 }
 
