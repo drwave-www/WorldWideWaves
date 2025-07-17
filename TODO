@@ -1,4 +1,6 @@
 
+- 16/9 boundingbox is not used at the right place
+- static Rome is empty
 - recheck all maps
 - wave on tokyo does not work
 
