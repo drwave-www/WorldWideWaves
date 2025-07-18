@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -190,7 +191,8 @@ class AndroidEventMap(
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(getEventImage("map", event.id) as DrawableResource),
-                contentDescription = "defaultMap"
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop
             )
 
             // LibreMap as Android Composable - only visible when map is loaded
