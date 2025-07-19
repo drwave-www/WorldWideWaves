@@ -138,12 +138,16 @@ adjust_bbox_to_16_9() {
     echo ""
     return
   fi
-
+  
+  # Print initial bbox to STDERR
+  echo "Initial bbox: $bbox" >&2
+  
   IFS=',' read -r minLng minLat maxLng maxLat <<< "$bbox"
-
+  
   # Validate numeric
   for v in "$minLng" "$minLat" "$maxLng" "$maxLat"; do
     if ! [[ $v =~ ^-?[0-9.]+$ ]]; then
+      echo "Invalid bbox format, returning original: $bbox" >&2
       echo "$bbox"
       return
     fi
@@ -160,36 +164,49 @@ adjust_bbox_to_16_9() {
   # Guard against zero height/width
   if [ "$(echo "$height == 0" | bc)" -eq 1 ] || \
      [ "$(echo "$width == 0"  | bc)" -eq 1 ]; then
+    echo "Zero width or height detected, returning original: $bbox" >&2
     echo "$bbox"
     return
   fi
 
   ratio=$(echo "$width / $height" | bc -l)
+  echo "Current ratio: $ratio (target: $targetRatio)" >&2
 
   # If already ~16/9 (within 1%), keep original
   if [ "$(echo "($ratio / $targetRatio) > 0.99 && ($ratio / $targetRatio) < 1.01" | bc -l)" -eq 1 ]; then
-    printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
+    echo "Ratio already within 1% of target, no adjustment needed" >&2
+    local result
+    result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
+    echo "Final bbox: $result" >&2
+    echo "$result"
     return
   fi
 
   # Expand logic
   if [ "$(echo "$ratio < $targetRatio" | bc -l)" -eq 1 ]; then
     # Too narrow → enlarge width
+    echo "Ratio too narrow, expanding width" >&2
     local newWidth delta
     newWidth=$(echo "$height * $targetRatio" | bc -l)
     delta=$(echo "$newWidth - $width" | bc -l)
+    echo "Width expansion: $width → $newWidth (delta: $delta)" >&2
     minLng=$(echo "$minLng - $delta/2" | bc -l)
     maxLng=$(echo "$maxLng + $delta/2" | bc -l)
   else
     # Too wide → enlarge height
+    echo "Ratio too wide, expanding height" >&2
     local newHeight deltaH
     newHeight=$(echo "$width / $targetRatio" | bc -l)
     deltaH=$(echo "$newHeight - $height" | bc -l)
+    echo "Height expansion: $height → $newHeight (delta: $deltaH)" >&2
     minLat=$(echo "$minLat - $deltaH/2" | bc -l)
     maxLat=$(echo "$maxLat + $deltaH/2" | bc -l)
   fi
 
-  printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat"
+  local result
+  result=$(printf "%.6f,%.6f,%.6f,%.6f" "$minLng" "$minLat" "$maxLng" "$maxLat")
+  echo "Final bbox: $result" >&2
+  echo "$result"
 }
 
 # Function to get the center for an event
