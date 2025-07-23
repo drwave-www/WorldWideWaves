@@ -189,7 +189,7 @@ adjust_bbox_to_16_9() {
     local newWidth delta
     newWidth=$(echo "$height * $targetRatio" | bc -l)
     delta=$(echo "$newWidth - $width" | bc -l)
-    echo "Width expansion: $width → $newWidth (delta: $delta)" >&2
+    echo "Width expansion: $width -> $newWidth (delta: $delta)" >&2
     minLng=$(echo "$minLng - $delta/2" | bc -l)
     maxLng=$(echo "$maxLng + $delta/2" | bc -l)
   else

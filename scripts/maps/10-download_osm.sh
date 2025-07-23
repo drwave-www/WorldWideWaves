@@ -94,15 +94,19 @@ for event in $EVENTS; do # Download OSM area as PBF file
 
   echo "Retrieved BBOX for event $event : $BBOX"
 
+  set -x
   AREAZONE=$(conf "$event" map.zone)
   SPBF=data/osm-$(echo "$AREAZONE" | sed -e 's,/,_,g').osm.pbf
   DPBF=data/www-${event}.osm.pbf
+  set +x
 
   [ ! -f "$SPBF" ] && echo "-- Download area $AREAZONE from OSM.." && download-osm "$AREAZONE" -o "$SPBF"
 
    if [ "$FORCE_GENERATION" = true ] || [ ! -f "$DPBF" ]; then
     echo "-- Extract bbox $BBOX from area $AREAZONE.."
+    set -x
     ./bin/osmconvert "$SPBF" -b="$BBOX" -o="$DPBF" && ./bin/osmconvert "$DPBF" --out-statistics
+    set +x
   else
     echo "   DPBF file already exists. Use -f to force regeneration."
   fi
