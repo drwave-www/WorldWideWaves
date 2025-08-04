@@ -61,8 +61,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -111,14 +112,16 @@ import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
+@OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
@@ -138,8 +141,10 @@ class EventActivity : AbstractEventWaveActivity() {
         }
 
         // Calculate height based on aspect ratio and available width
-        val configuration = LocalConfiguration.current
-        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Construct the event map
         val eventMap = remember(event.id) {

@@ -59,12 +59,14 @@ import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
+@OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
 
     private val clock: IClock by inject()

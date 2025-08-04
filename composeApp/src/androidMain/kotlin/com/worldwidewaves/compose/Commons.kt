@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.worldwidewaves.compose
 
 import android.content.Intent
@@ -70,9 +72,10 @@ import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import kotlinx.datetime.Instant
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /*
  * Copyright 2024 DrWave

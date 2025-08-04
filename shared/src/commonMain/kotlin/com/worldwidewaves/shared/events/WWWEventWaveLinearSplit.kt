@@ -21,14 +21,16 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,

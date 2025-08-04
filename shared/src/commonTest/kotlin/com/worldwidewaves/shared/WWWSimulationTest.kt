@@ -3,18 +3,20 @@ package com.worldwidewaves.shared
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
 
 /**
  * Tests for WWWSimulation class
  */
+@OptIn(ExperimentalTime::class)
 class WWWSimulationTest {
 
     // Common test parameters

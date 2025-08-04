@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for managing event data.
@@ -41,6 +42,7 @@ import kotlinx.coroutines.sync.withLock
  * `StateFlow`, and provides filtering functionality for displaying all events or only
  * favorite events.
  */
+@OptIn(ExperimentalTime::class)
 class EventsViewModel(
     private val wwwEvents: WWWEvents,
     private val mapChecker: MapAvailabilityChecker,

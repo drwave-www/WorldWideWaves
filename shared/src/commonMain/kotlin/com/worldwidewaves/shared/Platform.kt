@@ -6,10 +6,11 @@ import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /*
  * Copyright 2024 DrWave
@@ -32,6 +33,7 @@ import kotlinx.datetime.toLocalDateTime
  * limitations under the License.
  */
 
+@OptIn(ExperimentalTime::class)
 class WWWPlatform(val name: String) {
 
     private var _simulation : WWWSimulation? = null

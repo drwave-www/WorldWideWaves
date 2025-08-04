@@ -11,7 +11,7 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Napier
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.DrawableResource
@@ -21,6 +21,7 @@ import org.koin.core.component.inject
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 import kotlin.time.toDuration
 
 /*
@@ -44,6 +45,7 @@ import kotlin.time.toDuration
  * limitations under the License.
  */
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
@@ -59,6 +61,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val waveProgression: String = ".."
     )
 
+    @OptIn(ExperimentalTime::class)
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons

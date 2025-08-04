@@ -9,7 +9,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.verify
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -25,7 +24,10 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class ChoreographyManagerTest : KoinTest {
 
     // Test image type for the generic manager
@@ -45,6 +47,7 @@ class ChoreographyManagerTest : KoinTest {
     private lateinit var manager: ChoreographyManager<TestImage>
 
     // Test-specific subclass that allows setting test data
+    @OptIn(ExperimentalTime::class)
     private class TestChoreographyManager<T>(
         coroutineScopeProvider: CoroutineScopeProvider,
         private val warmingSequences: List<ChoreographySequence> = emptyList(),

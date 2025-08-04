@@ -39,8 +39,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
@@ -49,6 +47,9 @@ import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
@@ -58,6 +59,7 @@ interface DataValidator {
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 interface IClock {
     fun now(): Instant
 
@@ -71,6 +73,7 @@ interface IClock {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 class SystemClock : IClock, KoinComponent {
     private var platform : WWWPlatform? = null
 

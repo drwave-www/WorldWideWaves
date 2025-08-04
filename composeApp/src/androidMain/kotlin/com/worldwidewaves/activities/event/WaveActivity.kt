@@ -18,6 +18,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalTime::class)
+
 package com.worldwidewaves.activities.event
 
 // Debug-only utilities -------------------------------------------------------
@@ -58,9 +60,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -101,8 +103,10 @@ import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
+@OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
 
     private val clock: IClock by inject()
@@ -117,8 +121,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         var hasPlayedHitSound = false
 
         // Calculate height based on aspect ratio and available width
-        val configuration = LocalConfiguration.current
-        val calculatedHeight = configuration.screenWidthDp.dp / DIM_EVENT_MAP_RATIO
+        val calculatedHeight = LocalWindowInfo.current.containerSize.width.dp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
         val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
@@ -256,11 +259,11 @@ fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifie
     val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
     val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
     val barWidth = screenWidth * 0.8f
 
-    val density = LocalDensity.current
     val triangleSize = with(density) { DIM_WAVE_TRIANGLE_SIZE.dp.toPx() }
 
     Column(
@@ -374,8 +377,7 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
     if (text != EMPTY_COUNTER) {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp.dp
+        val screenWidth = LocalWindowInfo.current.containerSize.width.dp
         val boxWidth = screenWidth * 0.5f
 
         Box(

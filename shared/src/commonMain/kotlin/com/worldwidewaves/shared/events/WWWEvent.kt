@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -69,9 +68,12 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEvent(
 
@@ -268,8 +270,8 @@ data class WWWEvent(
      */
     override fun getLiteralStartDateSimple(): String = try {
         getStartDateTime().let {
-            "${it.toLocalDateTime(getTZ()).dayOfMonth.toString().padStart(2, '0')}/${
-                it.toLocalDateTime(getTZ()).monthNumber.toString().padStart(2, '0')
+            "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
+                it.toLocalDateTime(getTZ()).month.toString().padStart(2, '0')
             }"
         }
     } catch (e: Exception) {

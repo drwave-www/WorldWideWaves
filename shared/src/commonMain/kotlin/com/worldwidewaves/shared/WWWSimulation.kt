@@ -1,8 +1,9 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /*
  * Copyright 2024 DrWave
@@ -25,6 +26,7 @@ import kotlinx.datetime.Instant
  * limitations under the License.
  */
 
+@OptIn(ExperimentalTime::class)
 class WWWSimulation(
     private val startDateTime: Instant,
     private val userPosition: Position,

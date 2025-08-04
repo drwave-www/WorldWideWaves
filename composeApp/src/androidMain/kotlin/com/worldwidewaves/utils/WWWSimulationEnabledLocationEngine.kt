@@ -33,6 +33,7 @@ import org.maplibre.android.location.engine.LocationEngineCallback
 import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.engine.LocationEngineResult
 import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
+import kotlin.time.ExperimentalTime
 
 /**
  * `WWWSimulationEnabledLocationEngine` is a custom implementation of `MapLibreFusedLocationEngineImpl`
@@ -43,6 +44,7 @@ import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl
  * default location engine behavior.
  *
  */
+@OptIn(ExperimentalTime::class)
 class WWWSimulationEnabledLocationEngine(
     context: Context
 ) : KoinComponent, MapLibreFusedLocationEngineImpl(context) {
