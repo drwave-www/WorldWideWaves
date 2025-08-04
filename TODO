@@ -1,16 +1,9 @@
 
-- 16/9 boundingbox is not used at the right place
-- static Rome is empty
-- recheck all maps
-- wave on tokyo does not work
+TODAY :
 
-issues (seen on kinshasa) :
-    - pb de wave dessin sur kinshasa ?
-    - pb de compteur aussi ??
-    - zoom trop eleve vs geojson ?
+- pb de wave dessin sur kinshasa ?
 
 - ==> autozoom in wave screen is not enough zoomed (test: sydney)
-- ==> on full map, do not show the default static map in small, but show it in big, zoomed for height
 
 - !! recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
@@ -18,7 +11,9 @@ issues (seen on kinshasa) :
 - !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
 
-  - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+- !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+
+- compteur wave screen depasse sur samsung par moments
 
 ---------------------------------------------
 
@@ -30,6 +25,7 @@ Avril second part:
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
 - Limit size taken by events in cached WWWEvents : clean on request after a certain size
+- List and uninstall of downloaded event maps
 
 ------
 

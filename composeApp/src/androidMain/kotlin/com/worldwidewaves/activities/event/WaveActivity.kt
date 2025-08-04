@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -363,7 +364,6 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
     val userHitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
     var timeBeforeHit by remember { mutableStateOf(INFINITE) }
 
-    // Recalculate timeBeforeHit every second until wave is progression
     LaunchedEffect(Unit) {
         while (progression == 0.0) {
             delay(1000L)
@@ -373,7 +373,7 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
-    if (text != EMPTY_COUNTER) { // Decision to not show the empty counter
+    if (text != EMPTY_COUNTER) {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
         val boxWidth = screenWidth * 0.5f
@@ -384,14 +384,45 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
                 .border(2.dp, onPrimaryLight),
             contentAlignment = Alignment.Center
         ) {
-            Text(
+            AutoSizeText(
                 text = text,
                 style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
                 color = Color.White,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
             )
         }
     }
+}
+
+@Composable
+fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    textAlign: TextAlign,
+    maxLines: Int,
+    modifier: Modifier = Modifier
+) {
+    var fontSize by remember { mutableStateOf(style.fontSize) }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = fontSize),
+        color = color,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        softWrap = false,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.hasVisualOverflow) {
+                fontSize = fontSize * 0.9f
+            }
+        },
+        modifier = modifier
+    )
 }
 
 private fun formatDuration(duration: Duration): String {

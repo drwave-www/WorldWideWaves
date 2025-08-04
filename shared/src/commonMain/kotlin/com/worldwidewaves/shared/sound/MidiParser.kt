@@ -122,7 +122,7 @@ object MidiParser {
     /**
      * Parse raw MIDI file bytes using a custom SMF parser
      */
-    private fun parseMidiBytes(bytes: ByteArray): MidiTrack {
+    fun parseMidiBytes(bytes: ByteArray): MidiTrack {
         try {
             val reader = ByteArrayReader(bytes)
 
