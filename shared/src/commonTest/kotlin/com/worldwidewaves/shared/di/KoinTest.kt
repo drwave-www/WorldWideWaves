@@ -23,9 +23,9 @@ package com.worldwidewaves.shared.di
 
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.data.createDataStore
+import org.koin.core.KoinApplication
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import org.koin.test.check.checkModules
 import kotlin.test.Test
 
 class KoinTest : KoinTest {
@@ -37,7 +37,7 @@ class KoinTest : KoinTest {
             single { createDataStore { "/fake/path" } }
         }
 
-        checkModules {
+        fun KoinApplication.() {
             modules(sharedModule + testPlatformModule)
         }
     }
