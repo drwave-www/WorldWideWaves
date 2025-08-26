@@ -131,8 +131,6 @@ class EventsListScreen(
 ) : TabScreen {
     override val name = "Events"
 
-    private var starredSelected = false
-    private var downloadedSelected = false  // Add state for downloaded tab
     private var firstLaunch = true
 
     // ----------------------------
@@ -143,12 +141,16 @@ class EventsListScreen(
         val hasFavorites by viewModel.hasFavorites.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
+        // Convert to Compose state
+        var starredSelected by remember { mutableStateOf(false) }
+        var downloadedSelected by remember { mutableStateOf(false) }
+
         if (firstLaunch) { // Select favorites at launch if any
             firstLaunch = false
             starredSelected = hasFavorites
         }
 
-        // Update filter logic to include downloaded events
+        // Include downloaded events
         viewModel.filterEvents(starredSelected, downloadedSelected)
 
         // Refresh map availability when screen resumes
@@ -173,20 +175,24 @@ class EventsListScreen(
             mapChecker.refreshAvailability()
         }
 
+        fun selectTab(starred: Boolean = false, downloaded: Boolean = false) {
+            starredSelected = starred
+            downloadedSelected = downloaded
+            viewModel.filterEvents(starredSelected, downloadedSelected)
+        }
+
         EventsList(
-            modifier, events, mapStates,
+            modifier = modifier,
+            events = events,
+            mapStates = mapStates,
+            starredSelected = starredSelected,
+            downloadedSelected = downloadedSelected,
             onAllEventsClicked = { selectTab() },
-            onFavoriteEventsClicked = { selectTab(starredSelected = true) },
-            onDownloadedEventsClicked = { selectTab(downloadedSelected = true) }
+            onFavoriteEventsClicked = { selectTab(starred = true) },
+            onDownloadedEventsClicked = { selectTab(downloaded = true) }
         )
     }
 
-    // New method to handle tab selection with mutual exclusion
-    private fun selectTab(starredSelected: Boolean = false, downloadedSelected: Boolean = false) {
-        this.starredSelected = starredSelected
-        this.downloadedSelected = downloadedSelected
-        viewModel.filterEvents(this.starredSelected, this.downloadedSelected)
-    }
 
     // ----------------------------
 
@@ -195,18 +201,33 @@ class EventsListScreen(
         modifier: Modifier,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
         onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit  // Add parameter for downloaded tab){}
+        onDownloadedEventsClicked: () -> Unit
     ) {
         Column(
             modifier = modifier
                 .fillMaxHeight()
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
-            FavoritesSelector(onAllEventsClicked, onFavoriteEventsClicked, onDownloadedEventsClicked)
+            FavoritesSelector(
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected,
+                onAllEventsClicked = onAllEventsClicked,
+                onFavoriteEventsClicked = onFavoriteEventsClicked,
+                onDownloadedEventsClicked = onDownloadedEventsClicked
+            )
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
-            Events(viewModel, events, mapStates, modifier = Modifier.weight(1f))
+            Events(
+                viewModel = viewModel,
+                events = events,
+                mapStates = mapStates,
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 
@@ -214,9 +235,11 @@ class EventsListScreen(
 
     @Composable
     private fun FavoritesSelector(
-        onAllEventsCLicked: () -> Unit,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
+        onAllEventsClicked: () -> Unit,
         onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit,  // Add parameter for downloaded tab
+        onDownloadedEventsClicked: () -> Unit,
         modifier: Modifier = Modifier
     ) {
         // Determine colors and weights based on which tab is selected
@@ -237,15 +260,15 @@ class EventsListScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1/3f),  // Each tab takes 1/3 of the width
+                    modifier = Modifier.fillMaxWidth(1/3f),
                     backgroundColor = allColor.color,
-                    onClick = onAllEventsCLicked,
+                    onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
                     fontWeight = allWeight,
                     text = stringResource(ShRes.string.events_select_all)
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(0.5f),  // Takes 1/2 of the remaining 2/3
+                    modifier = Modifier.fillMaxWidth(0.5f),
                     backgroundColor = starredColor.color,
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
@@ -253,7 +276,7 @@ class EventsListScreen(
                     text = stringResource(ShRes.string.events_select_starred)
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1f),  // Takes all remaining space
+                    modifier = Modifier.fillMaxWidth(1f),
                     backgroundColor = downloadedColor.color,
                     onClick = onDownloadedEventsClicked,
                     textColor = downloadedColor.onColor,
@@ -298,6 +321,8 @@ class EventsListScreen(
         viewModel: EventsViewModel,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
+        starredSelected: Boolean,
+        downloadedSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         val state = rememberLazyListState()
@@ -309,9 +334,8 @@ class EventsListScreen(
         ) {
             if (events.isNotEmpty()) {
                 items(events) { event ->
-                    // Get current availability state
                     val isMapInstalled = mapStates[event.id] ?: false
-                    Event(viewModel, event, isMapInstalled)
+                    Event(viewModel, event, isMapInstalled, starredSelected)
                 }
             } else {
                 item {
@@ -321,7 +345,7 @@ class EventsListScreen(
                             when {
                                 hasLoadingError -> ShRes.string.events_loading_error
                                 starredSelected -> ShRes.string.events_favorites_empty
-                                downloadedSelected -> ShRes.string.events_downloaded_empty  // Add message for empty downloaded
+                                downloadedSelected -> ShRes.string.events_downloaded_empty
                                 else -> ShRes.string.events_empty
                             }
                         ),
@@ -335,7 +359,7 @@ class EventsListScreen(
     }
 
     @Composable
-    fun Event(viewModel: EventsViewModel, event: IWWWEvent, isMapInstalled: Boolean, modifier: Modifier = Modifier) {
+    fun Event(viewModel: EventsViewModel, event: IWWWEvent, isMapInstalled: Boolean, starredSelected: Boolean, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
         Column(modifier = modifier.clickable(
@@ -345,7 +369,7 @@ class EventsListScreen(
                 })
             }
         )) {
-            EventOverlay(viewModel, event, isMapInstalled)
+            EventOverlay(viewModel, event, isMapInstalled, starredSelected)
             EventLocationAndDate(event)
         }
     }
@@ -357,14 +381,13 @@ class EventsListScreen(
         viewModel: EventsViewModel,
         event: IWWWEvent,
         isMapInstalled: Boolean,
+        starredSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
         val eventStatus by viewModel.getEventStatusFlow(event.id).collectAsState()
 
         Box(modifier = heightModifier) {
-
-            // Main Image
             Box(modifier = heightModifier) {
                 Image(
                     modifier = modifier.fillMaxWidth(),
@@ -379,7 +402,7 @@ class EventsListScreen(
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
             EventOverlayMapDownloaded(event.id, isMapInstalled)
-            EventOverlayFavorite(viewModel, event)
+            EventOverlayFavorite(viewModel, event, starredSelected)
         }
     }
 
@@ -493,6 +516,7 @@ class EventsListScreen(
     private fun EventOverlayFavorite(
         viewModel: EventsViewModel,
         event: IWWWEvent,
+        starredSelected: Boolean,
         modifier: Modifier = Modifier
     ) {
         var isFavorite by remember { mutableStateOf(event.favorite) }
@@ -519,7 +543,7 @@ class EventsListScreen(
                             scope.launch {
                                 isFavorite = !isFavorite
                                 setEventFavorite.call(event, isFavorite)
-                                if (starredSelected) { // Refresh the list
+                                if (starredSelected) {
                                     viewModel.filterEvents(onlyFavorites = true)
                                 }
                             }
