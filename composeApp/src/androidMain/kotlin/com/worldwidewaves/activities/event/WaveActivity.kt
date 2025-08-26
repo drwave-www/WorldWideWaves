@@ -121,7 +121,10 @@ class WaveActivity : AbstractEventWaveActivity() {
         var hasPlayedHitSound = false
 
         // Calculate height based on aspect ratio and available width
-        val calculatedHeight = LocalWindowInfo.current.containerSize.width.dp / DIM_EVENT_MAP_RATIO
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
         val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
@@ -377,8 +380,10 @@ fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClo
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
     if (text != EMPTY_COUNTER) {
-        val screenWidth = LocalWindowInfo.current.containerSize.width.dp
-        val boxWidth = screenWidth * 0.5f
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val boxWidth = screenWidthDp * 0.5f
 
         Box(
             modifier = modifier
