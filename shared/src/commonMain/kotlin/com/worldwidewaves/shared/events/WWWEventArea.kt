@@ -33,8 +33,11 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
@@ -67,7 +70,8 @@ data class WWWEventArea(
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
+    @Transient private var cachedAreaPolygons: Area? = null
+    @Transient private val polygonsCacheMutex = Mutex() // Add mutex for cache protection
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
     @Transient private var cachedPositionWithinResult: Pair<Position, Boolean>? = null
@@ -237,29 +241,29 @@ data class WWWEventArea(
      * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
     suspend fun getPolygons(): Area {
-        if (cachedAreaPolygons.isEmpty()) {
+        // Fast path: if cache is already populated, return immediately
+        cachedAreaPolygons?.let { return it }
+
+        // Slow path: populate cache with mutex protection
+        polygonsCacheMutex.withLock {
+            // Double-check pattern: another coroutine might have populated the cache
+            cachedAreaPolygons?.let { return it }
+
+            // Build polygons in a temporary mutable list
+            val tempPolygons: MutableArea = mutableListOf()
+
             coroutineScopeProvider.withDefaultContext {
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
                     val type = geometryCollection["type"]?.jsonPrimitive?.content
                     val coordinates = geometryCollection["coordinates"]?.jsonArray
 
                     when (type) {
-                        "Polygon" -> coordinates?.flatMap { ring ->
-                            ring.jsonArray.map { point ->
-                                Position(
-                                    point.jsonArray[1].jsonPrimitive.double,
-                                    point.jsonArray[0].jsonPrimitive.double
-                                ).constrainToBoundingBox()
-                            }.toPolygon.apply { cachedAreaPolygons.add(this) }
+                        "Polygon" -> coordinates?.forEach { ring ->
+                            processRing(ring, tempPolygons)
                         }
-                        "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
-                            multiPolygon.jsonArray.flatMap { ring ->
-                                ring.jsonArray.map { point ->
-                                    Position(
-                                        point.jsonArray[1].jsonPrimitive.double,
-                                        point.jsonArray[0].jsonPrimitive.double
-                                    ).constrainToBoundingBox()
-                                }.toPolygon.apply { cachedAreaPolygons.add(this) }
+                        "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
+                            multiPolygon.jsonArray.forEach { ring ->
+                                processRing(ring, tempPolygons)
                             }
                         }
                         else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
@@ -268,8 +272,26 @@ data class WWWEventArea(
                     Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
+
+            // Atomically assign the complete immutable list
+            cachedAreaPolygons = tempPolygons.toList()
         }
-        return cachedAreaPolygons
+
+        return cachedAreaPolygons ?: emptyList()
+    }
+
+    private fun processRing(ring: JsonElement, polygons: MutableArea) {
+        val positions = ring.jsonArray.map { point ->
+            Position(
+                point.jsonArray[1].jsonPrimitive.double,
+                point.jsonArray[0].jsonPrimitive.double
+            ).constrainToBoundingBox()
+        }
+
+        val polygon = positions.toPolygon
+        if (polygon.size > 1) {
+            polygons.add(polygon)
+        }
     }
 
     private fun Position.constrainToBoundingBox(): Position {
