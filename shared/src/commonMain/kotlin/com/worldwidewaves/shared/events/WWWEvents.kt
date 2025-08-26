@@ -32,6 +32,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -40,6 +42,8 @@ import kotlin.jvm.JvmOverloads
 // ---------------------------
 
 class WWWEvents : KoinComponent {
+
+    private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
     private val eventsConfigurationProvider: EventsConfigurationProvider by inject()
@@ -75,15 +79,22 @@ class WWWEvents : KoinComponent {
         onLoadingError?.let { addOnEventsErrorListener(it) }
         onTermination?.let { addOnTerminationListener(it) }
 
-        if (!eventsLoaded) {
-            currentLoadJob?.cancel() // Cancel any ongoing load job
-            currentLoadJob = loadEventsJob()
+        // Launch a coroutine to handle the mutex-protected loading
+        coroutineScopeProvider.launchIO {
+            loadingMutex.withLock {
+                // Double-check if events are already loaded after acquiring the lock
+                if (!eventsLoaded && loadingError == null) {
+                    currentLoadJob = loadEventsJob()
+                    currentLoadJob?.join() // Wait for the loading job to complete
+                }
+            }
         }
     }
 
     fun cancelLoading() {
         currentLoadJob?.cancel()
         currentLoadJob = null
+        loadingError = null
     }
 
     /**
