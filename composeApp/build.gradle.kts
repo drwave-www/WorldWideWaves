@@ -18,6 +18,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+    implementation(libs.j2objc.annotations)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
@@ -66,8 +67,13 @@ android {
         )
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -144,6 +150,6 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
 }

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.choreographies
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -65,7 +65,6 @@ data class ChoreographySequence(
      * If empty, a default of 1 second per frame will be assumed.
      */
     val timing: Duration,
-    val text: String = "", // Text to display with the sequence
     val loop: Boolean = true, // Whether to loop the sequence
     val duration: Duration? = 10.seconds // Total duration for this sequence
 ) {

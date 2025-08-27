@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -92,4 +92,18 @@ actual fun getCacheDir(): String {
 
 actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
+}
+
+// ---------------------------------------------------------------------------
+//  Cache-maintenance helpers – no-op on iOS (resources are bundled & immutable)
+// ---------------------------------------------------------------------------
+
+actual fun clearEventCache(eventId: String) {
+    /* no-op on iOS – all map assets are shipped inside the app bundle */
+}
+
+actual fun isCachedFileStale(fileName: String): Boolean = false
+
+actual fun updateCacheMetadata(fileName: String) {
+    /* no-op on iOS */
 }

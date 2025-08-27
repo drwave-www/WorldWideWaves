@@ -1,18 +1,7 @@
 package com.worldwidewaves.shared
 
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -32,6 +21,18 @@ import kotlinx.datetime.toLocalDateTime
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlin.time.ExperimentalTime
+
+@OptIn(ExperimentalTime::class)
 class WWWPlatform(val name: String) {
 
     private var _simulation : WWWSimulation? = null
@@ -54,12 +55,12 @@ class WWWPlatform(val name: String) {
     // -------------------------------------------------------------------- //
 
     init {
-        val instant = Instant.parse("2024-07-14T16:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
-        val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
+        val now = LocalDateTime(2026, 7, 14, 17, 59).toInstant(timeZone)
         setSimulation(
             WWWSimulation(
                 now,
+                // Position(lat = 48.83625, lng = 2.46905),
                 Position(lat = 48.862725, lng = 2.287592),
                 50
             )
@@ -90,9 +91,6 @@ class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvi
 }
 
 // ---------------------------
-
-expect fun getEventImage(type: String, id: String): Any?
-
 expect suspend fun readGeoJson(eventId: String): String?
 expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
 
@@ -101,3 +99,11 @@ expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String): String
 expect suspend fun cacheDeepFile(fileName: String)
 expect fun getCacheDir(): String
+
+// ---------------------------------------------------------------------------
+//  Cache maintenance helpers (platform-specific actual implementations)
+// ---------------------------------------------------------------------------
+
+expect fun clearEventCache(eventId: String)
+expect fun isCachedFileStale(fileName: String): Boolean
+expect fun updateCacheMetadata(fileName: String)

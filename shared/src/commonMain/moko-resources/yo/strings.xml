@@ -1,0 +1,487 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <!-- src_hash: 58a942b5f882bb71aff38d2de8229bf4f42585a6 -->
+  <string name="empty"></string>
+  <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
+  <string name="logo_description">logo</string>
+  <!-- src_hash: 61fc0e60ec95e42f8980a55028563ef21f93b4a7 -->
+  <string name="background_description">abẹ́lẹ̀</string>
+  <!-- src_hash: 260c23d3c107c00be03123d75ba717173ab4e8f7 -->
+  <string name="instagram_logo_description">Ààmì Instagram</string>
+  <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
+  <string name="tab_infos_name">Nípa</string>
+  <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
+  <string name="tab_faq_name">FAQ</string>
+  <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
+  <string name="back">Padà</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">Igbi báyìí!</string>
+  <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
+  <string name="events_select_all">Gbogbo</string>
+  <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
+  <string name="events_select_starred">Àyànfẹ́</string>
+  <!-- src_hash: 5097ae23854862764e5f1fd13d54f9f50a888c5e -->
+  <string name="events_select_downloaded">Ti ṣe igbasilẹ</string>
+  <!-- src_hash: a792d80677e5ce46a722b25244c64040b7d2af8a -->
+  <string name="map_checking_state">Ń ṣàyẹ̀wò ipo maapu..</string>
+  <!-- src_hash: d23c5aaffa2874371f98e8c0838e7c00f19e4410 -->
+  <string name="map_download">Ṣe igbasilẹ maapu</string>
+  <!-- src_hash: 6d0c25a3cbd4f6f8f4767eb665c89323faa68b05 -->
+  <string name="map_downloading">Ń ṣe igbasilẹ..</string>
+  <!-- src_hash: e81121a332e731d8b2af71537baeb942c36acabc -->
+  <string name="map_starting_download">Bẹrẹ igbasilẹ..</string>
+  <!-- src_hash: 6462b24730b6834d28fbbb556f15724b2eef50f9 -->
+  <string name="map_retrying_download">Ń tún igbasilẹ ṣe</string>
+  <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
+  <string name="map_loading">Ń gbé maapu wọlé..</string>
+  <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
+  <string name="map_cancel_download">Fagilé</string>
+  <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
+  <string name="map_retry_download">Tun gbìyànjú</string>
+  <!-- src_hash: df1cb247f84a5ef21df00efb2b8583598a864904 -->
+  <string name="map_error_download">Aṣiṣe nígbà igbasilẹ maapu</string>
+  <!-- src_hash: 8f835e0a1dc2c6e63f307394c946b73dcdbd734f -->
+  <string name="map_downloaded">A ti ṣe igbasilẹ maapu</string>
+  <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
+  <string name="events_uninstall_map_title">Yọ maapu kúrò</string>
+  <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
+  <string name="events_uninstall">Yọ kúrò</string>
+  <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
+  <string name="events_uninstall_cancel">Fagilé</string>
+  <!-- src_hash: ed8a34ece8d4273d61156a1994c7203385b5436d -->
+  <string name="events_uninstall_completed">Ìyọkúrò parí</string>
+  <!-- src_hash: a15ddf81db1e785e07fab4bc2c288f5a62fae962 -->
+  <string name="events_uninstall_failed">Ìyọkúrò kùnà</string>
+  <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
+  <string name="events_uninstall_map_confirmation">Ṣé o dájú pé o fẹ́ yọ maapu yìí kúrò? O lè tún ṣe igbasilẹ rẹ̀ nígbà míì tí o bá nílò.</string>
+  <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
+  <string name="events_cannot_uninstall_map_message">A kò lè yọ maapu yìí kúrò nítorí pé ó jẹ́ apá ìpilẹ̀ app tàbí pé àwọn iṣẹ́ mìíràn nílò rẹ̀. A ó yọ ọ́ nígbà tí o bá yọ app kúrò.</string>
+  <!-- src_hash: 0bf7dc9508d76a25a739e81d6de9537e3beeae93 -->
+  <string name="event_done">Parí</string>
+  <!-- src_hash: 76fc38d3011bddbd0d6ea6c913c12b89768ea175 -->
+  <string name="event_soon">Láipẹ́ !</string>
+  <!-- src_hash: 7fcc365541c8136e015f6b6de62e592e8cd609f2 -->
+  <string name="event_running">ń lọ</string>
+  <!-- src_hash: 155d63c9d555a28cb041a7bc944bcd126028f94b -->
+  <string name="event_favorite_on">Àyànfẹ́ ṣiṣẹ́</string>
+  <!-- src_hash: ccf841f2ea2d86c733131d78cc57b56a89ed052c -->
+  <string name="event_favorite_off">Àyànfẹ́ ti pipa</string>
+  <!-- src_hash: d09e583eb6246d39ee2340b12e246596866c89e2 -->
+  <string name="event_target_wave_on">Tọ sí igbi</string>
+  <!-- src_hash: 2bf443288dd74a114ca76e11228daeee38988b74 -->
+  <string name="event_target_wave_off">Ìṣẹ̀lẹ̀ kò ń wáyé</string>
+  <!-- src_hash: 409a83af1ba070df076d65e78a69fb1ab46c745b -->
+  <string name="event_target_me_on">Tọ sí mi</string>
+  <!-- src_hash: 17347a1b073379a67baf79186d80d225e01c4a20 -->
+  <string name="event_target_me_off">O kò wà ní agbègbè náà</string>
+  <!-- src_hash: fcdce8786f93cb0a785fe6ebd0a2546ece0c5da8 -->
+  <string name="events_favorites_empty">Kò sí ìṣẹ̀lẹ̀ tí a ti fi sí àyànfẹ́; bẹ̀rẹ̀ nípa títẹ àmì irawọ̀ lórí ìṣẹ̀lẹ̀ ayanfẹ́ rẹ!</string>
+  <!-- src_hash: 479305cf78e08c6a09778809429446f92824a7b4 -->
+  <string name="events_downloaded_empty">Kò tíì ṣe igbasilẹ ìṣẹ̀lẹ̀ kankan</string>
+  <!-- src_hash: 663e59373c8e0cd7b9358c849e8155cf9b3a94a4 -->
+  <string name="events_empty">Àkójọ ìṣẹ̀lẹ̀ ṣofo</string>
+  <!-- src_hash: 64189e446905b9317177323f1da63cd54b194af1 -->
+  <string name="events_loading_error">Aṣiṣe kan ṣẹlẹ̀ nígbà tó ń kó ìṣẹ̀lẹ̀ wọlé</string>
+  <!-- src_hash: af453dedc41c38cf727bc928484385d1f5bbf0ad -->
+  <string name="geoloc_undone">Ń ṣe imúdójúìwọ̀n ipo..</string>
+  <!-- src_hash: f6328db0f2344b04d73ed011773813b83d534e00 -->
+  <string name="geoloc_error">A kò lè tọ́ ọ́ wá</string>
+  <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
+  <string name="geoloc_yourein">O WÀ NÍ agbègbè náà!</string>
+  <!-- src_hash: 00a98f842906831b5c3d3dfb72807ba042877e83 -->
+  <string name="geoloc_yourein_at">O WÀ ní agbègbè náà! (%1$s)</string>
+  <!-- src_hash: f64dbd0543a3f40d820d78be6ddbf1ccceb89c47 -->
+  <string name="geoloc_yourenotin">O KÒ WÀ ní agbègbè náà</string>
+  <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
+  <string name="geoloc_warm_in">O WÀ NÍ agbègbè náà, ìgbóná kíkọ́ máa bẹ̀rẹ̀!</string>
+  <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
+  <string name="ask_gps_enable">GPS rẹ dà bíi pé a ti pa a, ṣé o fẹ́ mu u ṣiṣẹ́?</string>
+  <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
+  <string name="yes">Bẹ́ẹ̀ni</string>
+  <!-- src_hash: 924c47189936d3b50379d50ec631597071d7f64f -->
+  <string name="no">Rárá</string>
+  <!-- src_hash: 5fef7a97148e6120fd47da067da7d148791afd0a -->
+  <string name="ok">OK</string>
+  <!-- src_hash: 38223eb4eb3385b1c5ac009bb3a4e24e0b9302d6 -->
+  <string name="error">Àṣìṣe</string>
+  <!-- src_hash: 865342e363cd7c8c16a70cdb75fca63df10f7357 -->
+  <string name="minute_singular">%1$dmn</string>
+  <!-- src_hash: d0bbe1455e4cdc62c76636760327c0516bc1f297 -->
+  <string name="minute_plural">%1$dmn</string>
+  <!-- src_hash: 5eb9b1d6cc4a945a538da02aaaa9f84721e28738 -->
+  <string name="hour_singular">%1$dh</string>
+  <!-- src_hash: cab581c24ad8e240921309dc5498396e2a09414b -->
+  <string name="hour_plural">%1$dh</string>
+  <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
+  <string name="be_waved">Dárapọ̀ mọ́ igbi!</string>
+  <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
+  <string name="wave_speed">Iyara igbi</string>
+  <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
+  <string name="wave_start_time">Àkókò ìbẹ̀rẹ̀</string>
+  <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
+  <string name="wave_end_time">Àkókò ìparí</string>
+  <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
+  <string name="wave_total_time">Àkókò apapọ̀</string>
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <string name="wave_progression">Ìlọsíwájú</string>
+  <!-- src_hash: 51ea217986113f63c3c9a1c4d5ef0f0fa04ebe55 -->
+  <string name="wave_warming">Ń gbóná..</string>
+  <!-- src_hash: 1ecbfefa00dbbe16006a8a0fdfd076be6122b99a -->
+  <string name="test_simulation">Ìdánwò Símúlésọ́n</string>
+  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <string name="test_simulation_started">Símúlésọ́n ti bẹ̀rẹ̀</string>
+  <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
+  <string name="wave_be_ready">Ṣe tán!</string>
+  <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->
+  <string name="wave_done">Igbi ti parí!</string>
+  <!-- src_hash: d955b930c0d83bdd6cf803ffa3627d94509153c8 -->
+  <string name="wave_hit">O ṣe dáadáa!</string>
+  <!-- src_hash: 00589bbc02fcac8151416d6e208c27b982b47c68 -->
+  <string name="wave_is_running">Igbi ń lọ!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">O mọ̀ èyí: bí a bá sọ ìtàn Ilẹ̀ Ayé nínú ìwé ojúewé 1,000, ìran ènìyàn yóò hàn nìkan ní àbala ìkẹyìn ojúewé ìkẹyìn.</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">Ṣùgbọ́n ìtàn kúkúrú yìí lè parí kí a tó retí. A yà sọ́tọ̀ nínú àgbáyé ńlá tí kò ní àyè ìgbé. A ń ba ohun gbogbo jẹ. A jẹ́ amọ̀tara-ẹni-nìkan. A lè jẹ́ ìkà. A jẹ́ ọkànjúwa. A ti di afikọ́jú. A sì ń wá láti ṣàkóso. Ṣùgbọ́n a tún lè ní ìtara mọ́ ẹlòmíì, a ń dá ìyanu sílẹ̀, a lè fara da, a sì lè jẹ́ aláìmọ̀tara-ẹni-nìkan.</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">Ṣùgbọ́n àkókò kéré. A ti ṣe ìlọsíwájú púpọ̀.. A lè kọ àṣàyàn míì: àwùjọ tí ó dá lórí ẹ̀tọ́, ìfarakanra, àti ìdemókíràsì. Ó wà lọ́wọ́ wa!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">Dárapọ̀ mọ́ ìrìnàjò àgbáyé, ìjí aláfọ̀ọ́kà. Ẹ jẹ́ ká dá àwọn igbi ènìyàn sílẹ̀, ẹ̀rí ti ìmúlọ́mìnira gidi wa, ìpinnu líle sí àwọn olórí wa. Ẹ jẹ́ ká kó jọ káàkiri àwọn ìlú àti àwọn orílẹ̀-èdè, káàkiri ayé. Ẹ jẹ́ ká yan àlàáfíà. Ẹ jẹ́ ká yan ayọ̀. Ẹ jẹ́ ká yan ìṣedá. Ẹ jẹ́ ká yan AWA.</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">Kí ni bí igbi kan ṣoṣo bá tó láti kó wa jọ?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves jẹ́ app alágbèéká àkókò-díẹ̀ pẹ̀lú ìlérí àfojúsùn: láti ṣètò lẹ́sẹ̀sẹ̀ àwọn igbi ènìyàn tí yóò rìn ká àwọn ìlú ńlá, kọjá àwọn orílẹ̀-èdè. Nípasẹ̀ ọdún kan, ètò yìí ń fojú kọ lílò kọjá ààlà ara àti àṣà, kí ó lè tọ́jú ìṣọ̀kan, àwùjọ, àti irírí ènìyàn apapọ̀.</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">Ní ìpìlẹ̀ rẹ̀, WorldWideWaves kì í ṣe app nìkan; ìrìnàjò àgbáyé ni tí a ṣe láti kó ènìyàn jọ nínú ìfihàn ìfarakanra àti ayọ̀, pẹ̀lú ìlàkàkà tí a pín pọ̀.</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">Nípasẹ̀ lílò imọ̀-ẹ̀rọ, WorldWideWaves yóò jẹ́ kí àwọn olùkópa káàkiri ayé darapọ̀ mọ́ àwọn igbi ènìyàn ní àwọn ìlú wọn, kí ó dá ìwòye àti ìmọ̀lára alágara kan sílẹ̀.</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">Ní ìṣọ̀kan, WorldWideWaves jẹ́ ìsapá alágbára láti harness agbára imọ̀-ẹ̀rọ fún ìdí ológo gidi kan, lílàkọsílẹ̀ ènìyàn pọ̀ nínú ayẹyẹ ìṣọ̀kan, ayọ̀ àti ìṣe apapọ̀. Nípasẹ̀ igbi kọọkan, àwọn olùkópa kì yóò kàn ṣàfikún sí ìwòye àgbáyé, ṣùgbọ́n yóò tún ní ìmọ̀lára yẹn, kí wọ́n sì pín pẹ̀lú ayé ipa gígùn tí lílòpọ̀ jọ ní bí a ṣe jẹ́ ọ̀kan.</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">Òfin &amp; Ààbò</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">Ẹ káàbọ̀ sí WorldWideWaves! A yọ̀ wá pé o darapọ̀ mọ́ àwọn ìgbì àgbáyé. Láti jẹ́ kí ìrírí gbogbo ènìyàn dáa àti láìlẹwu, jọ̀wọ́ tẹ̀lé ìlànà wọ̀nyí:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">Ìlànà Gbogbogbo :</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">Ìbọ̀wọ̀ fún Gbogbo Ènìyàn: Tọ́jú gbogbo olùkópa pẹ̀lú ìbọ̀wọ̀, láìka ìbílẹ̀ wọn. Jọ̀wọ́ bójú tó ìbọ̀wọ̀ fún gbogbo ẹni tó wà; ìwà ẹlẹ́yamẹ́ya tàbí ìtẹ́lọ́rùn ìkà kò bófin mu.</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">Bọ̀wọ̀ fún Àyè Gbangba: Jẹ́ kí ọ̀nà ṣí, tẹ̀lé òfin agbègbè àti ààmì, kí o sì má ṣe dì ìrìnàjò tàbí ọ̀nà pajawìrì dì.</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">Dúró nínú Àgbègbè Tí a Yàn: Fún ààbò rẹ, máa wà nínú àgbègbè tí a yàn fún ìṣẹ̀lẹ̀, bí ó bá wà.</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">Ṣe Ojúṣe: Bí o bá yan láti mu ọtí, ṣe e ní ìwọ̀n-dídùn, gẹ́gẹ́ bí òfin agbègbè.</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">Dín Ipa Ayika Kù: Sọ gbogbo ìdọ̀tí sínú àpótí tí a yàn, kí o sì má ṣe ṣọ́ọ̀rọ̀ kí àwọn ibi kún fọ́.</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">Jẹ́ Kí o Kìlọ̀: Bí o bá rí nnkan ẹlẹ́susù tàbí ẹnikan nínú ìṣòro, kéde lọ́wọ́ àṣẹ agbègbè lẹ́sẹ̀kẹsẹ̀.</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">Àbá Ààbò:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">Wọ Aṣọ Tó Bójú Mu: Wọ aṣọ àti bàtà tó rọrùn tó bá iṣẹ́lẹ̀ àti oju-ọjọ̀ mu.</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">Máa Mu Omi: Mu omi kí o sì máa mu, pàápàá nígbà ìṣẹ̀lẹ̀ ní ibi gbígbẹ́.</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">Ṣọ́ra Fún Ohun-ìní Rẹ: Pa ohun-ìní aládàáni mọ́ra, má sì kó ohun iyebíye tí o kò nílò.</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">Lo Ọ̀rẹ́-ọ̀nà: Dúró pẹ̀lú ọ̀rẹ́ tàbí ṣe tuntun, kí ẹ máa bójú tó ara yín.</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">Ṣe Tán Fún Pajawìrì: Fipamọ̀ nọnọ́mba pajawìrì agbègbè sí fónú rẹ, kí o sì yá ibi pàdé pẹ̀lú ọ̀rẹ́ bí ẹ bá yapa.</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">Ìlànà Pajawìrì:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">Máa Ṣọ́ra: Ṣàwárí ibi ìbọ̀sípò tó súnmọ́ rẹ àti àgbègbè ṣíṣi (bíi pílásà, ọgbà ìtura), kí o sì tẹ̀lé ìtọná àwọn àṣẹ agbègbè bí pajawìrì bá ṣẹlẹ̀.</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">Ọ̀rẹ́ Ìbánisọ̀rọ̀ Pajawìrì: Fipamọ̀ nọnọ́mba pajawìrì agbègbè àti ẹni ìbánisọ̀rọ̀ pajawìrì tirẹ nínú fónú rẹ kí o tó darapọ̀.</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">Tí Pajawìrì Bá ṣẹlẹ̀: Pe nọnọ́mba pajawìrì agbègbè, jáde ní ìfarapa-kekere sí àgbègbè ṣíṣi tó dáa, ràn àwọn míì lọ́wọ́ bí o bá lè ṣe, kí o sì jẹ́ kí ọ̀nà wọlé/bọ̀nà ṣí.</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">Òfin:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">Ìkọ̀wọ́-ọtẹ́lẹ̀mú: Ìkópa nínú àwọn ìṣẹ̀lẹ̀ WorldWideWaves wà ní ewu tirẹ. Nípa kópa, o gba láti kọ ẹ̀sùn kankan sílẹ̀ sí àwọn aṣèdá app nípa ìfarapa tí ó lè ṣẹlẹ̀ nígbà ìṣẹ̀lẹ̀.</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">Ìkìlọ̀ Àyè Gbangba: Ìpàdé gbangba ni èyí tí fọ́tò/fídíò lè wáyé lọ́wọ́ àwọn olùkópa tàbí média, gẹ́gẹ́ bí òfin agbègbè. A kò ń bẹ̀rẹ̀ ẹtọ́ sí àwòrán rẹ, a kò sì lè ṣàkóso ìkọ̀sílẹ̀ ẹlẹ́kẹta. Bí o kò bá fẹ́ hàn, gbìyànjú láti yà kúrò níbi kamẹ́rà bí ó bá ṣeé ṣe.</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">Wọlé sí FAQ</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">Kí ló dé tí kò sí ìṣẹ̀lẹ̀ ní ìlú tàbí orílẹ̀-èdè mi?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">A yàn ọ̀pọ̀lọpọ̀ nínú àwọn ìlú tó pọ̀ jù lọ ní ayé láti dá igbi àgbáyé tó ní ìtúmọ̀ sílẹ̀. Àwọn ìdènà imọ̀-ẹ̀rọ àti ìṣe-ọwọ́lọ́wọ́ ń jẹ́ kó ṣòro ká bo gbogbo ibi ní báyìí. A fojúkan sí aṣojú gbooro kọjá kóntìnẹ́ẹ̀ntì, àṣà, àti èdè—èyí kì í ṣe pé ó lè pé tán. A ní ìrètí láti fi àwọn ìlú míì kún un nígbà pẹ̀yà.</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">Kí ni àwọn àsìá kóntìnẹ́ẹ̀ntì wọ̀nyí?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">A dá àwọn àsìá kóntìnẹ́ẹ̀ntì ìmúlòlùfẹ́ sílẹ̀ láti ran ọ́ lọ́wọ́ kó lè mọ̀ ìlú ní kíákíá nínú àkójọ, kí ó sì hàn ìmúpapọ̀ tí WorldWideWaves ń gbé kalẹ̀. Àwọn àsìá yìí kì í ṣe ọ̀fíṣialì, wọ́n sì wà nínú app yìí nìkan; a kò fẹ́ bínú sí tàbí rọ́pò àmì orílẹ̀-èdè tàbí àṣà kankan. Nítorí pé kò sí àsìá ọ̀fíṣialì fún kóntìnẹ́ẹ̀ntì jiògíràfì, a ṣe tiwa fún ìmọ̀lára ìmúlẹ̀ àti ìdárayá. Bí o bá fẹ́ràn wọn, o lè lo wọn nífẹ̀ẹ́.</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">Ta ni ó wà lẹ́yìn WorldWideWaves?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves jẹ́ ìṣètò aládàáni pátápátá. Kò sí ilé-iṣẹ́, ẹgbẹ́, tàbí ìjọba kankan lẹ́yìn rẹ̀. Àwọn aṣèdá fẹ́ pèsè ọ̀nà tó ń kọ́ni nílẹ̀ fún àwọn tí ń wá bí wọ́n ṣe lè ran ayé àti ìgbésí-ayé lọ́wọ́—ìgbìyànjú láti kó gbogbo akitiyan ìlọsíwájú àti ìdemókíràsì pọ̀ ní abẹ́ asia aláfọ̀ọ́kà, aláìṣèlú.</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">Ṣé ìṣètò oníṣòwò ni èyí?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">Rárá. App náà jẹ́ ọ̀fẹ́ patapata. Bí ó tilẹ̀ jẹ́ pé àpẹrẹ àti ìdàgbàsókè rẹ̀ gba àkókò àti owó lọ́wọ́ àwọn aṣèdá, wọn kò ní anfàní owó taara kankan lọ́wọ́ rẹ̀.</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">Ṣé mo lè kópa sí ìsapá yìí?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">Bẹ́ẹ̀ni, a máa ń gba ọlọ́fẹ̀ ní gbogbo ìgbà. Kóòdù app jẹ́ orísun-ṣíi lórí GitHub, o sì lè kan sí àwọn aṣèdá ní worldwidewaves@proton.me (a kò lè ṣe ìlérí ìdáhùn). Ọ̀nà tó dáa jù ni kíkó ìròyìn kálẹ̀: pín fọ́tò àti fídíò láti ìṣẹ̀lẹ̀ pẹ̀lú àwọn hashtag tí a ṣàbẹwò, kan sí àwọn olùkópa agbára agbègbè kí wọ́n lè gbé ìròyìn ga, sọ̀rọ̀ nípa rẹ̀ pẹ̀lú àwùjọ rẹ, àti ju gbogbo rẹ̀ lọ, darapọ̀ mọ́ igbi!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">USA</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">Mexico</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">Brazil</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">Argentina</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">United Kingdom</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">France</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">Germany</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">Spain</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">Italy</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">Russia</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">Turkey</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">Egypt</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">South Africa</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">Kenya</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">Nigeria</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">Dem. Rep. of the Congo</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">United Arab Emirates</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">India</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">Indonesia</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">Thailand</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">Philippines</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">Japan</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">South Korea</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">China</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">Australia</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">Canada</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">Peru</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">Colombia</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">Chile</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">Iran</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">Pakistan</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">North America</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">South America</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">Europe</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">Africa</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">Middle East</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">Asia</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">Oceania</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">New York</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">Ní Ọjọ́ Òmìnira, ní Big Apple, nímọ̀lára ìgbóná bí igbi alárinrin ṣe ń kọjá Times Square, Central Park, àti ọ̀run-ìlú gíga.</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">Los Angeles</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">Ní Ọjọ́ Òmìnira, nígbà tí igbi kan ń tàn City of Angels, nírírí ìgboyà Hollywood, afẹ́fẹ́ Pacific, àti ìfẹ́ irawọ̀ ti L.A.</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">Mexico City</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">Bọ̀wọ̀ fún Ọjọ́ Òmìnira Mẹ́síkò ní ọkàn CDMX, níbi tí ìrẹlẹ̀ kọ́lóníà pàdé agbára tuntun, tí orin mariachi sì ń dun kọjá àwọn pílásà ìtàn.</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">Sao Paulo</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">Jẹ́ kí ìlù samba àti ẹ̀mí Ọjọ́ Òmìnira gbe ọ kọjá Paulista Avenue tó ń kún fún ìrìn, àti àwọn agbègbè alárinrin ti ilú apọ̀-òṣùpá yìí.</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">Buenos Aires</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">Ṣe ayẹyẹ Òmìnira Agentínà ní àárín ìlù tango, ọ̀nà ńlá irú Yúróòpù, àti ẹ̀mí ìtara àwọn porteños lẹ́gbẹ̀ẹ́ Río de la Plata.</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">London</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">Yọ̀ ayọ̀ nínú ìmọ̀lára ọ̀pọ̀-àṣà Notting Hill Carnival bí igbi yìí ṣe ń jó kọjá àwọn ọ̀nà ìtàn, ọkọ̀ akero méjì tí di ààmì, àti Thames ẹni-kìí-tán.</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">Paris</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">Ní Ọjọ́ Bastille, darapọ̀ mọ́ igbi tó ń ṣàn láti Eiffel Tower dé Champs-Élysées, ń ṣe ayẹyẹ ìfẹ́ àti ọ̀nà ìṣeré ìlú Imọlẹ̀.</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">Berlin</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">Ní Ọjọ́ Ìṣọ̀kan Jámánì, nímọ̀lára ìṣọ̀kan bí igbi ṣe ń kọjá Brandenburg Gate, àwọn ògiri tí graffiti kún, àti amọ̀ràn ilé tuntun ti olu-ilu alárinrin yìí.</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">Madrid</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">Ní Ọjọ́ Orílẹ̀-èdè Sípéènì, jẹ́ kí igbi mú iná sí àwọn bàà tapas Madrid, ọ̀nà ńlá, àti ogún ọ̀nà ìṣeré Prado.</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">Rome</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">Ní Ferragosto, ṣàn pẹ̀lú ara Róòmù àti alejo kọjá àwọn piazza tí orin, kànkàn omi, àti agbára ìsinmi kún ní ‘Eternal City’ ní ooru.</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">Moscow</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">Ní Ọjọ́ Rọ́ṣíà, jẹ́ kó wọ inú ìyọrísírí Red Square àti Kremlin, bí igbi ṣe ń ronú pada sí ìtàn ọba àti ìrìn àjò ìgbàlódé.</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">Istanbul</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">Ṣe ayẹyẹ Republic Day pẹ̀lú igbi tí ń yí kọjá Bosphorus, mọṣáláṣì ìtàn, àti pílásà tuntun, bí Istanbul ṣe ń tàn pẹ̀lú kónsátì, àsìá, àti iná ìtàkùn.</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">Cairo</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">Ṣe ayẹyẹ Eid ní Cairo bí àwọn ọ̀nà àti ọjà ṣe ń yè pẹ̀lú ìmọ́lẹ̀ ayẹyẹ, oorun dùn, àti àwọn ìdílé ayọ̀ tí ń samọ̀ja ìparí Ramadan pẹ̀lú igbi ìṣọ̀kan.</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">Johannesburg</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">Ní Ọjọ́ Òmìnira, darapọ̀ mọ́ igbi ní ‘City of Gold,’ níbi tí ilé gíga tuntun pàdé ogún ìfarada àti onírúurú àṣà.</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">Nairobi</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">Ṣe ayẹyẹ Madaraka Day ní àárín ọjà alárinrin àti ọ̀nà tó ń kún, níbi tí ìgbésí-ayé ìlú pàdé ẹnu-ọ̀nà sí ẹranko adayeba Kenya tó lẹ́wà.</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">Lagos</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">Gba ìlù Afrobeats tó kún fún agbára ní Ọjọ́ Òmìnira Nàìjíríà, bí igbi ṣe ń ru kọjá ìlú tó pọ̀ jù lọ ní Áfíríkà àti ọjà rẹ̀ alárinrin.</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">Kinshasa</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">Ní Ọjọ́ Òmìnira DR Congo, darapọ̀ mọ́ igbi tó ń rún lẹ́gbẹ̀ẹ́ Odò Congo ní olu-ilu alárinrin, tí orin àti ìgbéraga àṣà kún.</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">Dubai</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">Ṣe ayẹyẹ Ọjọ́ Orílẹ̀-èdè UAE ní àárín ilé gíga ọjọ́-ọla, irisi aginjù, àti ìtẹ̀lọ́run cosmopolitan ti ilú ìgbàlódé tó ga jù.</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">Mumbai</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">Ṣe ìrántí Òmìnira India pẹ̀lú ẹ̀mí Bollywood, amọ̀ràn ilé ìgbà kọ́lóníà, àti etíkun tí monsoon kàn lẹ́gbẹ̀ẹ́ Òkun Arabia.</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">Delhi</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">Ní Ọjọ́ Òmìnira, nímọ̀lára ìfẹ́ orílẹ̀-èdè bí igbi ṣe ń kọjá ọ̀nà ńlá ìgbà kọ́lóníà, olódi Mughal, àti ọkàn olú-ilu India.</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">Bangalore</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">Ṣe ayẹyẹ òmìnira ní ‘Silicon Valley’ ti India, níbi tí tẹ́ńpùlì ọ̀kẹ́ ọdún pàdé ọgbà imọ̀-ẹrọ tuntun àti ìkànìyàn ènìyàn cosmopolitan.</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">Jakarta</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">Ṣe àmì Ọjọ́ Òmìnira Indonesia ní ìlú onírúurú: láti ilé gíga tó ń tàn sí ọjà ọ̀nà tó ń kún àti àwọn ibi ogún àṣà.</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">Bangkok</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">Ṣe ayẹyẹ Ọjọ́ Bàbá Orílẹ̀-èdè Tháílándì ní ìbòmọ̀ràn ọba Bhumibol ní City of Angels, níbi tí tẹ́ńpùlì wúrà, ọjà lórí omi, àti onjẹ ọ̀nà alárinrin ń jí ìmọ̀lára rẹ.</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">Manila</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">Ṣe ayẹyẹ Òmìnira Philippines ní ìlú tí jeepney ń kọjá ṣọ́ọ̀ṣì ìgbà kọ́lóníà Sípáníìṣì, ọjà alárinrin, àti ilé gíga tuntun.</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">Tokyo</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">Darapọ̀ mọ́ ẹgbẹẹgbẹ̀rún lẹ́gbẹ̀ẹ́ Odò Sumida bí ọ̀run ṣe ń yọ̀ pẹ̀lú àwọ̀, tí ìmúlòlùfẹ́ òórùn Tókíò sì ń dá pẹpẹ pipe sílẹ̀ fún igbi tó ń dán.</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">Seoul</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">Wọ inú ayẹyẹ Gwangbokjeol bí igbi ṣe ń kọjá ààfin ọba, ibi K-pop, àti ọ̀run-ìlú tó darapọ̀ ìbílẹ̀ pẹ̀lú ìmòtuntun.</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">Beijing</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">Ní Labour Day, tọ̀ igbi kọjá àwọn ọgbà ìtura àti ọ̀nà ńlá Bẹ́jíṅ, níbi tí ọ̀pọ̀ ènìyàn ti ń kó jọ fún rìn, píkníkì, àti ìmọ̀lára ìsinmi orísun-omi.</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">Shanghai</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">Jẹ́ kí igbi kọjá Bund àti Nanjing Road bí Shanghai ṣe ń kún pẹ̀lú ìdílé, orin, àti agbára cosmopolitan ayẹyẹ Labour Day.</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">Hong Kong</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">Ní Golden Week Hong Kong, nímọ̀lára ìrọ̀rùn bí Victoria Harbour, ọjà, àti ọ̀nà nẹ́ọ́nì ṣe ń kún fún ènìyàn tí ń ṣe ayẹyẹ Labour Day pọ̀.</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">Sydney</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">Gùn igbi kọjá Mardi Gras Parade Sydney, níbi tí Oxford Street ti ń yọ̀ pẹ̀lú àwọ̀ òjò-ìrisì, float tó ń dán, àti ẹ̀mí kánìfànífà tó ń darapọ̀ ẹgbẹẹgbẹ̀rún ní ayẹyẹ.</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">Melbourne</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">Ní Melbourne Cup Day, gùn igbi kọjá olu-àṣà bí ìlú ṣe ń kún fún pẹ́rédè, ọ̀pọ̀ ènìyàn ní aṣọ ẹlẹ́wà, àti ẹ̀mí ayẹyẹ ‘the race that stops a nation’.</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">Toronto</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">Ní Canada Day, jẹ́ kí igbi gbe ọ kọjá nínú pupa àti funfun bí ó ti ń kọjá CN Tower, agbègbè ọ̀pọ̀-àṣà, àti etí Lake Ontario.</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">Vancouver</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">Ṣe ayẹyẹ Canada Day lẹ́gbẹ̀ẹ́ Pacific Coast, kíkó ara kọjá ìwòye ‘sea-to-sky’, àgbàdo ewé Stanley Park, àti ìtẹ̀lọ́run cosmopolitan ìlú arin.</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">Chicago</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">Ní Ọjọ́ Òmìnira, gbádùn onjẹ deep-dish àti iṣẹ́ ọnà ilé lẹ́gbẹ̀ẹ́ Lake Michigan bí igbi ṣe ń rìn kọjá Windy City.</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">San Francisco</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">Ní abẹ́ Golden Gate Bridge tó di ààmì, nímọ̀lára ẹ̀mí òmìnira bí igbi Ọjọ́ Òmìnira yìí ṣe ń kọjá òkè, ọkọ̀ kábu, àti agbègbè onírúurú.</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">Lima</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">Ní Ọjọ́ Òmìnira Peru, rìn kọjá pílásà ìgbà kọ́lóníà, ibi ìwádìí ṣáájú Inca, àti oorun onjẹ Peru tí ayé mọ̀.</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">Bogota</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">Ṣe ayẹyẹ Òmìnira Colombia láàárin ọ̀nà-art, ìwò òkè, àti ìlù àṣà ní agbègbè tí salsa kún ní olu-ilu Andean.</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">Santiago</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">Ní Ọjọ́ Òmìnira Chile, nímọ̀lára ìfẹ́ orílẹ̀-èdè bí igbi ṣe ń yí kiri lẹ́yìn àyíká Andes, ojú-ilé ìgbà kọ́lóníà, àti ilé gíláàsì tuntun.</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">Tehran</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">Darapọ̀ mọ́ Sizdah Bedar Tehran, ọjọ́ tí àwọn ìdílé ń kún ọgbà ìtura àti ọgbà fún píkníkì, ẹ̀rín, àti ìtúnjí, bí igbi ṣe ń kọjá ìpàdé òde-ilu alárinrin.</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">Karachi</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">Ṣe ayẹyẹ Òmìnira Pakistan lẹ́gbẹ̀ẹ́ Òkun Arabia, kọjá bázààrì tó ń kún, ìtàn ọlọ̀rọ̀, àti agbára alágbádá ti ìlú ńlá jù lọ ní orílẹ̀-èdè náà.</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">Gbé ọwọ́ rẹ soke!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">Lu ọwọ́ sí òsì àti ọtún!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">Yí ọwọ́ sẹ́yìn ká-ká!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">Bọ̀ sílẹ̀, dìde!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">Fi igbi hàn!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">Kọjá ọwọ́ pọ!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">Ṣètán fún igbi!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">Ṣe igbi báyìí!</string>
+</resources>

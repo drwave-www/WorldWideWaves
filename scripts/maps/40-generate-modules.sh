@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2024 DrWave
+# Copyright 2025 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
 # countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -80,11 +80,11 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
   DEST_DIR_MODULE_MAIN=$DEST_DIR_MODULE/src/main
   DEST_DIR_MODULE_FILES=$DEST_DIR_MODULE/src/main/assets
 
-  mkdir -p $DEST_DIR_MODULE
-  mkdir -p $DEST_DIR_MODULE_FILES
+  mkdir -p "$DEST_DIR_MODULE"
+  mkdir -p "$DEST_DIR_MODULE_FILES"
 
-  tpl $event templates/template-android-build-gradle.kts $DEST_DIR_MODULE/build.gradle.kts
-  tpl $event templates/template-AndroidManifest.xml $DEST_DIR_MODULE_MAIN/AndroidManifest.xml
+  tpl "$event" templates/template-android-build-gradle.kts "$DEST_DIR_MODULE/build.gradle.kts"
+  tpl "$event" templates/template-AndroidManifest.xml "$DEST_DIR_MODULE_MAIN/AndroidManifest.xml"
 
   # 1) Check the MBTiles file
   if [ ! -f "$DEST_DIR_MODULE_FILES/$event.mbtiles" ] || \

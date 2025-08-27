@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,8 +21,10 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.annotation.UiThread
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
+import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -31,7 +33,16 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(private val mapBounds: BoundingBox) {
+class MapConstraintManager(
+    private val mapBounds: BoundingBox,
+    private val mapLibreAdapter: MapLibreAdapter<*>,
+    /**
+     * When this lambda returns true the manager will not attempt to correct /
+     * move the camera.  Used while a user-initiated or automatic animation is
+     * already running to avoid fighting with it.
+     */
+    private val isSuppressed: () -> Boolean = { false }
+) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
@@ -39,6 +50,8 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
     )
 
     private var visibleRegionPadding = VisibleRegionPadding()
+    private var constraintBounds: BoundingBox? = null
+    private var constraintsApplied = false
 
     fun setVisibleRegionPadding(padding: VisibleRegionPadding) {
         visibleRegionPadding = padding
@@ -48,8 +61,115 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
         return calculatePaddedBounds(visibleRegionPadding)
     }
 
+    /**
+     * Apply constraints to a MapLibre map
+     */
+    @UiThread
+    fun applyConstraints() {
+        // Calculate visible region padding from the map
+        updateVisibleRegionPadding()
+
+        // Apply the constraints with the current padding
+        applyConstraintsWithPadding()
+
+        // Register the camera-idle listener only once
+        if (!constraintsApplied) {
+            mapLibreAdapter.addOnCameraIdleListener {
+                val newPadding = calculateVisibleRegionPadding()
+
+                if (
+                    hasSignificantPaddingChange(
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+                    )
+                ) {
+                    setVisibleRegionPadding(
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+                    )
+                    applyConstraintsWithPadding()
+                }
+            }
+            constraintsApplied = true
+        }
+    }
+
+    /**
+     * Apply constraints based on the current padding
+     */
+    private fun applyConstraintsWithPadding() {
+        try {
+            // Compute padded bounds and store them
+            val paddedBounds = calculateConstraintBounds()
+            constraintBounds = paddedBounds
+
+            // Apply bounds & min-zoom to the map – no immediate camera move
+            mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
+            val minZoom = mapLibreAdapter.getMinZoomLevel()
+            mapLibreAdapter.setMinZoomPreference(minZoom)
+        } catch (e: Exception) {
+            Napier.e("Error applying constraints: ${e.message}")
+        }
+    }
+
+    /**
+     * Constrain the camera to the valid bounds if needed
+     */
+    fun constrainCamera() {
+        if (isSuppressed()) return
+        val target = mapLibreAdapter.getCameraPosition() ?: return
+        if (constraintBounds != null && !isCameraWithinConstraints(target)) {
+            val mapPosition = Position(target.latitude, target.longitude)
+            val constraintBoundsMapped = constraintBounds?.let { bounds ->
+                BoundingBox.fromCorners(
+                    Position(bounds.southwest.latitude, bounds.southwest.longitude),
+                    Position(bounds.northeast.latitude, bounds.northeast.longitude)
+                )
+            }
+
+            constraintBoundsMapped?.let { bounds ->
+                val nearestValid = getNearestValidPoint(mapPosition, bounds)
+                mapLibreAdapter.animateCamera(Position(nearestValid.latitude, nearestValid.longitude))
+            }
+        }
+    }
+
+    /**
+     * Checks if camera is within the constraint bounds
+     */
+    private fun isCameraWithinConstraints(cameraPosition: Position): Boolean =
+        constraintBounds?.contains(cameraPosition) ?: false
+
+    /**
+     * Moves the camera to fit specified bounds
+     */
+    private fun fitMapToBounds(bounds: BoundingBox) {
+        mapLibreAdapter.moveCamera(bounds)
+    }
+
+    /**
+     * Updates visible region padding from the map
+     */
+    private fun updateVisibleRegionPadding() {
+        val padding = calculateVisibleRegionPadding()
+        setVisibleRegionPadding(
+            VisibleRegionPadding(padding.latPadding, padding.lngPadding)
+        )
+    }
+
+    private fun calculateVisibleRegionPadding(): VisibleRegionPadding {
+        // Get the visible region from the current map view
+        val visibleRegion = mapLibreAdapter.getVisibleRegion()
+
+        // Calculate padding as half the visible region dimensions
+        val latPadding = (visibleRegion.northLatitude -
+                visibleRegion.southLatitude) / 2.0
+        val lngPadding = (visibleRegion.eastLongitude -
+                visibleRegion.westLongitude) / 2.0
+
+        return VisibleRegionPadding(latPadding, lngPadding)
+    }
+
     private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
-        return BoundingBox(
+        return BoundingBox.fromCorners(
             Position(
                 mapBounds.southwest.latitude + padding.latPadding,
                 mapBounds.southwest.longitude + padding.lngPadding
@@ -128,7 +248,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
         val finalNorth = min(mapBounds.northeast.latitude, max(safeNorth, safeSouth + minLatSpan))
         val finalEast = min(mapBounds.northeast.longitude, max(safeEast, safeWest + minLngSpan))
 
-        return BoundingBox(
+        return BoundingBox.fromCorners(
             Position(safeSouth, safeWest),
             Position(finalNorth, finalEast)
         )
@@ -145,8 +265,8 @@ class MapConstraintManager(private val mapBounds: BoundingBox) {
     }
 
     fun getNearestValidPoint(point: Position, bounds: BoundingBox): Position {
-        val lat = point.latitude.coerceIn(bounds.southwest.latitude, bounds.northeast.latitude)
-        val lng = point.longitude.coerceIn(bounds.southwest.longitude, bounds.northeast.longitude)
+        val lat = point.latitude.coerceIn(bounds.minLatitude, bounds.maxLatitude)
+        val lng = point.longitude.coerceIn(bounds.minLongitude, bounds.maxLongitude)
         return Position(lat, lng)
     }
 }

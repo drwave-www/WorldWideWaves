@@ -1,7 +1,7 @@
 package com.worldwidewaves.compose.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,15 +61,10 @@ import com.worldwidewaves.compose.DownloadProgressIndicator
 import com.worldwidewaves.compose.ErrorMessage
 import com.worldwidewaves.compose.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.generated.resources.map_download
-import com.worldwidewaves.shared.generated.resources.map_downloading
-import com.worldwidewaves.shared.generated.resources.map_error_download
-import com.worldwidewaves.shared.generated.resources.map_loading
-import com.worldwidewaves.shared.generated.resources.map_starting_download
-import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
@@ -79,12 +75,13 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
 import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
+import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import org.koin.core.component.KoinComponent
 import org.koin.java.KoinJavaComponent.inject
 import org.maplibre.android.MapLibre
@@ -100,7 +97,6 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.geojson.Polygon
 import java.io.File
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 /**
  * Android-specific implementation of the EventMap
@@ -111,7 +107,7 @@ class AndroidEventMap(
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig()
-) : KoinComponent, AbstractEventMap(event, mapConfig, onLocationUpdate) {
+) : KoinComponent, AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate) {
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
@@ -188,8 +184,9 @@ class AndroidEventMap(
             // Default map image as background
             Image(
                 modifier = Modifier.fillMaxSize(),
-                painter = painterResource(getEventImage("map", event.id) as DrawableResource),
-                contentDescription = "defaultMap"
+                painter = painterResource(event.getMapImage() as DrawableResource),
+                contentDescription = "defaultMap",
+                contentScale = ContentScale.Crop
             )
 
             // LibreMap as Android Composable - only visible when map is loaded
@@ -221,16 +218,16 @@ class AndroidEventMap(
                                     is MapFeatureState.Downloading -> {
                                         DownloadProgressIndicator(
                                             progress = state.progress,
-                                            message = stringResource(ShRes.string.map_downloading),
+                                            message = stringResource(MokoRes.strings.map_downloading),
                                             onCancel = { mapViewModel.cancelDownload() }
                                         )
                                     }
                                     is MapFeatureState.Pending -> {
-                                        LoadingIndicator(message = stringResource(ShRes.string.map_starting_download))
+                                        LoadingIndicator(message = stringResource(MokoRes.strings.map_starting_download))
                                     }
                                     is MapFeatureState.Retrying -> {
                                         DownloadProgressIndicator(
-                                            message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
+                                            message = "${stringResource(MokoRes.strings.map_retrying_download)} (${state.attempt}/${state.maxAttempts})...",
                                             onCancel = {
                                                 isMapDownloading = false
                                                 mapViewModel.cancelDownload()
@@ -239,7 +236,7 @@ class AndroidEventMap(
                                     }
                                     else -> {
                                         // Generic loading indicator for other download states
-                                        LoadingIndicator(message = stringResource(ShRes.string.map_loading))
+                                        LoadingIndicator(message = stringResource(MokoRes.strings.map_loading))
                                     }
                                 }
                             }
@@ -250,7 +247,7 @@ class AndroidEventMap(
                     // Show error with retry option
                     Surface(modifier = Modifier.fillMaxSize()) {
                         ErrorMessage(
-                            message = stringResource(ShRes.string.map_error_download),
+                            message = stringResource(MokoRes.strings.map_error_download),
                             onRetry = {
                                 mapError = false
                                 mapViewModel.downloadMap(event.id)
@@ -278,7 +275,7 @@ class AndroidEventMap(
                             )
                         ) {
                             Text(
-                                text = stringResource(ShRes.string.map_download),
+                                text = stringResource(MokoRes.strings.map_download),
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )
@@ -294,7 +291,7 @@ class AndroidEventMap(
      */
     private fun loadMap(
         context: Context,
-        scope: kotlinx.coroutines.CoroutineScope,
+        scope: CoroutineScope,
         mapLibreView: MapView,
         hasLocationPermission: Boolean,
         onMapLoaded: () -> Unit,
@@ -304,29 +301,22 @@ class AndroidEventMap(
             withContext(Dispatchers.IO) { // IO actions
                 event.map.getStyleUri()?.let {
                     val uri = Uri.fromFile(File(it))
-
-                    scope.launch { // UI actions
+                    scope.launch { // Required -- UI actions
                         mapLibreView.getMapAsync { map ->
-                            map.setStyle(Style.Builder().fromUri(uri.toString())) { style ->
-                                map.uiSettings.setAttributionMargins(0, 0, 0, 0)
-
-                                // Provide Adapter with Android MapLibre instance
-                                mapLibreAdapter.setMap(map)
-
-                                // Initialize location provider if we have permission
-                                if (hasLocationPermission) {
-                                    setupMapLocationComponent(map, context, style)
-                                }
-
-                                // Initialize view and setup listeners
-                                setupMap(
-                                    scope, map.width.toDouble(), map.height.toDouble(),
-                                    onMapLoaded = onMapLoaded,
-                                    onMapClick = { _, _ ->
-                                        onMapClick?.invoke()
+                            // Setup Map
+                            this@AndroidEventMap.setupMap(
+                                map, scope,uri.toString(),
+                                onMapLoaded = {
+                                    // Initialize location provider if we have permission
+                                    if (hasLocationPermission) {
+                                        setupMapLocationComponent(map, context)
                                     }
-                                )
-                            }
+                                    onMapLoaded()
+                                },
+                                onMapClick = { _, _ ->
+                                    onMapClick?.invoke()
+                                }
+                            )
                         }
                     }
                 } ?: run {
@@ -342,13 +332,15 @@ class AndroidEventMap(
      * Sets up the Android location component
      */
     @SuppressLint("MissingPermission")
-    private fun setupMapLocationComponent(map: MapLibreMap, context: Context, style: Style) {
-        // Activate location component
-        map.locationComponent.activateLocationComponent(
-            buildLocationComponentActivationOptions(context, style)
-        )
-        map.locationComponent.isLocationComponentEnabled = true
-        map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+    private fun setupMapLocationComponent(map: MapLibreMap, context: Context) {
+        map.style?.let { style ->
+            // Activate location component
+            map.locationComponent.activateLocationComponent(
+                buildLocationComponentActivationOptions(context, style)
+            )
+            map.locationComponent.isLocationComponentEnabled = true
+            map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+        }
     }
 
     /**

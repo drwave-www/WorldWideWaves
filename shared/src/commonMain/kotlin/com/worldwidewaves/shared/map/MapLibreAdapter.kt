@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.map
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,101 +27,36 @@ import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Map interface that platform-specific implementations must implement
- * It provides convenient delegation helpers to the shared `cameraManager`
- * and `mapStateManager`, exposing a single cross-platform API surface.
- *
- * Constraint handling is now performed directly inside `SharedCameraManager`
- * and respects the **exact bounding box** supplied via `setBoundsConstraints`
- * (no extra padding is applied).  
- * The adapter exposes `constrainCamera()` so platform code can snap the
- * camera back inside those bounds after user gestures or other movements.
  */
-interface MapLibreAdapter : PlatformMapOperations, PlatformMapRenderer {
+interface MapLibreAdapter<T> {
 
-    /* --------------------------------------------------------------------- */
-    /* Shared helpers that handle cross-platform logic                       */
-    /* --------------------------------------------------------------------- */
-
-    /**
-     * Shared camera controller responsible for camera state & animations.
-     * Platform implementations **must** create it with `this`
-     * (because this adapter fulfils [PlatformMapOperations]).
-     */
-    val cameraManager: SharedCameraManager
-
-    /**
-     * Shared map-state controller (wave polygons, click listeners, etc.).
-     * Platform implementations **must** create it with `this`
-     * (because this adapter fulfils [PlatformMapRenderer]).
-     */
-    val mapStateManager: SharedMapStateManager
-
-    /* --------------------------------------------------------------------- */
-    /* Reactive state – just proxy to the camera manager                     */
-    /* --------------------------------------------------------------------- */
+    fun setMap(map: T)
+    fun setStyle(stylePath: String, callback: () -> Unit?)
 
     val currentPosition: StateFlow<Position?>
-        get() = cameraManager.currentPosition
-
     val currentZoom: StateFlow<Double>
-        get() = cameraManager.currentZoom
 
-    /* --------------------------------------------------------------------- */
-    /* Public API – kept for backward compatibility, now delegating          */
-    /* --------------------------------------------------------------------- */
+    fun getWidth() : Double
+    fun getHeight() : Double
 
-    fun animateCamera(
-        position: Position,
-        zoom: Double? = null,
-        callback: MapCameraCallback? = null
-    ) = cameraManager.animateCamera(position, zoom, callback)
+    fun getCameraPosition() : Position?
+    fun getVisibleRegion() : BoundingBox
+    fun moveCamera(bounds: BoundingBox)
+    fun animateCamera(position: Position, zoom: Double? = null, callback: MapCameraCallback? = null)
+    fun animateCameraToBounds(bounds: BoundingBox, padding: Int = 0, callback: MapCameraCallback? = null)
+    fun setBoundsForCameraTarget(constraintBounds: BoundingBox)
 
-    fun animateCameraToBounds(
-        bounds: BoundingBox,
-        padding: Int = 0,
-        callback: MapCameraCallback? = null
-    ) = cameraManager.animateCameraToBounds(bounds, padding, callback)
+    fun getMinZoomLevel() : Double
+    fun setMinZoomPreference(minZoom: Double)
+    fun setMaxZoomPreference(maxZoom: Double)
+    fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int)
 
-    override fun setBoundsConstraints(bounds: BoundingBox) =
-        cameraManager.setBoundsConstraints(bounds)
+    fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)
 
-    override fun setMinZoomPreference(minZoom: Double) =
-        cameraManager.setMinZoomPreference(minZoom)
+    fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?)
+    fun addOnCameraIdleListener(callback: () -> Unit)
 
-    override fun setMaxZoomPreference(maxZoom: Double) =
-        cameraManager.setMaxZoomPreference(maxZoom)
+    fun drawOverridenBbox(bbox: BoundingBox)
 
-    fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false) =
-        mapStateManager.updateWavePolygons(polygons, clearExisting)
-
-    fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?) =
-        mapStateManager.setMapClickListener(listener)
-
-    /**
-     * Ensures the camera remains inside previously set bounds constraints.
-     *
-     * @return `true` if the camera had to be moved to satisfy the constraints,
-     *         `false` if no adjustment was necessary.
-     */
-    fun constrainCamera(): Boolean = cameraManager.constrainCamera()
-
-    /* --------------------------------------------------------------------- */
-    /* Lifecycle helpers – platform impls must call them at the right time   */
-    /* --------------------------------------------------------------------- */
-
-    /**
-     * Must be invoked by the platform side once the underlying map view is
-     * fully ready (after style load, etc.). Executes pending callbacks and
-     * renders any queued layers.
-     */
-    fun onMapReady() = mapStateManager.notifyMapReady()
-
-    /**
-     * Call when the map view is about to be destroyed to release resources
-     * and cancel listeners.
-     */
-    fun cleanup() {
-        mapStateManager.cleanup()
-    }
 }
 

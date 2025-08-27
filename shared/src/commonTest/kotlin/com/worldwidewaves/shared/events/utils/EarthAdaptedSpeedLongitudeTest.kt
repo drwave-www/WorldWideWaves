@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events.utils
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -40,7 +40,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -57,7 +56,10 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class EarthAdaptedSpeedLongitudeTest {
 
     private val dispatcher = StandardTestDispatcher() // Create dispatcher instance
@@ -93,7 +95,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test withProgression - no elapsed time`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -109,7 +111,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test withProgression - positive elapsed time`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -126,7 +128,7 @@ class EarthAdaptedSpeedLongitudeTest {
     @Test
     fun `test withProgression - bands check`() = runTest {
         // GIVEN
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromCorners(
             sw = Position(-10.0, -10.0),
             ne = Position(10.0, 10.0)
         )
@@ -159,7 +161,7 @@ class EarthAdaptedSpeedLongitudeTest {
     @Test
     fun `test withProgression - compare with WaveDuration`() = runTest {
         // GIVEN
-        val bbox = BoundingBox(
+        val bbox = BoundingBox.fromCorners(
             sw = Position(-10.0, -10.0),
             ne = Position(10.0, 10.0)
         )
@@ -211,7 +213,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test withProgression - direction West`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.WEST
 
@@ -227,7 +229,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test calculateLonBandWidthAtMiddleLatitude`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -243,7 +245,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test calculateOptimalLatBandWidth`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -255,7 +257,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test adjustLongitudeWidthAtLatitude`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -267,7 +269,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test calculateWaveBands`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 
@@ -284,7 +286,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test invalid speed`() {
-        val bbox = BoundingBox(Position(0.0, 0.0), Position(10.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
         val speed = -100.0 // Invalid negative speed
         val direction = Direction.EAST
 
@@ -295,7 +297,7 @@ class EarthAdaptedSpeedLongitudeTest {
 
     @Test
     fun `test progression near poles`() {
-        val bbox = BoundingBox(Position(85.0, 0.0), Position(90.0, 10.0))
+        val bbox = BoundingBox.fromCorners(Position(85.0, 0.0), Position(90.0, 10.0))
         val speed = 100.0 // m/s
         val direction = Direction.EAST
 

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,19 +27,20 @@ import com.worldwidewaves.shared.events.utils.EarthAdaptedSpeedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
-import com.worldwidewaves.shared.events.utils.PolygonUtils.recomposeCutPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEventWaveLinear(
     override val speed: Double,
@@ -56,9 +57,8 @@ data class WWWEventWaveLinear(
 
     // ---------------------------
 
-    override suspend fun getWavePolygons(lastWaveState: WavePolygons?, mode: WaveMode): WavePolygons? {
-        require(event.isRunning()) { "Event must be running to request the wave polygons" }
-        require(lastWaveState == null || lastWaveState.timestamp <= clock.now()) { "Last wave state must be in the past" }
+    override suspend fun getWavePolygons(): WavePolygons? {
+        if(!event.isRunning()) return null
 
         val elapsedTime = clock.now() - event.getWaveStartDateTime()
         if (elapsedTime <= 0.seconds) return null
@@ -69,38 +69,16 @@ data class WWWEventWaveLinear(
 
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
-        val addedTraversedPolygons : MutableArea = mutableListOf()
 
-        if (lastWaveState == null) {
-            val areaPolygons = event.area.getPolygons()
-            val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
-            traversedPolygons.addAll(traversed)
-            remainingPolygons.addAll(remaining)
-        } else {
-            val (newTraversed, remaining) = splitAreaToWave(lastWaveState.remainingPolygons, composedLongitude)
-            when(mode) {
-                WaveMode.ADD -> { // Add new traversed polygons without reconstruction
-                    remainingPolygons.addAll(remaining)
-                    traversedPolygons.addAll(lastWaveState.traversedPolygons)
-                    traversedPolygons.addAll(newTraversed)
-                    addedTraversedPolygons.addAll(newTraversed)
-                }
-                WaveMode.RECOMPOSE -> { // Recompose the remaining polygons on CutPositions
-                    remainingPolygons.addAll(remaining)
-                    traversedPolygons.addAll(
-                        recomposeCutPolygons(
-                            lastWaveState.traversedPolygons +  newTraversed
-                        )
-                    )
-                }
-            }
-        }
+        val areaPolygons = event.area.getPolygons()
+        val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
+        traversedPolygons.addAll(traversed)
+        remainingPolygons.addAll(remaining)
 
         return if (traversedPolygons.isNotEmpty() || remainingPolygons.isNotEmpty()) WavePolygons(
             clock.now(),
             traversedPolygons,
-            remainingPolygons,
-            addedTraversedPolygons.ifEmpty { null }
+            remainingPolygons
         ) else null
     }
 
@@ -115,7 +93,7 @@ data class WWWEventWaveLinear(
         composedLongitude: ComposedLongitude
     ) : Pair<Area, Area> {
         if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
-        val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
+        val splitResults = areaPolygons.map { splitByLongitude(it, composedLongitude) }
 
         fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
             splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()
@@ -141,6 +119,11 @@ data class WWWEventWaveLinear(
      */
     override suspend fun getWaveDuration(): Duration = cachedWaveDuration ?: run {
         val bbox = bbox()
+
+        if (bbox.minLongitude == 0.0 && bbox.maxLongitude == 0.0) { // If map has not been loaded yet
+            return event.wave.getApproxDuration()
+        }
+
         val longestLat = bbox.latitudeOfWidestPart()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
         val durationInSeconds = maxEastWestDistance / speed
@@ -159,7 +142,7 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userHitDateTime(): Instant? {
-        val userPosition = getUserPosition() ?: return null
+        val userPosition = getUserPosition() ?: return null // FIXME / Check
         if (!event.area.isPositionWithin(userPosition)) return null
 
         // Check if we have a cached result for a nearby position
@@ -210,7 +193,7 @@ data class WWWEventWaveLinear(
     }
 
     override suspend fun userPositionToWaveRatio(): Double? {
-        val userPosition = getUserPosition() ?: return null
+        val userPosition = getUserPosition() ?: return null // FIXME / Check
 
         if (!event.area.isPositionWithin(userPosition)) {
             return null

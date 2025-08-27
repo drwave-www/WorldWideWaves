@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -28,15 +28,21 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MutableArea
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -60,10 +66,15 @@ data class WWWEventArea(
 
     // ---------------------------
 
+    val bboxIsOverride: Boolean by lazy { parseBboxString() != null }
+
+    // ---------------------------
+
     private val geoJsonDataProvider: GeoJsonDataProvider by inject()
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    @Transient private val cachedAreaPolygons: MutableArea = mutableListOf()
+    @Transient private var cachedAreaPolygons: Area? = null
+    @Transient private val polygonsCacheMutex = Mutex() // Add mutex for cache protection
     @Transient private var cachedBoundingBox: BoundingBox? = null
     @Transient private var cachedCenter: Position? = null
     @Transient private var cachedPositionWithinResult: Pair<Position, Boolean>? = null
@@ -176,7 +187,7 @@ data class WWWEventArea(
                 // Parse the string "minLng, minLat, maxLng, maxLat"
                 val coordinates = bbox.split(",").map { it.trim().toDouble() }
                 if (coordinates.size >= 4) {
-                    return BoundingBox(
+                    return BoundingBox.fromCorners(
                         sw = Position(lat = coordinates[1], lng = coordinates[0]),
                         ne = Position(lat = coordinates[3], lng = coordinates[2])
                     )
@@ -204,7 +215,7 @@ data class WWWEventArea(
         return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
-            } ?: BoundingBox(Position(0.0, 0.0), Position(0.0, 0.0))
+            } ?: BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
     }
 
     /**
@@ -233,39 +244,81 @@ data class WWWEventArea(
      * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
     suspend fun getPolygons(): Area {
-        if (cachedAreaPolygons.isEmpty()) {
-            coroutineScopeProvider.withDefaultContext {
-                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
-                    val type = geometryCollection["type"]?.jsonPrimitive?.content
-                    val coordinates = geometryCollection["coordinates"]?.jsonArray
+        // Fast path: if cache is already populated, return immediately
+        cachedAreaPolygons?.let { return it }
 
-                    when (type) {
-                        "Polygon" -> coordinates?.flatMap { ring ->
-                            ring.jsonArray.map { point ->
-                                Position(
-                                    point.jsonArray[1].jsonPrimitive.double,
-                                    point.jsonArray[0].jsonPrimitive.double
-                                ).constrainToBoundingBox()
-                            }.toPolygon.apply { cachedAreaPolygons.add(this) }
-                        }
-                        "MultiPolygon" -> coordinates?.flatMap { multiPolygon ->
-                            multiPolygon.jsonArray.flatMap { ring ->
-                                ring.jsonArray.map { point ->
-                                    Position(
-                                        point.jsonArray[1].jsonPrimitive.double,
-                                        point.jsonArray[0].jsonPrimitive.double
-                                    ).constrainToBoundingBox()
-                                }.toPolygon.apply { cachedAreaPolygons.add(this) }
+        // Slow path: populate cache with mutex protection
+        polygonsCacheMutex.withLock {
+            // Double-check pattern: another coroutine might have populated the cache
+            cachedAreaPolygons?.let { return it }
+
+            // Build polygons in a temporary mutable list
+            val tempPolygons: MutableArea = mutableListOf()
+
+            coroutineScopeProvider.withDefaultContext {
+                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
+                    val rootType = geoJsonData["type"]?.jsonPrimitive?.content
+
+                    when (rootType) {
+                        "FeatureCollection" -> {
+                            // Handle FeatureCollection format
+                            val features = geoJsonData["features"]?.jsonArray
+                            features?.forEach { feature ->
+                                val geometry = feature.jsonObject["geometry"]?.jsonObject
+                                geometry?.let { processGeometry(it, tempPolygons) }
                             }
                         }
-                        else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
+                        "Polygon", "MultiPolygon" -> {
+                            // Handle direct geometry format (your original case)
+                            processGeometry(geoJsonData, tempPolygons)
+                        }
+                        else -> {
+                            Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $rootType")
+                        }
                     }
                 } ?: run {
                     Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
+
+            // Atomically assign the complete immutable list
+            cachedAreaPolygons = tempPolygons.toList()
         }
-        return cachedAreaPolygons
+
+        return cachedAreaPolygons ?: emptyList()
+    }
+
+    private fun processGeometry(geometry: JsonObject, tempPolygons: MutableList<Polygon>) {
+        val type = geometry["type"]?.jsonPrimitive?.content
+        val coordinates = geometry["coordinates"]?.jsonArray
+
+        when (type) {
+            "Polygon" -> coordinates?.forEach { ring ->
+                processRing(ring, tempPolygons)
+            }
+            "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
+                multiPolygon.jsonArray.forEach { ring ->
+                    processRing(ring, tempPolygons)
+                }
+            }
+            else -> {
+                Log.e(::getPolygons.name, "Unsupported geometry type: $type")
+            }
+        }
+    }
+
+    private fun processRing(ring: JsonElement, polygons: MutableArea) {
+        val positions = ring.jsonArray.map { point ->
+            Position(
+                point.jsonArray[1].jsonPrimitive.double,
+                point.jsonArray[0].jsonPrimitive.double
+            ).constrainToBoundingBox()
+        }
+
+        val polygon = positions.toPolygon
+        if (polygon.size > 1) {
+            polygons.add(polygon)
+        }
     }
 
     private fun Position.constrainToBoundingBox(): Position {

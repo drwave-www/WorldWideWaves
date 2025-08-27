@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.serialization")
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.icerock.moko.multiplatform)
 }
 
 kotlin {
@@ -76,6 +77,11 @@ android {
     buildFeatures {
         compose = true
     }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+    }
     packaging {
         resources.excludes.addAll(
             listOf(
@@ -86,6 +92,7 @@ android {
         )
     }
     defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
     sourceSets["main"].apply {
@@ -96,10 +103,18 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        implementation(libs.mockk.android.v1120)
+        
         implementation(libs.maplibre.android)
     }
 
+    /*
+     * Configure the Android test runner so that common JVM tests can be executed
+     * directly from Android Studio (Run/Debug-gutter icon or context menu).
+     */
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 compose.resources {
@@ -113,6 +128,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics.android)
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.feature.delivery.ktx)
+    // MockK is only needed for unit tests; keep it out of the runtime classpath.
+    commonMainApi(libs.icerock.moko.resources)
+    commonMainApi(libs.icerock.moko.resources.compose)
+    testImplementation(libs.mockk.android.v1120)
+}
+
+multiplatformResources {
+    resourcesPackage.set("com.worldwidewaves.shared")
+    resourcesClassName.set("MokoRes")
+    iosBaseLocalizationRegion.set("en")
+
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

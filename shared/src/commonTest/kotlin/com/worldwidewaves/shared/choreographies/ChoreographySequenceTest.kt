@@ -4,7 +4,6 @@ import com.worldwidewaves.shared.utils.ImageResolver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,7 +36,6 @@ class ChoreographySequenceTest {
             frameHeight = 900,
             frameCount = 4,
             timing = 0.5.seconds,
-            text = "Wave!",
             loop = true,
             duration = 10.seconds
         )
@@ -47,7 +45,6 @@ class ChoreographySequenceTest {
         assertEquals(900, sequence.frameHeight)
         assertEquals(4, sequence.frameCount)
         assertEquals(0.5.seconds, sequence.timing)
-        assertEquals("Wave!", sequence.text)
         assertTrue(sequence.loop)
         assertEquals(10.seconds, sequence.duration)
     }
@@ -66,7 +63,6 @@ class ChoreographySequenceTest {
         assertEquals(200, sequence.frameHeight)
         assertEquals(1, sequence.frameCount) // Default value
         assertEquals(1.seconds, sequence.timing)
-        assertEquals("", sequence.text) // Default empty text
         assertTrue(sequence.loop) // Default to true
         assertEquals(10.seconds, sequence.duration) // Default duration
     }
@@ -199,7 +195,6 @@ class ChoreographySequenceTest {
             frameHeight = 300,
             frameCount = 5,
             timing = 0.75.seconds,
-            text = "Serialization Test",
             loop = false,
             duration = 5.seconds
         )
@@ -221,7 +216,6 @@ class ChoreographySequenceTest {
         assertEquals(original.frameHeight, deserialized.frameHeight)
         assertEquals(original.frameCount, deserialized.frameCount)
         assertEquals(original.timing, deserialized.timing)
-        assertEquals(original.text, deserialized.text)
         assertEquals(original.loop, deserialized.loop)
         assertEquals(original.duration, deserialized.duration)
     }
@@ -234,7 +228,6 @@ class ChoreographySequenceTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get ready!",
             duration = 3.seconds
         )
         
@@ -244,7 +237,6 @@ class ChoreographySequenceTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Wait...",
             duration = 2.seconds
         )
         
@@ -254,7 +246,6 @@ class ChoreographySequenceTest {
             frameHeight = 100,
             frameCount = 4,
             timing = 0.25.seconds,
-            text = "Now!",
             loop = false,
             duration = 1.seconds
         )
@@ -279,16 +270,13 @@ class ChoreographySequenceTest {
         // Verify all properties are preserved
         assertEquals(1, deserialized.warmingSequences.size)
         assertEquals(warmingSequence.frames, deserialized.warmingSequences[0].frames)
-        assertEquals(warmingSequence.text, deserialized.warmingSequences[0].text)
-        
+
         assertNotNull(deserialized.waitingSequence)
-        assertEquals(waitingSequence.frames, deserialized.waitingSequence?.frames)
-        assertEquals(waitingSequence.text, deserialized.waitingSequence?.text)
-        
+        assertEquals(waitingSequence.frames, deserialized.waitingSequence.frames)
+
         assertNotNull(deserialized.hitSequence)
-        assertEquals(hitSequence.frames, deserialized.hitSequence?.frames)
-        assertEquals(hitSequence.text, deserialized.hitSequence?.text)
-        assertFalse(deserialized.hitSequence?.loop ?: true)
+        assertEquals(hitSequence.frames, deserialized.hitSequence.frames)
+        assertFalse(deserialized.hitSequence.loop)
     }
     
     @Test
@@ -408,7 +396,6 @@ class ChoreographySequenceTest {
         assertEquals(400, sequence.frameHeight)
         assertEquals(6, sequence.frameCount)
         assertEquals(0.5.seconds, sequence.timing) // 500,000,000 nanoseconds = 0.5 seconds
-        assertEquals("Loaded from JSON", sequence.text)
         assertFalse(sequence.loop)
         assertEquals(3.seconds, sequence.duration) // 3,000,000,000 nanoseconds = 3 seconds
     }
@@ -436,7 +423,6 @@ class ChoreographySequenceTest {
         assertEquals(200, sequence.frameHeight)
         assertEquals(1, sequence.frameCount) // Default value
         assertEquals(1.seconds, sequence.timing)
-        assertEquals("", sequence.text) // Default value
         assertTrue(sequence.loop) // Default value
         assertEquals(10.seconds, sequence.duration) // Default value
     }

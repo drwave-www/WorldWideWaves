@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -59,8 +59,8 @@ class WWWGlobals {
         val WAVE_WARN_BEFORE_HIT = 30.seconds
         val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 10.seconds
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
-        const val WAVE_BACKGROUND_COLOR = "#D33682"
-        const val WAVE_BACKGROUND_OPACITY = 0.5f
+        const val WAVE_BACKGROUND_COLOR = "#00008B"
+        const val WAVE_BACKGROUND_OPACITY = 0.20f
 
         // -- UI Constants --
 

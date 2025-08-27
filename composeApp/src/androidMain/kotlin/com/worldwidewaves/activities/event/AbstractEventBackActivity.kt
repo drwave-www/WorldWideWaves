@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.event
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -24,19 +24,23 @@ package com.worldwidewaves.activities.event
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,26 +53,23 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import com.worldwidewaves.viewmodels.MapViewModel
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
 ) : MainActivity() {
 
-    private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
 
@@ -132,17 +133,29 @@ abstract class AbstractEventBackActivity(
                     )
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
+                    Row(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .clickable(onClick = { finish() }),
-                        text = "< " + stringResource(ShRes.string.back),
-                        style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
-                    )
+                            .clickable { finish() },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(MokoRes.strings.back),
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(end = 4.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(MokoRes.strings.back),
+                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
+                        )
+                    }
                     if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
-                            text = selectedEvent!!.location.uppercase(),
+                            text = stringResource(selectedEvent!!.getLocation()),
                             style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )
@@ -172,7 +185,7 @@ abstract class AbstractEventBackActivity(
         }
     }
 
-    // Main activity UI building methode to be implemented --------------------
+    // Main activity UI building method to be implemented ---------------------
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 

@@ -1,7 +1,7 @@
 package com.worldwidewaves.shared.events
 
 /*
- * Copyright 2024 DrWave
+ * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -21,14 +21,16 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEventWaveLinearSplit(
     override val speed: Double,
@@ -37,10 +39,7 @@ data class WWWEventWaveLinearSplit(
     val nbSplits: Int
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getWavePolygons(
-        lastWaveState: WavePolygons?,
-        mode: WaveMode
-    ): WavePolygons {
+    override suspend fun getWavePolygons(): WavePolygons {
         TODO("Not yet implemented")
     }
 
