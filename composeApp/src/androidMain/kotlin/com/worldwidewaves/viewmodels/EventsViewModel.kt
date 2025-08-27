@@ -200,6 +200,8 @@ class EventsViewModel(
      * Start observing status for a list of events
      */
     private suspend fun startObservingEvents(events: List<IWWWEvent>) {
+        Log.v(::EventsViewModel.name, "Starting observations for ${events.size} events")
+
         // Cancel any existing observation jobs first
         cancelEventObservations()
 
@@ -231,6 +233,8 @@ class EventsViewModel(
      * Start observation for a single event
      */
     private fun startEventObservation(event: IWWWEvent) {
+        Log.v(::EventsViewModel.name, "Starting observation for event ${event.id} in view model")
+
         // Start the event's observation
         event.startObservation()
 
@@ -238,6 +242,8 @@ class EventsViewModel(
         val job = event.eventStatus
             .onEach { status ->
                 try {
+                    Log.v(::EventsViewModel.name, "Event ${event.id} status changed to $status")
+
                     // Update our status map when the event's status changes
                     val updatedMap = _eventStatusMap.value.toMutableMap()
                     updatedMap[event.id] = status
