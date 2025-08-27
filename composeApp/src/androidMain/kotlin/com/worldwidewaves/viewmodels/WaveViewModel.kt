@@ -209,7 +209,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
         // First stop any existing observation for this ID
         stopObservation(observerId)
 
-        // Start the event's observation
+        // Start the event's observation if not already started
         event.startObservation()
 
         // Create and initialize observer state
@@ -324,7 +324,7 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
                 platform.getSimulation()?.setSpeed(speed)
             }
 
-            state.event.stopObservation()
+            // Cleanup state
             state.cleanup()
             observers.remove(observerId)
             lastPolygonUpdateTimestamps.remove(observerId)

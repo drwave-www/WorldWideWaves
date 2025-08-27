@@ -412,6 +412,7 @@ data class WWWEvent(
                 }
 
                 // Start observation if event is running or about to start
+                // Accepted as the application will not be let running for days (isSoon includes a delay)
                 if (isRunning() || (isSoon() && isNearTime())) {
                     observationJob = createObservationFlow()
                         .flowOn(Dispatchers.IO)
@@ -429,7 +430,7 @@ data class WWWEvent(
 
     override fun stopObservation() {
         coroutineScopeProvider.launchDefault {
-            Log.v("startObservation", "Stopping observation for event $id")
+            Log.v("stopObservation", "Stopping observation for event $id")
             try {
                 observationJob?.cancelAndJoin()
             } catch (e: CancellationException) {

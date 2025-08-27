@@ -238,6 +238,10 @@ class EventActivity : AbstractEventWaveActivity() {
                         Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
                         platform.setSimulation(simulation)
 
+                        // Restart event observation to apply simulation (observation delay changes)
+                        event.stopObservation()
+                        event.startObservation()
+
                         // Show feedback
                         Toast.makeText(
                             context,
@@ -245,8 +249,6 @@ class EventActivity : AbstractEventWaveActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        // Restart wave observation to apply simulation
-                        restartWaveObservation()
                     }
                 },
             contentAlignment = Alignment.Center

@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 /*
@@ -41,7 +41,7 @@ import org.koin.dsl.module
 val applicationModule = module {
     single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
-    viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
+    viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get()) }
     viewModel { WaveViewModel(platform = get()) }
 
     single { SettingsScreen() }

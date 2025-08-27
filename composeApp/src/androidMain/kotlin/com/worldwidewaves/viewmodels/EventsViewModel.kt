@@ -13,7 +13,6 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -45,8 +44,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class EventsViewModel(
     private val wwwEvents: WWWEvents,
-    private val mapChecker: MapAvailabilityChecker,
-    private val platform: WWWPlatform
+    private val mapChecker: MapAvailabilityChecker
 ) : ViewModel() {
 
     private val originalEventsMutex = Mutex()
@@ -79,40 +77,9 @@ class EventsViewModel(
 
     init {
         loadEvents()
-        observeSimulationChanges()
     }
 
     // ---------------------------
-
-    /**
-     * Observe simulation change counter from [WWWPlatform] and restart
-     * event observations whenever the simulation context is modified.
-     */
-    private fun observeSimulationChanges() { // Hack for simulation handling on non-observed events
-        platform.simulationChanged
-            .onEach { changeCount ->
-                if (changeCount > 0) {
-                    Log.d(::EventsViewModel.name, "Simulation changed ($changeCount), restarting observations")
-                    restartEventObservations()
-                }
-            }
-            .flowOn(Dispatchers.Default)
-            .launchIn(viewModelScope)
-    }
-
-    /**
-     * Restart observations for all currently loaded events, respecting mutex protection.
-     */
-    private fun restartEventObservations() {
-        Log.v(::EventsViewModel.name, "Restart observations for events list")
-        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
-            originalEventsMutex.withLock {
-                if (originalEvents.isNotEmpty()) {
-                    startObservingEvents(originalEvents)
-                }
-            }
-        }
-    }
 
     /**
      * Load events from the data source
@@ -157,7 +124,7 @@ class EventsViewModel(
         _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
 
         // Start observing all events
-        startObservingEvents(eventsList)
+        startObservingEvents(sortedEvents)
     }
 
     // ---------------------------
@@ -189,7 +156,7 @@ class EventsViewModel(
             _events.value = originalEvents.filter { event ->
                 when {
                     onlyFavorites -> event.favorite
-                    onlyDownloaded -> mapChecker.isMapDownloaded(event.id)
+                    onlyDownloaded ->mapChecker.isMapDownloaded(event.id)
                     else -> true // All events
                 }
             }
@@ -237,6 +204,11 @@ class EventsViewModel(
     private fun startEventObservation(event: IWWWEvent) {
         Log.v(::EventsViewModel.name, "Starting observation for event ${event.id} in view model")
 
+        if (eventObservationJobs.containsKey(event.id)) {
+            Log.w(::EventsViewModel.name, "Observation for event ${event.id} is already running")
+            return
+        }
+
         // Start the event's observation
         event.startObservation()
 
@@ -265,16 +237,13 @@ class EventsViewModel(
      * Cancel all event observations
      */
     private fun cancelEventObservations() {
-        Log.v(::EventsViewModel.name, "Stopping all events observations")
+        Log.v(::EventsViewModel.name, "Stopping all events observations in view model")
 
         eventObservationJobs.forEach { (_, job) ->
             job.cancel()
         }
         eventObservationJobs.clear()
 
-        originalEvents.forEach { event ->
-            event.stopObservation()
-        }
     }
 
     // ----------------------------

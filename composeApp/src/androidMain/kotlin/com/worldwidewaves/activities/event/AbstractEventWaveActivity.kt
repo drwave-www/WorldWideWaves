@@ -77,11 +77,6 @@ abstract class AbstractEventWaveActivity(
         }
     }
 
-    protected fun restartWaveObservation() {
-        waveProgressionObserver?.stopObservation()
-        waveProgressionObserver?.startObservation()
-    }
-
     // ------------------------------------------------------------------------
 
     override fun onDestroy() {
