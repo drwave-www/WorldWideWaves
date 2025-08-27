@@ -159,8 +159,8 @@ object PolygonUtils {
         val lngBbox = lngToCut.bbox()
 
         return when {
-            lngBbox.maxLongitude > maxLongitude -> fromSinglePolygon(workingPolygon, cutId, LEFT)
-            lngBbox.minLongitude < minLongitude -> fromSinglePolygon(workingPolygon, cutId, RIGHT)
+            lngBbox.minLongitude > maxLongitude -> fromSinglePolygon(workingPolygon, cutId, LEFT)
+            lngBbox.maxLongitude < minLongitude -> fromSinglePolygon(workingPolygon, cutId, RIGHT)
             else -> { // Separate the polygon into two parts based on the cut longitude
 
                 val iterator = if (workingPolygon.isClockwise()) workingPolygon.reverseLoopIterator() else workingPolygon.loopIterator()
