@@ -13,15 +13,14 @@ TODAY :
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
-- compteur wave screen depasse sur samsung par moments
-
 ---------------------------------------------
 
 Avril second part:
 
 - Packaging :
-    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - FIRST UPLOAD
+    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
 - Limit size taken by events in cached WWWEvents : clean on request after a certain size
@@ -39,8 +38,6 @@ Avril second part:
     - licences / tools mentions
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
 
----------------------------------------------
-First push prive Play Store
 ---------------------------------------------
 
 - PDF + Message + Planif presentation

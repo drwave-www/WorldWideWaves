@@ -65,7 +65,7 @@ class WaveProgressionObserver(
                         }
                     }
 
-                    // Set first user location value
+                    // Set first user location value, later managed by MapLibre
                     eventMap.locationProvider.currentLocation.filterNotNull().take(1).collect { location ->
                         waveViewModel.updateUserLocation(observerId, location)
                     }

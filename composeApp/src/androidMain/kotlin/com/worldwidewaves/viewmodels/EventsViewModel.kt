@@ -104,6 +104,7 @@ class EventsViewModel(
      * Restart observations for all currently loaded events, respecting mutex protection.
      */
     private fun restartEventObservations() {
+        Log.v(::EventsViewModel.name, "Restart observations for events list")
         viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
             originalEventsMutex.withLock {
                 if (originalEvents.isNotEmpty()) {
@@ -156,7 +157,7 @@ class EventsViewModel(
         _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
 
         // Start observing all events
-        startObservingEvents(sortedEvents)
+        startObservingEvents(eventsList)
     }
 
     // ---------------------------
@@ -264,6 +265,8 @@ class EventsViewModel(
      * Cancel all event observations
      */
     private fun cancelEventObservations() {
+        Log.v(::EventsViewModel.name, "Stopping all events observations")
+
         eventObservationJobs.forEach { (_, job) ->
             job.cancel()
         }

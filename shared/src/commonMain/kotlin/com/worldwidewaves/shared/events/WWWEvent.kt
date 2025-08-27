@@ -276,7 +276,7 @@ data class WWWEvent(
             }"
         }
     } catch (e: Exception) {
-        "error"
+        "00/00"
     }
 
     /**
@@ -430,6 +430,7 @@ data class WWWEvent(
 
     override fun stopObservation() {
         coroutineScopeProvider.launchDefault {
+            Log.v("startObservation", "Stopping observation for event $id")
             try {
                 observationJob?.cancelAndJoin()
             } catch (e: CancellationException) {
