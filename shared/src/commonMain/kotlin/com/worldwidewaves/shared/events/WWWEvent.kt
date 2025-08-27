@@ -52,6 +52,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.number
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -271,7 +272,7 @@ data class WWWEvent(
     override fun getLiteralStartDateSimple(): String = try {
         getStartDateTime().let {
             "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
-                it.toLocalDateTime(getTZ()).month.toString().padStart(2, '0')
+                it.toLocalDateTime(getTZ()).month.number .toString().padStart(2, '0')
             }"
         }
     } catch (e: Exception) {
@@ -397,6 +398,7 @@ data class WWWEvent(
     override fun startObservation() {
         if (observationJob == null) {
             coroutineScopeProvider.launchDefault {
+                Log.v("startObservation", "Starting observation for event $id")
 
                 // Initialize state with current values
                 _eventStatus.value = getStatus()
@@ -449,10 +451,14 @@ data class WWWEvent(
                 // Get current state and emit it
                 val progression = wave.getProgression()
                 val status = getStatus()
-                send(EventObservation(progression, status))
+                val eventObservation = EventObservation(progression, status)
+                Log.v("observationFlow", "Emitting observation for event $id: $eventObservation")
+                send(eventObservation)
 
                 // Wait for the next observation interval
-                delay(getObservationInterval())
+                val observationDelay = getObservationInterval()
+                Log.v("observationFlow", "Next observation in $observationDelay for event $id")
+                delay(observationDelay)
             }
 
             // Final emission when event is done
