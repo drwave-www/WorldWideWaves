@@ -94,12 +94,20 @@ class SystemClock : IClock, KoinComponent {
     }
 
     override suspend fun delay(duration: Duration): Unit {
-        if (platform?.isOnSimulation() == true) {
-            delay(duration / platform!!.getSimulation()!!.speed)
+        val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
+
+        if (simulation != null) {
+            val speed = simulation.speed.takeIf { it > 0.0 } ?: run {
+                Napier.w("${SystemClock::class.simpleName}: Simulation speed is ${simulation.speed}, using 1.0 instead")
+                1.0
+            }
+            val adjustedDuration = duration / speed.toDouble()
+            kotlinx.coroutines.delay(adjustedDuration)
         } else {
-            delay(duration)
+            kotlinx.coroutines.delay(duration)
         }
     }
+
 }
 
 // ---------------------------
