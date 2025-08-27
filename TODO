@@ -13,6 +13,8 @@ TODAY :
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
+- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
+
 ---------------------------------------------
 
 Avril second part:

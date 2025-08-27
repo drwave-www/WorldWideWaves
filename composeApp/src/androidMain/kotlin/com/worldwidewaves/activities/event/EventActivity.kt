@@ -375,7 +375,11 @@ private fun NotifyAreaUserPosition(waveViewModel: WaveViewModel, observerId: Str
 
 @Composable
 private fun EventNumbers(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val waveNumbers by waveViewModel.getWaveNumbersFlow(observerId).collectAsState()
+    val waveNumbers by try {
+        waveViewModel.getWaveNumbersFlow(observerId)
+    } catch (e: Exception) {
+        TODO("Not yet implemented")
+    }.collectAsState()
 
     val eventNumbers by remember(waveNumbers) {
         derivedStateOf {

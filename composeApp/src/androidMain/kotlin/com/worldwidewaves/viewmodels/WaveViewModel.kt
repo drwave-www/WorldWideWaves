@@ -328,7 +328,6 @@ class WaveViewModel(private val platform: WWWPlatform) : ViewModel() {
             state.cleanup()
             observers.remove(observerId)
             lastPolygonUpdateTimestamps.remove(observerId)
-            cachedFlows.remove(observerId)
 
             // Update observer existence map
             val currentMap = observerExistsMap.value.toMutableMap()
