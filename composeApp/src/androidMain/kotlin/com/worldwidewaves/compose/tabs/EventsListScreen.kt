@@ -92,6 +92,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.event_favorite_off
 import com.worldwidewaves.shared.generated.resources.event_favorite_on
@@ -154,6 +155,13 @@ class EventsListScreen(
         // Trigger filtering only when toggles actually change
         LaunchedEffect(starredSelected, downloadedSelected) {
             viewModel.filterEvents(starredSelected, downloadedSelected)
+        }
+
+        // Re-apply filtering when map install state changes while Downloaded tab is shown
+        LaunchedEffect(mapStates, downloadedSelected) {
+            if (downloadedSelected) {
+                viewModel.filterEvents(onlyDownloaded = true)
+            }
         }
 
         // Refresh map availability when screen resumes
@@ -429,7 +437,7 @@ class EventsListScreen(
                 EventFlag(
                     modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
                     imageResource = event.getCountryImage() as DrawableResource,
-                    contentDescription = event.community!!
+                    contentDescription = event.country!!
                 )
             }
         }
@@ -460,7 +468,12 @@ class EventsListScreen(
         val scope = rememberCoroutineScope()
 
         // Check if the map can be uninstalled
-        val canUninstall = remember(eventId) { mapChecker.canUninstallMap(eventId) }
+        // Consider it uninstallable only when the module is effectively installed *now*
+        val canUninstall = isMapInstalled
+
+        var isUninstalling by remember { mutableStateOf(false) }
+        var showUninstallResult by remember { mutableStateOf(false) }
+        var uninstallSucceeded by remember { mutableStateOf(false) }
 
         if (isMapInstalled) {
             Box(
@@ -493,14 +506,43 @@ class EventsListScreen(
                             }
                         },
                         confirmButton = {
-                            Button(onClick = {
+                            if (canUninstall) {
+                                Button(
+                                    enabled = !isUninstalling,
+                                    onClick = {
                                         scope.launch {
-                                            mapChecker.uninstallMap(eventId)
-                                            showUninstallDialog = false
+                                            isUninstalling = true
+                                            try {
+                                                mapChecker.uninstallMap(eventId)
+
+                                                var success = false
+                                                repeat(20) { // ~5 seconds max
+                                                    kotlinx.coroutines.delay(250)
+                                                    mapChecker.refreshAvailability()
+                                                    if (!mapChecker.isMapDownloaded(eventId)) {
+                                                        success = true
+                                                        return@repeat
+                                                    }
+                                                }
+                                                uninstallSucceeded = success
+                                            } catch (e: Exception) {
+                                                Log.e("EventOverlayMapDownloaded", "Error uninstalling map for event $eventId", e)
+                                                uninstallSucceeded = false
+                                            } finally {
+                                                isUninstalling = false
+                                                showUninstallDialog = false
+                                                showUninstallResult = true
+                                            }
                                         }
                                     }
-                            ) {
-                                Text(stringResource(ShRes.string.events_uninstall))
+                                ) {
+                                    Text(
+                                        if (isUninstalling)
+                                            "..."
+                                        else
+                                            stringResource(ShRes.string.events_uninstall)
+                                    )
+                                }
                             }
                         },
                         dismissButton = {
@@ -511,6 +553,27 @@ class EventsListScreen(
                     )
                 }
             }
+        }
+
+        // Result dialog
+        if (showUninstallResult) {
+            AlertDialog(
+                onDismissRequest = { showUninstallResult = false },
+                title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                text = {
+                    Text(
+                        if (uninstallSucceeded)
+                            "Uninstall completed"
+                        else
+                            "Uninstall failed"
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showUninstallResult = false }) {
+                        Text("OK")
+                    }
+                }
+            )
         }
     }
 
