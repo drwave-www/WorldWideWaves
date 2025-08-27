@@ -50,7 +50,7 @@ class EventsViewModel(
 ) : ViewModel() {
 
     private val originalEventsMutex = Mutex()
-    private var originalEvents: List<IWWWEvent> = emptyList()
+    var originalEvents: List<IWWWEvent> = emptyList()
     private val eventObservationJobs = mutableMapOf<String, Job>()
     private val eventStatusFlowCache = mutableMapOf<String, StateFlow<IWWWEvent.Status>>()
 
@@ -183,11 +183,12 @@ class EventsViewModel(
         onlyFavorites: Boolean = false,
         onlyDownloaded: Boolean = false
     ) {
+        mapChecker.refreshAvailability()
         viewModelScope.launch {
             _events.value = originalEvents.filter { event ->
                 when {
                     onlyFavorites -> event.favorite
-                    onlyDownloaded ->mapChecker.isMapDownloaded(event.id)
+                    onlyDownloaded -> mapChecker.isMapDownloaded(event.id)
                     else -> true // All events
                 }
             }
