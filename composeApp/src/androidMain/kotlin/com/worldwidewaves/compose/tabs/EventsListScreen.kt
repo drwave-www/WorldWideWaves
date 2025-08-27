@@ -57,6 +57,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -141,17 +142,19 @@ class EventsListScreen(
         val hasFavorites by viewModel.hasFavorites.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
-        // Convert to Compose state
-        var starredSelected by remember { mutableStateOf(false) }
-        var downloadedSelected by remember { mutableStateOf(false) }
+        // Convert to Compose state (save across config changes)
+        var starredSelected by rememberSaveable { mutableStateOf(false) }
+        var downloadedSelected by rememberSaveable { mutableStateOf(false) }
 
         if (firstLaunch) { // Select favorites at launch if any
             firstLaunch = false
             starredSelected = hasFavorites
         }
 
-        // Include downloaded events
-        viewModel.filterEvents(starredSelected, downloadedSelected)
+        // Trigger filtering only when toggles actually change
+        LaunchedEffect(starredSelected, downloadedSelected) {
+            viewModel.filterEvents(starredSelected, downloadedSelected)
+        }
 
         // Refresh map availability when screen resumes
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -178,7 +181,6 @@ class EventsListScreen(
         fun selectTab(starred: Boolean = false, downloaded: Boolean = false) {
             starredSelected = starred
             downloadedSelected = downloaded
-            viewModel.filterEvents(starredSelected, downloadedSelected)
         }
 
         EventsList(
@@ -427,7 +429,7 @@ class EventsListScreen(
                 EventFlag(
                     modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
                     imageResource = event.getCountryImage() as DrawableResource,
-                    contentDescription = event.country!!
+                    contentDescription = event.community!!
                 )
             }
         }
