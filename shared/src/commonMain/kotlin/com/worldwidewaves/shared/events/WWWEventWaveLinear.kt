@@ -118,7 +118,7 @@ data class WWWEventWaveLinear(
         composedLongitude: ComposedLongitude
     ) : Pair<Area, Area> {
         if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
-        val splitResults = areaPolygons.map { it.splitByLongitude(composedLongitude) }
+        val splitResults = areaPolygons.map { splitByLongitude(it, composedLongitude) }
 
         fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
             splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()

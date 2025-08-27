@@ -134,12 +134,12 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun Polygon.splitByLongitude(lngToCut: Double): PolygonSplitResult =
-        splitByLongitude(ComposedLongitude.fromLongitude(lngToCut))
+    fun splitByLongitude(polygon: Polygon, lngToCut: Double): PolygonSplitResult =
+        splitByLongitude(polygon,ComposedLongitude.fromLongitude(lngToCut))
 
-    fun Polygon.splitByLongitude(lngToCut: ComposedLongitude): PolygonSplitResult {
+    fun splitByLongitude(polygon: Polygon, lngToCut: ComposedLongitude): PolygonSplitResult {
         val workingPolygon = Polygon()
-        workingPolygon.addAll(this)
+        workingPolygon.addAll(polygon)
         workingPolygon.close().pop() // Ensure the polygon is closed and remove the last point
 
         val cutId = Random.nextInt(1, Int.MAX_VALUE)

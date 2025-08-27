@@ -55,8 +55,8 @@ class PolygonUtilsSplitPolygonTest {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {
-            testCase.longitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.longitudeToCut)
-            testCase.composedLongitudeToCut != null -> testCase.polygon.splitByLongitude(testCase.composedLongitudeToCut)
+            testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
+            testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
             else -> throw IllegalArgumentException("Invalid test case, should contain either longitudeToCut or composedLongitudeToCut")
         }
 
