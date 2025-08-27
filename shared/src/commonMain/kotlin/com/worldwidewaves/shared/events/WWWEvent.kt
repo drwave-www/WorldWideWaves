@@ -39,7 +39,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -459,7 +458,7 @@ data class WWWEvent(
                 // Wait for the next observation interval
                 val observationDelay = getObservationInterval()
                 Log.v("observationFlow", "Next observation in $observationDelay for event $id")
-                delay(observationDelay)
+                clock.delay(observationDelay)
             }
 
             // Final emission when event is done

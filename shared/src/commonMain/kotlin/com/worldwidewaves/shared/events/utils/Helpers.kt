@@ -48,6 +48,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -62,6 +63,7 @@ interface DataValidator {
 @OptIn(ExperimentalTime::class)
 interface IClock {
     fun now(): Instant
+    suspend fun delay(duration: Duration): Unit
 
     companion object {
         fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
@@ -88,6 +90,14 @@ class SystemClock : IClock, KoinComponent {
             platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()
+        }
+    }
+
+    override suspend fun delay(duration: Duration): Unit {
+        if (platform?.isOnSimulation() == true) {
+            delay(duration / platform!!.getSimulation()!!.speed)
+        } else {
+            delay(duration)
         }
     }
 }

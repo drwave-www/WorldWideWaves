@@ -23,8 +23,7 @@ Avril second part:
     - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
-- Limit size taken by events in cached WWWEvents : clean on request after a certain size
-- List and uninstall of downloaded event maps
+- Limit size taken by events in cached WWWEvents : clean on request after a certain size ==> Limit to 3 downloaded maps
 
 ------
 
