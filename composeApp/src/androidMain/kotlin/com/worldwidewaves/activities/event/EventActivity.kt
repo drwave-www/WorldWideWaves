@@ -221,7 +221,8 @@ class EventActivity : AbstractEventWaveActivity() {
                         val position = event.area.generateRandomPositionInArea()
 
                         // Calculate time 5 minutes before event start
-                        val simulationTime = event.getStartDateTime() - 5.minutes
+                        val simulationDelay = 0.minutes // Start NOW
+                        val simulationTime = event.getStartDateTime() + simulationDelay
 
                         // Reset any existing simulation
                         platform.disableSimulation()

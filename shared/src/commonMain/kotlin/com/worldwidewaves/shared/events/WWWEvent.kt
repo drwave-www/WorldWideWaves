@@ -453,12 +453,10 @@ data class WWWEvent(
                 val progression = wave.getProgression()
                 val status = getStatus()
                 val eventObservation = EventObservation(progression, status)
-                Log.d("observationFlow", "Emitting observation for event $id: $eventObservation")
                 send(eventObservation)
 
                 // Wait for the next observation interval
                 val observationDelay = getObservationInterval()
-                Log.d("observationFlow", "Next observation in $observationDelay for event $id")
                 clock.delay(observationDelay)
             }
 
