@@ -21,6 +21,7 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -29,6 +30,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -96,6 +98,7 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.be_waved
 import com.worldwidewaves.shared.generated.resources.geoloc_yourein
 import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
@@ -111,6 +114,7 @@ import com.worldwidewaves.theme.onPrimaryLight
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.viewmodels.WaveViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -185,52 +189,7 @@ class EventActivity : AbstractEventWaveActivity() {
                     
                     // Debug test button
                     if (BuildConfig.DEBUG) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 16.dp)
-                                .offset(y = (-8).dp)
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(onPrimaryLight)
-                                .clickable {
-                                    scope.launch {
-                                        // Generate random position within event area
-                                        val position = event.area.generateRandomPositionInArea()
-                                        
-                                        // Calculate time 5 minutes before event start
-                                        val simulationTime = event.getStartDateTime() - 5.minutes
-
-                                        // Reset any existing simulation
-                                        platform.disableSimulation()
-                                        
-                                        // Create new simulation with the calculated time and position
-                                        val simulation = WWWSimulation(
-                                            startDateTime = simulationTime,
-                                            userPosition = position,
-                                            initialSpeed = 50 // Use current default speed
-                                        )
-                                        
-                                        // Set the simulation
-                                        platform.setSimulation(simulation)
-                                        
-                                        // Show feedback
-                                        Toast.makeText(
-                                            context,
-                                            "Simulation Started",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Timer,
-                                contentDescription = "Test Simulation",
-                                tint = Color.Red,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                        SimulationButton(scope, event, context)
                     }
                 }
                 
@@ -239,6 +198,65 @@ class EventActivity : AbstractEventWaveActivity() {
                 EventNumbers(waveViewModel, observerId)
                 WWWEventSocialNetworks(event)
             }
+        }
+    }
+
+    @Composable
+    private fun BoxScope.SimulationButton(
+        scope: CoroutineScope,
+        event: IWWWEvent,
+        context: Context
+    ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp)
+                .offset(y = (-8).dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(onPrimaryLight)
+                .clickable {
+                    scope.launch {
+                        // Generate random position within event area
+                        val position = event.area.generateRandomPositionInArea()
+
+                        // Calculate time 5 minutes before event start
+                        val simulationTime = event.getStartDateTime() - 5.minutes
+
+                        // Reset any existing simulation
+                        platform.disableSimulation()
+
+                        // Create new simulation with the calculated time and position
+                        val simulation = WWWSimulation(
+                            startDateTime = simulationTime,
+                            userPosition = position,
+                            initialSpeed = 50 // Use current default speed
+                        )
+
+                        // Set the simulation
+                        Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
+                        Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                        platform.setSimulation(simulation)
+
+                        // Show feedback
+                        Toast.makeText(
+                            context,
+                            "Simulation Started",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // Restart wave observation to apply simulation
+                        restartWaveObservation()
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Timer,
+                contentDescription = "Test Simulation",
+                tint = Color.Red,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
