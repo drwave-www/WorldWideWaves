@@ -6,10 +6,9 @@ import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.time.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
 /*
@@ -56,9 +55,8 @@ class WWWPlatform(val name: String) {
     // -------------------------------------------------------------------- //
 
     init {
-        val instant = Instant.parse("2024-07-14T16:00:00Z")
         val timeZone = TimeZone.of("Europe/Paris")
-        val now = instant.toLocalDateTime(timeZone).toInstant(timeZone)
+        val now = LocalDateTime(2026, 7, 14, 17, 50).toInstant(timeZone)
         setSimulation(
             WWWSimulation(
                 now,
