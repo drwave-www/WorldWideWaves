@@ -76,6 +76,11 @@ android {
     buildFeatures {
         compose = true
     }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+        }
+    }
     packaging {
         resources.excludes.addAll(
             listOf(

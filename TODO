@@ -7,10 +7,6 @@ TODAY :
    ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
-- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
-  et des numbers, du compteur de l'ecran wave
-
-- image en 16/9 pour les events
 
 - Packaging :
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
@@ -32,7 +28,7 @@ TODAY :
 
 ---------------------------------------------
 
-- refaire les visuels : villes et choregraphies, avec un meilleur generateur IA
+- refaire les visuels : villes et choregraphies, avec un meilleur generateur IA, cf scripts/images
 
 - PDF + Message + Planif presentation
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
