@@ -57,7 +57,6 @@ import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -75,7 +74,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
-        val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState()
+        val eventStatus by event.eventStatus.collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event) {
             value = event.getEndDateTime()
         }
@@ -83,9 +82,6 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Construct the event map
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
-                onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(observerId, newLocation)
-                },
                 mapConfig = EventMapConfig(
                     initialCameraPosition = MapCameraPosition.WINDOW
                 )
@@ -99,7 +95,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(eventMap, waveViewModel, observerId)
+            MapActions(event, eventMap)
         }
     }
 
@@ -108,10 +104,10 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 // ----------------------------------------------------------------------------
 
 @Composable
-fun MapActions(eventMap: AndroidEventMap, waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
+fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
-    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+    val eventStatus by event.eventStatus.collectAsState(Status.UNDEFINED)
+    val isInArea by event.userIsInArea.collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING
 

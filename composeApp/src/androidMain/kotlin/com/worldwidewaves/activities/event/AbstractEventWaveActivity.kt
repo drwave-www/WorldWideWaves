@@ -1,7 +1,7 @@
 package com.worldwidewaves.activities.event
 
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -55,7 +55,8 @@ abstract class AbstractEventWaveActivity(
 
     override fun onPause() {
         // Stop observation when activity is not visible
-        waveProgressionObserver?.stopObservation()
+        // Only pause to keep the same StateFlow instances alive for UI collectors
+        waveProgressionObserver?.pauseObservation()
         super.onPause()
     }
 

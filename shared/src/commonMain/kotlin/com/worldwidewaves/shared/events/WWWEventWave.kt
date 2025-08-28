@@ -11,7 +11,6 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Napier
-import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.DrawableResource
@@ -22,6 +21,7 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlin.time.toDuration
 
 /*
@@ -58,7 +58,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         val waveStartTime: String = "..",
         val waveEndTime: String = "..",
         val waveTotalTime: String = "..",
-        val waveProgression: String = ".."
     )
 
     @OptIn(ExperimentalTime::class)
@@ -170,6 +169,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
      * Retrieves the literal progression of the event as a percentage string.
      */
     suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
+    fun getLiteralFromProgression(progression: Double): String = "${progression.roundToInt()}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 DrWave
+ * Copyright 2024 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
@@ -27,8 +27,6 @@ import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 /**
@@ -59,14 +57,6 @@ class WaveProgressionObserver(
                 }
                 else -> waveViewModel.startObservation(observerId, event)
             }
-
-            // Set initial user location
-            eventMap.locationProvider.currentLocation
-                .filterNotNull()
-                .take(1)
-                .collect { location ->
-                    waveViewModel.updateUserLocation(observerId, location)
-                }
 
             // Observe status changes
             startStatusObservation(event, eventMap)
@@ -106,6 +96,17 @@ class WaveProgressionObserver(
 
     fun stopObservation() {
         waveViewModel.stopObservation(observerId)
+        pauseObservation()
+    }
+
+    /**
+     * Temporarily pause observation without fully removing the ViewModel observer.
+     *
+     * This keeps all StateFlow instances alive (so the UI still holds the same
+     * reference) but stops the coroutine that was listening to status changes.
+     * Call {@link startObservation} to resume.
+     */
+    fun pauseObservation() {
         statusJob?.cancel()
         statusJob = null
     }

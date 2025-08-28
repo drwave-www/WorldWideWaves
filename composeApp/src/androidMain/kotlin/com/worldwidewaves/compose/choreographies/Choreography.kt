@@ -59,7 +59,6 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
@@ -69,15 +68,13 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun WaveChoreographies(
     event: IWWWEvent,
-    waveViewModel: WaveViewModel,
-    observerId: String,
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
-    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-    val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
+    val isWarmingInProgress by event.isWarmingInProgress.collectAsState()
+    val isGoingToBeHit by event.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.userHasBeenHit.collectAsState()
+    val hitDateTime by event.hitDateTime.collectAsState()
 
     // State to track if we should show the hit sequence
     var showHitSequence by remember { mutableStateOf(false) }

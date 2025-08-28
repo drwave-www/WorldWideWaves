@@ -70,6 +70,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 // ---------------------------
 
@@ -126,20 +127,32 @@ data class WWWEvent(
 
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
-    private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
-    override val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
+    @Transient private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
+    @Transient override val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
 
-    private val _progression = MutableStateFlow(0.0)
-    override val progression: StateFlow<Double> = _progression.asStateFlow()
+    @Transient private val _progression = MutableStateFlow(0.0)
+    @Transient override val progression: StateFlow<Double> = _progression.asStateFlow()
 
-    private val _isWarmingInProgress = MutableStateFlow(false)
-    override val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
+    @Transient private val _isWarmingInProgress = MutableStateFlow(false)
+    @Transient override val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
 
-    private val _userIsGoingToBeHit = MutableStateFlow(false)
-    override val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
+    @Transient private val _userIsGoingToBeHit = MutableStateFlow(false)
+    @Transient override val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
 
-    private val _userHasBeenHit = MutableStateFlow(false)
-    override val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
+    @Transient private val _userHasBeenHit = MutableStateFlow(false)
+    @Transient override val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
+
+    @Transient private val _userPositionRatio = MutableStateFlow(0.0)
+    @Transient override val userPositionRatio: StateFlow<Double> = _userPositionRatio.asStateFlow()
+
+    @Transient private val _timeBeforeHit = MutableStateFlow(INFINITE)
+    @Transient override val timeBeforeHit: StateFlow<Duration> = _timeBeforeHit.asStateFlow()
+
+    @Transient private val _hitDateTime = MutableStateFlow(DISTANT_FUTURE)
+    @Transient override val hitDateTime: StateFlow<Instant> = _hitDateTime.asStateFlow()
+
+    @Transient private val _userIsInArea = MutableStateFlow(false)
+    @Transient override val userIsInArea: StateFlow<Boolean> = _userIsInArea.asStateFlow()
 
     // --
 
@@ -274,7 +287,7 @@ data class WWWEvent(
                 it.toLocalDateTime(getTZ()).month.number .toString().padStart(2, '0')
             }"
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         "00/00"
     }
 
@@ -374,15 +387,14 @@ data class WWWEvent(
      */
     override suspend fun getAllNumbers(): WaveNumbersLiterals {
         suspend fun safeCall(block: suspend () -> String): String =
-            try { block() } catch (e: Throwable) { "error" }
+            try { block() } catch (_: Throwable) { "error" }
 
         return WaveNumbersLiterals(
             waveTimezone = safeCall { getLiteralTimezone() },
             waveSpeed = safeCall { wave.getLiteralSpeed() },
             waveStartTime = safeCall { getLiteralStartTime() },
             waveEndTime = safeCall { getLiteralEndTime() },
-            waveTotalTime = safeCall { getLiteralTotalTime() },
-            waveProgression = safeCall { wave.getLiteralProgression() }
+            waveTotalTime = safeCall { getLiteralTotalTime() }
         )
     }
 
@@ -433,7 +445,7 @@ data class WWWEvent(
             Log.v("stopObservation", "Stopping observation for event $id")
             try {
                 observationJob?.cancelAndJoin()
-            } catch (e: CancellationException) {
+            } catch (_: CancellationException) {
                 // Expected exception during cancellation
             } catch (e: Exception) {
                 Log.e("stopObservation", "Error stopping observation: $e")
@@ -498,6 +510,19 @@ data class WWWEvent(
             warmingInProgress = false
             userIsGoingToBeHit = false
             _userHasBeenHit.updateIfChanged(true)
+        }
+
+        // Update additional state flows
+        _userPositionRatio.updateIfChanged(wave.userPositionToWaveRatio() ?: 0.0)
+        _timeBeforeHit.updateIfChanged(wave.timeBeforeUserHit() ?: INFINITE)
+        _hitDateTime.updateIfChanged(wave.userHitDateTime() ?: DISTANT_FUTURE)
+
+        // User in area
+        val userPosition = wave.getUserPosition()
+        if (userPosition != null) {
+            _userIsInArea.updateIfChanged(area.isPositionWithin(userPosition))
+        } else {
+            _userIsInArea.updateIfChanged(false)
         }
 
         _isWarmingInProgress.updateIfChanged(warmingInProgress)

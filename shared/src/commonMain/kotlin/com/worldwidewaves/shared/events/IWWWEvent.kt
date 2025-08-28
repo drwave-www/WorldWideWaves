@@ -108,6 +108,10 @@ interface IWWWEvent : DataValidator {
     val isWarmingInProgress: StateFlow<Boolean>
     val userIsGoingToBeHit: StateFlow<Boolean>
     val userHasBeenHit: StateFlow<Boolean>
+    val userPositionRatio: StateFlow<Double>
+    val timeBeforeHit: StateFlow<Duration>
+    val hitDateTime: StateFlow<Instant>
+    val userIsInArea: StateFlow<Boolean>
 
     // ---------------------------
 

@@ -94,14 +94,11 @@ import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
-import com.worldwidewaves.viewmodels.WaveViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
@@ -127,10 +124,10 @@ class WaveActivity : AbstractEventWaveActivity() {
         val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by waveViewModel.getIsWarmingInProgressFlow(observerId).collectAsState()
-        val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-        val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-        val hitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
+        val isWarmingInProgress by event.isWarmingInProgress.collectAsState(false)
+        val hitDateTime by event.hitDateTime.collectAsState()
+        val isGoingToBeHit by event.userIsGoingToBeHit.collectAsState(false)
+        val hasBeenHit by event.userHasBeenHit.collectAsState(false)
 
         // Derive choreography active state
         val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
@@ -145,9 +142,6 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Construct the event Map
         val eventMap = remember(event.id) {
             AndroidEventMap(event,
-                onLocationUpdate = { newLocation ->
-                    waveViewModel.updateUserLocation(observerId, newLocation)
-                },
                 onMapClick = {
                     context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
                         putExtra("eventId", event.id)
@@ -169,7 +163,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         }
 
         // Always target the closest view to have user and wave in the same view
-        MapZoomAndLocationUpdate(waveViewModel, observerId, eventMap)
+        MapZoomAndLocationUpdate(event, eventMap)
 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
@@ -179,23 +173,23 @@ class WaveActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                UserWaveStatusText(waveViewModel, observerId)
+                UserWaveStatusText(event)
                 eventMap.Screen(autoMapDownload = true, Modifier
                     .fillMaxWidth()
                     .height(calculatedHeight))
-                WaveProgressionBar(waveViewModel, observerId)
+                WaveProgressionBar(event)
 
                 if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
                     Spacer(modifier = Modifier.weight(1f))
-                    WaveHitCounter(waveViewModel, observerId, clock)
+                    WaveHitCounter(event)
                     Spacer(modifier = Modifier.height(30.dp))
                 }
             }
 
-            WaveChoreographies(event, waveViewModel, observerId, clock, Modifier.zIndex(10f))
+            WaveChoreographies(event, clock, Modifier.zIndex(10f))
 
             if (isChoreographyActive) { // Ensure counter is visible when choreography is active
-                WaveHitCounter(waveViewModel, observerId, clock,
+                WaveHitCounter(event,
                     Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp)
@@ -211,10 +205,10 @@ class WaveActivity : AbstractEventWaveActivity() {
 // ------------------------------------------------------------------------
 
 @Composable
-fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, eventMap: AndroidEventMap) {
+fun MapZoomAndLocationUpdate(event: IWWWEvent, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+    val progression by event.progression.collectAsState()
+    val isInArea by event.userIsInArea.collectAsState()
 
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
@@ -228,10 +222,10 @@ fun MapZoomAndLocationUpdate(waveViewModel: WaveViewModel, observerId: String, e
 // ------------------------------------------------------------------------
 
 @Composable
-fun UserWaveStatusText(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val eventStatus by waveViewModel.getEventStatusFlow(observerId).collectAsState(Status.UNDEFINED)
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
+fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val eventStatus by event.eventStatus.collectAsState(Status.UNDEFINED)
+    val hasBeenHit by event.userHasBeenHit.collectAsState()
+    val isInArea by event.userIsInArea.collectAsState()
 
     val message = when {
         eventStatus == Status.DONE -> ShRes.string.wave_done
@@ -255,12 +249,12 @@ fun UserWaveStatusText(waveViewModel: WaveViewModel, observerId: String, modifie
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun WaveProgressionBar(waveViewModel: WaveViewModel, observerId: String, modifier: Modifier = Modifier) {
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState()
-    val isInArea by waveViewModel.getIsInAreaFlow(observerId).collectAsState()
-    val userPositionRatio by waveViewModel.getUserPositionRatioFlow(observerId).collectAsState()
-    val isGoingToBeHit by waveViewModel.getIsGoingToBeHitFlow(observerId).collectAsState()
-    val hasBeenHit by waveViewModel.getHasBeenHitFlow(observerId).collectAsState()
+fun WaveProgressionBar(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val progression by event.progression.collectAsState()
+    val isInArea by event.userIsInArea.collectAsState()
+    val userPositionRatio by event.userPositionRatio.collectAsState()
+    val isGoingToBeHit by event.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.userHasBeenHit.collectAsState()
 
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
@@ -364,18 +358,9 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
 // ------------------------------------------------------------------------
 
 @Composable
-fun WaveHitCounter(waveViewModel: WaveViewModel, observerId: String, clock: IClock, modifier: Modifier = Modifier) {
-    val progression by waveViewModel.getProgressionFlow(observerId).collectAsState(0.0)
-    val timeBeforeHitProgression by waveViewModel.getTimeBeforeHitFlow(observerId).collectAsState(INFINITE)
-    val userHitDateTime by waveViewModel.getHitDateTimeFlow(observerId).collectAsState()
-    var timeBeforeHit by remember { mutableStateOf(INFINITE) }
-
-    LaunchedEffect(Unit) {
-        while (progression == 0.0) {
-            delay(1000L)
-            timeBeforeHit = userHitDateTime - clock.now()
-        }
-    }
+fun WaveHitCounter(event: IWWWEvent, modifier: Modifier = Modifier) {
+    val timeBeforeHitProgression by event.timeBeforeHit.collectAsState()
+    val timeBeforeHit by event.timeBeforeHit.collectAsState()
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
