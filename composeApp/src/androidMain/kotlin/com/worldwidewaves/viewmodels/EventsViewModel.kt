@@ -91,7 +91,7 @@ class EventsViewModel(
                     }
                 )
 
-                // Collect the events flow
+                // Collect the events flow and process events list
                 wwwEvents.flow()
                     .onEach { eventsList ->
                         processEventsList(eventsList)
@@ -128,35 +128,42 @@ class EventsViewModel(
             event.observer.startObservation()
 
             // Setup simulation speed listeners on DEBUG mode
-            if (BuildConfig.DEBUG) {
-                val scope = CoroutineScope(Dispatchers.Default)
-                var backupSimulationSpeed = 1
+            monitorSimulatedSpeed(event)
+        }
 
-                // Handle warming started
-                scope.launch {
-                    event.observer.isWarmingInProgress.collect { isWarmingStarted ->
-                        if (isWarmingStarted) {
-                            backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
-                            platform.getSimulation()?.setSpeed(1)
-                        }
+    }
+
+    /**
+     * Monitor simulation speed during event phases (DEBUG mode only)
+     */
+    private fun monitorSimulatedSpeed(event: IWWWEvent) {
+        if (BuildConfig.DEBUG) {
+            val scope = CoroutineScope(Dispatchers.Default)
+            var backupSimulationSpeed = 1
+
+            // Handle warming started
+            scope.launch {
+                event.observer.isWarmingInProgress.collect { isWarmingStarted ->
+                    if (isWarmingStarted) {
+                        backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                        platform.getSimulation()?.setSpeed(1)
                     }
                 }
+            }
 
-                // Handle user has been hit
-                scope.launch {
-                    event.observer.userHasBeenHit.collect { hasBeenHit ->
-                        if (hasBeenHit) {
-                            // Restore simulation speed after a delay
-                            launch {
-                                delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
-                                platform.getSimulation()?.setSpeed(backupSimulationSpeed)
-                            }
+            // Handle user has been hit
+            scope.launch {
+                event.observer.userHasBeenHit.collect { hasBeenHit ->
+                    if (hasBeenHit) {
+                        // Restore simulation speed after a delay
+                        launch {
+                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                         }
                     }
                 }
             }
         }
-
     }
 
     // ---------------------------
