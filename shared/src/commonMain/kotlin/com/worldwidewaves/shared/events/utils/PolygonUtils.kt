@@ -283,6 +283,8 @@ object PolygonUtils {
         polygon.clear().add(lastPoint!!)
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * Reconstructs the side polygons from the given list of poly-lines.
      *
@@ -290,6 +292,7 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
+    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
             .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
@@ -307,6 +310,7 @@ object PolygonUtils {
      * and a new polygon is started.
      *
      */
+    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
@@ -345,6 +349,7 @@ object PolygonUtils {
      * them into a single polygon.
      *
      */
+    @Deprecated("Algorithm not reliable yet")
     fun recomposeCutPolygons(polygons: Area): Area {
         val recomposedPolygons = mutableListOf<Polygon>()
 

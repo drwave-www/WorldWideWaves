@@ -160,8 +160,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     /**
      * Retrieves the literal progression of the event as a percentage string.
      */
-    suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
-    fun getLiteralFromProgression(progression: Double): String = "${progression.roundToInt()}%"
+    suspend fun getLiteralProgression(): String = getLiteralFromProgression(getProgression())
+    fun getLiteralFromProgression(progression: Double): String =
+        if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.

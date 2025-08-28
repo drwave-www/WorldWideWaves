@@ -28,6 +28,8 @@ import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -71,7 +73,7 @@ class WaveProgressionObserver(
         val updateIntervalMs = 250L
         var lastUpdateTime = 0L
 
-        polygonsJob = scope.launch {
+        polygonsJob = scope.launch(Dispatchers.Default) {
             event.observer.progression.collect {
                 val now = System.currentTimeMillis()
                 if (now - lastUpdateTime >= updateIntervalMs) {
@@ -84,7 +86,7 @@ class WaveProgressionObserver(
 
     private fun addFullWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
         eventMap.mapLibreAdapter.onMapSet { mapLibre ->
-            scope.launch {
+            scope.launch(Dispatchers.Main) {
                 mapLibre.addWavePolygons(
                     event.area.getPolygons().map { it.toMapLibrePolygon() },
                     true
@@ -95,7 +97,7 @@ class WaveProgressionObserver(
 
     private fun startStatusObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
         statusJob?.cancel()
-        statusJob = scope.launch {
+        statusJob = scope.launch(Dispatchers.Default) {
             event.observer.eventStatus
                 .collect { status ->
                     when (status) {
@@ -132,11 +134,13 @@ class WaveProgressionObserver(
     private suspend fun updateWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
         if (!event.isRunning() && !event.isDone()) return
 
-        val polygons = event.wave
-            .getWavePolygons(null, WaveMode.ADD)
-            ?.traversedPolygons
-            ?.map { it.toMapLibrePolygon() }
-            ?: emptyList()
+        val polygons = withContext(Dispatchers.Default) {
+            event.wave
+                .getWavePolygons(null, WaveMode.ADD)
+                ?.traversedPolygons
+                ?.map { it.toMapLibrePolygon() }
+                ?: emptyList()
+        }
 
         eventMap.updateWavePolygons(context, polygons, true)
     }
