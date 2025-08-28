@@ -175,6 +175,12 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
 
                 // Wait for the next observation interval
                 val observationDelay = getObservationInterval()
+
+                if (!observationDelay.isFinite()) {
+                    Log.w("observationFlow", "Stopping flow due to infinite observation delay")
+                    break
+                }
+
                 clock.delay(observationDelay)
             }
 
@@ -253,7 +259,8 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
             event.isRunning() -> 500.milliseconds
-            timeBeforeHit < 2.seconds -> 50.milliseconds // For sound accuracy
+            timeBeforeHit < ZERO -> INFINITE
+            timeBeforeHit < 1.seconds -> 50.milliseconds // For sound accuracy
             else -> 1.minutes // Default case, more reasonable than 1 day
         }
     }
