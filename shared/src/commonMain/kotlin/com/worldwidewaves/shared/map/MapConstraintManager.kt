@@ -72,27 +72,24 @@ class MapConstraintManager(
         // Apply the constraints with the current padding
         applyConstraintsWithPadding()
 
-        // Set up camera movement listener to update constraints on zoom changes
-        mapLibreAdapter.addOnCameraIdleListener {
-            val newPadding = calculateVisibleRegionPadding()
+        // Register the camera-idle listener only once
+        if (!constraintsApplied) {
+            mapLibreAdapter.addOnCameraIdleListener {
+                val newPadding = calculateVisibleRegionPadding()
 
-            if (hasSignificantPaddingChange(
-                VisibleRegionPadding(
-                        newPadding.latPadding,
-                        newPadding.lngPadding
+                if (
+                    hasSignificantPaddingChange(
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
                     )
-                )) {
+                ) {
                     setVisibleRegionPadding(
-                        VisibleRegionPadding(
-                        newPadding.latPadding,
-                        newPadding.lngPadding
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
                     )
-                )
-                applyConstraintsWithPadding()
+                    applyConstraintsWithPadding()
+                }
             }
+            constraintsApplied = true
         }
-
-        constraintsApplied = true
     }
 
     /**

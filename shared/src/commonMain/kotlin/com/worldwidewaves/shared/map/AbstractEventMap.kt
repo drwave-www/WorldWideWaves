@@ -79,11 +79,28 @@ abstract class AbstractEventMap<T>(
      * constraint corrections so that the ConstraintManager does not
      * fight against the animation.
      */
-    private inline fun runCameraAnimation(crossinline block: (MapCameraCallback) -> Unit) {
+    private suspend inline fun runCameraAnimation(crossinline block: (MapCameraCallback) -> Unit) {
         suppressCorrections = true
+
+        // Save current constraint manager (may be null) and relax bounds to full event area
+        val originalConstraintManager = constraintManager
+        if (originalConstraintManager != null) {
+            // Allow the camera to move freely inside the full event area during animation
+            mapLibreAdapter.setBoundsForCameraTarget(event.area.bbox())
+        }
+
         block(object : MapCameraCallback {
-            override fun onFinish()  { suppressCorrections = false }
-            override fun onCancel()  { suppressCorrections = false }
+            override fun onFinish() {
+                suppressCorrections = false
+                // Re-apply constraints if they were configured
+                originalConstraintManager?.applyConstraints()
+            }
+
+            override fun onCancel() {
+                suppressCorrections = false
+                // Ensure constraints are reapplied even if animation is cancelled
+                originalConstraintManager?.applyConstraints()
+            }
         })
     }
 
@@ -178,7 +195,7 @@ abstract class AbstractEventMap<T>(
     /**
      * Moves the camera to the current user position
      */
-    fun targetUser() {
+    suspend fun targetUser() {
         val userPosition = locationProvider?.currentLocation?.value ?: return
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCamera(userPosition, CONST_MAPLIBRE_TARGET_USER_ZOOM)
@@ -286,7 +303,9 @@ abstract class AbstractEventMap<T>(
                     !userHasBeenLocated &&
                     !userInteracted &&
                     mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
-                    targetUser()
+                    scope.launch {
+                        targetUser()
+                    }
                     userHasBeenLocated = true
                 }
 

@@ -184,7 +184,6 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
                     break
                 }
 
-                Log.d("DELAY", "Observation delay: $observationDelay for event ${event.id}")
                 clock.delay(observationDelay)
             }
 
