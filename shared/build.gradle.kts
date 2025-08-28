@@ -78,7 +78,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
         }
     }
     packaging {
@@ -91,6 +91,7 @@ android {
         )
     }
     defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
     sourceSets["main"].apply {
@@ -101,7 +102,7 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        implementation(libs.mockk.android.v1120)
+        
         implementation(libs.maplibre.android)
     }
 
