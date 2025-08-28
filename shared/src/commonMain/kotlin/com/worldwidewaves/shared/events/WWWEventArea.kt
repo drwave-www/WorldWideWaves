@@ -28,7 +28,6 @@ import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MutableArea
-import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
 import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
@@ -39,10 +38,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -256,25 +253,20 @@ data class WWWEventArea(
             val tempPolygons: MutableArea = mutableListOf()
 
             coroutineScopeProvider.withDefaultContext {
-                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
-                    val rootType = geoJsonData["type"]?.jsonPrimitive?.content
+                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geometryCollection ->
+                    val type = geometryCollection["type"]?.jsonPrimitive?.content
+                    val coordinates = geometryCollection["coordinates"]?.jsonArray
 
-                    when (rootType) {
-                        "FeatureCollection" -> {
-                            // Handle FeatureCollection format
-                            val features = geoJsonData["features"]?.jsonArray
-                            features?.forEach { feature ->
-                                val geometry = feature.jsonObject["geometry"]?.jsonObject
-                                geometry?.let { processGeometry(it, tempPolygons) }
+                    when (type) {
+                        "Polygon" -> coordinates?.forEach { ring ->
+                            processRing(ring, tempPolygons)
+                        }
+                        "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
+                            multiPolygon.jsonArray.forEach { ring ->
+                                processRing(ring, tempPolygons)
                             }
                         }
-                        "Polygon", "MultiPolygon" -> {
-                            // Handle direct geometry format (your original case)
-                            processGeometry(geoJsonData, tempPolygons)
-                        }
-                        else -> {
-                            Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $rootType")
-                        }
+                        else -> { Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $type") }
                     }
                 } ?: run {
                     Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
@@ -286,25 +278,6 @@ data class WWWEventArea(
         }
 
         return cachedAreaPolygons ?: emptyList()
-    }
-
-    private fun processGeometry(geometry: JsonObject, tempPolygons: MutableList<Polygon>) {
-        val type = geometry["type"]?.jsonPrimitive?.content
-        val coordinates = geometry["coordinates"]?.jsonArray
-
-        when (type) {
-            "Polygon" -> coordinates?.forEach { ring ->
-                processRing(ring, tempPolygons)
-            }
-            "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
-                multiPolygon.jsonArray.forEach { ring ->
-                    processRing(ring, tempPolygons)
-                }
-            }
-            else -> {
-                Log.e(::getPolygons.name, "Unsupported geometry type: $type")
-            }
-        }
     }
 
     private fun processRing(ring: JsonElement, polygons: MutableArea) {

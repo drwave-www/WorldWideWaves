@@ -33,16 +33,7 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(
-    private val mapBounds: BoundingBox,
-    private val mapLibreAdapter: MapLibreAdapter<*>,
-    /**
-     * When this lambda returns true the manager will not attempt to correct /
-     * move the camera.  Used while a user-initiated or automatic animation is
-     * already running to avoid fighting with it.
-     */
-    private val isSuppressed: () -> Boolean = { false }
-) {
+class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter<*>) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
@@ -72,24 +63,27 @@ class MapConstraintManager(
         // Apply the constraints with the current padding
         applyConstraintsWithPadding()
 
-        // Register the camera-idle listener only once
-        if (!constraintsApplied) {
-            mapLibreAdapter.addOnCameraIdleListener {
-                val newPadding = calculateVisibleRegionPadding()
+        // Set up camera movement listener to update constraints on zoom changes
+        mapLibreAdapter.addOnCameraIdleListener {
+            val newPadding = calculateVisibleRegionPadding()
 
-                if (
-                    hasSignificantPaddingChange(
-                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+            if (hasSignificantPaddingChange(
+                VisibleRegionPadding(
+                        newPadding.latPadding,
+                        newPadding.lngPadding
                     )
-                ) {
+                )) {
                     setVisibleRegionPadding(
-                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+                        VisibleRegionPadding(
+                        newPadding.latPadding,
+                        newPadding.lngPadding
                     )
-                    applyConstraintsWithPadding()
-                }
+                )
+                applyConstraintsWithPadding()
             }
-            constraintsApplied = true
         }
+
+        constraintsApplied = true
     }
 
     /**
@@ -97,14 +91,32 @@ class MapConstraintManager(
      */
     private fun applyConstraintsWithPadding() {
         try {
-            // Compute padded bounds and store them
+            // Get platform-independent bounds from the constraint manager
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
-            // Apply bounds & min-zoom to the map – no immediate camera move
+            // Apply constraints to the map
             mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
+
+            // Also set min zoom
             val minZoom = mapLibreAdapter.getMinZoomLevel()
             mapLibreAdapter.setMinZoomPreference(minZoom)
+
+            // Check if our constrained area is too small for the current view
+            val currentPosition = mapLibreAdapter.getCameraPosition()?.let {
+                Position(
+                    it.latitude,
+                    it.longitude
+                )
+            }
+
+            if (!isValidBounds(paddedBounds, currentPosition)) {
+                // If bounds are too small, calculate safer bounds centered around current position
+                currentPosition?.let {
+                    val safeBounds = calculateSafeBounds(it)
+                    fitMapToBounds(safeBounds)
+                }
+            }
         } catch (e: Exception) {
             Napier.e("Error applying constraints: ${e.message}")
         }
@@ -114,7 +126,6 @@ class MapConstraintManager(
      * Constrain the camera to the valid bounds if needed
      */
     fun constrainCamera() {
-        if (isSuppressed()) return
         val target = mapLibreAdapter.getCameraPosition() ?: return
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)

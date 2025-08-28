@@ -155,6 +155,150 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
 
+actual fun getEventImage(type: String, id: String): Any? {
+    return when (type) { // TODO : not possible, we need another way than this static mess
+                         // FIXME: Use AndroidImageResolver
+
+        "location" -> when (id) {
+            "bangalore_india" -> Res.drawable.e_location_bangalore_india
+            "bangkok_thailand" -> Res.drawable.e_location_bangkok_thailand
+            "beijing_china" -> Res.drawable.e_location_beijing_china
+            "berlin_germany" -> Res.drawable.e_location_berlin_germany
+            "bogota_colombia" -> Res.drawable.e_location_bogota_colombia
+            "buenos_aires_argentina" -> Res.drawable.e_location_buenos_aires_argentina
+            "cairo_egypt" -> Res.drawable.e_location_cairo_egypt
+            "chicago_usa" -> Res.drawable.e_location_chicago_usa
+            "delhi_india" -> Res.drawable.e_location_delhi_india
+            "dubai_united_arab_emirates" -> Res.drawable.e_location_dubai_united_arab_emirates
+            "hong_kong_china" -> Res.drawable.e_location_hong_kong_china
+            "istanbul_turkey" -> Res.drawable.e_location_istanbul_turkey
+            "jakarta_indonesia" -> Res.drawable.e_location_jakarta_indonesia
+            "johannesburg_south_africa" -> Res.drawable.e_location_johannesburg_south_africa
+            "karachi_pakistan" -> Res.drawable.e_location_karachi_pakistan
+            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_location_kinshasa_democratic_republic_of_the_congo
+            "lagos_nigeria" -> Res.drawable.e_location_lagos_nigeria
+            "lima_peru" -> Res.drawable.e_location_lima_peru
+            "london_england" -> Res.drawable.e_location_london_england
+            "los_angeles_usa" -> Res.drawable.e_location_los_angeles_usa
+            "madrid_spain" -> Res.drawable.e_location_madrid_spain
+            "manila_philippines" -> Res.drawable.e_location_manila_philippines
+            "melbourne_australia" -> Res.drawable.e_location_melbourne_australia
+            "mexico_city_mexico" -> Res.drawable.e_location_mexico_city_mexico
+            "moscow_russia" -> Res.drawable.e_location_moscow_russia
+            "mumbai_india" -> Res.drawable.e_location_mumbai_india
+            "nairobi_kenya" -> Res.drawable.e_location_nairobi_kenya
+            "new_york_usa" -> Res.drawable.e_location_new_york_usa
+            "paris_france" -> Res.drawable.e_location_paris_france
+            "rome_italy" -> Res.drawable.e_location_rome_italy
+            "san_francisco_usa" -> Res.drawable.e_location_san_francisco_usa
+            "santiago_chile" -> Res.drawable.e_location_santiago_chile
+            "sao_paulo_brazil" -> Res.drawable.e_location_sao_paulo_brazil
+            "seoul_south_korea" -> Res.drawable.e_location_seoul_south_korea
+            "shanghai_china" -> Res.drawable.e_location_shanghai_china
+            "sydney_australia" -> Res.drawable.e_location_sydney_australia
+            "tehran_iran" -> Res.drawable.e_location_tehran_iran
+            "tokyo_japan" -> Res.drawable.e_location_tokyo_japan
+            "toronto_canada" -> Res.drawable.e_location_toronto_canada
+            "vancouver_canada" -> Res.drawable.e_location_vancouver_canada
+            else -> Res.drawable.not_found
+        }
+
+        "map" -> when(id) {
+            "bangalore_india" -> Res.drawable.e_map_bangalore_india
+            "bangkok_thailand" -> Res.drawable.e_map_bangkok_thailand
+            "beijing_china" -> Res.drawable.e_map_beijing_china
+            "berlin_germany" -> Res.drawable.e_map_berlin_germany
+            "bogota_colombia" -> Res.drawable.e_map_bogota_colombia
+            "buenos_aires_argentina" -> Res.drawable.e_map_buenos_aires_argentina
+            "cairo_egypt" -> Res.drawable.e_map_cairo_egypt
+            "chicago_usa" -> Res.drawable.e_map_chicago_usa
+            "delhi_india" -> Res.drawable.e_map_delhi_india
+            "dubai_united_arab_emirates" -> Res.drawable.e_map_dubai_united_arab_emirates
+            "hong_kong_china" -> Res.drawable.e_map_hong_kong_china
+            "istanbul_turkey" -> Res.drawable.e_map_istanbul_turkey
+            "jakarta_indonesia" -> Res.drawable.e_map_jakarta_indonesia
+            "johannesburg_south_africa" -> Res.drawable.e_map_johannesburg_south_africa
+            "karachi_pakistan" -> Res.drawable.e_map_karachi_pakistan
+            "kinshasa_democratic_republic_of_the_congo" -> Res.drawable.e_map_kinshasa_democratic_republic_of_the_congo
+            "lagos_nigeria" -> Res.drawable.e_map_lagos_nigeria
+            "lima_peru" -> Res.drawable.e_map_lima_peru
+            "london_england" -> Res.drawable.e_map_london_england
+            "los_angeles_usa" -> Res.drawable.e_map_los_angeles_usa
+            "madrid_spain" -> Res.drawable.e_map_madrid_spain
+            "manila_philippines" -> Res.drawable.e_map_manila_philippines
+            "melbourne_australia" -> Res.drawable.e_map_melbourne_australia
+            "mexico_city_mexico" -> Res.drawable.e_map_mexico_city_mexico
+            "moscow_russia" -> Res.drawable.e_map_moscow_russia
+            "mumbai_india" -> Res.drawable.e_map_mumbai_india
+            "nairobi_kenya" -> Res.drawable.e_map_nairobi_kenya
+            "new_york_usa" -> Res.drawable.e_map_new_york_usa
+            "paris_france" -> Res.drawable.e_map_paris_france
+            "rome_italy" -> Res.drawable.e_map_rome_italy
+            "san_francisco_usa" -> Res.drawable.e_map_san_francisco_usa
+            "santiago_chile" -> Res.drawable.e_map_santiago_chile
+            "sao_paulo_brazil" -> Res.drawable.e_map_sao_paulo_brazil
+            "seoul_south_korea" -> Res.drawable.e_map_seoul_south_korea
+            "shanghai_china" -> Res.drawable.e_map_shanghai_china
+            "sydney_australia" -> Res.drawable.e_map_sydney_australia
+            "tehran_iran" -> Res.drawable.e_map_tehran_iran
+            "tokyo_japan" -> Res.drawable.e_map_tokyo_japan
+            "toronto_canada" -> Res.drawable.e_map_toronto_canada
+            "vancouver_canada" -> Res.drawable.e_map_vancouver_canada
+            else -> Res.drawable.not_found
+        }
+
+        "community" -> when (id) {
+            "africa" -> Res.drawable.e_community_africa
+            "asia" -> Res.drawable.e_community_asia
+            "europe" -> Res.drawable.e_community_europe
+            "middle_east" -> Res.drawable.e_community_middle_east
+            "north_america" -> Res.drawable.e_community_north_america
+            "oceania" -> Res.drawable.e_community_oceania
+            "south_america" -> Res.drawable.e_community_south_america
+            else -> Res.drawable.not_found
+        }
+
+        "country" -> when (id) {
+            "argentina" -> Res.drawable.e_country_argentina
+            "australia" -> Res.drawable.e_country_australia
+            "brazil" -> Res.drawable.e_country_brazil
+            "canada" -> Res.drawable.e_country_canada
+            "chile" -> Res.drawable.e_country_chile
+            "china" -> Res.drawable.e_country_china
+            "colombia" -> Res.drawable.e_country_colombia
+            "democratic_republic_of_the_congo" -> Res.drawable.e_country_democratic_republic_of_the_congo
+            "egypt" -> Res.drawable.e_country_egypt
+            "england" -> Res.drawable.e_country_england
+            "france" -> Res.drawable.e_country_france
+            "germany" -> Res.drawable.e_country_germany
+            "india" -> Res.drawable.e_country_india
+            "indonesia" -> Res.drawable.e_country_indonesia
+            "iran" -> Res.drawable.e_country_iran
+            "italy" -> Res.drawable.e_country_italy
+            "japan" -> Res.drawable.e_country_japan
+            "kenya" -> Res.drawable.e_country_kenya
+            "mexico" -> Res.drawable.e_country_mexico
+            "nigeria" -> Res.drawable.e_country_nigeria
+            "pakistan" -> Res.drawable.e_country_pakistan
+            "peru" -> Res.drawable.e_country_peru
+            "philippines" -> Res.drawable.e_country_philippines
+            "russia" -> Res.drawable.e_country_russia
+            "south_africa" -> Res.drawable.e_country_south_africa
+            "south_korea" -> Res.drawable.e_country_south_korea
+            "spain" -> Res.drawable.e_country_spain
+            "thailand" -> Res.drawable.e_country_thailand
+            "turkey" -> Res.drawable.e_country_turkey
+            "united_arab_emirates" -> Res.drawable.e_country_united_arab_emirates
+            "usa" -> Res.drawable.e_country_usa
+            else -> Res.drawable.not_found
+        }
+
+        else -> Res.drawable.not_found
+    }
+}
+
+// ---------------------------
+
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
 
@@ -202,7 +346,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
             // Get asset information - this might not provide accurate size for compressed assets
             val assetFileDescriptor = try {
                 context.assets.openFd(assetPath)
-            } catch (_: IOException) {
+            } catch (e: IOException) {
                 // Some compressed assets can't be accessed via openFd, fall back to open
                 null
             }
@@ -213,14 +357,14 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
                 else -> {
                     val lastCacheTime = try {
                         metadataFile.readText().toLong()
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
                         0L
                     }
 
                     // Check if the app was installed/updated after we cached the file
                     val appInstallTime = try {
                         context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
                         System.currentTimeMillis()
                     }
 
@@ -362,81 +506,4 @@ actual suspend fun cacheDeepFile(fileName: String) {
 actual fun getCacheDir(): String {
     val context: Context by inject(Context::class.java)
     return context.cacheDir.absolutePath
-}
-
-// ---------------------------------------------------------------------------
-//  Cache-maintenance helpers (Android actuals)
-// ---------------------------------------------------------------------------
-
-/**
- * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
- */
-actual fun clearEventCache(eventId: String) {
-    val context: Context by inject(Context::class.java)
-    val cacheDir = context.cacheDir
-
-    val targets = listOf(
-        "$eventId.mbtiles",
-        "$eventId.mbtiles.metadata",
-        "$eventId.geojson",
-        "$eventId.geojson.metadata",
-        "style-$eventId.json",
-        "style-$eventId.json.metadata"
-    )
-
-    for (name in targets) {
-        try {
-            val f = File(cacheDir, name)
-            if (f.exists()) {
-                if (f.delete()) {
-                    Log.i(::clearEventCache.name, "Deleted cached file $name")
-                } else {
-                    Log.e(::clearEventCache.name, "Failed to delete cached file $name")
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(::clearEventCache.name, "Error while deleting $name", e)
-        }
-    }
-}
-
-/**
- * Determine whether an already-cached file is stale with regard to the
- * application’s lastUpdateTime (which also changes when dynamic-feature
- * splits are updated through the Play Store).
- */
-actual fun isCachedFileStale(fileName: String): Boolean {
-    val context: Context by inject(Context::class.java)
-    val cacheDir = context.cacheDir
-
-    val dataFile = File(cacheDir, fileName)
-    if (!dataFile.exists()) return true
-
-    val metadataFile = File(cacheDir, "$fileName.metadata")
-    val cachedTime = try {
-        metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
-    } catch (_: Exception) {
-        0L
-    }
-
-    val appUpdateTime = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-    } catch (_: Exception) {
-        System.currentTimeMillis()
-    }
-
-    return appUpdateTime > cachedTime
-}
-
-/**
- * Force-update (or create) the metadata timestamp associated with a cached file.
- */
-actual fun updateCacheMetadata(fileName: String) {
-    val context: Context by inject(Context::class.java)
-    val metadataFile = File(context.cacheDir, "$fileName.metadata")
-    try {
-        metadataFile.writeText(System.currentTimeMillis().toString())
-    } catch (e: Exception) {
-        Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
-    }
 }

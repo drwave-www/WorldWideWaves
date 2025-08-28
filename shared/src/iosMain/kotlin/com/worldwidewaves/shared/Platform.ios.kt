@@ -93,17 +93,3 @@ actual fun getCacheDir(): String {
 actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
 }
-
-// ---------------------------------------------------------------------------
-//  Cache-maintenance helpers – no-op on iOS (resources are bundled & immutable)
-// ---------------------------------------------------------------------------
-
-actual fun clearEventCache(eventId: String) {
-    /* no-op on iOS – all map assets are shipped inside the app bundle */
-}
-
-actual fun isCachedFileStale(fileName: String): Boolean = false
-
-actual fun updateCacheMetadata(fileName: String) {
-    /* no-op on iOS */
-}

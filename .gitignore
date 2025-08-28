@@ -17,5 +17,3 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 *.aab
-**/logs/
-scripts/images/generated_images/

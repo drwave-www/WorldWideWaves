@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
 import com.worldwidewaves.shared.events.utils.DataValidator
-import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.Transient
 import kotlin.time.Duration
@@ -45,6 +44,7 @@ interface IWWWEvent : DataValidator {
 
     val id: String
     val type: String
+    val location: String
     val country: String?
     val community: String?
 
@@ -52,6 +52,7 @@ interface IWWWEvent : DataValidator {
     val date: String
     val startHour: String
 
+    val description: String
     val instagramAccount: String
     val instagramHashtag: String
 
@@ -74,19 +75,11 @@ interface IWWWEvent : DataValidator {
     fun isSoon(): Boolean
     suspend fun isRunning(): Boolean
 
-    // - Images -------------------
+    // ---------------------------
 
     fun getLocationImage(): Any?
     fun getCommunityImage(): Any?
     fun getCountryImage(): Any?
-    fun getMapImage(): Any?
-
-    // - Localized ---------------
-
-    fun getLocation(): StringResource
-    fun getDescription(): StringResource
-    fun getLiteralCountry(): StringResource
-    fun getLiteralCommunity(): StringResource
 
     // ---------------------------
 
@@ -100,6 +93,9 @@ interface IWWWEvent : DataValidator {
     fun getLiteralStartTime(): String
     suspend fun getLiteralEndTime(): String
     suspend fun getLiteralTotalTime(): String
+
+    fun getLiteralCountry(): String
+    fun getLiteralCommunity(): String
 
     fun getWaveStartDateTime() : Instant
     fun getWarmingDuration(): Duration

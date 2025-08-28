@@ -66,7 +66,7 @@ class WWWEventTest {
         // Stop Koin if it's already running to ensure clean state
         try {
             stopKoin()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Ignore if Koin wasn't started
         }
 
@@ -77,7 +77,7 @@ class WWWEventTest {
     fun tearDown() {
         try {
             stopKoin()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Ignore if Koin wasn't started
         }
     }
@@ -221,6 +221,18 @@ class WWWEventTest {
     }
 
     @Test
+    fun testValidationErrors_EmptyLocation() {
+        // GIVEN
+        val event = buildEmptyEvent(location = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Location is empty") })
+    }
+
+    @Test
     fun testValidationErrors_EmptyCountryForCityType() {
         // GIVEN
         val event = buildEmptyEvent(type = "city", country = null)
@@ -266,6 +278,18 @@ class WWWEventTest {
 
         // THEN
         assertTrue(errors!!.any { it.contains("Start hour format is invalid or time is not valid") })
+    }
+
+    @Test
+    fun testValidationErrors_EmptyDescription() {
+        // GIVEN
+        val event = buildEmptyEvent(description = "")
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN
+        assertTrue(errors!!.any { it.contains("Description is empty") })
     }
 
     @Test
@@ -371,11 +395,13 @@ class WWWEventTest {
 fun buildEmptyEvent(
     id: String = "test",
     type: String = "city",
+    location: String = "somewhere",
     country: String? = "xx",
     community: String? = null,
     timeZone: String = "Europe/London",
     date: String = "2024-03-15",
     startHour: String = "18:00",
+    description: String = "some event",
     instagramAccount: String = "user",
     instagramHashtag: String = "#hashtag",
     wavedef: WWWWaveDefinition = WWWWaveDefinition(),
@@ -387,11 +413,13 @@ fun buildEmptyEvent(
     return WWWEvent(
         id = id,
         type = type,
+        location = location,
         country = country,
         community = community,
         timeZone = timeZone,
         date = date,
         startHour = startHour,
+        description = description,
         instagramAccount = instagramAccount,
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,

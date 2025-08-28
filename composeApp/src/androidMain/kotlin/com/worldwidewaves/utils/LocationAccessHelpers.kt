@@ -39,8 +39,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
-import com.worldwidewaves.shared.MokoRes
-import dev.icerock.moko.resources.compose.stringResource
+import com.worldwidewaves.shared.generated.resources.ask_gps_enable
+import com.worldwidewaves.shared.generated.resources.no
+import com.worldwidewaves.shared.generated.resources.yes
+import org.jetbrains.compose.resources.stringResource
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @Composable
 fun requestLocationPermission(): Boolean {
@@ -88,12 +91,12 @@ fun CheckGPSEnable() {
 
     if (requestLocationPermission() && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
         AlertDialog.Builder(context)
-            .setMessage(stringResource(MokoRes.strings.ask_gps_enable))
+            .setMessage(stringResource(ShRes.string.ask_gps_enable))
             .setCancelable(false)
-            .setPositiveButton(stringResource(MokoRes.strings.yes)) { _, _ ->
+            .setPositiveButton(stringResource(ShRes.string.yes)) { _, _ ->
                 startActivity(context, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
             }
-            .setNegativeButton(stringResource(MokoRes.strings.no)) { dialog, _ -> dialog.cancel() }
+            .setNegativeButton(stringResource(ShRes.string.no)) { dialog, _ -> dialog.cancel() }
             .create()
             .show()
     }

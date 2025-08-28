@@ -33,7 +33,6 @@ import com.google.android.play.core.splitinstall.SplitInstallSessionState
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import com.worldwidewaves.shared.clearEventCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -146,32 +145,6 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 _featureState.value = MapFeatureState.Downloading(100)
             }
             SplitInstallSessionStatus.INSTALLED -> {
-                // ------------------------------------------------------------------
-                //  Invalidate any cached resources that belong to the module(s)
-                //  that have just been installed to ensure we don't use stale files.
-                // ------------------------------------------------------------------
-                try {
-                    // Prefer the module list from the state; fall back to currentMapId
-                    val moduleIds: List<String> =
-                        try {
-                            state.moduleNames()?.toList().orEmpty()
-                        } catch (_: Exception) {
-                            emptyList()
-                        }.ifEmpty {
-                            currentMapId?.let { listOf(it) }.orEmpty()
-                        }
-
-                    moduleIds.forEach { id ->
-                        try {
-                            clearEventCache(id)
-                        } catch (_: Exception) {
-                            // Do not crash the ViewModel because of cache cleanup issues
-                        }
-                    }
-                } catch (_: Exception) {
-                    // Defensive catch – no-op on failure
-                }
-
                 _featureState.value = MapFeatureState.Installed
                 currentSessionId = 0
             }

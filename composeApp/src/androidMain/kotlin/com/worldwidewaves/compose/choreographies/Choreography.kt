@@ -59,7 +59,6 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
@@ -72,7 +71,7 @@ fun WaveChoreographies(
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
+    val isWarmingInProgress by event.observer.isWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
@@ -274,7 +273,7 @@ fun ChoreographyDisplay(
                 }
 
                 Text(
-                    text = stringResource(sequence.text),
+                    text = sequence.text,
                     style = quinaryColoredBoldTextStyle(24),
                     color = Color.White,
                     textAlign = TextAlign.Center

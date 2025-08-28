@@ -33,53 +33,9 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-val bodyFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
-
-val displayFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
-
-val extraFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat Alternates"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+val bodyFontFamily = FontFamily(Font(GoogleFont("Montserrat"), provider))
+val displayFontFamily = FontFamily(Font(GoogleFont("Montserrat"), provider))
+val extraFontFamily = FontFamily(Font(GoogleFont("Montserrat Alternates"), provider))
 
 val AppTypography = Typography(
     displayLarge = Typography().displayLarge.copy(fontFamily = displayFontFamily),

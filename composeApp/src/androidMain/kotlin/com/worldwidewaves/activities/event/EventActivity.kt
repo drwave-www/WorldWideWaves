@@ -23,7 +23,6 @@ package com.worldwidewaves.activities.event
 
 import android.content.Context
 import android.content.Intent
-import android.text.BidiFormatter
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -67,15 +66,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.text.format.DateFormat
-import java.util.Date
-import java.time.Instant as JavaInstant
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
@@ -83,7 +77,6 @@ import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
@@ -108,23 +101,30 @@ import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.format.DateTimeFormats
+import com.worldwidewaves.shared.generated.resources.be_waved
+import com.worldwidewaves.shared.generated.resources.geoloc_yourein
+import com.worldwidewaves.shared.generated.resources.geoloc_yourenotin
+import com.worldwidewaves.shared.generated.resources.wave_end_time
+import com.worldwidewaves.shared.generated.resources.wave_progression
+import com.worldwidewaves.shared.generated.resources.wave_speed
+import com.worldwidewaves.shared.generated.resources.wave_start_time
+import com.worldwidewaves.shared.generated.resources.wave_total_time
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.onPrimaryLight
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
@@ -244,7 +244,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         // Show feedback
                         Toast.makeText(
                             context,
-                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
+                            "Simulation Started",
                             Toast.LENGTH_SHORT
                         ).show()
 
@@ -254,7 +254,7 @@ class EventActivity : AbstractEventWaveActivity() {
         ) {
             Icon(
                 imageVector = Icons.Default.Timer,
-                contentDescription = stringResource(MokoRes.strings.test_simulation),
+                contentDescription = "Test Simulation",
                 tint = Color.Red,
                 modifier = Modifier.size(24.dp)
             )
@@ -266,37 +266,31 @@ class EventActivity : AbstractEventWaveActivity() {
 
 @Composable
 private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
-    val dir = LocalLayoutDirection.current
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
-        text = stringResource(event.getDescription()),
+        text = event.description,
         style = extraQuinaryColoredBoldTextStyle(),
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
-        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
+        textAlign = TextAlign.Justify
     )
 }
 
 // ----------------------------------------------------------------------------
 
-@OptIn(ExperimentalTime::class)
 @Composable
 private fun EventOverlay(event: IWWWEvent) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    
-    val localizedDate = remember(event.id) { 
-        DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ()) 
-    }
 
     Box {
         Image(
             modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(event.getLocationImage() as DrawableResource),
-            contentDescription = stringResource(event.getLocation())
+            contentDescription = event.location
         )
         Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDate(eventStatus, localizedDate)
+            EventOverlayDate(eventStatus, event.getLiteralStartDateSimple())
             EventOverlayDone(eventStatus)
         }
     }
@@ -345,27 +339,14 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 
 // ----------------------------------------------------------------------------
 
-@OptIn(ExperimentalTime::class)
 @Composable
 private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifier) {
     val isInArea by event.observer.userIsInArea.collectAsState()
-    val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val context = LocalContext.current
-    val javaInstant = hitDateTime?.let {
-        JavaInstant.ofEpochSecond(it.epochSeconds, it.nanosecondsOfSecond.toLong())
+    val geolocText = when {
+        isInArea -> ShRes.string.geoloc_yourein
+        else -> ShRes.string.geoloc_yourenotin
     }
-    val formattedTime = javaInstant?.let {
-        DateFormat.getTimeFormat(context).format(Date(it.toEpochMilli()))
-    } ?: ""
-
-    val geolocText = if (isInArea) {
-        stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
-    } else {
-        stringResource(MokoRes.strings.geoloc_yourenotin)
-    }
-    
-    val displayText = BidiFormatter.getInstance().unicodeWrap(geolocText)
 
     Row(
         modifier = modifier
@@ -382,7 +363,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = displayText,
+                text = stringResource(geolocText),
                 style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE)
             )
         }
@@ -391,39 +372,24 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 
 // ----------------------------------------------------------------------------
 
-@OptIn(ExperimentalTime::class)
 @Composable
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
-    var totalMinutes by remember { mutableStateOf<Long?>(null) }
-    var startTimeText by remember { mutableStateOf<String?>(null) }
-    var endTimeText by remember { mutableStateOf<String?>(null) }
     val progression by event.observer.progression.collectAsState()
-    val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
-    val warmingText = stringResource(MokoRes.strings.wave_warming)
 
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
-        totalMinutes = event.getTotalTime().inWholeMinutes
-
-        val start = event.getStartDateTime()
-        val end = event.getEndDateTime()
-        startTimeText = DateTimeFormats.timeShort(start, event.getTZ())
-        endTimeText = DateTimeFormats.timeShort(end, event.getTZ())
     }
 
     val eventNumbers by remember(waveNumbers) {
         derivedStateOf {
             waveNumbers?.let {
                 mapOf(
-                    MokoRes.strings.wave_start_time to it.waveStartTime,
-                    MokoRes.strings.wave_end_time to it.waveEndTime,
-                    MokoRes.strings.wave_speed to it.waveSpeed,
-                    MokoRes.strings.wave_total_time to it.waveTotalTime,
-                    MokoRes.strings.wave_progression to if (startWarmingInProgress)
-                        warmingText
-                    else
-                        event.wave.getLiteralFromProgression(progression)
+                    ShRes.string.wave_start_time to it.waveStartTime,
+                    ShRes.string.wave_end_time to it.waveEndTime,
+                    ShRes.string.wave_speed to it.waveSpeed,
+                    ShRes.string.wave_total_time to it.waveTotalTime,
+                    ShRes.string.wave_progression to event.wave.getLiteralFromProgression(progression)
                 )
             } ?: emptyMap()
         }
@@ -431,11 +397,11 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
 
     val eventTimeZone = waveNumbers?.waveTimezone
     val orderedLabels = listOf(
-        MokoRes.strings.wave_start_time,
-        MokoRes.strings.wave_end_time,
-        MokoRes.strings.wave_speed,
-        MokoRes.strings.wave_total_time,
-        MokoRes.strings.wave_progression
+        ShRes.string.wave_start_time,
+        ShRes.string.wave_end_time,
+        ShRes.string.wave_speed,
+        ShRes.string.wave_total_time,
+        ShRes.string.wave_progression
     )
 
     Box(modifier = modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
@@ -453,42 +419,16 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
         ) {
             Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
                 Text(
-                    text = stringResource(MokoRes.strings.be_waved),
+                    text = stringResource(ShRes.string.be_waved),
                     modifier = Modifier.fillMaxWidth(),
                     style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE).copy(
-                        textAlign = TextAlign.End
+                        textAlign = TextAlign.Right
                     )
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
                     orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
-                        val displayValue =
-                            if (key == MokoRes.strings.wave_total_time) {
-                                totalMinutes?.let { mins ->
-                                    val hours = (mins / 60).toInt()
-                                    val minutesLeft = (mins % 60).toInt()
-                                    val parts = buildList {
-                                        if (hours > 0) add(
-                                            if (hours == 1)
-                                                stringResource(MokoRes.strings.hour_singular, hours)
-                                            else
-                                                stringResource(MokoRes.strings.hour_plural, hours)
-                                        )
-                                        if (minutesLeft > 0) add(
-                                            if (minutesLeft == 1)
-                                                stringResource(MokoRes.strings.minute_singular, minutesLeft)
-                                            else
-                                                stringResource(MokoRes.strings.minute_plural, minutesLeft)
-                                        )
-                                    }
-                                    if (parts.isNotEmpty()) parts.joinToString(" ") else value
-                                } ?: value
-                            } else if (key == MokoRes.strings.wave_start_time && startTimeText != null) {
-                                startTimeText!!
-                            } else if (key == MokoRes.strings.wave_end_time && endTimeText != null) {
-                                endTimeText!!
-                            } else value
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -504,26 +444,26 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // Value
                                 Text(
-                                    text = displayValue,
+                                    text = value,
                                     style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
                                         color = when (key) {
-                                            MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
-                                            MokoRes.strings.wave_start_time -> Color.Yellow
+                                            ShRes.string.wave_progression -> MaterialTheme.colorScheme.secondary
+                                            ShRes.string.wave_start_time -> Color.Yellow
                                             else -> MaterialTheme.colorScheme.primary
                                         }
                                     )
                                 )
                                 // optional Timezone
                                 if (key in listOf(
-                                        MokoRes.strings.wave_start_time,
-                                        MokoRes.strings.wave_end_time
+                                        ShRes.string.wave_start_time,
+                                        ShRes.string.wave_end_time
                                     )
                                 ) {
                                     Text(
                                         text = " $eventTimeZone",
                                         style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
                                             color = when (key) {
-                                                MokoRes.strings.wave_start_time -> Color.Yellow
+                                                ShRes.string.wave_start_time -> Color.Yellow
                                                 else -> MaterialTheme.colorScheme.primary
                                             }
                                         )

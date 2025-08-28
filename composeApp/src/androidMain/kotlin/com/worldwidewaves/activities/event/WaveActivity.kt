@@ -69,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
@@ -82,6 +81,10 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SEC
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.generated.resources.wave_be_ready
+import com.worldwidewaves.shared.generated.resources.wave_done
+import com.worldwidewaves.shared.generated.resources.wave_hit
+import com.worldwidewaves.shared.generated.resources.wave_is_running
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -91,13 +94,14 @@ import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
@@ -120,7 +124,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
+        val isWarmingInProgress by event.observer.isWarmingInProgress.collectAsState(false)
         val hitDateTime by event.observer.hitDateTime.collectAsState()
         val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
@@ -222,14 +226,12 @@ fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
-    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
 
     val message = when {
-        eventStatus == Status.DONE -> MokoRes.strings.wave_done
-        hasBeenHit -> MokoRes.strings.wave_hit
-        isWarming && isInArea -> MokoRes.strings.wave_warming
-        isInArea -> MokoRes.strings.wave_be_ready
-        else -> MokoRes.strings.wave_is_running
+        eventStatus == Status.DONE -> ShRes.string.wave_done
+        hasBeenHit -> ShRes.string.wave_hit
+        isInArea -> ShRes.string.wave_be_ready
+        else -> ShRes.string.wave_is_running
     }
 
     Box(

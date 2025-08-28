@@ -30,11 +30,7 @@ import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.getCommunityText
-import com.worldwidewaves.shared.getCountryText
 import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.getEventText
-import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -60,6 +56,7 @@ data class WWWEvent(
 
     override val id: String,
     override val type: String,
+    override val location: String,
     override val country: String? = null,
     override val community: String? = null,
 
@@ -67,6 +64,7 @@ data class WWWEvent(
     override val date: String,
     override val startHour: String,
 
+    override val description: String,
     override  val instagramAccount: String,
     override val instagramHashtag: String,
 
@@ -161,14 +159,6 @@ data class WWWEvent(
     override fun getLocationImage(): Any? = getEventImageByType("location", this.id)
     override fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
     override fun getCountryImage(): Any? = getEventImageByType("country", this.country)
-    override fun getMapImage(): Any? = getEventImageByType("map", this.id)
-
-    // ---------------------------
-
-    override fun getLocation(): StringResource = getEventText("location", this.id)
-    override fun getDescription(): StringResource = getEventText("description", this.id)
-    override fun getLiteralCountry(): StringResource = getCountryText(this.country)
-    override fun getLiteralCommunity(): StringResource= getCommunityText(this.community)
 
     // ---------------------------
 
@@ -282,6 +272,31 @@ data class WWWEvent(
 
     // -----------------------------------------------------------------------
 
+    override fun getLiteralCountry(): String {
+        return country
+            ?.lowercase()
+            ?.replace("_", " ") // Replace underscores with spaces
+            ?.split(" ") // Split into words
+            ?.joinToString(" ") { word -> // Join words with spaces
+                word.replaceFirstChar { char -> char.uppercase() } // Capitalize each word
+            }
+            ?.replace("England", "United Kingdom") // FIXME: Ugly hack for London
+            ?: ""
+    }
+
+    override fun getLiteralCommunity(): String {
+        return community
+            ?.lowercase()
+            ?.replace("_", " ") // Replace underscores with spaces
+            ?.split(" ") // Split into words
+            ?.joinToString(" ") { word -> // Join words with spaces
+                word.replaceFirstChar { char -> char.uppercase() } // Capitalize each word
+            }
+            ?: ""
+    }
+
+    // -----------------------------------------------------------------------
+
     /**
      * Starting date/time of the wave
      */
@@ -349,6 +364,9 @@ data class WWWEvent(
             type !in listOf("city", "country", "world") ->
                 this.add("Type must be either 'city', 'country', or 'world'")
 
+            location.isEmpty() ->
+                this.add("Location is empty")
+
             type == "city" && country.isNullOrEmpty() ->
                 this.add("Country must be specified for type 'city'")
 
@@ -360,6 +378,9 @@ data class WWWEvent(
 
             !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
                 this.add("Start hour format is invalid or time is not valid")
+
+            description.isEmpty() ->
+                this.add("Description is empty")
 
             instagramAccount.isEmpty() ->
                 this.add("Instagram account is empty")

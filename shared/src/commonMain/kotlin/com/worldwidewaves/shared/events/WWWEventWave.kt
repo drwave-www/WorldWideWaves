@@ -50,12 +50,14 @@ import kotlin.time.toDuration
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
     enum class Direction { WEST, EAST }
+    enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
 
     @OptIn(ExperimentalTime::class)
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
-        val remainingPolygons: Area
+        val remainingPolygons: Area,
+        val addedTraversedPolygons: Area? = null
     )
 
     // ---------------------------
@@ -78,7 +80,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
 
     // ---------------------------
 
-    abstract suspend fun getWavePolygons(): WavePolygons?
+    abstract suspend fun getWavePolygons(lastWaveState: WavePolygons? = null, mode: WaveMode = WaveMode.ADD): WavePolygons?
     abstract suspend fun getWaveDuration(): Duration
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
     abstract suspend fun userHitDateTime(): Instant?
@@ -105,7 +107,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     @VisibleForTesting
     fun getUserPosition(): Position? {
         var platform : WWWPlatform? = null
-        try { platform = get() } catch (_: Exception) {
+        try { platform = get() } catch (e: Exception) {
             Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
         }
         return if (platform?.isOnSimulation() == true) {
@@ -158,9 +160,8 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     /**
      * Retrieves the literal progression of the event as a percentage string.
      */
-    suspend fun getLiteralProgression(): String = getLiteralFromProgression(getProgression())
-    fun getLiteralFromProgression(progression: Double): String =
-        if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
+    suspend fun getLiteralProgression(): String = "${getProgression().roundToInt()}%"
+    fun getLiteralFromProgression(progression: Double): String = "${progression.roundToInt()}%"
 
     /**
      * Retrieves the literal speed of the event in meters per second.

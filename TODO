@@ -1,58 +1,95 @@
 
 TODAY :
 
-- pb de placement labels running / ..
-- erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
-                 --> Beijing ??
-   --> Add logs in splitLongitude (nb of polygons original/left/right)
-   ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
+- erreurs cartes : Jakarta, London
 
-- !! Tester le deroulement complet d'une vague sur une tres grande ville a vitesse normale
-- !! performance analysis (profiling) de l'app sur une grande ville
+- erreurs wave : Dubai / Moscow / Shanghai / Tokyo
 
-- Global code linting review
-- > PLAY STORE UPLOAD <
+- !!!!!!! NOW :
+    - numbers ne se mettent pas a jour qd on switch de full a event
+    - plus de fleche sur wavescreen (you are IN / you are NOT IN ne fonctionne pas non plus)
+    --> p-e du a la modif dans stopObservation qui ne nettoie plus les flux ??
+
+- ==> autozoom in wave screen is not enough zoomed (test: sydney)
+
+- !! recalcul de 'in the area' apres init du gps :
+   - paris, wave, puis go back to paris : 'you are NOT in the area'
+
+- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
+
+- GPS refresh (simulation + capteur active)
+
+- issue on large map zoom ? (ex: beijing)
+
+- !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+
+- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+  et des numbers, du compteur de l'ecran wave
+
+---------------------------------------------
+
+Avril second part:
 
 - Packaging :
-    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+    - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
+    - FIRST UPLOAD
+    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+    - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
+
+- Limit size taken by events in cached WWWEvents : clean on request after a certain size ==> Limit to 3 downloaded maps
+
+------
+
+- manage with translations
+    - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
+    - https://phrase.com/blog/posts/kotlin-multiplatform-mobile-i18n-android-ios/
+    - manage with translation of events contents (description, location, etc, ...)
+
+- Production:
+    - Fill-in FAQ Contents
+    - licences / tools mentions
+    - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
 
 ---------------------------------------------
 
 - PDF + Message + Planif presentation
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
-- faire qques modifs sur la video 1 (rempl visuels au debut, quote plus longue a la fin, ..)
-- automatiser la generation des textes sur une liste de langues (comptes instagram)
-    - prompt:
-        - https://chatgpt.com/c/68b21370-8f78-8331-a8bd-7fe411bfca04
-        - j'ai fais une video, avec des placeholders pour du texte, comment puis-je automatiser la production de cette video dans toutes ces langues en lui fournissant simplement les traductions des textes dans toutes ces langues ?
-    - extraire de la video PowerDirector les temps de debut, duree de tous les textes
 
 ---------------------------------------------
 
 - Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
 - ======== Bugs/Issues/Refactorings =========
-    - put a timer on GPS activation requests (?)
+    - verifier la bonne gestion des heures internationales, j'ai un doute..
+    - put a timer on GPS activation requests
 
 ---------------------------------------------
 START IOS
---> Global tour of what can be put in commons
 ---------------------------------------------
 
-TODO:
+- Wave simulator
+    - add a simulation button (accelerated) on the event screen while it's possible (call Wave Now button 'Preview' or 'Remind me')
+    - warn we are in a simulation mode in all event screens (click on banner allow for show details + cancellation)
 
-- Site statique genere avec Cloudflare Pages (maps, liens, infos events, ..)
-
-LATER:
 - Diamond: Deep wave for city streets (?)
 
 - systeme de notifications :
    - coder des NotificationUseCase dans shared a partir d'un context qui peuvent reagir et pousser des notifs
    --> app en fond de tache, smooth, avec un parametres de config
 
+- config parameters de l'app (?)
+
+- IMOORTANT: World Map system
+
  - adapt wave behavior on countries and the world (linear split, ...)
      --> add end date additionally to end hour for countries and the world
      --> add 'wave hours', so countries and the world can have several waves over days during the process
+
+Debug:
+- Implement a way to deeply simulate events & geolocation
+     ==> button "simulate now avec un bandeau en haut en cours de simulation + 'stop'"
+     ==> uniquemment si l'option setting 'activate simulation's est activé
+          ==> ajouter une option 'simulate position' dans les settings sinon prendre la position réelle
 
 Ideas:
 - Section d'information / apprentissage - youtube videos

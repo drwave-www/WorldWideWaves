@@ -143,7 +143,7 @@ class EventsViewModel(
 
             // Handle warming started
             scope.launch {
-                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
+                event.observer.isWarmingInProgress.collect { isWarmingStarted ->
                     if (isWarmingStarted) {
                         backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
                         platform.getSimulation()?.setSpeed(1)

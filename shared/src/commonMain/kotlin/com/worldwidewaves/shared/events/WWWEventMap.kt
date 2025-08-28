@@ -27,8 +27,6 @@ import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
-import com.worldwidewaves.shared.isCachedFileStale
-import com.worldwidewaves.shared.updateCacheMetadata
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
@@ -85,7 +83,7 @@ class WWWEventMap(
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
         val styleFilename = "style-${event.id}.json"
-        if (cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename))
+        if (cachedFileExists(styleFilename))
             return cachedFilePath(styleFilename)
 
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
@@ -98,7 +96,6 @@ class WWWEventMap(
             .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
         cacheStringToFile(styleFilename, newFileStr)
-        updateCacheMetadata(styleFilename)
         return cachedFilePath(styleFilename)
     }
 

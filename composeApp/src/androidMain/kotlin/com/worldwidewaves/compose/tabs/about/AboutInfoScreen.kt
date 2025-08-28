@@ -21,34 +21,47 @@ package com.worldwidewaves.compose.tabs.about
  * limitations under the License.
  */
 
-import androidx.compose.foundation.layout.Arrangement
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.LayoutDirection
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
-import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_INSTA_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
+import com.worldwidewaves.shared.generated.resources.drwave
+import com.worldwidewaves.shared.generated.resources.drwave_instagram
+import com.worldwidewaves.shared.generated.resources.drwave_instagram_url
+import com.worldwidewaves.shared.generated.resources.infos_core
+import com.worldwidewaves.shared.generated.resources.instagram_icon
+import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
-import dev.icerock.moko.resources.compose.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 class AboutInfoScreen : TabScreen {
     override val name = "Infos"
@@ -65,7 +78,7 @@ class AboutInfoScreen : TabScreen {
             ) {
                 item { AboutWWWLogo() }
                 item { MainInfo() }
-                item { DrWaveSignature() }
+                item { DrWaveSignatureAndContact() }
                 item { AboutDividerLine() }
                 item { AboutWWWSocialNetworks() }
             }
@@ -76,44 +89,46 @@ class AboutInfoScreen : TabScreen {
 
     @Composable
     private fun MainInfo() {
-        val dir = LocalLayoutDirection.current
-        val items = listOf(
-            MokoRes.strings.infos_core_1,
-            MokoRes.strings.infos_core_2,
-            MokoRes.strings.infos_core_3,
-            MokoRes.strings.infos_core_4,
-            MokoRes.strings.infos_core_5,
-            MokoRes.strings.infos_core_6,
-            MokoRes.strings.infos_core_7,
-            MokoRes.strings.infos_core_8,
-            MokoRes.strings.infos_core_9
+        Text(
+            text = stringResource(ShRes.string.infos_core),
+            style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
         )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp) // space between items
-        ) {
-            items.forEach { res ->
-                Text(
-                    text = stringResource(res),
-                    style = commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
-                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
-                    )
-                )
-            }
-        }
     }
-
 
     // ----------------------------
 
     @Composable
-    private fun DrWaveSignature() {
+    private fun DrWaveSignatureAndContact() {
+        val uriHandler = LocalUriHandler.current
+
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
-                text = stringResource(MokoRes.strings.drwave),
+                text = stringResource(ShRes.string.drwave),
                 style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
+            Row {
+                Image(
+                    painter = painterResource(ShRes.drawable.instagram_icon),
+                    contentDescription = "Instagram logo",
+                    modifier = Modifier.width(25.dp)
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(start = DIM_DEFAULT_INT_PADDING.dp)
+                        .clickable(onClick = {
+                            try {
+                                uriHandler.openUri(ShRes.string.drwave_instagram_url.toString())
+                            } catch (e: Exception) {
+                                Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
+                            }
+                        }),
+                    text = stringResource(ShRes.string.drwave_instagram),
+                    style = commonTextStyle(DIM_INFO_DRWAVE_INSTA_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            }
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }

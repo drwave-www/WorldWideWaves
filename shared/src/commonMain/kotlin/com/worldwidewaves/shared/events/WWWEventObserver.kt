@@ -75,11 +75,8 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
     private val _progression = MutableStateFlow(0.0)
     val progression: StateFlow<Double> = _progression.asStateFlow()
 
-    private val _isUserWarmingInProgress = MutableStateFlow(false)
-    val isUserWarmingInProgress: StateFlow<Boolean> = _isUserWarmingInProgress.asStateFlow()
-
-    private val _isStartWarmingInProgress = MutableStateFlow(false)
-    val isStartWarmingInProgress: StateFlow<Boolean> = _isStartWarmingInProgress.asStateFlow()
+    private val _isWarmingInProgress = MutableStateFlow(false)
+    val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
 
     private val _userIsGoingToBeHit = MutableStateFlow(false)
     val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
@@ -178,12 +175,6 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
 
                 // Wait for the next observation interval
                 val observationDelay = getObservationInterval()
-
-                if (!observationDelay.isFinite()) {
-                    Log.w("observationFlow", "Stopping flow due to infinite observation delay")
-                    break
-                }
-
                 clock.delay(observationDelay)
             }
 
@@ -228,13 +219,9 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
         }
 
         // Update additional state flows
-        _timeBeforeHit.updateIfChanged(timeBeforeHit)
         _userPositionRatio.updateIfChanged(event.wave.userPositionToWaveRatio() ?: 0.0)
+        _timeBeforeHit.updateIfChanged(event.wave.timeBeforeUserHit() ?: INFINITE)
         _hitDateTime.updateIfChanged(event.wave.userHitDateTime() ?: DISTANT_FUTURE)
-
-        // Warming start (between event start and wave start)
-        val now = clock.now()
-        _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
 
         // User in area
         val userPosition = event.wave.getUserPosition()
@@ -244,7 +231,7 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
             _userIsInArea.updateIfChanged(false)
         }
 
-        _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
+        _isWarmingInProgress.updateIfChanged(warmingInProgress)
         _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
     }
 
@@ -265,9 +252,8 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
             timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
-            timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
-            timeBeforeHit < ZERO -> INFINITE
-            timeBeforeHit < 1.seconds -> 50.milliseconds // For sound accuracy
+            event.isRunning() -> 500.milliseconds
+            timeBeforeHit < 2.seconds -> 50.milliseconds // For sound accuracy
             else -> 1.minutes // Default case, more reasonable than 1 day
         }
     }

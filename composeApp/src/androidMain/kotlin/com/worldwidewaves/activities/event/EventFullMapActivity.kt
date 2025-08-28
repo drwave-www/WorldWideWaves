@@ -40,22 +40,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.event_target_me_off
+import com.worldwidewaves.shared.generated.resources.event_target_me_on
+import com.worldwidewaves.shared.generated.resources.event_target_wave_off
+import com.worldwidewaves.shared.generated.resources.event_target_wave_on
 import com.worldwidewaves.shared.generated.resources.target_me_active
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -79,8 +83,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
                 mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW,
-                    autoTargetUserOnFirstLocation = true
+                    initialCameraPosition = MapCameraPosition.WINDOW
                 )
             )
         }
@@ -92,7 +95,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(event, eventMap, clock)
+            MapActions(event, eventMap)
         }
     }
 
@@ -100,9 +103,8 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
 // ----------------------------------------------------------------------------
 
-@OptIn(ExperimentalTime::class)
 @Composable
-fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modifier: Modifier = Modifier) {
+fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()
@@ -117,28 +119,26 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modif
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
-                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                            eventMap.markUserInteracted()
+                        if (isRunning) {
                             scope.launch {
                                 eventMap.targetWave()
                             }
                         }
                     },
                 painter = painterResource(if (isRunning) ShRes.drawable.target_wave_active else ShRes.drawable.target_wave_inactive),
-                contentDescription = stringResource(if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off)
+                contentDescription = stringResource(if (isRunning) ShRes.string.event_target_wave_on else Res.string.event_target_wave_off)
             )
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
-                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetUser()
                             }
                         }
                     },
                 painter = painterResource(if (isInArea) ShRes.drawable.target_me_active else ShRes.drawable.target_me_inactive),
-                contentDescription = stringResource(if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off)
+                contentDescription = stringResource(if (isInArea) ShRes.string.event_target_me_on else ShRes.string.event_target_me_off)
             )
         }
     }

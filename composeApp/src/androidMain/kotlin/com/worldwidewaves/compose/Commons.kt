@@ -2,27 +2,6 @@
 
 package com.worldwidewaves.compose
 
-/*
- * Copyright 2025 DrWave
- *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -63,7 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.event.WaveActivity
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
@@ -84,15 +62,41 @@ import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
+import com.worldwidewaves.shared.generated.resources.event_running
+import com.worldwidewaves.shared.generated.resources.event_soon
 import com.worldwidewaves.shared.generated.resources.instagram_icon
+import com.worldwidewaves.shared.generated.resources.map_cancel_download
+import com.worldwidewaves.shared.generated.resources.map_retry_download
+import com.worldwidewaves.shared.generated.resources.wave_now
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+
+/*
+ * Copyright 2025 DrWave
+ *
+ * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * boundaries, fostering unity, community, and shared human experience by leveraging real-time
+ * coordination and location-based services.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // ----------------------------
 
@@ -110,9 +114,9 @@ fun DividerLine(modifier: Modifier = Modifier) {
 fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
         val (backgroundColor, textId) = if (eventStatus == Status.SOON) {
-            MaterialTheme.colorScheme.secondary to MokoRes.strings.event_soon
+            MaterialTheme.colorScheme.secondary to Res.string.event_soon
         } else {
-            MaterialTheme.colorScheme.tertiary to MokoRes.strings.event_running
+            MaterialTheme.colorScheme.tertiary to Res.string.event_running
         }
 
         Box(
@@ -122,7 +126,7 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
             Box(
                 modifier = Modifier
                     .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
-                    .height(DIM_COMMON_SOONRUNNING_HEIGHT.dp)
+                    .size(width = DIM_COMMON_SOONRUNNING_WIDTH.dp, height = DIM_COMMON_SOONRUNNING_HEIGHT.dp)
                     .background(backgroundColor)
                     .padding(end = DIM_DEFAULT_INT_PADDING.dp),
                 contentAlignment = Alignment.Center
@@ -147,7 +151,7 @@ fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
             ) { }
             Image(
                 painter = painterResource(Res.drawable.event_done),
-                contentDescription = stringResource(MokoRes.strings.event_done),
+                contentDescription = stringResource(Res.string.event_done),
                 modifier = Modifier.width(DIM_COMMON_DONE_IMAGE_WIDTH.dp),
             )
         }
@@ -180,7 +184,7 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentHeight(align = Alignment.CenterVertically),
-            text = stringResource(MokoRes.strings.wave_now),
+            text = stringResource(Res.string.wave_now).uppercase(),
             style = quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
                 textAlign = TextAlign.Center
             )
@@ -201,7 +205,7 @@ fun WWWSocialNetworks(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
-            contentDescription = stringResource(MokoRes.strings.instagram_logo_description),
+            contentDescription = "Instagram logo",
             modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp)
         )
         Column(
@@ -298,7 +302,7 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
             onClick = onCancel,
             modifier = Modifier
         ) {
-            Text(text = stringResource(MokoRes.strings.map_cancel_download))
+            Text(text = stringResource(Res.string.map_cancel_download))
         }
     }
 }
@@ -311,7 +315,7 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
     ) {
         Icon(
             imageVector = Icons.Default.Info,
-            contentDescription = stringResource(MokoRes.strings.error),
+            contentDescription = "Error",
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
         )
@@ -333,11 +337,11 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
-                contentDescription = stringResource(MokoRes.strings.map_retry_download),
+                contentDescription = "Retry",
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(MokoRes.strings.map_retry_download))
+            Text(text = stringResource(Res.string.map_retry_download))
         }
     }
 }

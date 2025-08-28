@@ -148,6 +148,11 @@ object PolygonUtils {
             return PolygonSplitResult.empty(cutId).also { workingPolygon.close() }
         }
 
+        val leftSide =  mutableListOf<LeftCutPolygon>()
+        val rightSide = mutableListOf<RightCutPolygon>()
+        val currentLeft = LeftCutPolygon(cutId)
+        val currentRight = RightCutPolygon(cutId)
+
         val minLongitude = workingPolygon.bbox().minLongitude
         val maxLongitude = workingPolygon.bbox().maxLongitude
 
@@ -157,62 +162,73 @@ object PolygonUtils {
             lngBbox.minLongitude > maxLongitude -> fromSinglePolygon(workingPolygon, cutId, LEFT)
             lngBbox.maxLongitude < minLongitude -> fromSinglePolygon(workingPolygon, cutId, RIGHT)
             else -> { // Separate the polygon into two parts based on the cut longitude
-                // ------------------------------------------------------------------
-                // New simple splitter : single pass, single polygon per side
-                // ------------------------------------------------------------------
 
-                val leftPoly  = LeftCutPolygon(cutId)
-                val rightPoly = RightCutPolygon(cutId)
+                val iterator = if (workingPolygon.isClockwise()) workingPolygon.reverseLoopIterator() else workingPolygon.loopIterator()
+                var stopPoint = if (workingPolygon.isClockwise()) workingPolygon.first()!! else workingPolygon.last()!! // Security stop
+                var prev : Position? = null
 
-                fun addPointToSides(point: Position, side: ComposedLongitude.Side) {
-                    when {
-                        side.isWest() -> leftPoly.add(point)
-                        side.isEast() -> rightPoly.add(point)
-                        side.isOn()   -> {
-                            val cutPt = point.toPointCut(cutId)
-                            leftPoly.add(cutPt)
-                            rightPoly.add(cutPt)
+                while (iterator.hasNext()) { // Anti-Clockwise loop
+                    val point = iterator.next()
+
+                    val nextPoint = iterator.viewCurrent()
+                    prev?.let { if (point == it) return@let }
+
+                    // Calculate the intersection point with the cut longitude
+                    val isOnLng = lngToCut.isPointOnLine(point)
+                    val intersection = lngToCut.intersectWithSegment(cutId, Segment(point, nextPoint))
+
+                    fun computeSplitForCurrentPoint() {
+                        // Add point to left and/or right side
+                        val cutPosition = if (isOnLng.isOn()) point.toPointCut(cutId) else point
+                        when {
+                            isOnLng.isWest() -> currentLeft.add(cutPosition)
+                            isOnLng.isEast() -> currentRight.add(cutPosition)
+                        }
+
+                        // Check if the segment intersects the cut lng and add the intersection point
+                        intersection?.let {
+                            currentLeft.add(it)
+                            currentRight.add(it)
+                        }
+
+                        // When we encounter a second cut point, we record the current poly-line
+                        // and start a new one from the last point
+                        if (isOnLng.isOn() || intersection != null) {
+                            addPolygonPartIfNeeded(currentLeft, leftSide)
+                            addPolygonPartIfNeeded(currentRight, rightSide)
                         }
                     }
-                }
 
-                val points = workingPolygon.toList()
-                for (i in points.indices) {
-                    val start = points[i]
-                    val end   = points[(i + 1) % points.size] // close ring
-
-                    val sideStart = lngToCut.isPointOnLine(start)
-                    val sideEnd   = lngToCut.isPointOnLine(end)
-                    val intersection = lngToCut.intersectWithSegment(cutId, Segment(start, end))
-
-                    // Emit start point
-                    addPointToSides(start, sideStart)
-
-                    // Emit intersection if any
-                    intersection?.let {
-                        leftPoly.add(it)
-                        rightPoly.add(it)
+                    // Really start to compute from here (start iteration on a CutPosition)
+                    if (currentLeft.isEmpty() && currentRight.isEmpty()) {
+                        if (isOnLng.isOn() || intersection != null) {
+                            stopPoint = point // Mark the real loop stop
+                            computeSplitForCurrentPoint()
+                        } else { /* Continue to iterate until we reach a CutPosition */ }
+                    } else {
+                        computeSplitForCurrentPoint()
+                        if (point.id == stopPoint.id) break
                     }
 
-                    // If this is the last segment, also emit end (otherwise next loop will do)
-                    if (i == points.size - 1) {
-                        addPointToSides(end, sideEnd)
-                    }
+                    prev = point
                 }
 
-                // Prepare resulting lists (only keep valid polygons)
-                val leftList = mutableListOf<LeftCutPolygon>()
-                val rightList = mutableListOf<RightCutPolygon>()
+                // Add the last polygons, completing them, to the left and/or right side
+                if (leftSide.size > 1) {
+                    currentLeft.add(if (currentLeft.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    leftSide.add(currentLeft.move())
+                }
 
-                if (leftPoly.size >= 3) leftList.add(leftPoly.close())
-                if (rightPoly.size >= 3) rightList.add(rightPoly.close())
+                if (rightSide.size > 1) {
+                    currentRight.add(if (currentRight.cutPositions.size == 1) stopPoint.toPointCut(cutId) else stopPoint)
+                    rightSide.add(currentRight.move())
+                }
 
-                // Inject intermediate longitude points if needed
-                val completedLeft  = completeLongitudePoints(cutId, lngToCut, leftList)
-                val completedRight = completeLongitudePoints(cutId, lngToCut, rightList)
-
-                return PolygonSplitResult(cutId, completedLeft, completedRight)
-                    .also { workingPolygon.close() }
+                // Group the poly-lines into ring polygons and add the ComposedLongitude positions
+                return PolygonSplitResult(cutId,
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, leftSide, currentLeft)),
+                    completeLongitudePoints(cutId, lngToCut, reconstructSide(cutId, rightSide, currentRight))
+                ).also { workingPolygon.close() }
             }
         }
     }
@@ -267,8 +283,6 @@ object PolygonUtils {
         polygon.clear().add(lastPoint!!)
     }
 
-    // ------------------------------------------------------------------------
-
     /**
      * Reconstructs the side polygons from the given list of poly-lines.
      *
@@ -276,7 +290,6 @@ object PolygonUtils {
      * Each polyline should cut the longitude twice and have more than two points.
      *
      */
-    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
         side.asSequence()
             .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
@@ -294,7 +307,6 @@ object PolygonUtils {
      * and a new polygon is started.
      *
      */
-    @Deprecated("Algorithm not reliable yet")
     private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
         val result = mutableListOf<T>()
         initPolygon.clear()
@@ -321,6 +333,81 @@ object PolygonUtils {
         }
 
         return result
+    }
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Recomposes cut polygons into a single polygon.
+     *
+     * This function takes a list of cut polygons and recomposes them into a single polygon.
+     * It groups the cut polygons by their cut ID and then traverses the polygons to recompose
+     * them into a single polygon.
+     *
+     */
+    fun recomposeCutPolygons(polygons: Area): Area {
+        val recomposedPolygons = mutableListOf<Polygon>()
+
+        polygons
+            .filterIsInstance<CutPolygon>() // Should always be the case
+            .groupBy { it.cutId } // Identify parts coming from the same original polygon
+            .forEach { (_, cutPolygons) ->
+                if (cutPolygons.size == 1) { // There's no point to recompose a single part
+                    recomposedPolygons.add(cutPolygons.first()) // Just add it to the area
+                } else {
+                    val recomposedPolygon = Polygon()
+
+                    // Pair CutPositions of area polygons
+                    val associatedCutPositions = cutPolygons
+                        .flatMap { p -> p.cutPositions.map { cp -> cp.pairId to Pair(cp, p) } }
+                        .groupBy({ it.first }, {it.second}) // Group by pairId
+                        .filterValues { it.size == 2 } // Filter out the points that are not cut segments
+                        .mapValues { (_, value) -> value[0] to value[1] } // Regroup pairs
+
+                    // Start recomposition from the lowest latitude and longitude CutPosition
+                    cutPolygons
+                        .flatMap { p -> p.cutPositions }
+                        .minWithOrNull(compareBy({ it.lat }, { it.lng }))
+                        .apply {
+                            fun addInRecomposedPolygon(position: Position) =
+                                recomposedPolygon.add(if (position is CutPosition) position.detached() else position)
+
+                            // Recompose polygon from multiple previously cut polygons traversing
+                            // the CutPosition pairs and then jumping from one polygon to another
+                            fun traverse(current: Position, previous: Position? = null) {
+                                if (current == this && previous != null) return // Stop traversal, polygon is closed
+
+                                if (current is CutPosition && associatedCutPositions.containsKey(current.pairId)) {
+
+                                    // We'll jump here from one polygon to another by their common CutPosition
+                                    associatedCutPositions[current.pairId]?.let { positions ->
+                                        when { // Identify the polygon behind the gate
+                                            positions.first.first.id == current.id -> positions.second.second
+                                            positions.second.first.id == current.id -> positions.first.second
+                                            else -> throw IllegalStateException("Invalid pairId")
+
+                                        }.search(current)?.next?.let { // Connect with the same position
+                                            if (current.isPointOnLine) // Add the position if it was on the line
+                                                addInRecomposedPolygon(current)
+                                            // next is safe as CutPolygons are created anti-clockwise
+                                            traverse(it, current) // Jump
+                                        }
+                                    }
+                                } else { // PointCuts and normal points are just added
+                                    addInRecomposedPolygon(current)
+                                    current.next?.let { traverse(it, current) }
+                                }
+                            }
+
+                            this?.let { traverse(it) }
+                        }
+
+                    if (recomposedPolygon.isNotEmpty())
+                        recomposedPolygons.add(recomposedPolygon.close())
+                }
+            }
+
+        return recomposedPolygons
     }
 
     // ------------------------------------------------------------------------
