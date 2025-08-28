@@ -1,14 +1,7 @@
 
 TODAY :
 
-- erreurs cartes : Jakarta, London
-
-- erreurs wave : Dubai / Moscow / Shanghai / Tokyo
-
-- !!!!!!! NOW :
-    - numbers ne se mettent pas a jour qd on switch de full a event
-    - plus de fleche sur wavescreen (you are IN / you are NOT IN ne fonctionne pas non plus)
-    --> p-e du a la modif dans stopObservation qui ne nettoie plus les flux ??
+- erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
 
 - ==> autozoom in wave screen is not enough zoomed (test: sydney)
 
