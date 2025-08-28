@@ -78,7 +78,7 @@ class AboutInfoScreen : TabScreen {
             ) {
                 item { AboutWWWLogo() }
                 item { MainInfo() }
-                item { DrWaveSignatureAndContact() }
+                item { DrWaveSignature() }
                 item { AboutDividerLine() }
                 item { AboutWWWSocialNetworks() }
             }
@@ -98,37 +98,13 @@ class AboutInfoScreen : TabScreen {
     // ----------------------------
 
     @Composable
-    private fun DrWaveSignatureAndContact() {
-        val uriHandler = LocalUriHandler.current
-
+    private fun DrWaveSignature() {
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(ShRes.string.drwave),
                 style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
-            Row {
-                Image(
-                    painter = painterResource(ShRes.drawable.instagram_icon),
-                    contentDescription = "Instagram logo",
-                    modifier = Modifier.width(25.dp)
-                )
-                Text(
-                    modifier = Modifier
-                        .padding(start = DIM_DEFAULT_INT_PADDING.dp)
-                        .clickable(onClick = {
-                            try {
-                                uriHandler.openUri(ShRes.string.drwave_instagram_url.toString())
-                            } catch (e: Exception) {
-                                Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
-                            }
-                        }),
-                    text = stringResource(ShRes.string.drwave_instagram),
-                    style = commonTextStyle(DIM_INFO_DRWAVE_INSTA_FONTSIZE).copy(
-                        textDecoration = TextDecoration.Underline
-                    )
-                )
-            }
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }
