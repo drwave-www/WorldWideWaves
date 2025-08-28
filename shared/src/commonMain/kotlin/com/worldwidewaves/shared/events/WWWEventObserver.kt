@@ -181,6 +181,7 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
                     break
                 }
 
+                Log.d("DELAY", "Observation delay: $observationDelay for event ${event.id}")
                 clock.delay(observationDelay)
             }
 
@@ -225,8 +226,8 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
         }
 
         // Update additional state flows
+        _timeBeforeHit.updateIfChanged(timeBeforeHit)
         _userPositionRatio.updateIfChanged(event.wave.userPositionToWaveRatio() ?: 0.0)
-        _timeBeforeHit.updateIfChanged(event.wave.timeBeforeUserHit() ?: INFINITE)
         _hitDateTime.updateIfChanged(event.wave.userHitDateTime() ?: DISTANT_FUTURE)
 
         // User in area
@@ -258,7 +259,7 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
             timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
             timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
             timeBeforeEvent > 35.seconds -> 1.seconds
-            event.isRunning() -> 500.milliseconds
+            timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
             timeBeforeHit < ZERO -> INFINITE
             timeBeforeHit < 1.seconds -> 50.milliseconds // For sound accuracy
             else -> 1.minutes // Default case, more reasonable than 1 day

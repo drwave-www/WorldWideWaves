@@ -85,6 +85,7 @@ import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
 import com.worldwidewaves.shared.generated.resources.wave_is_running
+import com.worldwidewaves.shared.generated.resources.wave_warming
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -226,10 +227,12 @@ fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
+    val isWarming by event.observer.isWarmingInProgress.collectAsState()
 
     val message = when {
         eventStatus == Status.DONE -> ShRes.string.wave_done
         hasBeenHit -> ShRes.string.wave_hit
+        isWarming && isInArea -> ShRes.string.wave_warming
         isInArea -> ShRes.string.wave_be_ready
         else -> ShRes.string.wave_is_running
     }

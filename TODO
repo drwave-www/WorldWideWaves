@@ -2,25 +2,15 @@
 TODAY :
 
 - erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
+                 --> Beijing ??
    --> Add logs in splitLongitude (nb of polygons original/left/right)
-
-- !! recalcul de 'in the area' apres init du gps :
-   - paris, wave, puis go back to paris : 'you are NOT in the area'
-
-- GPS refresh (simulation + capteur active)
-
-- issue on large map zoom ? (ex: beijing)
+   ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
-
 - !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
 
 - image en 16/9 pour les events
-
----------------------------------------------
-
-Avril second part:
 
 - Packaging :
     - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
@@ -29,8 +19,6 @@ Avril second part:
     - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
 
 - Limit size taken by events in cached WWWEvents : clean on request after a certain size ==> Limit to 3 downloaded maps
-
-------
 
 - manage with translations
     - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
@@ -43,6 +31,8 @@ Avril second part:
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
 
 ---------------------------------------------
+
+- refaire les visuels : villes et choregraphies, avec un meilleur generateur IA
 
 - PDF + Message + Planif presentation
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362

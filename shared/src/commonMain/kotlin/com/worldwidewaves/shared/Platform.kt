@@ -56,12 +56,12 @@ class WWWPlatform(val name: String) {
 
     init {
         val timeZone = TimeZone.of("Europe/Paris")
-        val now = LocalDateTime(2026, 7, 14, 17, 50).toInstant(timeZone)
+        val now = LocalDateTime(2026, 7, 14, 17, 59).toInstant(timeZone)
         setSimulation(
             WWWSimulation(
                 now,
-                Position(lat = 48.862725, lng = 2.287592),
-                50
+                Position(lat = 48.83625, lng = 2.46905), // Position(lat = 48.862725, lng = 2.287592),
+                1 // 50
             )
         ) // In Paris, 1h is 2mn
     }
