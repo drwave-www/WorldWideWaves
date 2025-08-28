@@ -71,7 +71,7 @@ fun WaveChoreographies(
     clock: IClock,
     modifier: Modifier = Modifier
 ) {
-    val isWarmingInProgress by event.observer.isWarmingInProgress.collectAsState()
+    val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()

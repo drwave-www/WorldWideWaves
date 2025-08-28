@@ -376,6 +376,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
     val progression by event.observer.progression.collectAsState()
+    val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
 
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
@@ -389,7 +390,10 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                     ShRes.string.wave_end_time to it.waveEndTime,
                     ShRes.string.wave_speed to it.waveSpeed,
                     ShRes.string.wave_total_time to it.waveTotalTime,
-                    ShRes.string.wave_progression to event.wave.getLiteralFromProgression(progression)
+                    ShRes.string.wave_progression to if (startWarmingInProgress)
+                        "warming..."
+                    else
+                        event.wave.getLiteralFromProgression(progression)
                 )
             } ?: emptyMap()
         }

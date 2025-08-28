@@ -9,12 +9,7 @@ TODAY :
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
 - Packaging :
-    - apply android app size reduction good practices : https://developer.android.com/topic/performance/reduce-apk-size?hl=fr
-    - FIRST UPLOAD
-    - configurer le mandatory update flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
-    - systeme de cache pour la production : prendre en compte le numero de version/build et clean old versions
-
-- Limit size taken by events in cached WWWEvents : clean on request after a certain size ==> Limit to 3 downloaded maps
+    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
 
 - manage with translations
     - https://medium.com/@stevdza-san/multi-language-support-in-kotlin-compose-multiplatform-android-ios-45f6989d648f
@@ -24,7 +19,9 @@ TODAY :
 - Production:
     - Fill-in FAQ Contents
     - licences / tools mentions
+    - settings ?
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
+    - what happens if I want to force the update of a downloaded map ?
 
 ---------------------------------------------
 

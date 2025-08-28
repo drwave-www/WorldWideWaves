@@ -101,3 +101,11 @@ expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String): String
 expect suspend fun cacheDeepFile(fileName: String)
 expect fun getCacheDir(): String
+
+// ---------------------------------------------------------------------------
+//  Cache maintenance helpers (platform-specific actual implementations)
+// ---------------------------------------------------------------------------
+
+expect fun clearEventCache(eventId: String)
+expect fun isCachedFileStale(fileName: String): Boolean
+expect fun updateCacheMetadata(fileName: String)

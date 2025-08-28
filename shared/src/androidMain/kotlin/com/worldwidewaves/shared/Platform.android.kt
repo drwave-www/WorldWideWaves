@@ -346,7 +346,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
             // Get asset information - this might not provide accurate size for compressed assets
             val assetFileDescriptor = try {
                 context.assets.openFd(assetPath)
-            } catch (e: IOException) {
+            } catch (_: IOException) {
                 // Some compressed assets can't be accessed via openFd, fall back to open
                 null
             }
@@ -357,14 +357,14 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
                 else -> {
                     val lastCacheTime = try {
                         metadataFile.readText().toLong()
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         0L
                     }
 
                     // Check if the app was installed/updated after we cached the file
                     val appInstallTime = try {
                         context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         System.currentTimeMillis()
                     }
 
@@ -506,4 +506,81 @@ actual suspend fun cacheDeepFile(fileName: String) {
 actual fun getCacheDir(): String {
     val context: Context by inject(Context::class.java)
     return context.cacheDir.absolutePath
+}
+
+// ---------------------------------------------------------------------------
+//  Cache-maintenance helpers (Android actuals)
+// ---------------------------------------------------------------------------
+
+/**
+ * Delete all cached artefacts (data + metadata files) that belong to a given map/event.
+ */
+actual fun clearEventCache(eventId: String) {
+    val context: Context by inject(Context::class.java)
+    val cacheDir = context.cacheDir
+
+    val targets = listOf(
+        "$eventId.mbtiles",
+        "$eventId.mbtiles.metadata",
+        "$eventId.geojson",
+        "$eventId.geojson.metadata",
+        "style-$eventId.json",
+        "style-$eventId.json.metadata"
+    )
+
+    for (name in targets) {
+        try {
+            val f = File(cacheDir, name)
+            if (f.exists()) {
+                if (f.delete()) {
+                    Log.i(::clearEventCache.name, "Deleted cached file $name")
+                } else {
+                    Log.e(::clearEventCache.name, "Failed to delete cached file $name")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(::clearEventCache.name, "Error while deleting $name", e)
+        }
+    }
+}
+
+/**
+ * Determine whether an already-cached file is stale with regard to the
+ * application’s lastUpdateTime (which also changes when dynamic-feature
+ * splits are updated through the Play Store).
+ */
+actual fun isCachedFileStale(fileName: String): Boolean {
+    val context: Context by inject(Context::class.java)
+    val cacheDir = context.cacheDir
+
+    val dataFile = File(cacheDir, fileName)
+    if (!dataFile.exists()) return true
+
+    val metadataFile = File(cacheDir, "$fileName.metadata")
+    val cachedTime = try {
+        metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
+    } catch (_: Exception) {
+        0L
+    }
+
+    val appUpdateTime = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+    } catch (_: Exception) {
+        System.currentTimeMillis()
+    }
+
+    return appUpdateTime > cachedTime
+}
+
+/**
+ * Force-update (or create) the metadata timestamp associated with a cached file.
+ */
+actual fun updateCacheMetadata(fileName: String) {
+    val context: Context by inject(Context::class.java)
+    val metadataFile = File(context.cacheDir, "$fileName.metadata")
+    try {
+        metadataFile.writeText(System.currentTimeMillis().toString())
+    } catch (e: Exception) {
+        Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
+    }
 }
