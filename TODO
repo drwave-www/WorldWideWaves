@@ -8,6 +8,10 @@ TODAY :
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
+- boutons de focus large map (user/wave) ne fonctionnent pas correctement
+
+- Github Actions compilation : check
+
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
 
@@ -19,7 +23,6 @@ TODAY :
 - Production:
     - Fill-in FAQ Contents
     - licences / tools mentions
-    - settings ?
     - choose icons, convert images to SVG, or generate declinations --> https://icons8.com
     - what happens if I want to force the update of a downloaded map ?
 
