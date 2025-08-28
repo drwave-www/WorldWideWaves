@@ -23,16 +23,23 @@ package com.worldwidewaves.activities.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.worldwidewaves.activities.utils.WaveProgressionObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.di.CloseableCoroutineScope
+import org.koin.android.ext.android.inject
 import java.util.UUID
 
 abstract class AbstractEventWaveActivity(
     activateInfiniteScroll : Boolean = true
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
+
+    /**
+     * Application-level CoroutineScope (stays alive as long as the process lives)
+     * Injected from DI to avoid cancelling jobs when the Composable scope disappears.
+     */
+    private val appScope: CloseableCoroutineScope by inject()
 
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
@@ -62,7 +69,6 @@ abstract class AbstractEventWaveActivity(
     @Composable
     protected fun ObserveEventMapProgression(event: IWWWEvent, eventMap: AndroidEventMap) {
         val context = LocalContext.current
-        val scope = rememberCoroutineScope()
 
         _eventMap = eventMap
 
@@ -71,7 +77,7 @@ abstract class AbstractEventWaveActivity(
             if (waveProgressionObserver == null) {
                 waveProgressionObserver = WaveProgressionObserver(
                     context = context,
-                    scope = scope,
+                    scope = appScope,
                     eventMap = eventMap,
                     event = event,
                     observerId = observerId
