@@ -78,7 +78,7 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
         }
     }
     packaging {
@@ -101,7 +101,6 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-        implementation(libs.mockk.android.v1120)
         implementation(libs.maplibre.android)
     }
 
@@ -126,6 +125,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics.android)
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.feature.delivery.ktx)
+    testImplementation(libs.mockk.android.v1120)
+
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
