@@ -1,4 +1,5 @@
 [versions]
+j2objcAnnotations = "2.8"
 agp = "8.11.1"
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -37,6 +38,7 @@ featureDeliveryKtx = "2.1.0"
 coreSplashscreen = "1.0.1"
 
 [libraries]
+j2objc-annotations = { group = "com.google.j2objc", name = "j2objc-annotations", version.ref = "j2objcAnnotations" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
