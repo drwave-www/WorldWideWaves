@@ -53,8 +53,12 @@ fi
 # Node dependencies (optional: only if scripts/maps exists)
 if [[ -f "$NODE_DIR/package.json" ]]; then
   echo "[2/3] Generating Node license report from scripts/maps..."
-  ( cd "$NODE_DIR" && npm install --silent && npm ci --silent )
-  npx --yes license-checker@25.0.1 --production --direct --json > "$OUT_DIR/licenses-node.json"
+  ( 
+  	cd "$NODE_DIR" &&\
+	npm install --silent &&\
+       	npm ci --silent &&\
+  	npx --yes license-checker@25.0.1 --production --direct --json > "$OUT_DIR/licenses-node.json"
+  )
 else
   echo "[2/3] No scripts/maps/package.json found; skipping Node license report."
 fi
