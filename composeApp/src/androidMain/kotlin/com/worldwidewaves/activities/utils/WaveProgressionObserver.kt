@@ -23,11 +23,12 @@ package com.worldwidewaves.activities.utils
 import android.content.Context
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.toMapLibrePolygon
-import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+
 
 /**
  * Coordination of map, event and viewmodel during wave observation
@@ -37,11 +38,11 @@ class WaveProgressionObserver(
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,
     private val event: IWWWEvent?,
-    private val waveViewModel: WaveViewModel,
-    private val observerId: String // Add observer ID
+    private val observerId: String // Stable ID kept for future usage
 ) {
 
     private var statusJob: Job? = null
+    private var polygonsJob: Job? = null
 
     fun startObservation() {
         val eventMap = eventMap ?: return
@@ -49,13 +50,11 @@ class WaveProgressionObserver(
 
         scope.launch {
             // Initial observation setup
+            // Initial observation setup
             when {
-                event.isRunning() -> startObservationWithPolygons(event, eventMap)
-                event.isDone() -> {
-                    waveViewModel.startObservation(observerId, event)
-                    addFullWavePolygons(event, eventMap)
-                }
-                else -> waveViewModel.startObservation(observerId, event)
+                event.isRunning() -> startPolygonsObservation(event, eventMap)
+                event.isDone() -> addFullWavePolygons(event, eventMap)
+                else -> { /* wait for RUNNING status */ }
             }
 
             // Observe status changes
@@ -63,9 +62,23 @@ class WaveProgressionObserver(
         }
     }
 
-    private fun startObservationWithPolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
-        waveViewModel.startObservation(observerId, event) { wavePolygons, clearPolygons ->
-            eventMap.updateWavePolygons(context, wavePolygons, clearPolygons)
+    /**
+     * Start collecting progression to update polygons on the map with a small rate-limit.
+     */
+    private fun startPolygonsObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
+        polygonsJob?.cancel()
+
+        val updateIntervalMs = 250L
+        var lastUpdateTime = 0L
+
+        polygonsJob = scope.launch {
+            event.observer.progression.collect {
+                val now = System.currentTimeMillis()
+                if (now - lastUpdateTime >= updateIntervalMs) {
+                    lastUpdateTime = now
+                    updateWavePolygons(event, eventMap)
+                }
+            }
         }
     }
 
@@ -86,7 +99,7 @@ class WaveProgressionObserver(
             event.observer.eventStatus
                 .collect { status ->
                     when (status) {
-                        IWWWEvent.Status.RUNNING -> startObservationWithPolygons(event, eventMap)
+                        IWWWEvent.Status.RUNNING -> startPolygonsObservation(event, eventMap)
                         IWWWEvent.Status.DONE -> addFullWavePolygons(event, eventMap)
                         else -> { /* No-op */ }
                     }
@@ -95,7 +108,6 @@ class WaveProgressionObserver(
     }
 
     fun stopObservation() {
-        waveViewModel.stopObservation(observerId)
         pauseObservation()
     }
 
@@ -109,5 +121,23 @@ class WaveProgressionObserver(
     fun pauseObservation() {
         statusJob?.cancel()
         statusJob = null
+
+        polygonsJob?.cancel()
+        polygonsJob = null
+    }
+
+    /**
+     * Compute and push wave polygons to the map.
+     */
+    private suspend fun updateWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
+        if (!event.isRunning() && !event.isDone()) return
+
+        val polygons = event.wave
+            .getWavePolygons(null, WaveMode.ADD)
+            ?.traversedPolygons
+            ?.map { it.toMapLibrePolygon() }
+            ?: emptyList()
+
+        eventMap.updateWavePolygons(context, polygons, true)
     }
 }

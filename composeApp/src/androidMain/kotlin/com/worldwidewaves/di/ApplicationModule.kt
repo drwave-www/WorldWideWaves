@@ -9,7 +9,6 @@ import com.worldwidewaves.utils.AndroidLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.viewmodels.EventsViewModel
-import com.worldwidewaves.viewmodels.WaveViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,7 +41,6 @@ val applicationModule = module {
     single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
     viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
-    viewModel { WaveViewModel() }
 
     single { SettingsScreen() }
     single { AboutScreen(get(), get()) }

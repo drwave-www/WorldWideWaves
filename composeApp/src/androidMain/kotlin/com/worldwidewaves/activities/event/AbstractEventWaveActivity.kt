@@ -28,15 +28,12 @@ import androidx.compose.ui.platform.LocalContext
 import com.worldwidewaves.activities.utils.WaveProgressionObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.viewmodels.WaveViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.UUID
 
 abstract class AbstractEventWaveActivity(
     activateInfiniteScroll : Boolean = true
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
 
-    protected val waveViewModel: WaveViewModel by viewModel()
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
     private var _eventMap : AndroidEventMap? = null
@@ -72,7 +69,13 @@ abstract class AbstractEventWaveActivity(
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {
             if (waveProgressionObserver == null) {
-                waveProgressionObserver = WaveProgressionObserver(context, scope, eventMap, event, waveViewModel, observerId)
+                waveProgressionObserver = WaveProgressionObserver(
+                    context = context,
+                    scope = scope,
+                    eventMap = eventMap,
+                    event = event,
+                    observerId = observerId
+                )
                 waveProgressionObserver!!.startObservation()
             }
         }
