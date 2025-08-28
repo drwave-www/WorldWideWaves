@@ -1,19 +1,30 @@
 
 TODAY :
 
-- pb de wave dessin sur kinshasa ?
+- erreurs cartes : Jakarta, London
+
+- erreurs wave : Dubai / Moscow / Shanghai / Tokyo
+
+- !!!!!!! NOW :
+    - numbers ne se mettent pas a jour qd on switch de full a event
+    - plus de fleche sur wavescreen (you are IN / you are NOT IN ne fonctionne pas non plus)
+    --> p-e du a la modif dans stopObservation qui ne nettoie plus les flux ??
 
 - ==> autozoom in wave screen is not enough zoomed (test: sydney)
 
 - !! recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
 
-- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
-  et des numbers, du compteur de l'ecran wave
+- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
+
+- GPS refresh (simulation + capteur active)
+
+- issue on large map zoom ? (ex: beijing)
 
 - !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
 
-- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
+- !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
+  et des numbers, du compteur de l'ecran wave
 
 ---------------------------------------------
 
@@ -46,17 +57,11 @@ Avril second part:
 
 ---------------------------------------------
 
-- Shared: add tests for all missing functions
-    - caching mechanism
-    - download of app features on app update / feature update
 - Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
 - ======== Bugs/Issues/Refactorings =========
     - verifier la bonne gestion des heures internationales, j'ai un doute..
     - put a timer on GPS activation requests
-    - deporter un maximum de choses sur shared: ex nom des boutons Wave/preview/remind, etc...
-    - loadMap of AndroidEventMap is ugly, refactor it
-        -> move stuff in AbstractEventMap and rely on the MapLibreAdapter interface as possible
 
 ---------------------------------------------
 START IOS
