@@ -125,7 +125,7 @@ class EventsViewModel(
         sortedEvents.forEach { event ->
 
             // Start event observation
-            event.startObservation()
+            event.observer.startObservation()
 
             // Setup simulation speed listeners on DEBUG mode
             if (BuildConfig.DEBUG) {
@@ -134,7 +134,7 @@ class EventsViewModel(
 
                 // Handle warming started
                 scope.launch {
-                    event.isWarmingInProgress.collect { isWarmingStarted ->
+                    event.observer.isWarmingInProgress.collect { isWarmingStarted ->
                         if (isWarmingStarted) {
                             backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
                             platform.getSimulation()?.setSpeed(1)
@@ -144,7 +144,7 @@ class EventsViewModel(
 
                 // Handle user has been hit
                 scope.launch {
-                    event.userHasBeenHit.collect { hasBeenHit ->
+                    event.observer.userHasBeenHit.collect { hasBeenHit ->
                         if (hasBeenHit) {
                             // Restore simulation speed after a delay
                             launch {

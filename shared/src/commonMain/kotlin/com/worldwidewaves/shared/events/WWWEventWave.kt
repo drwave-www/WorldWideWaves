@@ -52,14 +52,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     enum class Direction { WEST, EAST }
     enum class WaveMode { ADD, RECOMPOSE } // Either add new polygons to the wave or recompose it
 
-    data class WaveNumbersLiterals(
-        val waveTimezone: String = "",
-        val waveSpeed: String = "..",
-        val waveStartTime: String = "..",
-        val waveEndTime: String = "..",
-        val waveTotalTime: String = "..",
-    )
-
     @OptIn(ExperimentalTime::class)
     data class WavePolygons(
         val timestamp: Instant,

@@ -83,7 +83,7 @@ class WaveProgressionObserver(
     private fun startStatusObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
         statusJob?.cancel()
         statusJob = scope.launch {
-            event.eventStatus
+            event.observer.eventStatus
                 .collect { status ->
                     when (status) {
                         IWWWEvent.Status.RUNNING -> startObservationWithPolygons(event, eventMap)

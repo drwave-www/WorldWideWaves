@@ -24,7 +24,6 @@ package com.worldwidewaves.activities.event
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -58,7 +57,6 @@ import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import com.worldwidewaves.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
@@ -68,7 +66,6 @@ abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
 ) : MainActivity() {
 
-    private val mapViewModel by viewModels<MapViewModel>()
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
 

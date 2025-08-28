@@ -25,28 +25,12 @@ import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SOON_DELAY
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
-import com.worldwidewaves.shared.events.IWWWEvent.EventObservation
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getEventImage
-import com.worldwidewaves.shared.utils.updateIfChanged
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -59,18 +43,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.INFINITE
-import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 // ---------------------------
 
@@ -125,41 +101,6 @@ data class WWWEvent(
 
     // ---------------------------
 
-    private val coroutineScopeProvider: CoroutineScopeProvider by inject()
-
-    @Transient private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
-    @Transient override val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
-
-    @Transient private val _progression = MutableStateFlow(0.0)
-    @Transient override val progression: StateFlow<Double> = _progression.asStateFlow()
-
-    @Transient private val _isWarmingInProgress = MutableStateFlow(false)
-    @Transient override val isWarmingInProgress: StateFlow<Boolean> = _isWarmingInProgress.asStateFlow()
-
-    @Transient private val _userIsGoingToBeHit = MutableStateFlow(false)
-    @Transient override val userIsGoingToBeHit: StateFlow<Boolean> = _userIsGoingToBeHit.asStateFlow()
-
-    @Transient private val _userHasBeenHit = MutableStateFlow(false)
-    @Transient override val userHasBeenHit: StateFlow<Boolean> = _userHasBeenHit.asStateFlow()
-
-    @Transient private val _userPositionRatio = MutableStateFlow(0.0)
-    @Transient override val userPositionRatio: StateFlow<Double> = _userPositionRatio.asStateFlow()
-
-    @Transient private val _timeBeforeHit = MutableStateFlow(INFINITE)
-    @Transient override val timeBeforeHit: StateFlow<Duration> = _timeBeforeHit.asStateFlow()
-
-    @Transient private val _hitDateTime = MutableStateFlow(DISTANT_FUTURE)
-    @Transient override val hitDateTime: StateFlow<Instant> = _hitDateTime.asStateFlow()
-
-    @Transient private val _userIsInArea = MutableStateFlow(false)
-    @Transient override val userIsInArea: StateFlow<Boolean> = _userIsInArea.asStateFlow()
-
-    // --
-
-    @Transient private var observationJob: Job? = null
-
-    // ---------------------------
-
     @Transient private var _wave: WWWEventWave? = null
     override val wave: WWWEventWave
         get() = _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
@@ -175,6 +116,12 @@ data class WWWEvent(
     }
 
     @Transient override val warming = WWWEventWaveWarming(this)
+
+    // ---------------------------
+
+    @Transient var cachedObserver: WWWEventObserver? = null
+    override fun getEventObserver(): WWWEventObserver =
+        cachedObserver ?: WWWEventObserver(this).also { cachedObserver = it }
 
     // ---------------------------
 
@@ -396,160 +343,6 @@ data class WWWEvent(
             waveEndTime = safeCall { getLiteralEndTime() },
             waveTotalTime = safeCall { getLiteralTotalTime() }
         )
-    }
-
-    // ---------------------------
-
-    /**
-     * Starts observing the wave event if not already started.
-     *
-     * Launches a coroutine to initialize the last observed status and progression,
-     * then calls `observeWave` to begin periodic checks.
-     */
-    override fun startObservation() {
-        if (observationJob == null) {
-            coroutineScopeProvider.launchDefault {
-                Log.v("startObservation", "Starting observation for event $id")
-
-                // Initialize state with current values
-                _eventStatus.value = getStatus()
-
-                try {
-                    _progression.value = wave.getProgression()
-                } catch (e: Throwable) {
-                    Log.e(
-                        tag = WWWEventWave::class.simpleName!!,
-                        message = "Error initializing progression: $e"
-                    )
-                }
-
-                // Start observation if event is running or about to start
-                // Accepted as the application will not be let running for days (isSoon includes a delay)
-                if (isRunning() || (isSoon() && isNearTime())) {
-                    observationJob = createObservationFlow()
-                        .flowOn(Dispatchers.IO)
-                        .catch { e ->
-                            Log.e("observeWave", "Error in observation flow: $e")
-                        }
-                        .onEach { (progressionValue, status) ->
-                            updateStates(progressionValue, status)
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
-                }
-            }
-        }
-    }
-
-    override fun stopObservation() {
-        coroutineScopeProvider.launchDefault {
-            Log.v("stopObservation", "Stopping observation for event $id")
-            try {
-                observationJob?.cancelAndJoin()
-            } catch (_: CancellationException) {
-                // Expected exception during cancellation
-            } catch (e: Exception) {
-                Log.e("stopObservation", "Error stopping observation: $e")
-            } finally {
-                observationJob = null
-            }
-        }
-    }
-
-    /**
-     * Creates a flow that periodically emits wave observations.
-     */
-    private fun createObservationFlow() = callbackFlow {
-        try {
-            while (!isDone()) {
-                // Get current state and emit it
-                val progression = wave.getProgression()
-                val status = getStatus()
-                val eventObservation = EventObservation(progression, status)
-                send(eventObservation)
-
-                // Wait for the next observation interval
-                val observationDelay = getObservationInterval()
-                clock.delay(observationDelay)
-            }
-
-            // Final emission when event is done
-            send(EventObservation(100.0, Status.DONE))
-
-        } catch (e: Exception) {
-            Log.e("observationFlow", "Error in observation flow: $e")
-        }
-
-        // Clean up when flow is cancelled
-        awaitClose()
-    }
-
-    /**
-     * Updates all state flows based on the current event state.
-     */
-    private suspend fun updateStates(progression: Double, status: Status) {
-        // Update the main state flows
-        _progression.updateIfChanged(progression)
-        _eventStatus.updateIfChanged(status)
-
-        // Check for warming started
-        var warmingInProgress = false
-        if (warming.isUserWarmingStarted()) {
-            warmingInProgress = true
-        }
-
-        // Check if user is about to be hit
-        var userIsGoingToBeHit = false
-        val timeBeforeHit = wave.timeBeforeUserHit() ?: INFINITE
-        if (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) {
-            warmingInProgress = false
-            userIsGoingToBeHit = true
-        }
-
-        // Check if user has been hit
-        if (wave.hasUserBeenHitInCurrentPosition()) {
-            warmingInProgress = false
-            userIsGoingToBeHit = false
-            _userHasBeenHit.updateIfChanged(true)
-        }
-
-        // Update additional state flows
-        _userPositionRatio.updateIfChanged(wave.userPositionToWaveRatio() ?: 0.0)
-        _timeBeforeHit.updateIfChanged(wave.timeBeforeUserHit() ?: INFINITE)
-        _hitDateTime.updateIfChanged(wave.userHitDateTime() ?: DISTANT_FUTURE)
-
-        // User in area
-        val userPosition = wave.getUserPosition()
-        if (userPosition != null) {
-            _userIsInArea.updateIfChanged(area.isPositionWithin(userPosition))
-        } else {
-            _userIsInArea.updateIfChanged(false)
-        }
-
-        _isWarmingInProgress.updateIfChanged(warmingInProgress)
-        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
-    }
-
-    /**
-     * Calculates the observation interval for the wave event.
-     *
-     * This function determines the appropriate interval for observing the wave event based on the
-     * current time, the event start time, and the time before the user is hit by the wave.
-     *
-     */
-    private suspend fun getObservationInterval(): Duration {
-        val now = clock.now()
-        val eventStartTime = getStartDateTime()
-        val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = wave.timeBeforeUserHit() ?: 1.days
-
-        return when {
-            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
-            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
-            timeBeforeEvent > 35.seconds -> 1.seconds
-            isRunning() -> 500.milliseconds
-            timeBeforeHit < 2.seconds -> 50.milliseconds // For sound accuracy
-            else -> 1.minutes // Default case, more reasonable than 1 day
-        }
     }
 
     // ---------------------------

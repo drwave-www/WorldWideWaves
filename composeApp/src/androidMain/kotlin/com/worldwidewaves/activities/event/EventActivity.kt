@@ -98,7 +98,7 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
+import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.be_waved
@@ -138,7 +138,7 @@ class EventActivity : AbstractEventWaveActivity() {
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val eventStatus by event.eventStatus.collectAsState(Status.UNDEFINED)
+        val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
 
         LaunchedEffect(event) {
@@ -238,8 +238,8 @@ class EventActivity : AbstractEventWaveActivity() {
                         platform.setSimulation(simulation)
 
                         // Restart event observation to apply simulation (observation delay changes)
-                        event.stopObservation()
-                        event.startObservation()
+                        event.observer.stopObservation()
+                        event.observer.startObservation()
 
                         // Show feedback
                         Toast.makeText(
@@ -279,7 +279,7 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 
 @Composable
 private fun EventOverlay(event: IWWWEvent) {
-    val eventStatus by event.eventStatus.collectAsState(Status.UNDEFINED)
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
 
     Box {
         Image(
@@ -341,7 +341,7 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 
 @Composable
 private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifier) {
-    val isInArea by event.userIsInArea.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
 
     val geolocText = when {
         isInArea -> ShRes.string.geoloc_yourein
@@ -375,7 +375,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 @Composable
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
-    val progression by event.progression.collectAsState()
+    val progression by event.observer.progression.collectAsState()
 
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()

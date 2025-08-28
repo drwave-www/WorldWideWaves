@@ -22,10 +22,9 @@ package com.worldwidewaves.shared.events
  */
 
 import com.worldwidewaves.shared.events.WWWEvent.WWWWaveDefinition
-import com.worldwidewaves.shared.events.WWWEventWave.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.TimeZone
+import kotlinx.serialization.Transient
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -35,9 +34,12 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 interface IWWWEvent : DataValidator {
 
-    data class EventObservation(
-        val progression: Double,
-        val status: Status
+    data class WaveNumbersLiterals(
+        val waveTimezone: String = "",
+        val waveSpeed: String = "..",
+        val waveStartTime: String = "..",
+        val waveEndTime: String = "..",
+        val waveTotalTime: String = "..",
     )
 
     val id: String
@@ -103,20 +105,11 @@ interface IWWWEvent : DataValidator {
 
     suspend fun getAllNumbers(): WaveNumbersLiterals
 
-    val eventStatus: StateFlow<Status>
-    val progression: StateFlow<Double>
-    val isWarmingInProgress: StateFlow<Boolean>
-    val userIsGoingToBeHit: StateFlow<Boolean>
-    val userHasBeenHit: StateFlow<Boolean>
-    val userPositionRatio: StateFlow<Double>
-    val timeBeforeHit: StateFlow<Duration>
-    val hitDateTime: StateFlow<Instant>
-    val userIsInArea: StateFlow<Boolean>
-
     // ---------------------------
 
-    fun startObservation()
-    fun stopObservation()
+    @Transient val observer: WWWEventObserver
+        get() = getEventObserver()
+    fun getEventObserver(): WWWEventObserver
 
 }
 

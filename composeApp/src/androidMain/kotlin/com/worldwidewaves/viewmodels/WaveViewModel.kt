@@ -42,8 +42,11 @@ class WaveViewModel : ViewModel() {
         event: IWWWEvent,
         polygonsHandler: ((List<Polygon>, Boolean) -> Unit)? = null
     ): String {
+
         stopObservation(observerId)
-        event.startObservation()
+
+        // Start event observation if not already started
+        event.observer.startObservation()
 
         val job = Job()
         val scope = CoroutineScope(Dispatchers.Default + job)
@@ -53,7 +56,7 @@ class WaveViewModel : ViewModel() {
 
         polygonsHandler?.let { handler ->
             scope.launch {
-                event.progression.collect {
+                event.observer.progression.collect {
                     if (shouldUpdatePolygons(observer)) {
                         observer.lastUpdateTime = System.currentTimeMillis()
                         updateWavePolygons(event, handler)

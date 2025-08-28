@@ -124,10 +124,10 @@ class WaveActivity : AbstractEventWaveActivity() {
         val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by event.isWarmingInProgress.collectAsState(false)
-        val hitDateTime by event.hitDateTime.collectAsState()
-        val isGoingToBeHit by event.userIsGoingToBeHit.collectAsState(false)
-        val hasBeenHit by event.userHasBeenHit.collectAsState(false)
+        val isWarmingInProgress by event.observer.isWarmingInProgress.collectAsState(false)
+        val hitDateTime by event.observer.hitDateTime.collectAsState()
+        val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
+        val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
         // Derive choreography active state
         val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
@@ -207,8 +207,8 @@ class WaveActivity : AbstractEventWaveActivity() {
 @Composable
 fun MapZoomAndLocationUpdate(event: IWWWEvent, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
-    val progression by event.progression.collectAsState()
-    val isInArea by event.userIsInArea.collectAsState()
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
 
     LaunchedEffect(progression, isInArea) {
         if (isInArea) {
@@ -223,9 +223,9 @@ fun MapZoomAndLocationUpdate(event: IWWWEvent, eventMap: AndroidEventMap) {
 
 @Composable
 fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
-    val eventStatus by event.eventStatus.collectAsState(Status.UNDEFINED)
-    val hasBeenHit by event.userHasBeenHit.collectAsState()
-    val isInArea by event.userIsInArea.collectAsState()
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
 
     val message = when {
         eventStatus == Status.DONE -> ShRes.string.wave_done
@@ -250,11 +250,11 @@ fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
 @SuppressLint("DefaultLocale")
 @Composable
 fun WaveProgressionBar(event: IWWWEvent, modifier: Modifier = Modifier) {
-    val progression by event.progression.collectAsState()
-    val isInArea by event.userIsInArea.collectAsState()
-    val userPositionRatio by event.userPositionRatio.collectAsState()
-    val isGoingToBeHit by event.userIsGoingToBeHit.collectAsState()
-    val hasBeenHit by event.userHasBeenHit.collectAsState()
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val userPositionRatio by event.observer.userPositionRatio.collectAsState()
+    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
 
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
@@ -359,8 +359,8 @@ fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoing
 
 @Composable
 fun WaveHitCounter(event: IWWWEvent, modifier: Modifier = Modifier) {
-    val timeBeforeHitProgression by event.timeBeforeHit.collectAsState()
-    val timeBeforeHit by event.timeBeforeHit.collectAsState()
+    val timeBeforeHitProgression by event.observer.timeBeforeHit.collectAsState()
+    val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 

@@ -395,7 +395,7 @@ class EventsListScreen(
         modifier: Modifier = Modifier
     ) {
         val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
-        val eventStatus by event.eventStatus.collectAsState()
+        val eventStatus by event.observer.eventStatus.collectAsState()
 
         Box(modifier = heightModifier) {
             Box(modifier = heightModifier) {
