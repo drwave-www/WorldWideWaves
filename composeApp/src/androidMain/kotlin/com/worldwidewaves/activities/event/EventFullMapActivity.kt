@@ -83,7 +83,8 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
                 mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true
                 )
             )
         }
@@ -121,6 +122,7 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modif
                 modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
                         if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetWave()
                             }
@@ -133,6 +135,7 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modif
                 modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetUser()
                             }

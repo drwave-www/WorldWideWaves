@@ -33,7 +33,16 @@ import kotlin.math.min
  * Platform-independent map constraint management that handles the logic
  * for keeping the map view within bounds.
  */
-class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLibreAdapter: MapLibreAdapter<*>) {
+class MapConstraintManager(
+    private val mapBounds: BoundingBox,
+    private val mapLibreAdapter: MapLibreAdapter<*>,
+    /**
+     * When this lambda returns true the manager will not attempt to correct /
+     * move the camera.  Used while a user-initiated or automatic animation is
+     * already running to avoid fighting with it.
+     */
+    private val isSuppressed: () -> Boolean = { false }
+) {
 
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
@@ -91,32 +100,14 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
      */
     private fun applyConstraintsWithPadding() {
         try {
-            // Get platform-independent bounds from the constraint manager
+            // Compute padded bounds and store them
             val paddedBounds = calculateConstraintBounds()
             constraintBounds = paddedBounds
 
-            // Apply constraints to the map
+            // Apply bounds & min-zoom to the map – no immediate camera move
             mapLibreAdapter.setBoundsForCameraTarget(paddedBounds)
-
-            // Also set min zoom
             val minZoom = mapLibreAdapter.getMinZoomLevel()
             mapLibreAdapter.setMinZoomPreference(minZoom)
-
-            // Check if our constrained area is too small for the current view
-            val currentPosition = mapLibreAdapter.getCameraPosition()?.let {
-                Position(
-                    it.latitude,
-                    it.longitude
-                )
-            }
-
-            if (!isValidBounds(paddedBounds, currentPosition)) {
-                // If bounds are too small, calculate safer bounds centered around current position
-                currentPosition?.let {
-                    val safeBounds = calculateSafeBounds(it)
-                    fitMapToBounds(safeBounds)
-                }
-            }
         } catch (e: Exception) {
             Napier.e("Error applying constraints: ${e.message}")
         }
@@ -126,6 +117,7 @@ class MapConstraintManager(private val mapBounds: BoundingBox, private val mapLi
      * Constrain the camera to the valid bounds if needed
      */
     fun constrainCamera() {
+        if (isSuppressed()) return
         val target = mapLibreAdapter.getCameraPosition() ?: return
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)
