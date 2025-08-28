@@ -18,6 +18,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
+    implementation(libs.j2objc.annotations)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
