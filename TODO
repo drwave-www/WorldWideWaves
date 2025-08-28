@@ -2,13 +2,10 @@
 TODAY :
 
 - erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
-
-- ==> autozoom in wave screen is not enough zoomed (test: sydney)
+   --> Add logs in splitLongitude (nb of polygons original/left/right)
 
 - !! recalcul de 'in the area' apres init du gps :
    - paris, wave, puis go back to paris : 'you are NOT in the area'
-
-- Ne pas afficher 100% sur un event dont la map n'est pas telechargee lorsqu'il est running, utiliser estimated time
 
 - GPS refresh (simulation + capteur active)
 
@@ -18,6 +15,8 @@ TODAY :
 
 - !! tester avec une position GPS tres proche du debut de vague, constater le fonctionnement du warming
   et des numbers, du compteur de l'ecran wave
+
+- image en 16/9 pour les events
 
 ---------------------------------------------
 

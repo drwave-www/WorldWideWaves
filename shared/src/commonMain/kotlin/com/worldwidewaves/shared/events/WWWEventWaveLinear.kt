@@ -144,6 +144,11 @@ data class WWWEventWaveLinear(
      */
     override suspend fun getWaveDuration(): Duration = cachedWaveDuration ?: run {
         val bbox = bbox()
+
+        if (bbox.minLongitude == 0.0 && bbox.maxLongitude == 0.0) { // If map has not been loaded yet
+            return event.wave.getApproxDuration()
+        }
+
         val longestLat = bbox.latitudeOfWidestPart()
         val maxEastWestDistance = calculateDistance(bbox.minLongitude, bbox.maxLongitude, longestLat)
         val durationInSeconds = maxEastWestDistance / speed
