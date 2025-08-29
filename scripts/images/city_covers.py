@@ -14,9 +14,9 @@ output_dir = Path("generated_images")
 output_dir.mkdir(exist_ok=True)
 
 # List of city suffixes (drawable-style)
-cities = [
-    "beijing_china", "berlin_germany", "bogota_colombia", "buenos_aires_argentina", "cairo_egypt",
-    "chicago_usa", "delhi_india", "dubai_united_arab_emirates", "hong_kong_china", "istanbul_turkey",
+cities = [ "delhi_india", "karachi_pakistan", "bangalore_india", "bangkok_thailand", "berlin_germany",
+    "beijing_china", "bogota_colombia", "buenos_aires_argentina", "cairo_egypt",
+    "chicago_usa", "dubai_united_arab_emirates", "hong_kong_china", "istanbul_turkey",
     "jakarta_indonesia", "johannesburg_south_africa", "kinshasa_democratic_republic_of_the_congo",
     "lagos_nigeria", "lima_peru", "london_england", "los_angeles_usa", "madrid_spain",
     "manila_philippines", "melbourne_australia", "mexico_city_mexico", "moscow_russia", "mumbai_india",
