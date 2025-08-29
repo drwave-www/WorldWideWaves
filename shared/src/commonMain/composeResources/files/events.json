@@ -7,7 +7,7 @@
     "timeZone": "America/New_York",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.newyork",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavenewyork",
     "wavedef": {
       "linear": {
@@ -27,7 +27,7 @@
     "timeZone": "America/Los_Angeles",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.losangeles",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelosangeles",
     "wavedef": {
       "linear": {
@@ -47,7 +47,7 @@
     "timeZone": "America/Mexico_City",
     "date": "2026-09-15",
     "startHour": "20:30",
-    "instagramAccount": "worldwidewaves.mexicocity",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavemexicocity",
     "wavedef": {
       "linear": {
@@ -67,7 +67,7 @@
     "timeZone": "America/Sao_Paulo",
     "date": "2026-09-07",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.saopaulo",
+    "instagramAccount": "worldwidewaves_pt",
     "instagramHashtag": "#wavesaopaulo",
     "wavedef": {
       "linear": {
@@ -87,7 +87,7 @@
     "timeZone": "America/Argentina/Buenos_Aires",
     "date": "2026-07-09",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.buenosaires",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavebuenosaires",
     "wavedef": {
       "linear": {
@@ -107,7 +107,7 @@
     "timeZone": "Europe/London",
     "date": "2026-08-31",
     "startHour": "15:00",
-    "instagramAccount": "worldwidewaves.london",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelondon",
     "wavedef": {
       "linear": {
@@ -127,7 +127,7 @@
     "timeZone": "Europe/Paris",
     "date": "2026-07-14",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.paris",
+    "instagramAccount": "worldwidewaves_fr",
     "instagramHashtag": "#waveparis",
     "wavedef": {
       "linear": {
@@ -147,7 +147,7 @@
     "timeZone": "Europe/Berlin",
     "date": "2026-10-03",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.berlin",
+    "instagramAccount": "worldwidewaves_de",
     "instagramHashtag": "#waveberlin",
     "wavedef": {
       "linear": {
@@ -167,7 +167,7 @@
     "timeZone": "Europe/Madrid",
     "date": "2026-10-12",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.madrid",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavemadrid",
     "wavedef": {
       "linear": {
@@ -187,7 +187,7 @@
     "timeZone": "Europe/Rome",
     "date": "2026-08-15",
     "startHour": "17:00",
-    "instagramAccount": "worldwidewaves.rome",
+    "instagramAccount": "worldwidewaves_it",
     "instagramHashtag": "#waverome",
     "wavedef": {
       "linear": {
@@ -207,7 +207,7 @@
     "timeZone": "Europe/Moscow",
     "date": "2026-06-12",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.moscow",
+    "instagramAccount": "worldwidewaves_ru",
     "instagramHashtag": "#wavemoscow",
     "wavedef": {
       "linear": {
@@ -227,7 +227,7 @@
     "timeZone": "Europe/Istanbul",
     "date": "2026-10-29",
     "startHour": "17:00",
-    "instagramAccount": "worldwidewaves.istanbul",
+    "instagramAccount": "worldwidewaves_tr",
     "instagramHashtag": "#waveistanbul",
     "wavedef": {
       "linear": {
@@ -247,7 +247,7 @@
     "timeZone": "Africa/Cairo",
     "date": "2026-03-21",
     "startHour": "17:00",
-    "instagramAccount": "worldwidewaves.cairo",
+    "instagramAccount": "worldwidewaves_ar",
     "instagramHashtag": "#wavecairo",
     "wavedef": {
       "linear": {
@@ -267,7 +267,7 @@
     "timeZone": "Africa/Johannesburg",
     "date": "2026-04-27",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.johannesburg",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavejohannesburg",
     "wavedef": {
       "linear": {
@@ -287,7 +287,7 @@
     "timeZone": "Africa/Nairobi",
     "date": "2026-06-01",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.nairobi",
+    "instagramAccount": "worldwidewaves_sw",
     "instagramHashtag": "#wavenairobi",
     "wavedef": {
       "linear": {
@@ -307,7 +307,7 @@
     "timeZone": "Africa/Lagos",
     "date": "2026-10-01",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.lagos",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavelagos",
     "wavedef": {
       "linear": {
@@ -327,7 +327,7 @@
     "timeZone": "Africa/Kinshasa",
     "date": "2026-06-30",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.kinshasa",
+    "instagramAccount": "worldwidewaves_fr",
     "instagramHashtag": "#wavekinshasa",
     "wavedef": {
       "linear": {
@@ -347,7 +347,7 @@
     "timeZone": "Asia/Dubai",
     "date": "2026-12-02",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.dubai",
+    "instagramAccount": "worldwidewaves_ar",
     "instagramHashtag": "#wavedubai",
     "wavedef": {
       "linear": {
@@ -367,7 +367,7 @@
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.mumbai",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavemumbai",
     "wavedef": {
       "linear": {
@@ -377,7 +377,7 @@
       }
     },
     "area": { "osmAdminids": [7964375] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "delhi_india",
@@ -387,7 +387,7 @@
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.delhi",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavedelhi",
     "wavedef": {
       "linear": {
@@ -397,7 +397,7 @@
       }
     },
     "area": { "osmAdminids": [1942586] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "bangalore_india",
@@ -407,7 +407,7 @@
     "timeZone": "Asia/Kolkata",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.bangalore",
+    "instagramAccount": "worldwidewaves_hi",
     "instagramHashtag": "#wavebangalore",
     "wavedef": {
       "linear": {
@@ -417,7 +417,7 @@
       }
     },
     "area": { "osmAdminids": [2020589] },
-    "map": { "minZoom": 7, "maxZoom": 17, "language": "en", "zone": "asia/india" }
+    "map": { "minZoom": 7, "maxZoom": 17, "language": "hi", "zone": "asia/india" }
   },
   {
     "id": "jakarta_indonesia",
@@ -427,7 +427,7 @@
     "timeZone": "Asia/Jakarta",
     "date": "2026-08-17",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.jakarta",
+    "instagramAccount": "worldwidewaves_id",
     "instagramHashtag": "#wavejakarta",
     "wavedef": {
       "linear": {
@@ -447,7 +447,7 @@
     "timeZone": "Asia/Bangkok",
     "date": "2026-12-05",
     "startHour": "16:00",
-    "instagramAccount": "worldwidewaves.bangkok",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavebangkok",
     "wavedef": {
       "linear": {
@@ -467,7 +467,7 @@
     "timeZone": "Asia/Manila",
     "date": "2026-06-12",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.manila",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavemanila",
     "wavedef": {
       "linear": {
@@ -477,7 +477,7 @@
       }
     },
     "area": { "osmAdminids": [103703], "bbox": "120.940178,14.550825,121.027467,14.641119" },
-    "map": { "minZoom": 7, "maxZoom": 18, "language": "tl", "zone": "asia/philippines" }
+    "map": { "minZoom": 7, "maxZoom": 18, "language": "ph", "zone": "asia/philippines" }
   },
   {
     "id": "tokyo_japan",
@@ -487,7 +487,7 @@
     "timeZone": "Asia/Tokyo",
     "date": "2026-07-25",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.tokyo",
+    "instagramAccount": "worldwidewaves_ja",
     "instagramHashtag": "#wavetokyo",
     "wavedef": {
       "linear": {
@@ -507,7 +507,7 @@
     "timeZone": "Asia/Seoul",
     "date": "2026-08-15",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.seoul",
+    "instagramAccount": "worldwidewaves_ko",
     "instagramHashtag": "#waveseoul",
     "wavedef": {
       "linear": {
@@ -527,7 +527,7 @@
     "timeZone": "Asia/Shanghai",
     "date": "2026-05-01",
     "startHour": "12:00",
-    "instagramAccount": "worldwidewaves.beijing",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#wavebeijing",
     "wavedef": {
       "linear": {
@@ -547,7 +547,7 @@
     "timeZone": "Asia/Shanghai",
     "date": "2026-05-01",
     "startHour": "14:00",
-    "instagramAccount": "worldwidewaves.shanghai",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#waveshanghai",
     "wavedef": {
       "linear": {
@@ -567,7 +567,7 @@
     "timeZone": "Asia/Hong_Kong",
     "date": "2026-05-01",
     "startHour": "17:00",
-    "instagramAccount": "worldwidewaves.hongkong",
+    "instagramAccount": "worldwidewaves_zh",
     "instagramHashtag": "#wavehongkong",
     "wavedef": {
       "linear": {
@@ -587,7 +587,7 @@
     "timeZone": "Australia/Sydney",
     "date": "2026-02-28",
     "startHour": "19:00",
-    "instagramAccount": "worldwidewaves.sydney",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavesydney",
     "wavedef": {
       "linear": {
@@ -607,7 +607,7 @@
     "timeZone": "Australia/Melbourne",
     "date": "2026-11-03",
     "startHour": "13:00",
-    "instagramAccount": "worldwidewaves.melbourne",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavemelbourne",
     "wavedef": {
       "linear": {
@@ -627,7 +627,7 @@
     "timeZone": "America/Toronto",
     "date": "2026-07-01",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.toronto",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavetoronto",
     "wavedef": {
       "linear": {
@@ -647,7 +647,7 @@
     "timeZone": "America/Vancouver",
     "date": "2026-07-01",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.vancouver",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavevancouver",
     "wavedef": {
       "linear": {
@@ -667,7 +667,7 @@
     "timeZone": "America/Chicago",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.chicago",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavechicago",
     "wavedef": {
       "linear": {
@@ -687,7 +687,7 @@
     "timeZone": "America/Los_Angeles",
     "date": "2026-07-04",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.sanfrancisco",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavesanfrancisco",
     "wavedef": {
       "linear": {
@@ -707,7 +707,7 @@
     "timeZone": "America/Lima",
     "date": "2026-07-28",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.lima",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavelima",
     "wavedef": {
       "linear": {
@@ -727,7 +727,7 @@
     "timeZone": "America/Bogota",
     "date": "2026-07-20",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.bogota",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavebogota",
     "wavedef": {
       "linear": {
@@ -747,7 +747,7 @@
     "timeZone": "America/Santiago",
     "date": "2026-09-18",
     "startHour": "18:00",
-    "instagramAccount": "worldwidewaves.santiago",
+    "instagramAccount": "worldwidewaves_es",
     "instagramHashtag": "#wavesantiago",
     "wavedef": {
       "linear": {
@@ -767,7 +767,7 @@
     "timeZone": "Asia/Tehran",
     "date": "2026-04-02",
     "startHour": "15:00",
-    "instagramAccount": "worldwidewaves.tehran",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavetehran",
     "wavedef": {
       "linear": {
@@ -787,7 +787,7 @@
     "timeZone": "Asia/Karachi",
     "date": "2026-08-14",
     "startHour": "15:00",
-    "instagramAccount": "worldwidewaves.karachi",
+    "instagramAccount": "worldwidewaves_all",
     "instagramHashtag": "#wavekarachi",
     "wavedef": {
       "linear": {

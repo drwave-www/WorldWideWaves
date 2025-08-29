@@ -25,7 +25,41 @@ from pathlib import Path
 
 # ---- Configure here ---------------------------------------------------------
 
-LANGUAGES = ["ru", "fr", "es", "pt", "it", "de", "id", "ko", "tr", "sw", "ja", "zh", "pa", "ar"]
+LANGUAGES = [
+    "am",  # Amharic - Ethiopia
+    "ar",  # Arabic - Middle East, North Africa
+    "bn",  # Bengali - Bangladesh, India
+    "de",  # German - Germany, Austria, Switzerland
+    "es",  # Spanish - Latin America, Spain
+    "fa",  # Persian (Farsi) - Iran, Afghanistan
+    "fil", # Filipino (Tagalog) - Philippines
+    "fr",  # French - Europe, Africa, Canada
+    "ha",  # Hausa - Nigeria, Niger, West Africa
+    "he",  # Hebrew - Israel
+    "hi",  # Hindi - India
+    "id",  # Indonesian - Indonesia
+    "ig",  # Igbo - Nigeria
+    "it",  # Italian - Italy
+    "ja",  # Japanese - Japan
+    "ko",  # Korean - South Korea
+    "ms",  # Malay - Malaysia, Brunei
+    "nl",  # Dutch - Netherlands, Belgium
+    "pa",  # Punjabi - India, Pakistan
+    "pl",  # Polish - Poland
+    "pt",  # Portuguese - Brazil, Portugal
+    "ro",  # Romanian - Romania
+    "ru",  # Russian - Russia, Eastern Europe
+    "sw",  # Swahili - East Africa
+    "th",  # Thai - Thailand
+    "tr",  # Turkish - Turkey
+    "uk",  # Ukrainian - Ukraine
+    "ur",  # Urdu - Pakistan, India
+    "vi",  # Vietnamese - Vietnam
+    "xh",  # Xhosa - South Africa
+    "yo",  # Yoruba - Nigeria
+    "zh",  # Chinese (Mandarin) - China, Taiwan, Singapore
+    "zu"   # Zulu - South Africa
+]
 MODEL = os.getenv("OPENAI_MODEL", "gpt-5")       # override via OPENAI_MODEL
 GLOBAL_CONTEXT = """
 You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.
@@ -153,12 +187,9 @@ def extract_base_entries(base_tree: ET._ElementTree):
         if n.tag != "string":
             continue
         name = n.get("name")
-        vprint(f"name: {name}")
         value = xml_text(n)
         before = nearest_preceding_comment_text(sibs, i)
         after = inline_trailing_comment(n)
-        vprint(f"before: {before}")
-        vprint(f"after: {after}")
         context = "\n".join([t for t in [before, after] if t])
         do_not_translate_ctx = bool(re.search(r"\b(do\s*not\s*translate|don[’']t\s*translate)\b", context, flags=re.I))
         do_not_translate_attr = (n.get("translatable") == "false")

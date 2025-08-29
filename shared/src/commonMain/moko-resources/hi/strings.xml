@@ -1,0 +1,463 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <!-- src_hash: 58a942b5f882bb71aff38d2de8229bf4f42585a6 -->
+  <string name="empty"></string>
+  <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
+  <string name="logo_description">लोगो</string>
+  <!-- src_hash: 261f676de9b71d385c64b9d08a86b1ea1e10e90b -->
+  <string name="background_description">पृष्ठभूमि</string>
+  <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
+  <string name="tab_infos_name">परिचय</string>
+  <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
+  <string name="tab_faq_name">FAQ</string>
+  <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
+  <string name="back">वापस</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">अभी वेव करें!</string>
+  <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
+  <string name="events_select_all">सभी</string>
+  <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
+  <string name="events_select_starred">पसंदीदा</string>
+  <!-- src_hash: 5097ae23854862764e5f1fd13d54f9f50a888c5e -->
+  <string name="events_select_downloaded">डाउनलोड किए गए</string>
+  <!-- src_hash: a792d80677e5ce46a722b25244c64040b7d2af8a -->
+  <string name="map_checking_state">मानचित्र की स्थिति जाँच रहे हैं..</string>
+  <!-- src_hash: d23c5aaffa2874371f98e8c0838e7c00f19e4410 -->
+  <string name="map_download">मानचित्र डाउनलोड करें</string>
+  <!-- src_hash: 6d0c25a3cbd4f6f8f4767eb665c89323faa68b05 -->
+  <string name="map_downloading">डाउनलोड हो रहा है..</string>
+  <!-- src_hash: e81121a332e731d8b2af71537baeb942c36acabc -->
+  <string name="map_starting_download">डाउनलोड शुरू हो रहा है..</string>
+  <!-- src_hash: 6462b24730b6834d28fbbb556f15724b2eef50f9 -->
+  <string name="map_retrying_download">डाउनलोड पुनः प्रयास कर रहे हैं</string>
+  <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
+  <string name="map_loading">मानचित्र लोड हो रहा है..</string>
+  <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
+  <string name="map_cancel_download">रद्द करें</string>
+  <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
+  <string name="map_retry_download">फिर से प्रयास करें</string>
+  <!-- src_hash: df1cb247f84a5ef21df00efb2b8583598a864904 -->
+  <string name="map_error_download">मानचित्र डाउनलोड करने में त्रुटि</string>
+  <!-- src_hash: 8f835e0a1dc2c6e63f307394c946b73dcdbd734f -->
+  <string name="map_downloaded">मानचित्र डाउनलोड हो गया है</string>
+  <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
+  <string name="events_uninstall_map_title">मानचित्र अनइंस्टॉल करें</string>
+  <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
+  <string name="events_uninstall">अनइंस्टॉल करें</string>
+  <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
+  <string name="events_uninstall_cancel">रद्द करें</string>
+  <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
+  <string name="events_uninstall_map_confirmation">क्या आप वाकई इस मानचित्र को अनइंस्टॉल करना चाहते हैं? आवश्यकता होने पर आप इसे बाद में फिर डाउनलोड कर सकते हैं।</string>
+  <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
+  <string name="events_cannot_uninstall_map_message">यह मानचित्र अनइंस्टॉल नहीं किया जा सकता क्योंकि यह बेस ऐप का हिस्सा है या अन्य सुविधाओं के लिए आवश्यक है। ऐप अनइंस्टॉल करने पर यह हट जाएगा।</string>
+  <!-- src_hash: 0bf7dc9508d76a25a739e81d6de9537e3beeae93 -->
+  <string name="event_done">समाप्त</string>
+  <!-- src_hash: 76fc38d3011bddbd0d6ea6c913c12b89768ea175 -->
+  <string name="event_soon">जल्द!</string>
+  <!-- src_hash: 7fcc365541c8136e015f6b6de62e592e8cd609f2 -->
+  <string name="event_running">चल रहा है</string>
+  <!-- src_hash: 155d63c9d555a28cb041a7bc944bcd126028f94b -->
+  <string name="event_favorite_on">पसंदीदा चालू है</string>
+  <!-- src_hash: ccf841f2ea2d86c733131d78cc57b56a89ed052c -->
+  <string name="event_favorite_off">पसंदीदा बंद है</string>
+  <!-- src_hash: d09e583eb6246d39ee2340b12e246596866c89e2 -->
+  <string name="event_target_wave_on">वेव पर जाएँ</string>
+  <!-- src_hash: 2bf443288dd74a114ca76e11228daeee38988b74 -->
+  <string name="event_target_wave_off">इवेंट चालू नहीं है</string>
+  <!-- src_hash: 409a83af1ba070df076d65e78a69fb1ab46c745b -->
+  <string name="event_target_me_on">मेरे स्थान पर जाएँ</string>
+  <!-- src_hash: 17347a1b073379a67baf79186d80d225e01c4a20 -->
+  <string name="event_target_me_off">आप क्षेत्र में नहीं हैं</string>
+  <!-- src_hash: fcdce8786f93cb0a785fe6ebd0a2546ece0c5da8 -->
+  <string name="events_favorites_empty">कोई इवेंट पसंदीदा में नहीं जोड़ा गया है; अपने पसंदीदा इवेंट पर स्टार आइकन टैप करके शुरू करें!</string>
+  <!-- src_hash: 479305cf78e08c6a09778809429446f92824a7b4 -->
+  <string name="events_downloaded_empty">अभी तक कोई इवेंट डाउनलोड नहीं किया गया है</string>
+  <!-- src_hash: 663e59373c8e0cd7b9358c849e8155cf9b3a94a4 -->
+  <string name="events_empty">इवेंट सूची खाली है</string>
+  <!-- src_hash: 64189e446905b9317177323f1da63cd54b194af1 -->
+  <string name="events_loading_error">इवेंट लोड करते समय त्रुटि हुई</string>
+  <!-- src_hash: af453dedc41c38cf727bc928484385d1f5bbf0ad -->
+  <string name="geoloc_undone">स्थान अपडेट हो रहा है..</string>
+  <!-- src_hash: f6328db0f2344b04d73ed011773813b83d534e00 -->
+  <string name="geoloc_error">आपका स्थान नहीं मिल सका</string>
+  <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
+  <string name="geoloc_yourein">आप क्षेत्र में हैं!</string>
+  <!-- src_hash: 7e34ceee47862c755aad525412ae784314b4da22 -->
+  <string name="geoloc_yourenotin">आप क्षेत्र में नहीं हैं</string>
+  <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
+  <string name="geoloc_warm_in">आप क्षेत्र में हैं और वार्म-अप होगा!</string>
+  <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
+  <string name="ask_gps_enable">लगता है आपका GPS बंद है, क्या आप इसे चालू करना चाहते हैं?</string>
+  <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
+  <string name="yes">हाँ</string>
+  <!-- src_hash: 42febde652f67df0a9f5863acff108c65b0721ba -->
+  <string name="no">नहीं</string>
+  <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
+  <string name="be_waved">वेव में शामिल हों!</string>
+  <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
+  <string name="wave_speed">वेव की गति</string>
+  <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
+  <string name="wave_start_time">प्रारंभ समय</string>
+  <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
+  <string name="wave_end_time">समाप्ति समय</string>
+  <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
+  <string name="wave_total_time">कुल समय</string>
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <string name="wave_progression">प्रगति</string>
+  <!-- src_hash: 1d840cbc39e4fc3d5163f8c8e7b0ece9a9a6c022 -->
+  <string name="wave_warming">वार्म-अप..</string>
+  <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
+  <string name="wave_be_ready">तैयार रहें!</string>
+  <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->
+  <string name="wave_done">वेव पूरी हो गई!</string>
+  <!-- src_hash: d955b930c0d83bdd6cf803ffa3627d94509153c8 -->
+  <string name="wave_hit">बहुत बढ़िया!</string>
+  <!-- src_hash: 00589bbc02fcac8151416d6e208c27b982b47c68 -->
+  <string name="wave_is_running">वेव हो रही है!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">आप जानते हैं: अगर पृथ्वी की कहानी 1,000 पन्नों की किताब में कही जाए, तो मानवता सिर्फ़ आख़िरी पन्ने के आख़िरी अनुच्छेद में दिखेगी।</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">लेकिन यह संक्षिप्त कहानी उम्मीद से पहले ही समाप्त हो सकती है। हम एक विशाल, उजाड़ ब्रह्मांड में अलग-थलग हैं। हम सब नष्ट कर देते हैं। हम स्वार्थी हैं। हम क्रूर हैं। हम लालची हैं। हम अंधे हैं। और हम वर्चस्व चाहते हैं। पर हम सहानुभूति रखने में सक्षम हैं, हम अद्भुत चीज़ें रचते हैं, हम लचीले हैं, हम परमार्थी भी हो सकते हैं।</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">लेकिन हमारे पास समय कम है। हमने बहुत प्रगति की है.. हम एक विकल्प बना सकते हैं: अधिकारों, एकजुटता और लोकतंत्र का समुदाय। यह हमारे हाथ में है!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">एक वैश्विक आंदोलन से जुड़ें, एक शांतिपूर्ण जागरण। आइए मानव वेव्स बनाएँ—हमारी सच्ची मानवता की गवाही, हमारे नेताओं के लिए स्पष्ट संदेश। आइए दुनिया भर के शहरों और देशों में इकट्ठा हों। शांति चुनें। आनंद चुनें। प्रकृति चुनें। हमें चुनें।</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">क्या सिर्फ़ एक वेव हमें साथ लाने के लिए काफ़ी है?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves एक क्षणिक मोबाइल ऐप है, जिसका दूरदर्शी लक्ष्य महान शहरों और देशों में मानव वेव्स की शृंखला का आयोजन करना है। एक वर्ष में फैले इस प्रयास का उद्देश्य भौतिक और सांस्कृतिक सीमाओं से परे जाकर एकता, समुदाय और साझा मानवीय अनुभव की भावना को बढ़ावा देना है।</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">मूल रूप से, WorldWideWaves सिर्फ़ एक ऐप नहीं, बल्कि साझा मूल्यों के साथ एकजुटता और आनंद का प्रदर्शन करते हुए लोगों को साथ लाने के लिए बनाया गया एक वैश्विक आंदोलन है।</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">तकनीक का लाभ उठाकर, WorldWideWaves दुनिया भर के प्रतिभागियों को अपने-अपने शहरों में इन मानव वेव्स से जुड़ने में सक्षम बनाएगा, और एक शक्तिशाली दृश्य व भावनात्मक अनुभव रचेगा।</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">संक्षेप में, WorldWideWaves तकनीक की शक्ति को वास्तव में नेक उद्देश्य के लिए साधने का एक महत्वाकांक्षी प्रयास है—एकता, आनंद और सामूहिक कार्रवाई के उत्सव में मानवता को जोड़ना। हर वेव के साथ प्रतिभागी न केवल एक वैश्विक दृश्य का हिस्सा बनेंगे, बल्कि एक होकर आने के गहरे प्रभाव को महसूस करेंगे और दुनिया के साथ साझा करेंगे।</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">नियम और सुरक्षा</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">WorldWideWaves में आपका स्वागत है! हमें खुशी है कि आप वैश्विक वेव इवेंट्स से जुड़ रहे हैं। सभी के लिए सुरक्षित और आनंददायक अनुभव सुनिश्चित करने हेतु कृपया इन दिशानिर्देशों का पालन करें:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">सामान्य नियम:</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">सभी का सम्मान: सभी प्रतिभागियों के साथ, उनकी पृष्ठभूमि चाहे जो हो, सम्मान से पेश आएँ। भेदभाव या उत्पीड़न स्वीकार्य नहीं है।</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">सार्वजनिक स्थान का सम्मान: रास्ते खुले रखें, स्थानीय क़ानून और संकेतों का पालन करें, और ट्रैफ़िक या आपातकालीन पहुँच में बाधा न बनें।</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">निर्धारित क्षेत्रों में रहें: सुरक्षा के लिए, यदि कोई निर्धारित क्षेत्र हैं तो उन्हीं के भीतर रहें।</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">ज़िम्मेदार रहें: यदि आप पेय लेते हैं, तो संयम से और स्थानीय क़ानूनों के अनुसार लें।</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">पर्यावरणीय प्रभाव कम करें: कचरा निर्धारित डिब्बों में डालें और कूड़ा-कचरा न फैलाएँ, ताकि स्थान साफ़ रहे।</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">चिंताओं की रिपोर्ट करें: यदि कुछ संदिग्ध दिखे या कोई परेशानी में हो, तो तुरंत स्थानीय अधिकारियों को सूचित करें।</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">सुरक्षा सुझाव:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">उचित पहनावा: कार्यक्रम और मौसम के अनुसार आरामदायक कपड़े और जूते पहनें।</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">हाइड्रेटेड रहें: पानी साथ रखें और विशेषकर गर्म मौसम में पर्याप्त पानी पिएँ।</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">सामान का ध्यान रखें: अपने निजी सामान को सुरक्षित रखें और अनावश्यक कीमती चीज़ें न लाएँ।</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">बडी सिस्टम अपनाएँ: दोस्तों के साथ रहें या नए दोस्त बनाएँ, और एक-दूसरे का ख़याल रखें।</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">आपातकाल के लिए तैयार: अपने फ़ोन में स्थानीय आपातकालीन नंबर सहेजें और दोस्तों के साथ अलग हो जाने की स्थिति में मिलने की जगह तय करें।</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">आपातकालीन निर्देश:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">सतर्क रहें: अपने आस-पास के निकटतम सुरक्षित निकास और खुले क्षेत्रों (जैसे चौक, पार्क) को पहचानें, और आपातस्थिति में स्थानीय अधिकारियों के निर्देशों का पालन करें।</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">आपात संपर्क: शामिल होने से पहले अपने स्थान का स्थानीय आपातकालीन नंबर और एक निजी आपात संपर्क अपने फ़ोन में सहेजें।</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">आपातस्थिति में: स्थानीय आपातकालीन नंबर पर कॉल करें, शांतिपूर्वक सुरक्षित खुले क्षेत्र में निकलें, संभव हो तो दूसरों की सहायता करें, और मार्गों को खुला रखें।</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">कानूनी:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">दायित्व-त्याग: WorldWideWaves इवेंट्स में भागीदारी आपके अपने जोखिम पर है। भाग लेकर, आप ऐप निर्माताओं के विरुद्ध कार्यक्रम के दौरान संभावित चोटों से जुड़ी किसी दावे को छोड़ने पर सहमति जताते हैं।</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">सार्वजनिक स्थल सूचना: यह एक सार्वजनिक सभा है जहाँ उपस्थित लोग या मीडिया स्थानीय क़ानूनों के अधीन फ़ोटो/वीडियो ले सकते हैं। हम आपकी छवि पर अधिकार का दावा नहीं करते और किसी तृतीय-पक्ष रिकॉर्डिंग को नियंत्रित नहीं कर सकते। यदि आप दिखाई नहीं देना चाहते, तो यथासंभव कैमरों से बचने का प्रयास करें।</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">FAQ देखें</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">मेरे शहर या देश में इवेंट क्यों नहीं है?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">हमने दुनिया के सबसे अधिक आबादी वाले दर्जनों शहर चुने हैं ताकि एक अर्थपूर्ण वैश्विक वेव बनाई जा सके। तकनीकी और परिचालन सीमाएँ फिलहाल हमें असीमित स्थानों का समर्थन करने से रोकती हैं। हमारा लक्ष्य महाद्वीपों, संस्कृतियों और भाषाओं में व्यापक प्रतिनिधित्व था, जो कभी परिपूर्ण नहीं हो सकता। हम समय के साथ और शहर जोड़ने की आशा करते हैं।</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">ये महाद्वीपीय झंडे क्या हैं?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">WorldWideWaves की एकता की भावना को दर्शाने और सूची में शहरों को जल्दी पहचानने में मदद के लिए हमने मौलिक, काल्पनिक महाद्वीपीपी झंडे बनाए हैं। ये झंडे आधिकारिक नहीं हैं और केवल इस ऐप में मौजूद हैं; इनका उद्देश्य किसी भी राष्ट्रीय या सांस्कृतिक प्रतीक का अपमान करना या उन्हें बदलना नहीं है। क्योंकि भौगोलिक महाद्वीपों के आधिकारिक झंडे नहीं होते, हमने स्पष्टता और मज़े के लिए अपने झंडे डिज़ाइन किए। अगर ये आपको पसंद आएँ, तो निःसंकोच उनका उपयोग करें।</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">WorldWideWaves के पीछे कौन है?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves पूरी तरह निजी पहल है। इसके पीछे कोई निगम, संगठन या सरकार नहीं है। निर्माताओं ने उन लोगों के लिए एक रचनात्मक तरीका प्रस्तुत करना चाहा जो सोचते हैं कि वे दुनिया और जीवन-स्थितियों को बेहतर बनाने में कैसे मदद कर सकते हैं—शांतिपूर्ण, गैर-राजनीतिक ध्वज तले सभी इच्छुक प्रगतिशील और लोकतांत्रिक प्रयासों को साथ लाने का एक प्रयास।</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">क्या यह व्यावसायिक पहल है?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">नहीं। ऐप पूरी तरह निःशुल्क है। इसके डिज़ाइन और विकास में निर्माताओं का समय और धन लगा है, लेकिन उन्हें बदले में कोई प्रत्यक्ष व्यक्तिगत आर्थिक लाभ नहीं मिलता।</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">क्या मैं योगदान दे सकता/सकती हूँ?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">हाँ, स्वयंसेवकों का हमेशा स्वागत है। ऐप का कोड GitHub पर ओपन-सोर्स है, और आप निर्माताओं से worldwidewaves@proton.me पर संपर्क कर सकते हैं (उत्तर की गारंटी नहीं)। मदद का सबसे अच्छा तरीका है बात फैलाना: इवेंट्स की फ़ोटो और वीडियो सुझाए गए हैशटैग के साथ साझा करें, स्थानीय इन्फ्लूएंसर्स से संदेश को बढ़ाने के लिए संपर्क करें, अपनी समुदाय में इसके बारे में बात करें, और सबसे ज़रूरी—वेव से जुड़ें!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">USA</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">मेक्सिको</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">ब्राज़ील</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">अर्जेंटीना</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">यूनाइटेड किंगडम</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">फ़्रांस</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">जर्मनी</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">स्पेन</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">इटली</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">रूस</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">तुर्की</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">मिस्र</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">दक्षिण अफ्रीका</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">केन्या</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">नाइजीरिया</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">डी.आर. कांगो</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">संयुक्त अरब अमीरात</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">भारत</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">इंडोनेशिया</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">थाईलैंड</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">फ़िलिपींस</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">जापान</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">दक्षिण कोरिया</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">चीन</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">ऑस्ट्रेलिया</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">कनाडा</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">पेरू</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">कोलंबिया</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">चिली</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">ईरान</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">पाकिस्तान</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">उत्तरी अमेरिका</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">दक्षिण अमेरिका</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">यूरोप</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">अफ्रीका</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">मध्य पूर्व</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">एशिया</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">ओशियानिया</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">न्यूयॉर्क</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">Independence Day पर Big Apple की धड़कन महसूस करें, जब एक जीवंत वेव Times Square, Central Park और ऊँची-ऊँची स्काईलाइन के पास से गुजरती है।</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">लॉस एंजेलिस</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">Hollywood का ग्लैमर, Pacific की ठंडी हवा और L.A. का सितारों भरा आकर्षण महसूस करें, जब Independence Day पर City of Angels में वेव शहर को रोशन कर देती है।</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">मेक्सिको सिटी</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">CDMX के दिल में Mexican Independence Day का सम्मान करें—जहाँ औपनिवेशिक आकर्षण आधुनिक ऊर्जा से मिलता है और mariachi की धुनें ऐतिहासिक चौकों में गूँजती हैं।</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">साओ पाउलो</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">samba की ताल और Independence Day की भावना के साथ व्यस्त Paulista Avenue और इस महानगर के जीवंत मोहल्लों से गुज़रती वेव के संग बहें।</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">ब्यूनस आयर्स</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">Argentina के Independence का जश्न मनाएँ—tango की धुनों, भव्य यूरोपीय शैली की सड़कों और Río de la Plata के किनारे porteños की जुनूनी ऊर्जा के साथ।</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">लंदन</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">Notting Hill Carnival की बहुरंगी धुनों में झूमें, जब वेव ऐतिहासिक गलियों, प्रतिष्ठित double-decker बसों और सदाबहार Thames के किनारे नृत्य करती है।</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">पेरिस</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">Bastille Day पर एक ऐसी वेव से जुड़ें जो Eiffel Tower से Champs-Élysées तक बहती है, City of Light के रोमांस और कलात्मक अंदाज़ का उत्सव मनाते हुए।</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">बर्लिन</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">German Unity Day पर एकता की भावना महसूस करें, जब वेव Brandenburg Gate, ग्रैफिटी से सजी दीवारों और इस जीवंत राजधानी की आधुनिक इमारतों से होकर गुज़रती है।</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">मैड्रिड</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">Spain's National Day पर वेव के साथ मैड्रिड के जीवंत tapas बार, भव्य बुलेवार्ड्स और Prado की कलात्मक धरोहर में रौनक भरें।</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">रोम</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">Ferragosto पर, संगीत, फ़व्वारों और छुट्टी की ऊर्जा से जीवंत piazzas में स्थानीयों और आगंतुकों के साथ बहें—गर्मियों की धूप में जगमगाता Eternal City।</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">मास्को</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">Russia Day पर Red Square और Kremlin की भव्यता में डूबें, जब वेव शहर के समृद्ध शाही इतिहास और आधुनिक महानगरीय रौनक की प्रतिध्वनि बनती है।</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">इस्तांबुल</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">Republic Day मनाएँ, जब वेव Bosphorus, ऐतिहासिक मस्जिदों और आधुनिक चौकों के पास से फिसलती है—जैसे-जैसे इस्तांबुल संगीत, झंडों और आतिशबाज़ी से जगमगा उठता है।</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">काहिरा</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">Eid पर काहिरा में शामिल हों, जब गालियाँ और बाज़ार रोशनी, मीठी ख़ुशबुओं और रमज़ान के अंत का जश्न मनाते ख़ुशगवार परिवारों से भर उठते हैं—एक एकजुट करती वेव के साथ।</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">जोहान्सबर्ग</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">Freedom Day पर ‘City of Gold’ में वेव से जुड़ें, जहाँ आधुनिक गगनचुंबी इमारतें दृढ़ता और सांस्कृतिक विविधता की समृद्ध विरासत से मिलती हैं।</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">नैरोबी</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">Madaraka Day मनाएँ—जीवंत बाज़ारों और चहल-पहल भरी गलियों के बीच, जहाँ शहरी जीवन केन्या के अद्भुत वन्यजीवों के प्रवेशद्वार से मिलता है।</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">लागोस</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">Nigeria’s Independence Day पर Afrobeats की ऊर्जा को अपनाएँ, जब वेव अफ्रीका के सबसे आबादी वाले शहर और उसके जीवंत बाज़ारों से होकर गुजरती है।</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">किंशासा</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">DR Congo’s Independence Day पर, संगीत और सांस्कृतिक गर्व से भरी राजधानी में Congo River के किनारे लहराती वेव से जुड़ें।</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">दुबई</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">UAE National Day मनाएँ—भविष्यवादी गगनचुंबी इमारतों, रेगिस्तानी नज़ारों और दुनिया के अग्रणी आधुनिक महानगर की महानगरीय चमक के बीच।</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">मुंबई</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">India’s Independence को Bollywood की रौनक, औपनिवेशिक युग की इमारतों और Arabian Sea के मानसूनी किनारों के साथ यादगार बनाएँ।</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">दिल्ली</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">Independence Day पर देशभक्ति की भावना महसूस करें, जब वेव औपनिवेशिक युग के बुलेवार्ड्स, मुग़ल किलों और भारत की राजधानी की धड़कन के पास से गुजरती है।</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">बेंगलुरु</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">भारत के Silicon Valley में स्वतंत्रता का जश्न मनाएँ—जहाँ सदियों पुराने मंदिर अत्याधुनिक टेक पार्क्स और जीवंत महानगरीय भीड़ से मिलते हैं।</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">जकार्ता</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">Indonesia's Independence Day मनाएँ—चमचमाती गगनचुंबी इमारतों से लेकर चहल-पहल भरे स्ट्रीट मार्केट्स और सांस्कृतिक धरोहर स्थलों तक के विरोधाभासों से भरे शहर में।</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">बैंकॉक</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">Thailand’s National Father’s Day पर King Bhumibol को श्रद्धांजलि देते हुए City of Angels में वेव के साथ जुड़ें—जहाँ सुनहरे मंदिर, फ़्लोटिंग मार्केट्स और जीवंत स्ट्रीट फूड आपकी इंद्रियों को जगाते हैं।</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">मनीला</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">Philippine Independence Day मनाएँ—जहाँ jeepneys Spanish-colonial चर्चों, जीवंत बाज़ारों और आधुनिक गगनचुंबी इमारतों के बीच दौड़ते हैं।</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">टोक्यो</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">Sumida River के किनारे लाखों लोगों के साथ जुड़ें—जब आसमान रंगों से भर उठता है और Tokyo का समर फेस्टिवल माहौल एक शानदार वेव के लिए आदर्श मंच बनाता है।</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">सियोल</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">Gwangbokjeol के जश्न में डूबें, जब वेव शाही महलों, K-pop के केंद्रों और परंपरा व आधुनिक नवाचार को मिलाती स्काईलाइन के पास से गुजरती है।</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">बीजिंग</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">Labour Day पर बीजिंग के पार्कों और बुलेवार्ड्स में वेव के साथ चलें—जहाँ लाखों लोग टहलने, पिकनिक और वसंत की छुट्टियों का आनंद लेने निकलते हैं।</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">शंघाई</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">Bund और Nanjing Road पर वेव को बहने दें—जब Labour Day के उत्सवों में परिवार, संगीत और शंघाई की महानगरीय ऊर्जा उमड़ पड़ती है।</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">हांगकांग</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">Hong Kong’s Golden Week की रफ़्तार महसूस करें—जब Victoria Harbour, बाज़ार और नीयन सजी गलियाँ Labour Day मनाते लोगों से भर उठती हैं।</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">सिडनी</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">Sydney’s Mardi Gras Parade में वेव के साथ बहें—जहाँ Oxford Street इंद्रधनुषी रंगों, चकाचौंध झाँकियों और लाखों लोगों को जोड़ती कार्निवल भावना से जगमगाती है।</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">मेलबर्न</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">Melbourne Cup Day पर सांस्कृतिक राजधानी में वेव के साथ दौड़ें—जब शहर परेड, सुरुचिपूर्ण पोशाकों में सजे जीवंत जनसमूह और 'the race that stops a nation' की उत्सवधर्मिता से भर जाता है।</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">टोरंटो</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">Canada Day पर लाल- सफ़ेद लहर में खो जाएँ—जब वेव CN Tower, बहुसांस्कृतिक मोहल्लों और Lake Ontario के किनारों के पास से गुजरती है।</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">वैंकूवर</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">Canada Day को Pacific Coast के साथ मनाएँ—sea-to-sky दृश्यों, Stanley Park की हरियाली और downtown के महानगरीय आकर्षण में लहराते हुए।</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">शिकागो</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">Independence Day पर deep-dish का स्वाद लें और Lake Michigan के किनारे वास्तुकला की धरोहर निहारें—जब वेव Windy City से होकर गुजरती है।</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">सैन फ़्रांसिस्को</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">Golden Gate Bridge के प्रतिष्ठित मेहराब के नीचे आज़ादी की भावना महसूस करें—जब Independence Day की वेव पहाड़ियों, केबल कारों और विविध मोहल्लों से गुज़रती है।</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">लीमा</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">Peru's Independence Day पर औपनिवेशिक चौकों, प्राचीन-इन्का पुरातात्विक स्थलों और विश्व-विख्यात पेरूवियन व्यंजनों की सोंधी ख़ुशबूओं के बीच घूमें।</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">बोगोटा</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">Colombia's Independence का जश्न मनाएँ—स्ट्रीट आर्ट, पर्वतीय नज़ारों और एंडीज़ की राजधानी के साल्सा-धुन वाले मोहल्लों की सांस्कृतिक धड़कन के साथ।</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">सैंटियागो</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">Chile’s Independence Day पर देशभक्ति की भावना महसूस करें—जब वेव Andes की पृष्ठभूमि, औपनिवेशिक मुखौटों और आधुनिक काँच की इमारतों के बीच से गुजरती है।</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">तेहरान</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">तेहरान के Sizdah Bedar में शामिल हों—जब परिवार पिकनिक, हँसी और नएपन के लिए पार्कों व उद्यानों में उमड़ते हैं—और वेव शहर की जीवंत खुली महफिलों में लहराती है।</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">कराची</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">Pakistan’s Independence Day को Arabian Sea के किनारों, चहल-पहल भरे बाज़ारों, समृद्ध इतिहास और देश के सबसे बड़े शहर की गतिशील ऊर्जा के साथ मनाएँ।</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">अपने हाथ उठाएँ!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">बाएँ-दाएँ ताली बजाएँ!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">हाथ पीछे की ओर घुमाएँ!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">नीचे झुकें और ऊपर उठें!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">वेव दिखाएँ!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">बाँहें क्रॉस करें!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">वेव के लिए तैयार हों!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">अभी वेव करें!</string>
+</resources>
