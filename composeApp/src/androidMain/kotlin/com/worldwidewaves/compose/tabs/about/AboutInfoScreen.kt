@@ -21,6 +21,7 @@ package com.worldwidewaves.compose.tabs.about
  * limitations under the License.
  */
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -72,11 +73,30 @@ class AboutInfoScreen : TabScreen {
 
     @Composable
     private fun MainInfo() {
-        Text(
-            text = stringResource(MokoRes.strings.infos_core),
-            style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
+        val items = listOf(
+            MokoRes.strings.infos_core_1,
+            MokoRes.strings.infos_core_2,
+            MokoRes.strings.infos_core_3,
+            MokoRes.strings.infos_core_4,
+            MokoRes.strings.infos_core_5,
+            MokoRes.strings.infos_core_6,
+            MokoRes.strings.infos_core_7,
+            MokoRes.strings.infos_core_8,
+            MokoRes.strings.infos_core_9
         )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp) // space between items
+        ) {
+            items.forEach { res ->
+                Text(
+                    text = stringResource(res),
+                    style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
+                )
+            }
+        }
     }
+
 
     // ----------------------------
 

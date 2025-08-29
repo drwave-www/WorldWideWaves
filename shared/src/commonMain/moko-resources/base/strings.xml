@@ -79,7 +79,7 @@
     <string name="wave_speed">Wave speed</string>
     <string name="wave_start_time">Start time</string>
     <string name="wave_end_time">End time</string>
-    <string name="wave_total_time">Total event time</string>
+    <string name="wave_total_time">Total time</string>
     <string name="wave_progression">Progression</string>
     <string name="wave_warming">Warming..</string>
 
@@ -89,27 +89,18 @@
     <string name="wave_hit">Well done!</string> <!-- The event is currently running, the wave already hit the user -->
     <string name="wave_is_running">Waving!</string> <!-- The event is currently running, the wave is hitting the user now -->
 
-    <!-- Context: In app information tab, 'about' section, to present the context of the app and the concept of the events, Size: Medium -->
-    <string name="infos_core">
-You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.
+    <!-- Context: In app information tab, 'about' section, to present the context of the app and the concept of the events, to be translated, Size: Medium -->
+    <string name="infos_core_1">You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.</string>
+    <string name="infos_core_2">But this brief story could end sooner than expected. We are isolated in a vast a desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.</string>
+    <string name="infos_core_3">But we have little time. We have made so much progress.. We can build an alternative : a community of rights, of solidarity, of democracy. It's up to us!</string>
+    <string name="infos_core_4">Join a global movement, a peaceful awakening. Let's create human waves, a testimony of our true humanity, a strong command to our leaders. Let's gather around cities and countries, all over the world. Let's choose peace. Let's choose joy. Let's choose nature. Let's choose US.</string>
+    <string name="infos_core_5">What if just one wave was enough to bring us together?</string>
+    <string name="infos_core_6">WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.</string>
+    <string name="infos_core_7">At its core, WorldWideWaves is more than just an app, it's a global movement designed to bring people together in a display of solidarity and joy, with shared values.</string>
+    <string name="infos_core_8">By leveraging technology, WorldWideWaves will enable participants from around the world to join in these human waves in their cities, creating a powerful visual and emotional spectacle.</string>
+    <string name="infos_core_9">In essence, WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause, connecting humanity in a celebration of unity, joy and collective action. Through each wave, participants will not only contribute to a global spectacle but also feel and share with the world the profound impact of coming together as one.</string>
 
-But this brief story could end sooner than expected. We are isolated in a vast a desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.
-
-But we have little time. We have made so much progress.. We can build an alternative : a community of rights, of solidarity, of democracy. It's up to us.
-
-Join a global movement, a peaceful awakening. Let's create human waves, a testimony of our true humanity, a strong command to our leaders. Let's gather around cities and countries, all over the world. Let's choose peace. Let's choose joy. Let's choose nature. Let's choose US.
-
-What if just one wave was enough to bring us together?
-
-WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.
-
-At its core, WorldWideWaves is more than just an app, it's a global movement designed to bring people together in a display of solidarity and joy, with shared values.
-
-By leveraging technology, WorldWideWaves will enable participants from around the world to join in these human waves in their cities, creating a powerful visual and emotional spectacle.
-
-In essence, WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause, connecting humanity in a celebration of unity, joy and collective action. Through each wave, participants will not only contribute to a global spectacle but also feel and share with the world the profound impact of coming together as one.
-    </string>
-
+    <!-- Context: DrWave signature -->
     <!-- Do not translate these -->
     <string name="drwave">Dr Wave</string>
     <string name="www_instagram">@worldwidewaves_all</string>
@@ -155,7 +146,7 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
     <string name="faq_answer_2">We created original, imaginary continent flags to help you quickly identify cities in the list and to reflect the spirit of unity championed by WorldWideWaves. These flags are not official and exist only in this app; they are not meant to offend or replace any national or cultural symbols. Since there are no official flags for geographic continents, we designed our own for clarity and fun. If you like them, feel free to use them.</string>
 
     <string name="faq_question_3">Who is behind WorldWideWaves?</string>
-    <string name="faq_answer_3">WorldWideWaves is a purely private initiative. There is no corporation, association, or government behind it. The creators wanted to offer a constructive way for people who wonder how they can help improve the world and living conditions, an attempt to bring existing progressive and democratic efforts together under a peaceful, apolitical banner.</string>
+    <string name="faq_answer_3">WorldWideWaves is a purely private initiative. There is no corporation, association, or government behind it. The creators wanted to offer a constructive way for people who wonder how they can help improve the world and living conditions, an attempt to bring all interested existing progressive and democratic efforts together under a peaceful, apolitical banner.</string>
 
     <string name="faq_question_4">Is this a commercial initiative?</string>
     <string name="faq_answer_4">No. The app is entirely free. While its design and development required time and money from the creators, they receive no direct personal financial benefit in return from it.</string>
