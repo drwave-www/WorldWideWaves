@@ -1,5 +1,6 @@
 package com.worldwidewaves.shared.choreographies
 
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.utils.ImageResolver
@@ -57,7 +58,7 @@ class ChoreographyManagerTest : KoinTest {
         
         // This method allows us to test without relying on resource loading
         fun initializeWithTestData() {
-            // Build an in-memory resolved choreography we can use in overriden getters
+            // Build an in-memory resolved choreography we can use in overridden getters
             val resolvedWarmingSequences = mutableListOf<ResolvedSequence<T>>()
             var startTime = Duration.ZERO
             
@@ -66,7 +67,8 @@ class ChoreographyManagerTest : KoinTest {
                     sequence = sequence,
                     resolvedImage = null,
                     startTime = startTime,
-                    endTime = startTime + (sequence.duration ?: 10.seconds)
+                    endTime = startTime + (sequence.duration ?: 10.seconds),
+                    text = MokoRes.strings.empty
                 )
                 resolvedWarmingSequences.add(resolvedSequence)
                 startTime = resolvedSequence.endTime
@@ -77,7 +79,8 @@ class ChoreographyManagerTest : KoinTest {
                     sequence = it,
                     resolvedImage = null,
                     startTime = Duration.ZERO,
-                    endTime = it.duration ?: 10.seconds
+                    endTime = it.duration ?: 10.seconds,
+                    text = MokoRes.strings.empty
                 )
             }
             
@@ -86,7 +89,8 @@ class ChoreographyManagerTest : KoinTest {
                     sequence = it,
                     resolvedImage = null,
                     startTime = Duration.ZERO,
-                    endTime = it.duration ?: 10.seconds
+                    endTime = it.duration ?: 10.seconds,
+                    text = MokoRes.strings.empty
                 )
             }
 
@@ -113,7 +117,7 @@ class ChoreographyManagerTest : KoinTest {
                 frameCount = sequence.frameCount,
                 timing = sequence.timing,
                 duration = sequence.duration ?: 10.seconds,
-                text = sequence.text,
+                text = text,
                 loop = sequence.loop,
                 remainingDuration = remaining
             )
@@ -194,7 +198,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -205,7 +208,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Almost There",
             loop = true,
             duration = 2.seconds
         )
@@ -225,7 +227,6 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequence1 = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence1)
-        assertEquals("Get Ready", sequence1.text)
         assertEquals(100, sequence1.frameWidth)
         assertEquals(100, sequence1.frameHeight)
         assertEquals(3, sequence1.frameCount)
@@ -235,7 +236,6 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequence2 = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence2)
-        assertEquals("Almost There", sequence2.text)
         assertEquals(100, sequence2.frameWidth)
         assertEquals(100, sequence2.frameHeight)
         assertEquals(2, sequence2.frameCount)
@@ -250,7 +250,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -261,7 +260,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Almost There",
             loop = true,
             duration = 2.seconds
         )
@@ -281,14 +279,12 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequence = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence)
-        assertEquals("Get Ready", sequence.text)
-        
+
         // Time way beyond total duration (10.5 seconds in, should wrap to 0.0 second in first sequence)
         every { clock.now() } returns Instant.fromEpochMilliseconds(11500)
         
         val sequenceWrapped = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequenceWrapped)
-        assertEquals("Get Ready", sequenceWrapped.text)
     }
 
     @Test
@@ -300,7 +296,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -338,7 +333,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 200,
             frameCount = 4,
             timing = 0.75.seconds,
-            text = "Wait For It",
             loop = true,
             duration = 3.seconds
         )
@@ -353,7 +347,6 @@ class ChoreographyManagerTest : KoinTest {
         val result = testManager.getWaitingSequence()
         
         assertNotNull(result)
-        assertEquals("Wait For It", result.text)
         assertEquals(200, result.frameWidth)
         assertEquals(200, result.frameHeight)
         assertEquals(4, result.frameCount)
@@ -370,7 +363,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 300,
             frameCount = 5,
             timing = 0.2.seconds,
-            text = "Now!",
             loop = false,
             duration = 1.seconds
         )
@@ -385,7 +377,6 @@ class ChoreographyManagerTest : KoinTest {
         val result = testManager.getHitSequence()
         
         assertNotNull(result)
-        assertEquals("Now!", result.text)
         assertEquals(300, result.frameWidth)
         assertEquals(300, result.frameHeight)
         assertEquals(5, result.frameCount)
@@ -418,7 +409,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 1,
             timing = 0.seconds,
-            text = "Zero Duration 1",
             duration = 0.seconds
         )
         
@@ -428,7 +418,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 1,
             timing = 0.seconds,
-            text = "Zero Duration 2",
             duration = 0.seconds
         )
         
@@ -444,7 +433,6 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequence = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence)
-        assertEquals("Zero Duration 1", sequence.text)
     }
 
     @Test
@@ -456,7 +444,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -467,7 +454,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Almost There",
             loop = true,
             duration = 2.seconds
         )
@@ -501,7 +487,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -534,7 +519,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -545,7 +529,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Almost There",
             loop = true,
             duration = 2.seconds
         )
@@ -564,14 +547,12 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequenceAtBoundary = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequenceAtBoundary)
-        assertEquals("Almost There", sequenceAtBoundary.text)
-        
+
         // Exactly at the end of all sequences (3.5 seconds)
         every { clock.now() } returns Instant.fromEpochMilliseconds(4500)
         
         val sequenceAtTotalBoundary = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequenceAtTotalBoundary)
-        assertEquals("Get Ready", sequenceAtTotalBoundary.text)
     }
 
     @Test
@@ -583,7 +564,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 3,
             timing = 0.5.seconds,
-            text = "Get Ready",
             loop = true,
             duration = 1.5.seconds
         )
@@ -594,7 +574,6 @@ class ChoreographyManagerTest : KoinTest {
             frameHeight = 100,
             frameCount = 2,
             timing = 1.seconds,
-            text = "Almost There",
             loop = true,
             duration = 2.seconds
         )
@@ -614,6 +593,5 @@ class ChoreographyManagerTest : KoinTest {
         
         val sequence = testManager.getCurrentWarmingSequence(startTime)
         assertNotNull(sequence)
-        assertEquals("Almost There", sequence.text)
     }
 }

@@ -47,6 +47,7 @@ import kotlinx.serialization.json.jsonObject
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import com.worldwidewaves.shared.format.DateTimeFormats
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -67,10 +68,9 @@ interface IClock {
 
     companion object {
         fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
-            val localDateTime = instant.toLocalDateTime(timeZone)
-            val hour = localDateTime.hour.toString().padStart(2, '0')
-            val minute = localDateTime.minute.toString().padStart(2, '0')
-            return "$hour:$minute"
+            // Delegate to shared, locale-aware formatter so both Android & iOS
+            // use the same logic (12/24 h handled per platform conventions).
+            return DateTimeFormats.timeShort(instant, timeZone)
         }
     }
 }
