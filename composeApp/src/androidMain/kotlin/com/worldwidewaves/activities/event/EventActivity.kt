@@ -117,6 +117,7 @@ import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -339,13 +340,19 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 
 // ----------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 @Composable
 private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifier) {
     val isInArea by event.observer.userIsInArea.collectAsState()
+    val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val geolocText = when {
-        isInArea -> ShRes.string.geoloc_yourein
-        else -> ShRes.string.geoloc_yourenotin
+    val geolocText = if (isInArea) {
+        val time = hitDateTime.toLocalDateTime(event.getTZ()).time
+        "${stringResource(ShRes.string.geoloc_yourein)} " +
+                "(est. ${time.hour.toString().padStart(2, '0')}" +
+                ":${time.minute.toString().padStart(2, '0')})"
+    } else {
+        stringResource(ShRes.string.geoloc_yourenotin)
     }
 
     Row(
@@ -363,7 +370,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(geolocText),
+                text = geolocText,
                 style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE)
             )
         }
@@ -376,6 +383,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
     val progression by event.observer.progression.collectAsState()
+    val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
 
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
@@ -389,7 +397,10 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                     ShRes.string.wave_end_time to it.waveEndTime,
                     ShRes.string.wave_speed to it.waveSpeed,
                     ShRes.string.wave_total_time to it.waveTotalTime,
-                    ShRes.string.wave_progression to event.wave.getLiteralFromProgression(progression)
+                    ShRes.string.wave_progression to if (startWarmingInProgress)
+                        "warming..."
+                    else
+                        event.wave.getLiteralFromProgression(progression)
                 )
             } ?: emptyMap()
         }

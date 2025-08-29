@@ -85,6 +85,7 @@ import com.worldwidewaves.shared.generated.resources.wave_be_ready
 import com.worldwidewaves.shared.generated.resources.wave_done
 import com.worldwidewaves.shared.generated.resources.wave_hit
 import com.worldwidewaves.shared.generated.resources.wave_is_running
+import com.worldwidewaves.shared.generated.resources.wave_warming
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -124,7 +125,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Get choreography-related states
-        val isWarmingInProgress by event.observer.isWarmingInProgress.collectAsState(false)
+        val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
         val hitDateTime by event.observer.hitDateTime.collectAsState()
         val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
@@ -226,10 +227,12 @@ fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
+    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
 
     val message = when {
         eventStatus == Status.DONE -> ShRes.string.wave_done
         hasBeenHit -> ShRes.string.wave_hit
+        isWarming && isInArea -> ShRes.string.wave_warming
         isInArea -> ShRes.string.wave_be_ready
         else -> ShRes.string.wave_is_running
     }

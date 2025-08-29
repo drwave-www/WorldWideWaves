@@ -63,67 +63,76 @@
     <string name="wave_total_time">Total event time</string>
     <string name="wave_progression">Progression</string>
 
+    <string name="wave_warming">Warming..</string>
     <string name="wave_be_ready">Be ready!</string>
     <string name="wave_done">Wave is done!</string>
     <string name="wave_hit">Well done!</string>
     <string name="wave_is_running">Waving!</string>
 
     <string name="infos_core">
-WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries, culminating in a final, awe-inspiring wave that spans the globe. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.
+You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.
 
-At its core, WorldWideWaves is more than just an app—it's a global movement designed to bring people together in a display of solidarity and joy.
+But this brief story could end sooner than expected. We are isolated in a vast a desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.
+
+But we have little time. We have made so much progress.. We can build an alternative : a community of rights, of solidarity, of democracy. It's up to us.
+
+Join a global movement, a peaceful awakening. Let's create human waves, a testimony of our true humanity, a strong command to our leaders. Let's gather around cities and countries, all over the world. Let's choose peace. Let's choose joy. Let's choose nature. Let's choose US.
+
+What if just one wave was enough to bring us together?
+
+WorldWideWaves is an ephemeral mobile app with a visionary goal: to orchestrate a series of human waves that ripple through great cities, across countries. Set to unfold over the span of one year, this initiative aims to transcend physical and cultural boundaries, fostering a sense of unity, community, and shared human experience.
+
+At its core, WorldWideWaves is more than just an app, it's a global movement designed to bring people together in a display of solidarity and joy, with shared values.
 
 By leveraging technology, WorldWideWaves will enable participants from around the world to join in these human waves in their cities, creating a powerful visual and emotional spectacle.
 
-In essence, WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause—connecting humanity in a celebration of unity, joy and collective action. Through each wave, participants will not only contribute to a global spectacle but also experience the profound impact of coming together as one.
+In essence, WorldWideWaves is an ambitious endeavor to harness the power of technology for a truly noble cause, connecting humanity in a celebration of unity, joy and collective action. Through each wave, participants will not only contribute to a global spectacle but also feel and share with the world the profound impact of coming together as one.
     </string>
 
     <string name="drwave">Dr Wave</string>
-    <string name="drwave_instagram">@dr.wave</string>
-    <string name="drwave_instagram_url">https://www.instagram.com/dr.wave/</string>
-    <string name="www_instagram">@worldwide.waves</string>
-    <string name="www_instagram_url">https://www.instagram.com/worldwide.waves/</string>
-    <string name="www_hashtag">#wwwaves</string>
+    <string name="www_instagram">@worldwidewaves_all</string>
+    <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+    <string name="www_hashtag">#worldwidewaves #wwwaves</string>
 
     <string name="warn_rules_security_title">Rules &amp; Security</string>
-    <string name="warn_rules_security_text">Welcome to WorldWideWaves! We are excited to have you join our global wave events. To ensure everyone has a safe and enjoyable experience, please follow these guidelines:</string>
+    <string name="warn_rules_security_text">Welcome to WorldWideWaves! We are excited to have you join the global wave events. To ensure everyone has a safe and enjoyable experience, please follow these guidelines:</string>
     <string name="warn_general_title">General Rules :</string>
-    <string name="warn_general_item_1">Respect for All: Treat all participants with respect, regardless of their background. Please uphold respect for all attendees; discriminatory behavior or harassment is not acceptable at our events.</string>
-    <string name="warn_general_item_2">Follow Directions: Adhere to instructions from event organizers and local authorities at all times if any.</string>
+    <string name="warn_general_item_1">Respect for All: Treat all participants with respect, regardless of their background. Please uphold respect for all attendees; discriminatory behavior or harassment is not acceptable.</string>
+    <string name="warn_general_item_2">Respect Public Space: Keep pathways clear, obey local laws and signage, and avoid obstructing traffic or emergency access.</string>
     <string name="warn_general_item_3">Stay Within Designated Areas: For your safety, remain within the areas designated for the event if any.</string>
-    <string name="warn_general_item_4">No Alcohol or Illegal Substances: We kindly request that attendees refrain from bringing alcohol or illegal substances to the event.</string>
-    <string name="warn_general_item_5">Minimize Environmental Impact: Dispose of all waste in designated receptacles and avoid littering to keep our venues clean.</string>
-    <string name="warn_general_item_6">Report Concerns: If you see something suspicious or someone in distress, immediately report it to event staff or local authorities.</string>
+    <string name="warn_general_item_4">Be Responsible: If you choose to drink, do so moderately and in accordance with local laws.</string>
+    <string name="warn_general_item_5">Minimize Environmental Impact: Dispose of all waste in designated receptacles and avoid littering to keep the venues clean.</string>
+    <string name="warn_general_item_6">Report Concerns: If you see something suspicious or someone in distress, immediately report it to local authorities.</string>
     <string name="warn_safety_title">Safety Tips:</string>
     <string name="warn_safety_item_1">Dress Appropriately: Wear comfortable clothing and footwear suitable for the event's activities and weather conditions.</string>
     <string name="warn_safety_item_2">Stay Hydrated: Bring water and stay hydrated, especially during events in warm climates.</string>
     <string name="warn_safety_item_3">Be Mindful of Your Belongings: Keep personal belongings secure and avoid bringing valuables that you do not need.</string>
     <string name="warn_safety_item_4">Use the Buddy System: Stay with friends or make new ones, and look out for each other's safety.</string>
-    <string name="warn_safety_item_5">First Aid: Familiarize yourself with the locations of first aid stations, which are clearly marked on the event map in the app.</string>
+    <string name="warn_safety_item_5">Emergency Ready: Save local emergency numbers in your phone and agree on a meetup spot with friends in case you get separated.</string>
     <string name="warn_emergency_title">Emergency Procedures:</string>
-    <string name="warn_emergency_item_1">Evacuation Routes: Know the evacuation routes, marked clearly in our app and at the event site.</string>
-    <string name="warn_emergency_item_2">Emergency Contacts: Save the emergency contact numbers provided in the app, including local emergency services and event-specific contacts.</string>
-    <string name="warn_emergency_item_3">In Case of Emergency: Follow the instructions of event staff and emergency responders. If an evacuation is ordered, leave promptly and calmly.</string>
+    <string name="warn_emergency_item_1">Stay Aware: Identify the nearest safe exits and open spaces (e.g., squares, parks) around you, and follow instructions from local authorities if an emergency occurs.</string>
+    <string name="warn_emergency_item_2">Emergency Contacts: Save the local emergency number for your location and a personal emergency contact in your phone before you join.</string>
+    <string name="warn_emergency_item_3">In Case of Emergency: Call the local emergency number, evacuate calmly to a safe open area, assist others if you can, and keep access routes clear.</string>
     <string name="warn_legal_title">Legal:</string>
-    <string name="warn_legal_item_1">Liability Waiver: Participation in WorldWideWaves events is at your own risk. By participating, you agree to waive any claims against the organizers related to injuries that could happen during the event.</string>
-    <string name="warn_legal_item_2">Media Release: Events may be photographed or filmed for promotional purposes. Participation grants us permission to use your image in promotional materials.</string>
+    <string name="warn_legal_item_1">Liability Waiver: Participation in WorldWideWaves events is at your own risk. By participating, you agree to waive any claims against the app creators related to injuries that could happen during the event.</string>
+    <string name="warn_legal_item_2">Public Space Notice: This is a public gathering where photography/filming by attendees or media may occur, subject to local laws. We do not claim rights to your image and cannot control third-party recordings. If you prefer not to appear, try to avoid cameras when possible.</string>
 
     <string name="faq">FAQ</string>
     <string name="faq_access">Access FAQ</string>
 
-    <string name="faq_question_1">Question 1</string>
-    <string name="faq_answer_1">Answer 1</string>
+    <string name="faq_question_1">Why isn’t there an event in my city or country?</string>
+    <string name="faq_answer_1">We selected several dozen of the world’s most populous cities to create a meaningful global wave. Technical and operational constraints currently prevent us from supporting an unlimited number of locations. We aimed for broad representation across continents, cultures, and languages, which can never be perfect. We hope to add more cities over time.</string>
 
-    <string name="faq_question_2">Question 2</string>
-    <string name="faq_answer_2">Answer 2</string>
+    <string name="faq_question_2">What are these continent flags?</string>
+    <string name="faq_answer_2">We created original, imaginary continent flags to help you quickly identify cities in the list and to reflect the spirit of unity championed by WorldWideWaves. These flags are not official and exist only in this app; they are not meant to offend or replace any national or cultural symbols. Since there are no official flags for geographic continents, we designed our own for clarity and fun. If you like them, feel free to use them.</string>
 
-    <string name="faq_question_3">Question 3</string>
-    <string name="faq_answer_3">Answer 3</string>
+    <string name="faq_question_3">Who is behind WorldWideWaves?</string>
+    <string name="faq_answer_3">WorldWideWaves is a purely private initiative. There is no corporation, association, or government behind it. The creators wanted to offer a constructive way for people who wonder how they can help improve the world and living conditions, an attempt to bring existing progressive and democratic efforts together under a peaceful, apolitical banner.</string>
 
-    <string name="faq_question_4">Question 4</string>
-    <string name="faq_answer_4">Answer 4</string>
+    <string name="faq_question_4">Is this a commercial initiative?</string>
+    <string name="faq_answer_4">No. The app is entirely free. While its design and development required time and money from the creators, they receive no direct personal financial benefit in return from it.</string>
 
-    <string name="faq_question_5">Question 5</string>
-    <string name="faq_answer_5">Answer 5</string>
+    <string name="faq_question_5">Can I contribute to the effort?</string>
+    <string name="faq_answer_5">Yes, volunteers are always welcome. The app’s code is open-source on GitHub, and you can reach the creators at worldwidewaves@proton.me (replies not guaranteed). The best way to help is to spread the word: share photos and videos from events using the suggested hashtags, contact local influencers to amplify the message, talk about it with your community, and most importantly, join the wave!</string>
 
 </resources>

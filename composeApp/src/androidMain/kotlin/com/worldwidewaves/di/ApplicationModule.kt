@@ -2,7 +2,6 @@ package com.worldwidewaves.di
 
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.compose.tabs.SettingsScreen
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.utils.AndroidLocationProvider
@@ -42,7 +41,6 @@ val applicationModule = module {
 
     viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
 
-    single { SettingsScreen() }
     single { AboutScreen(get(), get()) }
     single { AboutInfoScreen() }
     single { AboutFaqScreen() }

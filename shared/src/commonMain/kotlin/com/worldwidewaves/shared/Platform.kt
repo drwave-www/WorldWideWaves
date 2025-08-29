@@ -1,16 +1,5 @@
 package com.worldwidewaves.shared
 
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlin.time.ExperimentalTime
-
 /*
  * Copyright 2025 DrWave
  *
@@ -31,6 +20,17 @@ import kotlin.time.ExperimentalTime
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.events.utils.Position
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WWWPlatform(val name: String) {
@@ -56,10 +56,11 @@ class WWWPlatform(val name: String) {
 
     init {
         val timeZone = TimeZone.of("Europe/Paris")
-        val now = LocalDateTime(2026, 7, 14, 17, 50).toInstant(timeZone)
+        val now = LocalDateTime(2026, 7, 14, 17, 59).toInstant(timeZone)
         setSimulation(
             WWWSimulation(
                 now,
+                // Position(lat = 48.83625, lng = 2.46905),
                 Position(lat = 48.862725, lng = 2.287592),
                 50
             )
@@ -101,3 +102,11 @@ expect fun cachedFilePath(fileName: String): String?
 expect fun cacheStringToFile(fileName: String, content: String): String
 expect suspend fun cacheDeepFile(fileName: String)
 expect fun getCacheDir(): String
+
+// ---------------------------------------------------------------------------
+//  Cache maintenance helpers (platform-specific actual implementations)
+// ---------------------------------------------------------------------------
+
+expect fun clearEventCache(eventId: String)
+expect fun isCachedFileStale(fileName: String): Boolean
+expect fun updateCacheMetadata(fileName: String)

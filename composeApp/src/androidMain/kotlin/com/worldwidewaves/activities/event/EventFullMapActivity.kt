@@ -83,7 +83,8 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val eventMap =  remember(event.id) {
             AndroidEventMap(event,
                 mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW
+                    initialCameraPosition = MapCameraPosition.WINDOW,
+                    autoTargetUserOnFirstLocation = true
                 )
             )
         }
@@ -95,7 +96,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
             ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
-            MapActions(event, eventMap)
+            MapActions(event, eventMap, clock)
         }
     }
 
@@ -103,8 +104,9 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
 
 // ----------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 @Composable
-fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, modifier: Modifier = Modifier) {
+fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()
@@ -119,7 +121,8 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, modifier: Modifier =
             Image(
                 modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
                     .clickable {
-                        if (isRunning) {
+                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetWave()
                             }
@@ -132,6 +135,7 @@ fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, modifier: Modifier =
                 modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
                     .clickable {
                         if (isInArea) {
+                            eventMap.markUserInteracted()
                             scope.launch {
                                 eventMap.targetUser()
                             }
