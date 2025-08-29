@@ -65,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
@@ -101,9 +103,6 @@ import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
 import com.worldwidewaves.shared.generated.resources.events_empty
 import com.worldwidewaves.shared.generated.resources.events_favorites_empty
 import com.worldwidewaves.shared.generated.resources.events_loading_error
-import com.worldwidewaves.shared.generated.resources.events_select_all
-import com.worldwidewaves.shared.generated.resources.events_select_downloaded
-import com.worldwidewaves.shared.generated.resources.events_select_starred
 import com.worldwidewaves.shared.generated.resources.events_uninstall
 import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
 import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
@@ -275,7 +274,7 @@ class EventsListScreen(
                     onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
                     fontWeight = allWeight,
-                    text = stringResource(ShRes.string.events_select_all)
+                    text = stringResource(MokoRes.strings.events_select_all.resourceId)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(0.5f),
@@ -283,7 +282,7 @@ class EventsListScreen(
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
                     fontWeight = starredWeight,
-                    text = stringResource(ShRes.string.events_select_starred)
+                    text = stringResource(MokoRes.strings.events_select_starred.resourceId)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(1f),
@@ -291,7 +290,7 @@ class EventsListScreen(
                     onClick = onDownloadedEventsClicked,
                     textColor = downloadedColor.onColor,
                     fontWeight = downloadedWeight,
-                    text = stringResource(ShRes.string.events_select_downloaded)
+                    text = stringResource(MokoRes.strings.events_select_downloaded.resourceId)
                 )
             }
         }

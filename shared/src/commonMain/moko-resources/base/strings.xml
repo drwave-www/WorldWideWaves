@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="events_select_all">All</string>
+    <string name="events_select_starred">Starred</string>
+    <string name="events_select_downloaded">Downloaded</string>
+
+</resources>
