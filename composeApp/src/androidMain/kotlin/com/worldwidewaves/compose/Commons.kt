@@ -122,7 +122,7 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
             Box(
                 modifier = Modifier
                     .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
-                    .size(width = DIM_COMMON_SOONRUNNING_WIDTH.dp, height = DIM_COMMON_SOONRUNNING_HEIGHT.dp)
+                    .height(DIM_COMMON_SOONRUNNING_HEIGHT.dp)
                     .background(backgroundColor)
                     .padding(end = DIM_DEFAULT_INT_PADDING.dp),
                 contentAlignment = Alignment.Center
@@ -180,7 +180,7 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentHeight(align = Alignment.CenterVertically),
-            text = stringResource(MokoRes.strings.wave_now).uppercase(),
+            text = stringResource(MokoRes.strings.wave_now),
             style = quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
                 textAlign = TextAlign.Center
             )
@@ -201,7 +201,7 @@ fun WWWSocialNetworks(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
-            contentDescription = "Instagram logo",
+            contentDescription = stringResource(MokoRes.strings.instagram_logo_description),
             modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp)
         )
         Column(
@@ -311,7 +311,7 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
     ) {
         Icon(
             imageVector = Icons.Default.Info,
-            contentDescription = "Error",
+            contentDescription = stringResource(MokoRes.strings.error),
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
         )
@@ -333,7 +333,7 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
         ) {
             Icon(
                 imageVector = Icons.Default.Refresh,
-                contentDescription = "Retry",
+                contentDescription = stringResource(MokoRes.strings.map_retry_download),
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))

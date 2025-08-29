@@ -101,7 +101,7 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
                 )
             }
             Text(
-                text = stringResource(tabInfo[tabIndex]).uppercase(),
+                text = stringResource(tabInfo[tabIndex]),
                 style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
                     color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                     fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal

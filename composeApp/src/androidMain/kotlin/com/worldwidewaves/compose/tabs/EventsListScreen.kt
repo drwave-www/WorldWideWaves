@@ -22,6 +22,7 @@ package com.worldwidewaves.compose.tabs
  */
 
 import android.content.Intent
+import android.text.BidiFormatter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -549,14 +550,14 @@ class EventsListScreen(
                 text = {
                     Text(
                         if (uninstallSucceeded)
-                            "Uninstall completed"
+                            stringResource(MokoRes.strings.events_uninstall_completed)
                         else
-                            "Uninstall failed"
+                            stringResource(MokoRes.strings.events_uninstall_failed)
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = { showUninstallResult = false }) {
-                        Text("OK")
+                        Text(stringResource(MokoRes.strings.ok))
                     }
                 }
             )
@@ -611,6 +612,9 @@ class EventsListScreen(
     @Composable
     private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
         val eventDate = event.getLiteralStartDateSimple()
+        val bidi = BidiFormatter.getInstance()
+        val countryText = bidi.unicodeWrap(stringResource(event.getLiteralCountry()))
+        val communityText = bidi.unicodeWrap(stringResource(event.getLiteralCommunity()))
 
         Box(modifier = modifier) {
             Column {
@@ -620,7 +624,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = stringResource(event.getLocation()).uppercase(),
+                        text = stringResource(event.getLocation()),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
                     )
                     Text(
@@ -636,7 +640,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(event.getLiteralCountry()),
+                        text = countryText,
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
@@ -646,7 +650,7 @@ class EventsListScreen(
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
                     Text(
-                        text = stringResource(event.getLiteralCommunity()),
+                        text = communityText,
                         style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )

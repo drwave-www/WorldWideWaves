@@ -31,9 +31,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
@@ -43,7 +46,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
-import com.worldwidewaves.theme.commonJustifiedTextStyle
+import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
@@ -73,6 +76,7 @@ class AboutInfoScreen : TabScreen {
 
     @Composable
     private fun MainInfo() {
+        val dir = LocalLayoutDirection.current
         val items = listOf(
             MokoRes.strings.infos_core_1,
             MokoRes.strings.infos_core_2,
@@ -91,7 +95,9 @@ class AboutInfoScreen : TabScreen {
             items.forEach { res ->
                 Text(
                     text = stringResource(res),
-                    style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
+                    style = commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
+                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
+                    )
                 )
             }
         }

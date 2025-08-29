@@ -30,12 +30,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -128,17 +133,29 @@ abstract class AbstractEventBackActivity(
                     )
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
+                    Row(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .clickable(onClick = { finish() }),
-                        text = "< " + stringResource(MokoRes.strings.back),
-                        style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
-                    )
+                            .clickable { finish() },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(MokoRes.strings.back),
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(end = 4.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(MokoRes.strings.back),
+                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
+                        )
+                    }
                     if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
-                            text = stringResource(selectedEvent!!.getLocation()).uppercase(),
+                            text = stringResource(selectedEvent!!.getLocation()),
                             style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )
