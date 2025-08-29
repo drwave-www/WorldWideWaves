@@ -59,6 +59,7 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
@@ -273,7 +274,7 @@ fun ChoreographyDisplay(
                 }
 
                 Text(
-                    text = sequence.text,
+                    text = stringResource(sequence.text),
                     style = quinaryColoredBoldTextStyle(24),
                     color = Color.White,
                     textAlign = TextAlign.Center

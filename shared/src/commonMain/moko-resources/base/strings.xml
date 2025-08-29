@@ -304,4 +304,15 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
 
     <string name="event_location_karachi_pakistan">Karachi</string>
     <string name="event_description_karachi_pakistan">Celebrate Pakistan’s Independence Day along the Arabian Sea, through bustling bazaars, rich history, and the dynamic energy of the nation’s largest city.</string>
+
+    <!-- Choreographies -->
+    <string name="choreography_warming_seq_1">Raise your hands!</string>
+    <string name="choreography_warming_seq_2">Clap left and right!</string>
+    <string name="choreography_warming_seq_3">Back windmill!</string>
+    <string name="choreography_warming_seq_4">Go down and up!</string>
+    <string name="choreography_warming_seq_5">Show the wave!</string>
+    <string name="choreography_warming_seq_6">Cross arms!</string>
+    <string name="choreography_waiting">Prepare to wave!</string>
+    <string name="choreography_hit">Wave now!</string>
+
 </resources>
