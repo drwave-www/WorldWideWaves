@@ -228,7 +228,7 @@ class AndroidEventMap(
                                     }
                                     is MapFeatureState.Retrying -> {
                                         DownloadProgressIndicator(
-                                            message = "Retrying download (${state.attempt}/${state.maxAttempts})...",
+                                            message = "${stringResource(MokoRes.strings.map_retrying_download)} (${state.attempt}/${state.maxAttempts})...",
                                             onCancel = {
                                                 isMapDownloading = false
                                                 mapViewModel.cancelDownload()

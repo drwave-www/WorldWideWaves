@@ -341,7 +341,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
     val geolocText = if (isInArea) {
         val time = hitDateTime.toLocalDateTime(event.getTZ()).time
         "${stringResource(MokoRes.strings.geoloc_yourein)} " +
-                "(est. ${time.hour.toString().padStart(2, '0')}" +
+                "(${time.hour.toString().padStart(2, '0')}" +
                 ":${time.minute.toString().padStart(2, '0')})"
     } else {
         stringResource(MokoRes.strings.geoloc_yourenotin)

@@ -36,6 +36,7 @@
     <string name="map_download">Download Map</string>
     <string name="map_downloading">Downloading.. </string>
     <string name="map_starting_download">Starting download..</string>
+    <string name="map_retrying_download">Retrying download</string>
     <string name="map_loading">Loading map..</string>
     <string name="map_cancel_download">Cancel</string>
     <string name="map_retry_download">Retry</string>

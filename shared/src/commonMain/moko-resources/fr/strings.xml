@@ -1,7 +1,0 @@
-<resources>
-
-    <string name="events_select_all">Tous</string>
-    <string name="events_select_starred">Favoris</string>
-    <string name="events_select_downloaded">Téléchargés</string>
-
-</resources>
