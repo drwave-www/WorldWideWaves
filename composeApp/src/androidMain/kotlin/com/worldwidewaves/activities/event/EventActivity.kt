@@ -243,7 +243,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         // Show feedback
                         Toast.makeText(
                             context,
-                            stringResource(MokoRes.strings.test_simulation_started),
+                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
                             Toast.LENGTH_SHORT
                         ).show()
 
@@ -277,9 +277,22 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 
 // ----------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 @Composable
 private fun EventOverlay(event: IWWWEvent) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val context = LocalContext.current
+
+    // Build a locale-aware date string using Android formatter
+    val localizedDate = remember(event.id) {
+        runCatching {
+            val start = event.getStartDateTime()
+            val javaInstant =
+                JavaInstant.ofEpochSecond(start.epochSeconds, start.nanosecondsOfSecond.toLong())
+            val date = Date(javaInstant.toEpochMilli())
+            DateFormat.getDateFormat(context).format(date)
+        }.getOrElse { event.getLiteralStartDateSimple() }
+    }
 
     Box {
         Image(
@@ -290,7 +303,7 @@ private fun EventOverlay(event: IWWWEvent) {
         )
         Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDate(eventStatus, event.getLiteralStartDateSimple())
+            EventOverlayDate(eventStatus, localizedDate)
             EventOverlayDone(eventStatus)
         }
     }
@@ -388,12 +401,14 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 @Composable
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
+    var totalMinutes by remember { mutableStateOf<Long?>(null) }
     val progression by event.observer.progression.collectAsState()
     val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
     val warmingText = stringResource(MokoRes.strings.wave_warming)
 
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
+        totalMinutes = event.getTotalTime().inWholeMinutes
     }
 
     val eventNumbers by remember(waveNumbers) {
@@ -447,6 +462,15 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                 if (eventNumbers.isNotEmpty()) {
                     orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
+                        val displayValue =
+                            if (key == MokoRes.strings.wave_total_time) {
+                                totalMinutes?.let {
+                                    if (it == 1L)
+                                        stringResource(MokoRes.strings.minute_singular, it.toInt())
+                                    else
+                                        stringResource(MokoRes.strings.minute_plural, it.toInt())
+                                } ?: value
+                            } else value
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -462,7 +486,7 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // Value
                                 Text(
-                                    text = value,
+                                    text = displayValue,
                                     style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
                                         color = when (key) {
                                             MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
