@@ -73,6 +73,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.text.format.DateFormat
+import java.util.Date
+import java.time.Instant as JavaInstant
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
@@ -201,7 +204,6 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
         context: Context
     ) {
-        val textSimulationStarted = stringResource(MokoRes.strings.test_simulation_started)
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -241,7 +243,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         // Show feedback
                         Toast.makeText(
                             context,
-                            textSimulationStarted,
+                            stringResource(MokoRes.strings.test_simulation_started),
                             Toast.LENGTH_SHORT
                         ).show()
 
@@ -343,11 +345,16 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
+    val context = LocalContext.current
+    val javaInstant = hitDateTime?.let {
+        JavaInstant.ofEpochSecond(it.epochSeconds, it.nanosecondsOfSecond.toLong())
+    }
+    val formattedTime = javaInstant?.let {
+        DateFormat.getTimeFormat(context).format(Date(it.toEpochMilli()))
+    } ?: ""
+
     val geolocText = if (isInArea) {
-        val time = hitDateTime.toLocalDateTime(event.getTZ()).time
-        "${stringResource(MokoRes.strings.geoloc_yourein)} " +
-                "(${time.hour.toString().padStart(2, '0')}" +
-                ":${time.minute.toString().padStart(2, '0')})"
+        stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
     } else {
         stringResource(MokoRes.strings.geoloc_yourenotin)
     }

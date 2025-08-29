@@ -69,6 +69,8 @@
     <string name="geoloc_undone">Updating location..</string>
     <string name="geoloc_error">Unable to locate you</string>
     <string name="geoloc_yourein">YOU ARE in the area!</string> <!-- The user is in the event area -->
+    <!-- Same as above, but with a time literal injected (placeholder will be formatted locale-aware) -->
+    <string name="geoloc_yourein_at">YOU ARE in the area! (%1$s)</string>
     <string name="geoloc_yourenotin">YOU ARE NOT in the area</string> <!-- The user is not in the event area -->
     <string name="geoloc_warm_in">YOU ARE in the area and will warm!</string> <!-- The user is in the event area and the wave warming will start soon (choreography before the wave) -->
 
