@@ -138,7 +138,7 @@ abstract class AbstractEventBackActivity(
                     if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
-                            text = selectedEvent!!.location.uppercase(),
+                            text = stringResource(selectedEvent!!.getLocation()).uppercase(),
                             style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
                                 textAlign = TextAlign.Center
                             )

@@ -390,7 +390,7 @@ class EventsListScreen(
                     contentScale = ContentScale.Crop,
                     alignment = Alignment.TopCenter,
                     painter = painterResource(event.getLocationImage() as DrawableResource),
-                    contentDescription = event.location
+                    contentDescription = stringResource(event.getLocation())
                 )
             }
 
@@ -620,7 +620,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = event.location.uppercase(),
+                        text = stringResource(event.getLocation()).uppercase(),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE)
                     )
                     Text(
@@ -636,7 +636,7 @@ class EventsListScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = event.getLiteralCountry(),
+                        text = stringResource(event.getLiteralCountry()),
                         style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
@@ -646,7 +646,7 @@ class EventsListScreen(
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )
                     Text(
-                        text = event.getLiteralCommunity(),
+                        text = stringResource(event.getLiteralCommunity()),
                         style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
                     )

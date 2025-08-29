@@ -261,7 +261,7 @@ class EventActivity : AbstractEventWaveActivity() {
 private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
-        text = event.description,
+        text = stringResource(event.getDescription()),
         style = extraQuinaryColoredBoldTextStyle(),
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
         textAlign = TextAlign.Justify
@@ -279,7 +279,7 @@ private fun EventOverlay(event: IWWWEvent) {
             modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(event.getLocationImage() as DrawableResource),
-            contentDescription = event.location
+            contentDescription = stringResource(event.getLocation())
         )
         Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)

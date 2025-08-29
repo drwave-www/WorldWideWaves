@@ -65,7 +65,6 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.LocationProvider
@@ -185,7 +184,7 @@ class AndroidEventMap(
             // Default map image as background
             Image(
                 modifier = Modifier.fillMaxSize(),
-                painter = painterResource(getEventImage("map", event.id) as DrawableResource),
+                painter = painterResource(event.getMapImage() as DrawableResource),
                 contentDescription = "defaultMap",
                 contentScale = ContentScale.Crop
             )
