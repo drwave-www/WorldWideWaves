@@ -90,11 +90,9 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
     </string>
 
     <string name="drwave">Dr Wave</string>
-    <string name="drwave_instagram">@dr.wave</string>
-    <string name="drwave_instagram_url">https://www.instagram.com/dr.wave/</string>
-    <string name="www_instagram">@worldwide.waves</string>
-    <string name="www_instagram_url">https://www.instagram.com/worldwide.waves/</string>
-    <string name="www_hashtag">#wwwaves</string>
+    <string name="www_instagram">@worldwidewaves_all</string>
+    <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+    <string name="www_hashtag">#worldwidewaves #wwwaves</string>
 
     <string name="warn_rules_security_title">Rules &amp; Security</string>
     <string name="warn_rules_security_text">Welcome to WorldWideWaves! We are excited to have you join the global wave events. To ensure everyone has a safe and enjoyable experience, please follow these guidelines:</string>
@@ -122,19 +120,19 @@ In essence, WorldWideWaves is an ambitious endeavor to harness the power of tech
     <string name="faq">FAQ</string>
     <string name="faq_access">Access FAQ</string>
 
-    <string name="faq_question_1">Question 1</string>
-    <string name="faq_answer_1">Answer 1</string>
+    <string name="faq_question_1">Why isn’t there an event in my city or country?</string>
+    <string name="faq_answer_1">We selected several dozen of the world’s most populous cities to create a meaningful global wave. Technical and operational constraints currently prevent us from supporting an unlimited number of locations. We aimed for broad representation across continents, cultures, and languages, which can never be perfect. We hope to add more cities over time.</string>
 
-    <string name="faq_question_2">Question 2</string>
-    <string name="faq_answer_2">Answer 2</string>
+    <string name="faq_question_2">What are these continent flags?</string>
+    <string name="faq_answer_2">We created original, imaginary continent flags to help you quickly identify cities in the list and to reflect the spirit of unity championed by WorldWideWaves. These flags are not official and exist only in this app; they are not meant to offend or replace any national or cultural symbols. Since there are no official flags for geographic continents, we designed our own for clarity and fun. If you like them, feel free to use them.</string>
 
-    <string name="faq_question_3">Question 3</string>
-    <string name="faq_answer_3">Answer 3</string>
+    <string name="faq_question_3">Who is behind WorldWideWaves?</string>
+    <string name="faq_answer_3">WorldWideWaves is a purely private initiative. There is no corporation, association, or government behind it. The creators wanted to offer a constructive way for people who wonder how they can help improve the world and living conditions, an attempt to bring existing progressive and democratic efforts together under a peaceful, apolitical banner.</string>
 
-    <string name="faq_question_4">Question 4</string>
-    <string name="faq_answer_4">Answer 4</string>
+    <string name="faq_question_4">Is this a commercial initiative?</string>
+    <string name="faq_answer_4">No. The app is entirely free. While its design and development required time and money from the creators, they receive no direct personal financial benefit in return from it.</string>
 
-    <string name="faq_question_5">Question 5</string>
-    <string name="faq_answer_5">Answer 5</string>
+    <string name="faq_question_5">Can I contribute to the effort?</string>
+    <string name="faq_answer_5">Yes, volunteers are always welcome. The app’s code is open-source on GitHub, and you can reach the creators at worldwidewaves@proton.me (replies not guaranteed). The best way to help is to spread the word: share photos and videos from events using the suggested hashtags, contact local influencers to amplify the message, talk about it with your community, and most importantly, join the wave!</string>
 
 </resources>
