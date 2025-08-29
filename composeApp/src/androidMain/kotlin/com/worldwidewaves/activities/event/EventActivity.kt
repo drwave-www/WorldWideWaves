@@ -201,6 +201,7 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
         context: Context
     ) {
+        val textSimulationStarted = stringResource(MokoRes.strings.test_simulation_started)
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -240,7 +241,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         // Show feedback
                         Toast.makeText(
                             context,
-                            stringResource(MokoRes.strings.test_simulation_started),
+                            textSimulationStarted,
                             Toast.LENGTH_SHORT
                         ).show()
 
