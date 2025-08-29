@@ -83,6 +83,8 @@
     <!-- Plural template for durations -->
     <string name="minute_singular">%1$d minute</string>
     <string name="minute_plural">%1$d minutes</string>
+    <string name="hour_singular">%1$d hour</string>
+    <string name="hour_plural">%1$d hours</string>
 
     <!-- Context: In event screen, in the 'numbers' section, label of the numbers of the wave, Size: Short -->
     <string name="be_waved">be waved!</string> <!-- Title of the screen section, encourage people to join the wave -->

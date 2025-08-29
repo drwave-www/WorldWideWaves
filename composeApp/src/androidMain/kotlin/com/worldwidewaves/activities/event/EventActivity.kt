@@ -398,10 +398,14 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 
 // ----------------------------------------------------------------------------
 
+@OptIn(ExperimentalTime::class)
 @Composable
 private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
     var totalMinutes by remember { mutableStateOf<Long?>(null) }
+    val context = LocalContext.current
+    var localizedStartTime by remember { mutableStateOf<String?>(null) }
+    var localizedEndTime by remember { mutableStateOf<String?>(null) }
     val progression by event.observer.progression.collectAsState()
     val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
     val warmingText = stringResource(MokoRes.strings.wave_warming)
@@ -409,6 +413,32 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
         totalMinutes = event.getTotalTime().inWholeMinutes
+
+        // Localized start time
+        localizedStartTime = runCatching {
+            val start = event.getStartDateTime()
+            DateFormat.getTimeFormat(context).format(
+                Date(
+                    JavaInstant.ofEpochSecond(
+                        start.epochSeconds,
+                        start.nanosecondsOfSecond.toLong()
+                    ).toEpochMilli()
+                )
+            )
+        }.getOrNull()
+
+        // Localized end time
+        localizedEndTime = runCatching {
+            val end = event.getEndDateTime()
+            DateFormat.getTimeFormat(context).format(
+                Date(
+                    JavaInstant.ofEpochSecond(
+                        end.epochSeconds,
+                        end.nanosecondsOfSecond.toLong()
+                    ).toEpochMilli()
+                )
+            )
+        }.getOrNull()
     }
 
     val eventNumbers by remember(waveNumbers) {
@@ -464,12 +494,29 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                         val value = eventNumbers[key]!!
                         val displayValue =
                             if (key == MokoRes.strings.wave_total_time) {
-                                totalMinutes?.let {
-                                    if (it == 1L)
-                                        stringResource(MokoRes.strings.minute_singular, it.toInt())
-                                    else
-                                        stringResource(MokoRes.strings.minute_plural, it.toInt())
+                                totalMinutes?.let { mins ->
+                                    val hours = (mins / 60).toInt()
+                                    val minutesLeft = (mins % 60).toInt()
+                                    val parts = buildList {
+                                        if (hours > 0) add(
+                                            if (hours == 1)
+                                                stringResource(MokoRes.strings.hour_singular, hours)
+                                            else
+                                                stringResource(MokoRes.strings.hour_plural, hours)
+                                        )
+                                        if (minutesLeft > 0) add(
+                                            if (minutesLeft == 1)
+                                                stringResource(MokoRes.strings.minute_singular, minutesLeft)
+                                            else
+                                                stringResource(MokoRes.strings.minute_plural, minutesLeft)
+                                        )
+                                    }
+                                    if (parts.isNotEmpty()) parts.joinToString(" ") else value
                                 } ?: value
+                            } else if (key == MokoRes.strings.wave_start_time && localizedStartTime != null) {
+                                localizedStartTime!!
+                            } else if (key == MokoRes.strings.wave_end_time && localizedEndTime != null) {
+                                localizedEndTime!!
                             } else value
 
                         Row(
