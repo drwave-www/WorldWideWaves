@@ -37,16 +37,14 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
-import com.worldwidewaves.shared.generated.resources.drwave
-import com.worldwidewaves.shared.generated.resources.infos_core
 import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
-import org.jetbrains.compose.resources.stringResource
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
+import dev.icerock.moko.resources.compose.stringResource
 
 class AboutInfoScreen : TabScreen {
     override val name = "Infos"
@@ -75,7 +73,7 @@ class AboutInfoScreen : TabScreen {
     @Composable
     private fun MainInfo() {
         Text(
-            text = stringResource(ShRes.string.infos_core),
+            text = stringResource(MokoRes.strings.infos_core),
             style = commonJustifiedTextStyle(DIM_INFO_TEXT_FONTSIZE)
         )
     }
@@ -87,7 +85,7 @@ class AboutInfoScreen : TabScreen {
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
-                text = stringResource(ShRes.string.drwave),
+                text = stringResource(MokoRes.strings.drwave),
                 style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
         }

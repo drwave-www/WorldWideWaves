@@ -48,19 +48,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.generated.resources.back
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.android.ext.android.inject
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
@@ -133,7 +132,7 @@ abstract class AbstractEventBackActivity(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .clickable(onClick = { finish() }),
-                        text = "< " + stringResource(ShRes.string.back),
+                        text = "< " + stringResource(MokoRes.strings.back),
                         style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
                     )
                     if (selectedEvent != null) {

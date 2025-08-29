@@ -65,7 +65,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -96,20 +95,8 @@ import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
-import com.worldwidewaves.shared.generated.resources.event_favorite_off
-import com.worldwidewaves.shared.generated.resources.event_favorite_on
-import com.worldwidewaves.shared.generated.resources.events_cannot_uninstall_map_message
-import com.worldwidewaves.shared.generated.resources.events_downloaded_empty
-import com.worldwidewaves.shared.generated.resources.events_empty
-import com.worldwidewaves.shared.generated.resources.events_favorites_empty
-import com.worldwidewaves.shared.generated.resources.events_loading_error
-import com.worldwidewaves.shared.generated.resources.events_uninstall
-import com.worldwidewaves.shared.generated.resources.events_uninstall_cancel
-import com.worldwidewaves.shared.generated.resources.events_uninstall_map_confirmation
-import com.worldwidewaves.shared.generated.resources.events_uninstall_map_title
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.generated.resources.map_downloaded
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
@@ -117,10 +104,10 @@ import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
@@ -274,7 +261,7 @@ class EventsListScreen(
                     onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
                     fontWeight = allWeight,
-                    text = stringResource(MokoRes.strings.events_select_all.resourceId)
+                    text = stringResource(MokoRes.strings.events_select_all)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(0.5f),
@@ -282,7 +269,7 @@ class EventsListScreen(
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
                     fontWeight = starredWeight,
-                    text = stringResource(MokoRes.strings.events_select_starred.resourceId)
+                    text = stringResource(MokoRes.strings.events_select_starred)
                 )
                 SelectorBox(
                     modifier = Modifier.fillMaxWidth(1f),
@@ -290,7 +277,7 @@ class EventsListScreen(
                     onClick = onDownloadedEventsClicked,
                     textColor = downloadedColor.onColor,
                     fontWeight = downloadedWeight,
-                    text = stringResource(MokoRes.strings.events_select_downloaded.resourceId)
+                    text = stringResource(MokoRes.strings.events_select_downloaded)
                 )
             }
         }
@@ -352,10 +339,10 @@ class EventsListScreen(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(
                             when {
-                                hasLoadingError -> ShRes.string.events_loading_error
-                                starredSelected -> ShRes.string.events_favorites_empty
-                                downloadedSelected -> ShRes.string.events_downloaded_empty
-                                else -> ShRes.string.events_empty
+                                hasLoadingError -> MokoRes.strings.events_loading_error
+                                starredSelected -> MokoRes.strings.events_favorites_empty
+                                downloadedSelected -> MokoRes.strings.events_downloaded_empty
+                                else -> MokoRes.strings.events_empty
                             }
                         ),
                         style = quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
@@ -489,19 +476,19 @@ class EventsListScreen(
                         .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
                         .clickable { showUninstallDialog = true }, // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
-                    contentDescription = stringResource(ShRes.string.map_downloaded),
+                    contentDescription = stringResource(MokoRes.strings.map_downloaded),
                 )
 
                 // Show confirmation dialog when clicked
                 if (showUninstallDialog) {
                     AlertDialog(
                         onDismissRequest = { showUninstallDialog = false },
-                        title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                        title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
                         text = {
                             if (canUninstall) {
-                                Text(stringResource(ShRes.string.events_uninstall_map_confirmation))
+                                Text(stringResource(MokoRes.strings.events_uninstall_map_confirmation))
                             } else {
-                                Text(stringResource(ShRes.string.events_cannot_uninstall_map_message))
+                                Text(stringResource(MokoRes.strings.events_cannot_uninstall_map_message))
                             }
                         },
                         confirmButton = {
@@ -539,14 +526,14 @@ class EventsListScreen(
                                         if (isUninstalling)
                                             "..."
                                         else
-                                            stringResource(ShRes.string.events_uninstall)
+                                            stringResource(MokoRes.strings.events_uninstall)
                                     )
                                 }
                             }
                         },
                         dismissButton = {
                             TextButton(onClick = { showUninstallDialog = false }) {
-                                Text(stringResource(ShRes.string.events_uninstall_cancel))
+                                Text(stringResource(MokoRes.strings.events_uninstall_cancel))
                             }
                         }
                     )
@@ -558,7 +545,7 @@ class EventsListScreen(
         if (showUninstallResult) {
             AlertDialog(
                 onDismissRequest = { showUninstallResult = false },
-                title = { Text(stringResource(ShRes.string.events_uninstall_map_title)) },
+                title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
                 text = {
                     Text(
                         if (uninstallSucceeded)
@@ -613,7 +600,7 @@ class EventsListScreen(
                             }
                         },
                     painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
-                    contentDescription = stringResource(if (isFavorite) ShRes.string.event_favorite_on else ShRes.string.event_favorite_off),
+                    contentDescription = stringResource(if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off),
                 )
             }
         }
