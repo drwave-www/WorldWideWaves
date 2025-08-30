@@ -218,115 +218,39 @@ object PolygonUtils {
         }
     }
 
+    // ------------------------------------------------------------------------
+
     /**
-     * Completes the longitude points for a list of polygons.
-     *
-     * This function takes a `ComposedLongitude` object and a list of polygons, and ensures that the
-     * polygons have the necessary points along the longitude. If the `ComposedLongitude` object has
-     * more than one position, it inserts new points between the minimum and maximum cut positions
-     * of each polygon.
+     * Converts a list of polygons into a GeoJSON string.
      *
      */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
-        propCutId: Int, // Kept for signature stability but not used
-        lngToCut: ComposedLongitude,
+        propCutId: Int,               // kept for signature stability
+        lngToCut: ComposedLongitude,  // the composed longitude used for the cut
         polygons: List<T>
-    ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
+    ): List<T> = if (lngToCut.size() > 1) {   // nothing to add for a straight vertical line
         polygons.map { polygon ->
-            // Find points that are ON the composed longitude
-            val onLinePoints = polygon.filter { 
-                lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON 
-            }.sortedBy { it.lat }
-            
-            if (onLinePoints.size < 2) return@map polygon
+            // Anchor points already lying exactly on the composed longitude
+            val onLine = polygon
+                .filter { lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON }
+                .sortedBy { it.lat }
 
-            val minCut = onLinePoints.minByOrNull { it.lat }
-            val maxCut = onLinePoints.maxByOrNull { it.lat }
+            if (onLine.size < 2) return@map polygon
 
-            if (minCut != null && maxCut != null) {
-                val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
-                if (newPositions.isNotEmpty()) { // If there are some longitude points in between
-                    var currentPosition : Position = if (polygon is LeftCutPolygon) minCut else maxCut
-                    for (newPosition in newPositions) {
-                        currentPosition = polygon.insertAfter(newPosition, currentPosition.id)
-                    }
+            val minCut = onLine.first()
+            val maxCut = onLine.last()
+
+            // Positions of the composed longitude between those two anchors
+            val intermediate = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
+            if (intermediate.isNotEmpty()) {
+                var current: Position = if (polygon is LeftCutPolygon) minCut else maxCut
+                for (p in intermediate) {
+                    current = polygon.insertAfter(p, current.id)
                 }
             }
             polygon
         }
     } else polygons
-
-    /**
-     * Adds a polygon part to the list if needed and prepare for next iteration.
-     *
-     * This function checks if the given polygon has more than two points. If it does, it moves
-     * the polygon to the provided list and then clears the polygon, adding back the last point.
-     *
-     */
-    private inline fun <reified T : CutPolygon> addPolygonPartIfNeeded(polygon: T, polygonList: MutableList<T>) {
-        if (polygon.isEmpty()) return
-        val lastPoint = polygon.last()
-        if (polygon.size > 2) {
-            polygonList.add(polygon.move())
-        }
-        polygon.clear().add(lastPoint!!)
-    }
-
-    // ------------------------------------------------------------------------
-
-    /**
-     * Reconstructs the side polygons from the given list of poly-lines.
-     *
-     * This function reconstructs poly-lines into polygons.
-     * Each polyline should cut the longitude twice and have more than two points.
-     *
-     */
-    @Deprecated("Algorithm not reliable yet")
-    private inline fun <reified T : CutPolygon> reconstructSide(propCutId: Int, side: MutableList<T>, initPolygon: T): List<T> =
-        side.asSequence()
-            .filter { it.size > 2 && it.cutPositions.filter { it2 -> it2.cutId == propCutId }.size == 2 } // Each polyline should cut the lng twice
-            .sortedBy { it.cutPositions.filter { it2 -> it2.cutId == propCutId }.minOf { cutPos -> cutPos.lat } } // Grow latitude from min
-            .let { connectPolylines(it.toList(), initPolygon) }
-
-
-    /**
-     * Reconstructs polygons from a list of poly-lines.
-     *
-     * This function takes a list of poly-lines and an initial polygon, and reconstructs them into
-     * a list of polygons. It handles self-intersecting polygons on longitude cuts by adding
-     * poly-lines to the current polygon if they intersect with the current polygon's latitude range.
-     * If they do not intersect, the current polygon is closed moved to the result list,
-     * and a new polygon is started.
-     *
-     */
-    @Deprecated("Algorithm not reliable yet")
-    private inline fun <reified T : CutPolygon> connectPolylines(polyLines: List<T>, initPolygon: T): List<T> {
-        val result = mutableListOf<T>()
-        initPolygon.clear()
-        var current: T = initPolygon
-
-        for (polyLine in polyLines) {
-            val firstNextLat = polyLine.first()!!.lat
-            val lastLat by lazy { current.last()!!.lat }
-            val firstCurrentLat by lazy { current.first()!!.lat }
-
-            if (current.isEmpty() || firstNextLat in minOf(lastLat, firstCurrentLat)..maxOf(lastLat, firstCurrentLat)) {
-                // Here we accept to have self-intersecting polygons on longitude cut
-                // ex: (Lat,lng): (-2,0),(-1,2),(0,0),(1,2),(2,0),(-2,0)
-                current.addAll(polyLine)
-            } else {
-                result.add(current.close().move())
-                initPolygon.clear().addAll(polyLine)
-                current = initPolygon
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            result.add(current.close().move())
-        }
-
-        return result
-    }
 
     // ------------------------------------------------------------------------
 
@@ -338,12 +262,6 @@ object PolygonUtils {
 
     /**
      * Calculates the bounding box of a multi-polygon.
-     *
-     * This function takes a multi-polygon represented as a list of [Position]objects and returns a
-     * [BoundingBox] object that encompasses the entire polygon.
-     *
-     * It throws an [IllegalArgumentException] if the input polygon is empty.
-     *
      */
     fun polygonsBbox(polygons: Area): BoundingBox {
         require(polygons.isNotEmpty() && polygons.all { it.isNotEmpty() }) {
@@ -371,10 +289,6 @@ object PolygonUtils {
 
     // ------------------------------------------------------------------------
 
-    /**
-     * Converts a list of polygons into a GeoJSON string.
-     *
-     */
     fun convertPolygonsToGeoJson(polygons: Area): String {
         val features = polygons.map { polygon ->
             val coordinates = polygon.map { listOf(it.lng, it.lat) }
