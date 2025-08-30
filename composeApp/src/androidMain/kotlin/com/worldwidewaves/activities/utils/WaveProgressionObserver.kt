@@ -23,12 +23,11 @@ package com.worldwidewaves.activities.utils
 import android.content.Context
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEventWave.WaveMode
 import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
@@ -136,7 +135,7 @@ class WaveProgressionObserver(
 
         val polygons = withContext(Dispatchers.Default) {
             event.wave
-                .getWavePolygons(null, WaveMode.ADD)
+                .getWavePolygons()
                 ?.traversedPolygons
                 ?.map { it.toMapLibrePolygon() }
                 ?: emptyList()

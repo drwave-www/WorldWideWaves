@@ -21,12 +21,12 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 // ---------------------------
 
@@ -38,10 +38,7 @@ data class WWWEventWaveDeep(
     override val approxDuration: Int
 ) : KoinComponent, WWWEventWave() {
 
-    override suspend fun getWavePolygons(
-        lastWaveState: WavePolygons?,
-        mode: WaveMode
-    ): WavePolygons {
+    override suspend fun getWavePolygons(): WavePolygons {
         TODO("Not yet implemented")
     }
 

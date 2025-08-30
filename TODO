@@ -1,15 +1,14 @@
 
 TODAY :
 
-- Production:
-    - licences / tools mentions -> do something with it
-
+- pb de placement labels running / ..
 - erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
                  --> Beijing ??
    --> Add logs in splitLongitude (nb of polygons original/left/right)
    ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
 
 - !! Tester le deroulement complet d'une vague sur une tres grande ville a vitesse normale
+- !! performance analysis (profiling) de l'app sur une grande ville
 
 - Global code linting review
 - > PLAY STORE UPLOAD <
