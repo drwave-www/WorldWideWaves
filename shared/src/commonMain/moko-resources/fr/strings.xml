@@ -4,8 +4,10 @@
   <string name="empty"></string>
   <!-- src_hash: 434c9b53199c5d909953ecf74a89b182c8125303 -->
   <string name="logo_description">logo</string>
-  <!-- src_hash: 261f676de9b71d385c64b9d08a86b1ea1e10e90b -->
+  <!-- src_hash: 61fc0e60ec95e42f8980a55028563ef21f93b4a7 -->
   <string name="background_description">arrière-plan</string>
+  <!-- src_hash: 260c23d3c107c00be03123d75ba717173ab4e8f7 -->
+  <string name="instagram_logo_description">Logo Instagram</string>
   <!-- src_hash: 663c1cfff8598316d8aa4acb98e362aa11798b8f -->
   <string name="tab_infos_name">À propos</string>
   <!-- src_hash: 6106635c1a868fb4479e09f546d4719b0aba5738 -->
@@ -46,6 +48,10 @@
   <string name="events_uninstall">Désinstaller</string>
   <!-- src_hash: e8d930b1022430cda230854c6d25980aaff89b90 -->
   <string name="events_uninstall_cancel">Annuler</string>
+  <!-- src_hash: ed8a34ece8d4273d61156a1994c7203385b5436d -->
+  <string name="events_uninstall_completed">Désinstallation terminée</string>
+  <!-- src_hash: a15ddf81db1e785e07fab4bc2c288f5a62fae962 -->
+  <string name="events_uninstall_failed">Échec de la désinstallation</string>
   <!-- src_hash: 372e387d428ad033fe62c3d70509fab77a3af317 -->
   <string name="events_uninstall_map_confirmation">Voulez-vous vraiment désinstaller cette carte ? Vous pourrez la télécharger de nouveau plus tard si besoin.</string>
   <!-- src_hash: f16b6e443c11d02a3429ab0ec7894bb84f8773d0 -->
@@ -82,16 +88,30 @@
   <string name="geoloc_error">Impossible de vous localiser</string>
   <!-- src_hash: df7c54ed8761fff84bd8cfcf90e35efe5c89da98 -->
   <string name="geoloc_yourein">VOUS ÊTES dans la zone !</string>
-  <!-- src_hash: 7e34ceee47862c755aad525412ae784314b4da22 -->
-  <string name="geoloc_yourenotin">VOUS N’ÊTES PAS dans la zone</string>
+  <!-- src_hash: 00a98f842906831b5c3d3dfb72807ba042877e83 -->
+  <string name="geoloc_yourein_at">VOUS ÊTES dans la zone ! (%1$s)</string>
+  <!-- src_hash: f64dbd0543a3f40d820d78be6ddbf1ccceb89c47 -->
+  <string name="geoloc_yourenotin">VOUS N'ÊTES PAS dans la zone</string>
   <!-- src_hash: 3347f7f1d10f015b2d9398db498946a7640bb681 -->
   <string name="geoloc_warm_in">VOUS ÊTES dans la zone et l’échauffement va commencer !</string>
   <!-- src_hash: 5f0b893296e2c3de3208024720414f75d0f97552 -->
   <string name="ask_gps_enable">Votre GPS semble désactivé. Voulez-vous l’activer ?</string>
   <!-- src_hash: 5ef6c6a7812ab09d81aa89f64e5a2b995574202f -->
   <string name="yes">Oui</string>
-  <!-- src_hash: 42febde652f67df0a9f5863acff108c65b0721ba -->
+  <!-- src_hash: 924c47189936d3b50379d50ec631597071d7f64f -->
   <string name="no">Non</string>
+  <!-- src_hash: 5fef7a97148e6120fd47da067da7d148791afd0a -->
+  <string name="ok">OK</string>
+  <!-- src_hash: 38223eb4eb3385b1c5ac009bb3a4e24e0b9302d6 -->
+  <string name="error">Erreur</string>
+  <!-- src_hash: 865342e363cd7c8c16a70cdb75fca63df10f7357 -->
+  <string name="minute_singular">%1$d min</string>
+  <!-- src_hash: d0bbe1455e4cdc62c76636760327c0516bc1f297 -->
+  <string name="minute_plural">%1$d min</string>
+  <!-- src_hash: 5eb9b1d6cc4a945a538da02aaaa9f84721e28738 -->
+  <string name="hour_singular">%1$d h</string>
+  <!-- src_hash: cab581c24ad8e240921309dc5498396e2a09414b -->
+  <string name="hour_plural">%1$d h</string>
   <!-- src_hash: 0920bbc4062b08b8f98efc98f78e2a4ee63c363a -->
   <string name="be_waved">Faites la vague !</string>
   <!-- src_hash: 33674c15442b4972564235deea08d33e0abfc07c -->
@@ -104,8 +124,12 @@
   <string name="wave_total_time">Durée totale</string>
   <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
   <string name="wave_progression">Progression</string>
-  <!-- src_hash: 1d840cbc39e4fc3d5163f8c8e7b0ece9a9a6c022 -->
+  <!-- src_hash: 51ea217986113f63c3c9a1c4d5ef0f0fa04ebe55 -->
   <string name="wave_warming">Échauffement..</string>
+  <!-- src_hash: 1ecbfefa00dbbe16006a8a0fdfd076be6122b99a -->
+  <string name="test_simulation">Tester la simulation</string>
+  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <string name="test_simulation_started">Simulation lancée</string>
   <!-- src_hash: 58d6967d87288604395eae2538c94eda4270a85b -->
   <string name="wave_be_ready">Préparez-vous !</string>
   <!-- src_hash: 52857f07e5292e694178f00663d7d55bad92febf -->

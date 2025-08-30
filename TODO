@@ -2,37 +2,42 @@
 TODAY :
 
 - Production:
-    - licences / tools mentions
-
-- translations: ar, ko, zh, ...
+    - licences / tools mentions -> do something with it
 
 - erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
                  --> Beijing ??
    --> Add logs in splitLongitude (nb of polygons original/left/right)
    ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
 
-- !! Tester le deroulement complet d'une vague sur paris et sur une tres grande ville a vitesse normale
+- !! Tester le deroulement complet d'une vague sur une tres grande ville a vitesse normale
 
-- PLAY STORE UPLOAD
+- Global code linting review
+- > PLAY STORE UPLOAD <
 
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
 
 ---------------------------------------------
 
-- PDF + Message + Planif presentation + faire qques modifs sur la video 1 (rempl visuels au debut, quote plus longue a la fin, ..)
+- PDF + Message + Planif presentation
    -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
+- faire qques modifs sur la video 1 (rempl visuels au debut, quote plus longue a la fin, ..)
+- automatiser la generation des textes sur une liste de langues (comptes instagram)
+    - prompt:
+        - https://chatgpt.com/c/68b21370-8f78-8331-a8bd-7fe411bfca04
+        - j'ai fais une video, avec des placeholders pour du texte, comment puis-je automatiser la production de cette video dans toutes ces langues en lui fournissant simplement les traductions des textes dans toutes ces langues ?
+    - extraire de la video PowerDirector les temps de debut, duree de tous les textes
 
 ---------------------------------------------
 
 - Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
 - ======== Bugs/Issues/Refactorings =========
-    - verifier la bonne gestion des heures internationales, j'ai un doute..
-    - put a timer on GPS activation requests
+    - put a timer on GPS activation requests (?)
 
 ---------------------------------------------
 START IOS
+--> Global tour of what can be put in commons
 ---------------------------------------------
 
 TODO:
