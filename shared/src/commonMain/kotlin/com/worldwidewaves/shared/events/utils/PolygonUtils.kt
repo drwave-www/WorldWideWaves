@@ -163,6 +163,20 @@ object PolygonUtils {
 
                 val leftPoly  = LeftCutPolygon(cutId)
                 val rightPoly = RightCutPolygon(cutId)
+                
+                // Mutable lists to collect multiple pieces per side
+                val leftList  = mutableListOf<LeftCutPolygon>()
+                val rightList = mutableListOf<RightCutPolygon>()
+                
+                // Helper that closes & pushes a polygon when it currently contains
+                // at least three vertices, then starts a new part beginning with
+                // the last (intersection) vertex so that continuity is preserved.
+                fun <T: CutPolygon> addPolygonPartIfNeeded(poly: T, list: MutableList<T>) {
+                    val last = poly.last()
+                    if (poly.size >= 3) list.add(poly.close())
+                    poly.clear()
+                    last?.let { poly.add(it) }
+                }
 
                 fun addPointToSides(point: Position, side: ComposedLongitude.Side) {
                     when {
@@ -193,6 +207,13 @@ object PolygonUtils {
                         val intersectionPoint = Position(it.lat, it.lng)
                         leftPoly.add(intersectionPoint)
                         rightPoly.add(intersectionPoint)
+                        
+                        // flush polygons when crossing occurs
+                        if (sideStart.isWest() && sideEnd.isEast()) {
+                            addPolygonPartIfNeeded(leftPoly, leftList)
+                        } else if (sideStart.isEast() && sideEnd.isWest()) {
+                            addPolygonPartIfNeeded(rightPoly, rightList)
+                        }
                     }
 
                     // If this is the last segment, also emit end (otherwise next loop will do)
@@ -201,12 +222,9 @@ object PolygonUtils {
                     }
                 }
 
-                // Prepare resulting lists (only keep valid polygons)
-                val leftList = mutableListOf<LeftCutPolygon>()
-                val rightList = mutableListOf<RightCutPolygon>()
-
-                if (leftPoly.size >= 3) leftList.add(leftPoly.close())
-                if (rightPoly.size >= 3) rightList.add(rightPoly.close())
+                // flush remaining current builders
+                addPolygonPartIfNeeded(leftPoly, leftList)
+                addPolygonPartIfNeeded(rightPoly, rightList)
 
                 // Inject intermediate longitude points if needed
                 val completedLeft  = completeLongitudePoints(cutId, lngToCut, leftList)
