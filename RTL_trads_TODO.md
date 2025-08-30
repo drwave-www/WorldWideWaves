@@ -28,12 +28,18 @@ Scope covers UI alignment, bidi safety, hard-coded strings, font coverage, local
 ## 3. Pending / Future Improvements  
 | ☐ | Task |
 |---|------|
-| [ ] Date/Time localisation: platform `expect/actual` util; replace fixed “dd/MM” + “X min”; add plural resources |
-| [ ] Declare new languages in `scripts/translate/update_translations.py` (see §4) |
-| [ ] Ensure remaining icons/images (fav, map, etc.) are auto-mirrored or neutral |
+| [x] Date/Time localisation: shared `DateTimeFormats` **expect/actual** added (day-month & timeShort); UI now uses it + pluralised hours/minutes, removing hard-coded “dd/MM” & “X min”. |
+| [x] Declare new languages in `scripts/translate/update_translations.py` (list already matches full locales set). |
+| [x] Ensure remaining icons/images (fav, map, etc.) are auto-mirrored or neutral – audit shows no remaining directional assets; back navigation uses `AutoMirrored` icon. |
 | [ ] QA pass on real devices/emulators in Arabic, Hebrew, Urdu |
 
 ---
+
+### Since last update  
+* Added KMP `DateTimeFormats` (Android / iOS) for `dayMonth` & `timeShort`.  
+* Refactored `EventActivity` / `EventsListScreen` to use shared formatter.  
+* Implemented plural resources for hours & minutes; total time now human-friendly.  
+* Performed icon audit – all navigation icons use `AutoMirrored` or are neutral.  
 
 ## 4. Language Coverage & `locales_config.xml`  
 Planned list (36 codes):  
