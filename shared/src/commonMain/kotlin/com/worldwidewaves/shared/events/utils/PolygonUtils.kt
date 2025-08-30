@@ -196,8 +196,8 @@ object PolygonUtils {
                 addPolygonPartIfNeeded(rightPoly, rightList)
 
                 // Inject intermediate longitude points if needed
-                val completedLeft  = completeLongitudePoints(lngToCut, leftList)
-                val completedRight = completeLongitudePoints(lngToCut, rightList)
+                val completedLeft  = completeLongitudePoints(lngToCut, leftList, workingPolygon, true)
+                val completedRight = completeLongitudePoints(lngToCut, rightList, workingPolygon, false)
 
                 // Filter out any degenerate polygons that could slip through
                 val filteredLeft  = completedLeft.filter  { it.size >= 3 }
@@ -215,28 +215,41 @@ object PolygonUtils {
      * Adds intermediate points along a composed longitude to polygons.
      *
      * For each polygon, finds ON-line anchor points and inserts intermediate points
-     * from the composed longitude between them.
+     * from the composed longitude between them, but only if the midpoint between anchors
+     * is determined to be on the correct side of the split based on sampling the original polygon.
      */
     private fun completeLongitudePoints(
         lngToCut: ComposedLongitude,  // the composed longitude used for the cut
-        polygons: List<Polygon>
+        polygons: List<Polygon>,      // the polygons to process
+        source: Polygon,              // the original polygon before splitting
+        forLeft: Boolean              // true if processing left side, false for right side
     ): List<Polygon> = if (lngToCut.size() > 1) {   // nothing to add for a straight vertical line
         polygons.map { polygon ->
             // Anchor points already lying exactly on the composed longitude
             val onLine = polygon
                 .filter { lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON }
-                .sortedBy { it.lat }
 
             if (onLine.size < 2) return@map polygon
 
-            /* Insert intermediate points for every consecutive pair of ON-line anchors
-               keeping the original traversal order of the polygon ring. */
-            val anchorsInOrder = onLine
-            for (idx in 0 until anchorsInOrder.size - 1) {
-                var current = anchorsInOrder[idx]
-                val next    = anchorsInOrder[idx + 1]
-
-                // Collect composed-longitude points strictly between current & next
+            // Process consecutive anchors in traversal order (no sorting)
+            for (idx in 0 until onLine.size - 1) {
+                var current = onLine[idx]
+                val next = onLine[idx + 1]
+                
+                // Calculate midpoint latitude
+                val midLat = (current.lat + next.lat) / 2
+                val midLng = lngToCut.lngAt(midLat) ?: continue
+                
+                // Sample points slightly west and east of the midpoint
+                val eps = 1e-6
+                val insideWest = source.containsPosition(Position(midLat, midLng - eps))
+                val insideEast = source.containsPosition(Position(midLat, midLng + eps))
+                
+                // Determine if we should include this segment based on which side we're processing
+                val shouldInclude = if (forLeft) insideWest else insideEast
+                if (!shouldInclude) continue
+                
+                // Get intermediate points between anchors, preserving direction
                 val between = if (current.lat <= next.lat) {
                     lngToCut.positionsBetween(current.lat, next.lat)
                 } else {

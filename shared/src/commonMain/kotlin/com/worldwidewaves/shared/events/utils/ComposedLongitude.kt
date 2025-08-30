@@ -165,6 +165,27 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         }
     }
 
+    /**
+     * Returns the longitude value of this composed-longitude at the given latitude, when the
+     * latitude lies on (or between vertices of) the poly-line.  For a vertical straight line
+     * the single longitude is returned.  If the latitude does not intersect the composed
+     * longitude, `null` is returned.
+     */
+    fun lngAt(lat: Double): Double? {
+        if (positions.isEmpty()) return null
+        if (positions.size == 1) return positions.first().lng
+
+        positions.zipWithNext { a, b ->
+            val minLat = minOf(a.lat, b.lat)
+            val maxLat = maxOf(a.lat, b.lat)
+            if (lat + EPSILON >= minLat && lat - EPSILON <= maxLat && abs(b.lat - a.lat) > EPSILON) {
+                val t = (lat - a.lat) / (b.lat - a.lat)
+                return a.lng + t * (b.lng - a.lng)
+            }
+        }
+        return null
+    }
+
     fun positionsBetween(minLat: Double, maxLat: Double): List<Position> =
          positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
 
