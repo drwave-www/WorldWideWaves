@@ -12,7 +12,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 157
       }
     },
@@ -32,7 +32,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 157
       }
     },
@@ -52,7 +52,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 148
       }
     },
@@ -72,7 +72,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 156
       }
     },
@@ -92,7 +92,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 136
       }
     },
@@ -112,7 +112,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 195
       }
     },
@@ -132,7 +132,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 60
       }
     },
@@ -152,7 +152,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 151
       }
     },
@@ -172,7 +172,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 104
       }
     },
@@ -192,7 +192,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 170
       }
     },
@@ -212,7 +212,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 130
       }
     },
@@ -232,7 +232,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 234
       }
     },
@@ -252,7 +252,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 137
       }
     },
@@ -272,7 +272,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 173
       }
     },
@@ -292,7 +292,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 150
       }
     },
@@ -312,7 +312,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 112
       }
     },
@@ -332,7 +332,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 120
       }
     },
@@ -346,13 +346,13 @@
     "community": "middle_east",
     "timeZone": "Asia/Dubai",
     "date": "2026-12-02",
-    "startHour": "18:00",
+    "startHour": "16:00",
     "instagramAccount": "worldwidewaves_ar",
     "instagramHashtag": "#wavedubai",
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 177
       }
     },
@@ -372,7 +372,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 73
       }
     },
@@ -392,7 +392,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 164
       }
     },
@@ -412,7 +412,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 115
       }
     },
@@ -432,7 +432,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 114
       }
     },
@@ -452,7 +452,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 220
       }
     },
@@ -472,7 +472,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 105
       }
     },
@@ -492,7 +492,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 109
       }
     },
@@ -512,7 +512,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 123
       }
     },
@@ -532,7 +532,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 592
       }
     },
@@ -552,7 +552,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 355
       }
     },
@@ -572,7 +572,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 211
       }
     },
@@ -592,7 +592,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 243
       }
     },
@@ -612,7 +612,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 356
       }
     },
@@ -632,7 +632,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 140
       }
     },
@@ -652,7 +652,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 48
       }
     },
@@ -672,7 +672,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 115
       }
     },
@@ -692,7 +692,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 261
       }
     },
@@ -712,7 +712,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 165
       }
     },
@@ -732,7 +732,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 91
       }
     },
@@ -752,7 +752,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 98
       }
     },
@@ -772,7 +772,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 154
       }
     },
@@ -792,7 +792,7 @@
     "wavedef": {
       "linear": {
         "direction": "WEST",
-        "speed": 5,
+        "speed": 6,
         "approxDuration": 277
       }
     },
