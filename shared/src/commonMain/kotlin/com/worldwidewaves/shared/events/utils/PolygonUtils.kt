@@ -173,8 +173,9 @@ object PolygonUtils {
 
                     // Emit intersection if any
                     intersection?.let {
-                        leftPoly.add(it)
-                        rightPoly.add(it)
+                        // avoid consecutive duplicates
+                        if (leftPoly.last() != it)  leftPoly.add(it)
+                        if (rightPoly.last() != it) rightPoly.add(it)
                         
                         // flush polygons when crossing occurs
                         if (sideStart.isWest() && sideEnd.isEast()) {
@@ -234,7 +235,17 @@ object PolygonUtils {
             // Positions of the composed longitude between those two anchors
             val intermediate = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
             if (intermediate.isNotEmpty()) {
-                var current: Position = minCut
+                /* decide which side this polygon mostly belongs to to keep
+                   insertion order consistent with ring direction */
+                val (westCnt, eastCnt) = polygon.fold(0 to 0) { (w, e), p ->
+                    when (lngToCut.isPointOnLine(p)) {
+                        ComposedLongitude.Side.WEST -> (w + 1) to e
+                        ComposedLongitude.Side.EAST -> w to (e + 1)
+                        else -> w to e
+                    }
+                }
+                val isLeftPiece = westCnt >= eastCnt
+                var current: Position = if (isLeftPiece) minCut else maxCut
                 for (p in intermediate) {
                     current = polygon.insertAfter(p, current.id)
                 }
