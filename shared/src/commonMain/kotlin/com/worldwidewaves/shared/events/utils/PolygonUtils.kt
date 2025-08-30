@@ -229,25 +229,26 @@ object PolygonUtils {
 
             if (onLine.size < 2) return@map polygon
 
-            val minCut = onLine.first()
-            val maxCut = onLine.last()
+            /* Insert intermediate points for every consecutive pair of ON-line anchors
+               keeping the original traversal order of the polygon ring. */
+            val anchorsInOrder = onLine
+            for (idx in 0 until anchorsInOrder.size - 1) {
+                var current = anchorsInOrder[idx]
+                val next    = anchorsInOrder[idx + 1]
 
-            // Positions of the composed longitude between those two anchors
-            val intermediate = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
-            if (intermediate.isNotEmpty()) {
-                /* decide which side this polygon mostly belongs to to keep
-                   insertion order consistent with ring direction */
-                val (westCnt, eastCnt) = polygon.fold(0 to 0) { (w, e), p ->
-                    when (lngToCut.isPointOnLine(p)) {
-                        ComposedLongitude.Side.WEST -> (w + 1) to e
-                        ComposedLongitude.Side.EAST -> w to (e + 1)
-                        else -> w to e
-                    }
+                // Collect composed-longitude points strictly between current & next
+                val between = if (current.lat <= next.lat) {
+                    lngToCut.positionsBetween(current.lat, next.lat)
+                } else {
+                    lngToCut.positionsBetween(next.lat, current.lat).asReversed()
                 }
-                val isLeftPiece = westCnt >= eastCnt
-                var current: Position = if (isLeftPiece) minCut else maxCut
-                for (p in intermediate) {
-                    current = polygon.insertAfter(p, current.id)
+
+                // Insert each intermediate point right after the running anchor
+                for (p in between) {
+                    // Avoid duplicates with last inserted / anchor
+                    if (p != current) {
+                        current = polygon.insertAfter(p, current.id)
+                    }
                 }
             }
             polygon
