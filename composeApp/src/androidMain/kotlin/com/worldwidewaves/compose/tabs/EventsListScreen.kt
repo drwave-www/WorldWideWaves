@@ -106,9 +106,7 @@ import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.compose.stringResource
-import android.text.format.DateFormat
-import java.util.Date
-import java.time.Instant as JavaInstant
+import com.worldwidewaves.shared.format.DateTimeFormats
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -616,18 +614,8 @@ class EventsListScreen(
     @Composable
     @OptIn(kotlin.time.ExperimentalTime::class)
     private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
-        val context = LocalContext.current
         val eventDate = remember(event.id) {
-            runCatching {
-                val start = event.getStartDateTime()
-                val date = Date(
-                    JavaInstant.ofEpochSecond(
-                        start.epochSeconds,
-                        start.nanosecondsOfSecond.toLong()
-                    ).toEpochMilli()
-                )
-                DateFormat.getDateFormat(context).format(date)
-            }.getOrElse { event.getLiteralStartDateSimple() }
+            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
         }
         val bidi = BidiFormatter.getInstance()
         val countryText = bidi.unicodeWrap(stringResource(event.getLiteralCountry()))
