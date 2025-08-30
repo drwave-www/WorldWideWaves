@@ -172,10 +172,14 @@ object PolygonUtils {
                 // at least three vertices, then starts a new part beginning with
                 // the last (intersection) vertex so that continuity is preserved.
                 fun <T: CutPolygon> addPolygonPartIfNeeded(poly: T, list: MutableList<T>) {
-                    val last = poly.last()
-                    if (poly.size >= 3) list.add(poly.close())
-                    poly.clear()
-                    last?.let { poly.add(it) }
+                    val keep = poly.last()
+                    if (poly.size >= 3) {
+                        @Suppress("UNCHECKED_CAST")
+                        list.add((poly.createNew().xferFrom(poly) as T).close())
+                    } else {
+                        poly.clear()
+                    }
+                    keep?.let { poly.add(it) }
                 }
 
                 fun addPointToSides(point: Position, side: ComposedLongitude.Side) {
@@ -230,7 +234,11 @@ object PolygonUtils {
                 val completedLeft  = completeLongitudePoints(cutId, lngToCut, leftList)
                 val completedRight = completeLongitudePoints(cutId, lngToCut, rightList)
 
-                return PolygonSplitResult(cutId, completedLeft, completedRight)
+                // Filter out any degenerate polygons that could slip through
+                val filteredLeft  = completedLeft.filter  { it.size >= 3 }
+                val filteredRight = completedRight.filter { it.size >= 3 }
+
+                return PolygonSplitResult(cutId, filteredLeft, filteredRight)
                     .also { workingPolygon.close() }
             }
         }
