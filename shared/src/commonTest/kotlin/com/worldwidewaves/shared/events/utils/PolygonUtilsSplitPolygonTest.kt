@@ -49,7 +49,7 @@ class PolygonUtilsSplitPolygonTest {
         }
     }
 
-    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.PolygonSplitResult {
+    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.SplitResult {
         Napier.i("==> Testing split of polygon testcase $idx")
 
         val result = when {

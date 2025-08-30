@@ -26,7 +26,7 @@ import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.EarthAdaptedSpeedLongitude
 import com.worldwidewaves.shared.events.utils.GeoUtils.calculateDistance
 import com.worldwidewaves.shared.events.utils.MutableArea
-import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult
+import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.splitByLongitude
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.Serializable
@@ -95,12 +95,12 @@ data class WWWEventWaveLinear(
         if (areaPolygons.isEmpty()) return Pair(emptyList(), emptyList())
         val splitResults = areaPolygons.map { splitByLongitude(it, composedLongitude) }
 
-        fun flattenNonEmptyPolygons(selector: (PolygonSplitResult) -> Area) =
+        fun flattenNonEmptyPolygons(selector: (SplitResult) -> Area) =
             splitResults.mapNotNull { result -> selector(result).ifEmpty { null } }.flatten()
 
         val (traversed, remaining) = when (direction) {
-            Direction.WEST -> Pair(PolygonSplitResult::right, PolygonSplitResult::left)
-            Direction.EAST -> Pair(PolygonSplitResult::left, PolygonSplitResult::right)
+            Direction.WEST -> Pair(SplitResult::right, SplitResult::left)
+            Direction.EAST -> Pair(SplitResult::left, SplitResult::right)
         }
 
         return Pair(flattenNonEmptyPolygons(traversed), flattenNonEmptyPolygons(remaining))

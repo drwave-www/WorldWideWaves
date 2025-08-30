@@ -146,6 +146,25 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         }
     }
 
+    /**
+     * Overload of [intersectWithSegment] that drops cut-tracking information.
+     *
+     * Returns the plain intersection [Position] of this composed-longitude and the provided
+     * [segment] or `null` when they do not intersect.
+     */
+    fun intersectWithSegment(segment: Segment): Position? {
+        if (positions.isEmpty()) return null
+        if (positions.size == 1) {
+            return segment.intersectWithLng(positions.first().lng)
+        }
+
+        return positions.zipWithNext { start, end ->
+            Segment(start, end)
+        }.firstNotNullOfOrNull { lineSegment ->
+            lineSegment.intersectWithSegment(segment)
+        }
+    }
+
     fun positionsBetween(minLat: Double, maxLat: Double): List<Position> =
          positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
 

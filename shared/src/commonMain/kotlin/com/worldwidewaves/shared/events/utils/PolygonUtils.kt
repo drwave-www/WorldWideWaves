@@ -21,10 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.Companion.fromSinglePolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.LEFT
-import com.worldwidewaves.shared.events.utils.PolygonUtils.PolygonSplitResult.LeftOrRight.RIGHT
-import kotlin.random.Random
+import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitResult.Companion.empty
 
 // ----------------------------------------------------------------------------
 
@@ -32,36 +29,13 @@ object PolygonUtils {
 
     data class Quad<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
 
-    // -- Add-on structures and methods for Polygon ---------------------------
+    // --------------------------------------------------------------------
+    //  New simple split result (plain polygons, no cutId bookkeeping)
+    // --------------------------------------------------------------------
 
-    abstract class CutPolygon(val cutId: Int) : Polygon() { // Part of an initial polygon after cut
-        abstract override fun createNew() : CutPolygon
-    }
-
-    class LeftCutPolygon(cutId: Int) : CutPolygon(cutId) { // Left part of a polygon after cut
-        override fun createNew(): LeftCutPolygon = LeftCutPolygon(cutId)
-    }
-
-    class RightCutPolygon(cutId: Int) : CutPolygon(cutId) { // Right part of a polygon after cut
-        override fun createNew(): RightCutPolygon = RightCutPolygon(cutId)
-    }
-
-    data class PolygonSplitResult(val cutId: Int, val left: List<LeftCutPolygon>, val right: List<RightCutPolygon>) {
-        enum class LeftOrRight { LEFT, RIGHT }
+    data class SplitResult(val left: Area, val right: Area) {
         companion object {
-
-            fun fromSinglePolygon(
-                polygon: Polygon, cutId: Int, leftOrRight: LeftOrRight = RIGHT
-            ): PolygonSplitResult {
-                return if (polygon.size > 1) {
-                    when (leftOrRight) {
-                        LEFT -> PolygonSplitResult(cutId, listOf(polygon.toLeft(cutId)), emptyList())
-                        RIGHT -> PolygonSplitResult(cutId, emptyList(), listOf(polygon.toRight(cutId)))
-                    }
-                } else empty(cutId)
-            }
-
-            fun empty(cutId: Int) = PolygonSplitResult(cutId, emptyList(), emptyList())
+            fun empty() = SplitResult(emptyList(), emptyList())
         }
     }
 
@@ -69,20 +43,6 @@ object PolygonUtils {
 
     val List<Position>.toPolygon : Polygon
         get() = Polygon().apply { this@toPolygon.forEach { add(it) } }
-
-    val List<Position>.toLeftPolygon: (Int) -> LeftCutPolygon
-        get() = { cutId -> LeftCutPolygon(cutId).apply { this@toLeftPolygon.forEach { add(it) } } }
-
-    val List<Position>.toRightPolygon: (Int) -> RightCutPolygon
-        get() = { cutId -> RightCutPolygon(cutId).apply { this@toRightPolygon.forEach { add(it) } } }
-
-    // ------------------------------------------------------------------------
-
-    fun Polygon.toLeft(cutId: Int) =
-        LeftCutPolygon(cutId).xferFrom(this)
-
-    fun Polygon.toRight(cutId: Int) =
-        RightCutPolygon(cutId).xferFrom(this)
 
     // ------------------------------------------------------------------------
 
@@ -134,18 +94,16 @@ object PolygonUtils {
      * points and adding them to both the left and right sides.
      *
      */
-    fun splitByLongitude(polygon: Polygon, lngToCut: Double): PolygonSplitResult =
-        splitByLongitude(polygon,ComposedLongitude.fromLongitude(lngToCut))
+    fun splitByLongitude(polygon: Polygon, lngToCut: Double): SplitResult =
+        splitByLongitude(polygon, ComposedLongitude.fromLongitude(lngToCut))
 
-    fun splitByLongitude(polygon: Polygon, lngToCut: ComposedLongitude): PolygonSplitResult {
+    fun splitByLongitude(polygon: Polygon, lngToCut: ComposedLongitude): SplitResult {
         val workingPolygon = Polygon()
         workingPolygon.addAll(polygon)
         workingPolygon.close().pop() // Ensure the polygon is closed and remove the last point
 
-        val cutId = Random.nextInt(1, Int.MAX_VALUE)
-
         require(workingPolygon.isNotEmpty() && workingPolygon.size >= 3) {
-            return PolygonSplitResult.empty(cutId).also { workingPolygon.close() }
+            return empty().also { workingPolygon.close() }
         }
 
         val minLongitude = workingPolygon.bbox().minLongitude
@@ -154,28 +112,35 @@ object PolygonUtils {
         val lngBbox = lngToCut.bbox()
 
         return when {
-            lngBbox.minLongitude > maxLongitude -> fromSinglePolygon(workingPolygon, cutId, LEFT)
-            lngBbox.maxLongitude < minLongitude -> fromSinglePolygon(workingPolygon, cutId, RIGHT)
+            // Cut line completely EAST of the polygon – everything ends up on the LEFT side
+            lngBbox.minLongitude > maxLongitude -> {
+                val closed = workingPolygon.move().close()
+                SplitResult(listOf(closed), emptyList())
+            }
+            // Cut line completely WEST of the polygon – everything ends up on the RIGHT side
+            lngBbox.maxLongitude < minLongitude -> {
+                val closed = workingPolygon.move().close()
+                SplitResult(emptyList(), listOf(closed))
+            }
             else -> { // Separate the polygon into two parts based on the cut longitude
                 // ------------------------------------------------------------------
                 // New simple splitter : single pass, single polygon per side
                 // ------------------------------------------------------------------
 
-                val leftPoly  = LeftCutPolygon(cutId)
-                val rightPoly = RightCutPolygon(cutId)
-                
-                // Mutable lists to collect multiple pieces per side
-                val leftList  = mutableListOf<LeftCutPolygon>()
-                val rightList = mutableListOf<RightCutPolygon>()
-                
+                // current builders
+                val leftPoly  = Polygon()
+                val rightPoly = Polygon()
+                // final pieces lists
+                val leftList  = mutableListOf<Polygon>()
+                val rightList = mutableListOf<Polygon>()
+
                 // Helper that closes & pushes a polygon when it currently contains
                 // at least three vertices, then starts a new part beginning with
                 // the last (intersection) vertex so that continuity is preserved.
-                fun <T: CutPolygon> addPolygonPartIfNeeded(poly: T, list: MutableList<T>) {
+                fun addPolygonPartIfNeeded(poly: Polygon, list: MutableList<Polygon>) {
                     val keep = poly.last()
                     if (poly.size >= 3) {
-                        @Suppress("UNCHECKED_CAST")
-                        list.add((poly.createNew().xferFrom(poly) as T).close())
+                        list.add(poly.createNew().xferFrom(poly).close())
                     } else {
                         poly.clear()
                     }
@@ -187,7 +152,7 @@ object PolygonUtils {
                         side.isWest() -> leftPoly.add(point)
                         side.isEast() -> rightPoly.add(point)
                         side.isOn()   -> {
-                            // Add the raw point to both sides (no CutPosition)
+                            // Add the raw point to both sides
                             leftPoly.add(point)
                             rightPoly.add(point)
                         }
@@ -201,16 +166,15 @@ object PolygonUtils {
 
                     val sideStart = lngToCut.isPointOnLine(start)
                     val sideEnd   = lngToCut.isPointOnLine(end)
-                    val intersection = lngToCut.intersectWithSegment(cutId, Segment(start, end))
+                    val intersection = lngToCut.intersectWithSegment(Segment(start, end))
 
                     // Emit start point
                     addPointToSides(start, sideStart)
 
-                    // Emit intersection if any, converting to plain Position
+                    // Emit intersection if any
                     intersection?.let {
-                        val intersectionPoint = Position(it.lat, it.lng)
-                        leftPoly.add(intersectionPoint)
-                        rightPoly.add(intersectionPoint)
+                        leftPoly.add(it)
+                        rightPoly.add(it)
                         
                         // flush polygons when crossing occurs
                         if (sideStart.isWest() && sideEnd.isEast()) {
@@ -231,14 +195,14 @@ object PolygonUtils {
                 addPolygonPartIfNeeded(rightPoly, rightList)
 
                 // Inject intermediate longitude points if needed
-                val completedLeft  = completeLongitudePoints(cutId, lngToCut, leftList)
-                val completedRight = completeLongitudePoints(cutId, lngToCut, rightList)
+                val completedLeft  = completeLongitudePoints(lngToCut, leftList)
+                val completedRight = completeLongitudePoints(lngToCut, rightList)
 
                 // Filter out any degenerate polygons that could slip through
                 val filteredLeft  = completedLeft.filter  { it.size >= 3 }
                 val filteredRight = completedRight.filter { it.size >= 3 }
 
-                return PolygonSplitResult(cutId, filteredLeft, filteredRight)
+                return SplitResult(filteredLeft, filteredRight)
                     .also { workingPolygon.close() }
             }
         }
@@ -247,14 +211,15 @@ object PolygonUtils {
     // ------------------------------------------------------------------------
 
     /**
-     * Converts a list of polygons into a GeoJSON string.
+     * Adds intermediate points along a composed longitude to polygons.
      *
+     * For each polygon, finds ON-line anchor points and inserts intermediate points
+     * from the composed longitude between them.
      */
-    private inline fun <reified T : CutPolygon> completeLongitudePoints(
-        propCutId: Int,               // kept for signature stability
+    private fun completeLongitudePoints(
         lngToCut: ComposedLongitude,  // the composed longitude used for the cut
-        polygons: List<T>
-    ): List<T> = if (lngToCut.size() > 1) {   // nothing to add for a straight vertical line
+        polygons: List<Polygon>
+    ): List<Polygon> = if (lngToCut.size() > 1) {   // nothing to add for a straight vertical line
         polygons.map { polygon ->
             // Anchor points already lying exactly on the composed longitude
             val onLine = polygon
@@ -269,7 +234,7 @@ object PolygonUtils {
             // Positions of the composed longitude between those two anchors
             val intermediate = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
             if (intermediate.isNotEmpty()) {
-                var current: Position = if (polygon is LeftCutPolygon) minCut else maxCut
+                var current: Position = minCut
                 for (p in intermediate) {
                     current = polygon.insertAfter(p, current.id)
                 }

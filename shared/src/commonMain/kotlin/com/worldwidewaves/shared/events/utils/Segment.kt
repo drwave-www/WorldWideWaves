@@ -90,4 +90,49 @@ data class Segment(val start: Position, val end: Position) {
         )
     }
 
+    // --------------------------------------------------------------------
+    // Plain (no cut-tracking) intersection helpers
+    // --------------------------------------------------------------------
+
+    /**
+     * Calculates the intersection of this segment with a vertical longitude line
+     * and returns the intersection point as a [Position] or `null` when no
+     * intersection occurs (parallel or out of segment bounds).
+     */
+    fun intersectWithLng(cutLng: Double): Position? {
+        val latDiff = end.lat - start.lat
+        val lngDiff = end.lng - start.lng
+
+        // Vertical segment – no unique intersection
+        if (abs(lngDiff) < EPSILON) return null
+
+        val t = (cutLng - start.lng) / lngDiff
+        if (t < 0 || t > 1) return null              // outside segment
+
+        val lat = start.lat + t * latDiff
+        return Position(lat, cutLng)
+    }
+
+    /**
+     * Calculates the intersection point of this segment with [other] and returns it
+     * as a plain [Position], or `null` when the segments do not intersect.
+     */
+    fun intersectWithSegment(other: Segment): Position? {
+        val (x1, y1) = start.lng to start.lat
+        val (x2, y2) = end.lng to end.lat
+        val (x3, y3) = other.start.lng to other.start.lat
+        val (x4, y4) = other.end.lng to other.end.lat
+
+        val denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+        if (abs(denominator) < EPSILON) return null // parallel
+
+        val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
+        val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
+        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // outside segments
+
+        val x = x1 + ua * (x2 - x1)
+        val y = y1 + ua * (y2 - y1)
+        return Position(lat = y, lng = x)
+    }
+
 }
