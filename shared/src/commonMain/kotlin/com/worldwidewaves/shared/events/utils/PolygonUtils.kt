@@ -169,9 +169,9 @@ object PolygonUtils {
                         side.isWest() -> leftPoly.add(point)
                         side.isEast() -> rightPoly.add(point)
                         side.isOn()   -> {
-                            val cutPt = point.toPointCut(cutId)
-                            leftPoly.add(cutPt)
-                            rightPoly.add(cutPt)
+                            // Add the raw point to both sides (no CutPosition)
+                            leftPoly.add(point)
+                            rightPoly.add(point)
                         }
                     }
                 }
@@ -188,10 +188,11 @@ object PolygonUtils {
                     // Emit start point
                     addPointToSides(start, sideStart)
 
-                    // Emit intersection if any
+                    // Emit intersection if any, converting to plain Position
                     intersection?.let {
-                        leftPoly.add(it)
-                        rightPoly.add(it)
+                        val intersectionPoint = Position(it.lat, it.lng)
+                        leftPoly.add(intersectionPoint)
+                        rightPoly.add(intersectionPoint)
                     }
 
                     // If this is the last segment, also emit end (otherwise next loop will do)
@@ -227,16 +228,20 @@ object PolygonUtils {
      *
      */
     private inline fun <reified T : CutPolygon> completeLongitudePoints(
-        propCutId: Int,
+        propCutId: Int, // Kept for signature stability but not used
         lngToCut: ComposedLongitude,
         polygons: List<T>
     ): List<T> = if (lngToCut.size() > 1) { // Nothing to complete on straight longitude line
         polygons.map { polygon ->
-            val cutPositions = polygon.getCutPositions().filter { it.cutId == propCutId }.sortedBy { it.lat }
-            if (cutPositions.size < 2) return@map polygon
+            // Find points that are ON the composed longitude
+            val onLinePoints = polygon.filter { 
+                lngToCut.isPointOnLine(it) == ComposedLongitude.Side.ON 
+            }.sortedBy { it.lat }
+            
+            if (onLinePoints.size < 2) return@map polygon
 
-            val minCut = cutPositions.minByOrNull { it.lat } // Complete between min and max cuts
-            val maxCut = cutPositions.maxByOrNull { it.lat }
+            val minCut = onLinePoints.minByOrNull { it.lat }
+            val maxCut = onLinePoints.maxByOrNull { it.lat }
 
             if (minCut != null && maxCut != null) {
                 val newPositions = lngToCut.positionsBetween(minCut.lat, maxCut.lat)
