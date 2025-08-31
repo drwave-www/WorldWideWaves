@@ -44,6 +44,7 @@ class WaveProgressionObserver(
 
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
+    private var lastWavePolygons: List<org.maplibre.geojson.Polygon> = emptyList()
 
     fun startObservation() {
         val eventMap = eventMap ?: return
@@ -141,6 +142,14 @@ class WaveProgressionObserver(
                 ?: emptyList()
         }
 
-        eventMap.updateWavePolygons(context, polygons, true)
+        if (polygons.isEmpty()) {
+            if (lastWavePolygons.isNotEmpty()) {
+                eventMap.updateWavePolygons(context, lastWavePolygons, false)
+            }
+            return
+        } else {
+            lastWavePolygons = polygons
+            eventMap.updateWavePolygons(context, polygons, true)
+        }
     }
 }

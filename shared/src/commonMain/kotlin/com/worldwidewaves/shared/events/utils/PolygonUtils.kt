@@ -159,6 +159,9 @@ object PolygonUtils {
                     }
                 }
 
+                // Track if any intersections are found
+                var hasIntersection = false
+
                 val points = workingPolygon.toList()
                 for (i in points.indices) {
                     val start = points[i]
@@ -173,6 +176,9 @@ object PolygonUtils {
 
                     // Emit intersection if any
                     intersection?.let {
+                        // Mark that we found an intersection
+                        hasIntersection = true
+                        
                         // avoid consecutive duplicates
                         if (leftPoly.last() != it)  leftPoly.add(it)
                         if (rightPoly.last() != it) rightPoly.add(it)
@@ -194,6 +200,59 @@ object PolygonUtils {
                 // flush remaining current builders
                 addPolygonPartIfNeeded(leftPoly, leftList)
                 addPolygonPartIfNeeded(rightPoly, rightList)
+
+                // If no intersections were found but the bounding boxes overlap,
+                // determine which side the polygon lies on
+                if (!hasIntersection) {
+                    val polyBbox = workingPolygon.bbox()
+                    val centerLat = (polyBbox.sw.lat + polyBbox.ne.lat) / 2
+                    
+                    // Try to get longitude at center latitude
+                    val cutLngAtCenter = lngToCut.lngAt(centerLat)
+                    
+                    if (cutLngAtCenter != null) {
+                        // We have a longitude at this latitude, determine side
+                        val closedPoly = workingPolygon.move().close()
+                        
+                        if (polyBbox.minLongitude >= cutLngAtCenter) {
+                            // Polygon is entirely to the east of the cut
+                            return SplitResult(emptyList(), listOf(closedPoly))
+                        } else if (polyBbox.maxLongitude <= cutLngAtCenter) {
+                            // Polygon is entirely to the west of the cut
+                            return SplitResult(listOf(closedPoly), emptyList())
+                        } else {
+                            // Cut longitude runs inside polygon horizontally but no intersection
+                            // Use polygon center longitude to determine side
+                            val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
+                            if (centerLng >= cutLngAtCenter) {
+                                return SplitResult(emptyList(), listOf(closedPoly))
+                            } else {
+                                return SplitResult(listOf(closedPoly), emptyList())
+                            }
+                        }
+                    } else {
+                        // The composed longitude doesn't cover this latitude range
+                        // Fall back to comparing horizontal relation between bboxes
+                        val closedPoly = workingPolygon.move().close()
+                        
+                        if (polyBbox.minLongitude >= lngBbox.maxLongitude) {
+                            // Polygon is entirely to the east of the cut's bbox
+                            return SplitResult(emptyList(), listOf(closedPoly))
+                        } else if (polyBbox.maxLongitude <= lngBbox.minLongitude) {
+                            // Polygon is entirely to the west of the cut's bbox
+                            return SplitResult(listOf(closedPoly), emptyList())
+                        } else {
+                            // Use polygon center vs cut bbox center
+                            val centerLng = (polyBbox.sw.lng + polyBbox.ne.lng) / 2
+                            val cutCenterLng = (lngBbox.sw.lng + lngBbox.ne.lng) / 2
+                            if (centerLng >= cutCenterLng) {
+                                return SplitResult(emptyList(), listOf(closedPoly))
+                            } else {
+                                return SplitResult(listOf(closedPoly), emptyList())
+                            }
+                        }
+                    }
+                }
 
                 // Inject intermediate longitude points if needed
                 val completedLeft  = completeLongitudePoints(lngToCut, leftList, workingPolygon, true)
