@@ -293,13 +293,15 @@ data class WWWEventArea(
         val coordinates = geometry["coordinates"]?.jsonArray
 
         when (type) {
-            "Polygon" -> coordinates?.forEach { ring ->
-                processRing(ring, tempPolygons)
+            // Only keep the exterior ring for a single Polygon
+            "Polygon" -> {
+                val exteriorRing = coordinates?.getOrNull(0)
+                exteriorRing?.let { processRing(it, tempPolygons) }
             }
+            // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
             "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
-                multiPolygon.jsonArray.forEach { ring ->
-                    processRing(ring, tempPolygons)
-                }
+                val exteriorRing = multiPolygon.jsonArray.getOrNull(0)
+                exteriorRing?.let { processRing(it, tempPolygons) }
             }
             else -> {
                 Log.e(::getPolygons.name, "Unsupported geometry type: $type")
