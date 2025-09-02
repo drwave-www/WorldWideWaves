@@ -4,7 +4,7 @@ package com.worldwidewaves.shared
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -23,19 +23,17 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Position
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WWWPlatform(val name: String) {
-
-    private var _simulation : WWWSimulation? = null
+class WWWPlatform(
+    val name: String,
+) {
+    private var _simulation: WWWSimulation? = null
 
     // -------------------------------------------------------------------- //
     //  Reactive simulation change tracking
@@ -51,20 +49,25 @@ class WWWPlatform(val name: String) {
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
 
     // -------------------------------------------------------------------- //
-    //  Default simulation initialization (runs after properties are ready)
+    //  Simulation *mode* flag (enables in-app testing UI)
     // -------------------------------------------------------------------- //
 
-    init {
-        val timeZone = TimeZone.of("Europe/Paris")
-        val now = LocalDateTime(2026, 7, 14, 17, 59).toInstant(timeZone)
-        setSimulation(
-            WWWSimulation(
-                now,
-                // Position(lat = 48.83625, lng = 2.46905),
-                Position(lat = 48.862725, lng = 2.287592),
-                50
-            )
-        ) // In Paris, 1h is 2mn
+    /**
+     * Indicates whether the global "simulation mode" is enabled.
+     * When true, UI layers may reveal extra controls to start/stop a
+     * per-event simulation.  This flag is orthogonal to an actual running
+     * [WWWSimulation] (held in [_simulation]) so that the mode can be active
+     * even when no simulation is currently running.
+     */
+    private val _simulationModeEnabled = MutableStateFlow(false)
+    val simulationModeEnabled: StateFlow<Boolean> = _simulationModeEnabled.asStateFlow()
+
+    fun enableSimulationMode() {
+        _simulationModeEnabled.value = true
+    }
+
+    fun disableSimulationMode() {
+        _simulationModeEnabled.value = false
     }
 
     fun disableSimulation() {
@@ -73,31 +76,50 @@ class WWWPlatform(val name: String) {
         _simulationChanged.value = _simulationChanged.value + 1
     }
 
-    fun setSimulation(simulation : WWWSimulation) {
+    fun setSimulation(simulation: WWWSimulation) {
         Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
         _simulation = simulation
         // Notify observers that the simulation context has changed
         _simulationChanged.value = _simulationChanged.value + 1
     }
 
-    fun getSimulation() : WWWSimulation? = _simulation
-    fun isOnSimulation() : Boolean = _simulation != null
+    fun getSimulation(): WWWSimulation? = _simulation
+
+    fun isOnSimulation(): Boolean = _simulation != null
 }
 
-class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvider) {
+class WWWShutdownHandler(
+    private val coroutineScopeProvider: CoroutineScopeProvider,
+) {
     fun onAppShutdown() {
         coroutineScopeProvider.cancelAllCoroutines()
     }
 }
 
 // ---------------------------
+
+expect fun localizeString(resource: StringResource): String
+
+// ---------------------------
+
 expect suspend fun readGeoJson(eventId: String): String?
-expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
+
+expect suspend fun getMapFileAbsolutePath(
+    eventId: String,
+    extension: String,
+): String?
 
 expect fun cachedFileExists(fileName: String): Boolean
+
 expect fun cachedFilePath(fileName: String): String?
-expect fun cacheStringToFile(fileName: String, content: String): String
+
+expect fun cacheStringToFile(
+    fileName: String,
+    content: String,
+): String
+
 expect suspend fun cacheDeepFile(fileName: String)
+
 expect fun getCacheDir(): String
 
 // ---------------------------------------------------------------------------
@@ -105,5 +127,7 @@ expect fun getCacheDir(): String
 // ---------------------------------------------------------------------------
 
 expect fun clearEventCache(eventId: String)
+
 expect fun isCachedFileStale(fileName: String): Boolean
+
 expect fun updateCacheMetadata(fileName: String)

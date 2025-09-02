@@ -4,7 +4,7 @@
 # Copyright 2025 DrWave
 #
 # WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
-# countries, culminating in a global wave. The project aims to transcend physical and cultural
+# countries. The project aims to transcend physical and cultural
 # boundaries, fostering unity, community, and shared human experience by leveraging real-time
 # coordination and location-based services.
 #
@@ -181,8 +181,9 @@ make import-osm
 
 echo "-------------------------------------------------------------------------------------"
 echo "====> : Start importing Wikidata: Wikidata Query Service -> PostgreSQL"
+echo "====> SKIPPED for now as we don't use it"
 echo
-make import-wikidata
+# make import-wikidata
 
 echo "-------------------------------------------------------------------------------------"
 echo "====> : Start SQL postprocessing:  ./build/sql/* -> PostgreSQL "

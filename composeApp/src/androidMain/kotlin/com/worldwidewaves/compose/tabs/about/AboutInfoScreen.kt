@@ -4,7 +4,7 @@ package com.worldwidewaves.compose.tabs.about
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -31,12 +31,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
@@ -46,10 +46,18 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
+import com.worldwidewaves.shared.infos_core
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
+/**
+ * **About > Info** tab.
+ *
+ * Implements [TabScreen] to display the core descriptive paragraphs about the
+ * WorldWideWaves project along with the author signature and social-network
+ * links.  Content is fully localized via `MokoRes.strings.*`.
+ */
 class AboutInfoScreen : TabScreen {
     override val name = "Infos"
 
@@ -61,7 +69,7 @@ class AboutInfoScreen : TabScreen {
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 item { AboutWWWLogo() }
                 item { MainInfo() }
@@ -75,47 +83,42 @@ class AboutInfoScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Iterates over a fixed list of localized string resources and renders each
+     * paragraph with justified alignment (or start-aligned for RTL locales).
+     */
     private fun MainInfo() {
         val dir = LocalLayoutDirection.current
-        val items = listOf(
-            MokoRes.strings.infos_core_1,
-            MokoRes.strings.infos_core_2,
-            MokoRes.strings.infos_core_3,
-            MokoRes.strings.infos_core_4,
-            MokoRes.strings.infos_core_5,
-            MokoRes.strings.infos_core_6,
-            MokoRes.strings.infos_core_7,
-            MokoRes.strings.infos_core_8,
-            MokoRes.strings.infos_core_9
-        )
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp) // space between items
+            verticalArrangement = Arrangement.spacedBy(12.dp), // space between items
         ) {
-            items.forEach { res ->
+            infos_core.forEach { res ->
                 Text(
                     text = stringResource(res),
-                    style = commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
-                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
-                    )
+                    style =
+                        commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
+                            textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
+                        ),
                 )
             }
         }
     }
 
-
     // ----------------------------
 
     @Composable
+    /**
+     * Displays “Dr Wave” signature block with custom sizing and spacing.
+     */
     private fun DrWaveSignature() {
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(MokoRes.strings.drwave),
-                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
+                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE),
             )
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }
-
 }

@@ -1,26 +1,10 @@
 package com.worldwidewaves.shared.events.utils
 
-import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
-import com.worldwidewaves.shared.events.WWWEventWave.Direction
-import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
-import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
-import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
-import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
-import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
-import io.github.aakira.napier.Napier
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-
 /*
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -37,16 +21,35 @@ import kotlin.time.Duration.Companion.seconds
  * limitations under the License.
  */
 
-class EarthAdaptedSpeedLongitude(
-    private val coveredArea : BoundingBox,
-    private val speed : Double,
-    private val direction: Direction
-) : ComposedLongitude(Position(0.0, coveredArea.latitudeOfWidestPart())) {
+import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.events.WWWEventWave.Direction
+import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
+import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
+import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
+import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
+import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
+import io.github.aakira.napier.Napier
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
+class EarthAdaptedSpeedLongitude(
+    private val coveredArea: BoundingBox,
+    private val speed: Double,
+    private val direction: Direction,
+) : ComposedLongitude(Position(0.0, coveredArea.latitudeOfWidestPart())) {
     /*
      * Latitude-split bands and longitude band for the wave.
      */
-    data class LatLonBand(val latitude: Double, val latWidth: Double, val lngWidth: Double)
+    data class LatLonBand(
+        val latitude: Double,
+        val latWidth: Double,
+        val lngWidth: Double,
+    )
 
     // ------------------------
 
@@ -65,15 +68,16 @@ class EarthAdaptedSpeedLongitude(
     /*
      * The duration of a single band refresh window in seconds.
      */
-    private val bandStepDuration : Duration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
+    private val bandStepDuration: Duration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
 
     /*
      * The starting longitude of the wave, based on the direction.
      */
-    private val startLongitude = when (direction) {
-        Direction.EAST -> coveredArea.minLongitude
-        Direction.WEST -> coveredArea.maxLongitude
-    }
+    private val startLongitude =
+        when (direction) {
+            Direction.EAST -> coveredArea.minLongitude
+            Direction.WEST -> coveredArea.maxLongitude
+        }
 
     /*
      * Cached latitude bands for the wave.
@@ -82,7 +86,7 @@ class EarthAdaptedSpeedLongitude(
 
     // ------------------------
 
-    private fun initialized() : EarthAdaptedSpeedLongitude {
+    private fun initialized(): EarthAdaptedSpeedLongitude {
         if (size() == 1) {
             val referenceLng = first().lng
             clear().also {
@@ -122,18 +126,22 @@ class EarthAdaptedSpeedLongitude(
         val totalDistanceCovered = speed * elapsedTime.inWholeSeconds
 
         val bands = bands()
-        return fromPositions(bands.map { (bandLatitude, band) ->
-            // Convert the total distance to longitude change at the current latitude
-            val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
+        return fromPositions(
+            bands.map { (bandLatitude, band) ->
+                // Convert the total distance to longitude change at the current latitude
+                val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
 
-            val newLatitude = min(90.0, max(-90.0, bandLatitude + band.latWidth / 2))
-            Position(newLatitude, when (direction) {
-                Direction.EAST -> min(startLongitude + longitudeChange, coveredArea.maxLongitude)
-                Direction.WEST -> max(startLongitude - longitudeChange, coveredArea.minLongitude)
-            })
-        })
+                val newLatitude = min(90.0, max(-90.0, bandLatitude + band.latWidth / 2))
+                Position(
+                    newLatitude,
+                    when (direction) {
+                        Direction.EAST -> min(startLongitude + longitudeChange, coveredArea.maxLongitude)
+                        Direction.WEST -> max(startLongitude - longitudeChange, coveredArea.minLongitude)
+                    },
+                )
+            },
+        )
     }
-
 
     // ------------------------
 
@@ -164,7 +172,7 @@ class EarthAdaptedSpeedLongitude(
      *   adjusting the band widths accordingly.
      */
     @VisibleForTesting
-     fun calculateWaveBands(): List<LatLonBand> {
+    fun calculateWaveBands(): List<LatLonBand> {
         val (sw, ne) = coveredArea
         val latLonBands = mutableListOf<LatLonBand>()
 
@@ -176,8 +184,12 @@ class EarthAdaptedSpeedLongitude(
         val lonBandWidthAtLongest = calculateLonBandWidthAtLatitude(longestLat)
         Napier.v { "Longitude band width at the middle latitude: $lonBandWidthAtLongest" }
 
-        latLonBands.add(LatLonBand(-89.9, 0.0, // Lower latitude band
-            adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest))
+        latLonBands.add(
+            LatLonBand(
+                -89.9,
+                0.0, // Lower latitude band
+                adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest),
+            ),
         )
 
         var currentLat = sw.lat
@@ -201,8 +213,12 @@ class EarthAdaptedSpeedLongitude(
             currentLat += optimalLatBandWidth
         }
 
-        latLonBands.add(LatLonBand(89.9, 0.0, // Higher latitude band
-            adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtLongest))
+        latLonBands.add(
+            LatLonBand(
+                89.9,
+                0.0, // Higher latitude band
+                adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtLongest),
+            ),
         )
 
         return latLonBands
@@ -241,7 +257,10 @@ class EarthAdaptedSpeedLongitude(
      * - The formula is: latBandWidth = lonBandWidthAtEquator / cos(latitude)
      */
     @VisibleForTesting
-    fun calculateOptimalLatBandWidth(latitude: Double, lonBandWidthAtEquator: Double): Double {
+    fun calculateOptimalLatBandWidth(
+        latitude: Double,
+        lonBandWidthAtEquator: Double,
+    ): Double {
         // Convert latitude to radians
         val latitudeInRadians = latitude.toRadians()
 
@@ -267,9 +286,11 @@ class EarthAdaptedSpeedLongitude(
      * - The formula is: adjustedLonWidth = lonWidth / cos(latitude)
      */
     @VisibleForTesting
-    fun adjustLongitudeWidthAtLatitude(latitude: Double, lonWidthAtTheLongest: Double) : Double {
+    fun adjustLongitudeWidthAtLatitude(
+        latitude: Double,
+        lonWidthAtTheLongest: Double,
+    ): Double {
         require(abs(latitude) < 90) // Prevent division by zero
         return lonWidthAtTheLongest / cos(latitude.toRadians())
     }
-
 }

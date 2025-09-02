@@ -13,7 +13,6 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -36,19 +35,27 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 /**
- * ViewModel for managing event data.
+ * Central ViewModel that drives the **Events** tab.
  *
- * This ViewModel fetches events from a data source (`WWWEvents`), exposes them as a
- * `StateFlow`, and provides filtering functionality for displaying all events or only
- * favorite events.
+ * Responsibilities:
+ * • Load the catalogue from the shared [WWWEvents] repository, sort by start date
+ * • Expose reactive `StateFlow`s for the full list, loading/error flags and
+ *   “has-favorites” helper used by the UI
+ * • Spin up each event’s [IWWWEvent.observer] so real-time status (soon / running
+ *   / done, user-hit, etc.) keeps updating in the background and, in debug
+ *   builds, throttle the simulation speed around the hit sequence
+ * • Maintain in-memory copy (`originalEvents`) protected by a mutex and provide
+ *   cheap filtering by favorites or “map downloaded” using
+ *   [MapAvailabilityChecker]
+ * • Catch uncaught coroutine exceptions through a dedicated
+ *   [CoroutineExceptionHandler] and surface them via `_loadingError`
  */
 @OptIn(ExperimentalTime::class)
 class EventsViewModel(
     private val wwwEvents: WWWEvents,
     private val mapChecker: MapAvailabilityChecker,
-    private val platform: WWWPlatform
+    private val platform: WWWPlatform,
 ) : ViewModel() {
-
     private val originalEventsMutex = Mutex()
     var originalEvents: List<IWWWEvent> = emptyList()
 
@@ -63,12 +70,13 @@ class EventsViewModel(
     val hasLoadingError: StateFlow<Boolean> = _loadingError.asStateFlow()
 
     // Exception handler for coroutines
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Log.e(::EventsViewModel.name, "Coroutine error: ${throwable.message}", throwable)
-        if (throwable !is CancellationException) {
-            _loadingError.value = true
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            Log.e(::EventsViewModel.name, "Coroutine error: ${throwable.message}", throwable)
+            if (throwable !is CancellationException) {
+                _loadingError.value = true
+            }
         }
-    }
 
     // ---------------------------
 
@@ -88,17 +96,16 @@ class EventsViewModel(
                     onLoadingError = { exception ->
                         Log.e(::EventsViewModel.name, "Error loading events", exception)
                         _loadingError.value = true
-                    }
+                    },
                 )
 
                 // Collect the events flow and process events list
-                wwwEvents.flow()
+                wwwEvents
+                    .flow()
                     .onEach { eventsList ->
                         processEventsList(eventsList)
-                    }
-                    .flowOn(Dispatchers.Default)
+                    }.flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
-
             } catch (e: Exception) {
                 Log.e(::EventsViewModel.name, "Failed to load events", e)
                 _loadingError.value = true
@@ -130,36 +137,33 @@ class EventsViewModel(
             // Setup simulation speed listeners on DEBUG mode
             monitorSimulatedSpeed(event)
         }
-
     }
 
     /**
      * Monitor simulation speed during event phases (DEBUG mode only)
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        if (BuildConfig.DEBUG) {
-            val scope = CoroutineScope(Dispatchers.Default)
-            var backupSimulationSpeed = 1
+        val scope = CoroutineScope(Dispatchers.Default)
+        var backupSimulationSpeed = 1
 
-            // Handle warming started
-            scope.launch {
-                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
-                    if (isWarmingStarted) {
-                        backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
-                        platform.getSimulation()?.setSpeed(1)
-                    }
+        // Handle warming started
+        scope.launch {
+            event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
+                if (isWarmingStarted) {
+                    backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                    platform.getSimulation()?.setSpeed(1)
                 }
             }
+        }
 
-            // Handle user has been hit
-            scope.launch {
-                event.observer.userHasBeenHit.collect { hasBeenHit ->
-                    if (hasBeenHit) {
-                        // Restore simulation speed after a delay
-                        launch {
-                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
-                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
-                        }
+        // Handle user has been hit
+        scope.launch {
+            event.observer.userHasBeenHit.collect { hasBeenHit ->
+                if (hasBeenHit) {
+                    // Restore simulation speed after a delay
+                    launch {
+                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                        platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                     }
                 }
             }
@@ -173,18 +177,18 @@ class EventsViewModel(
      */
     fun filterEvents(
         onlyFavorites: Boolean = false,
-        onlyDownloaded: Boolean = false
+        onlyDownloaded: Boolean = false,
     ) {
         mapChecker.refreshAvailability()
         viewModelScope.launch {
-            _events.value = originalEvents.filter { event ->
-                when {
-                    onlyFavorites -> event.favorite
-                    onlyDownloaded ->mapChecker.isMapDownloaded(event.id)
-                    else -> true // All events
+            _events.value =
+                originalEvents.filter { event ->
+                    when {
+                        onlyFavorites -> event.favorite
+                        onlyDownloaded -> mapChecker.isMapDownloaded(event.id)
+                        else -> true // All events
+                    }
                 }
-            }
         }
     }
-
 }

@@ -12,7 +12,7 @@ import kotlin.time.Duration.Companion.seconds
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -34,9 +34,7 @@ fun debugBuild() {
 }
 
 class WWWGlobals {
-
     companion object {
-
         // -- URL Constants --
         const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
 
@@ -61,11 +59,13 @@ class WWWGlobals {
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
         const val WAVE_BACKGROUND_COLOR = "#00008B"
         const val WAVE_BACKGROUND_OPACITY = 0.20f
+        const val DEFAULT_SPEED_SIMULATION = 50 // m/s
 
         // -- UI Constants --
 
-        val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
+        val CONST_SPLASH_MIN_DURATION = 2000.milliseconds
         val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
+        val CONST_GPS_PERMISSION_REASK_DELAY = 5.minutes
 
         // -- MapLibre Constants
         const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 16.0
@@ -95,9 +95,7 @@ class WWWGlobals {
         private const val DIM_HUGE_FONTSIZE = 64
         private const val DIM_HUGE2_FONTSIZE = 90
 
-
         // ----------------------------
-        const val CONST_SPLASH_LOGO_WIDTH = 200
 
         const val DIM_INT_TABBAR_HEIGHT = 60
         const val DIM_INT_TABBAR_ITEM_WIDTH = 150
@@ -144,7 +142,6 @@ class WWWGlobals {
 
         const val DIM_INFO_TEXT_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_INFO_DRWAVE_FONTSIZE = DIM_BIG2_FONTSIZE
-        const val DIM_INFO_DRWAVE_INSTA_FONTSIZE = DIM_BIG2_FONTSIZE
 
         const val DIM_FAQ_TITLE_FONTSIZE = DIM_HUGE_FONTSIZE
         const val DIM_FAQ_SECTION_TITLE_FONTSIZE = DIM_DEFAULT_FONTSIZE
@@ -157,7 +154,6 @@ class WWWGlobals {
         const val DIM_FAQ_RULE_ANSWER_FONTSIZE = DIM_DEFAULT_FONTSIZE
 
         const val DIM_COMMON_SOONRUNNING_PADDING = 15
-        const val DIM_COMMON_SOONRUNNING_WIDTH = 115
         const val DIM_COMMON_SOONRUNNING_HEIGHT = DIM_BIG2_FONTSIZE
         const val DIM_COMMON_SOONRUNNING_FONTSIZE = DIM_DEFAULT_FONTSIZE
 
@@ -173,7 +169,6 @@ class WWWGlobals {
         const val DIM_EVENTS_NOEVENTS_FONTSIZE = DIM_BIG_FONTSIZE
         const val DIM_EVENTS_OVERLAY_HEIGHT = 160
         const val DIM_EVENTS_FLAG_WIDTH = 65
-        const val DIM_EVENTS_FLAG_BORDER = 1
         const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
         const val DIM_EVENTS_MAPDL_IMAGE_SIZE = 36
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
@@ -183,5 +178,4 @@ class WWWGlobals {
 
         const val EMPTY_COUNTER = "--:--"
     }
-
 }

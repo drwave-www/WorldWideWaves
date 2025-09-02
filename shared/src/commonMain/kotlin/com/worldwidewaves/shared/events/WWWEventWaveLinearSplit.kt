@@ -4,10 +4,10 @@ package com.worldwidewaves.shared.events
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,9 +36,9 @@ data class WWWEventWaveLinearSplit(
     override val speed: Double,
     override val direction: Direction,
     override val approxDuration: Int,
-    val nbSplits: Int
-) : KoinComponent, WWWEventWave() {
-
+    val nbSplits: Int,
+) : WWWEventWave(),
+    KoinComponent {
     override suspend fun getWavePolygons(): WavePolygons {
         TODO("Not yet implemented")
     }
@@ -67,20 +67,22 @@ data class WWWEventWaveLinearSplit(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
-        val superValid = super.validationErrors()
-        val errors = superValid?.toMutableList() ?: mutableListOf()
+    override fun validationErrors(): List<String>? =
+        mutableListOf<String>().apply {
+            val superValid = super.validationErrors()
+            val errors = superValid?.toMutableList() ?: mutableListOf()
 
-        return errors.apply {
-            when {
-                nbSplits <= 2 ->
-                    add("Number of splits must be greater than 2")
+            return errors
+                .apply {
+                    when {
+                        nbSplits <= 2 ->
+                            add("Number of splits must be greater than 2")
 
-                // TODO
+                        // TODO
 
-                else -> { }
-            }
-        }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveLinearSplit::class.simpleName}: $it" }
-    }
-
+                        else -> { }
+                    }
+                }.takeIf { it.isNotEmpty() }
+                ?.map { "${WWWEventWaveLinearSplit::class.simpleName}: $it" }
+        }
 }

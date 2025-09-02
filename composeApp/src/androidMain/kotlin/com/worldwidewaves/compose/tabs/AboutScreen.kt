@@ -4,7 +4,7 @@ package com.worldwidewaves.compose.tabs
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -42,7 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.shared.MokoRes
@@ -57,20 +57,32 @@ import com.worldwidewaves.theme.commonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 
-private val tabInfo = listOf(
-    MokoRes.strings.tab_infos_name,
-    MokoRes.strings.tab_faq_name
-)
+private val tabInfo =
+    listOf(
+        MokoRes.strings.tab_infos_name,
+        MokoRes.strings.tab_faq_name,
+    )
 
-class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
+/**
+ * *About* root tab that aggregates the **Info** and **FAQ** sub-sections.
+ *
+ * Uses an internal [TabManager] to switch between the two supplied [TabScreen]s
+ * (`aboutInfoScreen`, `aboutFaqScreen`) and provides its own tiny tab-bar
+ * implementation via [TabBarItem].
+ */
+class AboutScreen(
+    aboutInfoScreen: AboutInfoScreen,
+    aboutFaqScreen: AboutFaqScreen,
+) : TabScreen {
     override val name = "Info"
 
-    private val tabManager = TabManager(
-        listOf(
-            aboutInfoScreen,
-            aboutFaqScreen
-        )
-    ) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
+    private val tabManager =
+        TabManager(
+            listOf(
+                aboutInfoScreen,
+                aboutFaqScreen,
+            ),
+        ) { isSelected, tabIndex, _ -> TabBarItem(isSelected, tabIndex) }
 
     // ----------------------------
 
@@ -84,32 +96,38 @@ class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScre
     // ----------------------------
 
     @Composable
-    private fun TabBarItem(isSelected: Boolean, tabIndex: Int) {
+    private fun TabBarItem(
+        isSelected: Boolean,
+        tabIndex: Int,
+    ) {
         Box(
-            modifier = Modifier
-                .height(DIM_INT_TABBAR_HEIGHT.dp)
-                .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .height(DIM_INT_TABBAR_HEIGHT.dp)
+                    .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
+            contentAlignment = Alignment.Center,
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
                 HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
-                        .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
-                    color = Color.White, thickness = 2.dp
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
+                            .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
+                    color = Color.White,
+                    thickness = 2.dp,
                 )
             }
             Text(
                 text = stringResource(tabInfo[tabIndex]),
-                style = commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
-                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal
-                )
+                style =
+                    commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                        fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                    ),
             )
         }
     }
-
 }
 
 // ------------- Common composables for About Screens ---------------
@@ -119,7 +137,8 @@ fun AboutDividerLine() {
     Spacer(modifier = Modifier.size(30.dp))
     HorizontalDivider(
         modifier = Modifier.width(200.dp),
-        color = Color.White, thickness = 2.dp
+        color = Color.White,
+        thickness = 2.dp,
     )
     Spacer(modifier = Modifier.size(30.dp))
 }
@@ -128,7 +147,7 @@ fun AboutDividerLine() {
 fun AboutWWWSocialNetworks() {
     WWWSocialNetworks(
         instagramAccount = stringResource(MokoRes.strings.www_instagram),
-        instagramHashtag = stringResource(MokoRes.strings.www_hashtag)
+        instagramHashtag = stringResource(MokoRes.strings.www_hashtag),
     )
 }
 
@@ -137,9 +156,10 @@ fun AboutWWWLogo() {
     Image(
         painter = painterResource(Res.drawable.www_logo_transparent),
         contentDescription = stringResource(MokoRes.strings.logo_description),
-        modifier = Modifier
-            .width(250.dp)
-            .padding(top = 10.dp)
+        modifier =
+            Modifier
+                .width(250.dp)
+                .padding(top = 10.dp),
     )
     Spacer(modifier = Modifier.size(20.dp))
 }

@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -33,10 +33,9 @@ import platform.UIKit.UIImage
 
 @OptIn(ExperimentalForeignApi::class)
 class IOSImageResolver : ImageResolver<UIImage> {
-    
     /**
      * Resolves a resource path to a UIImage.
-     * 
+     *
      * @param path The resource path to resolve.
      * @return The UIImage for the resource, or null if not found.
      */
@@ -53,10 +52,10 @@ class IOSImageResolver : ImageResolver<UIImage> {
             return null
         }
     }
-    
+
     /**
      * Extracts a specific frame from a sprite sheet.
-     * 
+     *
      * @param path The resource path of the sprite sheet.
      * @param frameIndex The index of the frame to extract (0-based).
      * @param frameWidth The width of a single frame in pixels.
@@ -70,38 +69,38 @@ class IOSImageResolver : ImageResolver<UIImage> {
         frameIndex: Int,
         frameWidth: Int,
         frameHeight: Int,
-        frameCount: Int
+        frameCount: Int,
     ): UIImage? {
         if (frameIndex < 0 || frameIndex >= frameCount) {
             Napier.e("Invalid frame index: $frameIndex (must be between 0 and ${frameCount - 1})")
             return null
         }
-        
+
         try {
             // Load the full sprite sheet image
             val fullImage = resolve(path) ?: return null
-            
+
             // Calculate the frame rectangle
             val x = frameIndex * frameWidth.toDouble()
             val y = 0.0
             val width = frameWidth.toDouble()
             val height = frameHeight.toDouble()
-            
+
             // Begin a new image context with the size of our desired frame
             UIGraphicsBeginImageContext(CGSizeMake(width, height))
-            
+
             // Extract the CValue<CGSize> into concrete width / height values
             val (imgWidth, imgHeight) = fullImage.size.useContents { width to height }
-            
+
             // Draw the full image at a negative offset so only the desired portion appears in the context
             fullImage.drawInRect(CGRectMake(-x, -y, imgWidth, imgHeight))
-            
+
             // Get the cropped image from the context
             val croppedImage = UIGraphicsGetImageFromCurrentImageContext()
-            
+
             // End the image context
             UIGraphicsEndImageContext()
-            
+
             return croppedImage ?: run {
                 Napier.e("Failed to create cropped image for $path at index $frameIndex")
                 null

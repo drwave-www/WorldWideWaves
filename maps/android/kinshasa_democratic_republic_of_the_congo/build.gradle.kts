@@ -4,10 +4,16 @@ plugins {
 }
 android {
     namespace = "com.worldwidewaves.maps.kinshasa_democratic_republic_of_the_congo"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
 
     defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
     }
 
     buildTypes {
