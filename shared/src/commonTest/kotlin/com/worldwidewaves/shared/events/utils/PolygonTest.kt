@@ -21,13 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.events.utils.PolygonUtils.LeftCutPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.RightCutPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeft
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toLeftPolygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toRight
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toRightPolygon
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -36,21 +30,8 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+@Suppress("VisibleForTests")
 class PolygonTest {
-
-    @Test
-    fun testCreateNewLeftCutPolygon() {
-        val leftCutPolygon = LeftCutPolygon(1)
-        val newPolygon: LeftCutPolygon = leftCutPolygon.createNew()
-        assertEquals(1, newPolygon.cutId)
-    }
-
-    @Test
-    fun testCreateNewRightCutPolygon() {
-        val rightCutPolygon = RightCutPolygon(2)
-        val newPolygon: RightCutPolygon = rightCutPolygon.createNew()
-        assertEquals(2, newPolygon.cutId)
-    }
 
     @Test
     fun testAddPosition() {
@@ -158,100 +139,6 @@ class PolygonTest {
             assertEquals(position.lat, polyPosition.lat)
             assertEquals(position.lng, polyPosition.lng)
         }
-    }
-
-    @Test
-    fun testListToLeftPolygon() {
-        val positions = listOf(
-            Position(1.0, 1.0),
-            Position(2.0, 2.0),
-            Position(3.0, 3.0)
-        )
-        val cutId = 1
-        val leftCutPolygon = positions.toLeftPolygon(cutId)
-        assertEquals(cutId, leftCutPolygon.cutId)
-        assertEquals(positions.size, leftCutPolygon.size)
-        val iterator = leftCutPolygon.iterator()
-        positions.forEach { position ->
-            val polyPosition = iterator.next()
-            assertEquals(position.lat, polyPosition.lat)
-            assertEquals(position.lng, polyPosition.lng)
-        }
-    }
-
-    @Test
-    fun testListToRightPolygon() {
-        val positions = listOf(
-            Position(1.0, 1.0),
-            Position(2.0, 2.0),
-            Position(3.0, 3.0)
-        )
-        val cutId = 2
-        val rightCutPolygon = positions.toRightPolygon(cutId)
-        assertEquals(cutId, rightCutPolygon.cutId)
-        assertEquals(positions.size, rightCutPolygon.size)
-        val iterator = rightCutPolygon.iterator()
-        positions.forEach { position ->
-            val polyPosition = iterator.next()
-            assertEquals(position.lat, polyPosition.lat)
-            assertEquals(position.lng, polyPosition.lng)
-        }
-    }
-
-    @Test
-    fun testLeftCutPolygonInitialization() {
-        val cutId = 1
-        val leftCutPolygon = LeftCutPolygon(cutId)
-        assertEquals(cutId, leftCutPolygon.cutId)
-    }
-
-    @Test
-    fun testRightCutPolygonInitialization() {
-        val cutId = 2
-        val rightCutPolygon = RightCutPolygon(cutId)
-        assertEquals(cutId, rightCutPolygon.cutId)
-    }
-
-    @Test
-    fun testLeftCutPolygonCreateNew() {
-        val cutId = 1
-        val leftCutPolygon = LeftCutPolygon(cutId)
-        val newPolygon: LeftCutPolygon = leftCutPolygon.createNew()
-        assertEquals(cutId, newPolygon.cutId)
-    }
-
-    @Test
-    fun testRightCutPolygonCreateNew() {
-        val cutId = 2
-        val rightCutPolygon = RightCutPolygon(cutId)
-        val newPolygon: RightCutPolygon = rightCutPolygon.createNew()
-        assertEquals(cutId, newPolygon.cutId)
-    }
-
-    @Test
-    fun testLeftCutPolygonConvert() {
-        val polygon = Polygon().apply {
-            add(Position(1.0, 1.0))
-            add(Position(2.0, 2.0))
-        }
-        val cutId = 1
-        val leftCutPolygon = polygon.toLeft(cutId)
-        assertEquals(cutId, leftCutPolygon.cutId)
-        assertEquals(0, polygon.size)
-        assertEquals(2, leftCutPolygon.size)
-    }
-
-    @Test
-    fun testRightCutPolygonConvert() {
-        val polygon = Polygon().apply {
-            add(Position(1.0, 1.0))
-            add(Position(2.0, 2.0))
-        }
-        val cutId = 2
-        val rightCutPolygon = polygon.toRight(cutId)
-        assertEquals(cutId, rightCutPolygon.cutId)
-        assertEquals(0, polygon.size)
-        assertEquals(2, rightCutPolygon.size)
     }
 
     @Test

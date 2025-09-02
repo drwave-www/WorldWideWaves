@@ -31,11 +31,11 @@ class SplitByLongitudeLondonTest {
         val geojsonContent = String(Files.readAllBytes(geojsonPath))
         val features = json.parseToJsonElement(geojsonContent).jsonObject["features"]?.jsonArray ?: return
 
-        val polygons = extractPolygons(features)
-        if (polygons.isEmpty()) return
+        val allPolygons = extractPolygons(features)
+        if (allPolygons.isEmpty()) return
 
-        londonPolygon = polygons.maxByOrNull { it.size } ?: return
-        val bbox = londonPolygon.bbox()
+        // Combined bounding-box of every ring to keep scaling identical
+        val bbox = PolygonUtils.polygonsBbox(allPolygons)
 
         val steps = 50
         val lngStep = (bbox.ne.lng - bbox.sw.lng) / steps
@@ -43,12 +43,18 @@ class SplitByLongitudeLondonTest {
         for (i in 0..steps) {
             val lng = bbox.sw.lng + (i * lngStep)
             val composed = ComposedLongitude.fromLongitude(lng)
-            val split = PolygonUtils.splitByLongitude(londonPolygon, composed)
-
+            val leftAgg  = mutableListOf<Polygon>()
+            val rightAgg = mutableListOf<Polygon>()
+            // Split every polygon independently and aggregate
+            allPolygons.forEach { poly ->
+                val split = PolygonUtils.splitByLongitude(poly, composed)
+                leftAgg.addAll(split.left)
+                rightAgg.addAll(split.right)
+            }
             val svg = generateSvg(
-                originalPolygon = londonPolygon,
-                leftPolygons = split.left.map { it as Polygon },
-                rightPolygons = split.right.map { it as Polygon },
+                originalPolygons = allPolygons,
+                leftPolygons = leftAgg,
+                rightPolygons = rightAgg,
                 composedLongitude = composed,
                 bbox = bbox
             )
@@ -80,7 +86,7 @@ class SplitByLongitudeLondonTest {
     }
 
     private fun generateSvg(
-        originalPolygon: Polygon,
+        originalPolygons: List<Polygon>,
         leftPolygons: List<Polygon>,
         rightPolygons: List<Polygon>,
         composedLongitude: ComposedLongitude,
@@ -101,9 +107,12 @@ class SplitByLongitudeLondonTest {
         s.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
         s.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"$width\" height=\"$height\" viewBox=\"0 0 $width $height\">\n")
 
-        s.append("<path d=\"M ")
-        originalPolygon.forEach { s.append("${toPt(it)} ") }
-        s.append("Z\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/>\n")
+        // Draw every original polygon outline
+        originalPolygons.forEach { poly ->
+            s.append("<path d=\"M ")
+            poly.forEach { s.append("${toPt(it)} ") }
+            s.append("Z\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/>\n")
+        }
 
         leftPolygons.forEach { poly ->
             s.append("<path d=\"M ")

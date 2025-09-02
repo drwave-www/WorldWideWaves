@@ -123,7 +123,6 @@ import java.util.Date
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import java.time.Instant as JavaInstant
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
@@ -231,7 +230,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         val simulation = WWWSimulation(
                             startDateTime = simulationTime,
                             userPosition = position,
-                            initialSpeed = 1 // Use current default speed
+                            initialSpeed = 50 // Use current default speed, FIXME: Globals.DIM_SIMULATION_SPEED
                         )
 
                         // Set the simulation
@@ -354,11 +353,8 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
     val context = LocalContext.current
-    val javaInstant = hitDateTime?.let {
-        JavaInstant.ofEpochSecond(it.epochSeconds, it.nanosecondsOfSecond.toLong())
-    }
-    val formattedTime = javaInstant?.let {
-        DateFormat.getTimeFormat(context).format(Date(it.toEpochMilli()))
+    val formattedTime = hitDateTime.let {
+        DateFormat.getTimeFormat(context).format(Date(it.toEpochMilliseconds()))
     } ?: ""
 
     val geolocText = if (isInArea) {

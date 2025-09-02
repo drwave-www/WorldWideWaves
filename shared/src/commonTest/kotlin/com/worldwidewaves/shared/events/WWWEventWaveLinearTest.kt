@@ -326,7 +326,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockClock.now() } returns startTime
 
         // WHEN
-        val result = waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNull(result)
@@ -345,7 +345,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockClock.now() } returns startTime + 1.hours
 
         // WHEN
-        val result = waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNotNull(result)
@@ -371,7 +371,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockClock.now() } returns startTime + 2.hours
 
         // WHEN
-        val result = waveLinear.getWavePolygons(lastWaveState, WWWEventWave.WaveMode.ADD)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNotNull(result)
@@ -410,7 +410,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockEvent.getWaveStartDateTime() } returns startTime
 
         // WHEN
-        val result = waveLinear.getWavePolygons(lastWaveState, WWWEventWave.WaveMode.RECOMPOSE)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNotNull(result)
@@ -431,7 +431,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockClock.now() } returns startTime
 
         // WHEN
-        val result = waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNull(result)
@@ -457,7 +457,7 @@ class WWWEventWaveLinearTest : KoinTest {
         every { mockEvent.getWaveStartDateTime() } returns startTime
 
         // WHEN
-        val result = waveLinear.getWavePolygons(null, WWWEventWave.WaveMode.ADD)
+        val result = waveLinear.getWavePolygons()
 
         // THEN
         assertNotNull(result)
