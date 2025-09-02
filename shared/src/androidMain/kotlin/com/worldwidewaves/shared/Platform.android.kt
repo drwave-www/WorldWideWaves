@@ -4,7 +4,7 @@ package com.worldwidewaves.shared
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -25,135 +25,17 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.e_community_africa
-import com.worldwidewaves.shared.generated.resources.e_community_asia
-import com.worldwidewaves.shared.generated.resources.e_community_europe
-import com.worldwidewaves.shared.generated.resources.e_community_middle_east
-import com.worldwidewaves.shared.generated.resources.e_community_north_america
-import com.worldwidewaves.shared.generated.resources.e_community_oceania
-import com.worldwidewaves.shared.generated.resources.e_community_south_america
-import com.worldwidewaves.shared.generated.resources.e_country_argentina
-import com.worldwidewaves.shared.generated.resources.e_country_australia
-import com.worldwidewaves.shared.generated.resources.e_country_brazil
-import com.worldwidewaves.shared.generated.resources.e_country_canada
-import com.worldwidewaves.shared.generated.resources.e_country_chile
-import com.worldwidewaves.shared.generated.resources.e_country_china
-import com.worldwidewaves.shared.generated.resources.e_country_colombia
-import com.worldwidewaves.shared.generated.resources.e_country_democratic_republic_of_the_congo
-import com.worldwidewaves.shared.generated.resources.e_country_egypt
-import com.worldwidewaves.shared.generated.resources.e_country_england
-import com.worldwidewaves.shared.generated.resources.e_country_france
-import com.worldwidewaves.shared.generated.resources.e_country_germany
-import com.worldwidewaves.shared.generated.resources.e_country_india
-import com.worldwidewaves.shared.generated.resources.e_country_indonesia
-import com.worldwidewaves.shared.generated.resources.e_country_iran
-import com.worldwidewaves.shared.generated.resources.e_country_italy
-import com.worldwidewaves.shared.generated.resources.e_country_japan
-import com.worldwidewaves.shared.generated.resources.e_country_kenya
-import com.worldwidewaves.shared.generated.resources.e_country_mexico
-import com.worldwidewaves.shared.generated.resources.e_country_nigeria
-import com.worldwidewaves.shared.generated.resources.e_country_pakistan
-import com.worldwidewaves.shared.generated.resources.e_country_peru
-import com.worldwidewaves.shared.generated.resources.e_country_philippines
-import com.worldwidewaves.shared.generated.resources.e_country_russia
-import com.worldwidewaves.shared.generated.resources.e_country_south_africa
-import com.worldwidewaves.shared.generated.resources.e_country_south_korea
-import com.worldwidewaves.shared.generated.resources.e_country_spain
-import com.worldwidewaves.shared.generated.resources.e_country_thailand
-import com.worldwidewaves.shared.generated.resources.e_country_turkey
-import com.worldwidewaves.shared.generated.resources.e_country_united_arab_emirates
-import com.worldwidewaves.shared.generated.resources.e_country_usa
-import com.worldwidewaves.shared.generated.resources.e_location_bangalore_india
-import com.worldwidewaves.shared.generated.resources.e_location_bangkok_thailand
-import com.worldwidewaves.shared.generated.resources.e_location_beijing_china
-import com.worldwidewaves.shared.generated.resources.e_location_berlin_germany
-import com.worldwidewaves.shared.generated.resources.e_location_bogota_colombia
-import com.worldwidewaves.shared.generated.resources.e_location_buenos_aires_argentina
-import com.worldwidewaves.shared.generated.resources.e_location_cairo_egypt
-import com.worldwidewaves.shared.generated.resources.e_location_chicago_usa
-import com.worldwidewaves.shared.generated.resources.e_location_delhi_india
-import com.worldwidewaves.shared.generated.resources.e_location_dubai_united_arab_emirates
-import com.worldwidewaves.shared.generated.resources.e_location_hong_kong_china
-import com.worldwidewaves.shared.generated.resources.e_location_istanbul_turkey
-import com.worldwidewaves.shared.generated.resources.e_location_jakarta_indonesia
-import com.worldwidewaves.shared.generated.resources.e_location_johannesburg_south_africa
-import com.worldwidewaves.shared.generated.resources.e_location_karachi_pakistan
-import com.worldwidewaves.shared.generated.resources.e_location_kinshasa_democratic_republic_of_the_congo
-import com.worldwidewaves.shared.generated.resources.e_location_lagos_nigeria
-import com.worldwidewaves.shared.generated.resources.e_location_lima_peru
-import com.worldwidewaves.shared.generated.resources.e_location_london_england
-import com.worldwidewaves.shared.generated.resources.e_location_los_angeles_usa
-import com.worldwidewaves.shared.generated.resources.e_location_madrid_spain
-import com.worldwidewaves.shared.generated.resources.e_location_manila_philippines
-import com.worldwidewaves.shared.generated.resources.e_location_melbourne_australia
-import com.worldwidewaves.shared.generated.resources.e_location_mexico_city_mexico
-import com.worldwidewaves.shared.generated.resources.e_location_moscow_russia
-import com.worldwidewaves.shared.generated.resources.e_location_mumbai_india
-import com.worldwidewaves.shared.generated.resources.e_location_nairobi_kenya
-import com.worldwidewaves.shared.generated.resources.e_location_new_york_usa
-import com.worldwidewaves.shared.generated.resources.e_location_paris_france
-import com.worldwidewaves.shared.generated.resources.e_location_rome_italy
-import com.worldwidewaves.shared.generated.resources.e_location_san_francisco_usa
-import com.worldwidewaves.shared.generated.resources.e_location_santiago_chile
-import com.worldwidewaves.shared.generated.resources.e_location_sao_paulo_brazil
-import com.worldwidewaves.shared.generated.resources.e_location_seoul_south_korea
-import com.worldwidewaves.shared.generated.resources.e_location_shanghai_china
-import com.worldwidewaves.shared.generated.resources.e_location_sydney_australia
-import com.worldwidewaves.shared.generated.resources.e_location_tehran_iran
-import com.worldwidewaves.shared.generated.resources.e_location_tokyo_japan
-import com.worldwidewaves.shared.generated.resources.e_location_toronto_canada
-import com.worldwidewaves.shared.generated.resources.e_location_vancouver_canada
-import com.worldwidewaves.shared.generated.resources.e_map_bangalore_india
-import com.worldwidewaves.shared.generated.resources.e_map_bangkok_thailand
-import com.worldwidewaves.shared.generated.resources.e_map_beijing_china
-import com.worldwidewaves.shared.generated.resources.e_map_berlin_germany
-import com.worldwidewaves.shared.generated.resources.e_map_bogota_colombia
-import com.worldwidewaves.shared.generated.resources.e_map_buenos_aires_argentina
-import com.worldwidewaves.shared.generated.resources.e_map_cairo_egypt
-import com.worldwidewaves.shared.generated.resources.e_map_chicago_usa
-import com.worldwidewaves.shared.generated.resources.e_map_delhi_india
-import com.worldwidewaves.shared.generated.resources.e_map_dubai_united_arab_emirates
-import com.worldwidewaves.shared.generated.resources.e_map_hong_kong_china
-import com.worldwidewaves.shared.generated.resources.e_map_istanbul_turkey
-import com.worldwidewaves.shared.generated.resources.e_map_jakarta_indonesia
-import com.worldwidewaves.shared.generated.resources.e_map_johannesburg_south_africa
-import com.worldwidewaves.shared.generated.resources.e_map_karachi_pakistan
-import com.worldwidewaves.shared.generated.resources.e_map_kinshasa_democratic_republic_of_the_congo
-import com.worldwidewaves.shared.generated.resources.e_map_lagos_nigeria
-import com.worldwidewaves.shared.generated.resources.e_map_lima_peru
-import com.worldwidewaves.shared.generated.resources.e_map_london_england
-import com.worldwidewaves.shared.generated.resources.e_map_los_angeles_usa
-import com.worldwidewaves.shared.generated.resources.e_map_madrid_spain
-import com.worldwidewaves.shared.generated.resources.e_map_manila_philippines
-import com.worldwidewaves.shared.generated.resources.e_map_melbourne_australia
-import com.worldwidewaves.shared.generated.resources.e_map_mexico_city_mexico
-import com.worldwidewaves.shared.generated.resources.e_map_moscow_russia
-import com.worldwidewaves.shared.generated.resources.e_map_mumbai_india
-import com.worldwidewaves.shared.generated.resources.e_map_nairobi_kenya
-import com.worldwidewaves.shared.generated.resources.e_map_new_york_usa
-import com.worldwidewaves.shared.generated.resources.e_map_paris_france
-import com.worldwidewaves.shared.generated.resources.e_map_rome_italy
-import com.worldwidewaves.shared.generated.resources.e_map_san_francisco_usa
-import com.worldwidewaves.shared.generated.resources.e_map_santiago_chile
-import com.worldwidewaves.shared.generated.resources.e_map_sao_paulo_brazil
-import com.worldwidewaves.shared.generated.resources.e_map_seoul_south_korea
-import com.worldwidewaves.shared.generated.resources.e_map_shanghai_china
-import com.worldwidewaves.shared.generated.resources.e_map_sydney_australia
-import com.worldwidewaves.shared.generated.resources.e_map_tehran_iran
-import com.worldwidewaves.shared.generated.resources.e_map_tokyo_japan
-import com.worldwidewaves.shared.generated.resources.e_map_toronto_canada
-import com.worldwidewaves.shared.generated.resources.e_map_vancouver_canada
-import com.worldwidewaves.shared.generated.resources.not_found
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
+import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.IOException
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -164,7 +46,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
             File(filePath).readText()
         }
     } else {
-        Log.e(::readGeoJson.name, "Map file not available for event $eventId")
+        Log.w(::readGeoJson.name, "GeoJSON file not available for event $eventId")
         null
     }
 }
@@ -179,104 +61,130 @@ actual suspend fun readGeoJson(eventId: String): String? {
  * cached file size does not match the expected size, it reads the file from the resources and caches it.
  *
  */
-actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
+actual suspend fun getMapFileAbsolutePath(
+    eventId: String,
+    extension: String,
+): String? {
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
-    val splitInstallManager = SplitInstallManagerFactory.create(context)
 
-    if (!splitInstallManager.installedModules.contains(eventId)) {
-        Log.e(::getMapFileAbsolutePath.name, "Feature module $eventId is not installed")
-        return null
-    }
-
-    // Ensure split compat is installed
-    SplitCompat.install(context)
-
-    return try {
-        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension from feature module")
-
-        val assetPath = "$eventId.$extension"
-
-        try {
-            // Get asset information - this might not provide accurate size for compressed assets
-            val assetFileDescriptor = try {
-                context.assets.openFd(assetPath)
-            } catch (_: IOException) {
-                // Some compressed assets can't be accessed via openFd, fall back to open
-                null
+    // First check if we have a valid cached file that doesn't need updating
+    val needsUpdate =
+        when {
+            !cachedFile.exists() -> {
+                Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
+                true
             }
-
-            val needsUpdate = when {
-                !cachedFile.exists() -> true
-                !metadataFile.exists() -> true
-                else -> {
-                    val lastCacheTime = try {
+            !metadataFile.exists() -> {
+                Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
+                true
+            }
+            else -> {
+                val lastCacheTime =
+                    try {
                         metadataFile.readText().toLong()
                     } catch (_: Exception) {
                         0L
                     }
 
-                    // Check if the app was installed/updated after we cached the file
-                    val appInstallTime = try {
+                // Check if the app was installed/updated after we cached the file
+                val appInstallTime =
+                    try {
                         context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
                     } catch (_: Exception) {
                         System.currentTimeMillis()
                     }
 
-                    // If the app was updated after we cached the file, we should update the cache
-                    appInstallTime > lastCacheTime
+                val isStale = appInstallTime > lastCacheTime
+                if (isStale) {
+                    Log.d(
+                        ::getMapFileAbsolutePath.name,
+                        "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
+                    )
+                } else {
+                    Log.d(
+                        ::getMapFileAbsolutePath.name,
+                        "Cache is up-to-date for $eventId.$extension",
+                    )
                 }
+                isStale
             }
+        }
 
-            // Close the descriptor if we opened one
-            assetFileDescriptor?.close()
+    // If we have a valid cached file, return its path immediately
+    if (!needsUpdate) {
+        Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
+        return cachedFile.absolutePath
+    }
 
-            if (needsUpdate) {
-                Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+    // If we need to update the cache, try to open the asset from feature module
+    Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
 
-                withContext(Dispatchers.IO) {
-                    try {
-                        // Use a buffered approach for better memory efficiency
-                        context.assets.open(assetPath).use { input ->
-                            BufferedInputStream(input, 8192).use { bufferedInput ->
-                                cachedFile.outputStream().use { fileOutput ->
-                                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                        val buffer = ByteArray(8192)
-                                        var bytesRead: Int
+    val assetPath = "$eventId.$extension"
 
-                                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                            bufferedOutput.write(buffer, 0, bytesRead)
-                                        }
+    /* ------------------------------------------------------------------
+     * Play Feature Delivery race mitigation:
+     * Immediately after SplitInstall reports INSTALLED the asset might
+     * not yet be visible to the running Activity/process. Retry a few
+     * times with a fresh split-aware context before giving up.
+     * ---------------------------------------------------------------- */
 
-                                        bufferedOutput.flush()
-                                    }
+    val ctx =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                context.createContextForSplit(eventId)
+            } catch (_: Exception) {
+                context
+            }
+        } else {
+            context
+        }
+
+    // Ensure split-compat hooks into this context
+    SplitCompat.install(ctx)
+
+    // We found a context that can access the asset, now copy it to cache
+    try {
+        Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+
+        withContext(Dispatchers.IO) {
+            try {
+                // Use a buffered approach for better memory efficiency
+                ctx.assets.open(assetPath).use { input ->
+                    BufferedInputStream(input, 8192).use { bufferedInput ->
+                        cachedFile.outputStream().use { fileOutput ->
+                            BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                                val buffer = ByteArray(8192)
+                                var bytesRead: Int
+
+                                while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                                    bufferedOutput.write(buffer, 0, bytesRead)
                                 }
+
+                                bufferedOutput.flush()
                             }
                         }
-
-                        // Update metadata after successful copy
-                        metadataFile.writeText(System.currentTimeMillis().toString())
-                    } catch (e: Exception) {
-                        Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                        // Delete partially written file if there was an error
-                        if (cachedFile.exists()) {
-                            cachedFile.delete()
-                        }
-                        throw e
                     }
                 }
-            }
 
-            cachedFile.absolutePath
-        } catch (e: IOException) {
-            Log.e(::getMapFileAbsolutePath.name, "Resource not found in module: ${e.message}")
-            return null
+                // Update metadata after successful copy
+                metadataFile.writeText(System.currentTimeMillis().toString())
+            } catch (e: Exception) {
+                Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                // Delete partially written file if there was an error
+                if (cachedFile.exists()) {
+                    cachedFile.delete()
+                }
+                throw e
+            }
         }
+
+        return cachedFile.absolutePath
     } catch (e: Exception) {
         Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
         e.printStackTrace()
-        null
+        return null
     }
 }
 
@@ -323,7 +231,10 @@ actual fun cachedFilePath(fileName: String): String? {
  * is being cached.
  *
  */
-actual fun cacheStringToFile(fileName: String, content: String) : String {
+actual fun cacheStringToFile(
+    fileName: String,
+    content: String,
+): String {
     val context: Context by inject(Context::class.java)
     Log.v(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
@@ -375,14 +286,15 @@ actual fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
 
-    val targets = listOf(
-        "$eventId.mbtiles",
-        "$eventId.mbtiles.metadata",
-        "$eventId.geojson",
-        "$eventId.geojson.metadata",
-        "style-$eventId.json",
-        "style-$eventId.json.metadata"
-    )
+    val targets =
+        listOf(
+            "$eventId.mbtiles",
+            "$eventId.mbtiles.metadata",
+            "$eventId.geojson",
+            "$eventId.geojson.metadata",
+            "style-$eventId.json",
+            "style-$eventId.json.metadata",
+        )
 
     for (name in targets) {
         try {
@@ -402,7 +314,7 @@ actual fun clearEventCache(eventId: String) {
 
 /**
  * Determine whether an already-cached file is stale with regard to the
- * application’s lastUpdateTime (which also changes when dynamic-feature
+ * application's lastUpdateTime (which also changes when dynamic-feature
  * splits are updated through the Play Store).
  */
 actual fun isCachedFileStale(fileName: String): Boolean {
@@ -413,17 +325,19 @@ actual fun isCachedFileStale(fileName: String): Boolean {
     if (!dataFile.exists()) return true
 
     val metadataFile = File(cacheDir, "$fileName.metadata")
-    val cachedTime = try {
-        metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
-    } catch (_: Exception) {
-        0L
-    }
+    val cachedTime =
+        try {
+            metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
 
-    val appUpdateTime = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-    } catch (_: Exception) {
-        System.currentTimeMillis()
-    }
+    val appUpdateTime =
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+        } catch (_: Exception) {
+            System.currentTimeMillis()
+        }
 
     return appUpdateTime > cachedTime
 }
@@ -439,4 +353,11 @@ actual fun updateCacheMetadata(fileName: String) {
     } catch (e: Exception) {
         Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
     }
+}
+
+// -----------------------------------------------------------
+
+actual fun localizeString(resource: StringResource): String {
+    val context = KoinPlatform.getKoin().get<Context>()
+    return resource.desc().toString(context)
 }

@@ -19,3 +19,4 @@ captures
 *.aab
 **/logs/
 scripts/images/generated_images/
+composeApp/release/

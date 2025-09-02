@@ -1,43 +1,68 @@
 
 TODAY :
 
-- pb de placement labels running / ..
-- erreurs wave : Dubai / Moscow / Shanghai / Tokyo / Jakarta / London
-                 --> Beijing ??
-   --> Add logs in splitLongitude (nb of polygons original/left/right)
-   ==> STAGE SPLIT AND REVERT TO A SIMPLE METHOD (no CutPlygons + delete recovery methods) ?
+- Langue système pas prise en compte ? -> tester en rebootant le smartphone
 
-- !! Tester le deroulement complet d'une vague sur une tres grande ville a vitesse normale
-- !! performance analysis (profiling) de l'app sur une grande ville
-
-- Global code linting review
-- > PLAY STORE UPLOAD <
-
-- Packaging :
-    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+- faire la liste des remarques sur Factory.ai et accepter la demande de contact
+   - pause
+   - interrompre pendant le travail pour preciser des choses
+   - tres lents lorsque la discussion prend de l'ampleur
+   - connecter auto au local
+   - existe p-e ? verifier : liste de contraintes / regles personnelles
+   - parfois change le local sans commit, parfois commit, parfois cree une branche, pas clair de savoir, parfois utilise feat, parfois feature, parfois chore, .. pas clair
+   - detection de l'acces local en corus de tache
 
 ---------------------------------------------
 
-- PDF + Message + Planif presentation
-   -> referencement par chacun des evenements : https://chatgpt.com/c/686ef0eb-d180-8005-8197-9c151ba64362
-- faire qques modifs sur la video 1 (rempl visuels au debut, quote plus longue a la fin, ..)
-- automatiser la generation des textes sur une liste de langues (comptes instagram)
-    - prompt:
-        - https://chatgpt.com/c/68b21370-8f78-8331-a8bd-7fe411bfca04
-        - j'ai fais une video, avec des placeholders pour du texte, comment puis-je automatiser la production de cette video dans toutes ces langues en lui fournissant simplement les traductions des textes dans toutes ces langues ?
-    - extraire de la video PowerDirector les temps de debut, duree de tous les textes
+- commencer une liste de personnes a contacter dans chacune des 40 villes
+    - influenceurs
+    - associations
+    - podcasteurs
+    - journalistes
+
+- RESILIER abonnements non necessaires : InDesign, Deepl, ...
+
+---------------------------------------------
+
+- Add the 'message' to the app (cf PDF)
+- Add the link to events on event page
+- Packaging :
+    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+- UI Tests sur differents devices et langues
 
 ---------------------------------------------
 
 - Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
 
-- ======== Bugs/Issues/Refactorings =========
-    - put a timer on GPS activation requests (?)
+- languages of events :
+[
+"ar",--
+"de",--
+"en",--
+"es",--
+"fa",XX
+"fr",--
+"hi",XX
+"id",--
+"it",--
+"ja",--
+"ko",--
+"ph",XX
+"pt",--
+"ru",--
+"sw",XX
+"th",XX
+"tr",--
+"ur",XX
+"zh"--
+]
+
+fa, hi, ph, sw, th, ur : not supported by WWW yet
 
 ---------------------------------------------
 START IOS
 --> Global tour of what can be put in commons
----------------------------------------------
+---------------------------------------------çàèâéê
 
 TODO:
 
@@ -61,9 +86,5 @@ Ideas:
     - par pays / events
 - Une association par event, avec un lien cagnotte et une video youtube de présentation
 - Realite augmentee pour "voir" la vague ? : https://www.openium.fr/expertises/realitee-augmentee/
-
-- reduction of pbf : https://techblog.dac.digital/openstreetmap-map-size-reduction-guide-43372bbf38c9
-    --> + https://wiki.openstreetmap.org/wiki/Map_features
-    --> + https://wiki.openstreetmap.org/wiki/Category:Features
 
 - jetpack compose test UI : https://medium.com/@myofficework000/exploring-jetpack-compose-ui-testing-a-comprehensive-guide-eb0c2d93e111

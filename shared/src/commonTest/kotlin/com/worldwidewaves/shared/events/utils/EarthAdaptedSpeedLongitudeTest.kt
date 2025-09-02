@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -61,7 +61,6 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class EarthAdaptedSpeedLongitudeTest {
-
     private val dispatcher = StandardTestDispatcher() // Create dispatcher instance
 
     private val epsilonFine = 1e-6 // For floating-point comparisons
@@ -72,11 +71,18 @@ class EarthAdaptedSpeedLongitudeTest {
     private var mockClock = mockk<IClock>()
 
     init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
+        Napier.base(
+            object : Antilog() {
+                override fun performLog(
+                    priority: LogLevel,
+                    tag: String?,
+                    throwable: Throwable?,
+                    message: String?,
+                ) {
+                    println(message)
+                }
+            },
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -126,90 +132,96 @@ class EarthAdaptedSpeedLongitudeTest {
     }
 
     @Test
-    fun `test withProgression - bands check`() = runTest {
-        // GIVEN
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(-10.0, -10.0),
-            ne = Position(10.0, 10.0)
-        )
-        val speed = 100.0 // m/s
-        val direction = Direction.EAST
+    fun `test withProgression - bands check`() =
+        runTest {
+            // GIVEN
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(-10.0, -10.0),
+                    ne = Position(10.0, 10.0),
+                )
+            val speed = 100.0 // m/s
+            val direction = Direction.EAST
 
-        val distanceAtEquator = calculateDistance(-10.0, 10.0, 0.0)
-        val timeToFull : Duration = (distanceAtEquator / speed).seconds
-        val nbWindows1 = ceil(distanceAtEquator / WAVE_LINEAR_METERS_REFRESH)
-        val nbWindows2 = ceil(
-            timeToFull.inWholeMilliseconds.toDouble() /
-                    (WAVE_LINEAR_METERS_REFRESH / speed).seconds.inWholeMilliseconds.toDouble()
-        )
+            val distanceAtEquator = calculateDistance(-10.0, 10.0, 0.0)
+            val timeToFull: Duration = (distanceAtEquator / speed).seconds
+            val nbWindows1 = ceil(distanceAtEquator / WAVE_LINEAR_METERS_REFRESH)
+            val nbWindows2 =
+                ceil(
+                    timeToFull.inWholeMilliseconds.toDouble() /
+                        (WAVE_LINEAR_METERS_REFRESH / speed).seconds.inWholeMilliseconds.toDouble(),
+                )
 
-        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
-        val bands = longitude.bands()
+            val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+            val bands = longitude.bands()
 
-        // WHEN
-        val progressed = longitude.withProgression(timeToFull)
-        val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
-        val bandClosestToZero = bands.minBy { abs(it.key) }
-        val addedStepDistance = calculateDistance(nbWindows1 * bandClosestToZero.value.lngWidth, 0.0)
+            // WHEN
+            val progressed = longitude.withProgression(timeToFull)
+            val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
+            val bandClosestToZero = bands.minBy { abs(it.key) }
+            val addedStepDistance = calculateDistance(nbWindows1 * bandClosestToZero.value.lngWidth, 0.0)
 
-        // THEN
-        assertEquals(10.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 10")
-        assertEquals(nbWindows1, nbWindows2, epsilonFine, "Calculation of nb windows should be consistent")
-        assertEquals(distanceAtEquator, addedStepDistance, epsilonHuge, "Stepped distance should equal to traversed distance")
-    }
+            // THEN
+            assertEquals(10.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 10")
+            assertEquals(nbWindows1, nbWindows2, epsilonFine, "Calculation of nb windows should be consistent")
+            assertEquals(distanceAtEquator, addedStepDistance, epsilonHuge, "Stepped distance should equal to traversed distance")
+        }
 
     @Test
-    fun `test withProgression - compare with WaveDuration`() = runTest {
-        // GIVEN
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(-10.0, -10.0),
-            ne = Position(10.0, 10.0)
-        )
-        val speed = 100.0 // m/s
-        val direction = Direction.EAST
+    fun `test withProgression - compare with WaveDuration`() =
+        runTest {
+            // GIVEN
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(-10.0, -10.0),
+                    ne = Position(10.0, 10.0),
+                )
+            val speed = 100.0 // m/s
+            val direction = Direction.EAST
 
-        val halfDistanceAtEquator = calculateDistance(-10.0, 10.0, 0.0) / 2
-        val timeTo50percent : Duration = (halfDistanceAtEquator / speed).seconds
+            val halfDistanceAtEquator = calculateDistance(-10.0, 10.0, 0.0) / 2
+            val timeTo50percent: Duration = (halfDistanceAtEquator / speed).seconds
 
-        val startTime = Instant.parse("2024-01-01T00:00:00Z")
-        val currentTime = startTime + timeTo50percent
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + timeTo50percent
 
-        val mockEvent = mockk<IWWWEvent>(relaxed = true)
-        val mockArea = mockk<WWWEventArea>()
+            val mockEvent = mockk<IWWWEvent>(relaxed = true)
+            val mockArea = mockk<WWWEventArea>()
 
-        val waveLinear = WWWEventWaveLinear(
-            speed = speed,
-            direction = direction,
-            approxDuration = 60
-        )
+            val waveLinear =
+                WWWEventWaveLinear(
+                    speed = speed,
+                    direction = direction,
+                    approxDuration = 60,
+                )
 
-        every { mockClock.now() } returns currentTime
-        every { mockEvent.getWaveStartDateTime() } returns startTime
-        coEvery { mockEvent.isRunning() } returns true
-        every { mockEvent.area } returns mockArea
-        coEvery { mockEvent.area.bbox() } returns bbox
+            every { mockClock.now() } returns currentTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockEvent.isRunning() } returns true
+            every { mockEvent.area } returns mockArea
+            coEvery { mockEvent.area.bbox() } returns bbox
 
-        waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
+            waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
-        val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
+            val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
 
-        // WHEN
-        val waveDuration = waveLinear.getWaveDuration()
-        val progression = waveLinear.getProgression()
-        val progressed = longitude.withProgression(timeTo50percent)
+            // WHEN
+            val waveDuration = waveLinear.getWaveDuration()
+            val progression = waveLinear.getProgression()
+            val progressed = longitude.withProgression(timeTo50percent)
 
-        val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
+            val positionClosestToZero = progressed.getPositions().minBy { abs(it.lat) }
 
-        // THEN
-        assertEquals(
-            (timeTo50percent * 2).toDouble(DurationUnit.MILLISECONDS),
-            waveDuration.toDouble(DurationUnit.MILLISECONDS),
-            epsilonFine,
-            "Wave duration should be twice half the way"
-        )
-        assertEquals(50.0, progression, epsilonLarge, "progression should be half the way")
-        assertEquals(0.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 0")
-    }
+            // THEN
+            assertEquals(
+                (timeTo50percent * 2).toDouble(DurationUnit.MILLISECONDS),
+                waveDuration.toDouble(DurationUnit.MILLISECONDS),
+                epsilonFine,
+                "Wave duration should be twice half the way",
+            )
+            assertEquals(50.0, progression, epsilonLarge, "progression should be half the way")
+            assertEquals(0.0, positionClosestToZero.lng, epsilonMedium, "current longitude should be 0")
+        }
 
     @Test
     fun `test withProgression - direction West`() {
@@ -277,7 +289,8 @@ class EarthAdaptedSpeedLongitudeTest {
         val bands = longitude.calculateWaveBands()
 
         assertTrue(bands.isNotEmpty())
-        bands.drop(1).dropLast(1).forEach { // FIXME: remove first and last before testing
+        bands.drop(1).dropLast(1).forEach {
+            // FIXME: remove first and last before testing
             assertTrue(it.latitude in 0.0..10.0)
             assertTrue(it.latWidth > 0)
             assertTrue(it.lngWidth > 0)

@@ -2,7 +2,7 @@
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -21,10 +21,10 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
-import com.worldwidewaves.shared.doInitKoin
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.datetime.LocalDateTime
 import org.koin.core.context.loadKoinModules
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
@@ -35,7 +35,6 @@ import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
 import platform.Foundation.writeToFile
-import platform.UIKit.UIDevice
 
 fun initKoinIOS() {
     // Initialise Koin only once (see Helper.doInitKoin).
@@ -44,20 +43,18 @@ fun initKoinIOS() {
 }
 
 /**
- * Platform descriptor for iOS.  
+ * Platform descriptor for iOS.
  * Simply instantiate the common `WWWPlatform` with the device name/version.
  */
-
-
-actual fun getEventImage(type: String, id: String): Any? {
-    TODO("Not yet implemented")
-}
 
 actual suspend fun readGeoJson(eventId: String): String? {
     TODO("Not yet implemented")
 }
 
-actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
+actual suspend fun getMapFileAbsolutePath(
+    eventId: String,
+    extension: String,
+): String? {
     TODO("Not yet implemented")
 }
 
@@ -74,7 +71,10 @@ actual fun cachedFilePath(fileName: String): String? {
 }
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-actual fun cacheStringToFile(fileName: String, content: String) : String {
+actual fun cacheStringToFile(
+    fileName: String,
+    content: String,
+): String {
     val cacheDir = getCacheDir()
     val filePath = "$cacheDir/$fileName"
     val nsString = NSString.create(string = content)
@@ -82,13 +82,12 @@ actual fun cacheStringToFile(fileName: String, content: String) : String {
     return fileName
 }
 
-actual fun getCacheDir(): String {
-    return NSSearchPathForDirectoriesInDomains(
+actual fun getCacheDir(): String =
+    NSSearchPathForDirectoriesInDomains(
         NSCachesDirectory,
         NSUserDomainMask,
-        true
+        true,
     ).first() as String
-}
 
 actual suspend fun cacheDeepFile(fileName: String) {
     TODO("Not yet implemented")
@@ -99,11 +98,18 @@ actual suspend fun cacheDeepFile(fileName: String) {
 // ---------------------------------------------------------------------------
 
 actual fun clearEventCache(eventId: String) {
-    /* no-op on iOS – all map assets are shipped inside the app bundle */
+    // no-op on iOS – all map assets are shipped inside the app bundle
 }
 
 actual fun isCachedFileStale(fileName: String): Boolean = false
 
 actual fun updateCacheMetadata(fileName: String) {
-    /* no-op on iOS */
+    // no-op on iOS
+}
+
+// ---------------------------
+
+actual fun localizeString(resource: StringResource): String {
+    // Convert StringResource to localized string using iOS framework
+    return resource.desc().localized()
 }

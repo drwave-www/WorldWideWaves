@@ -1,4 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WorldWideWaves</string>
+
+    <!-- Dynamic-feature titles (English only) -->
+    <string name="map_title_bangalore_india">Map Bangalore</string>
+    <string name="map_title_bangkok_thailand">Map Bangkok</string>
+    <string name="map_title_beijing_china">Map Beijing</string>
+    <string name="map_title_berlin_germany">Map Berlin</string>
+    <string name="map_title_bogota_colombia">Map Bogota</string>
+    <string name="map_title_buenos_aires_argentina">Map Buenos Aires</string>
+    <string name="map_title_cairo_egypt">Map Cairo</string>
+    <string name="map_title_chicago_usa">Map Chicago</string>
+    <string name="map_title_delhi_india">Map Delhi</string>
+    <string name="map_title_dubai_united_arab_emirates">Map Dubai</string>
+    <string name="map_title_hong_kong_china">Map Hong Kong</string>
+    <string name="map_title_istanbul_turkey">Map Istanbul</string>
+    <string name="map_title_jakarta_indonesia">Map Jakarta</string>
+    <string name="map_title_johannesburg_south_africa">Map Johannesburg</string>
+    <string name="map_title_karachi_pakistan">Map Karachi</string>
+    <string name="map_title_kinshasa_democratic_republic_of_the_congo">Map Kinshasa</string>
+    <string name="map_title_lagos_nigeria">Map Lagos</string>
+    <string name="map_title_lima_peru">Map Lima</string>
+    <string name="map_title_london_england">Map London</string>
+    <string name="map_title_los_angeles_usa">Map Los Angeles</string>
+    <string name="map_title_madrid_spain">Map Madrid</string>
+    <string name="map_title_manila_philippines">Map Manila</string>
+    <string name="map_title_melbourne_australia">Map Melbourne</string>
+    <string name="map_title_mexico_city_mexico">Map Mexico City</string>
+    <string name="map_title_moscow_russia">Map Moscow</string>
+    <string name="map_title_mumbai_india">Map Mumbai</string>
+    <string name="map_title_nairobi_kenya">Map Nairobi</string>
+    <string name="map_title_new_york_usa">Map New York</string>
+    <string name="map_title_paris_france">Map Paris</string>
+    <string name="map_title_rome_italy">Map Rome</string>
+    <string name="map_title_san_francisco_usa">Map San Francisco</string>
+    <string name="map_title_santiago_chile">Map Santiago</string>
+    <string name="map_title_sao_paulo_brazil">Map São Paulo</string>
+    <string name="map_title_seoul_south_korea">Map Seoul</string>
+    <string name="map_title_shanghai_china">Map Shanghai</string>
+    <string name="map_title_sydney_australia">Map Sydney</string>
+    <string name="map_title_tehran_iran">Map Tehran</string>
+    <string name="map_title_tokyo_japan">Map Tokyo</string>
+    <string name="map_title_toronto_canada">Map Toronto</string>
+    <string name="map_title_vancouver_canada">Map Vancouver</string>
 </resources>

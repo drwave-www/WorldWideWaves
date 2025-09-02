@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.di
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -23,22 +23,23 @@ package com.worldwidewaves.shared.di
 
 import android.os.Build
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.debugBuild
+import com.worldwidewaves.shared.sound.AndroidSoundPlayer
+import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.utils.AndroidImageResolver
 import com.worldwidewaves.shared.utils.ImageResolver
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.dsl.module
 
-val androidModule = module {
-    single<WWWPlatform> {
-        debugBuild()
-        WWWPlatform("Android ${Build.VERSION.SDK_INT}")
-    }
-    single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
-    single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
+val androidModule =
+    module {
+        single<WWWPlatform> {
+            debugBuild()
+            WWWPlatform("Android ${Build.VERSION.SDK_INT}")
+        }
+        single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
+        single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
 
-    single<SoundPlayer> { AndroidSoundPlayer(get()) }
-}
+        single<SoundPlayer> { AndroidSoundPlayer(get()) }
+    }

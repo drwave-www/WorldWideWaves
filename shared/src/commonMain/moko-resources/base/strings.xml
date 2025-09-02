@@ -14,7 +14,7 @@
     <string name="back">Back</string>
 
     <!-- Context: In event and full map screens, to go to the wave screen, Size: Medium -->
-    <string name="wave_now">Wave Now!</string>
+    <string name="wave_now">Join the wave!</string>
 
     <!-- Context: In events list screen, text of the three events filtering tabs, Size: Short -->
     <string name="events_select_all">All</string> <!-- Select all events -->
@@ -28,10 +28,29 @@
     <string name="map_starting_download">Starting download..</string>
     <string name="map_retrying_download">Retrying download</string>
     <string name="map_loading">Loading map..</string>
+    <string name="map_installing">Installing..</string>
     <string name="map_cancel_download">Cancel</string>
     <string name="map_retry_download">Retry</string>
     <string name="map_error_download">Error downloading map</string>
     <string name="map_downloaded">Map has been downloaded</string>
+
+    <!-- Map dynamic-feature installation error messages -->
+    <string name="map_error_network">Network error. Please check your connection.</string>
+    <string name="map_error_insufficient_storage">Insufficient storage space.</string>
+    <string name="map_error_module_unavailable">Map module unavailable.</string>
+    <string name="map_error_active_sessions_limit">Too many sessions in progress. Try again later.</string>
+    <string name="map_error_invalid_request">Invalid request. Please try again.</string>
+    <string name="map_error_api_not_available">Play Store API is not available on this device.</string>
+    <string name="map_error_incompatible_with_existing_session">Incompatible with existing session.</string>
+    <string name="map_error_service_died">Service died unexpectedly. Please try again.</string>
+    <string name="map_error_access_denied">Access denied.</string>
+    <string name="map_error_account_issue">Google Play Store account issue. Please check your account and try again.</string>
+    <string name="map_error_unknown">Unknown error occurred: %1$d</string>
+    <string name="map_error_failed_after_retries">Failed to start download after multiple attempts</string>
+
+    <!-- Context: Error message when user tries to start simulation without downloading the map first, Size: Medium -->
+    <string name="simulation_map_required_title">Map Required</string> <!-- Title of the dialog when map is required for simulation -->
+    <string name="simulation_map_required_message">Please download the map first before starting the simulation.</string> <!-- Message telling user to download map before simulation -->
 
     <!-- Context: In the maps uninstall dialog after click of the user to the uninstall button on an already downloaded event, Size: Short -->
     <string name="events_uninstall_map_title">Uninstall Map</string> <!-- Title of the uninstall map confirmation dialog -->
@@ -46,33 +65,33 @@
 
     <!-- Context: In event screen, to show the status of the event, Size: Short -->
     <string name="event_done">Done</string> <!-- Event is finished, it has already occurred -->
-    <string name="event_soon">soon !</string> <!-- Event will start soon, in some days -->
-    <string name="event_running">running</string> <!-- Event is currently running -->
+    <string name="event_soon">soon !</string>
+    <string name="event_running">running</string>
 
     <!-- Context: In event screen, to show the favorite status of the map as image content description, Size: Medium -->
     <string name="event_favorite_on">favorite is on</string>
     <string name="event_favorite_off">favorite is off</string>
 
     <!-- Context: In full map event screen, to move the viewpoint to the current use position or to the current wave position, Size: Medium -->
-    <string name="event_target_wave_on">Target the wave</string> <!-- The event is running, move the map to the current wave position, image content description -->
-    <string name="event_target_wave_off">The event is not running</string> <!-- The event is not running, image content description -->
-    <string name="event_target_me_on">Target me</string> <!-- The event is running, move the map to the current user position, image content description -->
-    <string name="event_target_me_off">You're not in the area</string> <!-- The user is not in the event area, image content description -->
+    <string name="event_target_wave_on">Target the wave</string>
+    <string name="event_target_wave_off">The event is not running</string>
+    <string name="event_target_me_on">Target me</string>
+    <string name="event_target_me_off">You're not in the area</string>
 
     <!-- Context: In event list screen, backup text when no events can be shown depending on filtering, Size: Medium -->
     <string name="events_favorites_empty">No events has been added as favorite, start by clicking on the star icon on your favorite event!</string>
     <string name="events_downloaded_empty">No events has been yet downloaded</string>
     <string name="events_empty">Events list is empty</string>
     <string name="events_loading_error">An error occurred when loading events</string>
+    <string name="events_not_found_loading">Event not found and not yet loaded...</string>
 
     <!-- Context: In event screen, to show the status of the geolocation, Size: Medium -->
     <string name="geoloc_undone">Updating location..</string>
     <string name="geoloc_error">Unable to locate you</string>
-    <string name="geoloc_yourein">YOU ARE in the area!</string> <!-- The user is in the event area -->
-    <!-- Same as above, but with a time literal injected (placeholder will be formatted locale-aware) -->
+    <string name="geoloc_yourein">YOU ARE in the area!</string>
     <string name="geoloc_yourein_at">YOU ARE in the area! (%1$s)</string>
-    <string name="geoloc_yourenotin">YOU ARE NOT in the area</string> <!-- The user is not in the event area -->
-    <string name="geoloc_warm_in">YOU ARE in the area and will warm!</string> <!-- The user is in the event area and the wave warming will start soon (choreography before the wave) -->
+    <string name="geoloc_yourenotin">YOU ARE NOT in the area</string>
+    <string name="geoloc_warm_in">YOU ARE in the area and will warm!</string>
 
     <!-- Context: In event screens, when GPS access is requested, in a dialog, Size: Medium -->
     <string name="ask_gps_enable">Your GPS seems to be disabled, do you want to enable it?</string>
@@ -82,32 +101,37 @@
     <string name="error">Error</string>
 
     <!-- Context: Plural template for durations -->
-    <string name="minute_singular">%1$dmn</string> <!-- minutes abbreviated, singular -->
-    <string name="minute_plural">%1$dmn</string> <!-- minutes abbreviated, plural -->
-    <string name="hour_singular">%1$dh</string> <!-- hours abbreviated, singular -->
-    <string name="hour_plural">%1$dh</string> <!-- hours abbreviated, plural -->
+    <string name="minute_singular">%1$dmn</string>
+    <string name="minute_plural">%1$dmn</string>
+    <string name="hour_singular">%1$dh</string>
+    <string name="hour_plural">%1$dh</string>
 
     <!-- Context: In event screen, in the 'numbers' section, label of the numbers of the wave, Size: Short -->
-    <string name="be_waved">be waved!</string> <!-- Title of the screen section, encourage people to join the wave -->
-    <string name="wave_speed">Wave speed</string>
+    <string name="be_waved">The wave</string>
+    <string name="wave_speed">Speed</string>
     <string name="wave_start_time">Start time</string>
     <string name="wave_end_time">End time</string>
     <string name="wave_total_time">Total time</string>
     <string name="wave_progression">Progression</string>
+    <!-- newly added unit string for speed -->
+    <string name="speed_unit_mps">m/s</string>
     <string name="wave_warming">Warming..</string>
-    <!-- Context: Debug / test-only strings -->
-    <string name="test_simulation">Test Simulation</string>
+
+    <!-- Simulation mode controls -->
     <string name="test_simulation_started">Simulation Started</string>
+    <string name="simulation_stop">Stop simulation</string>
+    <string name="simulation_mode">Stop simulation mode</string>
+    <string name="test_simulation">Activate simulation mode</string>
 
     <!-- Context: In event wave screen, title of the screen depending on current wave status, Size: Short -->
-    <string name="wave_be_ready">Be ready!</string> <!-- The event will start soon, the wave is not yet running -->
-    <string name="wave_done">Wave is done!</string> <!-- The event is finished, the wave has already occurred -->
-    <string name="wave_hit">Well done!</string> <!-- The event is currently running, the wave already hit the user -->
-    <string name="wave_is_running">Waving!</string> <!-- The event is currently running, the wave is hitting the user now -->
+    <string name="wave_be_ready">Be ready!</string>
+    <string name="wave_done">Wave is done!</string>
+    <string name="wave_hit">Well done!</string>
+    <string name="wave_is_running">Waving!</string>
 
     <!-- Context: In app information tab, 'about' section, to present the context of the app and the concept of the events, to be translated, Size: Medium -->
     <string name="infos_core_1">You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.</string>
-    <string name="infos_core_2">But this brief story could end sooner than expected. We are isolated in a vast a desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.</string>
+    <string name="infos_core_2">But this brief story could end sooner than expected. We are isolated in a vast and desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.</string>
     <string name="infos_core_3">But we have little time. We have made so much progress.. We can build an alternative : a community of rights, of solidarity, of democracy. It's up to us!</string>
     <string name="infos_core_4">Join a global movement, a peaceful awakening. Let's create human waves, a testimony of our true humanity, a strong command to our leaders. Let's gather around cities and countries, all over the world. Let's choose peace. Let's choose joy. Let's choose nature. Let's choose US.</string>
     <string name="infos_core_5">What if just one wave was enough to bring us together?</string>
@@ -169,6 +193,9 @@
 
     <string name="faq_question_5">Can I contribute to the effort?</string>
     <string name="faq_answer_5">Yes, volunteers are always welcome. The app’s code is open-source on GitHub, and you can reach the creators at worldwidewaves@proton.me (replies not guaranteed). The best way to help is to spread the word: share photos and videos from events using the suggested hashtags, contact local influencers to amplify the message, talk about it with your community, and most importantly, join the wave!</string>
+
+    <string name="faq_question_6">How can I simulate a wave?</string>
+    <string name="faq_answer_6">Tap the button below to activate the simulation mode. On the event screens use the timer button close the the "Join the wave" button to start the simulation using this event's properties (date, time, location). To stop the simulation use the same button. And finally stop the simulation mode using the stop icon on the persisting layer when you're done.</string>
 
     <!-- Context: Countries where the events happen, Size: short (limited size, about 20/25 chars) -->
     <string name="country_usa">USA</string>
@@ -340,7 +367,7 @@
     <string name="choreography_warming_seq_4">Go down and up!</string>
     <string name="choreography_warming_seq_5">Show the wave!</string>
     <string name="choreography_warming_seq_6">Cross arms!</string>
-    <string name="choreography_waiting">Prepare to wave!</string>
-    <string name="choreography_hit">Wave now!</string>
+    <string name="choreography_waiting">Prepare to jump!</string>
+    <string name="choreography_hit">Jump!</string>
 
 </resources>

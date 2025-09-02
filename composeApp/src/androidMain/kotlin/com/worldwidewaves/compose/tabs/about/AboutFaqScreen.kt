@@ -4,7 +4,7 @@ package com.worldwidewaves.compose.tabs.about
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,6 +70,9 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.faq_contents
+import com.worldwidewaves.shared.rules_hierarchy
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.commonTextStyle
@@ -81,44 +85,20 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-val rules_hierarchy = mapOf(
-    MokoRes.strings.warn_general_title to listOf(
-        MokoRes.strings.warn_general_item_1,
-        MokoRes.strings.warn_general_item_2,
-        MokoRes.strings.warn_general_item_3,
-        MokoRes.strings.warn_general_item_4,
-        MokoRes.strings.warn_general_item_5,
-        MokoRes.strings.warn_general_item_6
-    ),
-    MokoRes.strings.warn_safety_title to listOf(
-        MokoRes.strings.warn_safety_item_1,
-        MokoRes.strings.warn_safety_item_2,
-        MokoRes.strings.warn_safety_item_3,
-        MokoRes.strings.warn_safety_item_4,
-        MokoRes.strings.warn_safety_item_5
-    ),
-    MokoRes.strings.warn_emergency_title to listOf(
-        MokoRes.strings.warn_emergency_item_1,
-        MokoRes.strings.warn_emergency_item_2,
-        MokoRes.strings.warn_emergency_item_3
-    ),
-    MokoRes.strings.warn_legal_title to listOf(
-        MokoRes.strings.warn_legal_item_1,
-        MokoRes.strings.warn_legal_item_2
-    )
-)
-
-val faq_contents = listOf(
-    Pair(MokoRes.strings.faq_question_1, MokoRes.strings.faq_answer_1),
-    Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
-    Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
-    Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5)
-)
-
-// ----------------------------
-
-class AboutFaqScreen : TabScreen {
+/**
+ * *About > FAQ* tab implementation.
+ *
+ * Implements [TabScreen] to display:
+ * • A “Rules & Security” section rendered from [rules_hierarchy]
+ * • An interactive **FAQ** list whose items expand / collapse on tap
+ * • A “Jump to FAQ” link that smoothly scrolls to the FAQ section
+ *
+ * State is maintained with `remember` so expansion and scroll positions survive
+ * recompositions.  All strings are localized via `MokoRes`.
+ */
+class AboutFaqScreen(
+    private val platform: WWWPlatform,
+) : TabScreen {
     override val name = "FAQ"
 
     @Composable
@@ -131,7 +111,7 @@ class AboutFaqScreen : TabScreen {
         Box(modifier = modifier) {
             Column(
                 modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 AboutWWWLogo()
 
@@ -151,21 +131,27 @@ class AboutFaqScreen : TabScreen {
                 // FAQ title
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
                 Text(
-                    modifier = Modifier.onGloballyPositioned { coordinates ->
-                        // Save the position of the FAQ section
-                        scrollToFAQPosition = coordinates.positionInRoot().y
-                    },
+                    modifier =
+                        Modifier.onGloballyPositioned { coordinates ->
+                            // Save the position of the FAQ section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        },
                     text = stringResource(MokoRes.strings.faq),
-                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE)
+                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE),
                 )
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
 
                 // FAQ Items
                 FAQDividerLine()
                 faq_contents.forEachIndexed { index, (question, answer) ->
-                    FAQItem(index, question, answer,
+                    FAQItem(
+                        index,
+                        question,
+                        answer,
                         expandedFaqItem,
-                        onExpand = { expandedFaqItem = it })
+                        onExpand = { expandedFaqItem = it },
+                        showSimulateButton = (question == MokoRes.strings.faq_question_6),
+                    )
                     FAQDividerLine()
                 }
 
@@ -180,52 +166,68 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Header shown above the rules section.
+     *
+     * Displays the title + an underlined link that, when tapped, invokes the
+     * provided callback to scroll to the FAQ block further down in the list.
+     */
     private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 text = stringResource(MokoRes.strings.warn_rules_security_title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                style =
+                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
+                        textAlign = TextAlign.Start,
+                    ),
             )
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = scrollToFAQPosition),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = scrollToFAQPosition),
                 text = stringResource(MokoRes.strings.faq_access),
-                style = quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
-                    textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.End
-                )
+                style =
+                    quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline,
+                        textAlign = TextAlign.End,
+                    ),
             )
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
         Text(
             text = stringResource(MokoRes.strings.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
-            style = commonTextStyle().copy(textAlign = TextAlign.Justify)
+            style = commonTextStyle().copy(textAlign = TextAlign.Justify),
         )
     }
 
     @Composable
     private fun FAQDividerLine() {
         HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 2.dp
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White,
+            thickness = 2.dp,
         )
     }
 
     // ----------------------------
 
     @Composable
+    /**
+     * Iterates over [rules_hierarchy] and renders each rule section with a
+     * numbered list of items.
+     */
     private fun ShowRulesHierarchy() {
         rules_hierarchy.forEach { (title, items) ->
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                style =
+                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
+                        textAlign = TextAlign.Start,
+                    ),
             )
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
             items.forEachIndexed { index, item ->
@@ -233,12 +235,12 @@ class AboutFaqScreen : TabScreen {
                     Text(
                         modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
-                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                     Text(
                         modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
-                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                 }
             }
@@ -249,33 +251,59 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Single expandable FAQ entry.
+     *
+     * Tapping the row toggles its expanded state via [onExpand]; the currently
+     * expanded item index is held by the parent so only one entry can be open
+     * at a time.
+     */
     private fun FAQItem(
         itemIndex: Int,
         questionResource: StringResource,
         answerResource: StringResource,
         expandedFaqItem: Int,
-        onExpand: (Int) -> Unit
+        onExpand: (Int) -> Unit,
+        showSimulateButton: Boolean = false,
     ) {
-
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(DIM_DEFAULT_INT_PADDING.dp)
-            .clickable {
-                onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
-            }
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(DIM_DEFAULT_INT_PADDING.dp)
+                    .clickable {
+                        onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
+                    },
         ) {
-            Text(
-                text = stringResource(questionResource),
-                style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(questionResource),
+                    style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
             if (expandedFaqItem == itemIndex) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answerResource),
-                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
+                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE),
                 )
+                if (showSimulateButton) {
+                    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                    OutlinedButton(
+                        onClick = { platform.enableSimulationMode() },
+                    ) {
+                        Text(
+                            text = stringResource(MokoRes.strings.test_simulation),
+                            style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE - 2),
+                        )
+                    }
+                }
             }
         }
     }
-
 }

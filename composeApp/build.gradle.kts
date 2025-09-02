@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 kotlin {
@@ -18,8 +20,7 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-    implementation(libs.j2objc.annotations)
-            implementation(compose.preview)
+            implementation(libs.j2objc.annotations)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
@@ -31,19 +32,26 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(libs.koin.core)
-            implementation(libs.androidx.material.icons.extended)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
+            implementation(libs.mockk.common.v1120)
         }
     }
 }
 
 android {
     namespace = "com.worldwidewaves"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk =
+        libs.versions.android.compileSdk
+            .get()
+            .toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
     // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
-
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -52,18 +60,28 @@ android {
 
     defaultConfig {
         applicationId = "com.worldwidewaves"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
+        targetSdk =
+            libs.versions.android.targetSdk
+                .get()
+                .toInt()
+        versionCode = 26
+        versionName = "v0.22"
+        ndk {
+            // Ship only the arm64-v8a ABI to minimise download size
+            abiFilters += listOf("arm64-v8a")
+        }
     }
     packaging {
         resources.excludes.addAll(
             listOf(
                 "META-INF/LICENSE.md",
                 "META-INF/LICENSE-notice.md",
-                "/META-INF/{AL2.0,LGPL2.1}"
-            )
+                "/META-INF/{AL2.0,LGPL2.1}",
+            ),
         )
     }
     buildTypes {
@@ -72,8 +90,11 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
     compileOptions {
@@ -85,50 +106,52 @@ android {
         viewBinding = true
         buildConfig = true
     }
-    dynamicFeatures += setOf(
-        ":maps:android:paris_france",
-        ":maps:android:new_york_usa",
-        ":maps:android:los_angeles_usa",
-        ":maps:android:mexico_city_mexico",
-        ":maps:android:sao_paulo_brazil",
-        ":maps:android:buenos_aires_argentina",
-        ":maps:android:london_england",
-        ":maps:android:berlin_germany",
-        ":maps:android:madrid_spain",
-        ":maps:android:rome_italy",
-        ":maps:android:moscow_russia",
-        ":maps:android:cairo_egypt",
-        ":maps:android:johannesburg_south_africa",
-        ":maps:android:nairobi_kenya",
-        ":maps:android:lagos_nigeria",
-        ":maps:android:dubai_united_arab_emirates",
-        ":maps:android:mumbai_india",
-        ":maps:android:delhi_india",
-        ":maps:android:bangalore_india",
-        ":maps:android:jakarta_indonesia",
-        ":maps:android:bangkok_thailand",
-        ":maps:android:manila_philippines",
-        ":maps:android:tokyo_japan",
-        ":maps:android:seoul_south_korea",
-        ":maps:android:beijing_china",
-        ":maps:android:shanghai_china",
-        ":maps:android:hong_kong_china",
-        ":maps:android:sydney_australia",
-        ":maps:android:melbourne_australia",
-        ":maps:android:toronto_canada",
-        ":maps:android:vancouver_canada",
-        ":maps:android:chicago_usa",
-        ":maps:android:san_francisco_usa",
-        ":maps:android:lima_peru",
-        ":maps:android:bogota_colombia",
-        ":maps:android:santiago_chile",
-        ":maps:android:tehran_iran",
-        ":maps:android:istanbul_turkey",
-        ":maps:android:karachi_pakistan",
-        ":maps:android:kinshasa_democratic_republic_of_the_congo"
-    )
+    dynamicFeatures +=
+        setOf(
+            ":maps:android:paris_france",
+            ":maps:android:new_york_usa",
+            ":maps:android:los_angeles_usa",
+            ":maps:android:mexico_city_mexico",
+            ":maps:android:sao_paulo_brazil",
+            ":maps:android:buenos_aires_argentina",
+            ":maps:android:london_england",
+            ":maps:android:berlin_germany",
+            ":maps:android:madrid_spain",
+            ":maps:android:rome_italy",
+            ":maps:android:moscow_russia",
+            ":maps:android:cairo_egypt",
+            ":maps:android:johannesburg_south_africa",
+            ":maps:android:nairobi_kenya",
+            ":maps:android:lagos_nigeria",
+            ":maps:android:dubai_united_arab_emirates",
+            ":maps:android:mumbai_india",
+            ":maps:android:delhi_india",
+            ":maps:android:bangalore_india",
+            ":maps:android:jakarta_indonesia",
+            ":maps:android:bangkok_thailand",
+            ":maps:android:manila_philippines",
+            ":maps:android:tokyo_japan",
+            ":maps:android:seoul_south_korea",
+            ":maps:android:beijing_china",
+            ":maps:android:shanghai_china",
+            ":maps:android:hong_kong_china",
+            ":maps:android:sydney_australia",
+            ":maps:android:melbourne_australia",
+            ":maps:android:toronto_canada",
+            ":maps:android:vancouver_canada",
+            ":maps:android:chicago_usa",
+            ":maps:android:san_francisco_usa",
+            ":maps:android:lima_peru",
+            ":maps:android:bogota_colombia",
+            ":maps:android:santiago_chile",
+            ":maps:android:tehran_iran",
+            ":maps:android:istanbul_turkey",
+            ":maps:android:karachi_pakistan",
+            ":maps:android:kinshasa_democratic_republic_of_the_congo",
+        )
     dependencies {
         debugImplementation(compose.uiTooling)
+        debugImplementation(compose.preview)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
         implementation(libs.kotlinx.datetime)
@@ -152,4 +175,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics.ndk)
+    implementation(libs.firebase.analytics)
 }

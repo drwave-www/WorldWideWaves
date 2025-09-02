@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.sound
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -40,10 +40,8 @@ actual object AudioBufferFactory {
         samples: DoubleArray,
         sampleRate: Int,
         bitsPerSample: Int,
-        channels: Int
-    ): AudioBuffer {
-        return AndroidAudioBuffer(samples, sampleRate, bitsPerSample, channels)
-    }
+        channels: Int,
+    ): AudioBuffer = AndroidAudioBuffer(samples, sampleRate, bitsPerSample, channels)
 }
 
 // ----------------------------------------------------------------------------
@@ -55,17 +53,18 @@ class AndroidAudioBuffer(
     samples: DoubleArray,
     override val sampleRate: Int,
     bitsPerSample: Int,
-    channels: Int
+    channels: Int,
 ) : AudioBuffer {
     private val buffer: ByteArray
     override val sampleCount: Int = samples.size
 
     init {
-        buffer = when (bitsPerSample) {
-            8 -> convert8Bit(samples)
-            16 -> convert16Bit(samples)
-            else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
-        }
+        buffer =
+            when (bitsPerSample) {
+                8 -> convert8Bit(samples)
+                16 -> convert16Bit(samples)
+                else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
+            }
     }
 
     private fun convert16Bit(samples: DoubleArray): ByteArray {
@@ -98,7 +97,10 @@ class AndroidAudioBuffer(
 /**
  * Android implementation of SoundPlayer using AudioTrack
  */
-class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeController {
+class AndroidSoundPlayer(
+    private val context: Context,
+) : SoundPlayer,
+    VolumeController {
     private val sampleRate = 44100 // Hz
     private val activeTracks = mutableListOf<AudioTrack>()
 
@@ -119,7 +121,7 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
         audioManager.setStreamVolume(
             AudioManager.STREAM_MUSIC,
             volumeIndex,
-            0 // No flags, silent operation
+            0, // No flags, silent operation
         )
     }
 
@@ -127,9 +129,8 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
         frequency: Double,
         amplitude: Double,
         duration: Duration,
-        waveform: SoundPlayer.Waveform
+        waveform: SoundPlayer.Waveform,
     ) = withContext(Dispatchers.Main) {
-
         // Save current volume
         val originalVolume = getCurrentVolume()
 
@@ -143,49 +144,59 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
             // Play the tone (using withContext to switch back to IO dispatcher)
             withContext(Dispatchers.IO) {
                 // Generate and play
-                val samples = WaveformGenerator.generateWaveform(
-                    sampleRate = sampleRate,
-                    frequency = frequency,
-                    amplitude = amplitude,
-                    duration = duration,
-                    waveform = waveform
-                )
+                val samples =
+                    WaveformGenerator.generateWaveform(
+                        sampleRate = sampleRate,
+                        frequency = frequency,
+                        amplitude = amplitude,
+                        duration = duration,
+                        waveform = waveform,
+                    )
 
-                val buffer = AudioBufferFactory.createFromSamples(
-                    samples = samples,
-                    sampleRate = sampleRate,
-                    bitsPerSample = 16,
-                    channels = 1
-                )
+                val buffer =
+                    AudioBufferFactory.createFromSamples(
+                        samples = samples,
+                        sampleRate = sampleRate,
+                        bitsPerSample = 16,
+                        channels = 1,
+                    )
 
                 playBuffer(buffer, duration)
             }
 
             // Wait for playback to complete
             delay(duration + 100.milliseconds)
-
         } finally {
             // Always restore original volume
             setVolume(originalVolume)
         }
     }
 
-    private suspend fun playBuffer(buffer: AudioBuffer, duration: Duration) = withContext(Dispatchers.IO) {
+    private suspend fun playBuffer(
+        buffer: AudioBuffer,
+        duration: Duration,
+    ) = withContext(Dispatchers.IO) {
         val bufferSizeInBytes = buffer.getRawBuffer().size
 
-        val audioTrack = AudioTrack.Builder()
-            .setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build())
-            .setAudioFormat(AudioFormat.Builder()
-                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                .setSampleRate(buffer.sampleRate)
-                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                .build())
-            .setBufferSizeInBytes(bufferSizeInBytes)
-            .setTransferMode(AudioTrack.MODE_STATIC)
-            .build()
+        val audioTrack =
+            AudioTrack
+                .Builder()
+                .setAudioAttributes(
+                    AudioAttributes
+                        .Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build(),
+                ).setAudioFormat(
+                    AudioFormat
+                        .Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setSampleRate(buffer.sampleRate)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .build(),
+                ).setBufferSizeInBytes(bufferSizeInBytes)
+                .setTransferMode(AudioTrack.MODE_STATIC)
+                .build()
 
         synchronized(activeTracks) {
             activeTracks.add(audioTrack)
@@ -211,5 +222,4 @@ class AndroidSoundPlayer(private val context: Context) : SoundPlayer, VolumeCont
             activeTracks.clear()
         }
     }
-
 }

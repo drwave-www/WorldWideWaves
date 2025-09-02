@@ -4,10 +4,12 @@
 
     <dist:module
         dist:instant="false"
-        dist:title="Map Mexico City">
+        dist:title="@string/map_title_mexico_city_mexico">
         <dist:delivery>
             <dist:on-demand />
         </dist:delivery>
         <dist:fusing dist:include="false" />
     </dist:module>
+    <!-- Resource-only dynamic-feature: ensure Play knows no code is packaged -->
+    <application android:hasCode="false" />
 </manifest>

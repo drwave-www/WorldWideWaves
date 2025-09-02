@@ -1,20 +1,13 @@
 package com.worldwidewaves.shared.di
 
-import com.worldwidewaves.shared.data.FavoriteEventsStore
-import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.createDataStore
-import com.worldwidewaves.shared.data.keyValueStorePath
-import org.koin.dsl.module
-
 /*
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,10 +21,23 @@ import org.koin.dsl.module
  * limitations under the License.
  */
 
-val datastoreModule = module {
-    single { createDataStore { keyValueStorePath() } }
+import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.HiddenMapsStore
+import com.worldwidewaves.shared.data.InitFavoriteEvent
+import com.worldwidewaves.shared.data.SetEventFavorite
+import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.data.keyValueStorePath
+import org.koin.dsl.module
 
-    single { FavoriteEventsStore(get()) }
-    factory { InitFavoriteEvent(favoriteEventsStore = get()) }
-    factory { SetEventFavorite(favoriteEventsStore = get()) }
-}
+val datastoreModule =
+    module {
+        single { createDataStore { keyValueStorePath() } }
+
+        // Persistent stores ------------------------------------------------------
+
+        single { FavoriteEventsStore(get()) }
+        single { HiddenMapsStore(get()) }
+
+        factory { InitFavoriteEvent(favoriteEventsStore = get()) }
+        factory { SetEventFavorite(favoriteEventsStore = get()) }
+    }
