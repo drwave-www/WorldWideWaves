@@ -24,7 +24,6 @@ package com.worldwidewaves.activities.event
 import android.content.Context
 import android.content.Intent
 import android.text.BidiFormatter
-import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -119,7 +118,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
-import java.util.Date
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -230,7 +228,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         val simulation = WWWSimulation(
                             startDateTime = simulationTime,
                             userPosition = position,
-                            initialSpeed = 50 // Use current default speed, FIXME: Globals.DIM_SIMULATION_SPEED
+                            initialSpeed = 50 // Use current default speed
                         )
 
                         // Set the simulation
@@ -352,10 +350,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val context = LocalContext.current
-    val formattedTime = hitDateTime.let {
-        DateFormat.getTimeFormat(context).format(Date(it.toEpochMilliseconds()))
-    } ?: ""
+    val formattedTime = hitDateTime.let { IClock.instantToLiteral(it, event.getTZ()) } ?: ""
 
     val geolocText = if (isInArea) {
         stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)

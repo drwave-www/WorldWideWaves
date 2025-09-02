@@ -87,10 +87,12 @@ class WaveProgressionObserver(
     private fun addFullWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
         eventMap.mapLibreAdapter.onMapSet { mapLibre ->
             scope.launch(Dispatchers.Main) {
-                mapLibre.addWavePolygons(
-                    event.area.getPolygons().map { it.toMapLibrePolygon() },
-                    true
-                )
+                // Render all original polygons independently (no holes merge)
+                val polygons = event.area
+                    .getPolygons()
+                    .map { it.toMapLibrePolygon() }
+
+                mapLibre.addWavePolygons(polygons, true)
             }
         }
     }
