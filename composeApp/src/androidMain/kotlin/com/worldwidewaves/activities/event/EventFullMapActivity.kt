@@ -71,7 +71,8 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val eventStatus by event.observer.eventStatus.collectAsState()
-        val endDateTime by produceState<Instant?>(initialValue = null, key1 = event) {
+        val progression by event.observer.progression.collectAsState()
+        val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
             value = event.getEndDateTime()
         }
 

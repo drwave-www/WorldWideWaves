@@ -24,6 +24,7 @@ package com.worldwidewaves.activities.event
 import android.content.Context
 import android.content.Intent
 import android.text.BidiFormatter
+import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -73,9 +74,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.text.format.DateFormat
-import java.util.Date
-import java.time.Instant as JavaInstant
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
@@ -118,13 +116,14 @@ import com.worldwidewaves.theme.quinaryLight
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
+import java.util.Date
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import java.time.Instant as JavaInstant
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
@@ -140,8 +139,11 @@ class EventActivity : AbstractEventWaveActivity() {
         val scope = rememberCoroutineScope()
         val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
+        // Observe progression so we can refresh end time once polygons & duration are available
+        val progression by event.observer.progression.collectAsState()
 
-        LaunchedEffect(event) {
+        // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
+        LaunchedEffect(event.id, progression) {
             endDateTime.value = event.getEndDateTime()
         }
 
@@ -229,7 +231,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         val simulation = WWWSimulation(
                             startDateTime = simulationTime,
                             userPosition = position,
-                            initialSpeed = 50 // Use current default speed
+                            initialSpeed = 1 // Use current default speed
                         )
 
                         // Set the simulation
@@ -402,14 +404,18 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
     val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
     val warmingText = stringResource(MokoRes.strings.wave_warming)
 
+    // Initial load – compute static numbers & start time (doesn't depend on polygons)
     LaunchedEffect(event.id) {
         waveNumbers = event.getAllNumbers()
-        totalMinutes = event.getTotalTime().inWholeMinutes
 
         val start = event.getStartDateTime()
-        val end = event.getEndDateTime()
         startTimeText = DateTimeFormats.timeShort(start, event.getTZ())
-        endTimeText = DateTimeFormats.timeShort(end, event.getTZ())
+    }
+
+    // Recompute values that depend on polygons/duration each time progression updates
+    LaunchedEffect(event.id, progression) {
+        totalMinutes = event.getTotalTime().inWholeMinutes
+        endTimeText = DateTimeFormats.timeShort(event.getEndDateTime(), event.getTZ())
     }
 
     val eventNumbers by remember(waveNumbers) {
