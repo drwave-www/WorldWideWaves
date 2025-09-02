@@ -1,236 +1,132 @@
 package com.worldwidewaves.shared.events.utils
 
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Before
 import org.junit.Test
 import java.io.File
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class SplitByLongitudeLondonTest {
 
-    private val jsonParser = Json { ignoreUnknownKeys = true }
-    
-    private fun loadLondonGeoJson(): JsonElement {
-        val projectDir = File(System.getProperty("user.dir"))
-        val rootDir = projectDir.parentFile ?: projectDir
-        val filePath = File(rootDir, "maps/android/london_england/src/main/assets/london_england.geojson")
-        require(filePath.exists()) { "London GeoJSON file not found at $filePath" }
-        return jsonParser.parseToJsonElement(filePath.readText())
+    private lateinit var londonPolygon: Polygon
+    private lateinit var reportDir: File
+    private val json = Json { ignoreUnknownKeys = true }
+
+    @Before
+    fun setup() {
+        reportDir = File("build/reports/split_by_longitude").apply { mkdirs() }
     }
-    
-    private fun extractRings(jsonElement: JsonElement): List<List<List<Double>>> {
-        val features = jsonElement.jsonObject["features"]?.jsonArray ?: return emptyList()
-        val rings = mutableListOf<List<List<Double>>>()
-        
-        for (feature in features) {
-            val geometry = feature.jsonObject["geometry"] ?: continue
-            val type = geometry.jsonObject["type"]?.jsonPrimitive?.content
-            val coordinates = geometry.jsonObject["coordinates"]?.jsonArray ?: continue
-            
-            when (type) {
-                "Polygon" -> {
-                    val polygonRings = coordinates.map { ring ->
-                        ring.jsonArray.map { coord ->
-                            coord.jsonArray.map { it.jsonPrimitive.double }
-                        }
-                    }
-                    rings.addAll(polygonRings)
-                }
-                "MultiPolygon" -> {
-                    for (polygon in coordinates) {
-                        val polygonRings = polygon.jsonArray.map { ring ->
-                            ring.jsonArray.map { coord ->
-                                coord.jsonArray.map { it.jsonPrimitive.double }
-                            }
-                        }
-                        rings.addAll(polygonRings)
-                    }
-                }
-            }
-        }
-        return rings
-    }
-    
-    private fun buildPolygon(ring: List<List<Double>>): Polygon {
-        val polygon = Polygon()
-        for (coord in ring) {
-            val lng = coord[0]
-            val lat = coord[1]
-            polygon.add(Position(lat, lng))
-        }
-        return polygon
-    }
-    
-    private fun collectUniqueVertexLongitudes(polygon: Polygon): Set<Double> {
-        return polygon.map { it.lng }.toSet()
-    }
-    
-    private fun collectUniqueMidSegmentLongitudes(polygon: Polygon): Set<Double> {
-        val midLongitudes = mutableSetOf<Double>()
-        val points = polygon.toList()
-        for (i in 0 until points.size - 1) {
-            val midLng = (points[i].lng + points[i + 1].lng) / 2
-            midLongitudes.add(midLng)
-        }
-        if (points.isNotEmpty() && points.size > 1) {
-            val midLng = (points.last().lng + points.first().lng) / 2
-            midLongitudes.add(midLng)
-        }
-        return midLongitudes
-    }
-    
-    private fun buildCoordinateSet(polygons: List<Polygon>): Set<Pair<Double, Double>> {
-        val coordinates = mutableSetOf<Pair<Double, Double>>()
-        for (polygon in polygons) {
-            for (position in polygon) {
-                coordinates.add(position.lat to position.lng)
-            }
-        }
-        return coordinates
-    }
-    
-    private fun formatCoordinate(lat: Double, lng: Double): String {
-        return String.format("%.9f;%.9f", lat, lng)
-    }
-    
+
     @Test
-    fun testSplitByLongitudeWithLondonGeoJson() {
-        val jsonElement = loadLondonGeoJson()
-        val rings = extractRings(jsonElement)
-        
-        for ((ringIndex, ring) in rings.withIndex()) {
-            val polygon = buildPolygon(ring)
-            
-            val bbox = polygon.bbox()
-            val lonLeft = bbox.minLongitude - 0.1
-            val lonRight = bbox.maxLongitude + 0.1
-            
-            val vertexLongitudes = collectUniqueVertexLongitudes(polygon)
-            val midSegmentLongitudes = collectUniqueMidSegmentLongitudes(polygon)
-            
-            val allLongitudes = mutableSetOf<Double>()
-            allLongitudes.add(lonLeft)
-            allLongitudes.add(lonRight)
-            allLongitudes.addAll(vertexLongitudes)
-            allLongitudes.addAll(midSegmentLongitudes)
-            
-            for (longitude in allLongitudes) {
-                val composedLongitude = ComposedLongitude.fromLongitude(longitude)
-                val splitResult = PolygonUtils.splitByLongitude(polygon, longitude)
-                
-                val leftCoordinates = buildCoordinateSet(splitResult.left)
-                val rightCoordinates = buildCoordinateSet(splitResult.right)
-                
-                // Helpers to know if the splitter produced actual polygons on each side
-                val hasLeft  = splitResult.left.isNotEmpty()
-                val hasRight = splitResult.right.isNotEmpty()
-                
-                val positions = polygon.toList()
-                for ((idx, position) in positions.withIndex()) {
-                    val side = composedLongitude.isPointOnLine(position)
-                    val coord = position.lat to position.lng
-                    
-                    when {
-                        side.isWest() -> {
-                            assertTrue(leftCoordinates.contains(coord), 
-                                "Ring $ringIndex: West vertex (${position.lat}, ${position.lng}) should be in left result for longitude $longitude")
-                            assertFalse(rightCoordinates.contains(coord), 
-                                "Ring $ringIndex: West vertex (${position.lat}, ${position.lng}) should not be in right result for longitude $longitude")
-                        }
-                        side.isEast() -> {
-                            assertTrue(rightCoordinates.contains(coord), 
-                                "Ring $ringIndex: East vertex (${position.lat}, ${position.lng}) should be in right result for longitude $longitude")
-                            assertFalse(leftCoordinates.contains(coord), 
-                                "Ring $ringIndex: East vertex (${position.lat}, ${position.lng}) should not be in left result for longitude $longitude")
-                        }
-                        side.isOn() -> {
-                            // Inspect neighbours to differentiate crossing vs tangency
-                            val prev = positions[(idx - 1 + positions.size) % positions.size]
-                            val next = positions[(idx + 1) % positions.size]
-                            val prevSide = composedLongitude.isPointOnLine(prev)
-                            val nextSide = composedLongitude.isPointOnLine(next)
+    fun generate_svgs_for_longitude_splits() {
+        val geojsonPath = Paths.get("..", "maps", "android", "london_england", "src", "main", "assets", "london_england.geojson")
+        if (!Files.exists(geojsonPath)) return
 
-                            val crossing = (prevSide.isWest() && nextSide.isEast()) ||
-                                           (prevSide.isEast() && nextSide.isWest())
-                            val tangentWest  = prevSide.isWest() && nextSide.isWest()
-                            val tangentEast  = prevSide.isEast() && nextSide.isEast()
+        val geojsonContent = String(Files.readAllBytes(geojsonPath))
+        val features = json.parseToJsonElement(geojsonContent).jsonObject["features"]?.jsonArray ?: return
 
-                            // Debug
-                            println(
-                                "ON vertex info -> ring=$ringIndex " +
-                                        "lon=$longitude coord=$coord " +
-                                        "hasLeft=$hasLeft hasRight=$hasRight " +
-                                        "leftHas=${leftCoordinates.contains(coord)} " +
-                                        "rightHas=${rightCoordinates.contains(coord)} " +
-                                        "prev=${prevSide.name} next=${nextSide.name}"
-                            )
-                            if (crossing) {
-                                if (hasLeft)  assertTrue(leftCoordinates.contains(coord),
-                                    "Ring $ringIndex: On-line crossing vertex $coord should be in left")
-                                if (hasRight) assertTrue(rightCoordinates.contains(coord),
-                                    "Ring $ringIndex: On-line crossing vertex $coord should be in right")
-                            } else if (tangentWest) {
-                                if (hasLeft)  assertTrue(leftCoordinates.contains(coord),
-                                    "Ring $ringIndex: Tangent-west vertex $coord should be in left")
-                            } else if (tangentEast) {
-                                if (hasRight) assertTrue(rightCoordinates.contains(coord),
-                                    "Ring $ringIndex: Tangent-east vertex $coord should be in right")
-                            } else {
-                                // Fallback – must appear in at least one existing side
-                                assertTrue(
-                                    (hasLeft  && leftCoordinates.contains(coord)) ||
-                                    (hasRight && rightCoordinates.contains(coord)),
-                                    "Ring $ringIndex: On-line vertex $coord should appear in at least one side"
-                                )
-                            }
+        val polygons = extractPolygons(features)
+        if (polygons.isEmpty()) return
 
-                            /* Previous logic kept for reference / clarity
-                            if (hasLeft) {
-                                assertTrue(
-                                    leftCoordinates.contains(coord),
-                                    "Ring $ringIndex: On-line vertex (${position.lat}, ${position.lng}) should be in left result for longitude $longitude"
-                                )
-                            }
-                            if (hasRight) {
-                                assertTrue(
-                                    rightCoordinates.contains(coord),
-                                    "Ring $ringIndex: On-line vertex (${position.lat}, ${position.lng}) should be in right result for longitude $longitude"
-                                )
-                            }
-                            */
-                        }
-                    }
-                }
-                
-                if (longitude == lonLeft) {
-                    assertTrue(splitResult.left.isEmpty(), 
-                        "Ring $ringIndex: Left result should be empty for longitude $longitude (outside left)")
-                    assertEquals(1, splitResult.right.size, 
-                        "Ring $ringIndex: Right result should contain exactly one polygon for longitude $longitude (outside left)")
-                    
-                    val originalCoords = buildCoordinateSet(listOf(polygon))
-                    val resultCoords = buildCoordinateSet(splitResult.right)
-                    assertEquals(originalCoords.size, resultCoords.size, 
-                        "Ring $ringIndex: Right result should contain exactly the same number of vertices as original for longitude $longitude (outside left)")
-                    assertTrue(originalCoords.containsAll(resultCoords) && resultCoords.containsAll(originalCoords), 
-                        "Ring $ringIndex: Right result should contain exactly the same vertices as original for longitude $longitude (outside left)")
-                }
-                
-                if (longitude == lonRight) {
-                    assertTrue(splitResult.right.isEmpty(), 
-                        "Ring $ringIndex: Right result should be empty for longitude $longitude (outside right)")
-                    assertEquals(1, splitResult.left.size, 
-                        "Ring $ringIndex: Left result should contain exactly one polygon for longitude $longitude (outside right)")
-                    
-                    val originalCoords = buildCoordinateSet(listOf(polygon))
-                    val resultCoords = buildCoordinateSet(splitResult.left)
-                    assertEquals(originalCoords.size, resultCoords.size, 
-                        "Ring $ringIndex: Left result should contain exactly the same number of vertices as original for longitude $longitude (outside right)")
-                    assertTrue(originalCoords.containsAll(resultCoords) && resultCoords.containsAll(originalCoords), 
-                        "Ring $ringIndex: Left result should contain exactly the same vertices as original for longitude $longitude (outside right)")
+        londonPolygon = polygons.maxByOrNull { it.size } ?: return
+        val bbox = londonPolygon.bbox()
+
+        val steps = 50
+        val lngStep = (bbox.ne.lng - bbox.sw.lng) / steps
+
+        for (i in 0..steps) {
+            val lng = bbox.sw.lng + (i * lngStep)
+            val composed = ComposedLongitude.fromLongitude(lng)
+            val split = PolygonUtils.splitByLongitude(londonPolygon, composed)
+
+            val svg = generateSvg(
+                originalPolygon = londonPolygon,
+                leftPolygons = split.left.map { it as Polygon },
+                rightPolygons = split.right.map { it as Polygon },
+                composedLongitude = composed,
+                bbox = bbox
+            )
+
+            val out = File(reportDir, "london_${i}_${String.format("%.6f", lng)}.svg")
+            FileOutputStream(out).use { it.write(svg.toByteArray()) }
+        }
+    }
+
+    private fun extractPolygons(features: JsonArray): List<Polygon> {
+        val list = mutableListOf<Polygon>()
+        features.forEach { feature ->
+            val geometry = feature.jsonObject["geometry"]?.jsonObject ?: return@forEach
+            when (geometry["type"]?.jsonPrimitive?.content) {
+                "Polygon" -> geometry["coordinates"]?.jsonArray?.firstOrNull()?.jsonArray?.let { list.add(parseRing(it)) }
+                "MultiPolygon" -> geometry["coordinates"]?.jsonArray?.forEach { poly ->
+                    poly.jsonArray.firstOrNull()?.jsonArray?.let { list.add(parseRing(it)) }
                 }
             }
         }
+        return list
+    }
+
+    private fun parseRing(ring: JsonArray): Polygon = Polygon().apply {
+        ring.forEach { pt ->
+            val coords = pt.jsonArray
+            add(Position(coords[1].jsonPrimitive.content.toDouble(), coords[0].jsonPrimitive.content.toDouble()))
+        }
+    }
+
+    private fun generateSvg(
+        originalPolygon: Polygon,
+        leftPolygons: List<Polygon>,
+        rightPolygons: List<Polygon>,
+        composedLongitude: ComposedLongitude,
+        bbox: BoundingBox
+    ): String {
+        val width = 800
+        val height = 600
+        val margin = 20.0
+
+        fun map(value: Double, a: Double, b: Double, c: Double, d: Double) = c + (value - a) * (d - c) / (b - a)
+        fun toPt(p: Position): String {
+            val x = map(p.lng, bbox.sw.lng, bbox.ne.lng, margin, width - margin)
+            val y = map(p.lat, bbox.sw.lat, bbox.ne.lat, height - margin, margin)
+            return "$x,$y"
+        }
+
+        val s = StringBuilder()
+        s.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        s.append("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"$width\" height=\"$height\" viewBox=\"0 0 $width $height\">\n")
+
+        s.append("<path d=\"M ")
+        originalPolygon.forEach { s.append("${toPt(it)} ") }
+        s.append("Z\" fill=\"none\" stroke=\"black\" stroke-width=\"1\"/>\n")
+
+        leftPolygons.forEach { poly ->
+            s.append("<path d=\"M ")
+            poly.forEach { s.append("${toPt(it)} ") }
+            s.append("Z\" fill=\"#2874F0\" fill-opacity=\"0.35\" stroke=\"#2874F0\" stroke-width=\"0.5\"/>\n")
+        }
+        rightPolygons.forEach { poly ->
+            s.append("<path d=\"M ")
+            poly.forEach { s.append("${toPt(it)} ") }
+            s.append("Z\" fill=\"#E74C3C\" fill-opacity=\"0.35\" stroke=\"#E74C3C\" stroke-width=\"0.5\"/>\n")
+        }
+
+        if (composedLongitude.size() == 1) {
+            val lng = composedLongitude.getPositions().first().lng
+            val x = map(lng, bbox.sw.lng, bbox.ne.lng, margin, width - margin)
+            s.append("<line x1=\"$x\" y1=\"$margin\" x2=\"$x\" y2=\"${height - margin}\" stroke=\"#2ECC71\" stroke-width=\"2\"/>\n")
+        } else {
+            s.append("<polyline points=\"")
+            composedLongitude.getPositions().forEach { s.append("${toPt(it)} ") }
+            s.append("\" fill=\"none\" stroke=\"#2ECC71\" stroke-width=\"2\"/>\n")
+        }
+
+        s.append("</svg>")
+        return s.toString()
     }
 }

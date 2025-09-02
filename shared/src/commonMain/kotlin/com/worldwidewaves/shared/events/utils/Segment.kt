@@ -29,11 +29,6 @@ import kotlin.math.abs
  */
 data class Segment(val start: Position, val end: Position) {
 
-    init {
-        start.init()
-        end.init()
-    }
-
     /**
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
@@ -84,9 +79,20 @@ data class Segment(val start: Position, val end: Position) {
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
 
-        return CutPosition(lat = y, lng = x, cutId = cutId,
-            cutLeft = if (x1 < x2) start else end,
-            cutRight = if (x1 < x2) end else start
+        // Determine cut side from the *polygon* segment (`other`)
+        val (polyStart, polyEnd) = other.start to other.end
+        val (west, east) = if (polyStart.lng <= polyEnd.lng) {
+            polyStart to polyEnd
+        } else {
+            polyEnd to polyStart
+        }
+
+        return CutPosition(
+            lat = y,
+            lng = x,
+            cutId = cutId,
+            cutLeft = west,
+            cutRight = east
         )
     }
 

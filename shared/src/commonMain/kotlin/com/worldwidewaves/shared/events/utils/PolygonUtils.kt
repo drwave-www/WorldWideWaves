@@ -122,6 +122,23 @@ object PolygonUtils {
                 val closed = workingPolygon.move().close()
                 SplitResult(emptyList(), listOf(closed))
             }
+            // --------------------------------------------------------------
+            // Simple vertical line (single position) – deterministic split
+            // --------------------------------------------------------------
+            lngToCut.size() == 1 -> {
+                val cutLng = lngToCut.getPositions().first().lng
+
+                // Run Sutherland–Hodgman half-plane clip once for each side
+                val leftPts  = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = true)
+                val rightPts = clipToHalfPlane(workingPolygon.toList(), cutLng, keepLeft = false)
+
+                val leftPolys  = if (leftPts.size >= 3)
+                    listOf(leftPts.toPolygon.close()) else emptyList()
+                val rightPolys = if (rightPts.size >= 3)
+                    listOf(rightPts.toPolygon.close()) else emptyList()
+
+                return SplitResult(leftPolys, rightPolys)
+            }
             else -> { // Separate the polygon into two parts based on the cut longitude
                 // ------------------------------------------------------------------
                 // New simple splitter : single pass, single polygon per side
@@ -269,6 +286,49 @@ object PolygonUtils {
     }
 
     // ------------------------------------------------------------------------
+
+    /**
+     * Clips a polygon ring (list of [Position]) against the vertical half-plane
+     * defined by x&nbsp;≤&nbsp;[cutLng] when [keepLeft] is true, or x&nbsp;≥&nbsp;[cutLng]
+     * when false.  Returns the resulting list of vertices (not closed).
+     * Implements a Sutherland–Hodgman style algorithm specialised for a vertical line.
+     */
+    private fun clipToHalfPlane(
+        points: List<Position>,
+        cutLng: Double,
+        keepLeft: Boolean
+    ): List<Position> {
+        if (points.size < 3) return emptyList()
+
+        val output = mutableListOf<Position>()
+
+        fun isInside(p: Position): Boolean =
+            if (keepLeft) p.lng <= cutLng + 1e-12 else p.lng >= cutLng - 1e-12
+
+        var prev = points.last()
+        var prevInside = isInside(prev)
+
+        for (curr in points) {
+            val currInside = isInside(curr)
+
+            if (prevInside && currInside) {
+                // Case 1: both inside – just add current
+                output.add(curr)
+            } else if (prevInside && !currInside) {
+                // Case 2: leaving – add intersection
+                Segment(prev, curr).intersectWithLng(cutLng)?.let { output.add(it) }
+            } else if (!prevInside && currInside) {
+                // Case 3: entering – add intersection then current
+                Segment(prev, curr).intersectWithLng(cutLng)?.let { output.add(it) }
+                output.add(curr)
+            } // Case 4: both outside – add nothing
+
+            prev = curr
+            prevInside = currInside
+        }
+
+        return output
+    }
 
     /**
      * Adds intermediate points along a composed longitude to polygons.
