@@ -82,6 +82,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     // --------------------------------
 
+    /* ---------------------------------------------------------------------
+     * Dynamic layers used for the wave rendering.  We keep their ids so we
+     * can reliably remove them the next time addWavePolygons() is invoked or
+     * when the caller requests a clear.
+     * -------------------------------------------------------------------- */
+    private val waveLayerIds  = mutableListOf<String>()
+    private val waveSourceIds = mutableListOf<String>()
+
     private var onMapSetCallbacks = mutableListOf<(AndroidMapLibreAdapter) -> Unit>()
 
     override fun setMap(map: MapLibreMap) {
@@ -265,37 +273,44 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
         val map = mapLibreMap ?: return
         val wavePolygons = polygons.filterIsInstance<Polygon>()
+        if (wavePolygons.isEmpty()) return
 
         map.getStyle { style ->
-            val sourceId = "wave-polygons-source"
-            val layerId = "wave-polygons-layer"
-
             try {
+                /* -- Clear existing dynamic layers/sources when requested ---- */
                 if (clearExisting) {
+                    waveLayerIds.forEach { style.removeLayer(it) }
+                    waveSourceIds.forEach { style.removeSource(it) }
+                    waveLayerIds.clear()
+                    waveSourceIds.clear()
+                }
+
+                /* -- Add each polygon on its own layer ----------------------- */
+                wavePolygons.forEachIndexed { index, polygon ->
+                    val sourceId = "wave-polygons-source-$index"
+                    val layerId  = "wave-polygons-layer-$index"
+
+                    /* Defensive cleanup in case ids are reused                */
                     style.removeLayer(layerId)
                     style.removeSource(sourceId)
-                }
 
-                // Create or update the source with new polygons
-                val geoJsonSource = style.getSourceAs(sourceId) ?: GeoJsonSource(sourceId)
+                    /* GeoJSON source with a single polygon                    */
+                    val src = GeoJsonSource(sourceId).apply {
+                        setGeoJson(Feature.fromGeometry(polygon))
+                    }
+                    style.addSource(src)
 
-                geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(wavePolygons.map {
-                    Feature.fromGeometry(it)
-                }))
-
-                if (style.getSource(sourceId) == null) {
-                    style.addSource(geoJsonSource)
-                }
-
-                // Create or update the layer
-                if (style.getLayer(layerId) == null) {
-                    val fillLayer = FillLayer(layerId, sourceId).withProperties(
+                    /* Fill layer                                              */
+                    val layer = FillLayer(layerId, sourceId).withProperties(
                         PropertyFactory.fillColor(WAVE_BACKGROUND_COLOR.toColorInt()),
                         PropertyFactory.fillOpacity(WAVE_BACKGROUND_OPACITY)
                     )
-                    style.addLayer(fillLayer)
-                }
+                    style.addLayer(layer)
 
+                    /* Track for next cleanup                                  */
+                    waveSourceIds.add(sourceId)
+                    waveLayerIds.add(layerId)
+                }
             } catch (e: Exception) {
                 Log.e("MapUpdate", "Error updating wave polygons", e)
             }
