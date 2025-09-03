@@ -34,9 +34,23 @@ import okio.Path.Companion.toPath
 
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
 @VisibleForTesting
-public lateinit var dataStore: DataStore<Preferences>
+lateinit var dataStore: DataStore<Preferences>
 private val lock = SynchronizedObject()
 
+/**
+ * Builds (or returns) the singleton [DataStore] instance used to persist **key-value
+ * preferences** across the application.
+ *
+ * The function is **idempotent** – subsequent calls will simply return the
+ * previously-created instance.  A platform-specific `producePath` lambda is
+ * invoked the first time to obtain the absolute file path where the serialized
+ * preferences will be stored.  Each invocation is logged to help diagnosing
+ * unexpected multiple initialisations.
+ *
+ * @param producePath Lambda returning the absolute path where the DataStore
+ *                    file must be created (e.g. `context.filesDir.absolutePath`)
+ * @return The singleton [DataStore] of type `Preferences`.
+ */
 fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {
     if (::dataStore.isInitialized) {
         Log.v(::createDataStore.name,"DataStore already initialized with path: ${producePath()}")
@@ -47,5 +61,6 @@ fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchro
     dataStore
 }
 
+/** Returns the platform-specific absolute path used to store the preferences DataStore file. */
 expect fun keyValueStorePath(): String
 

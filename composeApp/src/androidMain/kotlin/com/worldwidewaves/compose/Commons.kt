@@ -96,6 +96,7 @@ import kotlin.time.Instant
 // ----------------------------
 
 @Composable
+/** Horizontal white divider reused across screens. */
 fun DividerLine(modifier: Modifier = Modifier) {
     HorizontalDivider(
         modifier = modifier.width(DIM_DIVIDER_WIDTH.dp),
@@ -106,6 +107,7 @@ fun DividerLine(modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
+/** Top-right banner indicating SOON / RUNNING event states. */
 fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
         val (backgroundColor, textId) = if (eventStatus == Status.SOON) {
@@ -139,6 +141,7 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
 // ----------------------------
 
 @Composable
+/** Semi-transparent overlay with “done” image when the event is finished. */
 fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.DONE) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -158,6 +161,7 @@ fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
 // ----------------------------
 
 @Composable
+/** Primary button that navigates to [WaveActivity] when the wave is active or imminent. */
 fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock: IClock, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
@@ -192,6 +196,7 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
 // ----------------------------
 
 @Composable
+/** Displays clickable Instagram account & hashtag with logo; opens external URI on tap. */
 fun WWWSocialNetworks(
     modifier: Modifier = Modifier,
     instagramAccount: String,
@@ -235,6 +240,7 @@ fun WWWSocialNetworks(
 
 // Reusable composable for showing loading state
 @Composable
+/** Generic circular loading indicator with a message. */
 fun LoadingIndicator(message: String) {
     Column(
         horizontalAlignment = CenterHorizontally,
@@ -258,6 +264,7 @@ fun LoadingIndicator(message: String) {
 
 // Reusable composable for showing download progress
 @Composable
+/** Shows percentage, progress bar and cancel button while downloading. */
 fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -> Unit = {}) {
     Column(
         horizontalAlignment = CenterHorizontally,
@@ -305,6 +312,7 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
 }
 
 @Composable
+/** Error block with retry action – used for map download failures. */
 fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = CenterHorizontally,

@@ -60,7 +60,7 @@ abstract class AbstractEventMap<T>(
 ) {
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
-    abstract val locationProvider: LocationProvider? // LocationProvider is native location provider
+    abstract val locationProvider: WWWLocationProvider? // LocationProvider is native location provider
 
     // Class variables
     private var constraintManager: MapConstraintManager? = null // Map constraint manager

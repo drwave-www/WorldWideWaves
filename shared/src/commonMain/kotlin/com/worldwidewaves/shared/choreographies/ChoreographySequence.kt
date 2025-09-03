@@ -35,8 +35,20 @@ data class ChoreographyDefinition(
 )
 
 /**
- * Represents a sequence of images to be displayed in order with timing information
- * and associated text for wave choreography animations.
+ * Root JSON object describing the **visual choreography** attached to a wave.
+ *
+ * A full choreography is split into three logical sections:
+ * 1. *Warming*  – a list of progressive sequences that loop while the user is
+ *    performing the warming-up gesture; each sequence is displayed for its own
+ *    [ChoreographySequence.duration] before switching to the next, then the list
+ *    repeats from the beginning.
+ * 2. *Waiting*  – a single sequence shown when the user is about to be hit by
+ *    the wave (count-down phase).
+ * 3. *Hit*      – a single sequence displayed for a short period right after the
+ *    device detects the hit.
+ *
+ * At runtime the `ChoreographyManager` picks the appropriate list entry (or
+ * single sequence) based on current wave state and elapsed time.
  */
 @Serializable
 data class ChoreographySequence(
@@ -73,7 +85,14 @@ data class ChoreographySequence(
         require(frameWidth > 0 && frameHeight > 0) { "frame dimensions must be > 0" }
     }
 
-    // Returns resolved image resource IDs
+    /**
+     * Convert the sprite-sheet reference in [frames] into platform-specific
+     * drawable handles using the provided [ImageResolver].
+     *
+     * The same resource handle is repeated for each frame because, on the UI
+     * side, we draw individual frames by translating the sprite-sheet inside a
+     * clipped canvas rather than extracting separate bitmaps.
+     */
     fun <T> resolveImageResources(resolver: ImageResolver<T>): List<T> {
         // Extract each frame from the sprite sheet
         val resolvedFrames = (0 until frameCount).mapNotNull { frameIndex ->

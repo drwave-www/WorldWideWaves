@@ -58,6 +58,22 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
 // ---------------------------
 
 @OptIn(ExperimentalTime::class)
+/**
+ * Observes a single [IWWWEvent] and the user’s current position to expose
+ * UI-friendly reactive state.
+ *
+ * The observer runs periodic sampling loops to:
+ * • Track overall wave progression & event [Status]  
+ * • Predict if/when the user will be hit and the remaining time-to-hit  
+ * • Detect warming phases (global & per-user) and completion of the hit  
+ * • Mirror helper booleans used by choreography layers (start-warming, hit, …)  
+ * • Cache latest computations to minimise expensive geo / time calculations
+ *
+ * All values are surfaced as cold, hot [StateFlow]s so Composables can observe
+ * them without manual cancellation.  Internally the work is coalesced through
+ * an adaptive observation interval to avoid unnecessary CPU wake-ups when the
+ * event is far in the future.
+ */
 class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
 
     data class EventObservation(

@@ -31,12 +31,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
@@ -46,10 +46,18 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
+import com.worldwidewaves.shared.infos_core
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
+/**
+ * **About > Info** tab.
+ *
+ * Implements [TabScreen] to display the core descriptive paragraphs about the
+ * WorldWideWaves project along with the author signature and social-network
+ * links.  Content is fully localized via `MokoRes.strings.*`.
+ */
 class AboutInfoScreen : TabScreen {
     override val name = "Infos"
 
@@ -75,24 +83,17 @@ class AboutInfoScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Iterates over a fixed list of localized string resources and renders each
+     * paragraph with justified alignment (or start-aligned for RTL locales).
+     */
     private fun MainInfo() {
         val dir = LocalLayoutDirection.current
-        val items = listOf(
-            MokoRes.strings.infos_core_1,
-            MokoRes.strings.infos_core_2,
-            MokoRes.strings.infos_core_3,
-            MokoRes.strings.infos_core_4,
-            MokoRes.strings.infos_core_5,
-            MokoRes.strings.infos_core_6,
-            MokoRes.strings.infos_core_7,
-            MokoRes.strings.infos_core_8,
-            MokoRes.strings.infos_core_9
-        )
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp) // space between items
         ) {
-            items.forEach { res ->
+            infos_core.forEach { res ->
                 Text(
                     text = stringResource(res),
                     style = commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
@@ -107,6 +108,9 @@ class AboutInfoScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Displays “Dr Wave” signature block with custom sizing and spacing.
+     */
     private fun DrWaveSignature() {
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {

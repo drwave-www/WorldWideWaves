@@ -1,21 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
-import com.worldwidewaves.shared.events.WWWEventWave.Direction
-import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
-import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
-import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
-import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
-import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
-import io.github.aakira.napier.Napier
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-
 /*
  * Copyright 2025 DrWave
  *
@@ -36,6 +20,22 @@ import kotlin.time.Duration.Companion.seconds
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import androidx.annotation.VisibleForTesting
+import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.events.WWWEventWave.Direction
+import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
+import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
+import com.worldwidewaves.shared.events.utils.GeoUtils.MIN_PERCEPTIBLE_SPEED_DIFFERENCE
+import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
+import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
+import io.github.aakira.napier.Napier
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class EarthAdaptedSpeedLongitude(
     private val coveredArea : BoundingBox,

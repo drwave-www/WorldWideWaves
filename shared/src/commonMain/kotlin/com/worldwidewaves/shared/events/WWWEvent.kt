@@ -174,13 +174,6 @@ data class WWWEvent(
 
     override fun getTZ(): TimeZone = TimeZone.of(this.timeZone)
 
-    /**
-     * Converts the start date and time of the event to a local `LocalDateTime`.
-     *
-     * This function parses the event's date and start hour, converts it to an `Instant` using the event's time zone,
-     * and then converts it to a `LocalDateTime` in the same time zone.
-     *
-     */
     override fun getStartDateTime(): Instant =
         try {
             val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
@@ -199,29 +192,10 @@ data class WWWEvent(
         return getWarmingDuration() + WAVE_WARN_BEFORE_HIT + waveDuration
     }
 
-    /**
-     * Calculates the end time of the event based on its start time, bounding box, and speed.
-     *
-     * This function determines the end time of the event by performing the following steps:
-     * 1. Retrieves the start date and time of the event in the local time zone.
-     * 2. Obtains the bounding box of the event area.
-     * 3. Calculates the average latitude of the bounding box.
-     * 4. Computes the distance across the bounding box at the average latitude.
-     * 5. Calculates the duration of the event based on the distance and the event's speed.
-     * 6. Adds the duration to the start time to get the end time.
-     *
-     */
     override suspend fun getEndDateTime(): Instant = getStartDateTime().plus(getTotalTime())
 
     // ------------------------------------------------------------------------
 
-    /**
-     * Retrieves the event's time zone offset in the form "UTC+x".
-     *
-     * This function calculates the current offset of the event's time zone from UTC
-     * and returns it as a string in the format "UTC+x".
-     *
-     */
     override fun getLiteralTimezone(): String {
         val hoursOffset = getTZ().offsetAt(clock.now()).totalSeconds / 3600
         return when {
@@ -231,13 +205,6 @@ data class WWWEvent(
         }
     }
 
-    /**
-     * Converts the start date and time of the event to a simple local date format.
-     *
-     * This function parses the event's start date and time, converts it to the local time zone,
-     * and formats it as a string in the "dd/MM" format. If the conversion fails, it returns "00/00".
-     *
-     */
     override fun getLiteralStartDateSimple(): String = try {
         getStartDateTime().let {
             "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
@@ -248,59 +215,21 @@ data class WWWEvent(
         "00/00"
     }
 
-    /**
-     * Retrieves the literal start time of the event in "HH:mm" format.
-     *
-     * This function first checks if the start time has been cached. If it has, it returns the cached value.
-     * If not, it calculates the start time by converting the event's start date and time to a local `LocalDateTime`,
-     * formats the hour and minute to ensure they are two digits each, and then caches and returns the formatted time.
-     *
-     */
     override fun getLiteralStartTime(): String = IClock.instantToLiteral(getStartDateTime(), getTZ())
 
-    /**
-     * Retrieves the literal end time of the wave event in "HH:mm" format.
-     *
-     * This function checks if the end time has been previously cached. If it has, it returns the cached value.
-     * Otherwise, it calculates the end time by calling `getEndTime()`, formats it to "HH:mm" format,
-     * caches the result, and then returns it.
-     *
-     */
     @VisibleForTesting
     override suspend fun getLiteralEndTime(): String = IClock.instantToLiteral(getEndDateTime(), getTZ())
 
     // -----------------------------------------------------------------------
 
-    /**
-     * Retrieves the total time of the wave event in a human-readable format.
-     *
-     * This function calculates the total time of the wave event and returns it as a string
-     * in the format of "X min", where X is the total time in whole minutes.
-     *
-     */
     override suspend fun getLiteralTotalTime(): String = "${getTotalTime().inWholeMinutes} min"
 
     // -----------------------------------------------------------------------
 
-    /**
-     * Starting date/time of the wave
-     */
     override fun getWaveStartDateTime() : Instant = getStartDateTime() + getWarmingDuration() + WAVE_WARN_BEFORE_HIT
 
-    /**
-     * Duration of the warming phase
-     */
     override fun getWarmingDuration(): Duration = warming.getWarmingDuration()
 
-    /**
-     * Determines if the current time is near the event start time.
-     *
-     * This function calculates the duration between the current time and the event start time.
-     * It then checks if this duration is greater than the predefined observation delay.
-     *
-     * Is different than isSoon on the delay, isSoon is on date while isNearTime is on hours
-     *
-     */
     override fun isNearTime(): Boolean {
         val now = clock.now()
         val eventStartTime: Instant = getStartDateTime()

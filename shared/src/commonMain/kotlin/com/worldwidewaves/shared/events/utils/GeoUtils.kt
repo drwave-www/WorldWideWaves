@@ -29,6 +29,21 @@ import kotlin.math.min
 
 object GeoUtils {
 
+    /**
+     * Collection of lightweight geodesic helpers reused across the shared module.
+     *
+     * Main responsibilities:
+     * • Angle ↔ radians conversions (`toRadians` / `toDegrees`)  
+     * • Distance estimations on a WGS-84 ellipsoid (great-circle lon/lat helpers)  
+     * • Tiny predicates to compare / clamp coordinates while accounting for
+     *   floating-point imprecision (EPSILON)  
+     * • Convenience functions used by wave algorithms & map logic
+     *   (range checks, “point on segment”, …).
+     *
+     * All maths stay intentionally *simple* to keep the code size and runtime
+     * cost low – accuracy is “good enough” for UI visualisation and hit
+     * predictions (< 10 m error margin).
+     */
     const val EPSILON = 1e-9 // A small tolerance value for double precision errors
 
     const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0 // Adjustment variable to manage the nb of wave splits

@@ -51,6 +51,19 @@ import kotlin.random.Random
 
 // ---------------------------
 
+/**
+ * Geospatial definition of an event: polygons and bounding-box.
+ *
+ * Loads polygons from the event-specific cached GeoJSON (or an optional `bbox`
+ * string override), then:
+ *  • Caches the parsed polygons, computed bounding-box and center position.  
+ *  • Provides fast `isPositionWithin()` tests (bbox pre-check + polygon test).  
+ *  • Offers helpers such as `generateRandomPositionInArea()` for simulation.  
+ *  • Exposes lazy `bbox()` / `getCenter()` accessors used by map & wave logic.
+ *
+ * All heavy I/O / parsing work is executed inside the provided
+ * [CoroutineScopeProvider] so callers remain on the main thread.
+ */
 @Serializable
 data class WWWEventArea(
     val osmAdminids: List<Int>,

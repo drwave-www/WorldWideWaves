@@ -62,6 +62,13 @@ private val tabInfo = listOf(
     MokoRes.strings.tab_faq_name
 )
 
+/**
+ * *About* root tab that aggregates the **Info** and **FAQ** sub-sections.
+ *
+ * Uses an internal [TabManager] to switch between the two supplied [TabScreen]s
+ * (`aboutInfoScreen`, `aboutFaqScreen`) and provides its own tiny tab-bar
+ * implementation via [TabBarItem].
+ */
 class AboutScreen(aboutInfoScreen: AboutInfoScreen, aboutFaqScreen: AboutFaqScreen) : TabScreen {
     override val name = "Info"
 

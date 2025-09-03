@@ -21,11 +21,17 @@ package com.worldwidewaves.compose.map
  * limitations under the License.
  */
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -53,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -67,9 +74,9 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
-import com.worldwidewaves.shared.map.LocationProvider
+import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.utils.AndroidLocationProvider
+import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
@@ -99,7 +106,21 @@ import org.maplibre.geojson.Polygon
 import java.io.File
 
 /**
- * Android-specific implementation of the EventMap
+ * Android implementation of the shared **EventMap** adapter.
+ *
+ * Bridges the platform-agnostic map layer defined in the shared module with the
+ * MapLibre Android SDK by:
+ * • Loading the per-event style **URI** produced by [IWWWEvent.map]  
+ * • Instantiating / configuring the underlying `MapView` & `MapLibreMap`
+ *   (gestures, camera bounds, location component, click callbacks)  
+ * • Delegating tile/style generation & map-specific validation to
+ *   [com.worldwidewaves.shared.events.WWWEventMap] in the shared code while exposing a Compose `Screen`
+ *   convenience wrapper for UI layers.  
+ *
+ * All logic that can stay platform-agnostic (camera enums, location providers,
+ * polygon updates…) lives in [AbstractEventMap]; this class only contains the
+ * Android-specific glue code required to render and interact with the map on
+ * the device.
  */
 class AndroidEventMap(
     event: IWWWEvent,
@@ -110,8 +131,12 @@ class AndroidEventMap(
 ) : KoinComponent, AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate) {
 
     // Overrides properties from AbstractEventMap
-    override val locationProvider: LocationProvider by inject(AndroidLocationProvider::class.java)
+    override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
     override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
+
+    /** Holds the last [MapLibreMap] provided by MapView so we can (re-)enable
+     *  the location component whenever permission or provider state changes. */
+    private var currentMap: MapLibreMap? = null
 
     // Map availability and download state tracking
     private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
@@ -159,6 +184,38 @@ class AndroidEventMap(
         // Request GPS location Android permissions
         hasLocationPermission = requestLocationPermission()
         if (hasLocationPermission) CheckGPSEnable()
+
+        /* -----------------------------------------------------------------
+         * Re-check permission & GPS provider when activity resumes
+         * ----------------------------------------------------------------- */
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    val granted = isLocationPermissionGranted(context)
+                    hasLocationPermission = granted
+                    updateLocationComponent(context, granted)
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+
+        /* -----------------------------------------------------------------
+         * Monitor GPS provider toggles coming from system settings
+         * ----------------------------------------------------------------- */
+        DisposableEffect(Unit) {
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(c: Context?, i: Intent?) {
+                    val granted = isLocationPermissionGranted(context)
+                    hasLocationPermission = granted
+                    updateLocationComponent(context, granted)
+                }
+            }
+            val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+            context.registerReceiver(receiver, filter)
+            onDispose { context.unregisterReceiver(receiver) }
+        }
 
         // Setup Map Style and properties, initialize the map view if map is available
         LaunchedEffect(isMapAvailable) {
@@ -286,6 +343,8 @@ class AndroidEventMap(
         }
     }
 
+    // ------------------------------------------------------------------------
+
     /**
      * Helper function to load the map
      */
@@ -303,6 +362,8 @@ class AndroidEventMap(
                     val uri = Uri.fromFile(File(it))
                     scope.launch { // Required -- UI actions
                         mapLibreView.getMapAsync { map ->
+                            // Save reference so we can refresh location component later
+                            currentMap = map
                             // Setup Map
                             this@AndroidEventMap.setupMap(
                                 map, scope,uri.toString(),
@@ -359,7 +420,7 @@ class AndroidEventMap(
                     .build()
             )
             .useDefaultLocationEngine(false)
-            .locationEngine(LocationEngineProxy((locationProvider as AndroidLocationProvider).locationEngine))
+            .locationEngine(LocationEngineProxy((locationProvider as AndroidWWWLocationProvider).locationEngine))
             .locationEngineRequest(buildLocationEngineRequest())
             .build()
     }
@@ -372,6 +433,48 @@ class AndroidEventMap(
             .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Utility to check if both fine & coarse location permissions are already
+     * granted – used when the app returns to foreground or when the user toggles
+     * GPS from system settings so we can update the MapLibre location component
+     * without re-prompting.
+     */
+    private fun isLocationPermissionGranted(context: Context): Boolean {
+        val fine = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        return fine && coarse
+    }
+
+    /**
+     * Enable / disable the MapLibre location component depending on the latest
+     * permission + provider state.  Called from lifecycle & GPS receivers.
+     */
+    private fun updateLocationComponent(context: Context, hasPermission: Boolean) {
+        val map = currentMap ?: return
+        map.style?.let {
+            try {
+                // Always disable first to avoid stale state
+                map.locationComponent.isLocationComponentEnabled = false
+
+                if (hasPermission) {
+                    setupMapLocationComponent(map, context)
+                }
+            } catch (se: SecurityException) {
+                // Permission might have been revoked between check and use
+                Log.w("AndroidEventMap", "Location permission missing when enabling component", se)
+            } catch (t: Throwable) {
+                // Catch-all to avoid crashing the map in unexpected situations
+                Log.e("AndroidEventMap", "Failed to update location component", t)
+            }
+        }
+    }
 
     // ------------------------------------------------------------------------
 

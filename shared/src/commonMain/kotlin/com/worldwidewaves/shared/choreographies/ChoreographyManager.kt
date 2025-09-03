@@ -30,18 +30,27 @@ import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getChoreographyText
 import com.worldwidewaves.shared.utils.ImageResolver
 import dev.icerock.moko.resources.StringResource
-import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
- * Manages choreography sequences for different phases of wave events.
+ * Manages visual choreography sequences for different phases of wave events.
+ *
+ * Core responsibilities:
+ * • Loads JSON choreography definitions from [FS_CHOREOGRAPHIES_CONF]
+ * • Resolves sprite sheets into platform-specific image resources via [ImageResolver]
+ * • Builds warming (progressive), waiting, and hit sequences with correct timing
+ * • Provides [DisplayableSequence] objects with frame timing and remaining duration
+ *
+ * The manager handles sequence transitions, looping, and time-based frame selection
+ * to create a synchronized visual experience across all wave phases.
  */
 @OptIn(ExperimentalTime::class)
 open class ChoreographyManager<T>(
@@ -56,12 +65,20 @@ open class ChoreographyManager<T>(
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Holds all resolved choreography sequences for the three wave phases:
+     * warming (progressive build-up), waiting (pre-hit), and hit (impact).
+     */
     data class ResolvedChoreography<T>(
         val warmingSequences: List<ResolvedSequence<T>> = emptyList(),
         val waitingSequence: ResolvedSequence<T>? = null,
         val hitSequence: ResolvedSequence<T>? = null
     )
 
+    /**
+     * Single choreography sequence with resolved platform-specific image resource
+     * and timing boundaries (start/end time offsets).
+     */
     data class ResolvedSequence<T>(
         val sequence: ChoreographySequence,
         val text: StringResource,
@@ -70,6 +87,10 @@ open class ChoreographyManager<T>(
         val endTime: Duration
     )
 
+    /**
+     * UI-ready choreography sequence with all parameters needed for rendering:
+     * resolved image, frame dimensions, timing, text, and loop behavior.
+     */
     data class DisplayableSequence<T>(
         val image: T?,
         val frameWidth: Int,
@@ -90,15 +111,12 @@ open class ChoreographyManager<T>(
         seqNumber: Int? = null
     ): ResolvedSequence<T> {
         val resolvedImages = resolveImageResources(imageResolver)
-        Log.d("ChoreographyManager", "duration: ${duration?.inWholeSeconds}")
-        Log.d("ChoreographyManager", "startTime: ${startTime.inWholeSeconds}")
-        Log.d("ChoreographyManager", "endTime: ${(startTime + duration!!).inWholeSeconds}")
         return ResolvedSequence(
             sequence = this,
             text = getChoreographyText(seqType, seqNumber),
             resolvedImage = resolvedImages.firstOrNull(),
             startTime = startTime,
-            endTime = startTime + duration
+            endTime = startTime + (duration ?: 10.seconds)
         )
     }
 
@@ -138,7 +156,7 @@ open class ChoreographyManager<T>(
                 definition = it
             }
         } catch (e: Exception) {
-            Napier.e("Error loading choreography definition: ${e.message}")
+            Log.e("ChoreographyManager", "Error loading choreography definition: ${e.message}")
             return ChoreographyDefinition()
         }
     }
@@ -164,6 +182,10 @@ open class ChoreographyManager<T>(
 
     // ------------------------------------------------------------------------
 
+    /**
+     * Returns the current warming sequence based on elapsed time since [startTime],
+     * with remaining duration for smooth transitions.
+     */
     open fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
@@ -186,9 +208,15 @@ open class ChoreographyManager<T>(
         return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
     }
 
+    /**
+     * Returns the waiting sequence shown when a user is about to be hit by the wave.
+     */
     open fun getWaitingSequence(): DisplayableSequence<T>? =
         resolvedSequences?.waitingSequence?.toDisplayable()
 
+    /**
+     * Returns the hit sequence shown when a user has been hit by the wave.
+     */
     open fun getHitSequence(): DisplayableSequence<T>? =
         resolvedSequences?.hitSequence?.toDisplayable()
 }

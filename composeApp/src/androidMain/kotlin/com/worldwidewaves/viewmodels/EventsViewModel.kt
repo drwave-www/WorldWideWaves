@@ -36,11 +36,20 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 /**
- * ViewModel for managing event data.
+ * Central ViewModel that drives the **Events** tab.
  *
- * This ViewModel fetches events from a data source (`WWWEvents`), exposes them as a
- * `StateFlow`, and provides filtering functionality for displaying all events or only
- * favorite events.
+ * Responsibilities:
+ * • Load the catalogue from the shared [WWWEvents] repository, sort by start date  
+ * • Expose reactive `StateFlow`s for the full list, loading/error flags and
+ *   “has-favorites” helper used by the UI  
+ * • Spin up each event’s [IWWWEvent.observer] so real-time status (soon / running
+ *   / done, user-hit, etc.) keeps updating in the background and, in debug
+ *   builds, throttle the simulation speed around the hit sequence  
+ * • Maintain in-memory copy (`originalEvents`) protected by a mutex and provide
+ *   cheap filtering by favorites or “map downloaded” using
+ *   [MapAvailabilityChecker]  
+ * • Catch uncaught coroutine exceptions through a dedicated
+ *   [CoroutineExceptionHandler] and surface them via `_loadingError`
  */
 @OptIn(ExperimentalTime::class)
 class EventsViewModel(

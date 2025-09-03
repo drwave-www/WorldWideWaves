@@ -44,6 +44,15 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
 
 // ----------------------------
 
+/**
+ * Lightweight contract implemented by every screen that can appear inside the
+ * **tab bar**.
+ *
+ * A screen only needs to expose:
+ * • `Screen()` – the actual Composable content  
+ * • `name`     – label forwarded to the host so it can be used for a11y or
+ *   analytics.
+ */
 interface TabScreen {
     @Composable fun Screen(modifier: Modifier)
     val name : String
@@ -51,6 +60,16 @@ interface TabScreen {
 
 // ----------------------------
 
+/**
+ * Simple tab navigator for Compose.
+ *
+ * Takes a list of [TabScreen]s and a Composable factory (`tabBarItem`) that
+ * draws each item (icon/text).  It then:
+ * 1. Renders the currently-selected screen in a flexible content area.  
+ * 2. Displays a bottom tab-bar that lets the user switch screens.  
+ * 3. Persists the selected tab via `remember` so configuration changes keep the
+ *    current selection.
+ */
 class TabManager(
     private val screens: List<TabScreen>, // List of tab screens
     val tabBarItem: @Composable ( // How to draw a tab item
@@ -61,6 +80,12 @@ class TabManager(
 ) {
 
     @Composable
+    /**
+     * Renders the tab bar and the associated content area.
+     *
+     * [startScreen] can temporarily override the content (e.g. splash or
+     * onboarding) until the first tab selection occurs.
+     */
     fun TabView(
         modifier: Modifier = Modifier,
         startScreen: @Composable ((Modifier) -> Unit)? = null,

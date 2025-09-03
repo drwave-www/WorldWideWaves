@@ -53,7 +53,16 @@ import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 
 /**
- * MapLibre adapter that implements the PlatformMap interface
+ * Android-specific implementation of the shared [MapLibreAdapter].
+ *
+ * Wraps MapLibre Android’s `MapLibreMap` and exposes the platform-agnostic API
+ * expected by the shared `AbstractEventMap` / `AndroidEventMap` layers:
+ * • Style / source initialisation and dynamic updates (wave polygons, bbox)  
+ * • Camera helpers (bounds, animate/move, zoom & position flows)  
+ * • Click & camera listeners wiring with Kotlin callbacks  
+ *
+ * This adapter is strictly *glue* code – all high-level map logic remains in the
+ * shared module so iOS can provide its own counterpart.
  */
 class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : MapLibreAdapter<MapLibreMap> {
 
@@ -78,8 +87,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     // -- Private properties
 
     private var currentMapClickListener: MapLibreMap.OnMapClickListener? = null
-
-    // --------------------------------
 
     /* ---------------------------------------------------------------------
      * Dynamic layers used for the wave rendering.  We keep their ids so we

@@ -81,6 +81,7 @@ import com.worldwidewaves.compose.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
@@ -136,7 +137,6 @@ class EventActivity : AbstractEventWaveActivity() {
         val scope = rememberCoroutineScope()
         val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
-        // Observe progression so we can refresh end time once polygons & duration are available
         val progression by event.observer.progression.collectAsState()
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
@@ -174,7 +174,6 @@ class EventActivity : AbstractEventWaveActivity() {
                 EventDescription(event)
                 DividerLine()
                 
-                // Wave button row with relative positioning for test button
                 Box(modifier = Modifier.fillMaxWidth()) {
                     ButtonWave(
                         event.id, 
@@ -228,7 +227,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         val simulation = WWWSimulation(
                             startDateTime = simulationTime,
                             userPosition = position,
-                            initialSpeed = 50 // Use current default speed
+                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
                         )
 
                         // Set the simulation
@@ -350,7 +349,7 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val formattedTime = hitDateTime.let { IClock.instantToLiteral(it, event.getTZ()) } ?: ""
+    val formattedTime = IClock.instantToLiteral(hitDateTime, event.getTZ())
 
     val geolocText = if (isInArea) {
         stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
@@ -462,25 +461,7 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                         val value = eventNumbers[key]!!
                         val displayValue =
                             if (key == MokoRes.strings.wave_total_time) {
-                                totalMinutes?.let { mins ->
-                                    val hours = (mins / 60).toInt()
-                                    val minutesLeft = (mins % 60).toInt()
-                                    val parts = buildList {
-                                        if (hours > 0) add(
-                                            if (hours == 1)
-                                                stringResource(MokoRes.strings.hour_singular, hours)
-                                            else
-                                                stringResource(MokoRes.strings.hour_plural, hours)
-                                        )
-                                        if (minutesLeft > 0) add(
-                                            if (minutesLeft == 1)
-                                                stringResource(MokoRes.strings.minute_singular, minutesLeft)
-                                            else
-                                                stringResource(MokoRes.strings.minute_plural, minutesLeft)
-                                        )
-                                    }
-                                    if (parts.isNotEmpty()) parts.joinToString(" ") else value
-                                } ?: value
+                                formatDurationMinutes(totalMinutes, value)
                             } else if (key == MokoRes.strings.wave_start_time && startTimeText != null) {
                                 startTimeText!!
                             } else if (key == MokoRes.strings.wave_end_time && endTimeText != null) {
@@ -535,3 +516,26 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
         }
     }
 }
+
+// Formats a duration in minutes into a human-readable string (e\.g\., "1 hour 5 minutes")\.
+// If totalMinutes is null, returns the original value string\.
+@Composable
+private fun formatDurationMinutes(totalMinutes: Long?, defaultValue: String): String = totalMinutes?.let { mins ->
+    val hours = (mins / 60).toInt()
+    val minutesLeft = (mins % 60).toInt()
+    val parts = buildList {
+        if (hours > 0) add(
+            if (hours == 1)
+                stringResource(MokoRes.strings.hour_singular, hours)
+            else
+                stringResource(MokoRes.strings.hour_plural, hours)
+        )
+        if (minutesLeft > 0) add(
+            if (minutesLeft == 1)
+                stringResource(MokoRes.strings.minute_singular, minutesLeft)
+            else
+                stringResource(MokoRes.strings.minute_plural, minutesLeft)
+        )
+    }
+    if (parts.isNotEmpty()) parts.joinToString(" ") else defaultValue
+} ?: defaultValue

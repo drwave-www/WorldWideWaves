@@ -1,12 +1,5 @@
 package com.worldwidewaves.shared.di
 
-import com.worldwidewaves.shared.data.FavoriteEventsStore
-import com.worldwidewaves.shared.data.InitFavoriteEvent
-import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.createDataStore
-import com.worldwidewaves.shared.data.keyValueStorePath
-import org.koin.dsl.module
-
 /*
  * Copyright 2025 DrWave
  *
@@ -14,7 +7,7 @@ import org.koin.dsl.module
  * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +20,13 @@ import org.koin.dsl.module
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.InitFavoriteEvent
+import com.worldwidewaves.shared.data.SetEventFavorite
+import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.data.keyValueStorePath
+import org.koin.dsl.module
 
 val datastoreModule = module {
     single { createDataStore { keyValueStorePath() } }

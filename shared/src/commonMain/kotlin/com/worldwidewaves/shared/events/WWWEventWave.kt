@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
@@ -47,11 +45,33 @@ import kotlin.time.toDuration
 
 @OptIn(ExperimentalTime::class)
 @Serializable
+/**
+ * Base abstraction for the “wave” part of a World-Wide-Waves event.
+ *
+ * A wave is the dynamic entity that travels across the event area and drives most
+ * of the real-time behaviour exposed to the UI:
+ * • Time helpers – duration, start-/end-time, progression.  
+ * • Spatial helpers – closest longitude, user-hit prediction, polygons split.  
+ * • Choreography hooks – warming / waiting / hit sequences via
+ *   [ChoreographyManager].  
+ *
+ * Concrete subclasses (e.g. linear, deep, split) implement the geography-specific
+ * maths while this class provides common utilities and caching helpers.
+ */
 abstract class WWWEventWave : KoinComponent, DataValidator {
 
     enum class Direction { WEST, EAST }
 
     @OptIn(ExperimentalTime::class)
+    /**
+     * Immutable snapshot of the wave geometry at a given moment.
+     *
+     *  • *traversedPolygons* : part of the area already crossed by the wave  
+     *  • *remainingPolygons* : part still to come  
+     *
+     *  UI layers use this to render previously-hit polygons with a different
+     *  style while keeping the rest untouched.
+     */
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
@@ -102,7 +122,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         this.positionRequester = positionRequester
     }
 
-    @VisibleForTesting
     fun getUserPosition(): Position? {
         var platform : WWWPlatform? = null
         try { platform = get() } catch (_: Exception) {
@@ -114,12 +133,6 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
             positionRequester?.invoke()
         }
     }
-
-    suspend fun userIsGoingToBeHit(): Boolean = runCatching {
-        timeBeforeUserHit()?.let { duration ->
-            duration <= WAVE_WARN_BEFORE_HIT
-        } ?: false
-    }.getOrDefault(false)
 
     suspend fun timeBeforeUserHit(): Duration? {
         if (hasUserBeenHitInCurrentPosition()) return null
@@ -155,19 +168,9 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
         }
     }
 
-    /**
-     * Retrieves the literal progression of the event as a percentage string.
-     */
-    suspend fun getLiteralProgression(): String = getLiteralFromProgression(getProgression())
     fun getLiteralFromProgression(progression: Double): String =
         if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
 
-    /**
-     * Retrieves the literal speed of the event in meters per second.
-     *
-     * This function returns the speed of the event as a string formatted with "m/s".
-     *
-     */
     fun getLiteralSpeed(): String = "$speed m/s"
 
     // ---------------------------

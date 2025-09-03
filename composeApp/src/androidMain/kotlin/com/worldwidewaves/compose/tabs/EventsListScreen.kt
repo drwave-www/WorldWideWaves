@@ -107,14 +107,26 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import com.worldwidewaves.shared.format.DateTimeFormats
-import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.ExperimentalTime
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
+/**
+ * Tab that shows the full WorldWideWaves event catalogue.
+ *
+ * Implements [TabScreen] and provides:
+ * • Three-way filter (All / Favorites / Downloaded maps)  
+ * • Live observation of map-module availability through [MapAvailabilityChecker]  
+ * • Navigation to [EventActivity] on row click  
+ * • Reactive updates via [EventsViewModel] (status, favorites, cache)  
+ *
+ * Overlay badges (soon/running, done, favorite, downloaded) are composed on top
+ * of each event thumbnail to surface real-time state.
+ */
 class EventsListScreen(
     private val viewModel: EventsViewModel,
     private val mapChecker: MapAvailabilityChecker,
@@ -127,12 +139,16 @@ class EventsListScreen(
     // ----------------------------
 
     @Composable
+    /**
+     * Root Composable: renders the selector chips + lazy list and refreshes map
+     * availability on lifecycle resume.  Filtering is performed via
+     * [EventsViewModel.filterEvents].
+     */
     override fun Screen(modifier: Modifier) {
         val events by viewModel.events.collectAsState()
         val hasFavorites by viewModel.hasFavorites.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
-        // Convert to Compose state (save across config changes)
         var starredSelected by rememberSaveable { mutableStateOf(false) }
         var downloadedSelected by rememberSaveable { mutableStateOf(false) }
 
@@ -158,7 +174,6 @@ class EventsListScreen(
         DisposableEffect(lifecycleOwner) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    // Refresh availability when screen resumes
                     mapChecker.refreshAvailability()
                 }
             }
@@ -232,6 +247,11 @@ class EventsListScreen(
 
     // ----------------------------
 
+    /**
+     * Three-segment control that lets the user switch between All / Favorites /
+     * Downloaded filters.  Visually implemented with a rounded container and
+     * three equal-width clickable boxes.
+     */
     @Composable
     private fun FavoritesSelector(
         starredSelected: Boolean,
@@ -446,6 +466,11 @@ class EventsListScreen(
         )
     }
 
+    /**
+     * Shows the “map downloaded” badge and handles **uninstall** flow:
+     * confirmation dialog, async removal via [MapAvailabilityChecker],
+     * progress/lock-state and final result dialog.
+     */
     @Composable
     private fun EventOverlayMapDownloaded(
         eventId: String,
@@ -566,6 +591,10 @@ class EventsListScreen(
         }
     }
 
+    /**
+     * Star toggle – persists new state through [SetEventFavorite] and re-filters
+     * the list immediately if the Favorites tab is active.
+     */
     @Composable
     private fun EventOverlayFavorite(
         viewModel: EventsViewModel,
@@ -611,8 +640,12 @@ class EventsListScreen(
 
     // ----------------------------
 
+    /**
+     * Displays event location, date and “country / community” using bidi-safe
+     * wrapping and localized date formatting via [DateTimeFormats].
+     */
     @Composable
-    @OptIn(kotlin.time.ExperimentalTime::class)
+    @OptIn(ExperimentalTime::class)
     private fun EventLocationAndDate(event: IWWWEvent, modifier: Modifier = Modifier) {
         val eventDate = remember(event.id) {
             DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())

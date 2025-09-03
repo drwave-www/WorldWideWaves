@@ -24,11 +24,11 @@ package com.worldwidewaves
 import android.app.Application
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.di.CloseableCoroutineScope
 import com.worldwidewaves.di.applicationModule
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
+import com.worldwidewaves.utils.CloseableCoroutineScope
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext

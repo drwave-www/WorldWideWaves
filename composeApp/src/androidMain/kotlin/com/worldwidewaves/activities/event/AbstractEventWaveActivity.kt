@@ -27,10 +27,14 @@ import androidx.compose.ui.platform.LocalContext
 import com.worldwidewaves.activities.utils.WaveProgressionObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.di.CloseableCoroutineScope
+import com.worldwidewaves.utils.CloseableCoroutineScope
 import org.koin.android.ext.android.inject
-import java.util.UUID
 
+/**
+ * Abstract base activity for event wave features.
+ * Handles lifecycle management and observation of wave progression,
+ * providing a stable observer and coroutine scope for subclasses.
+ */
 abstract class AbstractEventWaveActivity(
     activateInfiniteScroll : Boolean = true
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
@@ -44,9 +48,6 @@ abstract class AbstractEventWaveActivity(
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
     private var _eventMap : AndroidEventMap? = null
-
-    // Create a stable observer ID based on activity instance
-    protected val observerId = UUID.randomUUID().toString()
 
     // ------------------------------------------------------------------------
 
@@ -79,8 +80,7 @@ abstract class AbstractEventWaveActivity(
                     context = context,
                     scope = appScope,
                     eventMap = eventMap,
-                    event = event,
-                    observerId = observerId
+                    event = event
                 )
                 waveProgressionObserver!!.startObservation()
             }

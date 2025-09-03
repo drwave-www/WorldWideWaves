@@ -61,6 +61,7 @@ class WWWGlobals {
         const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
         const val WAVE_BACKGROUND_COLOR = "#00008B"
         const val WAVE_BACKGROUND_OPACITY = 0.20f
+        const val DEFAULT_SPEED_SIMULATION = 50 // m/s
 
         // -- UI Constants --
 
@@ -97,7 +98,6 @@ class WWWGlobals {
 
 
         // ----------------------------
-        const val CONST_SPLASH_LOGO_WIDTH = 200
 
         const val DIM_INT_TABBAR_HEIGHT = 60
         const val DIM_INT_TABBAR_ITEM_WIDTH = 150
@@ -144,7 +144,6 @@ class WWWGlobals {
 
         const val DIM_INFO_TEXT_FONTSIZE = DIM_DEFAULT_FONTSIZE
         const val DIM_INFO_DRWAVE_FONTSIZE = DIM_BIG2_FONTSIZE
-        const val DIM_INFO_DRWAVE_INSTA_FONTSIZE = DIM_BIG2_FONTSIZE
 
         const val DIM_FAQ_TITLE_FONTSIZE = DIM_HUGE_FONTSIZE
         const val DIM_FAQ_SECTION_TITLE_FONTSIZE = DIM_DEFAULT_FONTSIZE
@@ -172,7 +171,6 @@ class WWWGlobals {
         const val DIM_EVENTS_NOEVENTS_FONTSIZE = DIM_BIG_FONTSIZE
         const val DIM_EVENTS_OVERLAY_HEIGHT = 160
         const val DIM_EVENTS_FLAG_WIDTH = 65
-        const val DIM_EVENTS_FLAG_BORDER = 1
         const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
         const val DIM_EVENTS_MAPDL_IMAGE_SIZE = 36
         const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26

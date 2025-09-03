@@ -67,6 +67,17 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
 
 @Composable
+/**
+ * High-level choreography container displayed on the **Wave** screen.
+ *
+ * Behaviour:
+ * • Subscribes to various flags exposed by [IWWWEvent.observer] to know whether
+ *   the user is currently warming-up, about to be hit, or has just been hit.  
+ * • According to those flags it queries the proper `ChoreographyManager`
+ *   (warming / waiting / hit) to obtain a [DisplayableSequence].  
+ * • The resulting animation is shown while leaving room at the
+ *   bottom for the count-down timer that the parent screen overlays.
+ */
 fun WaveChoreographies(
     event: IWWWEvent,
     clock: IClock,
@@ -156,6 +167,11 @@ fun WaveChoreographies(
 }
 
 @Composable
+/**
+ * Helper that renders [sequence] for its remaining duration (or full
+ * [DisplayableSequence.duration] when `remainingDuration == null`) and then
+ * triggers [onSequenceComplete] so the caller can request the next sequence.
+ */
 fun TimedSequenceDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     clock: IClock,
@@ -173,6 +189,14 @@ fun TimedSequenceDisplay(
 }
 
 @Composable
+/**
+ * Low-level renderer that plays a sprite-sheet based animation.
+ *
+ * Frames are laid out horizontally in a single bitmap; we translate the canvas
+ * by `frameWidth × currentIndex` inside a clipped rect to reveal each frame.
+ * The animation loops according to [DisplayableSequence.loop] and is wrapped in
+ * a semi-transparent card with the sequence’s localized caption underneath.
+ */
 fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     clock: IClock,

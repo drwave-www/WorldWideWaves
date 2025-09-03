@@ -252,31 +252,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         return addPosition
     }
 
-    fun removePositionsUpTo(pointId: Int): Boolean {
-        // Check if the polygon is empty or if the position id doesn't exist
-        require(isNotEmpty() && positionsIndex.containsKey(pointId)) { return false }
-
-        // If toCut is the head, nothing to delete
-        if (head?.id == pointId) {
-            return true
-        }
-
-        var current = head
-        while (current != null && current.id != pointId) {
-            val next = current.next
-            remove(current.id)
-            current = next
-        }
-
-        // Update the head to be the point
-        head = current
-        head?.prev = null
-
-        updateBoundingBox()
-        forceDirectionComputation()
-        return true
-    }
-
     fun pop(): Position? {
         val last = requireNotNull(tail) { return null }
         remove(last.id)
@@ -320,17 +295,6 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
         }
     }
 
-    fun reverseLoopIterator(): LoopIterator<Position> = object : LoopIterator<Position> {
-        private var current = tail
-        override fun hasNext(): Boolean = tail != null
-        override fun viewCurrent(): Position = requireNotNull(current ?: tail) { throw NoSuchElementException() }
-        override fun next(): Position {
-            val result = requireNotNull(current) { throw NoSuchElementException() }
-            current = current?.prev ?: tail
-            return result
-        }
-    }
-
     fun cutIterator() = cutPositions.iterator()
 
     // -------------------------------
@@ -352,17 +316,14 @@ open class Polygon(position: Position? = null) : Iterable<Position> { // Not thr
 
     // --------------------------------
 
-    fun isClosed(): Boolean = isEmpty() || first() == last()
     fun first(): Position? = head
     fun last(): Position? = tail
-    fun search(current: Position): Position? = this.find { it == current }
     val size: Int get() = positionsIndex.size
     val cutSize: Int get() = cutPositions.size
     fun isEmpty(): Boolean = positionsIndex.isEmpty()
     fun isCutEmpty(): Boolean = cutPositions.isEmpty()
     fun isNotEmpty(): Boolean = positionsIndex.isNotEmpty()
     fun isNotCutEmpty(): Boolean = cutPositions.isNotEmpty()
-    fun getPosition(id: Int): Position? = positionsIndex[id]
 
     // --------------------------------
 
@@ -398,7 +359,7 @@ fun <T: Polygon> T.withoutLast(n: Int = 1): Polygon = createNew().apply {
     var current = this@withoutLast.head
     repeat(newSize) {
         add(current!!)
-        current = current!!.next
+        current = current.next
     }
 }
 

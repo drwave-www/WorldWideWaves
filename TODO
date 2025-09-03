@@ -2,12 +2,15 @@
 TODAY :
 
 - !! performance analysis (profiling) de l'app sur une grande ville
+- check une langue inversee (ar, he, ..)
 
 - ----> Global code linting review <----
 - > PLAY STORE UPLOAD <
 
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+
+- UI Tests sur differents devices et langues
 
 ---------------------------------------------
 

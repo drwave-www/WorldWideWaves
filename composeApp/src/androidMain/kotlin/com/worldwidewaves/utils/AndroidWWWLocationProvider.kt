@@ -27,7 +27,7 @@ import android.os.Looper
 import android.util.Log
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.map.LocationProvider
+import com.worldwidewaves.shared.map.WWWLocationProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
@@ -40,7 +40,7 @@ import org.maplibre.android.location.engine.LocationEngineResult
 /**
  * Android-specific location provider
  */
-class AndroidLocationProvider : KoinComponent, LocationProvider {
+class AndroidWWWLocationProvider : KoinComponent, WWWLocationProvider {
 
     val locationEngine: WWWSimulationEnabledLocationEngine by KoinJavaComponent.inject(
         WWWSimulationEnabledLocationEngine::class.java

@@ -28,19 +28,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.MainActivity
+import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
@@ -66,6 +67,11 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
+/**
+ * Abstract base activity for event-related screens with back navigation.
+ * Handles event loading, status bar color, and provides a composable back screen.
+ * Subclasses must implement the [Screen] composable to display event-specific content.
+ */
 abstract class AbstractEventBackActivity(
     private val activateInfiniteScroll : Boolean = true
 ) : MainActivity() {
@@ -78,12 +84,12 @@ abstract class AbstractEventBackActivity(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val eventId = intent.getStringExtra("eventId")
+
         // Prevent the screen from turning off when on event screens
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
         setStatusBarColor(window)
-
-        val eventId = intent.getStringExtra("eventId")
+        hideStatusBar(this)
 
         // Download or Load the map as app feature
         if (eventId != null) {
@@ -178,14 +184,14 @@ abstract class AbstractEventBackActivity(
 
             } else {
                     Text(
-                        text = "Event not found",
+                        text = stringResource(MokoRes.strings.events_not_found_loading),
                         style = primaryColoredTextStyle()
                     )
             }
         }
     }
 
-    // Main activity UI building method to be implemented ---------------------
+    // Main activity UI building method to implement ----------------------------
     @Composable
     abstract fun Screen(modifier: Modifier, event: IWWWEvent)
 

@@ -32,26 +32,44 @@ import kotlinx.coroutines.withContext
 
 
 /**
- * Coordination of map, event and viewmodel during wave observation
+ * Observes a single wave **progression** and mirrors it on the Android map.
+ *
+ * Responsibilities:
+ * • At start-up it inspects the current event status and either begins a
+ *   running-phase polygon stream or instantly draws the final wave outline
+ *   (DONE).                                                       <br/>
+ * • Listens to [IWWWEvent.observer.eventStatus] so it can switch between the
+ *   two behaviours when the status flips from *RUNNING → DONE*.    <br/>
+ * • While *RUNNING*, collects the wave’s `progression` flow and pushes
+ *   traversed polygons to [AndroidEventMap] – throttled to one update every
+ *   250 ms to avoid flooding the UI thread.                         <br/>
+ * • Persists the last non-empty polygon list so, if the shared logic delivers
+ *   an empty set for a short period, the map keeps showing the previous frame
+ *   instead of flickering.
+ *
+ * Public API is intentionally minimal: [startObservation], [pauseObservation]
+ * (also aliased by [stopObservation]) and lifecycle-safe internal clean-up.
  */
 class WaveProgressionObserver(
     private val context: Context,
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,
-    private val event: IWWWEvent?,
-    private val observerId: String // Stable ID kept for future usage
+    private val event: IWWWEvent?
 ) {
 
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
     private var lastWavePolygons: List<org.maplibre.geojson.Polygon> = emptyList()
 
+    /**
+     * Entry-point – inspects current state then launches coroutines that will
+     * keep the map in sync with the wave until [pauseObservation] is called.
+     */
     fun startObservation() {
         val eventMap = eventMap ?: return
         val event = event ?: return
 
         scope.launch {
-            // Initial observation setup
             // Initial observation setup
             when {
                 event.isRunning() -> startPolygonsObservation(event, eventMap)
@@ -76,6 +94,7 @@ class WaveProgressionObserver(
         polygonsJob = scope.launch(Dispatchers.Default) {
             event.observer.progression.collect {
                 val now = System.currentTimeMillis()
+                // Throttle updates to at most every 250 ms --------------------
                 if (now - lastUpdateTime >= updateIntervalMs) {
                     lastUpdateTime = now
                     updateWavePolygons(event, eventMap)
@@ -97,6 +116,10 @@ class WaveProgressionObserver(
         }
     }
 
+    /**
+     * Subscribes to the event **status** flow and switches the active polygon
+     * coroutine when the wave enters *RUNNING* or *DONE*.
+     */
     private fun startStatusObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
         statusJob?.cancel()
         statusJob = scope.launch(Dispatchers.Default) {
@@ -146,6 +169,8 @@ class WaveProgressionObserver(
 
         if (polygons.isEmpty()) {
             if (lastWavePolygons.isNotEmpty()) {
+                // Keep displaying the previous frame to avoid flicker when the
+                // shared layer temporarily returns an empty list.
                 eventMap.updateWavePolygons(context, lastWavePolygons, false)
             }
             return

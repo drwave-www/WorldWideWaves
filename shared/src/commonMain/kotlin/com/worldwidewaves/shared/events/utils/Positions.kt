@@ -59,9 +59,6 @@ open class Position(val lat: Double, val lng: Double, // Element of the double L
     fun toCutPosition(cutId: Int, cutLeft: Position, cutRight: Position) =
         CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 
-    fun toPointCut(cutId: Int) =
-        CutPosition(lat, lng, cutId, this, this).init()
-
     fun copy(lat: Double? = null, lng: Double? = null): Position {
         return Position(lat ?: this.lat, lng ?: this.lng)
     }
@@ -98,8 +95,6 @@ class CutPosition( // A position that has been cut
     val pairId: Double by lazy { (cutId + listOf(cutLeft.id, cutRight.id).sorted().let { (first, second) ->
         ((first shl 4) + (second shr 5)).toDouble()
     }) }
-
-    val isPointOnLine by lazy { cutLeft == this || cutRight == this}
 
     override fun xfer() = CutPosition(lat, lng, cutId, cutLeft, cutRight).init()
 

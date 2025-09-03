@@ -41,6 +41,23 @@ import kotlin.jvm.JvmOverloads
 
 // ---------------------------
 
+/**
+ * Central, injectable repository that owns the **list of World-Wide-Waves
+ * events** for the whole application.
+ *
+ * Responsibilities:
+ * • Load and decode the JSON configuration shipped with the app (or downloaded)  
+ * • Validate every [IWWWEvent] and expose only the sound ones via
+ *   [flow] / [list] accessors  
+ * • Persist & restore user-specific flags such as “favorite” through
+ *   [InitFavoriteEvent]  
+ * • Provide simple callback registration helpers so view-models / screens know
+ *   when the catalogue is ready or if loading failed  
+ * • Cache the load job behind a mutex to guarantee a single concurrent fetch
+ *
+ * All UI view-models (e.g. `EventsViewModel`) and Compose screens observe the
+ * StateFlow exposed by this service to drive their lists or selectors.
+ */
 class WWWEvents : KoinComponent {
 
     private val loadingMutex = Mutex()
@@ -89,12 +106,6 @@ class WWWEvents : KoinComponent {
                 }
             }
         }
-    }
-
-    fun cancelLoading() {
-        currentLoadJob?.cancel()
-        currentLoadJob = null
-        loadingError = null
     }
 
     /**

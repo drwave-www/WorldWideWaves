@@ -33,7 +33,11 @@ import com.google.android.play.core.splitinstall.SplitInstallSessionState
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
+import com.worldwidewaves.shared.MokoRes
+import dev.icerock.moko.resources.desc.StringDesc
 import com.worldwidewaves.shared.clearEventCache
+import dev.icerock.moko.resources.desc.Resource
+import dev.icerock.moko.resources.desc.ResourceFormatted
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -219,26 +223,34 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun getErrorMessage(errorCode: Int): String {
         @Suppress("DEPRECATION")
-        return when (errorCode) {
+        val res = when (errorCode) {
             SplitInstallErrorCode.NETWORK_ERROR ->
-                "Network error. Please check your connection."
+                MokoRes.strings.map_error_network
             SplitInstallErrorCode.INSUFFICIENT_STORAGE ->
-                "Insufficient storage space."
+                MokoRes.strings.map_error_insufficient_storage
             SplitInstallErrorCode.MODULE_UNAVAILABLE ->
-                "Map module unavailable."
+                MokoRes.strings.map_error_module_unavailable
             SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED ->
-                "Too many sessions in progress. Try again later."
+                MokoRes.strings.map_error_active_sessions_limit
             SplitInstallErrorCode.INVALID_REQUEST ->
-                "Invalid request. Please try again."
+                MokoRes.strings.map_error_invalid_request
             SplitInstallErrorCode.API_NOT_AVAILABLE ->
-                "Play Store API is not available on this device."
+                MokoRes.strings.map_error_api_not_available
             SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION ->
-                "Incompatible with existing session."
+                MokoRes.strings.map_error_incompatible_with_existing_session
             SplitInstallErrorCode.SERVICE_DIED ->
-                "Service died unexpectedly. Please try again."
+                MokoRes.strings.map_error_service_died
             SplitInstallErrorCode.ACCESS_DENIED ->
-                "Access denied."
-            else -> "Unknown error occurred: $errorCode"
+                MokoRes.strings.map_error_access_denied
+            else ->
+                // Generic unknown error with code placeholder
+                MokoRes.strings.map_error_unknown
+        }
+
+        return if (res == MokoRes.strings.map_error_unknown) {
+            StringDesc.ResourceFormatted(res, errorCode).toString(getApplication())
+        } else {
+            StringDesc.Resource(res).toString(getApplication())
         }
     }
 
@@ -307,8 +319,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     }, nextDelay)
                 } else {
                     // We've exhausted our retry attempts
-                    _featureState.value = MapFeatureState.Failed(0,
-                        exception.message ?: "Failed to start download after multiple attempts"
+                    _featureState.value = MapFeatureState.Failed(
+                        0,
+                        StringDesc.Resource(
+                            MokoRes.strings.map_error_failed_after_retries
+                        ).toString(getApplication())
                     )
                 }
             }

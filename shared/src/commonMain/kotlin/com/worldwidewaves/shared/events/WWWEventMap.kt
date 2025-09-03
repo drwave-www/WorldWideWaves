@@ -43,6 +43,23 @@ import org.koin.core.component.inject
 
 // ---------------------------
 
+/**
+ * Encapsulates per-event map configuration and tooling.
+ *
+ * Core responsibilities:
+ * • Build a self-contained MapLibre **style JSON** on-the-fly, wiring the cached  
+ *   MBTiles, GeoJSON, sprites & glyphs locations via `getStyleUri()`.  
+ * • Lazy-cache heavy assets (`cacheSpriteAndGlyphs`) and keep them fresh using
+ *   simple TTL checks (`isCachedFileStale`, `updateCacheMetadata`).  
+ * • Provide convenience helpers such as [isPositionWithin] to quickly validate
+ *   whether a GPS coordinate falls inside the event bounding-box (fast bbox
+ *   test – no polygon walk).  
+ * • Offer lightweight validation of the declarative JSON section that feeds the
+ *   constructor (max-zoom bounds, language / zone format, …).
+ *
+ * The class is platform-agnostic; platform specific adapters (Android/iOS) only
+ * have to consume the generated style URI and map boundaries.
+ */
 @Serializable
 class WWWEventMap(
     val maxZoom: Double,

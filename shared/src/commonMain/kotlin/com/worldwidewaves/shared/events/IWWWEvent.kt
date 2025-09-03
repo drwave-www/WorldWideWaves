@@ -32,6 +32,22 @@ import kotlin.time.Instant
 
 // ---------------------------
 
+/**
+ * Defines the shared contract for a WorldWideWaves event.
+ *
+ * An implementation encapsulates:
+ * • Stable identifiers (id, country/community, type)  
+ * • Scheduling information (time-zone, date, start hour, total / end time helpers)  
+ * • Geospatial components (area polygons, bounding-box, map style)  
+ * • Wave definition & warming phase details (see [WWWEventWave] subclasses)  
+ * • Social metadata (Instagram account / hashtag)  
+ * • Runtime state helpers (favorite flag, [Status] computation, observer accessor)
+ *
+ * The interface is consumed by view-models, observers, and UI composables across
+ * platforms; therefore only platform-agnostic types are exposed.  Platform-specific
+ * implementations (e.g. Android/iOS data classes) must satisfy this contract to
+ * integrate seamlessly with the shared logic.
+ */
 @OptIn(ExperimentalTime::class)
 interface IWWWEvent : DataValidator {
 

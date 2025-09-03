@@ -69,6 +69,8 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
+import com.worldwidewaves.shared.faq_contents
+import com.worldwidewaves.shared.rules_hierarchy
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonJustifiedTextStyle
 import com.worldwidewaves.theme.commonTextStyle
@@ -81,43 +83,17 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-val rules_hierarchy = mapOf(
-    MokoRes.strings.warn_general_title to listOf(
-        MokoRes.strings.warn_general_item_1,
-        MokoRes.strings.warn_general_item_2,
-        MokoRes.strings.warn_general_item_3,
-        MokoRes.strings.warn_general_item_4,
-        MokoRes.strings.warn_general_item_5,
-        MokoRes.strings.warn_general_item_6
-    ),
-    MokoRes.strings.warn_safety_title to listOf(
-        MokoRes.strings.warn_safety_item_1,
-        MokoRes.strings.warn_safety_item_2,
-        MokoRes.strings.warn_safety_item_3,
-        MokoRes.strings.warn_safety_item_4,
-        MokoRes.strings.warn_safety_item_5
-    ),
-    MokoRes.strings.warn_emergency_title to listOf(
-        MokoRes.strings.warn_emergency_item_1,
-        MokoRes.strings.warn_emergency_item_2,
-        MokoRes.strings.warn_emergency_item_3
-    ),
-    MokoRes.strings.warn_legal_title to listOf(
-        MokoRes.strings.warn_legal_item_1,
-        MokoRes.strings.warn_legal_item_2
-    )
-)
-
-val faq_contents = listOf(
-    Pair(MokoRes.strings.faq_question_1, MokoRes.strings.faq_answer_1),
-    Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
-    Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
-    Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5)
-)
-
-// ----------------------------
-
+/**
+ * *About > FAQ* tab implementation.
+ *
+ * Implements [TabScreen] to display:
+ * • A “Rules & Security” section rendered from [rules_hierarchy]  
+ * • An interactive **FAQ** list whose items expand / collapse on tap  
+ * • A “Jump to FAQ” link that smoothly scrolls to the FAQ section
+ *
+ * State is maintained with `remember` so expansion and scroll positions survive
+ * recompositions.  All strings are localized via `MokoRes`.
+ */
 class AboutFaqScreen : TabScreen {
     override val name = "FAQ"
 
@@ -180,6 +156,12 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Header shown above the rules section.
+     *
+     * Displays the title + an underlined link that, when tapped, invokes the
+     * provided callback to scroll to the FAQ block further down in the list.
+     */
     private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -218,6 +200,10 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Iterates over [rules_hierarchy] and renders each rule section with a
+     * numbered list of items.
+     */
     private fun ShowRulesHierarchy() {
         rules_hierarchy.forEach { (title, items) ->
             Text(
@@ -249,6 +235,13 @@ class AboutFaqScreen : TabScreen {
     // ----------------------------
 
     @Composable
+    /**
+     * Single expandable FAQ entry.
+     *
+     * Tapping the row toggles its expanded state via [onExpand]; the currently
+     * expanded item index is held by the parent so only one entry can be open
+     * at a time.
+     */
     private fun FAQItem(
         itemIndex: Int,
         questionResource: StringResource,

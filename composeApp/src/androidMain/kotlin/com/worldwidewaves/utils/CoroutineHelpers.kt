@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.format
+package com.worldwidewaves.utils
 
 /*
  * Copyright 2025 DrWave
@@ -21,15 +21,25 @@ package com.worldwidewaves.shared.format
  * limitations under the License.
  */
 
-import kotlinx.datetime.TimeZone
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
-@OptIn(ExperimentalTime::class)
-expect object DateTimeFormats {
-    // Localized day + month only (no year). May not be zero-padded depending on locale.
-    fun dayMonth(instant: Instant, timeZone: TimeZone): String
+/**
+ * A coroutine scope that can be closed and helps with resource cleanup
+ */
+class CloseableCoroutineScope : CoroutineScope {
+    private val job = SupervisorJob()
+    override val coroutineContext = job + Dispatchers.Main
 
-    // Localized short time (hours:minutes, 12/24h per platform conventions/preferences).
-    fun timeShort(instant: Instant, timeZone: TimeZone): String
+    private val cleanupActions = mutableListOf<() -> Unit>()
+
+    fun registerForCleanup(action: () -> Unit) {
+        cleanupActions.add(action)
+    }
+
+    fun close() {
+        cleanupActions.forEach { it() }
+        job.cancel()
+    }
 }

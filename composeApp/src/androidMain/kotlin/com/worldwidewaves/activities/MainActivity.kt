@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.activities.utils.TabManager
+import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
@@ -114,14 +115,14 @@ open class MainActivity : AppCompatActivity() {
         val startTime = System.currentTimeMillis()
 
         /* ------------------------------------------------------------------
-         * Keep the *official* splash for ~10 ms so it can show our theme
+         * Keep the *official* splash for some time so it can show our theme
          * colours/logo, then dismiss it and let the programmatic splash take
          * over until the real readiness criteria are met.
          * ---------------------------------------------------------------- */
         splashScreen.setKeepOnScreenCondition {
             if (!isOfficialSplashDismissed) {
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(10)
+                    kotlinx.coroutines.delay(500L) // 500 ms
                     isOfficialSplashDismissed = true
                 }
                 true   // keep the official splash right now
@@ -131,8 +132,8 @@ open class MainActivity : AppCompatActivity() {
         }
 
         super.onCreate(savedInstanceState)
-
         setStatusBarColor(window)
+        hideStatusBar(this)
 
         /* Hide system UI like old SplashActivity */
         window.decorView.post {
@@ -208,8 +209,7 @@ open class MainActivity : AppCompatActivity() {
                 painter = painterResource(ShRes.drawable.background),
                 contentDescription = stringResource(MokoRes.strings.background_description),
                 contentScale = ContentScale.FillHeight,
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
             Image(
                 painter = painterResource(ShRes.drawable.www_logo_transparent),

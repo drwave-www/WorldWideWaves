@@ -40,8 +40,30 @@ import kotlin.time.ExperimentalTime
  */
 
 /**
- * Manages musical choreography for the wave experience,
- * allowing each device to play one note from a collective melody when hit arrives.
+ * Manages the **musical choreography** that accompanies a wave.
+ *
+ * Workflow:
+ * • At start-up, the manager pre-loads a MIDI file located at
+ *   [FS_CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
+ *   [preloadMidiFile]).  The file is parsed into a single [MidiTrack] that
+ *   stores note, timing and velocity information.  
+ * • When a device gets “hit” by the wave the UI calls [playCurrentSoundTone]
+ *   passing the *wave start* timestamp.  The manager maps the current
+ *   `clock.now() – waveStartTime` to a position inside the track (with optional
+ *   looping) and fetches all notes whose `[start,end]` window contains that
+ *   position.  
+ * • One of those active notes is randomly selected so each device contributes
+ *   a different tone, creating a crowd-sourced chord.  
+ * • The selected note’s pitch / velocity are converted to
+ *   `frequency` / `amplitude` using helpers in [WaveformGenerator] and finally
+ *   played through the platform-specific [SoundPlayer] with the currently
+ *   chosen [Waveform][SoundPlayer.Waveform] (default *sine*).  
+ *
+ * Public knobs:
+ * • [setWaveform] lets callers choose another synthesis waveform.  
+ * • [setLooping] controls whether the track should wrap when reaching its end.  
+ * • [getTotalDuration] exposes the track length for progress UI.  
+ * • [release] frees audio resources when the enclosing screen is disposed.  
  */
 @OptIn(ExperimentalTime::class)
 class SoundChoreographyManager(
