@@ -70,7 +70,8 @@ data class WWWEventWaveLinear(
         val traversedPolygons : MutableArea = mutableListOf()
         val remainingPolygons : MutableArea = mutableListOf()
 
-        val areaPolygons = listOf(event.area.getPolygons()[0])
+        // val areaPolygons = listOf(event.area.getPolygons()[1])
+        val areaPolygons = event.area.getPolygons()
         val (traversed, remaining) = splitAreaToWave(areaPolygons, composedLongitude)
         traversedPolygons.addAll(traversed)
         remainingPolygons.addAll(remaining)

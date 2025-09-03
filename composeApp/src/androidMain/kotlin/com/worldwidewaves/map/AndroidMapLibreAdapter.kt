@@ -289,10 +289,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
                     val sourceId = "wave-polygons-source-$index"
                     val layerId  = "wave-polygons-layer-$index"
 
-                    /* Defensive cleanup in case ids are reused                */
-                    style.removeLayer(layerId)
-                    style.removeSource(sourceId)
-
                     /* GeoJSON source with a single polygon                    */
                     val src = GeoJsonSource(sourceId).apply {
                         setGeoJson(Feature.fromGeometry(polygon))

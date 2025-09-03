@@ -279,7 +279,11 @@ object PolygonUtils {
                 val filteredLeft  = completedLeft.filter  { it.size >= 3 }
                 val filteredRight = completedRight.filter { it.size >= 3 }
 
-                return SplitResult(filteredLeft, filteredRight)
+                // Normalize polygons by removing consecutive duplicate vertices
+                val normLeft  = filteredLeft.map  { removeConsecutiveDuplicates(it) }
+                val normRight = filteredRight.map { removeConsecutiveDuplicates(it) }
+
+                return SplitResult(normLeft, normRight)
                     .also { workingPolygon.close() }
             }
         }
@@ -331,11 +335,35 @@ object PolygonUtils {
     }
 
     /**
+     * Returns a copy of [polygon] with consecutive duplicate vertices removed while
+     * preserving order and closure (first == last).  The returned instance shares
+     * the same concrete type via [Polygon.createNew].
+     */
+    private fun removeConsecutiveDuplicates(polygon: Polygon): Polygon {
+        if (polygon.size < 2) return polygon
+
+        val cleaned = polygon.createNew()
+        var lastAdded: Position? = null
+        polygon.forEach { pt ->
+            if (lastAdded == null || pt != lastAdded) {
+                cleaned.add(pt)
+                lastAdded = pt
+            }
+        }
+        // Ensure closure with a single duplicate of the first vertex
+        if (cleaned.isNotEmpty() && cleaned.first() != cleaned.last()) {
+            cleaned.add(cleaned.first()!!.detached())
+        }
+        return cleaned
+    }
+
+    /**
      * Adds intermediate points along a composed longitude to polygons.
      *
      * For each polygon, finds ON-line anchor points and inserts intermediate points
      * from the composed longitude between them, but only if the midpoint between anchors
-     * is determined to be on the correct side of the split based on sampling the original polygon.
+     * lies inside the original polygon.  This prevents bridging concave “mouths” where
+     * the composed longitude would otherwise connect regions outside the polygon.
      */
     private fun completeLongitudePoints(
         lngToCut: ComposedLongitude,  // the composed longitude used for the cut
@@ -359,14 +387,10 @@ object PolygonUtils {
                 val midLat = (current.lat + next.lat) / 2
                 val midLng = lngToCut.lngAt(midLat) ?: continue
                 
-                // Sample points slightly west and east of the midpoint
-                val eps = 1e-6
-                val insideWest = source.containsPosition(Position(midLat, midLng - eps))
-                val insideEast = source.containsPosition(Position(midLat, midLng + eps))
-                
-                // Determine if we should include this segment based on which side we're processing
-                val shouldInclude = if (forLeft) insideWest else insideEast
-                if (!shouldInclude) continue
+                // Include intermediate points only when the composed-longitude
+                // segment between anchors lies inside the source polygon.
+                val insideMid = source.containsPosition(Position(midLat, midLng))
+                if (!insideMid) continue
                 
                 // Get intermediate points between anchors, preserving direction
                 val between = if (current.lat <= next.lat) {
