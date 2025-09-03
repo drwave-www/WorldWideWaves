@@ -71,7 +71,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_HEIGHT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_WIDTH
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
@@ -124,17 +123,19 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
                     .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
                     .height(DIM_COMMON_SOONRUNNING_HEIGHT.dp)
                     .background(backgroundColor)
-                    .padding(end = DIM_DEFAULT_INT_PADDING.dp),
+                    .padding(horizontal = DIM_DEFAULT_INT_PADDING.dp), // Changed to horizontal padding
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = commonTextStyle(DIM_COMMON_SOONRUNNING_FONTSIZE)
+                    style = commonTextStyle(DIM_COMMON_SOONRUNNING_FONTSIZE),
+                    textAlign = TextAlign.Center // Added text alignment
                 )
             }
         }
     }
 }
+
 // ----------------------------
 
 @Composable
