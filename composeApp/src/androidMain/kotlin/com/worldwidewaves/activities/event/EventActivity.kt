@@ -62,7 +62,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource as painterResourceAndroid
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -73,6 +72,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.BuildConfig
+import com.worldwidewaves.R
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
 import com.worldwidewaves.compose.EventOverlayDone
@@ -118,10 +118,10 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
-import com.worldwidewaves.R
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
@@ -294,8 +294,8 @@ private fun EventOverlay(event: IWWWEvent) {
         )
         Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDate(eventStatus, localizedDate)
             EventOverlayDone(eventStatus)
+            EventOverlayDate(eventStatus, localizedDate)
         }
     }
 }

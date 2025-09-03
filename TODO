@@ -6,10 +6,8 @@ TODAY :
 
 - > PLAY STORE UPLOAD <
 
-- Packaging :
-    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
-
-- UI Tests sur differents devices et langues
+- logo WWW plutot que icone info dans la toolbar ?
+- image des choregraphies a revoir ?
 
 ---------------------------------------------
 
@@ -21,6 +19,13 @@ TODAY :
         - https://chatgpt.com/c/68b21370-8f78-8331-a8bd-7fe411bfca04
         - j'ai fais une video, avec des placeholders pour du texte, comment puis-je automatiser la production de cette video dans toutes ces langues en lui fournissant simplement les traductions des textes dans toutes ces langues ?
     - extraire de la video PowerDirector les temps de debut, duree de tous les textes
+
+---------------------------------------------
+
+- Packaging :
+    - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
+
+- UI Tests sur differents devices et langues
 
 ---------------------------------------------
 
