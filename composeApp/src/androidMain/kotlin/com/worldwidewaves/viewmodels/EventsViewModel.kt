@@ -155,7 +155,7 @@ class EventsViewModel(
                 event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                     if (isWarmingStarted) {
                         backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
-                        //platform.getSimulation()?.setSpeed(1)
+                        platform.getSimulation()?.setSpeed(1)
                     }
                 }
             }

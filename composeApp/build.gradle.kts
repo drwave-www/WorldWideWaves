@@ -19,7 +19,6 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
     implementation(libs.j2objc.annotations)
-            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
@@ -31,7 +30,6 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(libs.koin.core)
-            implementation(libs.androidx.material.icons.extended)
         }
     }
 }
@@ -56,6 +54,10 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        ndk {
+            // Ship only the arm64-v8a ABI to minimise download size
+            abiFilters += listOf("arm64-v8a")
+        }
     }
     packaging {
         resources.excludes.addAll(
@@ -129,6 +131,7 @@ android {
     )
     dependencies {
         debugImplementation(compose.uiTooling)
+        debugImplementation(compose.preview)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
         implementation(libs.kotlinx.datetime)

@@ -43,13 +43,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,9 +70,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.worldwidewaves.R
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
@@ -225,7 +220,7 @@ fun SoundChoreographyTestModeOverlay(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.MusicNote,
+                    painter = painterResource(R.drawable.ic_music_note),
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -240,7 +235,10 @@ fun SoundChoreographyTestModeOverlay(
             Row {
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        painter = painterResource(
+                            if (expanded) R.drawable.ic_keyboard_arrow_up
+                            else R.drawable.ic_keyboard_arrow_down
+                        ),
                         contentDescription = if (expanded) "Collapse" else "Expand",
                         tint = Color.White
                     )
@@ -248,7 +246,7 @@ fun SoundChoreographyTestModeOverlay(
                 
                 IconButton(onClick = onClose) {
                     Icon(
-                        imageVector = Icons.Default.Close,
+                        painter = painterResource(R.drawable.ic_close),
                         contentDescription = "Close",
                         tint = Color.White
                     )
@@ -384,7 +382,10 @@ fun SoundChoreographyTestModeOverlay(
                         }
                     ) {
                         Icon(
-                            imageVector = if (isSimulating) Icons.Default.Stop else Icons.Default.PlayArrow,
+                            painter = painterResource(
+                                if (isSimulating) R.drawable.ic_stop
+                                else R.drawable.ic_play_arrow
+                            ),
                             contentDescription = if (isSimulating) "Stop Simulation" else "Start Simulation"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -688,7 +689,7 @@ fun SoundChoreographyTestModeToggle(
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            imageVector = Icons.Default.MusicNote,
+            painter = painterResource(R.drawable.ic_music_note),
             contentDescription = "Sound Test Mode",
             tint = Color.White
         )

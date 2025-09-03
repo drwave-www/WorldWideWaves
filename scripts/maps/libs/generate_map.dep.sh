@@ -181,8 +181,9 @@ make import-osm
 
 echo "-------------------------------------------------------------------------------------"
 echo "====> : Start importing Wikidata: Wikidata Query Service -> PostgreSQL"
+echo "====> SKIPPED for now as we don't use it"
 echo
-make import-wikidata
+# make import-wikidata
 
 echo "-------------------------------------------------------------------------------------"
 echo "====> : Start SQL postprocessing:  ./build/sql/* -> PostgreSQL "

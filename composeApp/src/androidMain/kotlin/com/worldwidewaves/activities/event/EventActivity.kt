@@ -44,8 +44,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource as painterResourceAndroid
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -119,6 +118,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
+import com.worldwidewaves.R
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -251,7 +251,7 @@ class EventActivity : AbstractEventWaveActivity() {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Timer,
+                painter = painterResourceAndroid(R.drawable.ic_timer),
                 contentDescription = stringResource(MokoRes.strings.test_simulation),
                 tint = Color.Red,
                 modifier = Modifier.size(24.dp)

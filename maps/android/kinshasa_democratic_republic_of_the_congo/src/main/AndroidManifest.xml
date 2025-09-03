@@ -4,10 +4,14 @@
 
     <dist:module
         dist:instant="false"
-        dist:title="Map Kinshasa">
+        dist:hasCode="false"
+        dist:title="@string/map_title_kinshasa_democratic_republic_of_the_congo">
         <dist:delivery>
             <dist:on-demand />
         </dist:delivery>
         <dist:fusing dist:include="false" />
     </dist:module>
+
+    <!-- Resource-only dynamic-feature: explicitly declare no code -->
+    <application android:hasCode="false" />
 </manifest>

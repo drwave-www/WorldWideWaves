@@ -79,12 +79,15 @@ for event in $EVENTS; do # Retrieve Geojson files from OSM
   DEST_DIR_MODULE=$DEST_DIR/$event
   DEST_DIR_MODULE_MAIN=$DEST_DIR_MODULE/src/main
   DEST_DIR_MODULE_FILES=$DEST_DIR_MODULE/src/main/assets
+  DEST_DIR_MODULE_VALUES=$DEST_DIR_MODULE/src/main/res/values
 
   mkdir -p "$DEST_DIR_MODULE"
   mkdir -p "$DEST_DIR_MODULE_FILES"
+  mkdir -p "$DEST_DIR_MODULE_VALUES"
 
   tpl "$event" templates/template-android-build-gradle.kts "$DEST_DIR_MODULE/build.gradle.kts"
   tpl "$event" templates/template-AndroidManifest.xml "$DEST_DIR_MODULE_MAIN/AndroidManifest.xml"
+  tpl "$event" templates/template-android-strings.xml "$DEST_DIR_MODULE_VALUES/strings.xml"
 
   # 1) Check the MBTiles file
   if [ ! -f "$DEST_DIR_MODULE_FILES/$event.mbtiles" ] || \

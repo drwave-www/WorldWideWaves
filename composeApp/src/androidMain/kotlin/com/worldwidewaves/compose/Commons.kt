@@ -40,9 +40,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -59,9 +56,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource as painterResourceAndroid
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.R
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
@@ -141,7 +140,7 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
 // ----------------------------
 
 @Composable
-/** Semi-transparent overlay with “done” image when the event is finished. */
+/** Semi-transparent overlay with "done" image when the event is finished. */
 fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
     if (eventStatus == Status.DONE) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -319,7 +318,7 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
         modifier = modifier.padding(16.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.Info,
+            painter = painterResourceAndroid(R.drawable.ic_info),
             contentDescription = stringResource(MokoRes.strings.error),
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error
@@ -341,7 +340,7 @@ fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modi
             modifier = Modifier
         ) {
             Icon(
-                imageVector = Icons.Default.Refresh,
+                painter = painterResourceAndroid(R.drawable.ic_refresh),
                 contentDescription = stringResource(MokoRes.strings.map_retry_download),
                 modifier = Modifier.size(18.dp)
             )
