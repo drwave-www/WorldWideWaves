@@ -26,31 +26,27 @@ import android.util.Log
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
-import com.google.android.play.core.splitinstall.SplitInstallException
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
-import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.worldwidewaves.shared.clearEventCache
-import com.worldwidewaves.shared.data.HiddenMapsStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 /**
  * A utility class for checking and monitoring the availability of map feature modules.
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityChecker(val context: Context) : KoinComponent {
+class MapAvailabilityChecker(val context: Context) {
+
+    /** Log tag used throughout this helper for easy filtering. */
+    private companion object {
+        private const val TAG = "MapAvail"
+    }
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
-
-    // Persisted store for “hidden” maps (deferred-uninstalled in this session)
-    private val hiddenMapsStore: HiddenMapsStore by inject()
 
     // A map of mapId to its availability state
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
@@ -74,38 +70,34 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
     private val installStateListener: SplitInstallStateUpdatedListener
 
     init {
-        // Load previously hidden IDs from the DataStore so they persist across restarts
-        runBlocking {
-            try {
-                forcedUnavailable.addAll(hiddenMapsStore.getAll())
-            } catch (e: Exception) {
-                Log.e(::MapAvailabilityChecker.name, "Failed to load hidden maps set", e)
-            }
-        }
-
         // Create and register the installation state listener
         installStateListener = SplitInstallStateUpdatedListener { state ->
             when (state.status()) {
                 SplitInstallSessionStatus.INSTALLED -> {
                     Log.d(::MapAvailabilityChecker.name, "Module installation completed")
+                    Log.d(
+                        TAG,
+                        "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}"
+                    )
                     // If this module had previously been “forced” unavailable
                     // (deferred uninstall), drop the override so it becomes
                     // visible again without requiring an app restart.
                     state.moduleNames()?.forEach { id ->
                         forcedUnavailable.remove(id)
-                        // Also persist removal from the hidden set
-                        runBlocking {
-                            try { hiddenMapsStore.remove(id) } catch (_: Exception) { }
-                        }
                     }
                     refreshAvailability()
                 }
                 SplitInstallSessionStatus.FAILED -> {
                     Log.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
+                    Log.w(
+                        TAG,
+                        "session=${state.sessionId()} FAILED code=${state.errorCode()}"
+                    )
                     refreshAvailability()
                 }
                 SplitInstallSessionStatus.CANCELED -> {
                     Log.d(::MapAvailabilityChecker.name, "Module installation canceled")
+                    Log.i(TAG, "session=${state.sessionId()} CANCELED")
                     refreshAvailability()
                 }
                 else -> {
@@ -136,6 +128,7 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
     fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
         Log.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
+        Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
@@ -149,6 +142,7 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
 
         // Update the state flow with the new map
         _mapStates.value = updatedStates
+        Log.d(TAG, "Updated availability: $updatedStates")
     }
 
     /**
@@ -157,10 +151,13 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
     fun trackMaps(mapIds: Collection<String>) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
+        Log.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
     }
 
     fun isMapDownloaded(eventId: String): Boolean {
-        return mapStates.value[eventId] == true
+        val downloaded = mapStates.value[eventId] == true
+        Log.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
+        return downloaded
     }
 
     fun canUninstallMap(eventId: String): Boolean {
@@ -169,6 +166,7 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
             return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
         } catch (e: Exception) {
             Log.e("MapAvailabilityChecker", "Error checking if map can be uninstalled: ${e.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${e.message}")
             return false // If there's an error, assume it can't be uninstalled
         }
     }
@@ -183,6 +181,7 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
      */
     suspend fun uninstallMap(eventId: String): Boolean = suspendCancellableCoroutine { cont ->
         try {
+            Log.i(TAG, "uninstallMap requested for $eventId")
             val splitInstallManager = SplitInstallManagerFactory.create(context)
 
             splitInstallManager
@@ -192,10 +191,6 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
                     // remainder of the session – Play Core keeps it around
                     // until next update but UI must reflect immediate removal.
                     forcedUnavailable.add(eventId)
-                    // Persist in DataStore so state survives process death
-                    runBlocking {
-                        try { hiddenMapsStore.add(eventId) } catch (_: Exception) { }
-                    }
 
                     // Update reactive state immediately
                     _mapStates.value = _mapStates.value.toMutableMap().apply {
@@ -206,47 +201,20 @@ class MapAvailabilityChecker(val context: Context) : KoinComponent {
                     try { clearEventCache(eventId) } catch (_: Exception) { }
 
                     Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
+                    Log.i(TAG, "uninstallMap success (scheduled) id=$eventId")
                     if (cont.isActive) cont.resume(true)
                 }
                 .addOnFailureListener { e ->
-                    // Treat some Play-Core errors as soft success so UI can proceed
-                    val softSuccess = if (e is SplitInstallException) {
-                        when (e.errorCode) {
-                            SplitInstallErrorCode.API_NOT_AVAILABLE,
-                            SplitInstallErrorCode.MODULE_UNAVAILABLE,
-                            SplitInstallErrorCode.SERVICE_DIED -> true
-                            else -> false
-                        }
-                    } else false
-
-                    if (softSuccess) {
-                        Log.w(
-                            "MapAvailabilityChecker",
-                            "Deferred uninstall failed for $eventId with soft-success code ${if (e is SplitInstallException) e.errorCode else "N/A"} – proceeding as success"
-                        )
-                        // Apply forced override so subsequent refreshes don’t
-                        // resurrect the availability flag.
-                        forcedUnavailable.add(eventId)
-                        runBlocking {
-                            try { hiddenMapsStore.add(eventId) } catch (_: Exception) { }
-                        }
-
-                        // Update reactive state immediately
-                        _mapStates.value = _mapStates.value.toMutableMap().apply {
-                            this[eventId] = false
-                        }
-                        try { clearEventCache(eventId) } catch (_: Exception) { }
-                        if (cont.isActive) cont.resume(true)
-                    } else {
-                        Log.e(
-                            "MapAvailabilityChecker",
-                            "Deferred uninstall failed for $eventId: ${e.message}"
-                        )
-                        if (cont.isActive) cont.resume(false)
-                    }
+                    Log.e(
+                        "MapAvailabilityChecker",
+                        "Deferred uninstall failed for $eventId: ${e.message}"
+                    )
+                    Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
+                    if (cont.isActive) cont.resume(false)
                 }
         } catch (e: Exception) {
             Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
+            Log.e(TAG, "uninstallMap exception id=$eventId err=${e.message}")
             if (cont.isActive) cont.resume(false)
         }
     }
