@@ -118,7 +118,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun setStyle(stylePath: String, callback: () -> Unit?) {
         require(mapLibreMap != null)
-        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { style -> callback() }
+        // Log style application start – helps diagnose early style failures
+        Log.d("MapStyle", "Applying style from URI: $stylePath")
+
+        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
+            // Log successful style load – confirms MapLibre has parsed the style
+            Log.i("MapStyle", "Style loaded successfully")
+            callback()
+        }
     }
 
     fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {

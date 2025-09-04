@@ -217,6 +217,10 @@ class AndroidEventMap(
                     Log.d(TAG, "Map download canceling: ${event.id}")
                     isMapDownloading = false
                 }
+                is MapFeatureState.Installing -> {
+                    Log.d(TAG, "Map installing: ${event.id}")
+                    isMapDownloading = true
+                }
                 is MapFeatureState.NotAvailable -> {
                     Log.d(TAG, "Map not available: ${event.id}")
                     isMapDownloading = false
@@ -370,6 +374,17 @@ class AndroidEventMap(
                                             }
                                         )
                                     }
+                                    is MapFeatureState.Installing -> {
+                                        Log.d(TAG, "Showing installing indicator")
+                                        DownloadProgressIndicator(
+                                            message = "Installing..",
+                                            onCancel = {
+                                                Log.i(TAG, "User canceled install: ${event.id}")
+                                                userCanceled = true
+                                                mapViewModel.cancelDownload()
+                                            }
+                                        )
+                                    }
                                     else -> {
                                         // Generic loading indicator for other download states
                                         Log.d(TAG, "Showing generic loading indicator")
@@ -473,33 +488,36 @@ class AndroidEventMap(
                 Log.d(TAG, "Style URI converted to file URI: $uri")
                 
                 scope.launch { // UI actions
-                    Log.d(TAG, "Getting map async from MapView")
-                    mapLibreView.getMapAsync { map ->
-                        Log.i(TAG, "MapLibreMap instance received")
-                        // Save reference so we can refresh location component later
-                        currentMap = map
-                        // Setup Map
-                        Log.d(TAG, "Setting up map with style: ${uri}")
-                        this@AndroidEventMap.setupMap(
-                            map,
-                            scope,
-                            uri.toString(),
-                            onMapLoaded = {
-                                Log.i(TAG, "Map setup complete, initializing location if needed")
-                                // Initialize location component if permission granted
-                                if (hasLocationPermission) {
-                                    Log.d(TAG, "Setting up location component (permission granted)")
-                                    setupMapLocationComponent(map, context)
-                                } else {
-                                    Log.d(TAG, "Skipping location component (no permission)")
+                    Log.d(TAG, "Posting getMapAsync to MapView UI queue")
+                    mapLibreView.post {
+                        Log.d(TAG, "Invoking getMapAsync now")
+                        mapLibreView.getMapAsync { map ->
+                            Log.i(TAG, "MapLibreMap instance received")
+                            // Save reference so we can refresh location component later
+                            currentMap = map
+                            // Setup Map
+                            Log.d(TAG, "Setting up map with style: $uri")
+                            this@AndroidEventMap.setupMap(
+                                map,
+                                scope,
+                                uri.toString(),
+                                onMapLoaded = {
+                                    Log.i(TAG, "Map setup complete, initializing location if needed")
+                                    // Initialize location component if permission granted
+                                    if (hasLocationPermission) {
+                                        Log.d(TAG, "Setting up location component (permission granted)")
+                                        setupMapLocationComponent(map, context)
+                                    } else {
+                                        Log.d(TAG, "Skipping location component (no permission)")
+                                    }
+                                    onMapLoaded()
+                                },
+                                onMapClick = { _, _ ->
+                                    Log.d(TAG, "Map clicked")
+                                    onMapClick?.invoke()
                                 }
-                                onMapLoaded()
-                            },
-                            onMapClick = { _, _ -> 
-                                Log.d(TAG, "Map clicked")
-                                onMapClick?.invoke() 
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
