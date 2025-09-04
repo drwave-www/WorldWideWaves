@@ -1,13 +1,14 @@
 
 TODAY :
 
-- !! performance analysis (profiling) de l'app sur une grande ville
-- check une langue inversee (ar, he, ..)
-
 - > PLAY STORE UPLOAD <
 
+- add Crashlytics : https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
 - logo WWW plutot que icone info dans la toolbar ?
 - image des choregraphies a revoir ?
+- GPS activation / deactivation
+- garder sur une ligne : dans event numbers, et event wave title
+- Be waved : Take the wave
 
 ---------------------------------------------
 

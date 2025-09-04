@@ -49,6 +49,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -56,7 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource as painterResourceAndroid
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -89,8 +93,10 @@ import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
 // ----------------------------
 
@@ -139,6 +145,46 @@ fun EventOverlaySoonOrRunning(eventStatus: Status?, modifier: Modifier = Modifie
 
 // ----------------------------
 
+
+// ---------------------------------------------------------------------------
+//  Adaptive single-line text helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders [text] on a SINGLE line, automatically shrinking the font size until
+ * it fits the available width (down to [minFontSizeSp]).
+ *
+ * Useful for variable-length strings that must never wrap – e.g. headings or
+ * status banners.
+ */
+@Composable
+fun AutoResizeSingleLineText(
+    text: String,
+    style: TextStyle,
+    color: Color = Color.Unspecified,
+    textAlign: TextAlign = TextAlign.Start,
+    minFontSizeSp: Float = 8f,
+    stepScale: Float = 0.9f,
+    modifier: Modifier = Modifier
+) {
+    var fontSize by remember { mutableStateOf(style.fontSize) }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = fontSize),
+        color = color,
+        textAlign = textAlign,
+        maxLines = 1,
+        softWrap = false,
+        onTextLayout = { result ->
+            if (result.hasVisualOverflow && fontSize.value > minFontSizeSp) {
+                fontSize *= stepScale
+            }
+        },
+        modifier = modifier
+    )
+}
+
 @Composable
 /** Semi-transparent overlay with "done" image when the event is finished. */
 fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
@@ -166,7 +212,10 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
 
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON
-    val isEndDateTimeRecent = endDateTime?.let { it > clock.now() } ?: false
+    val isEndDateTimeRecent = endDateTime?.let {
+        val now = clock.now()
+        it > (now - 1.hours) && it <= now
+    } ?: false
     val isEnabled = isRunning || isSoon || isEndDateTimeRecent
 
     Surface(
