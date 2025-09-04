@@ -146,10 +146,8 @@
   <string name="wave_end_time">ਅੰਤ ਸਮਾਂ</string>
   <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
   <string name="wave_total_time">ਕੁੱਲ ਸਮਾਂ</string>
-  <!-- src_hash: d3e7e0c1937e38ee4b9feefbd1531c544682ce73 -->
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
   <string name="wave_progression">ਪ੍ਰਗਤੀ</string>
-  <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
-  <string name="speed_unit_mps">m/s</string>
   <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
   <string name="wave_warming">ਵਾਰਮਿੰਗ..</string>
   <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
@@ -162,6 +160,352 @@
   <string name="wave_done">ਲਹਿਰ ਪੂਰੀ ਹੋ ਗਈ!</string>
   <!-- src_hash: 11570d083c6454a2525057769726a4bc1904ea0b -->
   <string name="wave_hit">ਸ਼ਾਬਾਸ਼!</string>
-  <!-- src_hash: 0e49835f2bea62c861d9f5735cf1593e7c52397a -->
+  <!-- src_hash: ac21cade30813d44f4932a0338a1827ff31bb849 -->
   <string name="wave_is_running">ਲਹਿਰ ਚੱਲ ਰਹੀ ਹੈ!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">ਤੁਸੀਂ ਜਾਣਦੇ ਹੋ: ਜੇ ਧਰਤੀ ਦੀ ਕਹਾਣੀ 1,000 ਸਫ਼ਿਆਂ ਦੀ ਕਿਤਾਬ ਵਾਂਗ ਦੱਸੀ ਜਾਂਦੀ, ਤਾਂ ਮਨੁੱਖਤਾ ਕੇਵਲ ਸਭ ਤੋਂ ਆਖ਼ਰੀ ਸਫ਼ੇ ਦੇ ਆਖ਼ਰੀ ਪੈਰੇ ਵਿੱਚ ਹੀ ਨਜ਼ਰ ਆਉਂਦੀ।</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">ਪਰ ਇਹ ਛੋਟੀ ਕਹਾਣੀ ਉਮੀਦ ਤੋਂ ਪਹਿਲਾਂ ਖਤਮ ਹੋ ਸਕਦੀ ਹੈ। ਅਸੀਂ ਵਿਸ਼ਾਲ ਤੇ ਉਜਾੜ ਬ੍ਰਹਿਮੰਡ ਵਿੱਚ ਇਕਲੇ ਪਏ ਹਾਂ। ਅਸੀਂ ਸਭ ਕੁਝ ਨਸ਼ਟ ਕਰਦੇ ਹਾਂ। ਅਸੀਂ ਖੁਦਗਰਜ਼ ਹਾਂ। ਅਸੀਂ ਕਠੋਰ ਹਾਂ। ਅਸੀਂ ਲਾਲਚੀ ਹਾਂ। ਅਸੀਂ ਅੰਨੇ ਹਾਂ। ਅਤੇ ਅਸੀਂ ਹਕੂਮਤ ਕਰਨ ਦੀ ਖ਼ਾਹਿਸ਼ ਰੱਖਦੇ ਹਾਂ। ਪਰ ਅਸੀਂ ਹਮਦਰਦੀ ਦੇ ਯੋਗ ਵੀ ਹਾਂ, ਅਸੀਂ ਅਜੂਬੇ ਰਚਦੇ ਹਾਂ, ਅਸੀਂ ਜੁਝਾਰੂ ਹਾਂ, ਅਸੀਂ ਪਰਹਿਤਕਾਰੀ ਹੋ ਸਕਦੇ ਹਾਂ।</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">ਪਰ ਸਾਡੇ ਕੋਲ ਸਮਾਂ ਘੱਟ ਹੈ। ਅਸੀਂ ਬਹੁਤ ਤਰੱਕੀ ਕਰ ਲਈ ਹੈ.. ਅਸੀਂ ਇੱਕ ਵਿਕਲਪ ਸਿਰਜ ਸਕਦੇ ਹਾਂ: ਹੱਕਾਂ, ਇਕਜੁਟਤਾ ਅਤੇ ਲੋਕਤੰਤਰ ਦਾ ਭਾਈਚਾਰਾ। ਫ਼ੈਸਲਾ ਸਾਡਾ ਹੈ!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">ਇੱਕ ਗਲੋਬਲ ਅੰਦੋਲਨ ਨਾਲ ਜੁੜੋ, ਇੱਕ ਸ਼ਾਂਤਮਈ ਜਾਗਰਣ। ਆਓ ਮਨੁੱਖੀ ਲਹਿਰਾਂ ਬਣਾਈਏ—ਸਾਡੀ ਅਸਲ ਮਨੁੱਖਤਾ ਦੀ ਗਵਾਹੀ, ਆਪਣੇ ਨੇਤਾਵਾਂ ਲਈ ਤਾਕਤਵਰ ਸੁਨੇਹਾ। ਆਓ ਦੁਨੀਆ ਭਰ ਦੇ ਸ਼ਹਿਰਾਂ ਤੇ ਦੇਸ਼ਾਂ ਵਿੱਚ ਇਕੱਠੇ ਹੋਈਏ। ਆਓ ਅਮਨ ਚੁਣੀਏ। ਆਓ ਖੁਸ਼ੀ ਚੁਣੀਏ। ਆਓ ਕੁਦਰਤ ਚੁਣੀਏ। ਆਓ ਅਸੀਂ ਆਪ ਚੁਣੀਏ।</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">ਜੇ ਸਾਨੂੰ ਇਕੱਠੇ ਕਰਨ ਲਈ ਕੇਵਲ ਇੱਕ ਲਹਿਰ ਹੀ ਕਾਫ਼ੀ ਹੋਵੇ ਤਾਂ?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves ਇੱਕ ਅਸਥਾਈ ਮੋਬਾਈਲ ਐਪ ਹੈ ਜਿਸਦਾ ਦੂਰਦਰਸ਼ੀ ਮਕਸਦ ਹੈ: ਵੱਡੇ ਸ਼ਹਿਰਾਂ ਰਾਹੀਂ, ਦੇਸ਼ਾਂ ਪਾਰ ਗੂੰਜਦੀਆਂ ਮਨੁੱਖੀ ਲਹਿਰਾਂ ਦੀ ਲੜੀ ਸੰਗਠਿਤ ਕਰਨੀ। ਇੱਕ ਸਾਲ ਦੇ ਸਮੇਂ ਦੌਰਾਨ ਚੱਲਣ ਲਈ ਰਚੀ ਗਈ, ਇਹ ਪਹਲ ਭੌਤਿਕ ਅਤੇ ਸੱਭਿਆਚਾਰਕ ਸਰਹੱਦਾਂ ਤੋਂ ਪਰੇ ਜਾਣ ਅਤੇ ਏਕਤਾ, ਭਾਈਚਾਰੇ ਅਤੇ ਸਾਂਝੇ ਮਨੁੱਖੀ ਅਨੁਭਵ ਦੀ ਭਾਵਨਾ ਪੈਦਾ ਕਰਨ ਦਾ ਲਕਸ਼ ਰੱਖਦੀ ਹੈ।</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">ਆਪਣੇ ਮੂਲ ਵਿੱਚ, WorldWideWaves ਸਿਰਫ਼ ਇੱਕ ਐਪ ਨਹੀਂ—ਇਹ ਇੱਕ ਗਲੋਬਲ ਅੰਦੋਲਨ ਹੈ, ਜੋ ਸਾਂਝੇ ਮੁੱਲਾਂ ਨਾਲ ਇਕਜੁਟਤਾ ਅਤੇ ਖੁਸ਼ੀ ਦੇ ਪ੍ਰਦਰਸ਼ਨ ਵਿੱਚ ਲੋਕਾਂ ਨੂੰ ਇਕੱਠਾ ਕਰਨ ਲਈ ਬਣਾਇਆ ਗਿਆ ਹੈ।</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">ਤਕਨਾਲੋਜੀ ਦਾ ਲਾਭ ਲੈ ਕੇ, WorldWideWaves ਦੁਨੀਆ ਭਰ ਦੇ ਭਾਗੀਦਾਰਾਂ ਨੂੰ ਆਪਣੇ-ਆਪਣੇ ਸ਼ਹਿਰਾਂ ਵਿੱਚ ਇਨ੍ਹਾਂ ਮਨੁੱਖੀ ਲਹਿਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਣ ਯੋਗ ਬਣਾਏਗਾ, ਅਤੇ ਤਾਕਤਵਰ ਦ੍ਰਿਸ਼ੀ ਅਤੇ ਜਜ਼ਬਾਤੀ ਨਜ਼ਾਰਾ ਰਚੇਗਾ।</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">ਸਾਰ ਵਿੱਚ, WorldWideWaves ਇੱਕ ਮਹੱਤਵਾਕਾਂਕਸ਼ੀ ਯਤਨ ਹੈ ਜੋ ਤਕਨਾਲੋਜੀ ਦੀ ਤਾਕਤ ਨੂੰ ਸੱਚਮੁੱਚ ਉੱਚੇ ਮਕਸਦ ਲਈ ਵਰਤਦਾ ਹੈ—ਏਕਤਾ, ਖੁਸ਼ੀ ਅਤੇ ਸਾਂਝੀ ਕਾਰਵਾਈ ਦੇ ਜਸ਼ਨ ਵਿੱਚ ਮਨੁੱਖਤਾ ਨੂੰ ਜੋੜਦਾ ਹੈ। ਹਰ ਲਹਿਰ ਰਾਹੀਂ, ਭਾਗੀਦਾਰ ਨਾ ਸਿਰਫ਼ ਇੱਕ ਵਿਸ਼ਵ ਪੱਧਰੀ ਨਜ਼ਾਰੇ ਵਿੱਚ ਯੋਗਦਾਨ ਪਾਉਣਗੇ, ਸਗੋਂ ਇਕ ਜੁੱਟ ਹੋਣ ਦੇ ਡੂੰਘੇ ਅਸਰ ਨੂੰ ਮਹਿਸੂਸ ਕਰਕੇ ਦੁਨੀਆ ਨਾਲ ਸਾਂਝਾ ਵੀ ਕਰਨਗੇ।</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">ਨਿਯਮ ਅਤੇ ਸੁਰੱਖਿਆ</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">WorldWideWaves ਵਿੱਚ ਸੁਆਗਤ ਹੈ! ਅਸੀਂ ਖੁਸ਼ ਹਾਂ ਕਿ ਤੁਸੀਂ ਗਲੋਬਲ ਲਹਿਰ ਈਵੈਂਟਸ ਵਿੱਚ ਜੁੜ ਰਹੇ ਹੋ। ਸਭ ਦੀ ਸੁਰੱਖਿਆ ਅਤੇ ਚੰਗੇ ਅਨੁਭਵ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਇਹ ਹਦਾਇਤਾਂ ਮੱਨੋ:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">ਆਮ ਨਿਯਮ:</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">ਸਭ ਦਾ ਸਤਿਕਾਰ: ਕਿਸੇ ਦੇ ਭੀ ਪਿਛੋਕੜ ਤੋਂ ਬੇਪਰਵਾਹ, ਹਰ ਭਾਗੀਦਾਰ ਨਾਲ ਇੱਜ਼ਤ ਨਾਲ ਪੇਸ਼ ਆਓ। ਭੇਦਭਾਵ ਜਾਂ ਹੈਰਾਨ-ਪਰੇਸ਼ਾਨ ਕਰਨਾ ਕਬੂਲ ਨਹੀਂ।</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">ਜਨਤਕ ਥਾਂ ਦਾ ਆਦਰ: ਰਾਹ ਖੁੱਲ੍ਹੇ ਰੱਖੋ, ਸਥਾਨਕ ਕਾਨੂੰਨਾਂ ਅਤੇ ਸਾਈਨੇਜ ਦੀ ਪਾਲਣਾ ਕਰੋ, ਅਤੇ ਟ੍ਰੈਫਿਕ ਜਾਂ ਐਮਰਜੈਂਸੀ ਐਕਸੈੱਸ ਨੂੰ ਨਾ ਰੋਕੋ।</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">ਨਿਰਧਾਰਤ ਖੇਤਰਾਂ ਵਿੱਚ ਰਹੋ: ਆਪਣੀ ਸੁਰੱਖਿਆ ਲਈ, ਜੇ ਨਿਰਧਾਰਤ ਖੇਤਰ ਹਨ, ਉਨ੍ਹਾਂ ਤੋਂ ਬਾਹਰ ਨਾ ਜਾਓ।</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">ਜਿੰਮੇਵਾਰ ਬਣੋ: ਜੇ ਤੁਸੀਂ ਪੀਣਾ ਚੁਣਦੇ ਹੋ, ਤਾਂ ਸੰਯਮ ਨਾਲ ਅਤੇ ਸਥਾਨਕ ਕਾਨੂੰਨਾਂ ਦੇ ਅਨੁਸਾਰ।</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">ਵਾਤਾਵਰਣ 'ਤੇ ਪ੍ਰਭਾਵ ਘਟਾਓ: ਕੂੜਾ ਨਿਰਧਾਰਤ ਡੱਬਿਆਂ ਵਿੱਚ ਪਾਓ, ਥਾਂ ਸਾਫ਼ ਰੱਖੋ।</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">ਚਿੰਤਾਵਾਂ ਦੀ ਸੂਚਨਾ ਦਿਓ: ਜੇ ਕੋਈ ਸ਼ੱਕੀ ਚੀਜ਼ ਜਾਂ ਮੁਸੀਬਤ ਵਿੱਚ ਵਿਅਕਤੀ ਵੇਖੋ, ਤੁਰੰਤ ਸਥਾਨਕ ਅਧਿਕਾਰੀਆਂ ਨੂੰ ਦੱਸੋ।</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">ਸੁਰੱਖਿਆ ਸੁਝਾਵ:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">ਉਚਿਤ ਪਹਿਨਾਵਾ: ਈਵੈਂਟ ਦੀ ਸਰਗਰਮੀ ਤੇ ਮੌਸਮ ਦੇ ਮੁਤਾਬਕ ਆਰਾਮਦਾਇਕ ਕੱਪੜੇ ਤੇ ਜੁੱਤੇ ਪਾਓ।</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">ਹਾਈਡ੍ਰੇਟ ਰਹੋ: ਪਾਣੀ ਨਾਲ ਰਹੋ, ਖਾਸਕਰ ਗਰਮ ਮੌਸਮ ਵਾਲੇ ਈਵੈਂਟਸ ਦੌਰਾਨ।</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">ਸਮਾਨ ਦਾ ਧਿਆਨ: ਆਪਣਾ ਨਿੱਜੀ ਸਮਾਨ ਸੁਰੱਖਿਅਤ ਰੱਖੋ; ਲੋੜ ਤੋਂ ਵੱਧ ਕੀਮਤੀ ਚੀਜ਼ਾਂ ਨਾ ਲਿਆਓ।</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">ਬੱਡੀ ਸਿਸਟਮ ਵਰਤੋ: ਦੋਸਤਾਂ ਨਾਲ ਰਹੋ ਜਾਂ ਨਵੇਂ ਬਣਾਓ, ਇੱਕ-ਦੂਜੇ ਦੀ ਦੇਖਭਾਲ ਕਰੋ।</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">ਐਮਰਜੈਂਸੀ ਤਿਆਰੀ: ਸਥਾਨਕ ਐਮਰਜੈਂਸੀ ਨੰਬਰ ਫੋਨ ਵਿੱਚ ਸੰਭਾਲੋ ਅਤੇ ਜੇ ਖੋ ਗਏ ਤਾਂ ਦੋਸਤਾਂ ਨਾਲ ਮਿਲਣ ਦੀ ਥਾਂ ਤਹਿ ਕਰੋ।</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">ਐਮਰਜੈਂਸੀ ਕਾਰਵਾਈ:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">ਸਚੇਤ ਰਹੋ: ਨੇੜਲੇ ਸੁਰੱਖਿਅਤ ਬਾਹਰਲੇ ਰਸਤੇ ਅਤੇ ਖੁੱਲ੍ਹੀਆਂ ਥਾਂਵਾਂ (ਜਿਵੇਂ ਚੌਰਾਹੇ, ਪਾਰਕ) ਪਛਾਣੋ, ਤੇ ਐਮਰਜੈਂਸੀ ਵਿੱਚ ਸਥਾਨਕ ਅਧਿਕਾਰੀਆਂ ਦੇ ਹੁਕਮ ਮੰਨੋ।</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ: ਸ਼ਾਮਲ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੇ ਸਥਾਨ ਦਾ ਸਥਾਨਕ ਐਮਰਜੈਂਸੀ ਨੰਬਰ ਅਤੇ ਨਿੱਜੀ ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਫੋਨ ਵਿੱਚ ਸੇਵ ਕਰੋ।</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">ਐਮਰਜੈਂਸੀ ਵਿੱਚ: ਸਥਾਨਕ ਐਮਰਜੈਂਸੀ ਨੰਬਰ ਮਿਲਾਓ, ਸ਼ਾਂਤੀ ਨਾਲ ਸੁਰੱਖਿਅਤ ਖੁੱਲ੍ਹੇ ਖੇਤਰ ਵੱਲ ਨਿਕਲੋ, ਸਮਰੱਥ ਹੋਵੋ ਤਾਂ ਹੋਰਾਂ ਦੀ ਮਦਦ ਕਰੋ, ਅਤੇ ਰਸਤੇ ਖੁੱਲ੍ਹੇ ਰੱਖੋ।</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">ਕਾਨੂੰਨੀ:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">ਜ਼ਿੰਮੇਵਾਰੀ ਛੋਟ: WorldWideWaves ਈਵੈਂਟਸ ਵਿੱਚ ਭਾਗ ਲੈਣਾ ਤੁਹਾਡੇ ਆਪਣੇ ਜੋਖ਼ਮ 'ਤੇ ਹੈ। ਭਾਗ ਲੈ ਕੇ, ਤੁਸੀਂ ਐਪ ਨਿਰਮਾਤਾਵਾਂ ਖ਼ਿਲਾਫ਼ ਉਹ ਦਾਅਵੇ ਛੱਡਦੇ ਹੋ ਜੋ ਈਵੈਂਟ ਦੌਰਾਨ ਹੋ ਸਕਣ ਵਾਲੀਆਂ ਚੋਟਾਂ ਨਾਲ ਸੰਬੰਧਤ ਹਨ।</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">ਜਨਤਕ ਥਾਂ ਸੂਚਨਾ: ਇਹ ਜਨਤਕ ਇਕੱਠ ਹੈ ਜਿੱਥੇ ਹਾਜ਼ਰੀਨ ਜਾਂ ਮੀਡੀਆ ਵੱਲੋਂ ਫ਼ੋਟੋਗ੍ਰਾਫੀ/ਫ਼ਿਲਮਿੰਗ ਹੋ ਸਕਦੀ ਹੈ, ਸਥਾਨਕ ਕਾਨੂੰਨਾਂ ਦੇ ਅਧੀਨ। ਅਸੀਂ ਤੁਹਾਡੀ ਤਸਵੀਰ ਦੇ ਹੱਕ ਦਾ ਦਾਅਵਾ ਨਹੀਂ ਕਰਦੇ ਅਤੇ ਨਾ ਹੀ ਤੀਜੀਆਂ ਪੱਖੀਆਂ ਦੀ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਨਿਯੰਤ੍ਰਿਤ ਕਰ ਸਕਦੇ ਹਾਂ। ਜੇ ਤੁਸੀਂ ਨਹੀਂ ਦਿਖਣਾ ਚਾਹੁੰਦੇ, ਤਾਂ ਜਿੱਥੇ ਸੰਭਵ ਹੋਵੇ ਕੈਮਰਿਆਂ ਤੋਂ ਬਚੋ।</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">FAQ</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">FAQ ਵੇਖੋ</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">ਮੇਰੇ ਸ਼ਹਿਰ ਜਾਂ ਦੇਸ਼ ਵਿੱਚ ਈਵੈਂਟ ਕਿਉਂ ਨਹੀਂ?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">ਅਸੀਂ ਦੁਨੀਆ ਦੀਆਂ ਕਈ ਵੱਧ ਆਬਾਦੀ ਵਾਲੀਆਂ ਸ਼ਹਿਰਾਂ ਦਾ ਚੋਣ ਕੀਤੀ ਹੈ ਤਾਂ ਜੋ ਇਕ ਅਰਥਪੂਰਣ ਗਲੋਬਲ ਲਹਿਰ ਬਣ ਸਕੇ। ਤਕਨੀਕੀ ਅਤੇ ਸਾਂਭ-ਸੰਭਾਲ ਪਾਬੰਦੀਆਂ ਕਰਕੇ ਅਸੀਂ ਇਸ ਵੇਲੇ ਅਸੀਮਿਤ ਸਥਾਨਾਂ ਨੂੰ ਸਹਾਇਤਾ ਨਹੀਂ ਦੇ ਸਕਦੇ। ਅਸੀਂ ਮਹਾਂਦੀਪਾਂ, ਸਭਿਆਚਾਰਾਂ ਅਤੇ ਭਾਸ਼ਾਵਾਂ ਅੰਦਰ ਵਿਆਪਕ ਨੁਮਾਇੰਦਗੀ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਹੈ, ਜੋ ਕਦੇ ਪੂਰਨ ਨਹੀਂ ਹੋ ਸਕਦੀ। ਆਸ ਹੈ ਕਿ ਸਮੇਂ ਨਾਲ ਹੋਰ ਸ਼ਹਿਰ ਜੋੜਾਂਗੇ।</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">ਇਹ ਮਹਾਂਦੀਪਾਂ ਦੇ ਝੰਡੇ ਕੀ ਹਨ?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">ਅਸੀਂ ਮੂਲ, ਕਲਪਨਾਤਮਕ ਮਹਾਂਦੀਪੀ ਝੰਡੇ ਬਣਾਏ ਹਨ ਤਾਂ ਜੋ ਤੁਸੀਂ ਸੂਚੀ ਵਿੱਚ ਸ਼ਹਿਰਾਂ ਨੂੰ ਤੁਰੰਤ ਪਛਾਣ ਸਕੋ ਅਤੇ WorldWideWaves ਦੀ ਏਕਤਾ ਦੀ ਰੂਹ ਦਰਸੇ। ਇਹ ਝੰਡੇ ਅਧਿਕਾਰਿਕ ਨਹੀਂ ਹਨ ਅਤੇ ਸਿਰਫ਼ ਇਸ ਐਪ ਵਿੱਚ ਹਨ; ਇਹ ਕਿਸੇ ਰਾਸ਼ਟਰੀ ਜਾਂ ਸੱਭਿਆਚਾਰਕ ਪ੍ਰਤੀਕ ਦੀ ਥਾਂ ਲੈਣ ਜਾਂ ਨਾਰਾਜ਼ ਕਰਨ ਲਈ ਨਹੀਂ। ਕਿਉਂਕਿ ਭੂਗੋਲਿਕ ਮਹਾਂਦੀਪਾਂ ਦੇ ਅਧਿਕਾਰਿਕ ਝੰਡੇ ਨਹੀਂ ਹੁੰਦੇ, ਇਸ ਲਈ ਸਪਸ਼ਟਤਾ ਅਤੇ ਮਜ਼ੇ ਲਈ ਅਸੀਂ ਆਪਣੇ ਬਣਾਏ। ਜੇ ਇਹ ਤੁਹਾਨੂੰ ਪਸੰਦ ਹਨ, ਬੇਝਿਜਕ ਵਰਤੋ।</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">WorldWideWaves ਦੇ ਪਿੱਛੇ ਕੌਣ ਹੈ?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves ਪੂਰੀ ਤਰ੍ਹਾਂ ਨਿੱਜੀ ਪਹਲ ਹੈ। ਇਸ ਦੇ ਪਿੱਛੇ ਕੋਈ ਕਾਰਪੋਰੇਸ਼ਨ, ਸੰਸਥਾ ਜਾਂ ਸਰਕਾਰ ਨਹੀਂ ਹੈ। ਬਣਾਉਣ ਵਾਲੇ ਉਹਨਾਂ ਲੋਕਾਂ ਲਈ ਇੱਕ ਰਚਨਾਤਮਕ ਰਾਹ ਪੇਸ਼ ਕਰਨਾ ਚਾਹੁੰਦੇ ਸਨ ਜੋ ਸੋਚਦੇ ਹਨ ਕਿ ਉਹ ਦੁਨੀਆ ਅਤੇ ਜੀਵਨ ਸਥਿਤੀਆਂ ਨੂੰ ਕਿਵੇਂ ਬਿਹਤਰ ਬਣਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦੇ ਹਨ—ਇੱਕ ਕੋਸ਼ਿਸ਼ ਕਿ ਰੁਚੀ ਰੱਖਣ ਵਾਲੀਆਂ ਮੌਜੂਦਾ ਪ੍ਰਗਤੀਸ਼ੀਲ ਅਤੇ ਲੋਕਤੰਤਰੀ ਕੋਸ਼ਿਸ਼ਾਂ ਨੂੰ ਅਮਨਪ੍ਰੀਤ, ਅਰਾਜਨੀਤਿਕ ਝੰਡੇ ਹੇਠ ਇਕੱਠਾ ਕੀਤਾ ਜਾਵੇ।</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">ਕੀ ਇਹ ਵਪਾਰਿਕ ਪਹਿਲਕਦਮੀ ਹੈ?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">ਨਹੀਂ। ਐਪ ਪੂਰੀ ਤਰ੍ਹਾਂ ਮੁਫ਼ਤ ਹੈ। ਹਾਲਾਂਕਿ ਡਿਜ਼ਾਇਨ ਤੇ ਡਿਵੈਲਪਮੈਂਟ 'ਤੇ ਨਿਰਮਾਤਾਵਾਂ ਦਾ ਸਮਾਂ ਅਤੇ ਪੈਸਾ ਲੱਗਾ ਹੈ, ਉਨ੍ਹਾਂ ਨੂੰ ਇਸ ਤੋਂ ਕੋਈ ਨਿੱਜੀ ਵਿੱਤੀ ਲਾਭ ਨਹੀਂ ਮਿਲਦਾ।</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">ਕੀ ਮੈਂ ਯੋਗਦਾਨ ਦੇ ਸਕਦਾ/ਸਕਦੀ ਹਾਂ?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">ਹਾਂ, ਸਵੇਛਾਕਾਰ ਸਦਾ ਸਵਾਗਤਯੋਗ ਹਨ। ਐਪ ਦਾ ਕੋਡ GitHub 'ਤੇ ਖੁੱਲ੍ਹਾ ਸਰੋਤ ਹੈ, ਅਤੇ ਤੁਸੀਂ ਨਿਰਮਾਤਾਵਾਂ ਨੂੰ worldwidewaves@proton.me 'ਤੇ ਸੰਪਰਕ ਕਰ ਸਕਦੇ ਹੋ (ਜਵਾਬ ਦੀ ਗਾਰੰਟੀ ਨਹੀਂ)। ਸਭ ਤੋਂ ਵਧੀਆ ਮਦਦ ਇਹ ਹੈ ਕਿ ਗੱਲ ਫੈਲਾਓ: ਈਵੈਂਟਸ ਦੀਆਂ ਫ਼ੋਟੋਆਂ ਤੇ ਵੀਡੀਓਜ਼ ਸੁਝਾਏ ਹੈਸ਼ਟੈਗਜ਼ ਨਾਲ ਸਾਂਝੀਆਂ ਕਰੋ, ਸਥਾਨਕ ਇਨਫਲੂਐਂਸਰਾਂ ਨਾਲ ਸੰਪਰਕ ਕਰੋ, ਆਪਣੀ ਕਮਿਊਨਿਟੀ ਨਾਲ ਗੱਲ ਕਰੋ, ਅਤੇ ਸਭ ਤੋਂ ਮਹੱਤਵਪੂਰਣ—ਲਹਿਰ ਵਿੱਚ ਸ਼ਾਮਲ ਹੋਵੋ!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">USA</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">ਮੈਕਸੀਕੋ</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">ਬ੍ਰਾਜ਼ੀਲ</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">ਅਰਜਨਟੀਨਾ</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">ਯੂਨਾਈਟਿਡ ਕਿੰਗਡਮ</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">ਫਰਾਂਸ</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">ਜਰਮਨੀ</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">ਸਪੇਨ</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">ਇਟਲੀ</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">ਰੂਸ</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">ਤੁਰਕੀ</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">ਮਿਸਰ</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">ਦੱਖਣੀ ਅਫ਼ਰੀਕਾ</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">ਕੀਨੀਆ</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">ਨਾਈਜੀਰੀਆ</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">ਡੀ.ਆਰ. ਕਾਂਗੋ</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">ਸੰਯੁਕਤ ਅਰਬ ਅਮੀਰਾਤ</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">ਭਾਰਤ</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">ਇੰਡੋਨੇਸ਼ੀਆ</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">ਥਾਈਲੈਂਡ</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">ਫਿਲੀਪੀਨਜ਼</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">ਜਪਾਨ</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">ਦੱਖਣੀ ਕੋਰੀਆ</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">ਚੀਨ</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">ਆਸਟ੍ਰੇਲੀਆ</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">ਕੈਨੇਡਾ</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">ਪੇਰੂ</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">ਕੋਲੰਬੀਆ</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">ਚੀਲੇ</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">ਇਰਾਨ</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">ਪਾਕਿਸਤਾਨ</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">ਉੱਤਰੀ ਅਮਰੀਕਾ</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">ਦੱਖਣੀ ਅਮਰੀਕਾ</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">ਯੂਰਪ</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">ਅਫ਼ਰੀਕਾ</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">ਮੱਧ ਪੂਰਬ</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">ਏਸ਼ੀਆ</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">ਓਸ਼ੀਨੀਆ</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">ਨਿਊਯਾਰਕ</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਬਿਗ ਐਪਲ ਦੀ ਧੜਕਨ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ Times Square, Central Park ਅਤੇ ਅਸਮਾਨ-ਛੂਹਂਦੇ ਸਕਾਈਲਾਈਨ ਦੇ ਪਾਸੋਂ ਲੰਘਦੀ ਹੈ।</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">ਲਾਸ ਐੰਜਲਸ</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">ਹਾਲੀਵੁਡ ਦੀ ਚਮਕ, ਪੈਸਿਫ਼ਿਕ ਦੀ ਹਵਾ ਅਤੇ City of Angels ਦੀ ਤਾਰਿਆਂ ਭਰੀ ਖੂਬਸੂਰਤੀ—ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਲਹਿਰ ਐਲ.ਏ. ਨੂੰ ਰੌਸ਼ਨ ਕਰਦੀ।</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">ਮੈਕਸੀਕੋ ਸਿਟੀ</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">CDMX ਦੇ ਦਿਲ ਵਿੱਚ ਮੈਕਸੀਕਨ ਆਜ਼ਾਦੀ ਦਿਵਸ ਮਨਾਓ, ਜਿਥੇ ਔਪਨਿਵੇਸ਼ਿਕ ਸ਼ਾਨ ਆਧੁਨਿਕ ਊਰਜਾ ਨਾਲ ਮਿਲਦੀ ਹੈ ਅਤੇ ਮਾਰਿਆਚੀ ਦੀ ਧੁਨ ਇਤਿਹਾਸਕ ਚੌਂਕਾਂ ਵਿੱਚ ਗੂੰਜਦੀ ਹੈ।</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">ਸਾਓ ਪਾਓਲੋ</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">ਸਾਂਬਾ ਦੇ ਤਾਲ ਤੇ ਆਜ਼ਾਦੀ ਦਿਵਸ ਦੀ ਰੂਹ—ਪੌਲਿਸਤਾ ਐਵੇਨਿਊ ਅਤੇ ਇਸ ਮਹਾਂਨਗਰ ਦੇ ਰੰਗੀਲੇ ਪੜੋਸਾਂ ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਵਗੋ।</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">ਬੁਇਨਸ ਆਇਰਸ</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">ਤੈਂਗੋ ਦੀ ਧੁਨ, ਵਿਸ਼ਾਲ ਯੂਰਪੀ ਅੰਦਾਜ਼ ਦੀਆਂ ਬੁਲੇਵਾਰਡਾਂ ਅਤੇ ਰੀਓ ਦੇ ਲਾ ਪਲਾਤਾ ਕਿਨਾਰੇ ਪੋਰਤੇਨਿਓਜ਼ ਦੀ ਜਜ਼ਬੇਦਾਰ ਰੂਹ ਵਿੱਚ ਅਰਜਨਟੀਨਾ ਦਾ ਆਜ਼ਾਦੀ ਦਿਵਸ ਮਨਾਓ।</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">ਲੰਦਨ</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">ਨੌਟਿੰਗ ਹਿੱਲ ਕਾਰਨੀਵਲ ਦੀ ਬਹੁ-ਸੱਭਿਆਚਾਰਕ ਰੌਣਕ ਵਿੱਚ ਝੂਮੋ, ਜਿਥੇ ਲਹਿਰ ਇਤਿਹਾਸਕ ਗਲੀਆਂ, ਡਬਲ-ਡੈਕਰ ਬੱਸਾਂ ਅਤੇ ਹਮੇਸ਼ਾ ਦੇ Thames ਨਾਲ ਨੱਚਦੀ ਹੈ।</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">ਪੈਰਿਸ</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">ਬਾਸਤਿਲ ਦਿਵਸ 'ਤੇ ਐਫ਼ਲ ਟਾਵਰ ਤੋਂ Champs-Élysées ਤੱਕ ਲਹਿਰ ਨਾਲ ਜੁੜੋ—ਰੌਸ਼ਨੀ ਦੇ ਸ਼ਹਿਰ ਦੀ ਮੋਹਕਤਾ ਅਤੇ ਕਲਾ ਦਾ ਜਸ਼ਨ।</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">ਬਰਲਿਨ</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">ਜਰਮਨ ਏਕਤਾ ਦਿਵਸ 'ਤੇ ਇਕਤਾ ਦੀ ਰੂਹ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਬ੍ਰਾਂਡਨਬਰਗ ਗੇਟ, ਗ੍ਰਾਫ਼ਿਟੀ-ਰੰਗੀਆਂ ਦੀਵਾਰਾਂ ਅਤੇ ਆਧੁਨਿਕ ਵਾਸਤੂਕਲਾ ਵਿੱਚੋਂ ਗੁਜ਼ਰਦੀ ਹੈ।</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">ਮੈਡਰਿਡ</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">ਸਪੇਨ ਦੇ ਰਾਸ਼ਟਰੀ ਦਿਵਸ 'ਤੇ, ਲਹਿਰ ਮੈਡਰਿਡ ਦੇ ਜ਼ਿੰਦਾਦਿਲ ਟਾਪਾਸ ਬਾਰ, ਵਿਸ਼ਾਲ ਬੁਲੇਵਾਰਡ ਅਤੇ ਪ੍ਰਾਡੋ ਦੀ ਕਲਾਤਮਕ ਵਿਰਾਸਤ ਨੂੰ ਰੌਸ਼ਨ ਕਰੇ।</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">ਰੋਮ</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">Ferragosto 'ਤੇ, ਸੰਗੀਤ ਨਾਲ ਜੀਉਂਦੀਆਂ ਪਿਆਜ਼ਾਂ, ਫੁਹਾਰਿਆਂ ਅਤੇ ਸਦੀਵੀ ਸ਼ਹਿਰ ਦੀ ਗਰਮੀ ਵਾਲੀ ਰੌਣਕ ਵਿੱਚ ਰੋਮੀਆਂ ਤੇ ਸੈਲਾਨੀਆਂ ਨਾਲ ਮਿਲ ਕੇ ਵਗੋ।</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">ਮਾਸਕੋ</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">ਰੂਸ ਦਿਵਸ 'ਤੇ ਲਾਲ ਚੌਂਕ ਅਤੇ ਕ੍ਰੈਮਲਿਨ ਦੀ ਸ਼ਾਨ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਸ਼ਾਹੀ ਇਤਿਹਾਸ ਅਤੇ ਆਧੁਨਿਕ ਰੌਣਕ ਨੂੰ ਗੂੰਜੇ।</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">ਇਸਤਾਂਬੁਲ</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">ਗਣਤੰਤਰ ਦਿਵਸ ਮਨਾਉਂਦੇ ਹੋਏ ਲਹਿਰ ਬੋਸਫੋਰਸ, ਇਤਿਹਾਸਕ ਮਸੀਤਾਂ ਅਤੇ ਆਧੁਨਿਕ ਚੌਰਾਹਿਆਂ ਦੇ ਪਾਸੋਂ ਫ਼ਿਸਲਦੀ ਹੈ—ਕੰਸਰਟਾਂ, ਝੰਡਿਆਂ ਤੇ ਆਤਿਸ਼ਬਾਜ਼ੀ ਨਾਲ ਰੌਸ਼ਨ ਇਸਤਾਂਬੁਲ।</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">ਕਾਹਿਰਾ</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">ਕਾਹਿਰੇ ਵਿੱਚ ਈਦ ਮਨਾਓ, ਜਦੋਂ ਗਲੀਆਂ ਤੇ ਬਾਜ਼ਾਰ ਰੌਸ਼ਨੀ, ਮਿੱਠੀਆਂ ਖੁਸ਼ਬੂਆਂ ਅਤੇ ਪਰਿਵਾਰਾਂ ਦੀ ਖੁਸ਼ੀ ਨਾਲ ਚਮਕਦੇ ਹਨ—ਇਕਜੁਟ ਲਹਿਰ ਨਾਲ।</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">ਜੋਹਾਨਸਬਰਗ</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">ਫ੍ਰੀਡਮ ਡੇ 'ਤੇ ‘City of Gold’ ਵਿਚ ਲਹਿਰ ਨਾਲ ਜੁੜੋ, ਜਿਥੇ ਆਧੁਨਿਕ ਉੱਚੀਆਂ ਇਮਾਰਤਾਂ ਲਚੀਲੇਪਨ ਅਤੇ ਸਭਿਆਚਾਰਕ ਵਿਭਿੰਨਤਾ ਦੀ ਅਮੀਰ ਵਿਰਾਸਤ ਨਾਲ ਮਿਲਦੀਆਂ ਹਨ।</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">ਨੈਰੋਬੀ</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">ਮਦਾਰਾਕਾ ਡੇ ਮਨਾਓ—ਜੀਵੰਤ ਬਾਜ਼ਾਰਾਂ ਤੇ ਰੌਲਿਆਂ ਵਾਲੀਆਂ ਗਲੀਆਂ ਵਿੱਚ, ਜਿਥੇ ਸ਼ਹਿਰੀ ਜੀਵਨ ਕੀਨੀਆ ਦੀ ਮਨਮੋਹਕ ਜਾਣਵਰ-ਦੁਨੀਆ ਦੇ ਦਰਵਾਜ਼ੇ ਨਾਲ ਮਿਲਦਾ ਹੈ।</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">ਲਾਗੋਸ</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">ਨਾਈਜੀਰੀਆ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਅਫ਼੍ਰੋਬੀਟਸ ਦੇ ਜੋਸ਼ਿਲੇ ਤਾਲਾਂ ਨੂੰ ਗਲੇ ਲਗਾਓ, ਜਦੋਂ ਲਹਿਰ ਅਫ਼ਰੀਕਾ ਦੇ ਸਭ ਤੋਂ ਵੱਡੇ ਸ਼ਹਿਰ ਤੇ ਉਸਦੇ ਜੀਵੰਤ ਬਾਜ਼ਾਰਾਂ ਵਿੱਚੋਂ ਲੰਘਦੀ ਹੈ।</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">ਕਿਨਸ਼ਾਸਾ</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">ਡੀ.ਆਰ. ਕਾਂਗੋ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ, ਕਾਂਗੋ ਦਰਿਆ ਦੇ ਨਾਲ-ਨਾਲ ਸੰਗੀਤ ਤੇ ਸੱਭਿਆਚਾਰਕ ਮਾਣ ਨਾਲ ਭਰੀ ਰਾਜਧਾਨੀ ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਜੁੜੋ।</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">ਦੁਬਈ</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">ਯੂਏਈ ਰਾਸ਼ਟਰੀ ਦਿਵਸ ਮਨਾਓ—ਭਵਿੱਖਨੁਮਾ ਗਗਨਚੁੰਬੀਆਂ, ਰੇਗਿਸਤਾਨੀ ਨਜ਼ਾਰਿਆਂ ਅਤੇ ਦੁਨੀਆ ਦੇ ਅਗੇਤੂ ਆਧੁਨਿਕ ਮਹਾਂਨਗਰ ਦੀ ਰੌਣਕ ਦੇ ਵਿਚਕਾਰ।</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">ਮੁੰਬਈ</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">ਭਾਰਤ ਦਾ ਆਜ਼ਾਦੀ ਦਿਵਸ—ਬਾਲੀਵੁਡ ਦੀ ਰੂਹ, ਔਪਨਿਵੇਸ਼ਿਕ ਯੁੱਗ ਦੀ ਵਾਸਤੂਕਲਾ ਅਤੇ ਅਰਬ ਸਾਗਰ ਦੇ ਮਾਨਸੂਨੀ ਕੰਢੇ ਨਾਲ-ਨਾਲ ਮਨਾਓ।</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">ਦਿੱਲੀ</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਦੇਸ਼ਭਕਤੀ ਦੀ ਰੂਹ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਔਪਨਿਵੇਸ਼ਿਕ ਬੁਲੇਵਾਰਡਾਂ, ਮੁਗਲ ਕਿਲ੍ਹਿਆਂ ਅਤੇ ਭਾਰਤ ਦੀ ਰਾਜਧਾਨੀ ਦੀ ਧੜਕਨ ਦੇ ਪਾਸੋਂ ਲੰਘਦੀ ਹੈ।</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">ਬੈਂਗਲੋਰ</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">ਭਾਰਤ ਦੀ ਸਿਲਿਕਨ ਵੈਲੀ ਵਿੱਚ ਆਜ਼ਾਦੀ ਮਨਾਓ, ਜਿਥੇ ਸਦੀਆਂ ਪੁਰਾਣੇ ਮੰਦਿਰ, ਅਤਿਅਧੁਨਿਕ ਟੈਕ ਪਾਰਕਾਂ ਅਤੇ ਰੌਲਾਂ ਭਰੀ ਮਹਾਂਨਗਰੀ ਭੀੜ ਮਿਲਦੀ ਹੈ।</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">ਜਕਾਰਤਾ</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">ਇੰਡੋਨੇਸ਼ੀਆ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ ਨੂੰ ਵਿਰੋਧਾਂ ਨਾਲ ਭਰੇ ਸ਼ਹਿਰ ਵਿੱਚ ਮਨਾਓ—ਚਮਕਦਾਰ ਗਗਨਚੁੰਬੀਆਂ ਤੋਂ ਰੌਲਿਆਂ ਵਾਲੇ ਸਟ੍ਰੀਟ ਬਾਜ਼ਾਰਾਂ ਤੇ ਸੱਭਿਆਚਾਰਕ ਵਿਰਾਸਤ ਸਥਾਨਾਂ ਤੱਕ।</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">ਬੈਂਕਾਕ</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">ਰਾਜਾ ਭੂਮਿਬੋਲ ਦੀ ਯਾਦ ਵਿੱਚ ਰਾਸ਼ਟਰੀ ਫਾਥਰਜ਼ ਡੇ ਮਨਾਓ—ਫ਼ਰਿਸ਼ਤਿਆਂ ਦੇ ਸ਼ਹਿਰ ਵਿੱਚ ਸੁਨਹਿਰੇ ਮੰਦਰ, ਤੈਤਣ ਵਾਲੇ ਬਾਜ਼ਾਰ ਅਤੇ ਰੰਗੀਲਾ ਸਟ੍ਰੀਟ ਫੂਡ ਤੁਹਾਡੇ ਹੁੰਸਲਿਆਂ ਨੂੰ ਜਗਾਉਂਦੇ ਹਨ।</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">ਮਨਿਲਾ</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">ਫਿਲੀਪੀਨਜ਼ ਦਾ ਆਜ਼ਾਦੀ ਦਿਵਸ ਮਨਾਓ—ਜਿਥੇ ਜੀਪਨੀਜ਼ ਸਪੇਨੀ-ਔਪਨਿਵੇਸ਼ਿਕ ਗਿਰਜਾਘਰਾਂ, ਜੀਵੰਤ ਬਾਜ਼ਾਰਾਂ ਅਤੇ ਆਧੁਨਿਕ ਗਗਨਚੁੰਬੀਆਂ ਦੇ ਵਿਚਕਾਰ ਦੌੜਦੀਆਂ ਹਨ।</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">ਟੋਕਿਓ</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">ਸੁਮਿਦਾ ਦਰਿਆ ਦੇ ਕਿਨਾਰੇ ਲੱਖਾਂ ਲੋਕਾਂ ਨਾਲ ਜੁੜੋ, ਜਦੋਂ ਅਸਮਾਨ ਰੰਗਾਂ ਨਾਲ ਚਮਕਦਾ ਹੈ ਅਤੇ ਟੋਕਿਓ ਦਾ ਗਰਮੀ ਵਾਲਾ ਤਿਉਹਾਰੀ ਮਾਹੌਲ ਸ਼ਾਨਦਾਰ ਲਹਿਰ ਲਈ ਮੰਚ ਬਣਾਉਂਦਾ ਹੈ।</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">ਸਿਓਲ</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">ਗਵਾਂਗਬੋਕਜੋਲ ਦੇ ਜਸ਼ਨਾਂ ਨੂੰ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਸ਼ਾਹੀ ਮਹਲਾਂ, ਕੇ-ਪੌਪ ਕੇਂਦਰਾਂ ਅਤੇ ਰਵਾਇਤ ਤੇ ਆਧੁਨਿਕ ਨਵੀਨਤਾ ਨੂੰ ਮਿਲਾਉਂਦੀ ਸਕਾਈਲਾਈਨ ਦੇ ਪਾਸੋਂ ਗੁਜ਼ਰਦੀ ਹੈ।</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">ਬੀਜਿੰਗ</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">ਮਜ਼ਦੂਰ ਦਿਵਸ 'ਤੇ ਬੀਜਿੰਗ ਦੇ ਪਾਰਕਾਂ ਤੇ ਬੁਲੇਵਾਰਡਾਂ ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਵਗੋ, ਜਿਥੇ ਲੱਖਾਂ ਲੋਕ ਟਹਿਲਣ, ਪਿਕਨਿਕ ਅਤੇ ਬਹਾਰ ਦੇ ਮੌਸਮ ਦਾ ਆਨੰਦ ਮਾਣਦੇ ਹਨ।</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">ਸ਼ਾਂਘਾਈ</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">ਦ ਬੰਡ ਅਤੇ ਨੈਂਜਿੰਗ ਰੋਡ 'ਤੇ ਲਹਿਰ ਵਗਣ ਦਿਓ, ਜਦੋਂ ਸ਼ਾਂਘਾਈ ਪਰਿਵਾਰਾਂ, ਸੰਗੀਤ ਅਤੇ ਮਜ਼ਦੂਰ ਦਿਵਸ ਦੀ ਮਹਾਂਨਗਰੀ ਰੌਣਕ ਨਾਲ ਗੂੰਜਦਾ ਹੈ।</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">ਹਾਂਗ ਕਾਂਗ</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">ਹਾਂਗ ਕਾਂਗ ਦੇ ਗੋਲਡਨ ਵੀਕ ਦੀ ਲਹਿਰ ਮਹਿਸੂਸ ਕਰੋ—ਵਿਕਟੋਰੀਆ ਹਰਬਰ, ਬਾਜ਼ਾਰਾਂ ਅਤੇ ਨੀਅਨ ਗਲੀਆਂ ਵਿੱਚ ਲੋਕ ਇਕੱਠੇ ਹੋ ਕੇ ਮਜ਼ਦੂਰ ਦਿਵਸ ਮਨਾਉਂਦੇ ਹਨ।</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">ਸਿਡਨੀ</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">ਸਿਡਨੀ ਦੀ Mardi Gras Parade ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਵਗੋ—ਆਕਸਫੋਰਡ ਸਟ੍ਰੀਟ ਇੰਦਰਧਨੁਸੀ ਰੰਗਾਂ, ਚਮਕਦਾਰ ਫਲੋਟਾਂ ਅਤੇ ਸੈਂਕੜਿਆਂ ਹਜ਼ਾਰਾਂ ਨੂੰ ਇਕਜੁਟ ਕਰਦੇ ਕਾਰਨੀਵਲ ਜਜ਼ਬੇ ਨਾਲ ਧੜਕਦੀ ਹੈ।</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">ਮੇਲਬੋਰਨ</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">Melbourne Cup Day 'ਤੇ, ਸੱਭਿਆਚਾਰਕ ਰਾਜਧਾਨੀ ਦੀਆਂ ਪਰੇਡਾਂ, ਸ਼ਾਨਦਾਰ ਪਹਿਰਾਵੇ ਵਾਲੀਆਂ ਭੀੜਾਂ ਅਤੇ ‘the race that stops a nation’ ਦੇ ਤਿਉਹਾਰੀ ਜਜ਼ਬੇ ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਵਗੋ।</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">ਟੋਰਾਂਟੋ</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">ਕੈਨੇਡਾ ਡੇ 'ਤੇ ਲਾਲ-ਸਫ਼ੈਦ ਦੀ ਲਹਿਰ ਵਿੱਚ ਡੁੱਬ ਜਾਓ, ਜਦੋਂ ਲਹਿਰ CN Tower, ਬਹੁ-ਸੱਭਿਆਚਾਰਕ ਪੜੋਸਾਂ ਅਤੇ ਝੀਲ ਓਨਟਾਰਿਓ ਦੇ ਕਿਨਾਰੇ ਨਾਲ ਲੰਘਦੀ ਹੈ।</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">ਵੈਂਕੂਵਰ</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">ਪੈਸਿਫ਼ਿਕ ਤਟ ਦੇ ਨਾਲ ਕੈਨੇਡਾ ਡੇ ਮਨਾਓ—ਸਮੁੰਦਰ ਤੋਂ ਆਕਾਸ਼ ਤੱਕ ਦੇ ਨਜ਼ਾਰੇ, ਸਟੈਨਲੀ ਪਾਰਕ ਦੀ ਹਰਿਆਵਲੀ ਅਤੇ ਡਾਊਨਟਾਊਨ ਦੀ ਕੌਸਮੋਪੌਲਿਟਨ ਖੂਬਸੂਰਤੀ ਦੇ ਵਿਚਕਾਰ।</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">ਸ਼ਿਕਾਗੋ</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਡੀਪ-ਡਿਸ਼ ਦਾ ਮਜ਼ਾ ਅਤੇ ਲੇਕ ਮਿਚਿਗਨ ਦੇ ਨਾਲ ਵਾਸਤੂਕਲਾ ਦੇ ਕਰਿਸ਼ਮੇ—ਜਦੋਂ ਲਹਿਰ Windy City ਵਿੱਚੋਂ ਲੰਘਦੀ ਹੈ।</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">ਸੈਨ ਫ੍ਰਾਂਸਿਸਕੋ</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">ਗੋਲਡਨ ਗੇਟ ਬ੍ਰਿਜ ਦੇ ਪ੍ਰਤੀਕਾਤਮਕ ਖੰਭੇ ਹੇਠ ਆਜ਼ਾਦੀ ਦੀ ਰੂਹ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਟੇਕਰੀਆਂ, ਕੇਬਲ ਕਾਰਾਂ ਅਤੇ ਵਿਭਿੰਨ ਪੜੋਸਾਂ ਵਿੱਚੋਂ ਗੁਜ਼ਰਦੀ ਹੈ।</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">ਲੀਮਾ</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">ਪੇਰੂ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਔਪਨਿਵੇਸ਼ਿਕ ਚੌਂਕ, ਪ੍ਰੀ-ਇਨਕਾ ਸਥਲ ਅਤੇ ਦੁਨੀਆ-ਪ੍ਰਸਿੱਧ ਪੇਰੂਵੀਅਨ ਖਾਣੇ ਦੀਆਂ ਸੁਗੰਧਾਂ ਵਿੱਚੋਂ ਯਾਤਰਾ ਕਰੋ।</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">ਬੋਗੋਟਾ</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">ਕੋਲੰਬੀਆ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਸਟ੍ਰੀਟ ਆਰਟ, ਪਹਾੜੀ ਨਜ਼ਾਰੇ ਅਤੇ ਐਂਡੀਜ਼ ਰਾਜਧਾਨੀ ਦੇ ਸਾਲਸਾ-ਰੰਗੇ ਮੋਹੱਲਿਆਂ ਦੀ ਧੜਕਨ ਵਿੱਚ ਜਸ਼ਨ ਮਨਾਓ।</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">ਸੈਂਤਿਆਗੋ</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">ਚੀਲੇ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਦੇਸ਼ਭਕਤੀ ਦੀ ਰੌਂਹਕ ਮਹਿਸੂਸ ਕਰੋ, ਜਦੋਂ ਲਹਿਰ ਐਂਡੀਜ਼ ਦੀ ਪਿੱਠਭੂਮੀ, ਔਪਨਿਵੇਸ਼ਿਕ ਮਕਾਨ ਅਤੇ ਆਧੁਨਿਕ ਕੱਚ ਦੀਆਂ ਮੀਨਾਰਾਂ ਵਿੱਚੋਂ ਮੰਦਰਾਉਂਦੀ ਹੈ।</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">ਤੇਹਰਾਨ</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">ਤੇਹਰਾਨ ਦਾ Sizdah Bedar—ਜਦੋਂ ਪਰਿਵਾਰ ਪਾਰਕਾਂ ਤੇ ਬਾਗਾਂ ਵਿੱਚ ਪਿਕਨਿਕ, ਹਾਸੇ ਤੇ ਨਵੀਂ ਤਾਜ਼ਗੀ ਲਈ ਨਿਕਲਦੇ ਹਨ—ਸ਼ਹਿਰ ਦੀਆਂ ਬਾਹਰੀ ਰੌਣਕਾਂ 'ਚ ਲਹਿਰ ਨਾਲ ਜੁੜੋ।</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">ਕਰਾਚੀ</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">ਪਾਕਿਸਤਾਨ ਦੇ ਆਜ਼ਾਦੀ ਦਿਵਸ 'ਤੇ ਅਰਬ ਸਾਗਰ ਦੇ ਕਿਨਾਰੇ—ਰੌਲਿਆਂ ਵਾਲੇ ਬਾਜ਼ਾਰ, ਅਮੀਰ ਇਤਿਹਾਸ ਅਤੇ ਦੇਸ਼ ਦੇ ਸਭ ਤੋਂ ਵੱਡੇ ਸ਼ਹਿਰ ਦੀ ਗਤੀਸ਼ੀਲ ਊਰਜਾ ਵਿੱਚ ਲਹਿਰ ਨਾਲ ਜਸ਼ਨ ਮਨਾਓ।</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">ਹੱਥ ਚੁੱਕੋ!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">ਖੱਬੇ-ਸੱਜੇ ਤਾਲੀ ਵਜਾਓ!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">ਭੁੱਜਾਂ ਪਿੱਛੇ ਘੁਮਾਓ!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">ਹੇਠਾਂ ਜਾਓ ਤੇ ਉੱਪਰ!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">ਲਹਿਰ ਦਿਖਾਓ!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">ਭੁੱਜਾਂ ਕਰਾਸ ਕਰੋ!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">ਲਹਿਰ ਲਈ ਤਿਆਰ ਰਹੋ!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">ਹੁਣ ਲਹਿਰ ਕਰੋ!</string>
 </resources>

@@ -146,10 +146,8 @@
   <string name="wave_end_time">שעת סיום</string>
   <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
   <string name="wave_total_time">זמן כולל</string>
-  <!-- src_hash: d3e7e0c1937e38ee4b9feefbd1531c544682ce73 -->
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
   <string name="wave_progression">התקדמות</string>
-  <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
-  <string name="speed_unit_mps">m/s</string>
   <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
   <string name="wave_warming">מתחמם..</string>
   <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
@@ -162,6 +160,352 @@
   <string name="wave_done">הגל הסתיים!</string>
   <!-- src_hash: 11570d083c6454a2525057769726a4bc1904ea0b -->
   <string name="wave_hit">כל הכבוד!</string>
-  <!-- src_hash: 0e49835f2bea62c861d9f5735cf1593e7c52397a -->
+  <!-- src_hash: ac21cade30813d44f4932a0338a1827ff31bb849 -->
   <string name="wave_is_running">הגל בעיצומו!</string>
+  <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
+  <string name="infos_core_1">אתם יודעים זאת: אילו סיפור כדור הארץ היה מסופר בספר בן 1,000 עמודים, האנושות הייתה מופיעה רק בפסקה האחרונה של העמוד האחרון.</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">אבל הסיפור הקצר הזה עלול להסתיים מוקדם מהצפוי. אנחנו מבודדים ביקום עצום וקודר. אנחנו הורסים הכול. אנחנו אנוכיים. אנחנו אכזריים. אנחנו חמדנים. אנחנו עיוורים. ואנחנו שואפים לשלוט. אבל אנחנו גם מסוגלים לאמפתיה, יוצרים נפלאות, עמידים, ויכולים להיות אלטרואיסטים.</string>
+  <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
+  <string name="infos_core_3">אבל הזמן קצר. התקדמנו כל כך.. אנחנו יכולים לבנות חלופה: קהילה של זכויות, סולידריות ודמוקרטיה. זה בידיים שלנו!</string>
+  <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
+  <string name="infos_core_4">הצטרפו לתנועה עולמית, להתעוררות שקטה. ניצור גלים אנושיים, עדות לאנושיות האמיתית שלנו ופנייה ברורה למנהיגינו. נתאסף סביב ערים ומדינות בכל רחבי העולם. נבחר בשלום. נבחר בשמחה. נבחר בטבע. נבחר בנו.</string>
+  <!-- src_hash: 69c1d897b747cc55158f740ac6a615353736b9e1 -->
+  <string name="infos_core_5">ומה אם די בגל אחד כדי לאחד בינינו?</string>
+  <!-- src_hash: 0fb0e5adbe2d6105bd279ab53fa55ba23cb98085 -->
+  <string name="infos_core_6">WorldWideWaves היא אפליקציה זמנית עם חזון נועז: לארגן סדרת גלים אנושיים המתפשטים בערים גדולות ובין מדינות. במשך שנה אחת, היוזמה שואפת להתעלות מעל גבולות פיזיים ותרבותיים, ולטפח תחושת אחדות, קהילה וחוויה אנושית משותפת.</string>
+  <!-- src_hash: 843381f1726d7720f664afbe36d14b8d50c0992c -->
+  <string name="infos_core_7">בליבה, WorldWideWaves היא יותר מסתם אפליקציה — זו תנועה עולמית שנועדה לאחד אנשים בהפגנת סולידריות ושמחה, סביב ערכים משותפים.</string>
+  <!-- src_hash: e9b0433d527b27efc01e82567f36888320120579 -->
+  <string name="infos_core_8">בעזרת הטכנולוגיה, WorldWideWaves תאפשר למשתתפים מכל העולם להצטרף לגלים האנושיים בעריהם, וליצור מיצג חזותי ורגשי עוצמתי.</string>
+  <!-- src_hash: 16015c454483454f9e6f2e8394f5a47cae79a706 -->
+  <string name="infos_core_9">בעצם, WorldWideWaves היא מאמץ שאפתני לרתום את כוח הטכנולוגיה למטרה ראויה באמת, המחבר בין בני אדם בחגיגה של אחדות, שמחה ופעולה משותפת. בכל גל, המשתתפים לא רק יתרמו למופע עולמי, אלא גם יחושו וישתפו עם העולם את ההשפעה העמוקה של ההתחברות כאחד.</string>
+  <!-- src_hash: d6e9596a4d54d2d6d118f26c42f567dff2701040 -->
+  <string name="drwave">Dr Wave</string>
+  <!-- src_hash: 59e05f4e6bc62f61ac654ee8fa1d81ebb025a932 -->
+  <string name="www_instagram">@worldwidewaves_all</string>
+  <!-- src_hash: 59299d6aa2ed86494d34548d1141de09dfbc8906 -->
+  <string name="www_instagram_url">https://www.instagram.com/worldwidewaves_all/</string>
+  <!-- src_hash: 2c6ba102cf262d95d8ed789380859f559206b098 -->
+  <string name="www_hashtag">#worldwidewaves #wwwaves</string>
+  <!-- src_hash: cdf58557830e83678d5d085598977d83c990573e -->
+  <string name="warn_rules_security_title">כללים ובטיחות</string>
+  <!-- src_hash: 378d2708a645dd091869b92f36a28365c95053b5 -->
+  <string name="warn_rules_security_text">ברוכים הבאים ל-WorldWideWaves! שמחים שהצטרפתם לאירועי הגל העולמיים. כדי להבטיח חוויה בטוחה ונעימה לכולם, אנא פעלו לפי ההנחיות הבאות:</string>
+  <!-- src_hash: a0fa607cc5b3e154b43ce7d0dca32ca3a9d8e40a -->
+  <string name="warn_general_title">כללים כלליים:</string>
+  <!-- src_hash: 11b6cb7084be31254b173fdeedc6916fd17aec0b -->
+  <string name="warn_general_item_1">כבוד לכולם: התייחסו בכבוד לכל המשתתפים, ללא קשר לרקע. אנא שמרו על כבוד לכל הנוכחים; התנהגות מפלה או הטרדה אינן מתקבלות.</string>
+  <!-- src_hash: 3f8d984687d5b87b7a74b182e90f166659145e88 -->
+  <string name="warn_general_item_2">כבדו את המרחב הציבורי: שמרו על מעברים פנויים, צייתו לחוקים המקומיים ולשילוט, והימנעו מחסימת תנועה או גישת חירום.</string>
+  <!-- src_hash: ad657469fc5d5661d08dbd6dc0edfb15838abdad -->
+  <string name="warn_general_item_3">הישארו בשטחים המיועדים: לבטחונכם, הישארו בשטחים שיועדו לאירוע, אם קיימים.</string>
+  <!-- src_hash: b1955abf300678651b53da0e9058731d7f2842f7 -->
+  <string name="warn_general_item_4">התנהגו באחריות: אם בחרתם לשתות, עשו זאת במתינות ובהתאם לחוק המקומי.</string>
+  <!-- src_hash: 92fdc9013c382a901611796b9e7df4f4e401d0a2 -->
+  <string name="warn_general_item_5">צמצמו את ההשפעה הסביבתית: השליכו פסולת לפחים הייעודיים והימנעו מלכלוך כדי לשמור על הניקיון.</string>
+  <!-- src_hash: c2874610d18e11ab3b7f4f6cdb556986cf7f1ffd -->
+  <string name="warn_general_item_6">דיווח על חששות: אם ראיתם משהו חשוד או אדם במצוקה, דווחו מיד לרשויות המקומיות.</string>
+  <!-- src_hash: 3f8d380518d06739f9539dc35370639e2cd20561 -->
+  <string name="warn_safety_title">טיפים לבטיחות:</string>
+  <!-- src_hash: b02e4295ff6f88f01612a74732fe2dada721dbef -->
+  <string name="warn_safety_item_1">התלבשו בהתאם: לבשו בגדים ונעליים נוחים המתאימים לפעילויות האירוע ולמזג האוויר.</string>
+  <!-- src_hash: 813a567d9f7e98c654469eb417d3a3981cb2b718 -->
+  <string name="warn_safety_item_2">הקפידו על שתייה: הביאו מים והישארו רוויים, במיוחד באירועים באקלים חם.</string>
+  <!-- src_hash: 9f8ec4dd9f931249b924ce2e0b9963b0e436cefe -->
+  <string name="warn_safety_item_3">שמרו על חפצים: שמרו על רכושכם האישי והימנעו מהבאת חפצי ערך שאינכם צריכים.</string>
+  <!-- src_hash: ce29a1d3c960d18a3d0ef669414658f7c9397091 -->
+  <string name="warn_safety_item_4">היו עם חברים: הישארו עם חברים או הכירו חדשים, ודאגו זה לזה.</string>
+  <!-- src_hash: 276d1e9b00788b88149660ad3fa9d1bb371aa29c -->
+  <string name="warn_safety_item_5">היערכות לחירום: שמרו בטלפון את מספרי החירום המקומיים וקבעו עם חברים נקודת מפגש למקרה שתיפרדו.</string>
+  <!-- src_hash: ce047932e87c290cfbd2a1816c2e546bcc426445 -->
+  <string name="warn_emergency_title">נהלי חירום:</string>
+  <!-- src_hash: 50db62819f7337e71f3de89183f313449c6fa17d -->
+  <string name="warn_emergency_item_1">היו ערים לסביבה: איתרו את היציאות הבטוחות והמרחבים הפתוחים הקרובים (למשל כיכרות, פארקים), ופעלו לפי הוראות הרשויות במקרה חירום.</string>
+  <!-- src_hash: edf95c1ac024aff0c4d3bb10ca1fb5c7f39e6294 -->
+  <string name="warn_emergency_item_2">אנשי קשר לחירום: שמרו בטלפון את מספר החירום המקומי למיקומכם ואת פרטי איש קשר לחירום לפני ההצטרפות.</string>
+  <!-- src_hash: a8b24ac52d5e70b9a940dc41c3cd2add5e390c0f -->
+  <string name="warn_emergency_item_3">במקרה חירום: התקשרו למספר החירום המקומי, פנו ברוגע לאזור פתוח ובטוח, סייעו לאחרים אם תוכלו, והשאירו את דרכי הגישה פנויות.</string>
+  <!-- src_hash: 581a816365afc7abf295f29ff37952be66eb6bb3 -->
+  <string name="warn_legal_title">משפטי:</string>
+  <!-- src_hash: 0655ecc76b35c6f6b9ff0066222ca211417354e2 -->
+  <string name="warn_legal_item_1">כתב ויתור על אחריות: ההשתתפות באירועי WorldWideWaves היא על אחריותכם בלבד. בהשתתפותכם, אתם מוותרים על כל תביעה נגד יוצרי האפליקציה בקשר לפציעות שעלולות להתרחש במהלך האירוע.</string>
+  <!-- src_hash: 588486834790e9bc9d1c36551cbffa4924ea3628 -->
+  <string name="warn_legal_item_2">הודעה על מרחב ציבורי: זהו אירוע ציבורי שבו עשוי להתבצע צילום/תיעוד בידי משתתפים או מדיה, בכפוף לחוקים המקומיים. איננו תובעים זכויות לתמונתכם ואין ביכולתנו לשלוט בתיעוד של צד שלישי. אם אינכם מעוניינים להופיע, השתדלו להימנע ממצלמות כשמתאפשר.</string>
+  <!-- src_hash: dc78c52ffcd7376d30c50c70d15b31cb9483fc55 -->
+  <string name="faq">שאלות נפוצות</string>
+  <!-- src_hash: 58f6c460461d6ddd10c7a1193c20c6c6e1c30e81 -->
+  <string name="faq_access">גישה לשאלות נפוצות</string>
+  <!-- src_hash: a0dcddf1ce3a2c93c4f67ed57972ed4f45ac6c26 -->
+  <string name="faq_question_1">מדוע אין אירוע בעיר או במדינה שלי?</string>
+  <!-- src_hash: 3cba2854f1aafe147d8d24a92746aa2976a69e7c -->
+  <string name="faq_answer_1">בחרנו כמה עשרות מן הערים המאוכלסות בעולם כדי ליצור גל עולמי משמעותי. מגבלות טכניות ותפעוליות מונעות מאיתנו כרגע לתמוך במספר בלתי מוגבל של מיקומים. שאפנו לייצוג רחב של יבשות, תרבויות ושפות — לעולם לא מושלם. אנו מקווים להוסיף ערים עם הזמן.</string>
+  <!-- src_hash: 43955e518e37a0d19e61c11fb8ca420b36b25277 -->
+  <string name="faq_question_2">מהם דגלי היבשות הללו?</string>
+  <!-- src_hash: fd415f1d449d58fef2953a09b7be45835cb47662 -->
+  <string name="faq_answer_2">יצרנו דגלי יבשות מקוריים ודמיוניים כדי לסייע בזיהוי מהיר של ערים ברשימה ולהדגיש את רוח האחדות של WorldWideWaves. הדגלים אינם רשמיים וקיימים רק באפליקציה; אין בכוונתנו לפגוע או להחליף סמלים לאומיים או תרבותיים. מאחר שאין דגלים רשמיים ליבשות גאוגרפיות, עיצבנו משלנו לצורך בהירות וכיף. אם אהבתם — מוזמנים להשתמש בהם.</string>
+  <!-- src_hash: 104a8d8f07c45b599b6334b84ee18267bbeb6bf9 -->
+  <string name="faq_question_3">מי עומד מאחורי WorldWideWaves?</string>
+  <!-- src_hash: 653341cdefc4c25db40fbc25b71bef88415c9981 -->
+  <string name="faq_answer_3">WorldWideWaves היא יוזמה פרטית לחלוטין. אין תאגיד, עמותה או ממשלה מאחוריה. היוצרים ביקשו להציע דרך בונה למי שתוהים כיצד ניתן לשפר את העולם ותנאי החיים — ניסיון לאחד מאמצים דמוקרטיים ופרוגרסיביים קיימים תחת דגל של שלום וא-פוליטיות.</string>
+  <!-- src_hash: a3d30fa9f03b7698352aa5f597c9dbd5561f1a09 -->
+  <string name="faq_question_4">האם זו יוזמה מסחרית?</string>
+  <!-- src_hash: ccbe6314334ff2c1fea231bec76785d234f63af1 -->
+  <string name="faq_answer_4">לא. האפליקציה חינמית לחלוטין. אף שבעיצובה ובפיתוחה הושקעו זמן וכסף של היוצרים, הם אינם מקבלים ממנה טובת הנאה כספית אישית.</string>
+  <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
+  <string name="faq_question_5">האם אפשר לתרום למאמץ?</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">כן, תמיד נשמח למתנדבים. קוד האפליקציה בקוד פתוח ב-GitHub, ותוכלו ליצור קשר עם היוצרים בכתובת worldwidewaves@proton.me (לא מובטח מענה). הדרך הטובה ביותר לעזור היא להפיץ את הבשורה: שתפו תמונות וסרטונים מהאירועים עם ההאשטגים המוצעים, פנו למשפיענים מקומיים, דברו על כך בקהילה שלכם, והכי חשוב — הצטרפו לגל!</string>
+  <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
+  <string name="country_usa">ארצות הברית</string>
+  <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
+  <string name="country_mexico">מקסיקו</string>
+  <!-- src_hash: f42c91df4387db39010bf2e2603977b335f9b975 -->
+  <string name="country_brazil">ברזיל</string>
+  <!-- src_hash: a387f35cbad3a173124a6246ca773a898e69e1b5 -->
+  <string name="country_argentina">ארגנטינה</string>
+  <!-- src_hash: ca91a5003da7eb5b872fb0b364e0bbc2a6f1fd2e -->
+  <string name="country_england">בריטניה</string>
+  <!-- src_hash: d9026eb51097cff1b3fc3fcd9e8aba1d1929f043 -->
+  <string name="country_france">צרפת</string>
+  <!-- src_hash: a17f60b5049736d4843e502a6e318dc466711d03 -->
+  <string name="country_germany">גרמניה</string>
+  <!-- src_hash: 33a5ed91e9171e15ef173a75e0699d65328d7aa5 -->
+  <string name="country_spain">ספרד</string>
+  <!-- src_hash: 120fdb0e3049b45c867483a4d7015c739eaeed08 -->
+  <string name="country_italy">איטליה</string>
+  <!-- src_hash: cdfdb08e6cc88f0a0a78c3d905a07aa0f8fb5646 -->
+  <string name="country_russia">רוסיה</string>
+  <!-- src_hash: 26a58ff258343cd596796cd8282b4a06a2b7e0f5 -->
+  <string name="country_turkey">טורקיה</string>
+  <!-- src_hash: 458d8485cd93e7d0401efcc4fe6ed8a89f7e7bd6 -->
+  <string name="country_egypt">מצרים</string>
+  <!-- src_hash: 01311487be8b43a94361dae18b08629cbf70ec39 -->
+  <string name="country_south_africa">דרום אפריקה</string>
+  <!-- src_hash: 7e3fb903a21f3ba655c14247358cb3f0d7324894 -->
+  <string name="country_kenya">קניה</string>
+  <!-- src_hash: d7ac6becb3bcd313b384801ee9267ad113b3b664 -->
+  <string name="country_nigeria">ניגריה</string>
+  <!-- src_hash: 58777cbcc7d3f5d967d507174ba8374605c0e0e7 -->
+  <string name="country_democratic_republic_of_the_congo">קונגו הדמוקרטית</string>
+  <!-- src_hash: 7bb3c8e088f44e5ab8d16769451e11c672950467 -->
+  <string name="country_united_arab_emirates">איחוד האמירויות</string>
+  <!-- src_hash: 7880c6ea515f741b08af081302b6127ef9be4a38 -->
+  <string name="country_india">הודו</string>
+  <!-- src_hash: a500dd2aa7b902441c7667e3649421e02d83cb16 -->
+  <string name="country_indonesia">אינדונזיה</string>
+  <!-- src_hash: 8faf0ff23a1c57fbc00a744a4625fbe379fea4b0 -->
+  <string name="country_thailand">תאילנד</string>
+  <!-- src_hash: 87bb5fa75b71f6c9a606266245c170c38d9eec9f -->
+  <string name="country_philippines">הפיליפינים</string>
+  <!-- src_hash: 0866cc3aea25a27d54f4d0504fea677e3537985e -->
+  <string name="country_japan">יפן</string>
+  <!-- src_hash: 860466f25249ce64ffac5dfc6586629e662b3127 -->
+  <string name="country_south_korea">דרום קוריאה</string>
+  <!-- src_hash: 9687f1b9f26edb1965c44028cb1c90209dcc5756 -->
+  <string name="country_china">סין</string>
+  <!-- src_hash: 0123666086a1cd7fcae82829a784484aacb18341 -->
+  <string name="country_australia">אוסטרליה</string>
+  <!-- src_hash: 4ce7e59de425721a6ecf1840df6535421bc76088 -->
+  <string name="country_canada">קנדה</string>
+  <!-- src_hash: b1e2468ac4b9e29399cc8096c1067e3ca6bf46d0 -->
+  <string name="country_peru">פרו</string>
+  <!-- src_hash: a91e67abe2969f243fa25f31e18ee4d03c4d7c00 -->
+  <string name="country_colombia">קולומביה</string>
+  <!-- src_hash: ccb303c1478f064511e84074ae1d0b4d41f1ca22 -->
+  <string name="country_chile">צ'ילה</string>
+  <!-- src_hash: 5548661bf24f9c4606866d5e25abd2c597020f49 -->
+  <string name="country_iran">איראן</string>
+  <!-- src_hash: a399742f300a4d376f85bbce66243925e17a0277 -->
+  <string name="country_pakistan">פקיסטן</string>
+  <!-- src_hash: 178cde36394391e892be0e4f74f15c8082a42a61 -->
+  <string name="community_north_america">אמריקה הצפונית</string>
+  <!-- src_hash: edb28d5fd5c6d6f437b643dfc64c37729b4c300e -->
+  <string name="community_south_america">אמריקה הדרומית</string>
+  <!-- src_hash: e12b0a1e6cbbc9c6d23a4e962c6aa89945302af7 -->
+  <string name="community_europe">אירופה</string>
+  <!-- src_hash: 4e850f45c3b2ccedeeec9a18a0ce6877cbc637a8 -->
+  <string name="community_africa">אפריקה</string>
+  <!-- src_hash: 3b2dbd940a8b20b51948a7c70817c871128accdf -->
+  <string name="community_middle_east">המזרח התיכון</string>
+  <!-- src_hash: 049962e3cb5711b5f09c4bde3ce8417d18c1b033 -->
+  <string name="community_asia">אסיה</string>
+  <!-- src_hash: bfef7fcf08f76dee9883e06a5048253177475b9c -->
+  <string name="community_oceania">אוקיאניה</string>
+  <!-- src_hash: b1d6a0ce13b43c50f782679a1870594783bf53e7 -->
+  <string name="event_location_new_york_usa">ניו יורק</string>
+  <!-- src_hash: 42678ff6006d0f92b7369ba0f5b8f701da4545ab -->
+  <string name="event_description_new_york_usa">הרגישו את פעימות "התפוח הגדול" ביום העצמאות, כשהגל השוקק עובר בטיימס סקוור, בסנטרל פארק ובין גורדי השחקים.</string>
+  <!-- src_hash: 0183a387f2b02fe237f069638633a67640e63129 -->
+  <string name="event_location_los_angeles_usa">לוס אנג'לס</string>
+  <!-- src_hash: 43af2ce5969229761ff340276e245a3f8ff70dc5 -->
+  <string name="event_description_los_angeles_usa">חוו את זוהר הוליווד, רוחות האוקיינוס והשיק הכוכבי של לוס אנג'לס בגל שמאיר את עיר המלאכים ביום העצמאות.</string>
+  <!-- src_hash: 56facf1ce70987ce4c5db4cd663e048e4fa3331a -->
+  <string name="event_location_mexico_city_mexico">מקסיקו סיטי</string>
+  <!-- src_hash: 79822377253995ddbdbcee86a2e73417b79dd19f -->
+  <string name="event_description_mexico_city_mexico">כבדו את יום העצמאות של מקסיקו בלב CDMX, שם הקסם הקולוניאלי פוגש אנרגיה מודרנית, וניגוני מריאצ'י מהדהדים בכיכרות ההיסטוריות.</string>
+  <!-- src_hash: 6a3af67e5b16a3001ab0fea8d64ee40616cb08b0 -->
+  <string name="event_location_sao_paulo_brazil">סאו פאולו</string>
+  <!-- src_hash: 1ec8dd382fb8d747669778a0408163d060df4ab3 -->
+  <string name="event_description_sao_paulo_brazil">תנו לקצב הסמבה ולרוח יום העצמאות לשאת אתכם לאורך שדרת פאוליסטה השוקקת והשכונות הצבעוניות של המטרופולין הקוסמופוליטי הזה.</string>
+  <!-- src_hash: 4c7ea8f4eb390e7dea7a0840f36677712041ff86 -->
+  <string name="event_location_buenos_aires_argentina">בואנוס איירס</string>
+  <!-- src_hash: 15e68b4bf3c3f01ce266cd27fadd9d5cae9d86c2 -->
+  <string name="event_description_buenos_aires_argentina">חגגו את עצמאות ארגנטינה לצלילי טנגו, בשדרות רחבות בסגנון אירופי, וברוחם התוססת של תושבי העיר לאורך ריו דה לה פלטה.</string>
+  <!-- src_hash: e01153d790bec96b82a71d34fc7e4d062da5c2bb -->
+  <string name="event_location_london_england">לונדון</string>
+  <!-- src_hash: e9a4f3ee860dd68a4adb4f0e7a3e5c5181cba039 -->
+  <string name="event_description_london_england">שמחו ברב-תרבותיות של קרנבל נוטינג היל כשהגל רוקד ברחובות ההיסטוריים, ליד אוטובוסים דו-קומתיים ולאורך התמזה הנצחי.</string>
+  <!-- src_hash: c2c832e4953ec104969891a521832e831335becb -->
+  <string name="event_location_paris_france">פריז</string>
+  <!-- src_hash: c190976c37f6ca1757d2903328be9dc2fdd26aaf -->
+  <string name="event_description_paris_france">ביום הבסטיליה הצטרפו לגל שנע ממגדל אייפל לשאנז-אליזה, וחוגגים את הרומנטיקה והיצירתיות של עיר האורות.</string>
+  <!-- src_hash: 323da93d2967ec06961d6ead39228e669c6dad06 -->
+  <string name="event_location_berlin_germany">ברלין</string>
+  <!-- src_hash: 07d2b86e5280ae406c1e8bcfcb2aa6068888c3fd -->
+  <string name="event_description_berlin_germany">הרגישו את רוח האחדות ביום איחוד גרמניה כשהגל עובר בשער ברנדנבורג, לצד קירות מכוסי גרפיטי והאדריכלות המודרנית של הבירה התוססת.</string>
+  <!-- src_hash: 7aa669c11145403c03e255dcc5561ba13289f1c4 -->
+  <string name="event_location_madrid_spain">מדריד</string>
+  <!-- src_hash: 75cde86a1f93104a93a9856d2d69284ea1b76bfc -->
+  <string name="event_description_madrid_spain">ביום הלאומי של ספרד, תנו לגל להצית את ברי הטאפאס התוססים של מדריד, את השדרות המפוארות ואת המורשת האמנותית של הפראדו.</string>
+  <!-- src_hash: 473bbc20b4627e26035dbd0075b78757aa7e011a -->
+  <string name="event_location_rome_italy">רומא</string>
+  <!-- src_hash: 8344c33b9d4211d333d82ae4df73391e50166f31 -->
+  <string name="event_description_rome_italy">בפרגוסטו, זרמו עם הרומאים והמבקרים דרך כיכרות מלאות מוזיקה, מזרקות ואנרגיית חג שממלאת את העיר הנצחית תחת שמש הקיץ.</string>
+  <!-- src_hash: 85393f4b1881e9860bcb6a7c85e36121c6652149 -->
+  <string name="event_location_moscow_russia">מוסקבה</string>
+  <!-- src_hash: 394d31a731900db3ce198b7442145ed80db5fccc -->
+  <string name="event_description_moscow_russia">היספגו בהדר כיכר האדומה והקרמלין ביום רוסיה, כשהגל מהדהד את ההיסטוריה האימפריאלית העשירה של העיר ואת הדופק הקוסמופוליטי המודרני.</string>
+  <!-- src_hash: a1b6424130566493b0436160636e4ef20de7d262 -->
+  <string name="event_location_istanbul_turkey">איסטנבול</string>
+  <!-- src_hash: 2af3aee0796573ad58345ddac2cdefc6aa84b6c3 -->
+  <string name="event_description_istanbul_turkey">חגגו את יום הרפובליקה בגל שגולש לצד הבוספורוס, מסגדים היסטוריים וכיכרות מודרניות, כשאיסטנבול מתמלאת בקונצרטים, דגלים וזיקוקים.</string>
+  <!-- src_hash: f93e958e426df2c5a99036400cac7b424697a135 -->
+  <string name="event_location_cairo_egypt">קהיר</string>
+  <!-- src_hash: 619755eec961a411a9fff3ec4bf60284405853a3 -->
+  <string name="event_description_cairo_egypt">חגגו את עיד אל-פיטר בקהיר כשהרחובות והשוקים מתעוררים לאורות חג, ניחוחות מתוקים ומשפחות שמחות המציינות את סיום הרמדאן בגל מאחד.</string>
+  <!-- src_hash: cf8607732b8cf3b24587abdc17b1f6d527c1c6c9 -->
+  <string name="event_location_johannesburg_south_africa">יוהנסבורג</string>
+  <!-- src_hash: 426f457377625332b45f382914b5ed7df703f1ad -->
+  <string name="event_description_johannesburg_south_africa">ביום החירות, הצטרפו לגל דרך "עיר הזהב", שבה גורדי שחקים מודרניים נפגשים עם מורשת עשירה של חוסן וגיוון תרבותי.</string>
+  <!-- src_hash: 2a11692e8bccbe953ed08123ebe2d8f4aa049dff -->
+  <string name="event_location_nairobi_kenya">ניירובי</string>
+  <!-- src_hash: f6fc15be45043ccfd986a0ccc93c6ffef54b6071 -->
+  <string name="event_description_nairobi_kenya">חגגו את יום מדרקה בין השווקים התוססים והרחובות ההומים, במקום שבו החיים האורבניים נפגשים עם השער לחיות הבר המדהימות של קניה.</string>
+  <!-- src_hash: 38e2e8d08d1cf76f53f999cfa5df554b936f316a -->
+  <string name="event_location_lagos_nigeria">לאגוס</string>
+  <!-- src_hash: ed5ca09eebae0f1291bea13aacca68a1cfe2dd9e -->
+  <string name="event_description_lagos_nigeria">אמצו את הקצבים האנרגטיים של אפרוביטס ביום העצמאות של ניגריה, כשהגל שוטף את העיר המאוכלסת ביותר באפריקה ושווקיה התוססים.</string>
+  <!-- src_hash: a8d53694128e28233bd56ef35203e9bea7e9ff7f -->
+  <string name="event_location_kinshasa_democratic_republic_of_the_congo">קינשаса</string>
+  <!-- src_hash: 9143be5a3419974cbf151379ce4af2df6a00e716 -->
+  <string name="event_description_kinshasa_democratic_republic_of_the_congo">ביום העצמאות של קונגו הדמוקרטית, הצטרפו לגל המתפשט בבירה החיה לאורך נהר הקונגו, מלא במוזיקה וגאווה תרבותית.</string>
+  <!-- src_hash: 3459225b9113b0df31ec73dc91f52a5d74e6566a -->
+  <string name="event_location_dubai_united_arab_emirates">דובאי</string>
+  <!-- src_hash: 05789ee7f65f6d0276dbfddc63747dbbadb29b97 -->
+  <string name="event_description_dubai_united_arab_emirates">חגגו את היום הלאומי של איחוד האמירויות כשסביבכם גורדי שחקים עתידניים, נופי מדבר והדר קוסמופוליטי של מטרופולין מודרני מוביל.</string>
+  <!-- src_hash: 2d5e2f40153001268853a8c496a5e4783d2b2941 -->
+  <string name="event_location_mumbai_india">מומבאי</string>
+  <!-- src_hash: da40290d4d57dcf879738c2bc6a86a80c0c20ba9 -->
+  <string name="event_description_mumbai_india">ציינו את עצמאות הודו עם רוח בוליווד, אדריכלות מתקופת הקולוניאליזם וחופים נושקי מונסון לאורך הים הערבי.</string>
+  <!-- src_hash: 22df2e3b7980e6c86ebc54b6acd6bd4eaa9a1f77 -->
+  <string name="event_location_delhi_india">דלהי</string>
+  <!-- src_hash: ca3890c647fdc00393ff030b39142cebc9e49d53 -->
+  <string name="event_description_delhi_india">הרגישו את ההתלהבות הפטריוטית ביום העצמאות כשהגל עובר בשדרות מתקופת הקולוניאליזם, מבצרי מוגול ודופק הבירה של הודו.</string>
+  <!-- src_hash: 26e787a4cb4407a4c5ded5de3907699de9b975c5 -->
+  <string name="event_location_bangalore_india">בנגלור</string>
+  <!-- src_hash: e38a5a0b281aca12b0faf23cde14155a0ffb6671 -->
+  <string name="event_description_bangalore_india">חגגו חירות ב"עמק הסיליקון" של הודו, שם מקדשים בני מאות שנים נפגשים עם פארקי הייטק וקהל קוסמופוליטי משגשג.</string>
+  <!-- src_hash: ca7354fab918f0753418d6c2edf99420c046e310 -->
+  <string name="event_location_jakarta_indonesia">ג'קרטה</string>
+  <!-- src_hash: 327889af85fe18aa8d30f9372855aac1aad954ba -->
+  <string name="event_description_jakarta_indonesia">ציינו את יום העצמאות של אינדונזיה בעיר של ניגודים — בין גורדי שחקים נוצצים לשווקים עמוסים ואתרי מורשת תרבותית.</string>
+  <!-- src_hash: 8bdc562f95e2914a5c4ef3cba58156edf9ee1a98 -->
+  <string name="event_location_bangkok_thailand">בנגקוק</string>
+  <!-- src_hash: 7d1fd74c046dadb03ba1adc960851e3f4b4997fb -->
+  <string name="event_description_bangkok_thailand">חגגו את יום האב הלאומי של תאילנד לכבוד המלך בהומיבול בעיר המלאכים, שבה מקדשים מוזהבים, שווקים צפים ואוכל רחוב תוסס מעוררים את החושים.</string>
+  <!-- src_hash: fdb5cf1249608189aafd4e5907f6bd27119cf27d -->
+  <string name="event_location_manila_philippines">מנילה</string>
+  <!-- src_hash: 147ea4aef3532bc65c5f998fa9fbe2ff433e2c2e -->
+  <string name="event_description_manila_philippines">חגגו את יום העצמאות של הפיליפינים בעיר שבה ג'יפנים עוברים בין כנסיות ספרדיות, שווקים תוססים וגורדי שחקים מודרניים.</string>
+  <!-- src_hash: da249b17e71037526a87546e18ff38360cbb413e -->
+  <string name="event_location_tokyo_japan">טוקיו</string>
+  <!-- src_hash: fcb703ed443ce066d0bc21d25c1d882c8a2b4bac -->
+  <string name="event_description_tokyo_japan">הצטרפו למיליונים לאורך נהר סומידה כשהשמים מתמלאים צבע, ואווירת פסטיבלי הקיץ של טוקיו יוצרת במה מושלמת לגל מסנוור.</string>
+  <!-- src_hash: 34c841fe3e44c768ad1c8d1e5ca7f4437554fe4d -->
+  <string name="event_location_seoul_south_korea">סיאול</string>
+  <!-- src_hash: ac3af2ad156f249c238b09850dfacc6c70e65478 -->
+  <string name="event_description_seoul_south_korea">היסחפו בחגיגות גוואנבוקג'אול כשהגל חולף על פני ארמונות מלכותיים, מוקדי K-pop וקו רקיע שמשלב מסורת עם חדשנות מודרנית.</string>
+  <!-- src_hash: 004df8371ec1daca7aa8aea0bbfa42977564be8a -->
+  <string name="event_location_beijing_china">בייג'ינג</string>
+  <!-- src_hash: e8c259efff5106660d74ceb72ddc5f9d7a774baa -->
+  <string name="event_description_beijing_china">ביום העבודה, רכבו על גל בפארקים ושדרות של בייג'ינג, שם מיליונים מטיילים, עושים פיקניק ונהנים מרוח האביב החגיגית.</string>
+  <!-- src_hash: 69be7ad8f4cd37b8973339eabd024b9a266ed6c3 -->
+  <string name="event_location_shanghai_china">שנגחאי</string>
+  <!-- src_hash: 9b1f3226b8951b5528670b38757253ce127f2cec -->
+  <string name="event_description_shanghai_china">תנו לגל לשטוף את הבונד ורחוב ננג'ינג בזמן ששנגחאי רועשת ממשפחות, מוזיקה ואנרגיה קוסמופוליטית של חגיגות יום העבודה.</string>
+  <!-- src_hash: f3fee4803aeb652e812ed7042b9587b5e3402641 -->
+  <string name="event_location_hong_kong_china">הונג קונג</string>
+  <!-- src_hash: 7e4be8e2389ab60a1bbcdc1096897e0158adf125 -->
+  <string name="event_description_hong_kong_china">הרגישו את המומנטום של "שבוע הזהב" בהונג קונג, כשנמל ויקטוריה, השווקים והרחובות המוארים בניאון מתמלאים באנשים החוגגים יחד את יום העבודה.</string>
+  <!-- src_hash: 86ee12c3a5c493223d0ef9c9f93393e11dd82aa2 -->
+  <string name="event_location_sydney_australia">סידני</string>
+  <!-- src_hash: 99695922faf34a40043616ddc22473266b5b12f1 -->
+  <string name="event_description_sydney_australia">רכבו על הגל במצעד מרדי גרא של סידני, כשרחוב אוקספורד מתפוצץ בצבעי קשת, מייצגים מסנוורים ורוח קרנבל המאחדת מאות אלפים.</string>
+  <!-- src_hash: 6bc6960b70c59aee12b53beaf2bd70beaa404cff -->
+  <string name="event_location_melbourne_australia">מלבורן</string>
+  <!-- src_hash: e92da23acc0158ff1da0cd2ee212ebb84193e86f -->
+  <string name="event_description_melbourne_australia">ביום גביע מלבורן, רכבו על גל דרך בירת התרבות כשהעיר מלאה במצעדים, קהלים תוססים בלבוש אלגנטי ורוח חגיגית של 'המרוץ שעוצר אומה'.</string>
+  <!-- src_hash: d151d5a597f57fd4f351a01d63446d060c0ceb9e -->
+  <string name="event_location_toronto_canada">טורונטו</string>
+  <!-- src_hash: 5f5e7e46b2dc5ec0b9f8e47ca15dfaa779a21422 -->
+  <string name="event_description_toronto_canada">ביום קנדה, תנו לגל לשטוף אתכם בים של אדום ולבן כשהוא עובר ליד מגדל CN, בשכונות רב-תרבותיות ולאורך חופי אגם אונטריו.</string>
+  <!-- src_hash: 013ba22f06079217dcb2fd35c765b984d9ecdd38 -->
+  <string name="event_location_vancouver_canada">ונקובר</string>
+  <!-- src_hash: 0b95ec74b995fc8c4015fc965a32de2ec8d50a4a -->
+  <string name="event_description_vancouver_canada">חגגו את יום קנדה לאורך חוף האוקיינוס השקט, בין הים להרים, דרך הירוק של סטנלי פארק והקסם הקוסמופוליטי של מרכז העיר.</string>
+  <!-- src_hash: 14186087494f444f6657c578ee7c24240c5c2cf9 -->
+  <string name="event_location_chicago_usa">שיקגו</string>
+  <!-- src_hash: db60f18f890e62205a7cc6217bda92bb0442560e -->
+  <string name="event_description_chicago_usa">ביום העצמאות, נהנו מפיצות דיפ-דיש ומהפלאים האדריכליים לאורך אגם מישיגן כשהגל מתגלגל בעיר הרוחות.</string>
+  <!-- src_hash: bfdf4ac39bd6956e98ea5595225a916600e354ae -->
+  <string name="event_location_san_francisco_usa">סן פרנסיסקו</string>
+  <!-- src_hash: f0f4d3190b9bf4915a37d48467d3d14477b33657 -->
+  <string name="event_description_san_francisco_usa">הרגישו את רוח החופש תחת הקשת האיקונית של גשר שער הזהב, כשגל יום העצמאות הזה עובר בין גבעות, רכבלים ושכונות מגוונות.</string>
+  <!-- src_hash: 545ef7eec1e804d870feebbefc6b64bdff926c47 -->
+  <string name="event_location_lima_peru">לימה</string>
+  <!-- src_hash: 7fe60feaa2702f30b0a875e2a08bc8985c4a83d4 -->
+  <string name="event_description_lima_peru">ביום העצמאות של פרו, צאו בין כיכרות קולוניאליות, אתרים פרה-אינקאיים וניחוחות מגרי תיאבון של המטבח הפרואני עטור השבחים.</string>
+  <!-- src_hash: f633c3d062d2a03ae44bdf50dc1e0e5917be4bca -->
+  <string name="event_location_bogota_colombia">בוגוטה</string>
+  <!-- src_hash: dad81819a7a06d6580a5290d2317d4a1d71a3716 -->
+  <string name="event_description_bogota_colombia">חגגו את עצמאות קולומביה בין אמנות רחוב, נופי הרים והקצב התרבותי של שכונות ספוגות סלסה בבירת האנדים.</string>
+  <!-- src_hash: 8f23817b88b6c7c829224675bf86dd48b819df78 -->
+  <string name="event_location_santiago_chile">סנטיאגו</string>
+  <!-- src_hash: c9b12c1112326472df20948aba9881a5f490a975 -->
+  <string name="event_description_santiago_chile">הרגישו את הרוח הפטריוטית ביום העצמאות של צ'ילה כשהגל מתפתל בין רכס האנדים, חזיתות קולוניאליות ומגדלי זכוכית מודרניים.</string>
+  <!-- src_hash: 2a82b2b0c7bbeb017611f0d6474e1f0fec77d370 -->
+  <string name="event_location_tehran_iran">טהראן</string>
+  <!-- src_hash: 21ce84bef8453d7e061347b9e648d70e058bf053 -->
+  <string name="event_description_tehran_iran">הצטרפו ל-Sizdah Bedar של טהראן — היום שבו משפחות ממלאות פארקים וגנים לפיקניקים, צחוק והתחדשות — כשהגל שוטף את המפגשים החוציים התוססים של העיר.</string>
+  <!-- src_hash: 09fa05d855366b5ba7323c8e0712e9b1bbd84b65 -->
+  <string name="event_location_karachi_pakistan">קרצ'י</string>
+  <!-- src_hash: 12e757b69d6740ec63693370a644e678923c3fb9 -->
+  <string name="event_description_karachi_pakistan">חגגו את יום העצמאות של פקיסטן לאורך הים הערבי, דרך בזארים הומים, היסטוריה עשירה ואנרגיה דינמית של העיר הגדולה במדינה.</string>
+  <!-- src_hash: 97f505674fb4c4db8e23679c87e0569ad0ce7d08 -->
+  <string name="choreography_warming_seq_1">הרימו ידיים!</string>
+  <!-- src_hash: 8fafd8746e6cc347155e93114742fed80cadba13 -->
+  <string name="choreography_warming_seq_2">מחאו כפיים שמאלה וימינה!</string>
+  <!-- src_hash: b5db6090f1b3133b60b0d710a7e535c4a11a723f -->
+  <string name="choreography_warming_seq_3">סיבובי זרוע לאחור!</string>
+  <!-- src_hash: 25143a95934a6722c1321e784f00ede0b15d2be2 -->
+  <string name="choreography_warming_seq_4">רדו ועלו!</string>
+  <!-- src_hash: 57eae9ad7702af73a64e731d229adbe1359a4456 -->
+  <string name="choreography_warming_seq_5">הראו את הגל!</string>
+  <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
+  <string name="choreography_warming_seq_6">שילבו ידיים!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">התכוננו לגל!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">עשו גל עכשיו!</string>
 </resources>
