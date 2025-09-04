@@ -88,6 +88,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
@@ -375,30 +376,43 @@ class AndroidEventMap(
         
         scope.launch {
             withContext(Dispatchers.IO) { // IO actions
-                event.map.getStyleUri()?.let {
-                    val uri = Uri.fromFile(File(it))
-                    scope.launch { // Required -- UI actions
-                        mapLibreView.getMapAsync { map ->
-                            // Save reference so we can refresh location component later
-                            currentMap = map
-                            // Setup Map
-                            this@AndroidEventMap.setupMap(
-                                map, scope,uri.toString(),
-                                onMapLoaded = {
-                                    // Initialize location provider if we have permission
-                                    if (hasLocationPermission) {
-                                        setupMapLocationComponent(map, context)
-                                    }
-                                    onMapLoaded()
-                                },
-                                onMapClick = { _, _ ->
-                                    onMapClick?.invoke()
-                                }
-                            )
-                        }
+                var stylePath: String? = null
+                repeat(10) { attempt ->
+                    val candidate = event.map.getStyleUri()
+                    if (candidate != null && File(candidate).exists()) {
+                        stylePath = candidate
+                        return@repeat
                     }
-                } ?: run {
+                    // Give Play-Core/asset manager some time to expose freshly
+                    // installed split assets before next try.
+                    delay(200)
+                }
+
+                if (stylePath == null) {
                     onMapError()
+                    return@withContext
+                }
+
+                val uri = Uri.fromFile(File(stylePath!!))
+                scope.launch { // UI actions
+                    mapLibreView.getMapAsync { map ->
+                        // Save reference so we can refresh location component later
+                        currentMap = map
+                        // Setup Map
+                        this@AndroidEventMap.setupMap(
+                            map,
+                            scope,
+                            uri.toString(),
+                            onMapLoaded = {
+                                // Initialize location component if permission granted
+                                if (hasLocationPermission) {
+                                    setupMapLocationComponent(map, context)
+                                }
+                                onMapLoaded()
+                            },
+                            onMapClick = { _, _ -> onMapClick?.invoke() }
+                        )
+                    }
                 }
             }
         }
@@ -527,6 +541,10 @@ class AndroidEventMap(
             rotateGesturesEnabled(false)
             tiltGesturesEnabled(false)
         }
+
+        // Ensure MapLibre initialises with a split-aware AssetManager so freshly
+        // installed dynamic-feature resources (mbtiles, sprites, …) are visible
+        SplitCompat.install(context)
 
         MapLibre.getInstance(context) // Required by the API
 
