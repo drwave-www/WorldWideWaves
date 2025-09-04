@@ -77,7 +77,7 @@ android {
                 "proguard-rules.pro"
             )
             ndk {
-                debugSymbolLevel = com.android.build.api.dsl.DebugSymbolLevel.SYMBOL_TABLE
+                debugSymbolLevel = "SYMBOL_TABLE"
             }
         }
     }
