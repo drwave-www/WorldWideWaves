@@ -64,6 +64,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.DownloadProgressIndicator
 import com.worldwidewaves.compose.ErrorMessage
 import com.worldwidewaves.compose.LoadingIndicator
@@ -157,6 +158,8 @@ class AndroidEventMap(
         var hasLocationPermission by remember { mutableStateOf(false) }
         var isMapAvailable by remember { mutableStateOf(false) }
         var isMapDownloading by remember { mutableStateOf(false) }
+        // Guard to avoid auto-re-download after the user explicitly cancels
+        var userCanceled by remember { mutableStateOf(false) }
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
@@ -231,7 +234,7 @@ class AndroidEventMap(
                     },
                     onMapError = { mapError = true }
                 )
-            } else if (autoMapDownload) {
+            } else if (autoMapDownload && !userCanceled) {
                 mapViewModel.downloadMap(event.id)
             }
         }
@@ -276,7 +279,10 @@ class AndroidEventMap(
                                         DownloadProgressIndicator(
                                             progress = state.progress,
                                             message = stringResource(MokoRes.strings.map_downloading),
-                                            onCancel = { mapViewModel.cancelDownload() }
+                                            onCancel = {
+                                                userCanceled = true
+                                                mapViewModel.cancelDownload()
+                                            }
                                         )
                                     }
                                     is MapFeatureState.Pending -> {
@@ -287,6 +293,7 @@ class AndroidEventMap(
                                             message = "${stringResource(MokoRes.strings.map_retrying_download)} (${state.attempt}/${state.maxAttempts})...",
                                             onCancel = {
                                                 isMapDownloading = false
+                                                userCanceled = true
                                                 mapViewModel.cancelDownload()
                                             }
                                         )
@@ -323,6 +330,7 @@ class AndroidEventMap(
                                 // Immediately reflect downloading state for better UX
                                 mapError = false
                                 isMapDownloading = true
+                            userCanceled = false
                                 mapViewModel.downloadMap(event.id)
                             },
                             modifier = Modifier.size(width = 200.dp, height = 60.dp),
