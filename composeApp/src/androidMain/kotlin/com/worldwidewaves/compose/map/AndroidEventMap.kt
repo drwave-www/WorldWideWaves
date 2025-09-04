@@ -75,8 +75,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
-import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.map.WWWLocationProvider
+import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -86,9 +86,9 @@ import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
@@ -206,6 +206,10 @@ class AndroidEventMap(
                     isMapDownloading = false
                     isMapAvailable = true
                     mapError = false
+                }
+                is MapFeatureState.Installing -> {
+                    Log.d(TAG, "Map installing: ${event.id}")
+                    isMapDownloading = true
                 }
                 is MapFeatureState.Failed -> {
                     val errorCode = (mapFeatureState as MapFeatureState.Failed).errorCode
@@ -342,6 +346,17 @@ class AndroidEventMap(
                                 contentAlignment = Alignment.Center
                             ) {
                                 when (val state = mapFeatureState) {
+                                    is MapFeatureState.Installing -> {
+                                        Log.d(TAG, "Showing installing indicator")
+                                        DownloadProgressIndicator(
+                                            message = "Installing..",
+                                            onCancel = {
+                                                Log.i(TAG, "User canceled install: ${event.id}")
+                                                userCanceled = true
+                                                mapViewModel.cancelDownload()
+                                            }
+                                        )
+                                    }
                                     is MapFeatureState.Downloading -> {
                                         Log.d(TAG, "Showing download progress: ${state.progress}%")
                                         DownloadProgressIndicator(
