@@ -107,6 +107,8 @@
     <string name="wave_end_time">End time</string>
     <string name="wave_total_time">Total time</string>
     <string name="wave_progression">Progression</string>
+    <!-- newly added unit string for speed -->
+    <string name="speed_unit_mps">m/s</string>
     <string name="wave_warming">Warming..</string>
     <string name="test_simulation">Test Simulation</string>
     <string name="test_simulation_started">Simulation Started</string>

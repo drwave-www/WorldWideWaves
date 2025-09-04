@@ -24,6 +24,7 @@ package com.worldwidewaves.shared
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
+import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -91,6 +92,11 @@ class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvi
 }
 
 // ---------------------------
+
+expect fun localizeString(resource: StringResource): String
+
+// ---------------------------
+
 expect suspend fun readGeoJson(eventId: String): String?
 expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
 
