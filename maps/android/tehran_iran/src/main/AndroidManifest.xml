@@ -4,14 +4,12 @@
 
     <dist:module
         dist:instant="false"
-        dist:hasCode="false"
         dist:title="@string/map_title_tehran_iran">
         <dist:delivery>
             <dist:on-demand />
         </dist:delivery>
         <dist:fusing dist:include="false" />
     </dist:module>
-
-    <!-- Resource-only dynamic-feature: explicitly declare no code -->
+    <!-- Resource-only dynamic-feature: ensure Play knows no code is packaged -->
     <application android:hasCode="false" />
 </manifest>

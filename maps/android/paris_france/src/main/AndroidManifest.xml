@@ -10,7 +10,6 @@
         </dist:delivery>
         <dist:fusing dist:include="false" />
     </dist:module>
-
-    <!-- Resource-only dynamic-feature: explicitly declare no code -->
+    <!-- Resource-only dynamic-feature: ensure Play knows no code is packaged -->
     <application android:hasCode="false" />
 </manifest>
