@@ -2,7 +2,7 @@
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -25,7 +25,7 @@ import Shared
 // View Model for AboutView
 class AboutViewModel: ObservableObject {
     @Published var appVersion: String = "1.0.0"
-    @Published var appDescription: String = "WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries."
+    @Published var appDescription: String = "WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries, culminating in a global wave."
     
     // Placeholder for future implementation
     func loadAboutInformation() {

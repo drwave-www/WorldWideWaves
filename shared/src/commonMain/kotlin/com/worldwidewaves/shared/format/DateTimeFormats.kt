@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.format
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -28,14 +28,8 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 expect object DateTimeFormats {
     // Localized day + month only (no year). May not be zero-padded depending on locale.
-    fun dayMonth(
-        instant: Instant,
-        timeZone: TimeZone,
-    ): String
+    fun dayMonth(instant: Instant, timeZone: TimeZone): String
 
     // Localized short time (hours:minutes, 12/24h per platform conventions/preferences).
-    fun timeShort(
-        instant: Instant,
-        timeZone: TimeZone,
-    ): String
+    fun timeShort(instant: Instant, timeZone: TimeZone): String
 }

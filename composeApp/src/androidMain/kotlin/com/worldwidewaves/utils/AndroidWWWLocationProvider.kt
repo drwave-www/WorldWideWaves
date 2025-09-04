@@ -4,7 +4,7 @@ package com.worldwidewaves.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -40,11 +40,10 @@ import org.maplibre.android.location.engine.LocationEngineResult
 /**
  * Android-specific location provider
  */
-class AndroidWWWLocationProvider :
-    KoinComponent,
-    WWWLocationProvider {
+class AndroidWWWLocationProvider : KoinComponent, WWWLocationProvider {
+
     val locationEngine: WWWSimulationEnabledLocationEngine by KoinJavaComponent.inject(
-        WWWSimulationEnabledLocationEngine::class.java,
+        WWWSimulationEnabledLocationEngine::class.java
     )
 
     private val _currentLocation = MutableStateFlow<Position?>(null)
@@ -61,26 +60,25 @@ class AndroidWWWLocationProvider :
         proxyLocationEngine = LocationEngineProxy(locationEngine)
 
         // Create callback
-        locationCallback =
-            object : LocationEngineCallback<LocationEngineResult> {
-                override fun onSuccess(result: LocationEngineResult?) {
-                    result?.lastLocation?.let { location ->
-                        val position = Position(location.latitude, location.longitude)
-                        _currentLocation.value = position
-                        onLocationUpdate(position)
-                    }
-                }
-
-                override fun onFailure(exception: Exception) {
-                    Log.e("EventMap", "Failed to get location: $exception")
+        locationCallback = object : LocationEngineCallback<LocationEngineResult> {
+            override fun onSuccess(result: LocationEngineResult?) {
+                result?.lastLocation?.let { location ->
+                    val position = Position(location.latitude, location.longitude)
+                    _currentLocation.value = position
+                    onLocationUpdate(position)
                 }
             }
+
+            override fun onFailure(exception: Exception) {
+                Log.e("EventMap", "Failed to get location: $exception")
+            }
+        }
 
         // Request location updates
         proxyLocationEngine?.requestLocationUpdates(
             buildLocationEngineRequest(),
             locationCallback!!,
-            Looper.getMainLooper(),
+            Looper.getMainLooper()
         )
     }
 
@@ -93,8 +91,7 @@ class AndroidWWWLocationProvider :
     }
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest
-            .Builder(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
+        LocationEngineRequest.Builder(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
             .setFastestInterval(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()

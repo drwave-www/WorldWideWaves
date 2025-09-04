@@ -1,6 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
@@ -9,7 +8,6 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.localizeString
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -28,10 +26,10 @@ import kotlin.time.toDuration
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,29 +46,28 @@ import kotlin.time.toDuration
 @OptIn(ExperimentalTime::class)
 @Serializable
 /**
- * Base abstraction for the "wave" part of a World-Wide-Waves event.
+ * Base abstraction for the “wave” part of a World-Wide-Waves event.
  *
  * A wave is the dynamic entity that travels across the event area and drives most
  * of the real-time behaviour exposed to the UI:
- * • Time helpers – duration, start-/end-time, progression.
- * • Spatial helpers – closest longitude, user-hit prediction, polygons split.
+ * • Time helpers – duration, start-/end-time, progression.  
+ * • Spatial helpers – closest longitude, user-hit prediction, polygons split.  
  * • Choreography hooks – warming / waiting / hit sequences via
- *   [ChoreographyManager].
+ *   [ChoreographyManager].  
  *
  * Concrete subclasses (e.g. linear, deep, split) implement the geography-specific
  * maths while this class provides common utilities and caching helpers.
  */
-abstract class WWWEventWave :
-    KoinComponent,
-    DataValidator {
+abstract class WWWEventWave : KoinComponent, DataValidator {
+
     enum class Direction { WEST, EAST }
 
     @OptIn(ExperimentalTime::class)
     /**
      * Immutable snapshot of the wave geometry at a given moment.
      *
-     *  • *traversedPolygons* : part of the area already crossed by the wave
-     *  • *remainingPolygons* : part still to come
+     *  • *traversedPolygons* : part of the area already crossed by the wave  
+     *  • *remainingPolygons* : part still to come  
      *
      *  UI layers use this to render previously-hit polygons with a different
      *  style while keeping the rest untouched.
@@ -78,7 +75,7 @@ abstract class WWWEventWave :
     data class WavePolygons(
         val timestamp: Instant,
         val traversedPolygons: Area, // Maps of cutId to list of polygons
-        val remainingPolygons: Area,
+        val remainingPolygons: Area
     )
 
     // ---------------------------
@@ -97,21 +94,15 @@ abstract class WWWEventWave :
     // ---------------------------
 
     @Transient private var _event: IWWWEvent? = null
-
     @Transient protected var positionRequester: (() -> Position?)? = null
 
     // ---------------------------
 
     abstract suspend fun getWavePolygons(): WavePolygons?
-
     abstract suspend fun getWaveDuration(): Duration
-
     abstract suspend fun hasUserBeenHitInCurrentPosition(): Boolean
-
     abstract suspend fun userHitDateTime(): Instant?
-
     abstract suspend fun closestWaveLongitude(latitude: Double): Double
-
     abstract suspend fun userPositionToWaveRatio(): Double?
 
     // ---------------------------
@@ -127,16 +118,13 @@ abstract class WWWEventWave :
         return this as T
     }
 
-    fun setPositionRequester(positionRequester: () -> Position?) =
-        apply {
-            this.positionRequester = positionRequester
-        }
+    fun setPositionRequester(positionRequester: () -> Position?) = apply {
+        this.positionRequester = positionRequester
+    }
 
     fun getUserPosition(): Position? {
-        var platform: WWWPlatform? = null
-        try {
-            platform = get()
-        } catch (_: Exception) {
+        var platform : WWWPlatform? = null
+        try { platform = get() } catch (_: Exception) {
             Napier.w("${WWWEventWave::class.simpleName}: Platform not found, simulation disabled")
         }
         return if (platform?.isOnSimulation() == true) {
@@ -170,40 +158,40 @@ abstract class WWWEventWave :
      * of the total event duration.
      *
      */
-    suspend fun getProgression(): Double =
-        when {
-            event.isDone() -> 100.0
-            !event.isRunning() -> 0.0
-            else -> {
-                val elapsedTime = clock.now().epochSeconds - event.getWaveStartDateTime().epochSeconds
-                val totalTime = getWaveDuration().inWholeSeconds
-                (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
-            }
+    suspend fun getProgression(): Double = when {
+        event.isDone() -> 100.0
+        !event.isRunning() -> 0.0
+        else -> {
+            val elapsedTime = clock.now().epochSeconds - event.getWaveStartDateTime().epochSeconds
+            val totalTime = getWaveDuration().inWholeSeconds
+            (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
         }
+    }
 
     fun getLiteralFromProgression(progression: Double): String =
         if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
 
-    fun getLiteralSpeed(): String = "$speed ${localizeString(MokoRes.strings.speed_unit_mps)}"
+    fun getLiteralSpeed(): String = "$speed m/s"
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? =
-        mutableListOf<String>()
-            .apply {
-                when {
-                    speed <= 0 || speed >= 20 ->
-                        add("Speed must be greater than 0 and less than 20")
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            speed <= 0 || speed >= 20 ->
+                add("Speed must be greater than 0 and less than 20")
 
-                    else -> { /* No validation errors */ }
-                }
-            }.takeIf { it.isNotEmpty() }
-            ?.map { "${WWWEventWave::class.simpleName}: $it" }
+            else -> { /* No validation errors */ }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventWave::class.simpleName}: $it" }
 
     // ---------------------------
 
-    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getWaitingSequenceImmediate()
+    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getWaitingSequence()
+    }
 
-    // TIMING-CRITICAL: Hit sequence for precise wave synchronization
-    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getHitSequenceImmediate()
+    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? {
+        return choreographyManager.getHitSequence()
+    }
+
 }

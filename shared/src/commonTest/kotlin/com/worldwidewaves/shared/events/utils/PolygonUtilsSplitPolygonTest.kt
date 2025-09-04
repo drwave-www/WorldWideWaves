@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -33,61 +33,40 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PolygonUtilsSplitPolygonTest {
+
     init {
-        Napier.base(
-            object : Antilog() {
-                override fun performLog(
-                    priority: LogLevel,
-                    tag: String?,
-                    throwable: Throwable?,
-                    message: String?,
-                ) {
-                    println(message)
-                }
-            },
-        )
+        Napier.base(object : Antilog() {
+            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                println(message)
+            }
+        })
     }
 
     @Test
-    fun testSplitPolygonByLongitude() =
-        runTest {
-            PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { idx, testCase ->
-                try {
-                    testSplitPolygonCase(idx, testCase)
-                } catch (e: AssertionError) {
-                    // TODO: Fix polygon splitting algorithm - this is a known issue with complex polygons
-                    Napier.w("Skipping test case $idx due to polygon splitting issue: ${e.message}")
-                    // For now, just pass the test to unblock other work
-                    assertTrue(true)
-                }
-            }
+    fun testSplitPolygonByLongitude() = runTest {
+        PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { idx, testCase ->
+            testSplitPolygonCase(idx, testCase)
         }
+    }
 
-    private fun testSplitPolygonCase(
-        idx: Int,
-        testCase: TestCasePolygon,
-    ): PolygonUtils.SplitResult {
+    private fun testSplitPolygonCase(idx: Int, testCase: TestCasePolygon): PolygonUtils.SplitResult {
         Napier.i("==> Testing split of polygon testcase $idx")
 
-        val result =
-            when {
-                testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
-                testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
-                else -> throw IllegalArgumentException("Invalid test case, should contain either longitudeToCut or composedLongitudeToCut")
-            }
+        val result = when {
+            testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
+            testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
+            else -> throw IllegalArgumentException("Invalid test case, should contain either longitudeToCut or composedLongitudeToCut")
+        }
 
         listOf(
             Pair(TestCasePolygon::leftExpected, result.left),
-            Pair(TestCasePolygon::rightExpected, result.right),
+            Pair(TestCasePolygon::rightExpected, result.right)
         ).forEach { (selector, result) ->
             val expectedPolygons = selector(testCase)
             assertEquals(expectedPolygons.size, result.size, "${selector.name} size mismatch")
             expectedPolygons.forEachIndexed { index, expectedPolygon ->
                 assertEquals(expectedPolygon.polygon.size, result[index].size, "${selector.name} polygon $index size mismatch")
-                assertTrue(
-                    areRingPolygonsEqual(expectedPolygon.polygon, result[index]),
-                    "${selector.name} polygon $index not equal to test case",
-                )
+                assertTrue(areRingPolygonsEqual(expectedPolygon.polygon, result[index]), "${selector.name} polygon $index not equal to test case")
             }
         }
 
@@ -96,22 +75,18 @@ class PolygonUtilsSplitPolygonTest {
 
     // ------------------------------------------------------------------------
 
-    private fun areRingPolygonsEqual(
-        polygon1: Polygon,
-        polygon2: Polygon,
-    ): Boolean {
+    private fun areRingPolygonsEqual(polygon1: Polygon, polygon2: Polygon): Boolean {
         if (polygon1.size != polygon2.size) {
             Napier.d("Polygons are not equal: different sizes. Polygon1 size: ${polygon1.size}, Polygon2 size: ${polygon2.size}")
             return false
         }
 
         // Remove the repeating point from the end of each polygon
-        val cleanedPolygon1 =
-            if (polygon1.isClockwise() != polygon2.isClockwise()) {
-                removeRepeatingPoint(polygon1.inverted())
-            } else {
-                removeRepeatingPoint(polygon1)
-            }
+        val cleanedPolygon1 = if (polygon1.isClockwise() != polygon2.isClockwise()) {
+            removeRepeatingPoint(polygon1.inverted())
+        } else {
+            removeRepeatingPoint(polygon1)
+        }
         val cleanedPolygon2 = removeRepeatingPoint(polygon2)
 
         // Normalize both polygons to start from the same point
@@ -122,9 +97,7 @@ class PolygonUtilsSplitPolygonTest {
         var point2 = normalizedPolygon2.first()
         for (point in normalizedPolygon1) {
             if (point != point2) {
-                Napier.d(
-                    "Polygons are not equal: mismatch at index ${point.id}. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2",
-                )
+                Napier.d("Polygons are not equal: mismatch at index ${point.id}. Polygon1: $normalizedPolygon1, Polygon2: $normalizedPolygon2")
                 return false
             }
             point2 = point2.next
@@ -133,21 +106,20 @@ class PolygonUtilsSplitPolygonTest {
         return true
     }
 
-    private fun <T : Polygon> normalizePolygon(polygon: T): Polygon {
+    private fun <T: Polygon> normalizePolygon(polygon: T): Polygon {
         if (polygon.isEmpty()) return polygon
 
         // Find the smallest point lexicographically to use as the starting point
-        val minPoint =
-            polygon.minWithOrNull(compareBy({ it.lat }, { it.lng }))
-                ?: return polygon
+        val minPoint = polygon.minWithOrNull(compareBy({ it.lat }, { it.lng }))
+            ?: return polygon
 
         // Rotate the polygon to start from the smallest point
         return if (polygon.last() == minPoint) {
             polygon.subList(polygon.last()!!, polygon.last()!!.id) +
-                polygon.subList(polygon.first()!!, polygon.last()!!.id)
+                    polygon.subList(polygon.first()!!, polygon.last()!!.id)
         } else {
             polygon.subList(minPoint, polygon.last()!!.id) +
-                polygon.subList(polygon.last()!!, minPoint.id)
+                    polygon.subList(polygon.last()!!, minPoint.id)
         }
     }
 
@@ -472,4 +444,5 @@ class PolygonUtilsSplitPolygonTest {
 //    CutPosition(48.816876618969246, 2.332906338279445)
 //
 //        Longitude = (48.967884209893356, 2.3303314875399406)
+
 }

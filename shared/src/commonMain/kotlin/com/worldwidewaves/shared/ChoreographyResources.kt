@@ -6,7 +6,7 @@ import dev.icerock.moko.resources.StringResource
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -23,19 +23,17 @@ import dev.icerock.moko.resources.StringResource
  * limitations under the License.
  */
 
-fun getChoreographyText(
-    sequenceType: String,
-    sequenceNumber: Int? = null,
-): StringResource =
-    when (sequenceType) {
+fun getChoreographyText(sequenceType: String, sequenceNumber: Int? = null): StringResource {
+    return when (sequenceType) {
         "warming" -> getChoreographyWarmingText(sequenceNumber)
         "waiting" -> com.worldwidewaves.shared.getChoreographyWaitingText()
         "hit" -> com.worldwidewaves.shared.getChoreographyHitText()
         else -> throw Exception("Invalid choreography type: $sequenceType")
     }
+}
 
-fun getChoreographyWarmingText(seq: Int?): StringResource =
-    when (seq) {
+fun getChoreographyWarmingText(seq: Int?): StringResource {
+    return when (seq) {
         1 -> MokoRes.strings.choreography_warming_seq_1
         2 -> MokoRes.strings.choreography_warming_seq_2
         3 -> MokoRes.strings.choreography_warming_seq_3
@@ -44,7 +42,12 @@ fun getChoreographyWarmingText(seq: Int?): StringResource =
         6 -> MokoRes.strings.choreography_warming_seq_6
         else -> throw Exception("Invalid choreography sequence number: $seq")
     }
+}
 
-fun getChoreographyWaitingText(): StringResource = MokoRes.strings.choreography_waiting
+fun getChoreographyWaitingText(): StringResource {
+    return MokoRes.strings.choreography_waiting
+}
 
-fun getChoreographyHitText(): StringResource = MokoRes.strings.choreography_hit
+fun getChoreographyHitText(): StringResource {
+    return MokoRes.strings.choreography_hit
+}

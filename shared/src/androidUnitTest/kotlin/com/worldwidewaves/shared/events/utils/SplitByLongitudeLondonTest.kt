@@ -13,6 +13,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class SplitByLongitudeLondonTest {
+
     private lateinit var londonPolygon: Polygon
     private lateinit var reportDir: File
     private val json = Json { ignoreUnknownKeys = true }
@@ -42,7 +43,7 @@ class SplitByLongitudeLondonTest {
         for (i in 0..steps) {
             val lng = bbox.sw.lng + (i * lngStep)
             val composed = ComposedLongitude.fromLongitude(lng)
-            val leftAgg = mutableListOf<Polygon>()
+            val leftAgg  = mutableListOf<Polygon>()
             val rightAgg = mutableListOf<Polygon>()
             // Split every polygon independently and aggregate
             allPolygons.forEach { poly ->
@@ -50,14 +51,13 @@ class SplitByLongitudeLondonTest {
                 leftAgg.addAll(split.left)
                 rightAgg.addAll(split.right)
             }
-            val svg =
-                generateSvg(
-                    originalPolygons = allPolygons,
-                    leftPolygons = leftAgg,
-                    rightPolygons = rightAgg,
-                    composedLongitude = composed,
-                    bbox = bbox,
-                )
+            val svg = generateSvg(
+                originalPolygons = allPolygons,
+                leftPolygons = leftAgg,
+                rightPolygons = rightAgg,
+                composedLongitude = composed,
+                bbox = bbox
+            )
 
             val out = File(reportDir, "london_${i}_${String.format("%.6f", lng)}.svg")
             FileOutputStream(out).use { it.write(svg.toByteArray()) }
@@ -69,51 +69,34 @@ class SplitByLongitudeLondonTest {
         features.forEach { feature ->
             val geometry = feature.jsonObject["geometry"]?.jsonObject ?: return@forEach
             when (geometry["type"]?.jsonPrimitive?.content) {
-                "Polygon" ->
-                    geometry["coordinates"]
-                        ?.jsonArray
-                        ?.firstOrNull()
-                        ?.jsonArray
-                        ?.let { list.add(parseRing(it)) }
-                "MultiPolygon" ->
-                    geometry["coordinates"]?.jsonArray?.forEach { poly ->
-                        poly.jsonArray
-                            .firstOrNull()
-                            ?.jsonArray
-                            ?.let { list.add(parseRing(it)) }
-                    }
+                "Polygon" -> geometry["coordinates"]?.jsonArray?.firstOrNull()?.jsonArray?.let { list.add(parseRing(it)) }
+                "MultiPolygon" -> geometry["coordinates"]?.jsonArray?.forEach { poly ->
+                    poly.jsonArray.firstOrNull()?.jsonArray?.let { list.add(parseRing(it)) }
+                }
             }
         }
         return list
     }
 
-    private fun parseRing(ring: JsonArray): Polygon =
-        Polygon().apply {
-            ring.forEach { pt ->
-                val coords = pt.jsonArray
-                add(Position(coords[1].jsonPrimitive.content.toDouble(), coords[0].jsonPrimitive.content.toDouble()))
-            }
+    private fun parseRing(ring: JsonArray): Polygon = Polygon().apply {
+        ring.forEach { pt ->
+            val coords = pt.jsonArray
+            add(Position(coords[1].jsonPrimitive.content.toDouble(), coords[0].jsonPrimitive.content.toDouble()))
         }
+    }
 
     private fun generateSvg(
         originalPolygons: List<Polygon>,
         leftPolygons: List<Polygon>,
         rightPolygons: List<Polygon>,
         composedLongitude: ComposedLongitude,
-        bbox: BoundingBox,
+        bbox: BoundingBox
     ): String {
         val width = 800
         val height = 600
         val margin = 20.0
 
-        fun map(
-            value: Double,
-            a: Double,
-            b: Double,
-            c: Double,
-            d: Double,
-        ) = c + (value - a) * (d - c) / (b - a)
-
+        fun map(value: Double, a: Double, b: Double, c: Double, d: Double) = c + (value - a) * (d - c) / (b - a)
         fun toPt(p: Position): String {
             val x = map(p.lng, bbox.sw.lng, bbox.ne.lng, margin, width - margin)
             val y = map(p.lat, bbox.sw.lat, bbox.ne.lat, height - margin, margin)

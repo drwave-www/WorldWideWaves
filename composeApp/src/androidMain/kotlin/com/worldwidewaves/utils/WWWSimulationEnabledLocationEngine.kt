@@ -4,7 +4,7 @@ package com.worldwidewaves.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -46,18 +46,17 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class WWWSimulationEnabledLocationEngine(
-    context: Context,
-) : MapLibreFusedLocationEngineImpl(context),
-    KoinComponent {
+    context: Context
+) : KoinComponent, MapLibreFusedLocationEngineImpl(context) {
+
     private val platform: WWWPlatform by KoinJavaComponent.inject(WWWPlatform::class.java)
 
-    private fun getSimulatedLocation(): Location? =
-        if (platform.isOnSimulation()) {
+    private fun getSimulatedLocation(): Location? {
+        return if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
             simulation.getUserPosition().toLocation(simulation.now())
-        } else {
-            null
-        }
+        } else null
+    }
 
     override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) =
         getSimulatedLocation()?.let { location ->
@@ -67,8 +66,9 @@ class WWWSimulationEnabledLocationEngine(
     override fun requestLocationUpdates(
         request: LocationEngineRequest,
         listener: LocationListener,
-        looper: Looper?,
+        looper: Looper?
     ) = getSimulatedLocation()?.let { location ->
         listener.onLocationChanged(location)
     } ?: super.requestLocationUpdates(request, listener, looper)
+
 }

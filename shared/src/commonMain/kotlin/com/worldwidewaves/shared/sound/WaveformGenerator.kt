@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.sound
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -31,6 +31,7 @@ import kotlin.time.Duration
  * Shared waveform generation algorithms for all platforms
  */
 object WaveformGenerator {
+
     /**
      * Generate sample array for the specified waveform
      * @param sampleRate Sample rate in Hz (e.g., 44100)
@@ -45,66 +46,35 @@ object WaveformGenerator {
         frequency: Double,
         amplitude: Double,
         duration: Duration,
-        waveform: SoundPlayer.Waveform,
+        waveform: SoundPlayer.Waveform
     ): DoubleArray {
-        // Validate input parameters
-        require(sampleRate > 0) { "Sample rate must be positive, got: $sampleRate" }
-        require(frequency > 0.0 && frequency.isFinite()) { "Frequency must be positive and finite, got: $frequency" }
-        require(amplitude >= 0.0 && amplitude <= 1.0 && amplitude.isFinite()) { "Amplitude must be between 0.0 and 1.0, got: $amplitude" }
-        require(duration >= Duration.ZERO) { "Duration must be non-negative, got: $duration" }
 
         // Calculate number of samples
-        val numSamples =
-            (
-                sampleRate * duration.inWholeSeconds +
-                    (sampleRate * (duration.inWholeNanoseconds % 1_000_000_000) / 1_000_000_000.0)
-            ).toInt()
-
-        // Handle edge case of zero duration
-        if (numSamples <= 0) {
-            return doubleArrayOf()
-        }
+        val numSamples = (sampleRate * duration.inWholeSeconds +
+                (sampleRate * (duration.inWholeNanoseconds % 1_000_000_000) / 1_000_000_000.0)).toInt()
 
         // Create sample array
         val samples = DoubleArray(numSamples)
 
-        // Pre-calculate constants for better performance
-        val phaseIncrement = 2.0 * PI * frequency / sampleRate
-
-        // Generate the specified waveform with optimized algorithms
-        when (waveform) {
-            SoundPlayer.Waveform.SINE -> {
-                for (i in 0 until numSamples) {
-                    samples[i] = sin(i * phaseIncrement) * amplitude
-                }
-            }
-            SoundPlayer.Waveform.SQUARE -> {
-                // Square wave is more efficient without sin() calculation
-                val samplesPerCycle = (sampleRate / frequency).toInt()
-                val halfCycle = samplesPerCycle / 2
-                for (i in 0 until numSamples) {
-                    samples[i] = if ((i % samplesPerCycle) < halfCycle) amplitude else -amplitude
-                }
-            }
-            SoundPlayer.Waveform.TRIANGLE -> {
-                val samplesPerCycle = (sampleRate / frequency).toInt()
-                val quarterCycle = samplesPerCycle / 4
-                for (i in 0 until numSamples) {
-                    val cyclePos = i % samplesPerCycle
-                    samples[i] = when {
-                        cyclePos < quarterCycle -> (cyclePos.toDouble() / quarterCycle) * amplitude
-                        cyclePos < 3 * quarterCycle -> (2.0 - cyclePos.toDouble() / quarterCycle) * amplitude
-                        else -> ((cyclePos.toDouble() / quarterCycle) - 4.0) * amplitude
+        // Generate the specified waveform
+        for (i in 0 until numSamples) {
+            val phase = 2.0 * PI * i / (sampleRate / frequency)
+            samples[i] = when (waveform) {
+                SoundPlayer.Waveform.SINE -> sin(phase)
+                SoundPlayer.Waveform.SQUARE -> if (sin(phase) >= 0) 1.0 else -1.0
+                SoundPlayer.Waveform.TRIANGLE -> {
+                    val normPhase = (phase / (2.0 * PI)) % 1.0
+                    when {
+                        normPhase < 0.25 -> normPhase * 4.0
+                        normPhase < 0.75 -> 2.0 - (normPhase * 4.0)
+                        else -> (normPhase * 4.0) - 4.0
                     }
                 }
-            }
-            SoundPlayer.Waveform.SAWTOOTH -> {
-                val samplesPerCycle = (sampleRate / frequency).toInt()
-                for (i in 0 until numSamples) {
-                    val cyclePos = i % samplesPerCycle
-                    samples[i] = (2.0 * cyclePos / samplesPerCycle - 1.0) * amplitude
+                SoundPlayer.Waveform.SAWTOOTH -> {
+                    val normPhase = (phase / (2.0 * PI)) % 1.0
+                    2.0 * (normPhase - floor(0.5 + normPhase))
                 }
-            }
+            } * amplitude // Apply amplitude scaling
         }
 
         // Apply envelope to avoid clicks
@@ -116,10 +86,7 @@ object WaveformGenerator {
     /**
      * Apply a simple attack/release envelope to avoid clicks
      */
-    private fun applyEnvelope(
-        samples: DoubleArray,
-        sampleRate: Int,
-    ) {
+    private fun applyEnvelope(samples: DoubleArray, sampleRate: Int) {
         val attackTime = 0.01 // 10ms attack
         val releaseTime = 0.01 // 10ms release
 
@@ -141,24 +108,16 @@ object WaveformGenerator {
     /**
      * Convert MIDI pitch to frequency in Hz
      * A4 (MIDI note 69) = 440Hz
-     * Valid MIDI pitch range: 0-127
      */
     fun midiPitchToFrequency(pitch: Int): Double {
-        // Clamp pitch to valid MIDI range to prevent mathematical overflow
-        val clampedPitch = pitch.coerceIn(0, 127)
-        val frequency = 440.0 * 2.0.pow((clampedPitch - 69).toDouble() / 12.0)
-
-        // Ensure result is finite and positive
-        return if (frequency.isFinite() && frequency > 0.0) {
-            frequency
-        } else {
-            // Fallback to middle C (MIDI note 60)
-            440.0 * 2.0.pow((60 - 69).toDouble() / 12.0)
-        }
+        return 440.0 * 2.0.pow((pitch - 69).toDouble() / 12.0)
     }
 
     /**
      * Convert MIDI velocity (0-127) to amplitude (0.0-1.0)
      */
-    fun midiVelocityToAmplitude(velocity: Int): Double = (velocity / 127.0).coerceIn(0.0, 1.0)
+    fun midiVelocityToAmplitude(velocity: Int): Double {
+        return (velocity / 127.0).coerceIn(0.0, 1.0)
+    }
+
 }

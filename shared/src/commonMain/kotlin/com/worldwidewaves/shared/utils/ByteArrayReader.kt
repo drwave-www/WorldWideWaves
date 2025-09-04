@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -24,19 +24,10 @@ package com.worldwidewaves.shared.utils
 /**
  * Helper class for reading byte arrays
  */
-class ByteArrayReader(
-    private val bytes: ByteArray,
-) {
+class ByteArrayReader(private val bytes: ByteArray) {
     var position: Int = 0
 
-    private fun checkBounds(bytesToRead: Int) {
-        if (position + bytesToRead > bytes.size) {
-            throw IndexOutOfBoundsException("Attempting to read $bytesToRead bytes at position $position, but only ${bytes.size - position} bytes remaining")
-        }
-    }
-
     fun readUInt8(): Int {
-        checkBounds(1)
         return bytes[position++].toInt() and 0xFF
     }
 
@@ -55,7 +46,6 @@ class ByteArrayReader(
     }
 
     fun readString(length: Int): String {
-        checkBounds(length)
         val chars = CharArray(length)
         for (i in 0 until length) {
             chars[i] = bytes[position + i].toInt().toChar()
@@ -77,7 +67,6 @@ class ByteArrayReader(
     }
 
     fun skip(count: Int) {
-        // Allow skipping beyond bounds for flexibility, but reads will fail
         position += count
     }
 }

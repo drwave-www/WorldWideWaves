@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.map
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -34,19 +34,18 @@ import kotlinx.coroutines.launch
 
 interface MapCameraCallback { // Call back for camera animations
     fun onFinish()
-
     fun onCancel()
 }
 
 data class EventMapConfig( // Type of EventMap initial view setup
     val initialCameraPosition: MapCameraPosition = MapCameraPosition.BOUNDS,
-    val autoTargetUserOnFirstLocation: Boolean = false,
+    val autoTargetUserOnFirstLocation: Boolean = false
 )
 
 enum class MapCameraPosition {
-    WINDOW, // Fit map to window with proper aspect ratio
-    BOUNDS, // Show entire event bounds
-    DEFAULT_CENTER, // Center on the event's center point
+    WINDOW,   // Fit map to window with proper aspect ratio
+    BOUNDS,   // Show entire event bounds
+    DEFAULT_CENTER // Center on the event's center point
 }
 
 // ----------------------------------------------------------------------------
@@ -57,7 +56,7 @@ enum class MapCameraPosition {
 abstract class AbstractEventMap<T>(
     protected val event: IWWWEvent,
     protected val mapConfig: EventMapConfig = EventMapConfig(),
-    private val onLocationUpdate: (Position) -> Unit,
+    private val onLocationUpdate: (Position) -> Unit
 ) {
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
@@ -70,7 +69,6 @@ abstract class AbstractEventMap<T>(
     private var userHasBeenLocated = false
     private var lastKnownPosition: Position? = null
     private var userInteracted = false
-
     /** When true the MapConstraintManager is not allowed to move the camera. */
     private var suppressCorrections = false
 
@@ -91,21 +89,19 @@ abstract class AbstractEventMap<T>(
             mapLibreAdapter.setBoundsForCameraTarget(event.area.bbox())
         }
 
-        block(
-            object : MapCameraCallback {
-                override fun onFinish() {
-                    suppressCorrections = false
-                    // Re-apply constraints if they were configured
-                    originalConstraintManager?.applyConstraints()
-                }
+        block(object : MapCameraCallback {
+            override fun onFinish() {
+                suppressCorrections = false
+                // Re-apply constraints if they were configured
+                originalConstraintManager?.applyConstraints()
+            }
 
-                override fun onCancel() {
-                    suppressCorrections = false
-                    // Ensure constraints are reapplied even if animation is cancelled
-                    originalConstraintManager?.applyConstraints()
-                }
-            },
-        )
+            override fun onCancel() {
+                suppressCorrections = false
+                // Ensure constraints are reapplied even if animation is cancelled
+                originalConstraintManager?.applyConstraints()
+            }
+        })
     }
 
     /**
@@ -114,21 +110,10 @@ abstract class AbstractEventMap<T>(
     suspend fun moveToMapBounds(onComplete: () -> Unit = {}) {
         val bounds = event.area.bbox()
         runCameraAnimation { cb ->
-            mapLibreAdapter.animateCameraToBounds(
-                bounds,
-                callback =
-                    object : MapCameraCallback {
-                        override fun onFinish() {
-                            cb.onFinish()
-                            onComplete()
-                        }
-
-                        override fun onCancel() {
-                            cb.onCancel()
-                            onComplete()
-                        }
-                    },
-            )
+            mapLibreAdapter.animateCameraToBounds(bounds, callback = object : MapCameraCallback {
+                override fun onFinish() { cb.onFinish(); onComplete() }
+                override fun onCancel() { cb.onCancel(); onComplete() }
+            })
         }
     }
 
@@ -151,41 +136,31 @@ abstract class AbstractEventMap<T>(
         // Calculate the new southwest and northeast longitudes or latitudes,
         // depending on whether the event map is wider or taller than the MapLibre component.
         val screenComponentRatio = screenWidth / screenHeight
-        val (newSwLat, newNeLat, newSwLng, newNeLng) =
-            if (eventAspectRatio > screenComponentRatio) {
-                val lngDiff = eventMapHeight * screenComponentRatio / 2
-                Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
-            } else {
-                val latDiff = eventMapWidth / screenComponentRatio / 2
-                Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
-            }
+        val (newSwLat, newNeLat, newSwLng, newNeLng) = if (eventAspectRatio > screenComponentRatio) {
+            val lngDiff = eventMapHeight * screenComponentRatio / 2
+            Quad(sw.lat, ne.lat, centerLng - lngDiff, centerLng + lngDiff)
+        } else {
+            val latDiff = eventMapWidth / screenComponentRatio / 2
+            Quad(centerLat - latDiff, centerLat + latDiff, sw.lng, ne.lng)
+        }
 
-        val bounds =
-            BoundingBox.fromCorners(
-                Position(newSwLat, newSwLng),
-                Position(newNeLat, newNeLng),
-            )
+        val bounds = BoundingBox.fromCorners(
+            Position(newSwLat, newSwLng),
+            Position(newNeLat, newNeLng)
+        )
 
         runCameraAnimation { cb ->
-            mapLibreAdapter.animateCameraToBounds(
-                bounds,
-                padding = 0,
-                object : MapCameraCallback {
-                    override fun onFinish() {
-                        // Now that the camera is fitted, we can apply constraints safely
-                        constraintManager?.applyConstraints()
-                        mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
-                        mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
-                        cb.onFinish()
-                        onComplete()
-                    }
-
-                    override fun onCancel() {
-                        cb.onCancel()
-                        onComplete()
-                    }
-                },
-            )
+            mapLibreAdapter.animateCameraToBounds(bounds, padding = 0, object : MapCameraCallback {
+                override fun onFinish() {
+                    // Now that the camera is fitted, we can apply constraints safely
+                    constraintManager?.applyConstraints()
+                    mapLibreAdapter.setMinZoomPreference(mapLibreAdapter.currentZoom.value)
+                    mapLibreAdapter.setMaxZoomPreference(event.map.maxZoom)
+                    cb.onFinish()
+                    onComplete()
+                }
+                override fun onCancel() { cb.onCancel(); onComplete() }
+            })
         }
     }
 
@@ -195,21 +170,10 @@ abstract class AbstractEventMap<T>(
     suspend fun moveToCenter(onComplete: () -> Unit = {}) {
         val (centerLat, centerLng) = event.area.getCenter()
         runCameraAnimation { cb ->
-            mapLibreAdapter.animateCamera(
-                Position(centerLat, centerLng),
-                null,
-                object : MapCameraCallback {
-                    override fun onFinish() {
-                        cb.onFinish()
-                        onComplete()
-                    }
-
-                    override fun onCancel() {
-                        cb.onCancel()
-                        onComplete()
-                    }
-                },
-            )
+            mapLibreAdapter.animateCamera(Position(centerLat, centerLng), null, object : MapCameraCallback {
+                override fun onFinish() { cb.onFinish(); onComplete() }
+                override fun onCancel() { cb.onCancel(); onComplete() }
+            })
         }
     }
 
@@ -266,17 +230,16 @@ abstract class AbstractEventMap<T>(
         val verticalPadding = (areaBbox.ne.lat - areaBbox.sw.lat) * 0.1
 
         // Create new bounds with padding, constrained by the area's bounding box
-        val newBounds =
-            BoundingBox.fromCorners(
-                Position(
-                    maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
-                    maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng),
-                ),
-                Position(
-                    minOf(bounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - bounds.northLatitude), areaBbox.ne.lat),
-                    minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng),
-                ),
+        val newBounds = BoundingBox.fromCorners(
+            Position(
+                maxOf(bounds.southLatitude - minOf(verticalPadding, bounds.southLatitude - areaBbox.sw.lat), areaBbox.sw.lat),
+                maxOf(bounds.westLongitude - minOf(horizontalPadding, bounds.westLongitude - areaBbox.sw.lng), areaBbox.sw.lng)
+            ),
+            Position(
+                minOf(bounds.northLatitude + minOf(verticalPadding, areaBbox.ne.lat - bounds.northLatitude), areaBbox.ne.lat),
+                minOf(bounds.eastLongitude + minOf(horizontalPadding, areaBbox.ne.lng - bounds.eastLongitude), areaBbox.ne.lng)
             )
+        )
 
         runCameraAnimation { _ ->
             mapLibreAdapter.animateCameraToBounds(newBounds)
@@ -293,7 +256,7 @@ abstract class AbstractEventMap<T>(
         scope: CoroutineScope,
         stylePath: String,
         onMapLoaded: () -> Unit = {},
-        onMapClick: ((Double, Double) -> Unit)? = null,
+        onMapClick: ((Double, Double) -> Unit)? = null
     ) {
         // Pass the map to the adapter
         mapLibreAdapter.setMap(map)
@@ -303,6 +266,7 @@ abstract class AbstractEventMap<T>(
         this.screenHeight = mapLibreAdapter.getHeight()
 
         mapLibreAdapter.setStyle(stylePath) {
+
             // Set Attribution margins to 0
             mapLibreAdapter.setAttributionMargins(0, 0, 0, 0)
 
@@ -338,8 +302,7 @@ abstract class AbstractEventMap<T>(
                 if (mapConfig.autoTargetUserOnFirstLocation &&
                     !userHasBeenLocated &&
                     !userInteracted &&
-                    mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-                ) {
+                    mapConfig.initialCameraPosition == MapCameraPosition.WINDOW) {
                     scope.launch {
                         targetUser()
                     }
@@ -359,4 +322,6 @@ abstract class AbstractEventMap<T>(
             }
         }
     }
+
 }
+

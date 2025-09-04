@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -32,8 +32,9 @@ import kotlin.test.assertTrue
 
 @Suppress("VisibleForTests")
 class PolygonTest {
+
     @Test
-    fun `should add position correctly and update size`() {
+    fun testAddPosition() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0)
         polygon.add(position)
@@ -42,7 +43,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should remove position correctly and update size`() {
+    fun testRemovePosition() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0)
         polygon.add(position)
@@ -51,7 +52,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should insert position after specified position`() {
+    fun testInsertAfter() {
         val polygon = Polygon()
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
@@ -61,7 +62,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should insert position before specified position`() {
+    fun testInsertBefore() {
         val polygon = Polygon()
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
@@ -71,35 +72,33 @@ class PolygonTest {
     }
 
     @Test
-    fun `should create sub-polygon between specified positions`() {
+    fun testSubList() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
         val position3 = Position(3.0, 3.0)
-        val polygon =
-            Polygon().apply {
-                add(position1)
-                add(position2)
-                add(position3)
-            }
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+            add(position3)
+        }
         val subPolygon: Polygon = polygon.subList(polygon.first()!!, polygon.last()!!.id)
         assertEquals(2, subPolygon.size)
     }
 
     @Test
-    fun `should return polygon without last position`() {
+    fun testDropLast() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon =
-            Polygon().apply {
-                add(position1)
-                add(position2)
-            }
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+        }
         val newPolygon: Polygon = polygon.withoutLast()
         assertEquals(1, newPolygon.size)
     }
 
     @Test
-    fun `should combine two polygons using plus operator`() {
+    fun testPlusOperator() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
         val polygon1 = Polygon().apply { add(position1) }
@@ -109,7 +108,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should create copy of polygon with move operation`() {
+    fun testCopy() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
         val copiedPolygon: Polygon = polygon.move()
@@ -118,7 +117,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should clear all positions from polygon`() {
+    fun testClear() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
         polygon.clear()
@@ -126,13 +125,12 @@ class PolygonTest {
     }
 
     @Test
-    fun `should convert list of positions to polygon correctly`() {
-        val positions =
-            listOf(
-                Position(1.0, 1.0),
-                Position(2.0, 2.0),
-                Position(3.0, 3.0),
-            )
+    fun testListToPolygon() {
+        val positions = listOf(
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(3.0, 3.0)
+        )
         val polygon = positions.toPolygon
         assertEquals(positions.size, polygon.size)
         val iterator = polygon.iterator()
@@ -144,7 +142,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should throw exception when removing non-existent position`() {
+    fun testRemoveNonExistentPosition() {
         val polygon = Polygon()
         var position = Position(1.0, 1.0).init()
         position = polygon.add(position)
@@ -153,7 +151,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should throw exception when inserting after non-existent position`() {
+    fun testInsertAfterNonExistentPosition() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
@@ -162,7 +160,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should throw exception when inserting before non-existent position`() {
+    fun testInsertBeforeNonExistentPosition() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
@@ -171,7 +169,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should handle duplicate positions by maintaining single instance`() {
+    fun testAddImmediateDuplicatePositions() {
         val polygon = Polygon()
         val position = Position(1.0, 1.0).init()
         polygon.add(position)
@@ -180,7 +178,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should handle operations on empty polygon correctly`() {
+    fun testEmptyPolygonOperations() {
         val polygon = Polygon()
         assertTrue(polygon.isEmpty())
         assertFailsWith<NoSuchElementException> {
@@ -192,14 +190,13 @@ class PolygonTest {
     }
 
     @Test
-    fun `should iterate through polygon positions in loop`() {
+    fun testLoopIterator() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon =
-            Polygon().apply {
-                add(position1)
-                add(position2)
-            }
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+        }
         val iterator = polygon.loopIterator()
         assertTrue(iterator.hasNext())
         assertEquals(position1, iterator.next())
@@ -210,14 +207,13 @@ class PolygonTest {
     }
 
     @Test
-    fun `should iterate through cut positions correctly`() {
+    fun testCutIterator() {
         val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
         val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
-        val polygon =
-            Polygon().apply {
-                add(cutPosition1)
-                add(cutPosition2)
-            }
+        val polygon = Polygon().apply {
+            add(cutPosition1)
+            add(cutPosition2)
+        }
         val iterator = polygon.cutIterator()
         assertTrue(iterator.hasNext())
         assertEquals(cutPosition1, iterator.next())
@@ -226,71 +222,69 @@ class PolygonTest {
     }
 
     @Test
-    fun `should return first position in polygon`() {
+    fun testFirst() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
         assertEquals(position, polygon.first())
     }
 
     @Test
-    fun `should return last position in polygon`() {
+    fun testLast() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
         assertEquals(position, polygon.last())
     }
 
     @Test
-    fun `should return correct polygon size`() {
+    fun testSize() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon =
-            Polygon().apply {
-                add(position1)
-                add(position2)
-            }
+        val polygon = Polygon().apply {
+            add(position1)
+            add(position2)
+        }
         assertEquals(2, polygon.size)
     }
 
     @Test
-    fun `should return correct cut positions count`() {
+    fun testCutSize() {
         val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
         val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
-        val polygon =
-            Polygon().apply {
-                add(cutPosition1)
-                add(cutPosition2)
-            }
+        val polygon = Polygon().apply {
+            add(cutPosition1)
+            add(cutPosition2)
+        }
         assertEquals(2, polygon.cutSize)
     }
 
     @Test
-    fun `should return true when polygon is empty`() {
+    fun testIsEmpty() {
         val polygon = Polygon()
         assertTrue(polygon.isEmpty())
     }
 
     @Test
-    fun `should return true when polygon has no cut positions`() {
+    fun testIsCutEmpty() {
         val polygon = Polygon()
         assertTrue(polygon.isCutEmpty())
     }
 
     @Test
-    fun `should return true when polygon is not empty`() {
+    fun testIsNotEmpty() {
         val position = Position(1.0, 1.0)
         val polygon = Polygon().apply { add(position) }
         assertTrue(polygon.isNotEmpty())
     }
 
     @Test
-    fun `should return true when polygon has cut positions`() {
+    fun testIsNotCutEmpty() {
         val cutPosition = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
         val polygon = Polygon().apply { add(cutPosition) }
         assertTrue(polygon.isNotCutEmpty())
     }
 
     @Test
-    fun `should handle edge cases in polygon iterator correctly`() {
+    fun testPolygonIteratorEdgeCases() {
         val emptyPolygon = Polygon()
         val emptyIterator = emptyPolygon.iterator()
         assertFalse(emptyIterator.hasNext())
@@ -305,22 +299,21 @@ class PolygonTest {
     }
 
     @Test
-    fun `should support infinite looping through polygon positions`() {
+    fun testPolygonLoopIterator() {
         val polygon = Polygon()
         polygon.add(Position(1.0, 1.0))
         polygon.add(Position(2.0, 2.0))
         polygon.add(Position(3.0, 3.0))
 
         val loopIterator = polygon.loopIterator()
-        repeat(6) {
-            // Test two full loops
+        repeat(6) { // Test two full loops
             assertTrue(loopIterator.hasNext())
             assertNotNull(loopIterator.next())
         }
     }
 
     @Test
-    fun `should handle edge cases in subList operation correctly`() {
+    fun testPolygonSubListEdgeCases() {
         val polygon = Polygon()
         val pos1 = polygon.add(Position(1.0, 1.0))
         polygon.add(Position(2.0, 2.0))
@@ -355,7 +348,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should assign same pair ID to cut positions with same parameters`() {
+    fun testCutPositionPairId() {
         val polygon = Polygon()
         val cutLeft = polygon.add(Position(0.0, 0.0))
         val cutRight = polygon.add(Position(2.0, 2.0))
@@ -368,7 +361,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should create bounding box with correct coordinates and support equality`() {
+    fun testBoundingBoxCreationAndMethods() {
         val bbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
         assertEquals(0.0, bbox.minLatitude)
         assertEquals(2.0, bbox.maxLatitude)
@@ -385,7 +378,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should handle polygon operations with cut positions correctly`() {
+    fun testPolygonOperationsWithCutPositions() {
         val polygon = Polygon()
         val cutLeft = Position(0.0, 0.0)
         val cutRight = Position(2.0, 2.0)
@@ -405,7 +398,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should create correct bounding box for single position polygon`() {
+    fun testPolygonBoundingBoxSinglePosition() {
         val polygon = Polygon(Position(1.0, 1.0))
         val bbox = polygon.bbox()
         assertEquals(Position(1.0, 1.0), bbox.sw)
@@ -413,7 +406,7 @@ class PolygonTest {
     }
 
     @Test
-    fun `should create correct bounding box for multiple positions polygon`() {
+    fun testPolygonBoundingBoxMultiplePositions() {
         val polygon = Polygon()
         polygon.add(Position(1.0, 1.0))
         polygon.add(Position(2.0, 2.0))
@@ -423,13 +416,13 @@ class PolygonTest {
     }
 
     @Test
-    fun `should handle area and direction calculation for single position polygon`() {
+    fun testPolygonAreaAndDirectionSinglePosition() {
         val polygon = Polygon(Position(1.0, 1.0))
         assertTrue(polygon.isClockwise())
     }
 
     @Test
-    fun `should calculate area and direction correctly for multiple positions`() {
+    fun testPolygonAreaAndDirectionMultiplePositions() {
         val polygon = Polygon()
         polygon.add(Position(1.0, 1.0))
         polygon.add(Position(2.0, 2.0))
@@ -439,14 +432,14 @@ class PolygonTest {
     }
 
     @Test
-    fun `should add first position to empty polygon correctly`() {
+    fun testPolygonAddToEmpty() {
         val polygon = Polygon()
         polygon.add(Position(1.0, 1.0))
         assertEquals(1, polygon.size)
     }
 
     @Test
-    fun `should insert position after specified position and update links`() {
+    fun testPolygonInsertAfter() {
         val polygon = Polygon()
         val pos1 = polygon.add(Position(1.0, 1.0))
         val pos2 = polygon.insertAfter(Position(2.0, 2.0), pos1.id)
@@ -454,10 +447,11 @@ class PolygonTest {
     }
 
     @Test
-    fun `should insert position before specified position and update links`() {
+    fun testPolygonInsertBefore() {
         val polygon = Polygon()
         val pos1 = polygon.add(Position(1.0, 1.0))
         val pos2 = polygon.insertBefore(Position(0.0, 0.0), pos1.id)
         assertEquals(pos2, pos1.prev)
     }
+
 }

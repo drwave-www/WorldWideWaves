@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -32,16 +32,16 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class BoundingBoxTest {
+
     @Test
     fun testSimplePolygon() {
-        val polygon =
-            Polygon.fromPositions(
-                Position(0.0, 0.0),
-                Position(0.0, 1.0),
-                Position(1.0, 1.0),
-                Position(1.0, 0.0),
-                Position(0.0, 0.0),
-            )
+        val polygon = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
         val expectedBbox = BoundingBox(0.0, 0.0, 1.0, 1.0)
         val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
@@ -57,15 +57,14 @@ class BoundingBoxTest {
 
     @Test
     fun testComplexPolygon() {
-        val polygon =
-            Polygon.fromPositions(
-                Position(0.0, 0.0),
-                Position(0.0, 2.0),
-                Position(1.0, 1.0),
-                Position(2.0, 2.0),
-                Position(2.0, 0.0),
-                Position(0.0, 0.0),
-            )
+        val polygon = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(0.0, 2.0),
+            Position(1.0, 1.0),
+            Position(2.0, 2.0),
+            Position(2.0, 0.0),
+            Position(0.0, 0.0)
+        )
         val expectedBbox = BoundingBox(0.0, 0.0, 2.0, 2.0)
         val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
@@ -88,6 +87,8 @@ class BoundingBoxTest {
         assertEquals(1.0, bbox.ne.lat)
         assertEquals(1.0, bbox.ne.lng)
     }
+
+
 
     @Test
     fun testBoundingBoxProperties() {
@@ -135,36 +136,33 @@ class BoundingBoxTest {
 
     @Test
     fun testPointOnEdge() {
-        val polygon =
-            Polygon.fromPositions(
-                Position(0.0, 0.0),
-                Position(0.0, 1.0),
-                Position(1.0, 1.0),
-                Position(1.0, 0.0),
-                Position(0.0, 0.0),
-            )
+        val polygon = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(0.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 0.0),
+            Position(0.0, 0.0)
+        )
         val pointOnEdge = Position(0.5, 0.0)
         assertTrue(polygon.containsPosition(pointOnEdge))
     }
 
     @Test
     fun testPolygonWithHole() {
-        val outerPolygon =
-            Polygon.fromPositions(
-                Position(0.0, 0.0),
-                Position(0.0, 3.0),
-                Position(3.0, 3.0),
-                Position(3.0, 0.0),
-                Position(0.0, 0.0),
-            )
-        val innerPolygon =
-            Polygon.fromPositions(
-                Position(1.0, 1.0),
-                Position(1.0, 2.0),
-                Position(2.0, 2.0),
-                Position(2.0, 1.0),
-                Position(1.0, 1.0),
-            )
+        val outerPolygon = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(0.0, 3.0),
+            Position(3.0, 3.0),
+            Position(3.0, 0.0),
+            Position(0.0, 0.0)
+        )
+        val innerPolygon = Polygon.fromPositions(
+            Position(1.0, 1.0),
+            Position(1.0, 2.0),
+            Position(2.0, 2.0),
+            Position(2.0, 1.0),
+            Position(1.0, 1.0)
+        )
         val combinedPolygon = outerPolygon + innerPolygon
         val expectedBbox = BoundingBox(0.0, 0.0, 3.0, 3.0)
         val actualBbox = combinedPolygon.bbox()
@@ -173,12 +171,11 @@ class BoundingBoxTest {
 
     @Test
     fun testDegeneratePolygon() {
-        val polygon =
-            Polygon.fromPositions(
-                Position(1.0, 1.0),
-                Position(1.0, 1.0),
-                Position(1.0, 1.0),
-            )
+        val polygon = Polygon.fromPositions(
+            Position(1.0, 1.0),
+            Position(1.0, 1.0),
+            Position(1.0, 1.0)
+        )
         val expectedBbox = BoundingBox(1.0, 1.0, 1.0, 1.0)
         val actualBbox = polygon.bbox()
         assertEquals(expectedBbox, actualBbox)
@@ -186,20 +183,18 @@ class BoundingBoxTest {
 
     @Test
     fun testPolygonsBbox() {
-        val polygon1 =
-            Polygon.fromPositions(
-                Position(0.0, 0.0),
-                Position(2.0, 0.0),
-                Position(2.0, 2.0),
-                Position(0.0, 2.0),
-            )
-        val polygon2 =
-            Polygon.fromPositions(
-                Position(1.0, 1.0),
-                Position(3.0, 1.0),
-                Position(3.0, 3.0),
-                Position(1.0, 3.0),
-            )
+        val polygon1 = Polygon.fromPositions(
+            Position(0.0, 0.0),
+            Position(2.0, 0.0),
+            Position(2.0, 2.0),
+            Position(0.0, 2.0)
+        )
+        val polygon2 = Polygon.fromPositions(
+            Position(1.0, 1.0),
+            Position(3.0, 1.0),
+            Position(3.0, 3.0),
+            Position(1.0, 3.0)
+        )
 
         val bbox = polygonsBbox(listOf(polygon1, polygon2))
 
@@ -279,12 +274,11 @@ class BoundingBoxTest {
 
     @Test
     fun `fromPositions should create correct bounding box`() {
-        val positions =
-            listOf(
-                Position(0.0, 0.0),
-                Position(1.0, 1.0),
-                Position(-1.0, -1.0),
-            )
+        val positions = listOf(
+            Position(0.0, 0.0),
+            Position(1.0, 1.0),
+            Position(-1.0, -1.0)
+        )
         val bbox = BoundingBox.fromCorners(positions)
         assertEquals(-1.0, bbox?.minLatitude)
         assertEquals(-1.0, bbox?.minLongitude)
@@ -360,4 +354,5 @@ class BoundingBoxTest {
         val bbox = BoundingBox(0.0, 0.0, 2.0, 1.0)
         assertEquals(2.0, bbox.height)
     }
+
 }

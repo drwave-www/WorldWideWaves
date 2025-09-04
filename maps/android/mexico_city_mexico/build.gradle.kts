@@ -4,16 +4,10 @@ plugins {
 }
 android {
     namespace = "com.worldwidewaves.maps.mexico_city_mexico"
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     buildTypes {

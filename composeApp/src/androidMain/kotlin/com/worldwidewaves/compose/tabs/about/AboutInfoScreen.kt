@@ -4,7 +4,7 @@ package com.worldwidewaves.compose.tabs.about
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -69,7 +69,7 @@ class AboutInfoScreen : TabScreen {
             LazyColumn(
                 state = state,
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item { AboutWWWLogo() }
                 item { MainInfo() }
@@ -91,19 +91,19 @@ class AboutInfoScreen : TabScreen {
         val dir = LocalLayoutDirection.current
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp), // space between items
+            verticalArrangement = Arrangement.spacedBy(12.dp) // space between items
         ) {
             infos_core.forEach { res ->
                 Text(
                     text = stringResource(res),
-                    style =
-                        commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
-                            textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                        ),
+                    style = commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
+                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
+                    )
                 )
             }
         }
     }
+
 
     // ----------------------------
 
@@ -116,9 +116,10 @@ class AboutInfoScreen : TabScreen {
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(MokoRes.strings.drwave),
-                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE),
+                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE)
             )
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
     }
+
 }

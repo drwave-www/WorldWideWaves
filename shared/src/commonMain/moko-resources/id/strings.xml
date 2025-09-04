@@ -14,8 +14,8 @@
   <string name="tab_faq_name">FAQ</string>
   <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
   <string name="back">Kembali</string>
-  <!-- src_hash: e1fb89e37a8206dc26bc4d93617c7d8781fb5c91 -->
-  <string name="wave_now">Ikut gelombang!</string>
+  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
+  <string name="wave_now">Bergelombang Sekarang!</string>
   <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
   <string name="events_select_all">Semua</string>
   <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
@@ -34,8 +34,6 @@
   <string name="map_retrying_download">Mencoba mengunduh lagi</string>
   <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
   <string name="map_loading">Memuat peta..</string>
-  <!-- src_hash: cacfe1aebf4aac9dc9fb758dce9ace90bc882f52 -->
-  <string name="map_installing">Menginstal..</string>
   <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
   <string name="map_cancel_download">Batal</string>
   <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->
@@ -64,12 +62,8 @@
   <string name="map_error_access_denied">Akses ditolak.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Terjadi kesalahan tidak diketahui: %1$d</string>
-  <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
-  <string name="map_error_failed_after_retries">Gagal memulai unduhan setelah beberapa kali upaya</string>
-  <!-- src_hash: 5cac460b419be0c16e72a916485ee3cb900f590b -->
-  <string name="simulation_map_required_title">Peta Diperlukan</string>
-  <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
-  <string name="simulation_map_required_message">Silakan unduh peta terlebih dahulu sebelum memulai simulasi.</string>
+  <!-- src_hash: 4af57ca5d889477184fe302002addef23f53a3c3 -->
+  <string name="map_error_failed_after_retries">Gagal memulai unduhan setelah beberapa percobaan</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">Hapus Peta</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->
@@ -142,30 +136,24 @@
   <string name="hour_singular">%1$dj</string>
   <!-- src_hash: fc642830934c01bac23af586fd05baa7b95dc514 -->
   <string name="hour_plural">%1$dj</string>
-  <!-- src_hash: 34b78666a95b154897ab0f2f86dd51f62e7892c1 -->
-  <string name="be_waved">Gelombang</string>
-  <!-- src_hash: fe7e02359af64ab14bfec8b8f2152cf2566242e3 -->
-  <string name="wave_speed">Kecepatan</string>
+  <!-- src_hash: 9eef5d37ac16199ec0704b177ba0818bed78fa99 -->
+  <string name="be_waved">Bergelombang!</string>
+  <!-- src_hash: cc2086a26a2847f6821d1da28d172bbb2f0b3c29 -->
+  <string name="wave_speed">Kecepatan gelombang</string>
   <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
   <string name="wave_start_time">Waktu mulai</string>
   <!-- src_hash: 33c7398856803c02916813a44c248b9c07eff9a0 -->
   <string name="wave_end_time">Waktu selesai</string>
   <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
   <string name="wave_total_time">Waktu total</string>
-  <!-- src_hash: d3e7e0c1937e38ee4b9feefbd1531c544682ce73 -->
+  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
   <string name="wave_progression">Progres</string>
-  <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
-  <string name="speed_unit_mps">m/s</string>
-  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
+  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
   <string name="wave_warming">Pemanasan..</string>
-  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
-  <string name="test_simulation_started">Simulasi dimulai</string>
-  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
-  <string name="simulation_stop">Hentikan simulasi</string>
-  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
-  <string name="simulation_mode">Nonaktifkan mode simulasi</string>
-  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
-  <string name="test_simulation">Aktifkan mode simulasi</string>
+  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
+  <string name="test_simulation">Tes Simulasi</string>
+  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <string name="test_simulation_started">Simulasi Dimulai</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">Bersiap!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -266,12 +254,8 @@
   <string name="faq_answer_4">Tidak. Aplikasi ini sepenuhnya gratis. Meski perancangan dan pengembangannya memerlukan waktu dan biaya dari para pembuat, mereka tidak menerima keuntungan finansial pribadi langsung darinya.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Bisakah saya berkontribusi?</string>
-  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
-  <string name="faq_answer_5">Ya, relawan selalu disambut. Kode aplikasi ini bersifat sumber terbuka di GitHub, dan Anda dapat menghubungi para pembuatnya di worldwidewaves@proton.me (balasan tidak dijamin). Cara terbaik membantu adalah menyebarkan kabar: bagikan foto dan video dari acara menggunakan tagar yang disarankan, hubungi influencer lokal untuk memperkuat pesan, bicarakan dengan komunitas Anda, dan yang terpenting, bergabunglah dalam gelombang!</string>
-  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
-  <string name="faq_question_6">Bagaimana cara melakukan simulasi gelombang?</string>
-  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
-  <string name="faq_answer_6">Ketuk tombol di bawah untuk mengaktifkan mode simulasi. Pada layar acara, gunakan tombol timer di dekat tombol "Ikut gelombang" untuk memulai simulasi menggunakan properti acara ini (tanggal, waktu, lokasi). Untuk menghentikan simulasi, gunakan tombol yang sama. Terakhir, nonaktifkan mode simulasi menggunakan ikon berhenti pada lapisan yang selalu tampil saat Anda selesai.</string>
+  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
+  <string name="faq_answer_5">Ya, relawan selalu diterima. Kode aplikasi bersifat open-source di GitHub, dan Anda dapat menghubungi pembuat di worldwidewaves@proton.me (balasan tidak dijamin). Cara terbaik membantu adalah menyebarkan kabar: bagikan foto dan video dari acara menggunakan tagar yang disarankan, hubungi influencer lokal untuk memperkuat pesan, bicarakan dengan komunitas Anda, dan yang paling penting, bergabunglah dalam gelombang!</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Amerika Serikat</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
@@ -520,8 +504,8 @@
   <string name="choreography_warming_seq_5">Tunjukkan gelombang!</string>
   <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
   <string name="choreography_warming_seq_6">Silangkan tangan!</string>
-  <!-- src_hash: 6e3fac340680de97285b8d870ac379a4735dca1a -->
-  <string name="choreography_waiting">Bersiap untuk melompat!</string>
-  <!-- src_hash: 6b959edcc7ff8f64aaa68f1eed65e84913eadc7a -->
-  <string name="choreography_hit">Lompat!</string>
+  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
+  <string name="choreography_waiting">Bersiap bergelombang!</string>
+  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
+  <string name="choreography_hit">Gelombang sekarang!</string>
 </resources>

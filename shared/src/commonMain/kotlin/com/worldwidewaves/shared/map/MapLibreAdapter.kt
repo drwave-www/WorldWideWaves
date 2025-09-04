@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.map
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -29,61 +29,34 @@ import kotlinx.coroutines.flow.StateFlow
  * Map interface that platform-specific implementations must implement
  */
 interface MapLibreAdapter<T> {
-    fun setMap(map: T)
 
-    fun setStyle(
-        stylePath: String,
-        callback: () -> Unit?,
-    )
+    fun setMap(map: T)
+    fun setStyle(stylePath: String, callback: () -> Unit?)
 
     val currentPosition: StateFlow<Position?>
     val currentZoom: StateFlow<Double>
 
-    fun getWidth(): Double
+    fun getWidth() : Double
+    fun getHeight() : Double
 
-    fun getHeight(): Double
-
-    fun getCameraPosition(): Position?
-
-    fun getVisibleRegion(): BoundingBox
-
+    fun getCameraPosition() : Position?
+    fun getVisibleRegion() : BoundingBox
     fun moveCamera(bounds: BoundingBox)
-
-    fun animateCamera(
-        position: Position,
-        zoom: Double? = null,
-        callback: MapCameraCallback? = null,
-    )
-
-    fun animateCameraToBounds(
-        bounds: BoundingBox,
-        padding: Int = 0,
-        callback: MapCameraCallback? = null,
-    )
-
+    fun animateCamera(position: Position, zoom: Double? = null, callback: MapCameraCallback? = null)
+    fun animateCameraToBounds(bounds: BoundingBox, padding: Int = 0, callback: MapCameraCallback? = null)
     fun setBoundsForCameraTarget(constraintBounds: BoundingBox)
 
-    fun getMinZoomLevel(): Double
-
+    fun getMinZoomLevel() : Double
     fun setMinZoomPreference(minZoom: Double)
-
     fun setMaxZoomPreference(maxZoom: Double)
+    fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int)
 
-    fun setAttributionMargins(
-        left: Int,
-        top: Int,
-        right: Int,
-        bottom: Int,
-    )
-
-    fun addWavePolygons(
-        polygons: List<Any>,
-        clearExisting: Boolean = false,
-    )
+    fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean = false)
 
     fun setOnMapClickListener(listener: ((Double, Double) -> Unit)?)
-
     fun addOnCameraIdleListener(callback: () -> Unit)
 
     fun drawOverridenBbox(bbox: BoundingBox)
+
 }
+

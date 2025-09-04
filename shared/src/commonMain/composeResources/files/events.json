@@ -8,7 +8,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#waveNYC",
+    "instagramHashtag": "#wavenewyork",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -28,7 +28,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#waveLA",
+    "instagramHashtag": "#wavelosangeles",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -48,7 +48,7 @@
     "date": "2026-09-15",
     "startHour": "20:30",
     "instagramAccount": "worldwidewaves_es",
-    "instagramHashtag": "#wavemexico",
+    "instagramHashtag": "#wavemexicocity",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -343,7 +343,7 @@
     "id": "dubai_united_arab_emirates",
     "type": "city",
     "country": "united_arab_emirates",
-    "community": "asia",
+    "community": "middle_east",
     "timeZone": "Asia/Dubai",
     "date": "2026-12-02",
     "startHour": "16:00",
@@ -688,7 +688,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#waveSF",
+    "instagramHashtag": "#wavesanfrancisco",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -763,7 +763,7 @@
     "id": "tehran_iran",
     "type": "city",
     "country": "iran",
-    "community": "asia",
+    "community": "middle_east",
     "timeZone": "Asia/Tehran",
     "date": "2026-04-02",
     "startHour": "15:00",
