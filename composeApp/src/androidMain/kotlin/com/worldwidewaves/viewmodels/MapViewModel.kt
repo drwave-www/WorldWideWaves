@@ -52,7 +52,6 @@ sealed class MapFeatureState {
     data object NotAvailable : MapFeatureState()
     data object Pending : MapFeatureState()
     data class Downloading(val progress: Int) : MapFeatureState()
-    data object Installing : MapFeatureState()
     data object Installed : MapFeatureState()
     data class Failed(val errorCode: Int, val errorMessage: String? = null) : MapFeatureState()
     data class RequiresUserConfirmation(val sessionState: SplitInstallSessionState) : MapFeatureState()
@@ -171,7 +170,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             }
             SplitInstallSessionStatus.INSTALLING -> {
                 Log.d(TAG, "Status: INSTALLING")
-                _featureState.value = MapFeatureState.Installing
+                _featureState.value = MapFeatureState.Downloading(100)
             }
             SplitInstallSessionStatus.INSTALLED -> {
                 Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
