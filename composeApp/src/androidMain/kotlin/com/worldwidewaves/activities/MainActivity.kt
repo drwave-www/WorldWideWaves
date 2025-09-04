@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
@@ -105,6 +106,10 @@ open class MainActivity : AppCompatActivity() {
     // ----------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Ensure the Activity is split-compat aware so newly installed
+        // dynamic-feature assets (maps) are immediately visible.
+        SplitCompat.installActivity(this)
+
         /* ---------------------------------------------------------------------
          * Official Android 12+ splash-screen installation
          * The splash remains until BOTH: min duration elapsed AND data loaded.

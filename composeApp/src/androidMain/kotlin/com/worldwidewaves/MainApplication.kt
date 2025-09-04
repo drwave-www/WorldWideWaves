@@ -22,6 +22,7 @@ package com.worldwidewaves
  */
 
 import android.app.Application
+import android.content.Context
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
@@ -45,6 +46,15 @@ import kotlin.time.ExperimentalTime
 
 class MainApplication : Application(), Configuration.Provider {
     private val wwwShutdownHandler: WWWShutdownHandler by inject()
+
+    // ---------------------------------------------------------------------
+    // Install SplitCompat as early as possible so that assets from newly
+    // downloaded dynamic-feature modules (maps) are immediately visible.
+    // ---------------------------------------------------------------------
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        SplitCompat.install(this)
+    }
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()

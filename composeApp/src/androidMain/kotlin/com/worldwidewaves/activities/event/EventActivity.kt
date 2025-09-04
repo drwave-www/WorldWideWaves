@@ -75,6 +75,7 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.ButtonWave
+import com.worldwidewaves.compose.AutoResizeSingleLineText
 import com.worldwidewaves.compose.DividerLine
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
@@ -451,12 +452,12 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                 .padding(DIM_DEFAULT_EXT_PADDING.dp)
         ) {
             Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
-                Text(
+                AutoResizeSingleLineText(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE).copy(
-                        textAlign = TextAlign.End
-                    )
+                    style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE)
+                        .copy(textAlign = TextAlign.End),
+                    textAlign = TextAlign.End
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {

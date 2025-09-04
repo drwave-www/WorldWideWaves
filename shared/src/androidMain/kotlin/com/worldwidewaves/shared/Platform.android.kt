@@ -30,6 +30,7 @@ import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
@@ -67,114 +68,136 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
-    val splitInstallManager = SplitInstallManagerFactory.create(context)
-
-    /* ---------------------------------------------------------------
-     * Create a split-aware context that can see the assets belonging
-     * to the dynamic-feature even if `installedModules` hasn’t been
-     * updated yet, with a safe fallback for API < 26.
-     * ------------------------------------------------------------- */
-    val assetCtx: Context = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-            context.createContextForSplit(eventId)
-        } catch (_: Exception) {
-            context // fallback to base context
+    
+    // First check if we have a valid cached file that doesn't need updating
+    val needsUpdate = when {
+        !cachedFile.exists() -> {
+            Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
+            true
         }
-    } else {
-        context
+        !metadataFile.exists() -> {
+            Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
+            true
+        }
+        else -> {
+            val lastCacheTime = try {
+                metadataFile.readText().toLong()
+            } catch (_: Exception) {
+                0L
+            }
+
+            // Check if the app was installed/updated after we cached the file
+            val appInstallTime = try {
+                context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+            } catch (_: Exception) {
+                System.currentTimeMillis()
+            }
+
+            val isStale = appInstallTime > lastCacheTime
+            if (isStale) {
+                Log.d(::getMapFileAbsolutePath.name, "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)")
+            } else {
+                Log.d(::getMapFileAbsolutePath.name, "Cache is up-to-date for $eventId.$extension")
+            }
+            isStale
+        }
     }
 
-    // Ensure SplitCompat is installed for this (possibly) new context
-    SplitCompat.install(assetCtx)
+    // If we have a valid cached file, return its path immediately
+    if (!needsUpdate) {
+        Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
+        return cachedFile.absolutePath
+    }
 
-    return try {
-        Log.i(
-            ::getMapFileAbsolutePath.name,
-            "Fetching $eventId.$extension using split-aware context (feature module)"
-        )
+    // If we need to update the cache, try to open the asset from feature module
+    Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
+    
+    val assetPath = "$eventId.$extension"
 
-        val assetPath = "$eventId.$extension"
+    /* ------------------------------------------------------------------
+     * Play Feature Delivery race mitigation:
+     * Immediately after SplitInstall reports INSTALLED the asset might
+     * not yet be visible to the running Activity/process. Retry a few
+     * times with a fresh split-aware context before giving up.
+     * ---------------------------------------------------------------- */
+
+    val maxAttempts = 5
+    val retryDelayMs = 150L
+    var attemptCtx: Context? = null
+
+    repeat(maxAttempts) { attempt ->
+        val ctx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try { context.createContextForSplit(eventId) } catch (_: Exception) { context }
+        } else {
+            context
+        }
+
+        // Ensure split-compat hooks into this context
+        SplitCompat.install(ctx)
 
         try {
-            // Get asset information - this might not provide accurate size for compressed assets
-            val assetFileDescriptor = try {
-                assetCtx.assets.openFd(assetPath)
-            } catch (_: IOException) {
-                // Some compressed assets can't be accessed via openFd, fall back to open
-                null
+            // Just probe to see if the asset is available
+            ctx.assets.open(assetPath).use { 
+                // Success - we can access the asset
+                attemptCtx = ctx
+                return@repeat
             }
-
-            val needsUpdate = when {
-                !cachedFile.exists() -> true
-                !metadataFile.exists() -> true
-                else -> {
-                    val lastCacheTime = try {
-                        metadataFile.readText().toLong()
-                    } catch (_: Exception) {
-                        0L
-                    }
-
-                    // Check if the app was installed/updated after we cached the file
-                    val appInstallTime = try {
-                                assetCtx.packageManager
-                                    .getPackageInfo(assetCtx.packageName, 0).lastUpdateTime
-                    } catch (_: Exception) {
-                        System.currentTimeMillis()
-                    }
-
-                    // If the app was updated after we cached the file, we should update the cache
-                    appInstallTime > lastCacheTime
-                }
+        } catch (e: IOException) {
+            if (attempt < maxAttempts - 1) {
+                Log.w(::getMapFileAbsolutePath.name,
+                    "Asset $assetPath not yet available (attempt ${attempt + 1}/$maxAttempts) – retrying…")
+                kotlinx.coroutines.delay(retryDelayMs)
             }
+        }
+    }
 
-            // Close the descriptor if we opened one
-            assetFileDescriptor?.close()
+    if (attemptCtx == null) {
+        Log.e(::getMapFileAbsolutePath.name,
+            "Asset $assetPath still unavailable after $maxAttempts attempts")
+        return null
+    }
 
-            if (needsUpdate) {
-                Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+    // We found a context that can access the asset, now copy it to cache
+    try {
+        Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
 
-                withContext(Dispatchers.IO) {
-                    try {
-                        // Use a buffered approach for better memory efficiency
-                        assetCtx.assets.open(assetPath).use { input ->
-                            BufferedInputStream(input, 8192).use { bufferedInput ->
-                                cachedFile.outputStream().use { fileOutput ->
-                                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                        val buffer = ByteArray(8192)
-                                        var bytesRead: Int
+        withContext(Dispatchers.IO) {
+            try {
+                // Use a buffered approach for better memory efficiency
+                attemptCtx!!.assets.open(assetPath).use { input ->
+                    BufferedInputStream(input, 8192).use { bufferedInput ->
+                        cachedFile.outputStream().use { fileOutput ->
+                            BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                                val buffer = ByteArray(8192)
+                                var bytesRead: Int
 
-                                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                            bufferedOutput.write(buffer, 0, bytesRead)
-                                        }
-
-                                        bufferedOutput.flush()
-                                    }
+                                while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                                    bufferedOutput.write(buffer, 0, bytesRead)
                                 }
+
+                                bufferedOutput.flush()
                             }
                         }
-
-                        // Update metadata after successful copy
-                        metadataFile.writeText(System.currentTimeMillis().toString())
-                    } catch (e: Exception) {
-                        Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                        // Delete partially written file if there was an error
-                        if (cachedFile.exists()) {
-                            cachedFile.delete()
-                        }
-                        throw e
                     }
                 }
-            }
 
-            cachedFile.absolutePath
-        } catch (e: IOException) {
-            Log.e(::getMapFileAbsolutePath.name, "Resource not found in module: ${e.message}")
-            return null
+                // Update metadata after successful copy
+                metadataFile.writeText(System.currentTimeMillis().toString())
+            } catch (e: Exception) {
+                Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                // Delete partially written file if there was an error
+                if (cachedFile.exists()) {
+                    cachedFile.delete()
+                }
+                throw e
+            }
         }
+
+        return cachedFile.absolutePath
     } catch (e: Exception) {
         Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
         e.printStackTrace()
-        null
+        return null
     }
 }
 
@@ -300,7 +323,7 @@ actual fun clearEventCache(eventId: String) {
 
 /**
  * Determine whether an already-cached file is stale with regard to the
- * application’s lastUpdateTime (which also changes when dynamic-feature
+ * application's lastUpdateTime (which also changes when dynamic-feature
  * splits are updated through the Play Store).
  */
 actual fun isCachedFileStale(fileName: String): Boolean {
