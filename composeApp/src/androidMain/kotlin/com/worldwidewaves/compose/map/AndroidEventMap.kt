@@ -513,7 +513,7 @@ class AndroidEventMap(
      * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
      */
     @Composable
-    fun rememberMapLibreViewWithLifecycle(): MapView {
+    fun rememberMapLibreViewWithLifecycle(key: Any? = Unit): MapView {
         val context = LocalContext.current
 
         // Build the MapLibre view
@@ -548,7 +548,8 @@ class AndroidEventMap(
 
         MapLibre.getInstance(context) // Required by the API
 
-        val mapView = remember { MapView(context, maplibreMapOptions) }
+        // The key makes Compose recreate the MapView when it changes
+        val mapView = remember(key) { MapView(context, maplibreMapOptions) }
 
         // Makes MapView follow the lifecycle of this composable
         val lifecycle = LocalLifecycleOwner.current.lifecycle

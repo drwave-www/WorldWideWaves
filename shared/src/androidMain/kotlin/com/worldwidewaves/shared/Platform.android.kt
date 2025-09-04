@@ -38,6 +38,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -67,110 +68,129 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
-    val splitInstallManager = SplitInstallManagerFactory.create(context)
-
-    /* ---------------------------------------------------------------
-     * Create a split-aware context that can see the assets belonging
-     * to the dynamic-feature even if `installedModules` hasn’t been
-     * updated yet, with a safe fallback for API < 26.
-     * ------------------------------------------------------------- */
-    val assetCtx: Context = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-            context.createContextForSplit(eventId)
-        } catch (_: Exception) {
-            context // fallback to base context
+    val assetPath = "$eventId.$extension"
+    
+    // Helper function to try opening an asset stream from a context
+    fun tryOpenAsset(ctx: Context): Pair<Boolean, InputStream?> {
+        return try {
+            // Ensure SplitCompat is installed for this context
+            SplitCompat.install(ctx)
+            Pair(true, ctx.assets.open(assetPath))
+        } catch (e: IOException) {
+            Log.d(
+                ::getMapFileAbsolutePath.name,
+                "Could not open asset $assetPath from context: ${e.message}"
+            )
+            Pair(false, null)
+        } catch (e: Exception) {
+            Log.e(
+                ::getMapFileAbsolutePath.name,
+                "Error accessing assets from context: ${e.message}"
+            )
+            Pair(false, null)
         }
-    } else {
-        context
     }
 
-    // Ensure SplitCompat is installed for this (possibly) new context
-    SplitCompat.install(assetCtx)
-
     return try {
-        Log.i(
-            ::getMapFileAbsolutePath.name,
-            "Fetching $eventId.$extension using split-aware context (feature module)"
-        )
-
-        val assetPath = "$eventId.$extension"
-
-        try {
-            // Get asset information - this might not provide accurate size for compressed assets
-            val assetFileDescriptor = try {
-                assetCtx.assets.openFd(assetPath)
-            } catch (_: IOException) {
-                // Some compressed assets can't be accessed via openFd, fall back to open
-                null
-            }
-
-            val needsUpdate = when {
-                !cachedFile.exists() -> true
-                !metadataFile.exists() -> true
-                else -> {
-                    val lastCacheTime = try {
-                        metadataFile.readText().toLong()
-                    } catch (_: Exception) {
-                        0L
-                    }
-
-                    // Check if the app was installed/updated after we cached the file
-                    val appInstallTime = try {
-                                assetCtx.packageManager
-                                    .getPackageInfo(assetCtx.packageName, 0).lastUpdateTime
-                    } catch (_: Exception) {
-                        System.currentTimeMillis()
-                    }
-
-                    // If the app was updated after we cached the file, we should update the cache
-                    appInstallTime > lastCacheTime
+        // First try with the base application context
+        var (success, inputStream) = tryOpenAsset(context)
+        var assetCtx = context
+        
+        // If base context failed and we're on API 26+, try with a split-specific context
+        if (!success && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                val splitContext = context.createContextForSplit(eventId)
+                val result = tryOpenAsset(splitContext)
+                if (result.first) {
+                    success = true
+                    inputStream = result.second
+                    assetCtx = splitContext
+                    Log.i(
+                        ::getMapFileAbsolutePath.name,
+                        "Successfully opened asset using split-specific context for $eventId.$extension"
+                    )
                 }
+            } catch (e: Exception) {
+                Log.w(
+                    ::getMapFileAbsolutePath.name,
+                    "Failed to create split context for $eventId: ${e.message}"
+                )
             }
+        }
+        
+        // If we couldn't open the asset from any context, return null
+        if (!success || inputStream == null) {
+            Log.e(
+                ::getMapFileAbsolutePath.name,
+                "Could not find asset $assetPath in any context"
+            )
+            return null
+        }
 
-            // Close the descriptor if we opened one
-            assetFileDescriptor?.close()
+        // Determine if we need to update the cache
+        val needsUpdate = when {
+            !cachedFile.exists() -> true
+            !metadataFile.exists() -> true
+            else -> {
+                val lastCacheTime = try {
+                    metadataFile.readText().toLong()
+                } catch (_: Exception) {
+                    0L
+                }
 
-            if (needsUpdate) {
-                Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+                // Check if the app was installed/updated after we cached the file
+                val appInstallTime = try {
+                    assetCtx.packageManager
+                        .getPackageInfo(assetCtx.packageName, 0).lastUpdateTime
+                } catch (_: Exception) {
+                    System.currentTimeMillis()
+                }
 
-                withContext(Dispatchers.IO) {
-                    try {
-                        // Use a buffered approach for better memory efficiency
-                        assetCtx.assets.open(assetPath).use { input ->
-                            BufferedInputStream(input, 8192).use { bufferedInput ->
-                                cachedFile.outputStream().use { fileOutput ->
-                                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                        val buffer = ByteArray(8192)
-                                        var bytesRead: Int
+                // If the app was updated after we cached the file, we should update the cache
+                appInstallTime > lastCacheTime
+            }
+        }
 
-                                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                            bufferedOutput.write(buffer, 0, bytesRead)
-                                        }
+        if (needsUpdate) {
+            Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
 
-                                        bufferedOutput.flush()
+            withContext(Dispatchers.IO) {
+                try {
+                    // Use a buffered approach for better memory efficiency
+                    inputStream.use { input ->
+                        BufferedInputStream(input, 8192).use { bufferedInput ->
+                            cachedFile.outputStream().use { fileOutput ->
+                                BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                                    val buffer = ByteArray(8192)
+                                    var bytesRead: Int
+
+                                    while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                                        bufferedOutput.write(buffer, 0, bytesRead)
                                     }
+
+                                    bufferedOutput.flush()
                                 }
                             }
                         }
-
-                        // Update metadata after successful copy
-                        metadataFile.writeText(System.currentTimeMillis().toString())
-                    } catch (e: Exception) {
-                        Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                        // Delete partially written file if there was an error
-                        if (cachedFile.exists()) {
-                            cachedFile.delete()
-                        }
-                        throw e
                     }
+
+                    // Update metadata after successful copy
+                    metadataFile.writeText(System.currentTimeMillis().toString())
+                } catch (e: Exception) {
+                    Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                    // Delete partially written file if there was an error
+                    if (cachedFile.exists()) {
+                        cachedFile.delete()
+                    }
+                    throw e
                 }
             }
-
-            cachedFile.absolutePath
-        } catch (e: IOException) {
-            Log.e(::getMapFileAbsolutePath.name, "Resource not found in module: ${e.message}")
-            return null
+        } else {
+            // Make sure to close the input stream if we're not using it
+            inputStream.close()
         }
+
+        cachedFile.absolutePath
     } catch (e: Exception) {
         Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
         e.printStackTrace()
@@ -300,7 +320,7 @@ actual fun clearEventCache(eventId: String) {
 
 /**
  * Determine whether an already-cached file is stale with regard to the
- * application’s lastUpdateTime (which also changes when dynamic-feature
+ * application's lastUpdateTime (which also changes when dynamic-feature
  * splits are updated through the Play Store).
  */
 actual fun isCachedFileStale(fileName: String): Boolean {
