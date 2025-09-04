@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
 }
 
 kotlin {
@@ -158,4 +159,6 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 }

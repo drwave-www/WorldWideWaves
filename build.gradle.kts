@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.android.dynamic.feature) apply false
     alias(libs.plugins.licenseReport) apply false
     alias(libs.plugins.icerock.moko.multiplatform) apply false
+    id("com.google.gms.google-services") version "4.4.3" apply false
 }
 
 subprojects {
