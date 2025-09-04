@@ -185,23 +185,36 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
     val splitInstallManager = SplitInstallManagerFactory.create(context)
 
-    if (!splitInstallManager.installedModules.contains(eventId)) {
-        Log.e(::getMapFileAbsolutePath.name, "Feature module $eventId is not installed")
-        return null
+    /* ---------------------------------------------------------------
+     * Create a split-aware context that can see the assets belonging
+     * to the dynamic-feature even if `installedModules` hasn’t been
+     * updated yet, with a safe fallback for API < 26.
+     * ------------------------------------------------------------- */
+    val assetCtx: Context = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        try {
+            context.createContextForSplit(eventId)
+        } catch (_: Exception) {
+            context // fallback to base context
+        }
+    } else {
+        context
     }
 
-    // Ensure split compat is installed
-    SplitCompat.install(context)
+    // Ensure SplitCompat is installed for this (possibly) new context
+    SplitCompat.install(assetCtx)
 
     return try {
-        Log.i(::getMapFileAbsolutePath.name, "Trying to get $eventId.$extension from feature module")
+        Log.i(
+            ::getMapFileAbsolutePath.name,
+            "Fetching $eventId.$extension using split-aware context (feature module)"
+        )
 
         val assetPath = "$eventId.$extension"
 
         try {
             // Get asset information - this might not provide accurate size for compressed assets
             val assetFileDescriptor = try {
-                context.assets.openFd(assetPath)
+                assetCtx.assets.openFd(assetPath)
             } catch (_: IOException) {
                 // Some compressed assets can't be accessed via openFd, fall back to open
                 null
@@ -219,7 +232,8 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
 
                     // Check if the app was installed/updated after we cached the file
                     val appInstallTime = try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+                                assetCtx.packageManager
+                                    .getPackageInfo(assetCtx.packageName, 0).lastUpdateTime
                     } catch (_: Exception) {
                         System.currentTimeMillis()
                     }
@@ -238,7 +252,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
                 withContext(Dispatchers.IO) {
                     try {
                         // Use a buffered approach for better memory efficiency
-                        context.assets.open(assetPath).use { input ->
+                        assetCtx.assets.open(assetPath).use { input ->
                             BufferedInputStream(input, 8192).use { bufferedInput ->
                                 cachedFile.outputStream().use { fileOutput ->
                                     BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
