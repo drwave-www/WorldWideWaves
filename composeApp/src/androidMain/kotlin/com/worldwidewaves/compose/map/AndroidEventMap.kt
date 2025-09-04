@@ -31,7 +31,10 @@ import android.graphics.Color
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -377,6 +380,7 @@ class AndroidEventMap(
                                     is MapFeatureState.Installing -> {
                                         Log.d(TAG, "Showing installing indicator")
                                         DownloadProgressIndicator(
+                                            progress = 100,
                                             message = "Installing..",
                                             onCancel = {
                                                 Log.i(TAG, "User canceled install: ${event.id}")
@@ -488,8 +492,12 @@ class AndroidEventMap(
                 Log.d(TAG, "Style URI converted to file URI: $uri")
                 
                 scope.launch { // UI actions
-                    Log.d(TAG, "Posting getMapAsync to MapView UI queue")
-                    mapLibreView.post {
+                    /* -----------------------------------------------------------------
+                     * Ensure getMapAsync executes once the MapView is attached
+                     * ----------------------------------------------------------------- */
+
+                    // Encapsulate the original logic so we can call it from multiple places
+                    fun invokeGetMapAsync() {
                         Log.d(TAG, "Invoking getMapAsync now")
                         mapLibreView.getMapAsync { map ->
                             Log.i(TAG, "MapLibreMap instance received")
@@ -518,6 +526,35 @@ class AndroidEventMap(
                                 }
                             )
                         }
+                    }
+
+                    if (mapLibreView.isAttachedToWindow) {
+                        Log.d(TAG, "MapView already attached; calling getMapAsync immediately")
+                        invokeGetMapAsync()
+                    } else {
+                        Log.d(TAG, "MapView not yet attached; adding OnAttachStateChangeListener")
+                        // Listener to detect when the view gets attached
+                        val listener = object : View.OnAttachStateChangeListener {
+                            override fun onViewAttachedToWindow(v: View) {
+                                Log.d(TAG, "MapView attached; posting getMapAsync")
+                                v.removeOnAttachStateChangeListener(this)
+                                v.post { invokeGetMapAsync() }
+                            }
+
+                            override fun onViewDetachedFromWindow(v: View) = Unit
+                        }
+                        mapLibreView.addOnAttachStateChangeListener(listener)
+
+                        // Safety timeout in case attachment never happens
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            if (mapLibreView.isAttachedToWindow.not()) {
+                                Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
+                                try {
+                                    mapLibreView.removeOnAttachStateChangeListener(listener)
+                                } catch (_: Exception) { /* ignore */ }
+                                invokeGetMapAsync()
+                            }
+                        }, 1500)
                     }
                 }
             }
