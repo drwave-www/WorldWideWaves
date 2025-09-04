@@ -176,9 +176,16 @@ class AndroidEventMap(
                 is MapFeatureState.Installed -> {
                     isMapDownloading = false
                     isMapAvailable = true
+                    mapError = false
                 }
                 is MapFeatureState.Failed -> {
                     mapError = true
+                    isMapDownloading = false
+                }
+                is MapFeatureState.Canceled, 
+                is MapFeatureState.Canceling,
+                is MapFeatureState.NotAvailable -> {
+                    isMapDownloading = false
                 }
                 else -> {}
             }
@@ -364,6 +371,9 @@ class AndroidEventMap(
         onMapLoaded: () -> Unit,
         onMapError: () -> Unit = {}
     ) {
+        // Ensure SplitCompat is installed before accessing any dynamic feature assets
+        SplitCompat.install(context)
+        
         scope.launch {
             withContext(Dispatchers.IO) { // IO actions
                 event.map.getStyleUri()?.let {
