@@ -52,8 +52,8 @@ android {
         applicationId = "com.worldwidewaves"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
@@ -76,6 +76,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = com.android.build.api.dsl.DebugSymbolLevel.SYMBOL_TABLE
+            }
         }
     }
     compileOptions {
