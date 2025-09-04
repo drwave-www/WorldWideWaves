@@ -146,8 +146,10 @@
   <string name="wave_end_time">שעת סיום</string>
   <!-- src_hash: 1b358b78bfc444a0925a19b2fe328415e2b27956 -->
   <string name="wave_total_time">זמן כולל</string>
-  <!-- src_hash: 52ad3c6cbf85247f1f96ff3c55d9ea898356218b -->
+  <!-- src_hash: d3e7e0c1937e38ee4b9feefbd1531c544682ce73 -->
   <string name="wave_progression">התקדמות</string>
+  <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
+  <string name="speed_unit_mps">m/s</string>
   <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
   <string name="wave_warming">מתחמם..</string>
   <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->

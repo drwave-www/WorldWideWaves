@@ -21,10 +21,9 @@
 package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
-import com.worldwidewaves.shared.doInitKoin
+import dev.icerock.moko.resources.StringResource
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.datetime.LocalDateTime
 import org.koin.core.context.loadKoinModules
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
@@ -35,7 +34,6 @@ import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.create
 import platform.Foundation.writeToFile
-import platform.UIKit.UIDevice
 
 fun initKoinIOS() {
     // Initialise Koin only once (see Helper.doInitKoin).
@@ -47,11 +45,6 @@ fun initKoinIOS() {
  * Platform descriptor for iOS.  
  * Simply instantiate the common `WWWPlatform` with the device name/version.
  */
-
-
-actual fun getEventImage(type: String, id: String): Any? {
-    TODO("Not yet implemented")
-}
 
 actual suspend fun readGeoJson(eventId: String): String? {
     TODO("Not yet implemented")
@@ -106,4 +99,10 @@ actual fun isCachedFileStale(fileName: String): Boolean = false
 
 actual fun updateCacheMetadata(fileName: String) {
     /* no-op on iOS */
+}
+
+// ---------------------------
+
+actual fun localizeString(resource: StringResource): String {
+    TODO("Not yet implemented")
 }
