@@ -55,6 +55,7 @@ import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.MokoRes
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
@@ -83,6 +84,9 @@ abstract class AbstractEventBackActivity(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Ensure dynamic-feature splits are available without restarting the app
+        SplitCompat.installActivity(this)
 
         val eventId = intent.getStringExtra("eventId")
 
