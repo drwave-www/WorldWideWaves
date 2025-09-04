@@ -484,7 +484,7 @@ class AndroidEventMap(
                     return@withContext
                 }
 
-                val uri = Uri.fromFile(File(stylePath!!))
+                val uri = Uri.fromFile(File(stylePath))
                 Log.d(TAG, "Style URI converted to file URI: $uri")
                 
                 scope.launch { // UI actions

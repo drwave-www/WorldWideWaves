@@ -24,9 +24,9 @@ package com.worldwidewaves.viewmodels
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import android.util.Log
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
@@ -35,10 +35,10 @@ import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListene
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
-import dev.icerock.moko.resources.desc.StringDesc
 import com.worldwidewaves.shared.clearEventCache
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
+import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -183,7 +183,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     // Prefer the module list from the state; fall back to currentMapId
                     val moduleIds: List<String> =
                         try {
-                            state.moduleNames()?.toList().orEmpty()
+                            state.moduleNames().toList()
                         } catch (_: Exception) {
                             emptyList()
                         }.ifEmpty {
@@ -246,7 +246,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private fun getCurrentModuleFromState(state: SplitInstallSessionState): String? {
         return try {
             state.moduleNames().firstOrNull()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
