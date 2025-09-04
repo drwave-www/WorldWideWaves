@@ -71,6 +71,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.ButtonWave
@@ -134,6 +135,8 @@ class EventActivity : AbstractEventWaveActivity() {
     @Composable
     override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
+        // Ensure dynamic-feature splits are available immediately
+        SplitCompat.install(context)
         val scope = rememberCoroutineScope()
         val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
         val endDateTime = remember { mutableStateOf<Instant?>(null) }

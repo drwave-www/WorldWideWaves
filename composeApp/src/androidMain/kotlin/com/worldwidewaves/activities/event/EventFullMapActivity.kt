@@ -53,6 +53,7 @@ import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.google.android.play.core.splitcompat.SplitCompat
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -65,6 +66,12 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
 
     private val clock: IClock by inject()
+
+    // Ensure dynamic-feature splits are available without restarting the app
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        SplitCompat.installActivity(this)
+    }
 
     // ------------------------------------------------------------------------
 
