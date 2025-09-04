@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -57,42 +57,44 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 @Serializable
 data class WWWEvent(
+
     override val id: String,
     override val type: String,
     override val country: String? = null,
     override val community: String? = null,
+
     override val timeZone: String,
     override val date: String,
     override val startHour: String,
-    override val instagramAccount: String,
+
+    override  val instagramAccount: String,
     override val instagramHashtag: String,
+
     override val wavedef: WWWWaveDefinition,
     override val area: WWWEventArea,
     override val map: WWWEventMap,
-    override var favorite: Boolean = false,
-) : IWWWEvent,
-    DataValidator,
-    KoinComponent {
+
+    override var favorite: Boolean = false
+
+) : IWWWEvent, DataValidator, KoinComponent {
+
     @Serializable
     data class WWWWaveDefinition(
         val linear: WWWEventWaveLinear? = null,
         val deep: WWWEventWaveDeep? = null,
-        val linearSplit: WWWEventWaveLinearSplit? = null,
+        val linearSplit: WWWEventWaveLinearSplit? = null
     ) : DataValidator {
-        override fun validationErrors(): List<String>? =
-            mutableListOf<String>()
-                .apply {
-                    when {
-                        linear == null && deep == null && linearSplit == null ->
-                            this.add("event should contain one and only one wave definition")
+        override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+            when {
+                linear == null && deep == null && linearSplit == null ->
+                    this.add("event should contain one and only one wave definition")
 
-                        listOfNotNull(linear, deep, linearSplit).size != 1 ->
-                            this.add("only one of linear, deep, or linearSplit should be non-null")
+                listOfNotNull(linear, deep, linearSplit).size != 1 ->
+                    this.add("only one of linear, deep, or linearSplit should be non-null")
 
-                        else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
-                    }
-                }.takeIf { it.isNotEmpty() }
-                ?.map { "${WWWWaveDefinition::class.simpleName}: $it" }
+                else -> (linear ?: deep ?: linearSplit)!!.validationErrors()?.let { addAll(it) }
+            }
+        }.takeIf { it.isNotEmpty() }?.map { "${WWWWaveDefinition::class.simpleName}: $it" }
     }
 
     // ---------------------------
@@ -103,13 +105,12 @@ data class WWWEvent(
 
     @Transient private var _wave: WWWEventWave? = null
     override val wave: WWWEventWave
-        get() =
-            _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
-                "$id: No valid wave definition found"
-            }.apply {
-                setRelatedEvent<WWWEventWave>(this@WWWEvent)
-                _wave = this
-            }
+        get() = _wave ?: requireNotNull(wavedef.linear ?: wavedef.deep ?: wavedef.linearSplit) {
+            "$id: No valid wave definition found"
+        }.apply {
+            setRelatedEvent<WWWEventWave>(this@WWWEvent)
+            _wave = this
+        }
 
     init {
         map.setRelatedEvent(this)
@@ -121,18 +122,19 @@ data class WWWEvent(
     // ---------------------------
 
     @Transient var cachedObserver: WWWEventObserver? = null
-
-    override fun getEventObserver(): WWWEventObserver = cachedObserver ?: WWWEventObserver(this).also { cachedObserver = it }
+    override fun getEventObserver(): WWWEventObserver =
+        cachedObserver ?: WWWEventObserver(this).also { cachedObserver = it }
 
     // ---------------------------
 
-    override suspend fun getStatus(): Status =
-        when {
+    override suspend fun getStatus(): Status {
+        return when {
             isDone() -> Status.DONE
             isSoon() -> Status.SOON
             isRunning() -> Status.RUNNING
             else -> Status.NEXT
         }
+    }
 
     override suspend fun isDone(): Boolean {
         val endDateTime = getEndDateTime()
@@ -154,28 +156,19 @@ data class WWWEvent(
 
     // ---------------------------
 
-    private fun getEventImageByType(
-        type: String,
-        id: String?,
-    ): Any? = id?.let { getEventImage(type, it) }
+    private fun getEventImageByType(type: String, id: String?): Any? = id?.let { getEventImage(type, it) }
 
     override fun getLocationImage(): Any? = getEventImageByType("location", this.id)
-
     override fun getCommunityImage(): Any? = getEventImageByType("community", this.community)
-
     override fun getCountryImage(): Any? = getEventImageByType("country", this.country)
-
     override fun getMapImage(): Any? = getEventImageByType("map", this.id)
 
     // ---------------------------
 
     override fun getLocation(): StringResource = getEventText("location", this.id)
-
     override fun getDescription(): StringResource = getEventText("description", this.id)
-
     override fun getLiteralCountry(): StringResource = getCountryText(this.country)
-
-    override fun getLiteralCommunity(): StringResource = getCommunityText(this.community)
+    override fun getLiteralCommunity(): StringResource= getCommunityText(this.community)
 
     // ---------------------------
 
@@ -183,7 +176,7 @@ data class WWWEvent(
 
     override fun getStartDateTime(): Instant =
         try {
-            val localDateTime = LocalDateTime.parse("${date}T$startHour:00")
+            val localDateTime = LocalDateTime.parse("${date}T${startHour}:00")
             localDateTime.toInstant(getTZ())
         } catch (e: Exception) {
             Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $e")
@@ -193,10 +186,8 @@ data class WWWEvent(
     override suspend fun getTotalTime(): Duration {
         var waveDuration = wave.getWaveDuration()
 
-        if (waveDuration == 0.seconds) {
-            // If GeoJson has not been yet loaded we do not have the polygons
+        if (waveDuration == 0.seconds) // If GeoJson has not been yet loaded we do not have the polygons
             waveDuration = wave.getApproxDuration()
-        }
 
         return getWarmingDuration() + WAVE_WARN_BEFORE_HIT + waveDuration
     }
@@ -214,16 +205,15 @@ data class WWWEvent(
         }
     }
 
-    override fun getLiteralStartDateSimple(): String =
-        try {
-            getStartDateTime().let {
-                "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
-                    it.toLocalDateTime(getTZ()).month.number .toString().padStart(2, '0')
-                }"
-            }
-        } catch (_: Exception) {
-            "00/00"
+    override fun getLiteralStartDateSimple(): String = try {
+        getStartDateTime().let {
+            "${it.toLocalDateTime(getTZ()).day.toString().padStart(2, '0')}/${
+                it.toLocalDateTime(getTZ()).month.number .toString().padStart(2, '0')
+            }"
         }
+    } catch (_: Exception) {
+        "00/00"
+    }
 
     override fun getLiteralStartTime(): String = IClock.instantToLiteral(getStartDateTime(), getTZ())
 
@@ -236,7 +226,7 @@ data class WWWEvent(
 
     // -----------------------------------------------------------------------
 
-    override fun getWaveStartDateTime(): Instant = getStartDateTime() + getWarmingDuration() + WAVE_WARN_BEFORE_HIT
+    override fun getWaveStartDateTime() : Instant = getStartDateTime() + getWarmingDuration() + WAVE_WARN_BEFORE_HIT
 
     override fun getWarmingDuration(): Duration = warming.getWarmingDuration()
 
@@ -258,18 +248,14 @@ data class WWWEvent(
      */
     override suspend fun getAllNumbers(): WaveNumbersLiterals {
         suspend fun safeCall(block: suspend () -> String): String =
-            try {
-                block()
-            } catch (_: Throwable) {
-                "error"
-            }
+            try { block() } catch (_: Throwable) { "error" }
 
         return WaveNumbersLiterals(
             waveTimezone = safeCall { getLiteralTimezone() },
             waveSpeed = safeCall { wave.getLiteralSpeed() },
             waveStartTime = safeCall { getLiteralStartTime() },
             waveEndTime = safeCall { getLiteralEndTime() },
-            waveTotalTime = safeCall { getLiteralTotalTime() },
+            waveTotalTime = safeCall { getLiteralTotalTime() }
         )
     }
 
@@ -278,56 +264,53 @@ data class WWWEvent(
     /**
      * This function checks the event for various validation criteria.
      */
-    override fun validationErrors(): List<String>? =
-        mutableListOf<String>()
-            .apply {
-                when {
-                    id.isEmpty() ->
-                        this.add("ID is empty")
+    override fun validationErrors() : List<String>? = mutableListOf<String>().apply {
+        when {
+            id.isEmpty() ->
+                this.add("ID is empty")
 
-                    !id.matches(Regex("^[a-z_]+$")) ->
-                        this.add("ID must be lowercase with only simple letters or underscores")
+            !id.matches(Regex("^[a-z_]+$")) ->
+                this.add("ID must be lowercase with only simple letters or underscores")
 
-                    type.isEmpty() ->
-                        this.add("Type is empty")
+            type.isEmpty() ->
+                this.add("Type is empty")
 
-                    type !in listOf("city", "country", "world") ->
-                        this.add("Type must be either 'city', 'country', or 'world'")
+            type !in listOf("city", "country", "world") ->
+                this.add("Type must be either 'city', 'country', or 'world'")
 
-                    type == "city" && country.isNullOrEmpty() ->
-                        this.add("Country must be specified for type 'city'")
+            type == "city" && country.isNullOrEmpty() ->
+                this.add("Country must be specified for type 'city'")
 
-                    timeZone.isEmpty() ->
-                        this.add("Time zone is empty")
+            timeZone.isEmpty() ->
+                this.add("Time zone is empty")
 
-                    !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
-                        this.add("Date format is invalid or date is not valid")
+            !date.matches(Regex("\\d{4}-\\d{2}-\\d{2}")) || runCatching { LocalDate.parse(date) }.isFailure ->
+                this.add("Date format is invalid or date is not valid")
 
-                    !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
-                        this.add("Start hour format is invalid or time is not valid")
+            !startHour.matches(Regex("\\d{2}:\\d{2}")) || runCatching { LocalTime.parse(startHour) }.isFailure ->
+                this.add("Start hour format is invalid or time is not valid")
 
-                    instagramAccount.isEmpty() ->
-                        this.add("Instagram account is empty")
+            instagramAccount.isEmpty() ->
+                this.add("Instagram account is empty")
 
-                    !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
-                        this.add("Instagram account is invalid")
+            !instagramAccount.matches(Regex("^[A-Za-z0-9_.]+$")) ->
+                this.add("Instagram account is invalid")
 
-                    instagramHashtag.isEmpty() ->
-                        this.add("Instagram hashtag is empty")
+            instagramHashtag.isEmpty() ->
+                this.add("Instagram hashtag is empty")
 
-                    !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
-                        this.add("Instagram hashtag is invalid")
+            !instagramHashtag.matches(Regex("^#[A-Za-z0-9_]+$")) ->
+                this.add("Instagram hashtag is invalid")
 
-                    runCatching { TimeZone.of(timeZone) }.isFailure ->
-                        this.add("Time zone is invalid")
+            runCatching { TimeZone.of(timeZone) }.isFailure ->
+                this.add("Time zone is invalid")
 
-                    else ->
-                        wavedef
-                            .validationErrors()
-                            ?.let { addAll(it) }
-                            .also { area.validationErrors()?.let { addAll(it) } }
-                            .also { map.validationErrors()?.let { addAll(it) } }
-                }
-            }.takeIf { it.isNotEmpty() }
-            ?.map { "${WWWEvent::class.simpleName}: $it" }
+            else -> wavedef.validationErrors()?.let { addAll(it) }
+                .also { area.validationErrors()?.let { addAll(it) } }
+                .also { map.validationErrors()?.let { addAll(it) } }
+        }
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEvent::class.simpleName}: $it" }
+
 }
+
+

@@ -4,7 +4,7 @@ package com.worldwidewaves.activities.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -49,14 +49,13 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
  * **tab bar**.
  *
  * A screen only needs to expose:
- * • `Screen()` – the actual Composable content
+ * • `Screen()` – the actual Composable content  
  * • `name`     – label forwarded to the host so it can be used for a11y or
  *   analytics.
  */
 interface TabScreen {
     @Composable fun Screen(modifier: Modifier)
-
-    val name: String
+    val name : String
 }
 
 // ----------------------------
@@ -66,8 +65,8 @@ interface TabScreen {
  *
  * Takes a list of [TabScreen]s and a Composable factory (`tabBarItem`) that
  * draws each item (icon/text).  It then:
- * 1. Renders the currently-selected screen in a flexible content area.
- * 2. Displays a bottom tab-bar that lets the user switch screens.
+ * 1. Renders the currently-selected screen in a flexible content area.  
+ * 2. Displays a bottom tab-bar that lets the user switch screens.  
  * 3. Persists the selected tab via `remember` so configuration changes keep the
  *    current selection.
  */
@@ -76,25 +75,27 @@ class TabManager(
     val tabBarItem: @Composable ( // How to draw a tab item
         isSelected: Boolean,
         tabIndex: Int,
-        contentDescription: String?,
-    ) -> Unit,
+        contentDescription: String?
+    ) -> Unit
 ) {
+
+    @Composable
     /**
      * Renders the tab bar and the associated content area.
      *
      * [startScreen] can temporarily override the content (e.g. splash or
      * onboarding) until the first tab selection occurs.
      */
-    @Composable
     fun TabView(
         modifier: Modifier = Modifier,
         startScreen: @Composable ((Modifier) -> Unit)? = null,
-        selectedTab: Int = 0,
+        selectedTab: Int = 0
     ) {
         var currentTab by remember { mutableIntStateOf(selectedTab) }
         var originalScreen by remember { mutableStateOf(startScreen) }
 
         Column(modifier = Modifier.fillMaxHeight()) {
+
             // Display the selected tab screen
             Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
                 originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)
@@ -104,24 +105,16 @@ class TabManager(
             Row(
                 modifier = modifier.fillMaxWidth().height(DIM_INT_TABBAR_HEIGHT.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 screens.forEachIndexed { index, tab ->
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxHeight()
-                                .align(Alignment.CenterVertically)
-                                .clickable {
-                                    originalScreen = null
-                                    currentTab = index
-                                },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        tabBarItem(currentTab == index, index, tab.name)
-                    }
+                    Box(modifier = Modifier.clickable {
+                        originalScreen = null
+                        currentTab = index
+                    }) { tabBarItem(currentTab == index, index, tab.name) }
                 }
             }
         }
     }
+
 }

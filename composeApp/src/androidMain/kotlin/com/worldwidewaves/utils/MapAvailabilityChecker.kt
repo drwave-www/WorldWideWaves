@@ -4,7 +4,7 @@ package com.worldwidewaves.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -39,13 +39,7 @@ import kotlin.coroutines.resume
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityChecker(
-    val context: Context,
-) {
-    /** Log tag used throughout this helper for easy filtering. */
-    private companion object {
-        private const val TAG = "MapAvail"
-    }
+class MapAvailabilityChecker(val context: Context) {
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
 
@@ -58,55 +52,30 @@ class MapAvailabilityChecker(
     // Cache of queried map IDs to avoid unnecessary checks
     private val queriedMaps = ConcurrentHashMap.newKeySet<String>()
 
-    /**
-     * Modules for which we *pretend* unavailability even though Play-Core might
-     * keep them physically present until the next app update.  Populated when
-     * the user requests an uninstall and cleared automatically when Play
-     * notifies a fresh install of the same split.
-     */
-    private val forcedUnavailable =
-        java.util.Collections.synchronizedSet(mutableSetOf<String>())
-
     // Listener for module installation events
     private val installStateListener: SplitInstallStateUpdatedListener
 
     init {
         // Create and register the installation state listener
-        installStateListener =
-            SplitInstallStateUpdatedListener { state ->
-                when (state.status()) {
-                    SplitInstallSessionStatus.INSTALLED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation completed")
-                        Log.d(
-                            TAG,
-                            "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
-                        )
-                        // If this module had previously been “forced” unavailable
-                        // (deferred uninstall), drop the override so it becomes
-                        // visible again without requiring an app restart.
-                        state.moduleNames()?.forEach { id ->
-                            forcedUnavailable.remove(id)
-                        }
-                        refreshAvailability()
-                    }
-                    SplitInstallSessionStatus.FAILED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
-                        Log.w(
-                            TAG,
-                            "session=${state.sessionId()} FAILED code=${state.errorCode()}",
-                        )
-                        refreshAvailability()
-                    }
-                    SplitInstallSessionStatus.CANCELED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation canceled")
-                        Log.i(TAG, "session=${state.sessionId()} CANCELED")
-                        refreshAvailability()
-                    }
-                    else -> {
-                        // Other states aren't relevant for availability changes
-                    }
+        installStateListener = SplitInstallStateUpdatedListener { state ->
+            when (state.status()) {
+                SplitInstallSessionStatus.INSTALLED -> {
+                    Log.d(::MapAvailabilityChecker.name, "Module installation completed")
+                    refreshAvailability()
+                }
+                SplitInstallSessionStatus.FAILED -> {
+                    Log.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
+                    refreshAvailability()
+                }
+                SplitInstallSessionStatus.CANCELED -> {
+                    Log.d(::MapAvailabilityChecker.name, "Module installation canceled")
+                    refreshAvailability()
+                }
+                else -> {
+                    // Other states aren't relevant for availability changes
                 }
             }
+        }
 
         // Register the listener with the split install manager
         splitInstallManager.registerListener(installStateListener)
@@ -130,21 +99,17 @@ class MapAvailabilityChecker(
     fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
         Log.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
-        Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
 
-        // First add all queried maps – honour any forced-uninstall overrides
+        // First add all queried maps
         for (mapId in queriedMaps) {
-            val installed = installedModules.contains(mapId)
-            updatedStates[mapId] =
-                if (forcedUnavailable.contains(mapId)) false else installed
+            updatedStates[mapId] = installedModules.contains(mapId)
         }
 
         // Update the state flow with the new map
         _mapStates.value = updatedStates
-        Log.d(TAG, "Updated availability: $updatedStates")
     }
 
     /**
@@ -153,13 +118,10 @@ class MapAvailabilityChecker(
     fun trackMaps(mapIds: Collection<String>) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
-        Log.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
     }
 
     fun isMapDownloaded(eventId: String): Boolean {
-        val downloaded = mapStates.value[eventId] == true
-        Log.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
-        return downloaded
+        return mapStates.value[eventId] == true
     }
 
     fun canUninstallMap(eventId: String): Boolean {
@@ -168,7 +130,6 @@ class MapAvailabilityChecker(
             return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
         } catch (e: Exception) {
             Log.e("MapAvailabilityChecker", "Error checking if map can be uninstalled: ${e.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${e.message}")
             return false // If there's an error, assume it can't be uninstalled
         }
     }
@@ -181,47 +142,32 @@ class MapAvailabilityChecker(
      * immediately and any cached artefacts are cleared so UI can reflect the
      * change without polling.
      */
-    suspend fun uninstallMap(eventId: String): Boolean =
-        suspendCancellableCoroutine { cont ->
-            try {
-                Log.i(TAG, "uninstallMap requested for $eventId")
-                val splitInstallManager = SplitInstallManagerFactory.create(context)
+    suspend fun uninstallMap(eventId: String): Boolean = suspendCancellableCoroutine { cont ->
+        try {
+            val splitInstallManager = SplitInstallManagerFactory.create(context)
 
-                splitInstallManager
-                    .deferredUninstall(listOf(eventId))
-                    .addOnSuccessListener {
-                        // Mark this module as “virtually” unavailable for the
-                        // remainder of the session – Play Core keeps it around
-                        // until next update but UI must reflect immediate removal.
-                        forcedUnavailable.add(eventId)
-
-                        // Update reactive state immediately
-                        _mapStates.value =
-                            _mapStates.value.toMutableMap().apply {
-                                this[eventId] = false
-                            }
-
-                        // Best-effort cache cleanup – do not fail uninstall on errors
-                        try {
-                            clearEventCache(eventId)
-                        } catch (_: Exception) {
-                        }
-
-                        Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
-                        Log.i(TAG, "uninstallMap success (scheduled) id=$eventId")
-                        if (cont.isActive) cont.resume(true)
-                    }.addOnFailureListener { e ->
-                        Log.e(
-                            "MapAvailabilityChecker",
-                            "Deferred uninstall failed for $eventId: ${e.message}",
-                        )
-                        Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
-                        if (cont.isActive) cont.resume(false)
+            splitInstallManager
+                .deferredUninstall(listOf(eventId))
+                .addOnSuccessListener {
+                    // Update reactive state immediately
+                    _mapStates.value = _mapStates.value.toMutableMap().apply {
+                        this[eventId] = false
                     }
-            } catch (e: Exception) {
-                Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${e.message}")
-                if (cont.isActive) cont.resume(false)
-            }
+
+                    // Best-effort cache cleanup – do not fail uninstall on errors
+                    try { clearEventCache(eventId) } catch (_: Exception) { }
+
+                    Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
+                    if (cont.isActive) cont.resume(true)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MapAvailabilityChecker", "Deferred uninstall failed for $eventId: ${e.message}")
+                    if (cont.isActive) cont.resume(false)
+                }
+        } catch (e: Exception) {
+            Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
+            if (cont.isActive) cont.resume(false)
         }
+    }
+
 }

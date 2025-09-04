@@ -1,308 +1,44 @@
-# Scripts
+WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
+countries, culminating in a global wave. The project aims to transcend physical and cultural
+boundaries,
+fostering unity, community, and shared human experience by leveraging real-time coordination and
+location-based services.
 
-Development tools and automation scripts for WorldWideWaves. Contains utilities for map generation, build processes, image processing, and project maintenance.
+To get BBOX on specific city : http://polygons.openstreetmap.fr/ or http://bboxfinder.com
+To get GEOjson data from OSM admin bounday : http://polygons.openstreetmap.fr/?id=71525
+Where admin ID is get from OSM
+To see the area of a specified bbox : https://www.openstreetmap.org/?minlon=2.2241&minlat=48.8156&maxlon=2.4699&maxlat=48.9022#map=13/48.8589/2.3470
 
-## Overview
+## Project Structure
 
-```
-scripts/
-├── maps/           # Map tile generation and processing
-├── images/         # Image processing and generation  
-├── instagram/      # Social media content automation
-├── licenses/       # License management and reporting
-├── polygons/       # Geographic boundary processing
-├── style/          # Map style generation
-└── translate/      # Localization and translation tools
-```
+### `scripts/maps/libs/lib.inc.sh`
 
-## Quick Start
+This script contains utility functions and configurations used by other scripts. It includes:
 
-### Prerequisites
-- **Docker & Docker Compose** (for map generation)
-- **Node.js 16+** (for map processing)
-- **OpenStreetMap tools** (osmosis, osm2pgsql)
-- **ImageMagick** (for image processing)
+- **conf**: Reads event configuration property values.
+- **tpl**: Replaces event configuration values in a template file.
 
-### Common Workflows
+### `scripts/maps/libs/generate_map.dep.sh`
 
-#### Generate Maps for New City
-```bash
-cd scripts/maps/
+This script sets up the environment and generates map tiles for a specified event. It performs the
+following steps:
 
-# Generate offline map tiles
-./10-download_osm.sh new_city
-./20-generate_mbtiles.sh new_city
-```
+1. Checks for required Docker and Docker Compose versions.
+2. Pulls or refreshes OpenMapTiles Docker images.
+3. Initializes directories and cleans up old files.
+4. Imports OpenStreetMap data and Wikidata.
+5. Generates MBTiles files using PostGIS.
 
-#### Process Images
-```bash
-cd scripts/images/
-./generate_app_icons.sh        # Generate app icons
-./optimize_images.sh           # Optimize all images
-```
+### `scripts/maps/10-download_osm.sh`
 
-#### Update Licenses
-```bash
-cd scripts/licenses/
-./generate_license_report.sh   # Generate dependency licenses
-./check_compliance.sh          # Verify license compliance
-```
+This script downloads OpenStreetMap (OSM) data for specified events and extracts the bounding box (
+BBOX) for each event. It performs the following steps:
 
-## Module Details
+1. Downloads OSM data for the specified area.
+2. Extracts the BBOX from the downloaded OSM data.
+3. Generates environment and tileset definition files for each event.
 
-### 🗺️ [Maps](./maps/) - **Primary Tool**
-Complete map generation pipeline for offline city maps.
+### `scripts/maps/20-generate_mbtiles.sh`
 
-**Key Scripts:**
-- `10-download_osm.sh` - Download OpenStreetMap data
-- `20-generate_mbtiles.sh` - Generate offline map tiles
-- `libs/generate_map.dep.sh` - Core map processing logic
-
-**Generates:**
-- `.mbtiles` files for offline maps  
-- `.geojson` city boundaries
-- MapLibre-compatible tiles
-
-### 🖼️ [Images](./images/)
-Image processing and asset generation.
-
-**Purpose:**
-- App icon generation in multiple sizes
-- Image optimization for mobile
-- Asset preparation for different platforms
-
-### 📱 [Instagram](./instagram/)
-Social media automation and content generation.
-
-**Purpose:**
-- Automated post generation
-- Content scheduling
-- Social media asset creation
-
-### 📜 [Licenses](./licenses/)
-License compliance and dependency management.
-
-**Purpose:**
-- Generate license reports
-- Check dependency compliance  
-- Maintain legal documentation
-
-### 🌍 [Polygons](./polygons/)
-Geographic boundary processing and validation.
-
-**Purpose:**
-- Process city administrative boundaries
-- Validate geographic data
-- Generate boundary overlays
-
-### 🎨 [Style](./style/)
-Map style generation and customization.
-
-**Purpose:**
-- Generate custom MapLibre styles
-- Theme map appearances
-- Optimize styles for mobile rendering
-
-### 🌐 [Translate](./translate/)
-Localization and translation management.
-
-**Purpose:**
-- Manage app translations
-- Automate localization workflows
-- Validate translation completeness
-
-## Development Integration
-
-### Build Process Integration
-```bash
-# In main project build
-./gradlew build                    # Builds app
-scripts/maps/update_all.sh        # Updates map data
-scripts/licenses/generate_report.sh # Updates licenses
-```
-
-### CI/CD Integration
-```yaml
-# GitHub Actions example
-- name: Generate Maps
-  run: |
-    cd scripts/maps
-    ./generate_all.sh
-    
-- name: Process Assets  
-  run: |
-    cd scripts/images
-    ./optimize_all.sh
-```
-
-## Adding New Tools
-
-### Creating a New Script Module
-```bash
-# 1. Create module directory
-mkdir scripts/new_tool/
-
-# 2. Create main script
-cat > scripts/new_tool/process.sh << 'EOF'
-#!/bin/bash
-# Tool description and purpose
-
-set -e
-cd "$(dirname "$0")"
-
-echo "Processing with new tool..."
-# Implementation here
-EOF
-
-# 3. Make executable
-chmod +x scripts/new_tool/process.sh
-
-# 4. Create README
-cat > scripts/new_tool/README.md << 'EOF'
-# New Tool
-
-Description of what this tool does and how to use it.
-
-## Usage
-```bash
-./process.sh [options]
-```
-
-## Configuration
-- Setting 1: Description
-- Setting 2: Description
-EOF
-```
-
-### Integration Patterns
-```bash
-# Common script patterns used throughout
-source "$(dirname "$0")/libs/common.sh"  # Shared utilities
-check_dependencies                        # Verify prereqs
-load_configuration                        # Load settings
-process_with_logging                      # Execute with logs
-cleanup_on_exit                          # Cleanup handler
-```
-
-## Configuration Management
-
-### Environment Variables
-```bash
-# Common configuration
-export WWW_DATA_DIR="./data"
-export WWW_OUTPUT_DIR="./output"
-export WWW_CACHE_DIR="./cache"
-export WWW_LOG_LEVEL="INFO"
-```
-
-### Configuration Files
-```bash
-# Most tools use .properties files
-data/config.properties        # Global configuration
-data/events.properties       # Event-specific settings
-data/cities.properties       # City definitions
-```
-
-## Logging and Monitoring
-
-### Log Files
-```bash
-logs/
-├── map_generation.log       # Map processing logs
-├── image_processing.log     # Image tool logs
-├── build_process.log        # Build integration logs
-└── errors.log              # Consolidated errors
-```
-
-### Monitoring Commands
-```bash
-# Monitor map generation
-tail -f logs/map_generation.log
-
-# Check for errors across all tools
-grep ERROR logs/*.log
-
-# View recent activity
-ls -lat logs/
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Docker not available**
-   ```bash
-   # Check Docker installation
-   docker --version
-   docker-compose --version
-   ```
-
-2. **Permissions errors**
-   ```bash
-   # Fix script permissions
-   find scripts/ -name "*.sh" -exec chmod +x {} \;
-   ```
-
-3. **Missing dependencies**
-   ```bash
-   # Check requirements for each module
-   scripts/maps/check_deps.sh
-   scripts/images/check_deps.sh
-   ```
-
-4. **Disk space issues**
-   ```bash
-   # Clean up generated files
-   scripts/cleanup.sh
-   
-   # Check disk usage
-   du -sh scripts/*/tmp/
-   ```
-
-### Debug Mode
-```bash
-# Run any script in debug mode
-DEBUG=1 ./script_name.sh
-
-# Or set verbose output
-set -x
-./script_name.sh
-```
-
-## Performance Optimization
-
-### Parallel Processing
-Most scripts support parallel execution:
-```bash
-# Process multiple cities in parallel
-./generate_maps.sh --parallel 4 city1 city2 city3 city4
-
-# Optimize images concurrently  
-./optimize_images.sh --jobs 8
-```
-
-### Caching
-```bash
-# Use cache directories to speed up rebuilds
-WWW_ENABLE_CACHE=true ./generate_maps.sh
-
-# Clear cache when needed
-./clear_cache.sh
-```
-
-## Contributing
-
-### Adding New Scripts
-1. Follow existing patterns and conventions
-2. Include comprehensive error handling
-3. Add logging and progress indicators
-4. Create corresponding README.md
-5. Test with various inputs
-6. Update main scripts/README.md
-
-### Best Practices
-- Use `set -e` for error handling
-- Include usage documentation in script headers
-- Validate inputs before processing
-- Provide progress feedback for long operations
-- Clean up temporary files on exit
+This script generates MBTiles files from the downloaded OSM data for each event. It
+calls `generate_map.dep.sh` for each event to perform the map generation process.

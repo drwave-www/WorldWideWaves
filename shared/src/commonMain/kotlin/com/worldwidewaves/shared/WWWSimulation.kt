@@ -9,7 +9,7 @@ import kotlin.time.Instant
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -30,7 +30,7 @@ import kotlin.time.Instant
 class WWWSimulation(
     private val startDateTime: Instant,
     private val userPosition: Position,
-    private var initialSpeed: Int = 1,
+    private var initialSpeed: Int = 1
 ) {
     companion object {
         const val MIN_SPEED = 1
@@ -43,18 +43,17 @@ class WWWSimulation(
     // Track time checkpoints for accurate time calculation
     private data class TimeCheckpoint(
         val realTime: Instant,
-        val simulatedTime: Instant,
+        val simulatedTime: Instant
     )
 
     private var lastCheckpoint: TimeCheckpoint
 
     init {
         // Initialize with the first checkpoint at creation time
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = startDateTime,
-            )
+        lastCheckpoint = TimeCheckpoint(
+            realTime = Clock.System.now(),
+            simulatedTime = startDateTime
+        )
     }
 
     /**
@@ -71,11 +70,10 @@ class WWWSimulation(
         _speed = validateSpeed(newSpeed)
 
         // Create a new checkpoint with current values
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = currentSimulatedTime,
-            )
+        lastCheckpoint = TimeCheckpoint(
+            realTime = Clock.System.now(),
+            simulatedTime = currentSimulatedTime
+        )
 
         initialSpeed = _speed
         return _speed
@@ -85,7 +83,9 @@ class WWWSimulation(
      * Get the current simulated time.
      * @return The current instant in the simulation timeline
      */
-    fun now(): Instant = calculateCurrentTime()
+    fun now(): Instant {
+        return calculateCurrentTime()
+    }
 
     /**
      * Get the user's position.
@@ -114,23 +114,23 @@ class WWWSimulation(
      * @return The validated speed
      * @throws IllegalArgumentException if the speed is outside acceptable bounds
      */
-    private fun validateSpeed(speed: Int): Int =
-        speed.also {
+    private fun validateSpeed(speed: Int): Int {
+        return speed.also {
             require(it in MIN_SPEED..MAX_SPEED) {
                 "Speed must be between $MIN_SPEED and $MAX_SPEED"
             }
         }
+    }
 
     /**
      * Reset the simulation to start from the current moment.
      * Useful if you want to "pause" the simulation and restart it.
      */
     fun reset() {
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = startDateTime,
-            )
+        lastCheckpoint = TimeCheckpoint(
+            realTime = Clock.System.now(),
+            simulatedTime = startDateTime
+        )
     }
 
     /**
@@ -138,11 +138,10 @@ class WWWSimulation(
      * To resume, call resume().
      */
     fun pause() {
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = calculateCurrentTime(),
-            )
+        lastCheckpoint = TimeCheckpoint(
+            realTime = Clock.System.now(),
+            simulatedTime = calculateCurrentTime()
+        )
         _speed = 0 // Set speed to 0 to effectively pause
     }
 
@@ -152,12 +151,12 @@ class WWWSimulation(
      */
     fun resume(resumeSpeed: Int = initialSpeed.takeIf { it > 0 } ?: 1) {
         // Only update the real time in the checkpoint, keep simulated time as is
-        lastCheckpoint =
-            TimeCheckpoint(
-                realTime = Clock.System.now(),
-                simulatedTime = lastCheckpoint.simulatedTime,
-            )
+        lastCheckpoint = TimeCheckpoint(
+            realTime = Clock.System.now(),
+            simulatedTime = lastCheckpoint.simulatedTime
+        )
         _speed = validateSpeed(resumeSpeed)
         initialSpeed = _speed
     }
+
 }

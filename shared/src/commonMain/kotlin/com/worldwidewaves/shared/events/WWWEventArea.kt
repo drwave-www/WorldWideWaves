@@ -4,10 +4,10 @@ package com.worldwidewaves.shared.events
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,9 +56,9 @@ import kotlin.random.Random
  *
  * Loads polygons from the event-specific cached GeoJSON (or an optional `bbox`
  * string override), then:
- *  • Caches the parsed polygons, computed bounding-box and center position.
- *  • Provides fast `isPositionWithin()` tests (bbox pre-check + polygon test).
- *  • Offers helpers such as `generateRandomPositionInArea()` for simulation.
+ *  • Caches the parsed polygons, computed bounding-box and center position.  
+ *  • Provides fast `isPositionWithin()` tests (bbox pre-check + polygon test).  
+ *  • Offers helpers such as `generateRandomPositionInArea()` for simulation.  
  *  • Exposes lazy `bbox()` / `getCenter()` accessors used by map & wave logic.
  *
  * All heavy I/O / parsing work is executed inside the provided
@@ -67,9 +67,9 @@ import kotlin.random.Random
 @Serializable
 data class WWWEventArea(
     val osmAdminids: List<Int>,
-    val bbox: String? = null,
-) : KoinComponent,
-    DataValidator {
+    val bbox: String? = null
+) : KoinComponent, DataValidator {
+
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
         get() = _event ?: throw IllegalStateException("Event not set")
@@ -87,14 +87,9 @@ data class WWWEventArea(
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     @Transient private var cachedAreaPolygons: Area? = null
-
-    @Transient private val polygonsCacheMutex = Mutex()
-
-        // Add mutex for cache protection
+    @Transient private val polygonsCacheMutex = Mutex() // Add mutex for cache protection
     @Transient private var cachedBoundingBox: BoundingBox? = null
-
     @Transient private var cachedCenter: Position? = null
-
     @Transient private var cachedPositionWithinResult: Pair<Position, Boolean>? = null
 
     @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
@@ -114,7 +109,8 @@ data class WWWEventArea(
      * It uses the event's ID to locate the file within the cache directory.
      *
      */
-    internal suspend fun getGeoJsonFilePath(): String? = getMapFileAbsolutePath(event.id, "geojson")
+    internal suspend fun getGeoJsonFilePath(): String? =
+        getMapFileAbsolutePath(event.id, "geojson")
 
     // ---------------------------
 
@@ -127,6 +123,7 @@ data class WWWEventArea(
      * the polygons using the ray-casting algorithm.
      */
     suspend fun isPositionWithin(position: Position): Boolean {
+
         // Check if the cached result is within the epsilon
         cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
             if (isPositionWithinEpsilon(position, cachedPosition)) {
@@ -136,8 +133,7 @@ data class WWWEventArea(
 
         // First, check if the position is within the bounding box (fast check)
         val boundingBox = bbox()
-        val isWithinBbox =
-            position.lat >= boundingBox.sw.lat &&
+        val isWithinBbox = position.lat >= boundingBox.sw.lat &&
                 position.lat <= boundingBox.ne.lat &&
                 position.lng >= boundingBox.sw.lng &&
                 position.lng <= boundingBox.ne.lng
@@ -157,10 +153,9 @@ data class WWWEventArea(
         return result
     }
 
-    private fun isPositionWithinEpsilon(
-        pos1: Position,
-        pos2: Position,
-    ): Boolean = abs(pos1.lat - pos2.lat) < positionEpsilon && abs(pos1.lng - pos2.lng) < positionEpsilon
+    private fun isPositionWithinEpsilon(pos1: Position, pos2: Position): Boolean {
+        return abs(pos1.lat - pos2.lat) < positionEpsilon && abs(pos1.lng - pos2.lng) < positionEpsilon
+    }
 
     // ---------------------------
 
@@ -180,8 +175,7 @@ data class WWWEventArea(
             val latRange = (bbox.ne.lat - bbox.sw.lat) * shrinkFactor
             val lngRange = (bbox.ne.lng - bbox.sw.lng) * shrinkFactor
 
-            repeat(20) {
-                // Try 20 times with current shrink factor
+            repeat(20) { // Try 20 times with current shrink factor
                 val randomLat = center.lat + (Random.nextDouble() - 0.5) * latRange
                 val randomLng = center.lng + (Random.nextDouble() - 0.5) * lngRange
                 val position = Position(randomLat, randomLng)
@@ -208,7 +202,7 @@ data class WWWEventArea(
                 if (coordinates.size >= 4) {
                     return BoundingBox.fromCorners(
                         sw = Position(lat = coordinates[1], lng = coordinates[0]),
-                        ne = Position(lat = coordinates[3], lng = coordinates[2]),
+                        ne = Position(lat = coordinates[3], lng = coordinates[2])
                     )
                 }
             } catch (e: Exception) {
@@ -230,21 +224,8 @@ data class WWWEventArea(
             return bbox
         }
 
-        // Try to extract bbox directly from GeoJSON if available
-        parseGeoJsonBbox()?.let { geoBbox ->
-            cachedBoundingBox = geoBbox
-            return geoBbox
-        }
-
-        // Fallback: compute extent by scanning every coordinate in the GeoJSON
-        computeExtentFromGeoJson()?.let { extentBbox ->
-            cachedBoundingBox = extentBbox
-            return extentBbox
-        }
-
         // Otherwise calculate from polygons
-        return getPolygons()
-            .takeIf { it.isNotEmpty() }
+        return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
                 polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
             } ?: BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
@@ -262,7 +243,7 @@ data class WWWEventArea(
         cachedCenter ?: bbox().let { bbox ->
             Position(
                 lat = (bbox.ne.lat + bbox.sw.lat) / 2,
-                lng = (bbox.ne.lng + bbox.sw.lng) / 2,
+                lng = (bbox.ne.lng + bbox.sw.lng) / 2
             ).also { cachedCenter = it }
         }
 
@@ -291,9 +272,6 @@ data class WWWEventArea(
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
                     val rootType = geoJsonData["type"]?.jsonPrimitive?.content
 
-                    // Now that we know the type, log it for diagnostics
-                    Log.i(::getPolygons.name, "${event.id}: GeoJSON rootType=$rootType")
-
                     when (rootType) {
                         "FeatureCollection" -> {
                             // Handle FeatureCollection format
@@ -312,66 +290,45 @@ data class WWWEventArea(
                         }
                     }
                 } ?: run {
-                    Log.e(::getPolygons.name, "${event.id}: Error loading geojson data for event")
+                    Log.e(::getPolygons.name,"${event.id}: Error loading geojson data for event")
                 }
             }
 
             // Atomically assign the complete immutable list
-            cachedAreaPolygons =
-                tempPolygons.toList().also {
-                    Log.i(::getPolygons.name, "${event.id}: Built ${it.size} polygons")
-                }
+            cachedAreaPolygons = tempPolygons.toList()
         }
 
         return cachedAreaPolygons ?: emptyList()
     }
 
-    private fun processGeometry(
-        geometry: JsonObject,
-        tempPolygons: MutableList<Polygon>,
-    ) {
+    private fun processGeometry(geometry: JsonObject, tempPolygons: MutableList<Polygon>) {
         val type = geometry["type"]?.jsonPrimitive?.content
         val coordinates = geometry["coordinates"]?.jsonArray
 
         when (type) {
-            // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
-            "Polygon" ->
-                coordinates?.forEach { ring ->
+            // Only keep the exterior ring for a single Polygon
+            "Polygon" -> coordinates?.forEach { ring ->
+                processRing(ring, tempPolygons)
+            }
+            // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
+            "MultiPolygon" -> coordinates?.forEach { multiPolygon ->
+                multiPolygon.jsonArray.forEach { ring ->
                     processRing(ring, tempPolygons)
                 }
-            // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
-            "MultiPolygon" ->
-                coordinates?.forEach { multiPolygon ->
-                    multiPolygon.jsonArray.forEach { ring ->
-                        processRing(ring, tempPolygons)
-                    }
-                }
+            }
             else -> {
                 Log.e(::getPolygons.name, "Unsupported geometry type: $type")
             }
         }
-
-        // Lightweight diagnostics
-        val ringsCount =
-            when (type) {
-                "Polygon" -> coordinates?.size ?: 0
-                "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
-                else -> 0
-            }
-        Log.d(::processGeometry.name, "${event.id}: processed geometry type=$type rings=$ringsCount")
     }
 
-    private fun processRing(
-        ring: JsonElement,
-        polygons: MutableArea,
-    ) {
-        val positions =
-            ring.jsonArray.map { point ->
-                Position(
-                    point.jsonArray[1].jsonPrimitive.double,
-                    point.jsonArray[0].jsonPrimitive.double,
-                ).constrainToBoundingBox()
-            }
+    private fun processRing(ring: JsonElement, polygons: MutableArea) {
+        val positions = ring.jsonArray.map { point ->
+            Position(
+                point.jsonArray[1].jsonPrimitive.double,
+                point.jsonArray[0].jsonPrimitive.double
+            ).constrainToBoundingBox()
+        }
 
         val polygon = positions.toPolygon
         if (polygon.size > 1) {
@@ -383,7 +340,7 @@ data class WWWEventArea(
         parseBboxString()?.let { bbox ->
             return Position(
                 lat = lat.coerceIn(bbox.sw.lat, bbox.ne.lat),
-                lng = lng.coerceIn(bbox.sw.lng, bbox.ne.lng),
+                lng = lng.coerceIn(bbox.sw.lng, bbox.ne.lng)
             )
         }
 
@@ -392,127 +349,10 @@ data class WWWEventArea(
 
     // ---------------------------
 
-    /**
-     * Attempt to read a \"bbox\" array from the GeoJSON root and convert it to BoundingBox.
-     * Format expected: [minLng, minLat, maxLng, maxLat].
-     */
-    private suspend fun parseGeoJsonBbox(): BoundingBox? =
-        try {
-            geoJsonDataProvider
-                .getGeoJsonData(event.id)
-                ?.get("bbox")
-                ?.jsonArray
-                ?.takeIf { it.size >= 4 }
-                ?.let { arr ->
-                    val minLng = arr[0].jsonPrimitive.double
-                    val minLat = arr[1].jsonPrimitive.double
-                    val maxLng = arr[2].jsonPrimitive.double
-                    val maxLat = arr[3].jsonPrimitive.double
-
-                    Log.i(
-                        ::parseGeoJsonBbox.name,
-                        "${event.id}: Using bbox from GeoJSON [$minLng,$minLat,$maxLng,$maxLat]",
-                    )
-
-                    BoundingBox.fromCorners(
-                        sw = Position(minLat, minLng),
-                        ne = Position(maxLat, maxLng),
-                    )
-                }
-        } catch (e: Exception) {
-            Log.w(
-                ::parseGeoJsonBbox.name,
-                "${event.id}: Malformed or missing bbox in GeoJSON (${e.message})",
-            )
-            null
+    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
+        when {
+            else -> { /* No validation errors */ }
         }
-    // ---------------------------
+    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventArea::class.simpleName}: $it" }
 
-    /**
-     * Compute an extent by scanning every coordinate pair in the GeoJSON.
-     * Useful when the file has no explicit \"bbox\" property and polygons
-     * parsing has not yet happened.
-     */
-    private suspend fun computeExtentFromGeoJson(): BoundingBox? =
-        try {
-            var minLat = Double.POSITIVE_INFINITY
-            var minLng = Double.POSITIVE_INFINITY
-            var maxLat = Double.NEGATIVE_INFINITY
-            var maxLng = Double.NEGATIVE_INFINITY
-            var pointsFound = 0
-
-            fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
-                // Deep-walk coordinates arrays of unknown depth
-                array.forEach { element ->
-                    if (element is kotlinx.serialization.json.JsonArray &&
-                        element.firstOrNull() is JsonElement &&
-                        element.first() is kotlinx.serialization.json.JsonPrimitive &&
-                        element.size == 2 &&
-                        element[0].jsonPrimitive.isString.not()
-                    ) {
-                        // Element looks like [lng,lat]
-                        val lng = element[0].jsonPrimitive.double
-                        val lat = element[1].jsonPrimitive.double
-                        minLat = minOf(minLat, lat)
-                        maxLat = maxOf(maxLat, lat)
-                        minLng = minOf(minLng, lng)
-                        maxLng = maxOf(maxLng, lng)
-                        pointsFound++
-                    } else if (element is kotlinx.serialization.json.JsonArray) {
-                        consumeCoords(element)
-                    }
-                }
-            }
-
-            geoJsonDataProvider.getGeoJsonData(event.id)?.let { root ->
-                when (root["type"]?.jsonPrimitive?.content) {
-                    "FeatureCollection" -> {
-                        root["features"]?.jsonArray?.forEach { feature ->
-                            feature.jsonObject["geometry"]
-                                ?.jsonObject
-                                ?.get("coordinates")
-                                ?.jsonArray
-                                ?.let { consumeCoords(it) }
-                        }
-                    }
-                    "Polygon", "MultiPolygon" -> {
-                        root["coordinates"]?.jsonArray?.let { consumeCoords(it) }
-                    }
-                }
-            }
-
-            if (pointsFound > 0) {
-                Log.i(
-                    ::computeExtentFromGeoJson.name,
-                    "${event.id}: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)",
-                )
-                BoundingBox.fromCorners(
-                    sw = Position(minLat, minLng),
-                    ne = Position(maxLat, maxLng),
-                )
-            } else {
-                Log.w(
-                    ::computeExtentFromGeoJson.name,
-                    "${event.id}: No coordinates found while scanning GeoJSON for extent",
-                )
-                null
-            }
-        } catch (e: Exception) {
-            Log.w(
-                ::computeExtentFromGeoJson.name,
-                "${event.id}: Error scanning GeoJSON for extent (${e.message})",
-            )
-            null
-        }
-
-    // ---------------------------
-
-    override fun validationErrors(): List<String>? =
-        mutableListOf<String>()
-            .apply {
-                when {
-                    else -> { /* No validation errors */ }
-                }
-            }.takeIf { it.isNotEmpty() }
-            ?.map { "${WWWEventArea::class.simpleName}: $it" }
 }

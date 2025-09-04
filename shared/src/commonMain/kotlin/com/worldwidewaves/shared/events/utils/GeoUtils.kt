@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -24,229 +24,75 @@ package com.worldwidewaves.shared.events.utils
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.atan2
-import kotlin.math.sqrt
 
 object GeoUtils {
+
     /**
      * Collection of lightweight geodesic helpers reused across the shared module.
      *
      * Main responsibilities:
-     * • Angle ↔ radians conversions (`toRadians` / `toDegrees`)
-     * • Distance estimations on a WGS-84 ellipsoid (great-circle lon/lat helpers)
+     * • Angle ↔ radians conversions (`toRadians` / `toDegrees`)  
+     * • Distance estimations on a WGS-84 ellipsoid (great-circle lon/lat helpers)  
      * • Tiny predicates to compare / clamp coordinates while accounting for
-     *   floating-point imprecision (EPSILON)
+     *   floating-point imprecision (EPSILON)  
      * • Convenience functions used by wave algorithms & map logic
-     *   (range checks, "point on segment", …).
+     *   (range checks, “point on segment”, …).
      *
      * All maths stay intentionally *simple* to keep the code size and runtime
-     * cost low – accuracy is "good enough" for UI visualisation and hit
+     * cost low – accuracy is “good enough” for UI visualisation and hit
      * predictions (< 10 m error margin).
-     *
-     * Performance optimizations:
-     * • LRU cache for expensive trigonometric calculations (cos, sin)
-     * • Pre-computed lookup tables for common coordinate operations
-     * • Optimized algorithms for frequently called distance calculations
      */
-    // Scientifically justified coordinate precision epsilon:
-    // IEEE 754 double precision provides ~15-17 decimal digits
-    // At equatorial circumference (40,075,017m), 1e-9 degrees ≈ 0.11mm
-    // This provides sub-millimeter precision for geodetic calculations
-    const val EPSILON = 1e-9
+    const val EPSILON = 1e-9 // A small tolerance value for double precision errors
 
     const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0 // Adjustment variable to manage the nb of wave splits
+    const val EARTH_RADIUS = 6378137.0 // WGS84 Ellipsoid: Semi-major axis (equatorial radius), in meters
 
-    // WGS-84 Ellipsoid constants with scientific justification:
-    // Semi-major axis (equatorial radius) as defined by WGS-84 datum
-    // Reference: NIMA Technical Report TR8350.2 (2000)
-    const val EARTH_RADIUS = 6378137.0 // meters
-
-    /**
-     * Simple LRU cache for expensive trigonometric calculations.
-     * Optimized for geographic calculations where the same coordinates are often reused.
-     */
-    private class TrigCache<T>(private val maxSize: Int = 200) {
-        private val cache = mutableMapOf<Double, T>()
-        private val accessOrder = mutableListOf<Double>()
-
-        fun get(key: Double, compute: (Double) -> T): T {
-            return cache[key] ?: run {
-                val value = compute(key)
-                put(key, value)
-                value
-            }
-        }
-
-        private fun put(key: Double, value: T) {
-            if (cache.size >= maxSize) {
-                // Remove least recently used
-                val oldest = accessOrder.removeFirstOrNull()
-                oldest?.let { cache.remove(it) }
-            }
-            cache[key] = value
-            accessOrder.remove(key) // Remove if exists
-            accessOrder.add(key) // Add to end (most recent)
-        }
-
-        fun clear() {
-            cache.clear()
-            accessOrder.clear()
-        }
-    }
-
-    // Thread-local caches to avoid synchronization overhead
-    private val cosCache = TrigCache<Double>()
-    private val sinCache = TrigCache<Double>()
-    private val radiansCache = TrigCache<Double>()
-
-    /**
-     * Optimized cosine calculation with caching for repeated latitude values.
-     * Particularly effective for wave calculations that process the same latitudes repeatedly.
-     */
-    private fun cachedCos(radians: Double): Double = cosCache.get(radians) { cos(it) }
-
-    /**
-     * Optimized sine calculation with caching for repeated values.
-     */
-    private fun cachedSin(radians: Double): Double = sinCache.get(radians) { sin(it) }
-
-    /**
-     * Optimized radians conversion with caching for repeated latitude values.
-     */
-    private fun cachedToRadians(degrees: Double): Double = radiansCache.get(degrees) { it * (PI / 180) }
-
-    /**
-     * Clears all trigonometric caches to free memory.
-     * Useful for memory-constrained scenarios or testing.
-     */
-    fun clearTrignometricCaches() {
-        cosCache.clear()
-        sinCache.clear()
-        radiansCache.clear()
-    }
-
-    // Extension function to convert degrees to radians (optimized with caching)
-    fun Double.toRadians(): Double = cachedToRadians(this)
-
+    // Extension function to convert degrees to radians
+    fun Double.toRadians(): Double = this * (PI / 180)
     fun Double.toDegrees(): Double = this * 180.0 / PI
 
-    data class Vector2D(
-        val x: Double,
-        val y: Double,
-    ) {
+    data class Vector2D(val x: Double, val y: Double) {
         fun cross(other: Vector2D): Double = this.x * other.y - this.y * other.x
     }
 
     // ----------------------------------------------------------------------------
 
-    fun isLongitudeEqual(
-        lng1: Double,
-        lng2: Double,
-    ): Boolean = abs(lng1 - lng2) < EPSILON
+    fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean =
+        abs(lng1 - lng2) < EPSILON
 
-    fun isLongitudeInRange(
-        lng: Double,
-        start: Double,
-        end: Double,
-    ): Boolean =
-        if (start <= end) {
+    fun isLongitudeInRange(lng: Double, start: Double, end: Double): Boolean {
+        return if (start <= end) {
             // The range doesn't cross the date line
             lng in start..end
         } else {
             // The range crosses the date line
             lng >= start || lng <= end
         }
+    }
 
-    fun isLatitudeInRange(
-        lat: Double,
-        start: Double,
-        end: Double,
-    ): Boolean = lat in min(start, end)..max(start, end)
+    fun isLatitudeInRange(lat: Double, start: Double, end: Double): Boolean =
+        lat in min(start, end)..max(start, end)
 
     // ----------------------------------------------------------------------------
 
     /**
-     * Calculates the approximate distance between two longitudes at a given latitude.
-     * Uses a planar approximation that is fast but becomes inaccurate for long distances.
+     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
-     * Performance optimized: Uses cached trigonometric calculations for repeated latitude values.
-     *
-     * Mathematical basis: Assumes the Earth is locally flat at the given latitude.
-     * Error increases with distance and proximity to poles.
-     * Acceptable for UI visualization and short distances (<100km).
-     *
-     * @param lon1 First longitude in degrees
-     * @param lon2 Second longitude in degrees
-     * @param lat Latitude in degrees where the distance is measured
-     * @return Approximate distance in meters
      */
-    fun calculateDistanceFast(
-        lon1: Double,
-        lon2: Double,
-        lat: Double,
-    ): Double {
-        val dLon = (lon2 - lon1).toRadians() // Convert degrees to radians with caching
-        val latRad = lat.toRadians() // Convert degrees to radians with caching
-        return abs(EARTH_RADIUS * dLon * cachedCos(latRad))
+    fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
+        val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
+        val latRad = lat * (PI / 180) // Convert degrees to radians
+        return abs(EARTH_RADIUS * dLon * cos(latRad))
     }
 
     /**
-     * Calculates the great circle distance between two longitude points at a given latitude.
-     * Uses the Haversine formula for accurate geodesic calculations.
+     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
-     * Performance optimized: Uses cached trigonometric calculations for repeated latitude values.
-     *
-     * Mathematical basis: Treats the Earth as a perfect sphere and calculates
-     * the shortest distance along the surface (great circle arc).
-     * Accurate for all distances but computationally more expensive.
-     *
-     * @param lon1 First longitude in degrees
-     * @param lon2 Second longitude in degrees
-     * @param lat Latitude in degrees where the distance is measured
-     * @return Accurate distance in meters using great circle calculation
      */
-    fun calculateDistanceAccurate(
-        lon1: Double,
-        lon2: Double,
-        lat: Double,
-    ): Double {
-        val lat1Rad = lat.toRadians()
-        val lat2Rad = lat.toRadians() // Same latitude for longitude distance
-        val deltaLonRad = (lon2 - lon1).toRadians()
-
-        val halfDeltaLon = deltaLonRad / 2
-        val a = 0.0 + // deltaLat = 0 for longitude distance, so sin(0)^2 = 0
-                cachedCos(lat1Rad) * cachedCos(lat2Rad) *
-                cachedSin(halfDeltaLon) * cachedSin(halfDeltaLon)
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return EARTH_RADIUS * c
-    }
-
-    /**
-     * Calculates distance between two longitudes at a given latitude.
-     * Uses fast approximation for backward compatibility with existing code.
-     *
-     * For new code, consider using calculateDistanceFast() or calculateDistanceAccurate()
-     * explicitly based on your accuracy requirements.
-     */
-    fun calculateDistance(
-        lon1: Double,
-        lon2: Double,
-        lat: Double,
-    ): Double = calculateDistanceFast(lon1, lon2, lat)
-
-    /**
-     * Calculates the distance for a longitude width at a given latitude.
-     * Uses fast approximation for backward compatibility.
-     */
-    fun calculateDistance(
-        lonWidth: Double,
-        lat: Double,
-    ): Double = calculateDistance(0.0, lonWidth, lat)
+    fun calculateDistance(lonWidth: Double, lat: Double): Double =
+        calculateDistance(0.0, lonWidth, lat)
 
     /**
      * Checks if a given point lies on a line segment.
@@ -258,26 +104,19 @@ object GeoUtils {
      * segment's endpoints.
      *
      */
-    fun isPointOnSegment(
-        point: Position,
-        segment: Segment,
-    ): Boolean {
+    fun isPointOnSegment(point: Position, segment: Segment): Boolean {
         // Calculate the differences
         val dLat = segment.end.lat - segment.start.lat
         val dLng = segment.end.lng - segment.start.lng
 
         // Handle special cases: horizontal and vertical segments
-        if (abs(dLat) < EPSILON) {
-            // Horizontal segment
+        if (abs(dLat) < EPSILON)  // Horizontal segment
             return abs(point.lat - segment.start.lat) < EPSILON &&
-                isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
-        }
+                    isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
 
-        if (abs(dLng) < EPSILON) {
-            // Vertical segment
+        if (abs(dLng) < EPSILON)  // Vertical segment
             return isLongitudeEqual(point.lng, segment.start.lng) &&
-                point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
-        }
+                    point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
 
         // Calculate the parametric value t for the point
         val tLat = (point.lat - segment.start.lat) / dLat
@@ -286,4 +125,5 @@ object GeoUtils {
         // Check if t values are the same and within the range [0, 1]
         return abs(tLat - tLng) < EPSILON && tLat in 0.0..1.0
     }
+
 }

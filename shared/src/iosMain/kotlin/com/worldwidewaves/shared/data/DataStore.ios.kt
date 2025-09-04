@@ -4,10 +4,10 @@ package com.worldwidewaves.shared.data
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,14 +29,13 @@ import platform.Foundation.NSUserDomainMask
 
 @OptIn(ExperimentalForeignApi::class)
 actual fun keyValueStorePath(): String {
-    val documentDirectory: NSURL? =
-        NSFileManager.defaultManager.URLForDirectory(
-            directory = NSDocumentDirectory,
-            inDomain = NSUserDomainMask,
-            appropriateForURL = null,
-            create = false,
-            error = null,
-        )
+    val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
+        directory = NSDocumentDirectory,
+        inDomain = NSUserDomainMask,
+        appropriateForURL = null,
+        create = false,
+        error = null,
+    )
 
     return requireNotNull(documentDirectory).path + "/$dataStoreFileName"
 }

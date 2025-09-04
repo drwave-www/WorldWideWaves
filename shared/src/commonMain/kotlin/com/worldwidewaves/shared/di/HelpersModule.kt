@@ -4,10 +4,10 @@ package com.worldwidewaves.shared.di
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,13 +36,12 @@ import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.SystemClock
 import org.koin.dsl.module
 
-val helpersModule =
-    module {
-        single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
-        factory { WWWShutdownHandler(get()) }
-        single<IClock> { SystemClock() }
-        single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }
-        single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
-        single<MapDataProvider> { DefaultMapDataProvider() }
-        single<EventsDecoder> { DefaultEventsDecoder() }
-    }
+val helpersModule = module {
+    single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
+    factory { WWWShutdownHandler(get()) }
+    single<IClock> { SystemClock() }
+    single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }
+    single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
+    single<MapDataProvider> { DefaultMapDataProvider() }
+    single<EventsDecoder> { DefaultEventsDecoder() }
+}

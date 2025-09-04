@@ -2,7 +2,7 @@
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -68,7 +68,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.compose.choreographies.WaveChoreographies
-import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
@@ -102,15 +101,13 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
+
     private val clock: IClock by inject()
 
     // ------------------------------------------------------------------------
 
     @Composable
-    override fun Screen(
-        modifier: Modifier,
-        event: IWWWEvent,
-    ) {
+    override fun Screen(modifier: Modifier, event: IWWWEvent) {
         val context = LocalContext.current
 
         // States
@@ -129,34 +126,25 @@ class WaveActivity : AbstractEventWaveActivity() {
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
         // Derive choreography active state
-        val isChoreographyActive =
-            remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-                isWarmingInProgress ||
-                    isGoingToBeHit ||
-                    run {
-                        if (hasBeenHit) {
-                            val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                            secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                        } else {
-                            false
-                        }
-                    }
+        val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
+            isWarmingInProgress || isGoingToBeHit || run {
+                if (hasBeenHit) {
+                    val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
+                    secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                } else false
             }
+        }
 
         // Construct the event Map
-        val eventMap =
-            remember(event.id) {
-                AndroidEventMap(
-                    event,
-                    onMapClick = {
-                        context.startActivity(
-                            Intent(context, EventFullMapActivity::class.java).apply {
-                                putExtra("eventId", event.id)
-                            },
-                        )
-                    },
-                )
-            }
+        val eventMap = remember(event.id) {
+            AndroidEventMap(event,
+                onMapClick = {
+                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
+                        putExtra("eventId", event.id)
+                    })
+                }
+            )
+        }
 
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
@@ -164,7 +152,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Play the hit sound when the user has been hit - FIXME: move in WaveProgressionObserver
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-            if (hasBeenHit && secondsSinceHit in 0..1 && !hasPlayedHitSound) {
+            if (hasBeenHit && secondsSinceHit in 0.. 1 && !hasPlayedHitSound) {
                 event.warming.playCurrentSoundChoreographyTone()
                 hasPlayedHitSound = true
             }
@@ -175,18 +163,16 @@ class WaveActivity : AbstractEventWaveActivity() {
 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
+
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 UserWaveStatusText(event)
-                eventMap.Screen(
-                    autoMapDownload = true,
-                    Modifier
-                        .fillMaxWidth()
-                        .height(calculatedHeight),
-                )
+                eventMap.Screen(autoMapDownload = true, Modifier
+                    .fillMaxWidth()
+                    .height(calculatedHeight))
                 WaveProgressionBar(event)
 
                 if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
@@ -199,25 +185,23 @@ class WaveActivity : AbstractEventWaveActivity() {
             WaveChoreographies(event, clock, Modifier.zIndex(10f))
 
             if (isChoreographyActive) { // Ensure counter is visible when choreography is active
-                WaveHitCounter(
-                    event,
+                WaveHitCounter(event,
                     Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 60.dp)
-                        .zIndex(15f),
+                        .zIndex(15f)
                 )
             }
+
         }
     }
+
 }
 
 // ------------------------------------------------------------------------
 
 @Composable
-fun MapZoomAndLocationUpdate(
-    event: IWWWEvent,
-    eventMap: AndroidEventMap,
-) {
+fun MapZoomAndLocationUpdate(event: IWWWEvent, eventMap: AndroidEventMap) {
     val scope = rememberCoroutineScope()
     val progression by event.observer.progression.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
@@ -234,33 +218,27 @@ fun MapZoomAndLocationUpdate(
 // ------------------------------------------------------------------------
 
 @Composable
-fun UserWaveStatusText(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier,
-) {
+fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
     val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
 
-    val message =
-        when {
-            eventStatus == Status.DONE -> MokoRes.strings.wave_done
-            hasBeenHit -> MokoRes.strings.wave_hit
-            isWarming && isInArea -> MokoRes.strings.wave_warming
-            isInArea -> MokoRes.strings.wave_be_ready
-            else -> MokoRes.strings.wave_is_running
-        }
+    val message = when {
+        eventStatus == Status.DONE -> MokoRes.strings.wave_done
+        hasBeenHit -> MokoRes.strings.wave_hit
+        isWarming && isInArea -> MokoRes.strings.wave_warming
+        isInArea -> MokoRes.strings.wave_be_ready
+        else -> MokoRes.strings.wave_is_running
+    }
 
     Box(
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
-        AutoResizeSingleLineText(
+        Text(
             text = stringResource(message),
-            style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
+            style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE)
         )
     }
 }
@@ -269,10 +247,7 @@ fun UserWaveStatusText(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun WaveProgressionBar(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier,
-) {
+fun WaveProgressionBar(event: IWWWEvent, modifier: Modifier = Modifier) {
     val progression by event.observer.progression.collectAsState()
     val isInArea by event.observer.userIsInArea.collectAsState()
     val userPositionRatio by event.observer.userPositionRatio.collectAsState()
@@ -288,16 +263,15 @@ fun WaveProgressionBar(
 
     Column(
         modifier = modifier.width(barWidth),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(DIM_WAVE_PROGRESSION_HEIGHT.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(extendedLight.quaternary.color),
-            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(DIM_WAVE_PROGRESSION_HEIGHT.dp)
+                .clip(RoundedCornerShape(25.dp))
+                .background(extendedLight.quaternary.color),
+            contentAlignment = Alignment.Center
         ) {
             WaveProgressionFillArea(progression)
 
@@ -305,7 +279,7 @@ fun WaveProgressionBar(
                 text = "${String.format("%.1f", progression)}%",
                 style = primaryColoredBoldTextStyle(DIM_WAVE_PROGRESSION_FONTSIZE),
                 color = Color.Black,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
         }
         if (isInArea) {
@@ -320,10 +294,9 @@ private fun WaveProgressionFillArea(progression: Double) {
     val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
 
     Canvas(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(barHeight.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(barHeight.dp)
     ) {
         val width = size.width
         val height = barHeight // Adjusted height
@@ -332,59 +305,50 @@ private fun WaveProgressionFillArea(progression: Double) {
         // Draw the progression bar
         drawRect(
             color = onQuinaryLight,
-            size = Size(traversedWidth, height),
+            size = Size(traversedWidth, height)
         )
         drawRect(
             color = quinaryLight,
             topLeft = Offset(traversedWidth, 0f),
-            size = Size(width - traversedWidth, height),
+            size = Size(width - traversedWidth, height)
         )
+
     }
 }
 
 @Composable
-fun UserPositionTriangle(
-    userPositionRatio: Double,
-    triangleSize: Float,
-    isGoingToBeHit: Boolean,
-    hasBeenHit: Boolean,
-) {
-    val triangleColor =
-        when {
-            isGoingToBeHit -> {
-                val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
-                val animatedColor by infiniteTransition.animateColor(
-                    initialValue = extraElementsLight,
-                    targetValue = tertiaryLight,
-                    animationSpec =
-                        infiniteRepeatable(
-                            animation = tween(durationMillis = 500),
-                            repeatMode = RepeatMode.Reverse,
-                        ),
-                    label = "BlinkingTriangleColorAnimation",
-                )
-                animatedColor
-            }
-            hasBeenHit -> onQuaternaryLight
-            else -> extraElementsLight
+fun UserPositionTriangle(userPositionRatio: Double, triangleSize: Float, isGoingToBeHit: Boolean, hasBeenHit: Boolean) {
+    val triangleColor = when {
+        isGoingToBeHit -> {
+            val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
+            val animatedColor by infiniteTransition.animateColor(
+                initialValue = extraElementsLight,
+                targetValue = tertiaryLight,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 500),
+                    repeatMode = RepeatMode.Reverse
+                ), label = "BlinkingTriangleColorAnimation"
+            )
+            animatedColor
         }
+        hasBeenHit -> onQuaternaryLight
+        else -> extraElementsLight
+    }
 
     Canvas(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(triangleSize.toInt().dp)
-                .padding(top = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(triangleSize.toInt().dp)
+            .padding(top = 4.dp)
     ) {
         val width = size.width
         val trianglePosition = (width * userPositionRatio).toFloat().coerceIn(0f, width)
-        val path =
-            Path().apply {
-                moveTo(trianglePosition, 0f)
-                lineTo(trianglePosition - triangleSize / 2f, triangleSize)
-                lineTo(trianglePosition + triangleSize / 2f, triangleSize)
-                close()
-            }
+        val path = Path().apply {
+            moveTo(trianglePosition, 0f)
+            lineTo(trianglePosition - triangleSize / 2f, triangleSize)
+            lineTo(trianglePosition + triangleSize / 2f, triangleSize)
+            close()
+        }
         drawPath(path, triangleColor, style = Fill)
     }
 }
@@ -392,10 +356,7 @@ fun UserPositionTriangle(
 // ------------------------------------------------------------------------
 
 @Composable
-fun WaveHitCounter(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier,
-) {
+fun WaveHitCounter(event: IWWWEvent, modifier: Modifier = Modifier) {
     val timeBeforeHitProgression by event.observer.timeBeforeHit.collectAsState()
     val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
 
@@ -408,11 +369,10 @@ fun WaveHitCounter(
         val boxWidth = screenWidthDp * 0.5f
 
         Box(
-            modifier =
-                modifier
-                    .width(boxWidth)
-                    .border(2.dp, onPrimaryLight),
-            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .width(boxWidth)
+                .border(2.dp, onPrimaryLight),
+            contentAlignment = Alignment.Center
         ) {
             AutoSizeText(
                 text = text,
@@ -420,10 +380,9 @@ fun WaveHitCounter(
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp)
             )
         }
     }
@@ -436,7 +395,7 @@ fun AutoSizeText(
     color: Color,
     textAlign: TextAlign,
     maxLines: Int,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     var fontSize by remember { mutableStateOf(style.fontSize) }
 
@@ -452,12 +411,12 @@ fun AutoSizeText(
                 fontSize = fontSize * 0.9f
             }
         },
-        modifier = modifier,
+        modifier = modifier
     )
 }
 
-private fun formatDuration(duration: Duration): String =
-    when {
+private fun formatDuration(duration: Duration): String {
+    return when {
         duration.isInfinite() || duration < Duration.ZERO -> "--:--" // Protection
         duration < 1.hours -> {
             val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
@@ -473,3 +432,5 @@ private fun formatDuration(duration: Duration): String =
 
         else -> EMPTY_COUNTER
     }
+}
+

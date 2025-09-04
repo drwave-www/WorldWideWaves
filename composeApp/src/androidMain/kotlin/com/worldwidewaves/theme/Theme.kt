@@ -4,7 +4,7 @@ package com.worldwidewaves.theme
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -44,76 +44,69 @@ data class ExtendedColorScheme(
     val quinary: ColorFamily,
 )
 
-private val lightScheme =
-    lightColorScheme(
-        primary = primaryLight,
-        onPrimary = onPrimaryLight,
-        primaryContainer = primaryContainerLight,
-        onPrimaryContainer = onPrimaryContainerLight,
-        secondary = secondaryLight,
-        onSecondary = onSecondaryLight,
-        secondaryContainer = secondaryContainerLight,
-        onSecondaryContainer = onSecondaryContainerLight,
-        tertiary = tertiaryLight,
-        onTertiary = onTertiaryLight,
-        tertiaryContainer = tertiaryContainerLight,
-        onTertiaryContainer = onTertiaryContainerLight,
-        error = errorLight,
-        onError = onErrorLight,
-        errorContainer = errorContainerLight,
-        onErrorContainer = onErrorContainerLight,
-        background = backgroundLight,
-        onBackground = onBackgroundLight,
-        surface = surfaceLight,
-        onSurface = onSurfaceLight,
-        surfaceVariant = surfaceVariantLight,
-        onSurfaceVariant = onSurfaceVariantLight,
-        outline = outlineLight,
-        outlineVariant = outlineVariantLight,
-        scrim = scrimLight,
-        inverseSurface = inverseSurfaceLight,
-        inverseOnSurface = inverseOnSurfaceLight,
-        inversePrimary = inversePrimaryLight,
-        surfaceDim = surfaceDimLight,
-        surfaceBright = surfaceBrightLight,
-        surfaceContainerLowest = surfaceContainerLowestLight,
-        surfaceContainerLow = surfaceContainerLowLight,
-        surfaceContainer = surfaceContainerLight,
-        surfaceContainerHigh = surfaceContainerHighLight,
-        surfaceContainerHighest = surfaceContainerHighestLight,
-    )
+private val lightScheme = lightColorScheme(
+    primary = primaryLight,
+    onPrimary = onPrimaryLight,
+    primaryContainer = primaryContainerLight,
+    onPrimaryContainer = onPrimaryContainerLight,
+    secondary = secondaryLight,
+    onSecondary = onSecondaryLight,
+    secondaryContainer = secondaryContainerLight,
+    onSecondaryContainer = onSecondaryContainerLight,
+    tertiary = tertiaryLight,
+    onTertiary = onTertiaryLight,
+    tertiaryContainer = tertiaryContainerLight,
+    onTertiaryContainer = onTertiaryContainerLight,
+    error = errorLight,
+    onError = onErrorLight,
+    errorContainer = errorContainerLight,
+    onErrorContainer = onErrorContainerLight,
+    background = backgroundLight,
+    onBackground = onBackgroundLight,
+    surface = surfaceLight,
+    onSurface = onSurfaceLight,
+    surfaceVariant = surfaceVariantLight,
+    onSurfaceVariant = onSurfaceVariantLight,
+    outline = outlineLight,
+    outlineVariant = outlineVariantLight,
+    scrim = scrimLight,
+    inverseSurface = inverseSurfaceLight,
+    inverseOnSurface = inverseOnSurfaceLight,
+    inversePrimary = inversePrimaryLight,
+    surfaceDim = surfaceDimLight,
+    surfaceBright = surfaceBrightLight,
+    surfaceContainerLowest = surfaceContainerLowestLight,
+    surfaceContainerLow = surfaceContainerLowLight,
+    surfaceContainer = surfaceContainerLight,
+    surfaceContainerHigh = surfaceContainerHighLight,
+    surfaceContainerHighest = surfaceContainerHighestLight,
+)
 
-val extendedLight =
-    ExtendedColorScheme(
-        quaternary =
-            ColorFamily(
-                quaternaryLight,
-                onQuaternaryLight,
-                quaternaryContainerLight,
-                onQuaternaryContainerLight,
-            ),
-        quinary =
-            ColorFamily(
-                quinaryLight,
-                onQuinaryLight,
-                quinaryContainerLight,
-                onQuinaryContainerLight,
-            ),
-    )
+val extendedLight = ExtendedColorScheme(
+    quaternary = ColorFamily(
+        quaternaryLight,
+        onQuaternaryLight,
+        quaternaryContainerLight,
+        onQuaternaryContainerLight,
+    ),
+    quinary = ColorFamily(
+        quinaryLight,
+        onQuinaryLight,
+        quinaryContainerLight,
+        onQuinaryContainerLight,
+    ),
+)
 
 @Immutable
 data class ColorFamily(
     val color: Color,
     val onColor: Color,
     val colorContainer: Color,
-    val onColorContainer: Color,
+    val onColorContainer: Color
 )
 
 @Composable
-fun AppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
+fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colorScheme = lightScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -127,13 +120,14 @@ fun AppTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
-        content = content,
+        content = content
     )
 }
 
 // -- WWW Text presets --------------------------------------------------------
 
-fun defaultTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = TextStyle(fontSize = fontSize.sp)
+fun defaultTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    TextStyle(fontSize = fontSize.sp)
 
 fun commonTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     defaultTextStyle(fontSize).copy(fontFamily = AppTypography.bodyMedium.fontFamily)
@@ -141,9 +135,11 @@ fun commonTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
 fun commonJustifiedTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     commonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
 
-fun commonBoldStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun commonBoldStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun primaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = commonTextStyle(fontSize).copy(color = lightScheme.primary)
+fun primaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    commonTextStyle(fontSize).copy(color = lightScheme.primary)
 
 fun primaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     primaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
@@ -157,11 +153,14 @@ fun quaternaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle 
 fun quinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
+fun extraTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
 
-fun extraBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun extraBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraLightTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+fun extraLightTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
 
 fun extraPrimaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
     extraTextStyle(fontSize).copy(color = lightScheme.primary)

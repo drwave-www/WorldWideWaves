@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events.utils
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -27,18 +27,13 @@ import kotlin.math.abs
 /**
  * Represents a segment defined by its start and end positions.
  */
-data class Segment(
-    val start: Position,
-    val end: Position,
-) {
+data class Segment(val start: Position, val end: Position) {
+
     /**
      * Calculates the intersection of the segment with a given longitude
      * and returns a CutPosition if the segment intersects the longitude.
      */
-    fun intersectWithLng(
-        cutId: Int,
-        cutLng: Double,
-    ): CutPosition? {
+    fun intersectWithLng(cutId: Int, cutLng: Double): CutPosition? {
         // Calculate the latitude of intersection
         val latDiff = end.lat - start.lat
         val lngDiff = end.lng - start.lng
@@ -67,10 +62,7 @@ data class Segment(
      * Calculates the intersection of the segment with a given other segment
      * and returns a CutPosition if the segments intersects.
      */
-    fun intersectWithSegment(
-        cutId: Int,
-        other: Segment,
-    ): CutPosition? {
+    fun intersectWithSegment(cutId: Int, other: Segment): CutPosition? {
         val (x1, y1) = start.lng to start.lat
         val (x2, y2) = end.lng to end.lat
         val (x3, y3) = other.start.lng to other.start.lat
@@ -89,19 +81,18 @@ data class Segment(
 
         // Determine cut side from the *polygon* segment (`other`)
         val (polyStart, polyEnd) = other.start to other.end
-        val (west, east) =
-            if (polyStart.lng <= polyEnd.lng) {
-                polyStart to polyEnd
-            } else {
-                polyEnd to polyStart
-            }
+        val (west, east) = if (polyStart.lng <= polyEnd.lng) {
+            polyStart to polyEnd
+        } else {
+            polyEnd to polyStart
+        }
 
         return CutPosition(
             lat = y,
             lng = x,
             cutId = cutId,
             cutLeft = west,
-            cutRight = east,
+            cutRight = east
         )
     }
 
@@ -122,7 +113,7 @@ data class Segment(
         if (abs(lngDiff) < EPSILON) return null
 
         val t = (cutLng - start.lng) / lngDiff
-        if (t < 0 || t > 1) return null // outside segment
+        if (t < 0 || t > 1) return null              // outside segment
 
         val lat = start.lat + t * latDiff
         return Position(lat, cutLng)
@@ -149,4 +140,5 @@ data class Segment(
         val y = y1 + ua * (y2 - y1)
         return Position(lat = y, lng = x)
     }
+
 }

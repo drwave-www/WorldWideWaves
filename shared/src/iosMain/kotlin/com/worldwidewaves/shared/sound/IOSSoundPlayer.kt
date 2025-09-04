@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.sound
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -35,9 +35,7 @@ import kotlin.time.Duration
  * iOS implementation of SoundPlayer using AVAudioEngine
  */
 @OptIn(ExperimentalForeignApi::class)
-class IOSSoundPlayer :
-    SoundPlayer,
-    VolumeController {
+class IOSSoundPlayer : SoundPlayer, VolumeController {
     private val audioSession = AVAudioSession.sharedInstance()
     private val audioEngine = AVAudioEngine()
 
@@ -45,17 +43,17 @@ class IOSSoundPlayer :
         setupAudioSession()
         setupAudioEngine()
     }
-
+    
     @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioSession() {
         audioSession.setCategory(
             AVAudioSessionCategoryPlayback,
             AVAudioSessionCategoryOptionMixWithOthers,
-            null,
+            null
         )
         audioSession.setActive(true, null)
     }
-
+    
     @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioEngine() {
         audioEngine.prepare()
@@ -63,7 +61,9 @@ class IOSSoundPlayer :
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    override fun getCurrentVolume(): Float = audioSession.outputVolume()
+    override fun getCurrentVolume(): Float {
+        return audioSession.outputVolume()
+    }
 
     override fun setVolume(level: Float) {
         // Note: iOS doesn't allow direct volume control from apps
@@ -75,7 +75,7 @@ class IOSSoundPlayer :
         frequency: Double,
         amplitude: Double,
         duration: Duration,
-        waveform: SoundPlayer.Waveform,
+        waveform: SoundPlayer.Waveform
     ) {
         try {
             // Implementation would use AVAudioSourceNode to generate tones

@@ -20,7 +20,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64(),
+        iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
@@ -82,10 +82,7 @@ kotlin {
 
 android {
     namespace = "com.worldwidewaves.shared"
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -103,16 +100,13 @@ android {
             listOf(
                 "META-INF/LICENSE.md",
                 "META-INF/LICENSE-notice.md",
-                "/META-INF/{AL2.0,LGPL2.1}",
-            ),
+                "/META-INF/{AL2.0,LGPL2.1}"
+            )
         )
     }
     defaultConfig {
         consumerProguardFiles("consumer-rules.pro")
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
@@ -122,7 +116,7 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
-
+        
         implementation(libs.maplibre.android)
     }
 
@@ -157,6 +151,7 @@ multiplatformResources {
     resourcesPackage.set("com.worldwidewaves.shared")
     resourcesClassName.set("MokoRes")
     iosBaseLocalizationRegion.set("en")
+
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {

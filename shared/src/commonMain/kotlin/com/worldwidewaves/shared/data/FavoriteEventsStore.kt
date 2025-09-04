@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.data
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -42,39 +42,33 @@ import kotlinx.coroutines.withContext
  *
  * A simple boolean preference is stored under the key `"favorite_<eventId>"`.
  * The class offers:
- * • `setFavoriteStatus()` – suspend function to update the flag
- * • `isFavorite()`        – suspend function to read the current value
+ * • `setFavoriteStatus()` – suspend function to update the flag  
+ * • `isFavorite()`        – suspend function to read the current value  
  *
  * All I/O happens on the supplied [dispatcher] (defaults to `Dispatchers.IO`).
  */
 class FavoriteEventsStore(
     private val dataStore: DataStore<Preferences>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    private fun favoriteKey(eventId: String): Preferences.Key<Boolean> = booleanPreferencesKey("favorite_$eventId")
 
-    suspend fun setFavoriteStatus(
-        eventId: String,
-        isFavorite: Boolean,
-    ) = withContext(dispatcher) {
-        try {
-            dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
-            Log.d("FavoriteEventsStore", "Successfully set favorite status for event $eventId: $isFavorite")
-        } catch (e: Exception) {
-            Log.e("FavoriteEventsStore", "Failed to set favorite status for event $eventId", throwable = e)
-            throw DataStoreException("Failed to update favorite status for event $eventId: ${e.message}", e)
-        }
+    private fun favoriteKey(eventId: String): Preferences.Key<Boolean> =
+        booleanPreferencesKey("favorite_$eventId")
+
+    suspend fun setFavoriteStatus(eventId: String, isFavorite: Boolean) = withContext(dispatcher) {
+        dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
     }
 
-    suspend fun isFavorite(eventId: String): Boolean =
-        withContext(dispatcher) {
-            dataStore.data
-                .catch {
-                    Log.e(::isFavorite.name, "Error reading favorites", throwable = it)
-                    emit(emptyPreferences())
-                }.map { it[favoriteKey(eventId)] ?: false }
-                .firstOrNull() ?: false
-        }
+    suspend fun isFavorite(eventId: String): Boolean = withContext(dispatcher) {
+        dataStore.data
+            .catch {
+                Log.e(::isFavorite.name, "Error reading favorites", throwable = it)
+                emit(emptyPreferences())
+            }
+            .map { it[favoriteKey(eventId)] ?: false }
+            .firstOrNull() ?: false
+    }
+
 }
 
 // ----------------------------
@@ -84,9 +78,7 @@ class FavoriteEventsStore(
  * `event.favorite`.  Called once after the event list has been instantiated so
  * UI layers start with the correct value.
  */
-class InitFavoriteEvent(
-    private val favoriteEventsStore: FavoriteEventsStore,
-) {
+class InitFavoriteEvent(private val favoriteEventsStore: FavoriteEventsStore) {
     suspend fun call(event: IWWWEvent) {
         event.favorite = favoriteEventsStore.isFavorite(event.id)
     }
@@ -98,13 +90,8 @@ class InitFavoriteEvent(
  * back into `event.favorite` so callers do not have to mutate the model
  * themselves.
  */
-class SetEventFavorite(
-    private val favoriteEventsStore: FavoriteEventsStore,
-) {
-    suspend fun call(
-        event: IWWWEvent,
-        isFavorite: Boolean,
-    ) = favoriteEventsStore
-        .setFavoriteStatus(event.id, isFavorite)
-        .also { event.favorite = isFavorite }
+class SetEventFavorite(private val favoriteEventsStore: FavoriteEventsStore) {
+    suspend fun call(event: IWWWEvent, isFavorite: Boolean) =
+        favoriteEventsStore.setFavoriteStatus(event.id, isFavorite)
+            .also { event.favorite = isFavorite }
 }

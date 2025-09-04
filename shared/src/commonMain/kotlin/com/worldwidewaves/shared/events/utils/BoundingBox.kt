@@ -6,7 +6,7 @@ import kotlin.math.abs
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -29,47 +29,41 @@ import kotlin.math.abs
  * Does not support International Date Line wrapping.
  *
  */
-class BoundingBox private constructor(
-    val sw: Position,
-    val ne: Position,
-) {
-    operator fun component1(): Position = sw
+class BoundingBox private constructor(val sw: Position, val ne: Position) {
 
+    operator fun component1(): Position = sw
     operator fun component2(): Position = ne
 
     constructor(swLat: Double, swLng: Double, neLat: Double, neLng: Double) : this(
         sw = Position(minOf(swLat, neLat), minOf(swLng, neLng)).init(),
-        ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init(),
+        ne = Position(maxOf(swLat, neLat), maxOf(swLng, neLng)).init()
     )
 
     // --- Companion object
 
     companion object {
-        fun fromCorners(
-            sw: Position,
-            ne: Position,
-        ): BoundingBox =
-            if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
+        fun fromCorners(sw: Position, ne: Position): BoundingBox {
+            return if (sw.lat <= ne.lat && sw.lng <= ne.lng) {
                 // Already in correct order, no need to create new objects
                 BoundingBox(sw, ne)
             } else {
                 BoundingBox(
                     sw = Position(minOf(sw.lat, ne.lat), minOf(sw.lng, ne.lng)).init(),
-                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init(),
+                    ne = Position(maxOf(sw.lat, ne.lat), maxOf(sw.lng, ne.lng)).init()
                 )
             }
+        }
 
         fun fromCorners(positions: List<Position>): BoundingBox? {
             if (positions.isEmpty()) return null
             val minLat = positions.minOf { it.lat }
             val maxLat = positions.maxOf { it.lat }
             val lngs = positions.map { it.lng }
-            val (swLng, neLng) =
-                if (lngs.max() - lngs.min() > 180) {
-                    lngs.max() to lngs.min()
-                } else {
-                    lngs.min() to lngs.max()
-                }
+            val (swLng, neLng) = if (lngs.max() - lngs.min() > 180) {
+                lngs.max() to lngs.min()
+            } else {
+                lngs.min() to lngs.max()
+            }
             return BoundingBox(minLat, swLng, maxLat, neLng)
         }
     }
@@ -90,22 +84,18 @@ class BoundingBox private constructor(
     val eastLongitude: Double get() = ne.lng
 
     val width: Double get() =
-        if (ne.lng >= sw.lng) {
-            ne.lng - sw.lng
-        } else {
-            360 - sw.lng + ne.lng
-        }
+        if (ne.lng >= sw.lng) ne.lng - sw.lng
+        else 360 - sw.lng + ne.lng
 
     val height: Double get() = ne.lat - sw.lat
 
     // --- Public methods
 
-    fun latitudeOfWidestPart(): Double =
-        when {
-            sw.lat <= 0 && ne.lat >= 0 -> 0.0 // Box crosses the equator
-            abs(sw.lat) < abs(ne.lat) -> sw.lat // Southern latitude is closer to equator
-            else -> ne.lat // Northern latitude is closer to equator
-        }
+    fun latitudeOfWidestPart(): Double = when {
+        sw.lat <= 0 && ne.lat >= 0 -> 0.0 // Box crosses the equator
+        abs(sw.lat) < abs(ne.lat) -> sw.lat // Southern latitude is closer to equator
+        else -> ne.lat // Northern latitude is closer to equator
+    }
 
     fun contains(position: Position): Boolean {
         val lat = position.lat
@@ -124,13 +114,14 @@ class BoundingBox private constructor(
         val lngDelta = width * (factor - 1) / 2
         return BoundingBox(
             sw = Position(minLatitude - latDelta, minLongitude - lngDelta),
-            ne = Position(maxLatitude + latDelta, maxLongitude + lngDelta),
+            ne = Position(maxLatitude + latDelta, maxLongitude + lngDelta)
         )
     }
 
     // --- Overrides
 
-    override fun equals(other: Any?): Boolean = this === other || (other is BoundingBox && sw == other.sw && ne == other.ne)
+    override fun equals(other: Any?): Boolean =
+        this === other || (other is BoundingBox && sw == other.sw && ne == other.ne)
 
     override fun hashCode(): Int = 31 * sw.hashCode() + ne.hashCode()
 }

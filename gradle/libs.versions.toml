@@ -1,7 +1,7 @@
 [versions]
 firebaseBom = "34.2.0"
 j2objcAnnotations = "2.8"
-agp = "8.13.0"
+agp = "8.11.1"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "35"
@@ -38,13 +38,10 @@ napier = "2.7.1"
 featureDeliveryKtx = "2.1.0"
 coreSplashscreen = "1.0.1"
 icerockMoko = "0.25.0"
-ktlint = "1.4.1"
-detekt = "1.23.7"
 
 [libraries]
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 j2objc-annotations = { group = "com.google.j2objc", name = "j2objc-annotations", version.ref = "j2objcAnnotations" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }
@@ -95,5 +92,3 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 android-dynamic-feature = { id = "com.android.dynamic-feature", version.ref = "agp" }
 licenseReport = { id = "com.github.jk1.dependency-license-report", version = "2.9" }
 icerock-moko-multiplatform = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "icerockMoko" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.1" }
-detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

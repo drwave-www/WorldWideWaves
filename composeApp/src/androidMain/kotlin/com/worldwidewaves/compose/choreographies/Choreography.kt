@@ -3,7 +3,7 @@
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
+ * countries, culminating in a global wave. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -66,22 +66,22 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
 
+@Composable
 /**
  * High-level choreography container displayed on the **Wave** screen.
  *
  * Behaviour:
  * • Subscribes to various flags exposed by [IWWWEvent.observer] to know whether
- *   the user is currently warming-up, about to be hit, or has just been hit.
+ *   the user is currently warming-up, about to be hit, or has just been hit.  
  * • According to those flags it queries the proper `ChoreographyManager`
- *   (warming / waiting / hit) to obtain a [DisplayableSequence].
+ *   (warming / waiting / hit) to obtain a [DisplayableSequence].  
  * • The resulting animation is shown while leaving room at the
  *   bottom for the count-down timer that the parent screen overlays.
  */
-@Composable
 fun WaveChoreographies(
     event: IWWWEvent,
     clock: IClock,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
@@ -104,12 +104,10 @@ fun WaveChoreographies(
                 showHitSequence = true
 
                 // Calculate remaining time to show
-                val remainingTimeMs =
-                    maxOf(
-                        0,
-                        WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
-                            (currentTime - hitDateTime).inWholeMilliseconds,
-                    )
+                val remainingTimeMs = maxOf(0,
+                    WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
+                            (currentTime - hitDateTime).inWholeMilliseconds
+                )
 
                 // Schedule hiding after the remaining time
                 delay(remainingTimeMs)
@@ -127,22 +125,19 @@ fun WaveChoreographies(
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
             // Get the current sequence
-            val warmingSequence =
-                remember(warmingKey) {
-                    event.warming.getCurrentChoregraphySequence()
-                }
+            val warmingSequence = remember(warmingKey) {
+                event.warming.getCurrentChoregraphySequence()
+            }
 
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
                     clock = clock,
-                    modifier =
-                        modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 120.dp),
-                    // Leave space for counter
-                    onSequenceComplete = { warmingKey++ },
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 120.dp), // Leave space for counter
+                    onSequenceComplete = { warmingKey++ }
                 )
             }
         }
@@ -154,7 +149,7 @@ fun WaveChoreographies(
                 clock,
                 Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp), // Leave space for counter
+                    .padding(bottom = 120.dp) // Leave space for counter
             )
         }
 
@@ -165,23 +160,23 @@ fun WaveChoreographies(
                 clock,
                 Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 120.dp), // Leave space for counter
+                    .padding(bottom = 120.dp) // Leave space for counter
             )
         }
     }
 }
 
+@Composable
 /**
  * Helper that renders [sequence] for its remaining duration (or full
  * [DisplayableSequence.duration] when `remainingDuration == null`) and then
  * triggers [onSequenceComplete] so the caller can request the next sequence.
  */
-@Composable
 fun TimedSequenceDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     clock: IClock,
     modifier: Modifier = Modifier,
-    onSequenceComplete: () -> Unit,
+    onSequenceComplete: () -> Unit
 ) {
     if (sequence == null) return
 
@@ -193,6 +188,7 @@ fun TimedSequenceDisplay(
     }
 }
 
+@Composable
 /**
  * Low-level renderer that plays a sprite-sheet based animation.
  *
@@ -201,11 +197,10 @@ fun TimedSequenceDisplay(
  * The animation loops according to [DisplayableSequence.loop] and is wrapped in
  * a semi-transparent card with the sequence’s localized caption underneath.
  */
-@Composable
 fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
     clock: IClock,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     if (sequence == null || sequence.image == null) return
 
@@ -243,30 +238,28 @@ fun ChoreographyDisplay(
     // Position the choreography in the center without taking full screen space
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.Center
     ) {
         Box(
-            modifier =
-                Modifier
-                    .widthIn(max = 400.dp)
-                    .heightIn(max = 600.dp)
-                    .padding(24.dp)
-                    .shadow(8.dp)
-                    .background(Color.Black.copy(alpha = 0.7f))
-                    .border(2.dp, Color.White, RoundedCornerShape(12.dp))
-                    .clip(RoundedCornerShape(12.dp))
-                    .padding(24.dp),
-            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .widthIn(max = 400.dp)
+                .heightIn(max = 600.dp)
+                .padding(24.dp)
+                .shadow(8.dp)
+                .background(Color.Black.copy(alpha = 0.7f))
+                .border(2.dp, Color.White, RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Canvas(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f), // Take available space but leave room for text
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f) // Take available space but leave room for text
                 ) {
                     val frameWidthPx = sequence.frameWidth.toFloat()
                     val frameHeightPx = sequence.frameHeight.toFloat()
@@ -286,19 +279,18 @@ fun ChoreographyDisplay(
                         left = offsetX,
                         top = offsetY,
                         right = offsetX + scaledWidth,
-                        bottom = offsetY + scaledHeight,
+                        bottom = offsetY + scaledHeight
                     ) {
                         translate(
                             left = offsetX - (currentImageIndex * scaledWidth),
-                            top = offsetY,
+                            top = offsetY
                         ) {
                             with(painter) {
                                 draw(
-                                    size =
-                                        Size(
-                                            width = scaledWidth * 4, // Always 4 frames per slide
-                                            height = scaledHeight,
-                                        ),
+                                    size = Size(
+                                        width = scaledWidth * 4, // Always 4 frames per slide
+                                        height = scaledHeight
+                                    )
                                 )
                             }
                         }
@@ -309,7 +301,7 @@ fun ChoreographyDisplay(
                     text = stringResource(sequence.text),
                     style = quinaryColoredBoldTextStyle(24),
                     color = Color.White,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Center
                 )
             }
         }
