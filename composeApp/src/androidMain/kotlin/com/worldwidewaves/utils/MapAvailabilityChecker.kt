@@ -30,20 +30,27 @@ import com.google.android.play.core.splitinstall.SplitInstallException
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.data.HiddenMapsStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * A utility class for checking and monitoring the availability of map feature modules.
  * Uses a reactive approach with StateFlow to notify observers of changes.
  * Automatically listens for module installation events.
  */
-class MapAvailabilityChecker(val context: Context) {
+class MapAvailabilityChecker(val context: Context) : KoinComponent {
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(context)
+
+    // Persisted store for “hidden” maps (deferred-uninstalled in this session)
+    private val hiddenMapsStore: HiddenMapsStore by inject()
 
     // A map of mapId to its availability state
     private val _mapStates = MutableStateFlow<Map<String, Boolean>>(emptyMap())
@@ -67,6 +74,15 @@ class MapAvailabilityChecker(val context: Context) {
     private val installStateListener: SplitInstallStateUpdatedListener
 
     init {
+        // Load previously hidden IDs from the DataStore so they persist across restarts
+        runBlocking {
+            try {
+                forcedUnavailable.addAll(hiddenMapsStore.getAll())
+            } catch (e: Exception) {
+                Log.e(::MapAvailabilityChecker.name, "Failed to load hidden maps set", e)
+            }
+        }
+
         // Create and register the installation state listener
         installStateListener = SplitInstallStateUpdatedListener { state ->
             when (state.status()) {
@@ -75,7 +91,13 @@ class MapAvailabilityChecker(val context: Context) {
                     // If this module had previously been “forced” unavailable
                     // (deferred uninstall), drop the override so it becomes
                     // visible again without requiring an app restart.
-                    state.moduleNames()?.forEach { forcedUnavailable.remove(it) }
+                    state.moduleNames()?.forEach { id ->
+                        forcedUnavailable.remove(id)
+                        // Also persist removal from the hidden set
+                        runBlocking {
+                            try { hiddenMapsStore.remove(id) } catch (_: Exception) { }
+                        }
+                    }
                     refreshAvailability()
                 }
                 SplitInstallSessionStatus.FAILED -> {
@@ -170,6 +192,10 @@ class MapAvailabilityChecker(val context: Context) {
                     // remainder of the session – Play Core keeps it around
                     // until next update but UI must reflect immediate removal.
                     forcedUnavailable.add(eventId)
+                    // Persist in DataStore so state survives process death
+                    runBlocking {
+                        try { hiddenMapsStore.add(eventId) } catch (_: Exception) { }
+                    }
 
                     // Update reactive state immediately
                     _mapStates.value = _mapStates.value.toMutableMap().apply {
@@ -201,6 +227,9 @@ class MapAvailabilityChecker(val context: Context) {
                         // Apply forced override so subsequent refreshes don’t
                         // resurrect the availability flag.
                         forcedUnavailable.add(eventId)
+                        runBlocking {
+                            try { hiddenMapsStore.add(eventId) } catch (_: Exception) { }
+                        }
 
                         // Update reactive state immediately
                         _mapStates.value = _mapStates.value.toMutableMap().apply {
