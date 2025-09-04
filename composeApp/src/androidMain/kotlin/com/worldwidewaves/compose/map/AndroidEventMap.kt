@@ -150,10 +150,6 @@ class AndroidEventMap(
     fun Screen(autoMapDownload: Boolean = false, modifier: Modifier) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val mapLibreView: MapView = rememberMapLibreViewWithLifecycle()
-        val mapViewModel: MapViewModel = viewModel()
-        val mapFeatureState by mapViewModel.featureState.collectAsState()
-
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
@@ -161,6 +157,14 @@ class AndroidEventMap(
         var isMapDownloading by remember { mutableStateOf(false) }
         // Guard to avoid auto-re-download after the user explicitly cancels
         var userCanceled by remember { mutableStateOf(false) }
+
+        // Re-create the MapView whenever availability flips so a fresh
+        // split-aware AssetManager is used.
+        val mapLibreView: MapView =
+            rememberMapLibreViewWithLifecycle(key = "${event.id}-${isMapAvailable}")
+
+        val mapViewModel: MapViewModel = viewModel()
+        val mapFeatureState by mapViewModel.featureState.collectAsState()
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
@@ -175,6 +179,9 @@ class AndroidEventMap(
                 is MapFeatureState.Downloading -> isMapDownloading = true
                 is MapFeatureState.Pending -> isMapDownloading = true
                 is MapFeatureState.Installed -> {
+                    // Make the just-installed split immediately visible to this
+                    // running Activity – required for MapLibre to see assets.
+                    (context as? AppCompatActivity)?.let { SplitCompat.installActivity(it) }
                     isMapDownloading = false
                     isMapAvailable = true
                     mapError = false

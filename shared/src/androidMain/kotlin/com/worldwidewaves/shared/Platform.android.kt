@@ -25,7 +25,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
@@ -77,7 +76,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
             SplitCompat.install(ctx)
             Pair(true, ctx.assets.open(assetPath))
         } catch (e: IOException) {
-            Log.d(
+            Log.e(
                 ::getMapFileAbsolutePath.name,
                 "Could not open asset $assetPath from context: ${e.message}"
             )
