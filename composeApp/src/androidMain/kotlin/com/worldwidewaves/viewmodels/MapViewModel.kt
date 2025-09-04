@@ -26,6 +26,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
@@ -67,6 +68,13 @@ sealed class MapFeatureState {
  */
 class MapViewModel(application: Application) : AndroidViewModel(application) {
 
+    /* --------------------------------------------------------------------- */
+    /*  Logging                                                              */
+    /* --------------------------------------------------------------------- */
+    private companion object {
+        private const val TAG = "MapInstall"
+    }
+
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
 
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
@@ -89,11 +97,21 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     // ------------------------------------------------------------------------
 
     private fun registerListener() {
+        Log.d(TAG, "registerListener()")
         installStateListener = SplitInstallStateUpdatedListener { state ->
             // Only process updates for our current session
-            if (state.sessionId() == currentSessionId || currentSessionId == 0) {
-                updateStateFromInstallState(state)
+            Log.d(
+                TAG,
+                "Listener update  session=${state.sessionId()}  status=${state.status()}  err=${state.errorCode()}  modules=${state.moduleNames()}  " +
+                    "bytes=${state.bytesDownloaded()}/${state.totalBytesToDownload()}"
+            )
+            
+            if (state.sessionId() != currentSessionId && currentSessionId != 0) {
+                Log.d(TAG, "Ignoring state for unrelated session ${state.sessionId()}")
+                return@SplitInstallStateUpdatedListener
             }
+            
+            updateStateFromInstallState(state)
         }
         installStateListener?.let {
             splitInstallManager.registerListener(it)
@@ -109,6 +127,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED) {
 
+            Log.w(TAG, "SERVICE_DIED for session ${state.sessionId()} – scheduling retry")
             // Get current module from state if possible, otherwise use last known module
             val moduleId = getCurrentModuleFromState(state) ?: currentMapId
 
@@ -119,6 +138,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 retryCount++
 
                 _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
+                Log.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
 
                 // Create a new request and retry
                 val request = SplitInstallRequest.newBuilder()
@@ -135,6 +155,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
         when (state.status()) {
             SplitInstallSessionStatus.DOWNLOADING -> {
+                Log.d(TAG, "Status: DOWNLOADING bytes=${state.bytesDownloaded()}/${state.totalBytesToDownload()}")
                 val totalBytes = state.totalBytesToDownload()
                 val downloadedBytes = state.bytesDownloaded()
                 val progressPercent = if (totalBytes > 0) {
@@ -144,12 +165,15 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 _featureState.value = MapFeatureState.Downloading(progressPercent)
             }
             SplitInstallSessionStatus.DOWNLOADED -> {
+                Log.d(TAG, "Status: DOWNLOADED")
                 _featureState.value = MapFeatureState.Downloading(100)
             }
             SplitInstallSessionStatus.INSTALLING -> {
+                Log.d(TAG, "Status: INSTALLING")
                 _featureState.value = MapFeatureState.Downloading(100)
             }
             SplitInstallSessionStatus.INSTALLED -> {
+                Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
                 // ------------------------------------------------------------------
                 //  Invalidate any cached resources that belong to the module(s)
                 //  that have just been installed to ensure we don't use stale files.
@@ -180,9 +204,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 currentSessionId = 0
             }
             SplitInstallSessionStatus.PENDING -> {
+                Log.d(TAG, "Status: PENDING")
                 _featureState.value = MapFeatureState.Pending
             }
             SplitInstallSessionStatus.FAILED -> {
+                Log.e(TAG, "Status: FAILED code=${state.errorCode()}")
                 _featureState.value = MapFeatureState.Failed(
                     state.errorCode(),
                     getErrorMessage(state.errorCode())
@@ -190,19 +216,24 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 currentSessionId = 0
             }
             SplitInstallSessionStatus.CANCELED -> {
+                Log.w(TAG, "Status: CANCELED")
                 _featureState.value = MapFeatureState.NotAvailable
                 currentSessionId = 0
             }
             SplitInstallSessionStatus.CANCELING -> {
+                Log.w(TAG, "Status: CANCELING")
                 _featureState.value = MapFeatureState.Canceling
             }
             SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
+                Log.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
                 _featureState.value = MapFeatureState.RequiresUserConfirmation(state)
             }
             SplitInstallSessionStatus.UNKNOWN -> {
+                Log.w(TAG, "Status: UNKNOWN")
                 _featureState.value = MapFeatureState.Unknown
             }
             else -> {
+                Log.w(TAG, "Status: default->UNKNOWN")
                 _featureState.value = MapFeatureState.Unknown
             }
         }
@@ -258,13 +289,17 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean = false) {
         viewModelScope.launch {
+            Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
             currentMapId = mapId
             if (splitInstallManager.installedModules.contains(mapId)) {
+                Log.d(TAG, "Map $mapId already installed")
                 _featureState.value = MapFeatureState.Available
             } else {
+                Log.d(TAG, "Map $mapId NOT installed")
                 _featureState.value = MapFeatureState.NotAvailable
                 // Only auto-download if explicitly requested
                 if (autoDownload) {
+                    Log.d(TAG, "Auto-downloading $mapId")
                     downloadMap(mapId)
                 }
             }
@@ -274,8 +309,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     // ------------------------------------------------------------------------
 
     fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)? = null) {
+        Log.i(TAG, "downloadMap called for $mapId")
         if (_featureState.value is MapFeatureState.Downloading ||
             _featureState.value is MapFeatureState.Pending) {
+            Log.w(TAG, "downloadMap ignored – already downloading")
             return // Already downloading
         }
 
@@ -300,11 +337,13 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         splitInstallManager.startInstall(request)
             .addOnSuccessListener { sessionId ->
+                Log.i(TAG, "startInstall success session=$sessionId")
                 currentSessionId = sessionId
                 retryCount = 0 // Reset retry count on success
                 onMapDownloaded?.invoke()
             }
             .addOnFailureListener { exception ->
+                Log.e(TAG, "startInstall failure ${exception.message}")
                 // Check if it's worth retrying
                 if (retryCount < maxRetries) {
                     // Use exponential backoff for retries
@@ -312,6 +351,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     retryCount++
 
                     _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
+                    Log.i(TAG, "Scheduling retry #$retryCount after ${nextDelay}ms")
 
                     // Schedule retry after delay
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -319,6 +359,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                     }, nextDelay)
                 } else {
                     // We've exhausted our retry attempts
+                    Log.e(TAG, "Exhausted retries for $mapId")
                     _featureState.value = MapFeatureState.Failed(
                         0,
                         StringDesc.Resource(
@@ -333,8 +374,11 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     fun cancelDownload() {
         if (currentSessionId > 0) {
+            Log.i(TAG, "cancelDownload session=$currentSessionId")
             splitInstallManager.cancelInstall(currentSessionId)
             // State will be updated via the listener when cancellation completes
+        } else {
+            Log.d(TAG, "cancelDownload ignored – no active session")
         }
     }
 
