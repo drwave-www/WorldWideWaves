@@ -26,7 +26,9 @@ import android.util.Log
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
+import com.google.android.play.core.splitinstall.SplitInstallException
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
+import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.worldwidewaves.shared.clearEventCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -161,8 +163,34 @@ class MapAvailabilityChecker(val context: Context) {
                     if (cont.isActive) cont.resume(true)
                 }
                 .addOnFailureListener { e ->
-                    Log.e("MapAvailabilityChecker", "Deferred uninstall failed for $eventId: ${e.message}")
-                    if (cont.isActive) cont.resume(false)
+                    // Treat some Play-Core errors as soft success so UI can proceed
+                    val softSuccess = if (e is SplitInstallException) {
+                        when (e.errorCode) {
+                            SplitInstallErrorCode.API_NOT_AVAILABLE,
+                            SplitInstallErrorCode.MODULE_UNAVAILABLE,
+                            SplitInstallErrorCode.SERVICE_DIED -> true
+                            else -> false
+                        }
+                    } else false
+
+                    if (softSuccess) {
+                        Log.w(
+                            "MapAvailabilityChecker",
+                            "Deferred uninstall failed for $eventId with soft-success code ${if (e is SplitInstallException) e.errorCode else "N/A"} – proceeding as success"
+                        )
+                        // Update reactive state immediately
+                        _mapStates.value = _mapStates.value.toMutableMap().apply {
+                            this[eventId] = false
+                        }
+                        try { clearEventCache(eventId) } catch (_: Exception) { }
+                        if (cont.isActive) cont.resume(true)
+                    } else {
+                        Log.e(
+                            "MapAvailabilityChecker",
+                            "Deferred uninstall failed for $eventId: ${e.message}"
+                        )
+                        if (cont.isActive) cont.resume(false)
+                    }
                 }
         } catch (e: Exception) {
             Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
