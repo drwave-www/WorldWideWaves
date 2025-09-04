@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.di
  */
 
 import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.HiddenMapsStore
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.data.createDataStore
@@ -31,7 +32,11 @@ import org.koin.dsl.module
 val datastoreModule = module {
     single { createDataStore { keyValueStorePath() } }
 
+    // Persistent stores ------------------------------------------------------
+
     single { FavoriteEventsStore(get()) }
+    single { HiddenMapsStore(get()) }
+
     factory { InitFavoriteEvent(favoriteEventsStore = get()) }
     factory { SetEventFavorite(favoriteEventsStore = get()) }
 }
