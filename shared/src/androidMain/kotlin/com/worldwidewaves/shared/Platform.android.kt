@@ -29,6 +29,7 @@ import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
