@@ -14,7 +14,7 @@
     <string name="back">Back</string>
 
     <!-- Context: In event and full map screens, to go to the wave screen, Size: Medium -->
-    <string name="wave_now">Wave Now!</string>
+    <string name="wave_now">Join the wave!</string>
 
     <!-- Context: In events list screen, text of the three events filtering tabs, Size: Short -->
     <string name="events_select_all">All</string> <!-- Select all events -->
@@ -101,7 +101,7 @@
     <string name="hour_plural">%1$dh</string>
 
     <!-- Context: In event screen, in the 'numbers' section, label of the numbers of the wave, Size: Short -->
-    <string name="be_waved">Take the wave!</string>
+    <string name="be_waved">The wave</string>
     <string name="wave_speed">Wave speed</string>
     <string name="wave_start_time">Start time</string>
     <string name="wave_end_time">End time</string>
@@ -354,7 +354,7 @@
     <string name="choreography_warming_seq_4">Go down and up!</string>
     <string name="choreography_warming_seq_5">Show the wave!</string>
     <string name="choreography_warming_seq_6">Cross arms!</string>
-    <string name="choreography_waiting">Prepare to wave!</string>
-    <string name="choreography_hit">Wave now!</string>
+    <string name="choreography_waiting">Prepare to jump!</string>
+    <string name="choreography_hit">Jump!</string>
 
 </resources>

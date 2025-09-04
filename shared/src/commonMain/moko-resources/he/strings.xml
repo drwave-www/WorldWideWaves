@@ -14,8 +14,8 @@
   <string name="tab_faq_name">שאלות נפוצות</string>
   <!-- src_hash: 75a4b3e5d71a1e8bf3eea6f1778e235d2b35b654 -->
   <string name="back">חזרה</string>
-  <!-- src_hash: 880b4619cd1efd31e6ce7572397108c20b87cc2c -->
-  <string name="wave_now">גל עכשיו!</string>
+  <!-- src_hash: e1fb89e37a8206dc26bc4d93617c7d8781fb5c91 -->
+  <string name="wave_now">הצטרפו לגל!</string>
   <!-- src_hash: 273bcbb57f83fa06ace883dc9ec14fb47023f28b -->
   <string name="events_select_all">הכול</string>
   <!-- src_hash: 03e38dd37aeefd3302e5cdefc25b1e92080be641 -->
@@ -136,8 +136,8 @@
   <string name="hour_singular">%1$dש׳</string>
   <!-- src_hash: fc642830934c01bac23af586fd05baa7b95dc514 -->
   <string name="hour_plural">%1$dש׳</string>
-  <!-- src_hash: 6f9044475ede97cfe53ac64edf9d4f3a81e9eafc -->
-  <string name="be_waved">הצטרפו לגל!</string>
+  <!-- src_hash: 34b78666a95b154897ab0f2f86dd51f62e7892c1 -->
+  <string name="be_waved">הגל</string>
   <!-- src_hash: cc2086a26a2847f6821d1da28d172bbb2f0b3c29 -->
   <string name="wave_speed">מהירות הגל</string>
   <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->
@@ -506,8 +506,8 @@
   <string name="choreography_warming_seq_5">הראו את הגל!</string>
   <!-- src_hash: 875921a9cd5816aad5de6dd126862778c7dac335 -->
   <string name="choreography_warming_seq_6">שילבו ידיים!</string>
-  <!-- src_hash: 5ef14a7119a00547b4706a9a3c1064f2affd9d06 -->
-  <string name="choreography_waiting">התכוננו לגל!</string>
-  <!-- src_hash: 93d09c25454a3fa16121861b4c96d74015b32260 -->
-  <string name="choreography_hit">עשו גל עכשיו!</string>
+  <!-- src_hash: 6e3fac340680de97285b8d870ac379a4735dca1a -->
+  <string name="choreography_waiting">התכוננו לקפוץ!</string>
+  <!-- src_hash: 6b959edcc7ff8f64aaa68f1eed65e84913eadc7a -->
+  <string name="choreography_hit">קפצו!</string>
 </resources>
