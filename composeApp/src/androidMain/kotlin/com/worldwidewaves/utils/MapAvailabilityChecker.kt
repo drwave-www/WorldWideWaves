@@ -27,9 +27,12 @@ import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
+import com.worldwidewaves.shared.clearEventCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.resume
 
 /**
  * A utility class for checking and monitoring the availability of map feature modules.
@@ -131,17 +134,39 @@ class MapAvailabilityChecker(val context: Context) {
         }
     }
 
-    fun uninstallMap(eventId: String) {
+    /**
+     * Uninstall the dynamic-feature module corresponding to [eventId].
+     *
+     * Returns `true` when the uninstall request was successfully scheduled,
+     * `false` otherwise.  On success the internal [_mapStates] flow is updated
+     * immediately and any cached artefacts are cleared so UI can reflect the
+     * change without polling.
+     */
+    suspend fun uninstallMap(eventId: String): Boolean = suspendCancellableCoroutine { cont ->
         try {
-            // Call the API to uninstall the feature module
             val splitInstallManager = SplitInstallManagerFactory.create(context)
 
-            // Directly call deferredUninstall with the module name
-            splitInstallManager.deferredUninstall(listOf(eventId))
+            splitInstallManager
+                .deferredUninstall(listOf(eventId))
+                .addOnSuccessListener {
+                    // Update reactive state immediately
+                    _mapStates.value = _mapStates.value.toMutableMap().apply {
+                        this[eventId] = false
+                    }
 
-            Log.i("MapAvailabilityChecker", "Uninstalled map for event: $eventId")
+                    // Best-effort cache cleanup – do not fail uninstall on errors
+                    try { clearEventCache(eventId) } catch (_: Exception) { }
+
+                    Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
+                    if (cont.isActive) cont.resume(true)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MapAvailabilityChecker", "Deferred uninstall failed for $eventId: ${e.message}")
+                    if (cont.isActive) cont.resume(false)
+                }
         } catch (e: Exception) {
-            Log.e("MapAvailabilityChecker", "Error uninstalling map for event $eventId: ${e.message}")
+            Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
+            if (cont.isActive) cont.resume(false)
         }
     }
 
