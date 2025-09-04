@@ -527,20 +527,15 @@ class EventsListScreen(
                                         scope.launch {
                                             isUninstalling = true
                                             try {
-                                                mapChecker.uninstallMap(eventId)
-
-                                                var success = false
-                                                repeat(20) { // ~5 seconds max
-                                                    kotlinx.coroutines.delay(250)
-                                                    mapChecker.refreshAvailability()
-                                                    if (!mapChecker.isMapDownloaded(eventId)) {
-                                                        success = true
-                                                        return@repeat
-                                                    }
-                                                }
+                                                // Use the new suspend uninstall API – returns true on success
+                                                val success = mapChecker.uninstallMap(eventId)
                                                 uninstallSucceeded = success
                                             } catch (e: Exception) {
-                                                Log.e("EventOverlayMapDownloaded", "Error uninstalling map for event $eventId", e)
+                                                Log.e(
+                                                    "EventOverlayMapDownloaded",
+                                                    "Error uninstalling map for event $eventId",
+                                                    e
+                                                )
                                                 uninstallSucceeded = false
                                             } finally {
                                                 isUninstalling = false
