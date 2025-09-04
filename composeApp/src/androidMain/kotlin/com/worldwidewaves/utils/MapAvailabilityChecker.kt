@@ -54,6 +54,15 @@ class MapAvailabilityChecker(val context: Context) {
     // Cache of queried map IDs to avoid unnecessary checks
     private val queriedMaps = ConcurrentHashMap.newKeySet<String>()
 
+    /**
+     * Modules for which we *pretend* unavailability even though Play-Core might
+     * keep them physically present until the next app update.  Populated when
+     * the user requests an uninstall and cleared automatically when Play
+     * notifies a fresh install of the same split.
+     */
+    private val forcedUnavailable =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
     // Listener for module installation events
     private val installStateListener: SplitInstallStateUpdatedListener
 
@@ -63,6 +72,10 @@ class MapAvailabilityChecker(val context: Context) {
             when (state.status()) {
                 SplitInstallSessionStatus.INSTALLED -> {
                     Log.d(::MapAvailabilityChecker.name, "Module installation completed")
+                    // If this module had previously been “forced” unavailable
+                    // (deferred uninstall), drop the override so it becomes
+                    // visible again without requiring an app restart.
+                    state.moduleNames()?.forEach { forcedUnavailable.remove(it) }
                     refreshAvailability()
                 }
                 SplitInstallSessionStatus.FAILED -> {
@@ -105,9 +118,11 @@ class MapAvailabilityChecker(val context: Context) {
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
 
-        // First add all queried maps
+        // First add all queried maps – honour any forced-uninstall overrides
         for (mapId in queriedMaps) {
-            updatedStates[mapId] = installedModules.contains(mapId)
+            val installed = installedModules.contains(mapId)
+            updatedStates[mapId] =
+                if (forcedUnavailable.contains(mapId)) false else installed
         }
 
         // Update the state flow with the new map
@@ -151,6 +166,11 @@ class MapAvailabilityChecker(val context: Context) {
             splitInstallManager
                 .deferredUninstall(listOf(eventId))
                 .addOnSuccessListener {
+                    // Mark this module as “virtually” unavailable for the
+                    // remainder of the session – Play Core keeps it around
+                    // until next update but UI must reflect immediate removal.
+                    forcedUnavailable.add(eventId)
+
                     // Update reactive state immediately
                     _mapStates.value = _mapStates.value.toMutableMap().apply {
                         this[eventId] = false
@@ -178,6 +198,10 @@ class MapAvailabilityChecker(val context: Context) {
                             "MapAvailabilityChecker",
                             "Deferred uninstall failed for $eventId with soft-success code ${if (e is SplitInstallException) e.errorCode else "N/A"} – proceeding as success"
                         )
+                        // Apply forced override so subsequent refreshes don’t
+                        // resurrect the availability flag.
+                        forcedUnavailable.add(eventId)
+
                         // Update reactive state immediately
                         _mapStates.value = _mapStates.value.toMutableMap().apply {
                             this[eventId] = false

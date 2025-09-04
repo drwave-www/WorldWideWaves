@@ -23,14 +23,10 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.events.utils.Position
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -50,23 +46,6 @@ class WWWPlatform(val name: String) {
      */
     private val _simulationChanged = MutableStateFlow(0)
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
-
-    // -------------------------------------------------------------------- //
-    //  Default simulation initialization (runs after properties are ready)
-    // -------------------------------------------------------------------- //
-
-    init {
-        val timeZone = TimeZone.of("Europe/Paris")
-        val now = LocalDateTime(2026, 7, 14, 17, 59).toInstant(timeZone)
-        setSimulation(
-            WWWSimulation(
-                now,
-                // Position(lat = 48.83625, lng = 2.46905),
-                Position(lat = 48.862725, lng = 2.287592),
-                WWWGlobals.DEFAULT_SPEED_SIMULATION
-            )
-        ) // In Paris, 1h is 2mn
-    }
 
     fun disableSimulation() {
         _simulation = null
