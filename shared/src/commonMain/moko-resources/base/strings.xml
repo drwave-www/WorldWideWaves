@@ -101,7 +101,7 @@
     <string name="hour_plural">%1$dh</string>
 
     <!-- Context: In event screen, in the 'numbers' section, label of the numbers of the wave, Size: Short -->
-    <string name="be_waved">be waved!</string>
+    <string name="be_waved">Take the wave!</string>
     <string name="wave_speed">Wave speed</string>
     <string name="wave_start_time">Start time</string>
     <string name="wave_end_time">End time</string>

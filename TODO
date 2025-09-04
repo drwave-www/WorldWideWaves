@@ -3,11 +3,11 @@ TODAY :
 
 - > PLAY STORE UPLOAD <
 
+- add Crashlytics : https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
 - logo WWW plutot que icone info dans la toolbar ?
 - image des choregraphies a revoir ?
 - GPS activation / deactivation
 - garder sur une ligne : dans event numbers, et event wave title
-- bouton 'on fait la vague' actif meme lorsque l'event n'est ni soon/active,... + pas dans la zone
 - Be waved : Take the wave
 
 ---------------------------------------------

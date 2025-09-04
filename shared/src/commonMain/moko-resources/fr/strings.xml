@@ -136,8 +136,8 @@
   <string name="hour_singular">%1$dh</string>
   <!-- src_hash: fc642830934c01bac23af586fd05baa7b95dc514 -->
   <string name="hour_plural">%1$dh</string>
-  <!-- src_hash: 9eef5d37ac16199ec0704b177ba0818bed78fa99 -->
-  <string name="be_waved">Faites la vague !</string>
+  <!-- src_hash: 6f9044475ede97cfe53ac64edf9d4f3a81e9eafc -->
+  <string name="be_waved">Rejoins la vague !</string>
   <!-- src_hash: cc2086a26a2847f6821d1da28d172bbb2f0b3c29 -->
   <string name="wave_speed">Vitesse de la vague</string>
   <!-- src_hash: 6420ffd910d0ed2c238fd650572dbfa4bd9eac7a -->

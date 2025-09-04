@@ -91,6 +91,7 @@ import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
+import com.worldwidewaves.compose.AutoResizeSingleLineText
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -236,9 +237,11 @@ fun UserWaveStatusText(event: IWWWEvent, modifier: Modifier = Modifier) {
         modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
+        AutoResizeSingleLineText(
             text = stringResource(message),
-            style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE)
+            style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
 }
