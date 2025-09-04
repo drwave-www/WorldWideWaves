@@ -1,6 +1,7 @@
 package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.Area
@@ -8,6 +9,8 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
+import dev.icerock.moko.resources.desc.desc
+import dev.icerock.moko.resources.desc.localized
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -46,7 +49,7 @@ import kotlin.time.toDuration
 @OptIn(ExperimentalTime::class)
 @Serializable
 /**
- * Base abstraction for the “wave” part of a World-Wide-Waves event.
+ * Base abstraction for the "wave" part of a World-Wide-Waves event.
  *
  * A wave is the dynamic entity that travels across the event area and drives most
  * of the real-time behaviour exposed to the UI:
@@ -171,7 +174,7 @@ abstract class WWWEventWave : KoinComponent, DataValidator {
     fun getLiteralFromProgression(progression: Double): String =
         if (progression.isNaN()) "N/A" else "${(progression * 10).roundToInt() / 10.0}%"
 
-    fun getLiteralSpeed(): String = "$speed m/s"
+    fun getLiteralSpeed(): String = "$speed ${MokoRes.strings.speed_unit_mps.desc().localized()}"
 
     // ---------------------------
 
