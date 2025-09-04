@@ -182,7 +182,6 @@ class AndroidEventMap(
                     mapError = true
                     isMapDownloading = false
                 }
-                is MapFeatureState.Canceled, 
                 is MapFeatureState.Canceling,
                 is MapFeatureState.NotAvailable -> {
                     isMapDownloading = false
