@@ -166,6 +166,8 @@ class AndroidEventMap(
         var isMapDownloading by remember { mutableStateOf(false) }
         // Guard to avoid auto-re-download after the user explicitly cancels
         var userCanceled by remember { mutableStateOf(false) }
+        // Guard to avoid double initialization attempts from AndroidView.update
+        var initStarted by remember { mutableStateOf(false) }
 
         // Re-create the MapView whenever availability flips so a fresh
         // split-aware AssetManager is used.
@@ -209,12 +211,16 @@ class AndroidEventMap(
                     isMapDownloading = false
                     isMapAvailable = true
                     mapError = false
+                    // Allow a fresh initialization attempt now that install finished
+                    initStarted = false
                 }
                 is MapFeatureState.Failed -> {
                     val errorCode = (mapFeatureState as MapFeatureState.Failed).errorCode
                     Log.e(TAG, "Map download failed: ${event.id}, errorCode=$errorCode")
                     mapError = true
                     isMapDownloading = false
+                    // Reset init flag so a new attempt can be triggered after failure
+                    initStarted = false
                 }
                 is MapFeatureState.Canceling -> {
                     Log.d(TAG, "Map download canceling: ${event.id}")
@@ -285,27 +291,11 @@ class AndroidEventMap(
             }
         }
 
-        // Setup Map Style and properties, initialize the map view if map is available
-        LaunchedEffect(isMapAvailable) {
-            Log.i(TAG, "Map availability changed: ${event.id}, available=$isMapAvailable")
-            if (isMapAvailable) {
-                Log.d(TAG, "Starting map load process")
-                loadMap(
-                    context = context,
-                    scope = scope,
-                    mapLibreView = mapLibreView,
-                    hasLocationPermission = hasLocationPermission,
-                    onMapLoaded = {
-                        Log.i(TAG, "Map successfully loaded: ${event.id}")
-                        isMapLoaded = true
-                        onMapLoaded()
-                    },
-                    onMapError = { 
-                        Log.e(TAG, "Error loading map: ${event.id}")
-                        mapError = true 
-                    }
-                )
-            } else if (autoMapDownload && !userCanceled) {
+        /* -----------------------------------------------------------------
+         * Auto-download map once when requested by caller
+         * ----------------------------------------------------------------- */
+        LaunchedEffect(isMapAvailable, autoMapDownload, userCanceled) {
+            if (!isMapAvailable && autoMapDownload && !userCanceled) {
                 Log.i(TAG, "Auto-downloading map: ${event.id}")
                 mapViewModel.downloadMap(event.id)
             }
@@ -324,7 +314,38 @@ class AndroidEventMap(
             // LibreMap as Android Composable - only visible when map is loaded
             AndroidView(
                 factory = { mapLibreView },
-                modifier = Modifier.fillMaxSize().alpha(if (isMapLoaded) 1f else 0f)
+                update = { v ->
+                    Log.d(
+                        TAG,
+                        "AndroidView.update called; isMapAvailable=$isMapAvailable, " +
+                            "isMapLoaded=$isMapLoaded, initStarted=$initStarted"
+                    )
+
+                    if (isMapAvailable && !isMapLoaded && !initStarted) {
+                        initStarted = true
+                        Log.i(TAG, "Starting map init from AndroidView.update")
+                        loadMap(
+                            context = context,
+                            scope = scope,
+                            mapLibreView = v,
+                            hasLocationPermission = hasLocationPermission,
+                            lifecycle = lifecycleOwner.lifecycle,
+                            onMapLoaded = {
+                                Log.i(TAG, "Map successfully loaded: ${event.id}")
+                                isMapLoaded = true
+                                onMapLoaded()
+                            },
+                            onMapError = {
+                                Log.e(TAG, "Error loading map: ${event.id}")
+                                mapError = true
+                                initStarted = false     // allow retry
+                            }
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(if (isMapLoaded) 1f else 0f)
             )
 
             // Show appropriate UI based on map state
@@ -374,11 +395,14 @@ class AndroidEventMap(
                                                 isMapDownloading = false
                                                 userCanceled = true
                                                 mapViewModel.cancelDownload()
+                    initStarted = false // allow fresh init after install
+                                                mapViewModel.cancelDownload()
                                             }
                                         )
                                     }
                                     is MapFeatureState.Installing -> {
                                         Log.d(TAG, "Showing installing indicator")
+                    initStarted = false // allow retry after failure
                                         DownloadProgressIndicator(
                                             progress = 100,
                                             message = "Installing..",
@@ -408,6 +432,7 @@ class AndroidEventMap(
                             onRetry = {
                                 Log.i(TAG, "User requested retry after error: ${event.id}")
                                 mapError = false
+                                initStarted = false // ensure re-initialisation can start
                                 mapViewModel.downloadMap(event.id)
                             }
                         )
@@ -457,6 +482,7 @@ class AndroidEventMap(
         scope: CoroutineScope,
         mapLibreView: MapView,
         hasLocationPermission: Boolean,
+        lifecycle: Lifecycle,
         onMapLoaded: () -> Unit,
         onMapError: () -> Unit = {}
     ) {
@@ -511,12 +537,19 @@ class AndroidEventMap(
                                 uri.toString(),
                                 onMapLoaded = {
                                     Log.i(TAG, "Map setup complete, initializing location if needed")
-                                    // Initialize location component if permission granted
-                                    if (hasLocationPermission) {
-                                        Log.d(TAG, "Setting up location component (permission granted)")
+                                    // Initialize location component only if permission granted
+                                    // *and* the lifecycle is at least STARTED (Activity/Fragment visible).
+                                    if (hasLocationPermission && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                                        Log.d(
+                                            TAG,
+                                            "Setting up location component (permission granted & lifecycle STARTED+)"
+                                        )
                                         setupMapLocationComponent(map, context)
                                     } else {
-                                        Log.d(TAG, "Skipping location component (no permission)")
+                                        Log.d(
+                                            TAG,
+                                            "Skipping location component init (permission=$hasLocationPermission, lifecycle=${lifecycle.currentState})"
+                                        )
                                     }
                                     onMapLoaded()
                                 },
