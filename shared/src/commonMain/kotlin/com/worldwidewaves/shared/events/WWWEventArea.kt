@@ -224,6 +224,18 @@ data class WWWEventArea(
             return bbox
         }
 
+        // Try to extract bbox directly from GeoJSON if available
+        parseGeoJsonBbox()?.let { geoBbox ->
+            cachedBoundingBox = geoBbox
+            return geoBbox
+        }
+
+        // Fallback: compute extent by scanning every coordinate in the GeoJSON
+        computeExtentFromGeoJson()?.let { extentBbox ->
+            cachedBoundingBox = extentBbox
+            return extentBbox
+        }
+
         // Otherwise calculate from polygons
         return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
@@ -272,6 +284,9 @@ data class WWWEventArea(
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
                     val rootType = geoJsonData["type"]?.jsonPrimitive?.content
 
+                    // Now that we know the type, log it for diagnostics
+                    Log.i(::getPolygons.name, "${event.id}: GeoJSON rootType=$rootType")
+
                     when (rootType) {
                         "FeatureCollection" -> {
                             // Handle FeatureCollection format
@@ -295,7 +310,9 @@ data class WWWEventArea(
             }
 
             // Atomically assign the complete immutable list
-            cachedAreaPolygons = tempPolygons.toList()
+            cachedAreaPolygons = tempPolygons.toList().also {
+                Log.i(::getPolygons.name, "${event.id}: Built ${it.size} polygons")
+            }
         }
 
         return cachedAreaPolygons ?: emptyList()
@@ -306,7 +323,7 @@ data class WWWEventArea(
         val coordinates = geometry["coordinates"]?.jsonArray
 
         when (type) {
-            // Only keep the exterior ring for a single Polygon
+            // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
             "Polygon" -> coordinates?.forEach { ring ->
                 processRing(ring, tempPolygons)
             }
@@ -320,6 +337,14 @@ data class WWWEventArea(
                 Log.e(::getPolygons.name, "Unsupported geometry type: $type")
             }
         }
+
+        // Lightweight diagnostics
+        val ringsCount = when (type) {
+            "Polygon" -> coordinates?.size ?: 0
+            "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
+            else -> 0
+        }
+        Log.d(::processGeometry.name, "${event.id}: processed geometry type=$type rings=$ringsCount")
     }
 
     private fun processRing(ring: JsonElement, polygons: MutableArea) {
@@ -346,6 +371,111 @@ data class WWWEventArea(
 
         return this
     }
+
+    // ---------------------------
+
+    /**
+     * Attempt to read a \"bbox\" array from the GeoJSON root and convert it to BoundingBox.
+     * Format expected: [minLng, minLat, maxLng, maxLat].
+     */
+    private suspend fun parseGeoJsonBbox(): BoundingBox? {
+        return try {
+            geoJsonDataProvider.getGeoJsonData(event.id)
+                ?.get("bbox")
+                ?.jsonArray
+                ?.takeIf { it.size >= 4 }
+                ?.let { arr ->
+                    val minLng = arr[0].jsonPrimitive.double
+                    val minLat = arr[1].jsonPrimitive.double
+                    val maxLng = arr[2].jsonPrimitive.double
+                    val maxLat = arr[3].jsonPrimitive.double
+
+                    Log.i(::parseGeoJsonBbox.name,
+                        "${event.id}: Using bbox from GeoJSON [$minLng,$minLat,$maxLng,$maxLat]")
+
+                    BoundingBox.fromCorners(
+                        sw = Position(minLat, minLng),
+                        ne = Position(maxLat, maxLng)
+                    )
+                }
+        } catch (e: Exception) {
+            Log.w(::parseGeoJsonBbox.name,
+                "${event.id}: Malformed or missing bbox in GeoJSON (${e.message})")
+            null
+        }
+    }
+    // ---------------------------
+
+    /**
+     * Compute an extent by scanning every coordinate pair in the GeoJSON.
+     * Useful when the file has no explicit \"bbox\" property and polygons
+     * parsing has not yet happened.
+     */
+    private suspend fun computeExtentFromGeoJson(): BoundingBox? =
+        try {
+            var minLat = Double.POSITIVE_INFINITY
+            var minLng = Double.POSITIVE_INFINITY
+            var maxLat = Double.NEGATIVE_INFINITY
+            var maxLng = Double.NEGATIVE_INFINITY
+            var pointsFound = 0
+
+            fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
+                // Deep-walk coordinates arrays of unknown depth
+                array.forEach { element ->
+                    if (element is JsonElement && element is kotlinx.serialization.json.JsonArray &&
+                        element.firstOrNull() is JsonElement &&
+                        element.first() is kotlinx.serialization.json.JsonPrimitive &&
+                        element.size == 2 &&
+                        element[0].jsonPrimitive.isString.not()
+                    ) {
+                        // Element looks like [lng,lat]
+                        val lng = element[0].jsonPrimitive.double
+                        val lat = element[1].jsonPrimitive.double
+                        minLat = minOf(minLat, lat)
+                        maxLat = maxOf(maxLat, lat)
+                        minLng = minOf(minLng, lng)
+                        maxLng = maxOf(maxLng, lng)
+                        pointsFound++
+                    } else if (element is kotlinx.serialization.json.JsonArray) {
+                        consumeCoords(element)
+                    }
+                }
+            }
+
+            geoJsonDataProvider.getGeoJsonData(event.id)?.let { root ->
+                when (root["type"]?.jsonPrimitive?.content) {
+                    "FeatureCollection" -> {
+                        root["features"]?.jsonArray?.forEach { feature ->
+                            feature.jsonObject["geometry"]?.jsonObject
+                                ?.get("coordinates")?.jsonArray?.let { consumeCoords(it) }
+                        }
+                    }
+                    "Polygon", "MultiPolygon" -> {
+                        root["coordinates"]?.jsonArray?.let { consumeCoords(it) }
+                    }
+                }
+            }
+
+            if (pointsFound > 0) {
+                Log.i(
+                    ::computeExtentFromGeoJson.name,
+                    "${event.id}: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)"
+                )
+                BoundingBox.fromCorners(
+                    sw = Position(minLat, minLng),
+                    ne = Position(maxLat, maxLng)
+                )
+            } else {
+                Log.w(::computeExtentFromGeoJson.name,
+                    "${event.id}: No coordinates found while scanning GeoJSON for extent")
+                null
+            }
+        } catch (e: Exception) {
+            Log.w(::computeExtentFromGeoJson.name,
+                "${event.id}: Error scanning GeoJSON for extent (${e.message})")
+            null
+        }
+
 
     // ---------------------------
 

@@ -42,6 +42,7 @@ icerockMoko = "0.25.0"
 [libraries]
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics-ndk = { module = "com.google.firebase:firebase-crashlytics-ndk" }
 j2objc-annotations = { group = "com.google.j2objc", name = "j2objc-annotations", version.ref = "j2objcAnnotations" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotationJvm" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStorePreferences" }

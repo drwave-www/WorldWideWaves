@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 kotlin {
@@ -53,8 +54,8 @@ android {
         applicationId = "com.worldwidewaves"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 18
-        versionName = "v0.14"
+        versionCode = 20
+        versionName = "v0.16"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
@@ -160,5 +161,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
 }
