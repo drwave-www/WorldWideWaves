@@ -224,6 +224,12 @@ data class WWWEventArea(
             return bbox
         }
 
+        // Try to extract bbox directly from GeoJSON if available
+        parseGeoJsonBbox()?.let { geoBbox ->
+            cachedBoundingBox = geoBbox
+            return geoBbox
+        }
+
         // Otherwise calculate from polygons
         return getPolygons().takeIf { it.isNotEmpty() }
             ?.let {
@@ -272,6 +278,9 @@ data class WWWEventArea(
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
                     val rootType = geoJsonData["type"]?.jsonPrimitive?.content
 
+                    // Now that we know the type, log it for diagnostics
+                    Log.i(::getPolygons.name, "${event.id}: GeoJSON rootType=$rootType")
+
                     when (rootType) {
                         "FeatureCollection" -> {
                             // Handle FeatureCollection format
@@ -295,7 +304,9 @@ data class WWWEventArea(
             }
 
             // Atomically assign the complete immutable list
-            cachedAreaPolygons = tempPolygons.toList()
+            cachedAreaPolygons = tempPolygons.toList().also {
+                Log.i(::getPolygons.name, "${event.id}: Built ${it.size} polygons")
+            }
         }
 
         return cachedAreaPolygons ?: emptyList()
@@ -306,7 +317,7 @@ data class WWWEventArea(
         val coordinates = geometry["coordinates"]?.jsonArray
 
         when (type) {
-            // Only keep the exterior ring for a single Polygon
+            // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
             "Polygon" -> coordinates?.forEach { ring ->
                 processRing(ring, tempPolygons)
             }
@@ -320,6 +331,14 @@ data class WWWEventArea(
                 Log.e(::getPolygons.name, "Unsupported geometry type: $type")
             }
         }
+
+        // Lightweight diagnostics
+        val ringsCount = when (type) {
+            "Polygon" -> coordinates?.size ?: 0
+            "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
+            else -> 0
+        }
+        Log.d(::processGeometry.name, "${event.id}: processed geometry type=$type rings=$ringsCount")
     }
 
     private fun processRing(ring: JsonElement, polygons: MutableArea) {
@@ -345,6 +364,39 @@ data class WWWEventArea(
         }
 
         return this
+    }
+
+    // ---------------------------
+
+    /**
+     * Attempt to read a \"bbox\" array from the GeoJSON root and convert it to BoundingBox.
+     * Format expected: [minLng, minLat, maxLng, maxLat].
+     */
+    private suspend fun parseGeoJsonBbox(): BoundingBox? {
+        return try {
+            geoJsonDataProvider.getGeoJsonData(event.id)
+                ?.get("bbox")
+                ?.jsonArray
+                ?.takeIf { it.size >= 4 }
+                ?.let { arr ->
+                    val minLng = arr[0].jsonPrimitive.double
+                    val minLat = arr[1].jsonPrimitive.double
+                    val maxLng = arr[2].jsonPrimitive.double
+                    val maxLat = arr[3].jsonPrimitive.double
+
+                    Log.i(::parseGeoJsonBbox.name,
+                        "${event.id}: Using bbox from GeoJSON [$minLng,$minLat,$maxLng,$maxLat]")
+
+                    BoundingBox.fromCorners(
+                        sw = Position(minLat, minLng),
+                        ne = Position(maxLat, maxLng)
+                    )
+                }
+        } catch (e: Exception) {
+            Log.w(::parseGeoJsonBbox.name,
+                "${event.id}: Malformed or missing bbox in GeoJSON (${e.message})")
+            null
+        }
     }
 
     // ---------------------------
