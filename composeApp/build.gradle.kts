@@ -54,8 +54,8 @@ android {
         applicationId = "com.worldwidewaves"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 19
-        versionName = "v0.15"
+        versionCode = 20
+        versionName = "v0.16"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
