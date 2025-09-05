@@ -104,6 +104,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         // Update adapter with initial camera position
         updateCameraInfo()
 
+        // Debug: log initial camera details
+        Log.i(
+            "Camera",
+            "Initial camera: target=${map.cameraPosition.target?.latitude}," +
+                    "${map.cameraPosition.target?.longitude} " +
+                    "zoom=${map.cameraPosition.zoom}"
+        )
+
         // Set camera movement listener to update position
         map.addOnCameraIdleListener {
             updateCameraInfo()
@@ -118,7 +126,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun setStyle(stylePath: String, callback: () -> Unit?) {
         require(mapLibreMap != null)
-        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { style -> callback() }
+        // Log style application start – helps diagnose early style failures
+        Log.d("MapStyle", "Applying style from URI: $stylePath")
+
+        mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
+            // Log successful style load – confirms MapLibre has parsed the style
+            Log.i("MapStyle", "Style loaded successfully")
+            callback()
+        }
     }
 
     fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
@@ -214,12 +229,23 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun moveCamera(bounds: BoundingBox) {
         require(mapLibreMap != null)
+        Log.d(
+            "Camera",
+            "Moving camera to bounds: SW=${bounds.southwest.latitude},${bounds.southwest.longitude} " +
+                    "NE=${bounds.northeast.latitude},${bounds.northeast.longitude}"
+        )
         val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds.toLatLngBounds(), 0)
         mapLibreMap!!.moveCamera(cameraUpdate)
     }
 
     override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
+
+        Log.d(
+            "Camera",
+            "Animating to position: lat=${position.latitude}, " +
+                    "lng=${position.longitude}, zoom=$zoom"
+        )
 
         val builder = CameraPosition.Builder()
             .target(LatLng(position.latitude, position.longitude))
@@ -248,6 +274,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun animateCameraToBounds(bounds: BoundingBox, padding: Int, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
 
+        Log.d(
+            "Camera",
+            "Animating to bounds: SW=${bounds.southwest.latitude}," +
+                    "${bounds.southwest.longitude} " +
+                    "NE=${bounds.northeast.latitude},${bounds.northeast.longitude} " +
+                    "padding=$padding"
+        )
+
         val latLngBounds = LatLngBounds.Builder()
             .include(LatLng(bounds.southwest.latitude, bounds.southwest.longitude))
             .include(LatLng(bounds.northeast.latitude, bounds.northeast.longitude))
@@ -271,6 +305,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
+
+        Log.d(
+            "Camera",
+            "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
+                    "${constraintBounds.southwest.longitude} " +
+                    "NE=${constraintBounds.northeast.latitude},${constraintBounds.northeast.longitude}"
+        )
+
         mapLibreMap!!.setLatLngBoundsForCameraTarget(constraintBounds.toLatLngBounds())
     }
 
@@ -327,6 +369,14 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun drawOverridenBbox(bbox: BoundingBox) {
         require(mapLibreMap != null)
+
+        Log.d(
+            "Camera",
+            "Drawing override bbox: SW=${bbox.southwest.latitude}," +
+                    "${bbox.southwest.longitude} " +
+                    "NE=${bbox.northeast.latitude},${bbox.northeast.longitude}"
+        )
+
 
         mapLibreMap!!.style?.let { style ->
             val rectangleCoordinates = listOf(

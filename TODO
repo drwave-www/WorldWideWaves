@@ -3,12 +3,12 @@ TODAY :
 
 - > PLAY STORE UPLOAD <
 
+- forcer un timing avant de redemander l'acces au GPS si l'utilisateur a refuse
+   --> https://developer.android.com/guide/topics/location/permissions?hl=fr#request-location-updates
 - add Crashlytics : https://firebase.google.com/docs/crashlytics/get-started?platform=android#add-sdk
 - logo WWW plutot que icone info dans la toolbar ?
 - image des choregraphies a revoir ?
 - GPS activation / deactivation
-- garder sur une ligne : dans event numbers, et event wave title
-- Be waved : Take the wave
 
 ---------------------------------------------
 

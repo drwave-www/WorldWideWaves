@@ -103,6 +103,7 @@ import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
+import com.worldwidewaves.theme.scrimLight
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.compose.stringResource
@@ -511,12 +512,23 @@ class EventsListScreen(
                 if (showUninstallDialog) {
                     AlertDialog(
                         onDismissRequest = { showUninstallDialog = false },
-                        title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
+                        title = {
+                            Text(
+                                stringResource(MokoRes.strings.events_uninstall_map_title),
+                                style = commonTextStyle().copy(color = scrimLight)
+                            )
+                        },
                         text = {
                             if (canUninstall) {
-                                Text(stringResource(MokoRes.strings.events_uninstall_map_confirmation))
+                                Text(
+                                    stringResource(MokoRes.strings.events_uninstall_map_confirmation),
+                                    style = commonTextStyle().copy(color = scrimLight)
+                                )
                             } else {
-                                Text(stringResource(MokoRes.strings.events_cannot_uninstall_map_message))
+                                Text(
+                                    stringResource(MokoRes.strings.events_cannot_uninstall_map_message),
+                                    style = commonTextStyle().copy(color = scrimLight)
+                                )
                             }
                         },
                         confirmButton = {
@@ -568,13 +580,19 @@ class EventsListScreen(
         if (showUninstallResult) {
             AlertDialog(
                 onDismissRequest = { showUninstallResult = false },
-                title = { Text(stringResource(MokoRes.strings.events_uninstall_map_title)) },
+                title = {
+                    Text(
+                        stringResource(MokoRes.strings.events_uninstall_map_title),
+                        style = commonTextStyle().copy(color = scrimLight)
+                    )
+                },
                 text = {
                     Text(
                         if (uninstallSucceeded)
                             stringResource(MokoRes.strings.events_uninstall_completed)
                         else
-                            stringResource(MokoRes.strings.events_uninstall_failed)
+                            stringResource(MokoRes.strings.events_uninstall_failed),
+                        style = commonTextStyle().copy(color = scrimLight)
                     )
                 },
                 confirmButton = {
