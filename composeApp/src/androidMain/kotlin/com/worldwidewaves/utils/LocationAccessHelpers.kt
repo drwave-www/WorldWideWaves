@@ -39,8 +39,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
+
+/**
+ * Session-scoped in-memory marker of the last time the user denied
+ * GPS/location permission.  **Not persisted** – reset when the app process
+ * restarts.
+ */
+@Volatile
+private var lastGpsPermissionDeniedAtMillis: Long? = null
 
 @Composable
 fun requestLocationPermission(): Boolean {
@@ -52,9 +61,25 @@ fun requestLocationPermission(): Boolean {
     ) { permissions ->
         permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        // Update in-memory denial timestamp for this session
+        if (permissionGranted) {
+            lastGpsPermissionDeniedAtMillis = null
+        } else {
+            lastGpsPermissionDeniedAtMillis = System.currentTimeMillis()
+        }
     }
 
     LaunchedEffect(Unit) {
+
+        // Respect in-memory cooldown to avoid re-prompting within the same session
+        val lastDenied = lastGpsPermissionDeniedAtMillis
+        if (lastDenied != null &&
+            (System.currentTimeMillis() - lastDenied) <
+            WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
+        ) {
+            return@LaunchedEffect
+        }
 
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
