@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 kotlin {
@@ -160,5 +161,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.feature.delivery.ktx)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
 }
