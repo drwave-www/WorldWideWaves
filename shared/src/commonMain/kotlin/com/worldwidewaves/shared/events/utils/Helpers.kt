@@ -64,7 +64,7 @@ interface DataValidator {
 @OptIn(ExperimentalTime::class)
 interface IClock {
     fun now(): Instant
-    suspend fun delay(duration: Duration): Unit
+    suspend fun delay(duration: Duration)
 
     companion object {
         fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
@@ -80,7 +80,7 @@ class SystemClock : IClock, KoinComponent {
     private var platform : WWWPlatform? = null
 
     init {
-        try { platform = get() } catch (e: Exception) {
+        try { platform = get() } catch (_: Exception) {
             Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
         }
     }
@@ -93,7 +93,7 @@ class SystemClock : IClock, KoinComponent {
         }
     }
 
-    override suspend fun delay(duration: Duration): Unit {
+    override suspend fun delay(duration: Duration) {
         val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
 
         if (simulation != null) {
