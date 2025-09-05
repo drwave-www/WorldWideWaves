@@ -168,6 +168,8 @@ class AndroidEventMap(
         var userCanceled by remember { mutableStateOf(false) }
         // Guard to avoid double initialization attempts from AndroidView.update
         var initStarted by remember { mutableStateOf(false) }
+        // Track current MapView instance so we can detect recreations
+        var lastMapView by remember { mutableStateOf<MapView?>(null) }
 
         // Re-create the MapView whenever availability flips so a fresh
         // split-aware AssetManager is used.
@@ -315,6 +317,18 @@ class AndroidEventMap(
             AndroidView(
                 factory = { mapLibreView },
                 update = { v ->
+                    /* ------------------------------------------------------------
+                     * Detect MapView recreation (e.g. after recomposition) and
+                     * reset state so a fresh initialisation can run.
+                     * ------------------------------------------------------------ */
+                    if (lastMapView !== v) {
+                        Log.w(TAG, "MapView instance changed; resetting load state")
+                        lastMapView = v
+                        isMapLoaded = false
+                        initStarted = false
+                        mapError = false
+                    }
+
                     Log.d(
                         TAG,
                         "AndroidView.update called; isMapAvailable=$isMapAvailable, " +
