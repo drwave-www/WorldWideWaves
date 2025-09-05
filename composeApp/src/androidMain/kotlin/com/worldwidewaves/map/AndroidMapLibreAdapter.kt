@@ -55,7 +55,7 @@ import org.maplibre.geojson.Polygon
 /**
  * Android-specific implementation of the shared [MapLibreAdapter].
  *
- * Wraps MapLibre Android’s `MapLibreMap` and exposes the platform-agnostic API
+ * Wraps MapLibre Android's `MapLibreMap` and exposes the platform-agnostic API
  * expected by the shared `AbstractEventMap` / `AndroidEventMap` layers:
  * • Style / source initialisation and dynamic updates (wave polygons, bbox)  
  * • Camera helpers (bounds, animate/move, zoom & position flows)  
@@ -105,7 +105,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
         updateCameraInfo()
 
         // Debug: log initial camera details
-        Log.i(
+        Log.d(
             "Camera",
             "Initial camera: target=${map.cameraPosition.target?.latitude}," +
                     "${map.cameraPosition.target?.longitude} " +
@@ -229,7 +229,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
 
     override fun moveCamera(bounds: BoundingBox) {
         require(mapLibreMap != null)
-        Log.d(
+        Log.v(
             "Camera",
             "Moving camera to bounds: SW=${bounds.southwest.latitude},${bounds.southwest.longitude} " +
                     "NE=${bounds.northeast.latitude},${bounds.northeast.longitude}"
@@ -241,7 +241,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
 
-        Log.d(
+        Log.v(
             "Camera",
             "Animating to position: lat=${position.latitude}, " +
                     "lng=${position.longitude}, zoom=$zoom"
@@ -274,7 +274,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun animateCameraToBounds(bounds: BoundingBox, padding: Int, callback: MapCameraCallback?) {
         val map = mapLibreMap ?: return
 
-        Log.d(
+        Log.v(
             "Camera",
             "Animating to bounds: SW=${bounds.southwest.latitude}," +
                     "${bounds.southwest.longitude} " +
@@ -293,7 +293,6 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
-                    Log.i(::animateCameraToBounds.name, "Current Map zoom level: ${_currentZoom.value}")
                     callback?.onFinish()
                 }
                 override fun onCancel() {
@@ -306,7 +305,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
-        Log.d(
+        Log.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
                     "${constraintBounds.southwest.longitude} " +
@@ -370,7 +369,7 @@ class AndroidMapLibreAdapter(private var mapLibreMap: MapLibreMap? = null) : Map
     override fun drawOverridenBbox(bbox: BoundingBox) {
         require(mapLibreMap != null)
 
-        Log.d(
+        Log.v(
             "Camera",
             "Drawing override bbox: SW=${bbox.southwest.latitude}," +
                     "${bbox.southwest.longitude} " +
