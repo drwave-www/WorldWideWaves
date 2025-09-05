@@ -67,6 +67,7 @@ class WWWGlobals {
 
         val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
         val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
+        val CONST_GPS_PERMISSION_REASK_DELAY = 5.minutes
 
         // -- MapLibre Constants
         const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 16.0

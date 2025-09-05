@@ -179,10 +179,32 @@ interface GeoJsonDataProvider {
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
     override suspend fun getGeoJsonData(eventId: String): JsonObject? =
         try {
+            // 1) Starting log -------------------------------------------------
+            Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
+
             val geojsonData = readGeoJson(eventId)
+
             if (geojsonData != null) {
-                Json.parseToJsonElement(geojsonData).jsonObject
+                // 2) Raw string diagnostics -----------------------------------
+                val preview = geojsonData.take(80).replace("\n", "")
+                Log.i(
+                    ::getGeoJsonData.name,
+                    "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\""
+                )
+
+                // 3) Parse and post-parse diagnostics -------------------------
+                val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
+                val keysSummary = jsonObj.keys.joinToString(", ")
+                val rootType = jsonObj["type"]?.toString()
+                Log.d(
+                    ::getGeoJsonData.name,
+                    "Parsed geojson top-level keys=[$keysSummary], type=$rootType"
+                )
+
+                jsonObj
             } else {
+                // Missing data warning ----------------------------------------
+                Log.w(::getGeoJsonData.name, "Geojson data is null for event $eventId")
                 null
             }
         } catch (e: Exception) {
