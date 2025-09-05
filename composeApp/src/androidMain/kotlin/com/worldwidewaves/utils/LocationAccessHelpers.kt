@@ -44,12 +44,11 @@ import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
- * Session-scoped in-memory marker of the last time the user denied
- * GPS/location permission.  **Not persisted** – reset when the app process
- * restarts.
+ * Session-scoped in-memory marker of the last time the user declined the
+ * "enable GPS" system-settings dialog.  Not persisted; reset on process restart.
  */
 @Volatile
-private var lastGpsPermissionDeniedAtMillis: Long? = null
+private var lastGpsEnableDeclinedAtMillis: Long? = null
 
 @Composable
 fun requestLocationPermission(): Boolean {
@@ -61,26 +60,9 @@ fun requestLocationPermission(): Boolean {
     ) { permissions ->
         permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-
-        // Update in-memory denial timestamp for this session
-        if (permissionGranted) {
-            lastGpsPermissionDeniedAtMillis = null
-        } else {
-            lastGpsPermissionDeniedAtMillis = System.currentTimeMillis()
-        }
     }
 
     LaunchedEffect(Unit) {
-
-        // Respect in-memory cooldown to avoid re-prompting within the same session
-        val lastDenied = lastGpsPermissionDeniedAtMillis
-        if (lastDenied != null &&
-            (System.currentTimeMillis() - lastDenied) <
-            WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
-        ) {
-            return@LaunchedEffect
-        }
-
         val fineLocationGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -111,14 +93,33 @@ fun CheckGPSEnable() {
     val context = LocalContext.current
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    if (requestLocationPermission() && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+    // Check permission directly – avoid calling requestLocationPermission() here
+    val permissionGranted = ContextCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+        context, Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    // Apply cooldown only for the GPS-enable dialog
+    val lastDeclined = lastGpsEnableDeclinedAtMillis
+    val withinCooldown = lastDeclined != null &&
+            (System.currentTimeMillis() - lastDeclined) <
+            WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
+
+    if (permissionGranted &&
+        !withinCooldown &&
+        !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    ) {
         AlertDialog.Builder(context)
             .setMessage(stringResource(MokoRes.strings.ask_gps_enable))
             .setCancelable(false)
             .setPositiveButton(stringResource(MokoRes.strings.yes)) { _, _ ->
                 startActivity(context, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
             }
-            .setNegativeButton(stringResource(MokoRes.strings.no)) { dialog, _ -> dialog.cancel() }
+            .setNegativeButton(stringResource(MokoRes.strings.no)) { dialog, _ ->
+                lastGpsEnableDeclinedAtMillis = System.currentTimeMillis()
+                dialog.cancel()
+            }
             .create()
             .show()
     }
