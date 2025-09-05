@@ -95,6 +95,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
@@ -107,7 +108,6 @@ import com.worldwidewaves.theme.scrimLight
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.compose.stringResource
-import com.worldwidewaves.shared.format.DateTimeFormats
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -515,7 +515,8 @@ class EventsListScreen(
                         title = {
                             Text(
                                 stringResource(MokoRes.strings.events_uninstall_map_title),
-                                style = commonTextStyle().copy(color = scrimLight)
+                                style = commonTextStyle().copy(color = scrimLight),
+                                fontWeight = FontWeight.Bold
                             )
                         },
                         text = {
@@ -583,7 +584,8 @@ class EventsListScreen(
                 title = {
                     Text(
                         stringResource(MokoRes.strings.events_uninstall_map_title),
-                        style = commonTextStyle().copy(color = scrimLight)
+                        style = commonTextStyle().copy(color = scrimLight),
+                        fontWeight = FontWeight.Bold
                     )
                 },
                 text = {
