@@ -207,7 +207,7 @@ fun EventOverlayDone(eventStatus: Status?, modifier: Modifier = Modifier) {
 
 @Composable
 /** Primary button that navigates to [WaveActivity] when the wave is active or imminent. */
-fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock: IClock, modifier: Modifier = Modifier) {
+fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock: IClock, isInArea: Boolean, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     val isRunning = eventState == Status.RUNNING
@@ -216,7 +216,7 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
         val now = clock.now()
         it > (now - 1.hours) && it <= now
     } ?: false
-    val isEnabled = isRunning || isSoon || isEndDateTimeRecent
+    val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
 
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,

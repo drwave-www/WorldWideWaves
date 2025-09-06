@@ -34,6 +34,8 @@
   <string name="map_retrying_download">ダウンロードを再試行中</string>
   <!-- src_hash: e144c646b0e5289a80e0f937c4bcf7f588a6405e -->
   <string name="map_loading">マップを読み込み中…</string>
+  <!-- src_hash: cacfe1aebf4aac9dc9fb758dce9ace90bc882f52 -->
+  <string name="map_installing">インストール中..</string>
   <!-- src_hash: 1624bbe6416af49b9484aa26040dbfc5db1cd170 -->
   <string name="map_cancel_download">キャンセル</string>
   <!-- src_hash: e9e72ff93e47c6540595e7495702525eca74d244 -->

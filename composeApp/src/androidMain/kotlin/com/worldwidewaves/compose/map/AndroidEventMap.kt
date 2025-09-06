@@ -361,7 +361,7 @@ class AndroidEventMap(
                         is MapFeatureState.Installing ->
                             DownloadProgressIndicator(
                                 progress = 100,
-                                message = "Installing..",
+                                message = stringResource(MokoRes.strings.map_installing),
                                 onCancel = onCancel
                             )
                         else ->
