@@ -111,6 +111,7 @@ class TabManager(
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
+                            .align(Alignment.CenterVertically)
                             .clickable {
                         originalScreen = null
                         currentTab = index
