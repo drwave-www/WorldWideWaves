@@ -108,10 +108,18 @@ class TabManager(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 screens.forEachIndexed { index, tab ->
-                    Box(modifier = Modifier.clickable {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .align(Alignment.CenterVertically)
+                            .clickable {
                         originalScreen = null
                         currentTab = index
-                    }) { tabBarItem(currentTab == index, index, tab.name) }
+                        },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        tabBarItem(currentTab == index, index, tab.name)
+                    }
                 }
             }
         }

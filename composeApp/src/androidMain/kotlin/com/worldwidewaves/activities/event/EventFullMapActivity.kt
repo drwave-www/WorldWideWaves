@@ -38,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
@@ -53,7 +54,6 @@ import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.google.android.play.core.splitcompat.SplitCompat
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -82,6 +82,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
             value = event.getEndDateTime()
         }
+        val isInArea by event.observer.userIsInArea.collectAsState()
 
         // Construct the event map
         val eventMap =  remember(event.id) {
@@ -99,7 +100,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
-            ButtonWave(event.id, eventStatus, endDateTime, clock, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
+            ButtonWave(event.id, eventStatus, endDateTime, clock, isInArea, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
             MapActions(event, eventMap, clock)
         }
     }

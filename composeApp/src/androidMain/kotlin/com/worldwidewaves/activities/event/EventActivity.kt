@@ -74,8 +74,8 @@ import androidx.compose.ui.unit.sp
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.AutoResizeSingleLineText
+import com.worldwidewaves.compose.ButtonWave
 import com.worldwidewaves.compose.DividerLine
 import com.worldwidewaves.compose.EventOverlayDone
 import com.worldwidewaves.compose.EventOverlaySoonOrRunning
@@ -142,6 +142,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
         val progression by event.observer.progression.collectAsState()
+        val isInArea by event.observer.userIsInArea.collectAsState()
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {
@@ -183,7 +184,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         event.id, 
                         eventStatus, 
                         endDateTime.value, 
-                        clock,
+                        clock, isInArea,
                         modifier = Modifier.align(Alignment.Center)
                     )
                     
