@@ -25,6 +25,12 @@ package com.worldwidewaves.compose
 
 import android.content.Intent
 import android.util.Log
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -218,11 +225,24 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
     } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
 
+    // Blinking animation
+    val infiniteTransition = rememberInfiniteTransition(label = "blinking")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (isEnabled) 0.3f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800, easing = EaseInOut),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,
         modifier = modifier
             .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
             .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
+            .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
             .clickable(enabled = isEnabled, onClick = {
                 context.startActivity(Intent(context, WaveActivity::class.java).apply {
                     putExtra("eventId", eventId)
