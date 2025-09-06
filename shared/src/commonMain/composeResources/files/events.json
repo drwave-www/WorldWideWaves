@@ -8,7 +8,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#wavenewyork",
+    "instagramHashtag": "#waveNYC",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -28,7 +28,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#wavelosangeles",
+    "instagramHashtag": "#waveLA",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -48,7 +48,7 @@
     "date": "2026-09-15",
     "startHour": "20:30",
     "instagramAccount": "worldwidewaves_es",
-    "instagramHashtag": "#wavemexicocity",
+    "instagramHashtag": "#wavemexico",
     "wavedef": {
       "linear": {
         "direction": "WEST",
@@ -688,7 +688,7 @@
     "date": "2026-07-04",
     "startHour": "18:00",
     "instagramAccount": "worldwidewaves_all",
-    "instagramHashtag": "#wavesanfrancisco",
+    "instagramHashtag": "#waveSF",
     "wavedef": {
       "linear": {
         "direction": "WEST",
