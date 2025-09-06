@@ -265,7 +265,8 @@ fun WWWSocialNetworks(
             Text(
                 modifier = Modifier.clickable(onClick = {
                     try {
-                        uriHandler.openUri("$URL_BASE_INSTAGRAM/$instagramAccount")
+                        val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
+                        uriHandler.openUri(uri)
                     } catch (e: Exception) {
                         Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
                     }
