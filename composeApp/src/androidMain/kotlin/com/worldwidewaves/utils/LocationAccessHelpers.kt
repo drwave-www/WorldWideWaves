@@ -22,12 +22,13 @@ package com.worldwidewaves.utils
  */
 
 import android.Manifest
-import android.app.AlertDialog
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.provider.Settings
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -39,6 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
@@ -106,22 +112,54 @@ fun CheckGPSEnable() {
             (System.currentTimeMillis() - lastDeclined) <
             WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
 
-    if (permissionGranted &&
-        !withinCooldown &&
-        !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-    ) {
-        AlertDialog.Builder(context)
-            .setMessage(stringResource(MokoRes.strings.ask_gps_enable))
-            .setCancelable(false)
-            .setPositiveButton(stringResource(MokoRes.strings.yes)) { _, _ ->
-                startActivity(context, Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), null)
-            }
-            .setNegativeButton(stringResource(MokoRes.strings.no)) { dialog, _ ->
-                lastGpsEnableDeclinedAtMillis = System.currentTimeMillis()
-                dialog.cancel()
-            }
-            .create()
-            .show()
+    val activity = context as? Activity
+
+    // Launcher for the system "enable location" sheet
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_CANCELED) {
+            // User refused → start cooldown
+            lastGpsEnableDeclinedAtMillis = System.currentTimeMillis()
+        }
+    }
+
+    LaunchedEffect(permissionGranted, withinCooldown) {
+        if (permissionGranted &&
+            !withinCooldown &&
+            !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        ) {
+            val req = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                /* intervalMillis = */ 1000L
+            ).build()
+
+            val settingsReq = LocationSettingsRequest.Builder()
+                .addLocationRequest(req)
+                .setAlwaysShow(true)
+                .build()
+
+            val client = LocationServices.getSettingsClient(context)
+            client.checkLocationSettings(settingsReq)
+                .addOnSuccessListener {
+                    // GPS already enabled – nothing to do
+                }
+                .addOnFailureListener { ex ->
+                    if (ex is ResolvableApiException && activity != null) {
+                        // Show system dialog
+                        launcher.launch(
+                            IntentSenderRequest.Builder(ex.resolution).build()
+                        )
+                    } else {
+                        // Fallback to full Settings screen
+                        startActivity(
+                            context,
+                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
+                            null
+                        )
+                    }
+                }
+        }
     }
 }
 
