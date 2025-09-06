@@ -41,7 +41,8 @@ val applicationModule = module {
 
     single { AboutScreen(get(), get()) }
     single { AboutInfoScreen() }
-    single { AboutFaqScreen() }
+    // Inject the shared WWWPlatform instance into AboutFaqScreen
+    single { AboutFaqScreen(get()) }
 
     // Map availability checker as a singleton
     single {

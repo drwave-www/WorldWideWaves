@@ -23,10 +23,14 @@ package com.worldwidewaves.activities.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.worldwidewaves.activities.utils.WaveProgressionObserver
 import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.CloseableCoroutineScope
 import org.koin.android.ext.android.inject
 
@@ -44,6 +48,17 @@ abstract class AbstractEventWaveActivity(
      * Injected from DI to avoid cancelling jobs when the Composable scope disappears.
      */
     private val appScope: CloseableCoroutineScope by inject()
+
+    /**
+     * Platform single instance – used to observe simulation mode / simulation
+     * changes so we can restart observers accordingly.
+     */
+    private val platform: WWWPlatform by inject()
+
+    /**
+     * Central events repository – provides helper to restart observers globally.
+     */
+    private val events: WWWEvents by inject()
 
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
@@ -71,6 +86,10 @@ abstract class AbstractEventWaveActivity(
     protected fun ObserveEventMapProgression(event: IWWWEvent, eventMap: AndroidEventMap) {
         val context = LocalContext.current
 
+        // Restart observation whenever simulation context changes
+        val simulationChanged by platform.simulationChanged.collectAsState()
+        val simMode by platform.simulationModeEnabled.collectAsState()
+
         _eventMap = eventMap
 
         // Only create the observer once per activity instance
@@ -83,6 +102,19 @@ abstract class AbstractEventWaveActivity(
                     event = event
                 )
                 waveProgressionObserver!!.startObservation()
+            }
+        }
+
+        // Propagate simulation changes to all relevant events via central helper
+        LaunchedEffect(simulationChanged) {
+            events.restartObserversOnSimulationChange()
+        }
+
+        // Also react when simulation *mode* is toggled; only restart if a
+        // simulation is actually running to avoid unnecessary work.
+        LaunchedEffect(simMode) {
+            if (platform.isOnSimulation()) {
+                events.restartObserversOnSimulationChange()
             }
         }
     }

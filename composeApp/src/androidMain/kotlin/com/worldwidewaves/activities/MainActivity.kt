@@ -47,12 +47,14 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
@@ -83,6 +85,7 @@ open class MainActivity : AppCompatActivity() {
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val events: WWWEvents by inject()
+    private val platform: WWWPlatform by inject()
 
     /** Flag updated when `events.loadEvents()` finishes. */
     @Volatile
@@ -156,11 +159,19 @@ open class MainActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-                    val ready by isSplashFinished.collectAsState()
-                    if (ready) {
-                        tabManager.TabView()
-                    } else {
-                        ProgrammaticSplashScreen()
+                    // Box to stack main content and simulation-mode overlay
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val ready by isSplashFinished.collectAsState()
+                        if (ready) {
+                            tabManager.TabView()
+                        } else {
+                            ProgrammaticSplashScreen()
+                        }
+
+                        // -----------------------------------------------------------------
+                        //  Global Simulation-Mode chip shown whenever the mode is enabled
+                        // -----------------------------------------------------------------
+                        SimulationModeChip(platform)
                     }
                 }
             }

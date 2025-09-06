@@ -53,7 +53,8 @@ val faq_contents = listOf(
     Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
     Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
     Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5)
+    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5),
+    Pair(MokoRes.strings.faq_question_6, MokoRes.strings.faq_answer_6)
 )
 
 val infos_core = listOf(

@@ -195,4 +195,24 @@ class WWWEvents : KoinComponent {
         }
     }
 
+    // --------------------------------------------------------------------
+    //  Simulation helpers
+    // --------------------------------------------------------------------
+    /**
+     * Restarts observers for all events that should be actively observed when the
+     * simulation context (running simulation or simulation-mode) changes.
+     */
+    fun restartObserversOnSimulationChange() {
+        coroutineScopeProvider.launchDefault {
+            list().forEach { event ->
+                try {
+                    event.observer.stopObservation()
+                    event.observer.startObservation()
+                } catch (e: Exception) {
+                    Log.e("WWWEvents", "Error restarting observer for ${event.id}: $e", e)
+                }
+            }
+        }
+    }
+
 }

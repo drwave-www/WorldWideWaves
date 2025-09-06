@@ -3,10 +3,19 @@ TODAY :
 
 - > PLAY STORE UPLOAD <
 
-- ajouter un systeme dansd FAQ pour activer la simulation, puis ajouter un layer pour la desactiver a tout moment et voir qu'elle est active
+- ajouter un systeme dans FAQ pour activer la simulation, puis ajouter un layer pour la desactiver a tout moment et voir qu'elle est active
 - play store images / descriptions
 - image des choregraphies a revoir ?
-- Langue système pas prise en compte ?
+- Langue système pas prise en compte ? -> tester en rebootant le smartphone
+
+- faire la liste des remarques sur Factory.ai et accepter la demande de contact
+   - pause
+   - interrompre pendant le travail pour preciser des choses
+   - tres lents lorsque la discussion prend de l'ampleur
+   - connecter auto au local
+   - existe p-e ? verifier : liste de contraintes / regles personnelles
+   - parfois change le local sans commit, parfois commit, parfois cree une branche, pas clair de savoir, parfois utilise feat, parfois feature, parfois chore, .. pas clair
+   - detection de l'acces local en corus de tache
 
 ---------------------------------------------
 
@@ -23,15 +32,11 @@ TODAY :
 
 - Packaging :
     - configurer le "mandatory update" flow : https://developer.android.com/guide/playcore/in-app-updates/kotlin-java
-
 - UI Tests sur differents devices et langues
 
 ---------------------------------------------
 
 - Common: Factorize somme additional commons : everything which is not pure UI and WWW related should be in core shared
-
-- ======== Bugs/Issues/Refactorings =========
-    - put a timer on GPS activation requests (?)
 
 ---------------------------------------------
 START IOS
@@ -60,9 +65,5 @@ Ideas:
     - par pays / events
 - Une association par event, avec un lien cagnotte et une video youtube de présentation
 - Realite augmentee pour "voir" la vague ? : https://www.openium.fr/expertises/realitee-augmentee/
-
-- reduction of pbf : https://techblog.dac.digital/openstreetmap-map-size-reduction-guide-43372bbf38c9
-    --> + https://wiki.openstreetmap.org/wiki/Map_features
-    --> + https://wiki.openstreetmap.org/wiki/Category:Features
 
 - jetpack compose test UI : https://medium.com/@myofficework000/exploring-jetpack-compose-ui-testing-a-comprehensive-guide-eb0c2d93e111

@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,6 +70,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONT
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy
 import com.worldwidewaves.theme.commonBoldStyle
@@ -94,7 +96,7 @@ import kotlin.math.roundToInt
  * State is maintained with `remember` so expansion and scroll positions survive
  * recompositions.  All strings are localized via `MokoRes`.
  */
-class AboutFaqScreen : TabScreen {
+class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
     override val name = "FAQ"
 
     @Composable
@@ -141,7 +143,9 @@ class AboutFaqScreen : TabScreen {
                 faq_contents.forEachIndexed { index, (question, answer) ->
                     FAQItem(index, question, answer,
                         expandedFaqItem,
-                        onExpand = { expandedFaqItem = it })
+                        onExpand = { expandedFaqItem = it },
+                        showSimulateButton = (question == MokoRes.strings.faq_question_6)
+                    )
                     FAQDividerLine()
                 }
 
@@ -247,26 +251,46 @@ class AboutFaqScreen : TabScreen {
         questionResource: StringResource,
         answerResource: StringResource,
         expandedFaqItem: Int,
-        onExpand: (Int) -> Unit
+        onExpand: (Int) -> Unit,
+        showSimulateButton: Boolean = false
     ) {
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(DIM_DEFAULT_INT_PADDING.dp)
-            .clickable {
-                onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(DIM_DEFAULT_INT_PADDING.dp)
+                .clickable {
+                    onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
+                }
         ) {
-            Text(
-                text = stringResource(questionResource),
-                style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(questionResource),
+                    style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             if (expandedFaqItem == itemIndex) {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answerResource),
                     style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
                 )
+                if (showSimulateButton) {
+                    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                    OutlinedButton(
+                        onClick = { platform.enableSimulationMode() }
+                    ) {
+                        Text(
+                            text = stringResource(MokoRes.strings.test_simulation),
+                            style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE - 2)
+                        )
+                    }
+                }
             }
         }
     }

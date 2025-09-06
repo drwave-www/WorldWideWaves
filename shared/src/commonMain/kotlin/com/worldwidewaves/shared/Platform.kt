@@ -47,6 +47,23 @@ class WWWPlatform(val name: String) {
     private val _simulationChanged = MutableStateFlow(0)
     val simulationChanged: StateFlow<Int> = _simulationChanged.asStateFlow()
 
+    // -------------------------------------------------------------------- //
+    //  Simulation *mode* flag (enables in-app testing UI)
+    // -------------------------------------------------------------------- //
+
+    /**
+     * Indicates whether the global "simulation mode" is enabled.
+     * When true, UI layers may reveal extra controls to start/stop a
+     * per-event simulation.  This flag is orthogonal to an actual running
+     * [WWWSimulation] (held in [_simulation]) so that the mode can be active
+     * even when no simulation is currently running.
+     */
+    private val _simulationModeEnabled = MutableStateFlow(false)
+    val simulationModeEnabled: StateFlow<Boolean> = _simulationModeEnabled.asStateFlow()
+
+    fun enableSimulationMode() { _simulationModeEnabled.value = true }
+    fun disableSimulationMode() { _simulationModeEnabled.value = false }
+
     fun disableSimulation() {
         _simulation = null
         // Notify observers that the simulation context has changed
