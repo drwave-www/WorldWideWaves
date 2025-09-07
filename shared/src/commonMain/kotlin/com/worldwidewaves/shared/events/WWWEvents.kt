@@ -4,7 +4,7 @@ package com.worldwidewaves.shared.events
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -192,6 +192,26 @@ class WWWEvents : KoinComponent {
         else {
             addOnEventsLoadedListener { callback(null) }
             addOnEventsErrorListener { callback(it) }
+        }
+    }
+
+    // --------------------------------------------------------------------
+    //  Simulation helpers
+    // --------------------------------------------------------------------
+    /**
+     * Restarts observers for all events that should be actively observed when the
+     * simulation context (running simulation or simulation-mode) changes.
+     */
+    fun restartObserversOnSimulationChange() {
+        coroutineScopeProvider.launchDefault {
+            list().forEach { event ->
+                try {
+                    event.observer.stopObservation()
+                    event.observer.startObservation()
+                } catch (e: Exception) {
+                    Log.e("WWWEvents", "Error restarting observer for ${event.id}: $e", e)
+                }
+            }
         }
     }
 

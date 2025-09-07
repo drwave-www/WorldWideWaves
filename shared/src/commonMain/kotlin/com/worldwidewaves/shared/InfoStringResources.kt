@@ -4,7 +4,7 @@ package com.worldwidewaves.shared
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  *
@@ -53,7 +53,8 @@ val faq_contents = listOf(
     Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
     Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
     Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5)
+    Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5),
+    Pair(MokoRes.strings.faq_question_6, MokoRes.strings.faq_answer_6)
 )
 
 val infos_core = listOf(

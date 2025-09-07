@@ -152,12 +152,16 @@
   <string name="wave_progression">التقدم</string>
   <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
   <string name="speed_unit_mps">م/ث</string>
-  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
-  <string name="wave_warming">جاري الإحماء..</string>
-  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
-  <string name="test_simulation">اختبار المحاكاة</string>
-  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
+  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
+  <string name="wave_warming">جار التهيئة..</string>
+  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
   <string name="test_simulation_started">بدأت المحاكاة</string>
+  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
+  <string name="simulation_stop">أوقف المحاكاة</string>
+  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
+  <string name="simulation_mode">أوقف وضع المحاكاة</string>
+  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <string name="test_simulation">شغل وضع المحاكاة</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">استعد!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -258,8 +262,12 @@
   <string name="faq_answer_4">لا. التطبيق مجاني بالكامل. رغم أن تصميمه وتطويره احتاجا إلى وقت ومال من المنشئين، فإنهم لا يتلقون أي منفعة مالية شخصية مباشرة منه.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">هل يمكنني المساهمة؟</string>
-  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
-  <string name="faq_answer_5">نعم، المتطوعون مرحب بهم دائما. شيفرة التطبيق مفتوحة المصدر على GitHub، ويمكنك التواصل مع المنشئين عبر worldwidewaves@proton.me (لا ضمان للرد). أفضل وسيلة للمساعدة هي نشر الفكرة: شارك صورا وفيديوهات من الفعاليات باستخدام الوسوم المقترحة، وتواصل مع مؤثرين محليين لتضخيم الرسالة، وتحدث عنها مع مجتمعك، وأهم من ذلك، انضم إلى الموجة!</string>
+  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
+  <string name="faq_answer_5">نعم، نحن نرحب دائما بالمتطوعين. رمز التطبيق مفتوح المصدر على GitHub، ويمكنك التواصل مع المنشئين عبر worldwidewaves@proton.me (لا نضمن الرد). أفضل طريقة للمساعدة هي نشر الخبر: شارك الصور ومقاطع الفيديو من الفعاليات باستخدام الوسوم المقترحة، تواصل مع المؤثرين المحليين لتضخيم الرسالة، تحدث عنها مع مجتمعك، والأهم من ذلك: انضم إلى الموجة!</string>
+  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
+  <string name="faq_question_6">كيف أحاكي موجة؟</string>
+  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
+  <string name="faq_answer_6">اضغط الزر أدناه لتفعيل وضع المحاكاة. في شاشات الحدث، استخدم زر المؤقت بجوار زر "انضم إلى الموجة" لبدء المحاكاة باستخدام خصائص هذا الحدث (التاريخ، الوقت، الموقع). لإيقاف المحاكاة، استخدم الزر نفسه. واخيرا، أوقف وضع المحاكاة باستخدام أيقونة الإيقاف على الطبقة الثابتة عندما تنتهي.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">الولايات المتحدة</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

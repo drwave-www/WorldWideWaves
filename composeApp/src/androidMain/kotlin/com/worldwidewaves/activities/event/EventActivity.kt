@@ -4,7 +4,7 @@ package com.worldwidewaves.activities.event
  * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries, culminating in a global wave. The project aims to transcend physical and cultural
+ * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
  * 
@@ -74,12 +74,12 @@ import androidx.compose.ui.unit.sp
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.AutoResizeSingleLineText
-import com.worldwidewaves.compose.ButtonWave
-import com.worldwidewaves.compose.DividerLine
-import com.worldwidewaves.compose.EventOverlayDone
-import com.worldwidewaves.compose.EventOverlaySoonOrRunning
-import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.compose.common.AutoResizeSingleLineText
+import com.worldwidewaves.compose.common.ButtonWave
+import com.worldwidewaves.compose.common.DividerLine
+import com.worldwidewaves.compose.common.EventOverlayDone
+import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
+import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals
