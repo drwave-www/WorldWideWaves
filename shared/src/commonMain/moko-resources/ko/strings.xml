@@ -152,12 +152,16 @@
   <string name="wave_progression">진행</string>
   <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
   <string name="speed_unit_mps">m/s</string>
-  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
+  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
   <string name="wave_warming">준비 중..</string>
-  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
-  <string name="test_simulation">시뮬레이션 테스트</string>
-  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
-  <string name="test_simulation_started">시뮬레이션 시작</string>
+  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
+  <string name="test_simulation_started">시뮬레이션 시작됨</string>
+  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
+  <string name="simulation_stop">시뮬레이션 중지</string>
+  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
+  <string name="simulation_mode">시뮬레이션 모드 중지</string>
+  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <string name="test_simulation">시뮬레이션 모드 활성화</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">준비하세요!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -258,8 +262,12 @@
   <string name="faq_answer_4">아닙니다. 앱은 완전히 무료입니다. 기획과 개발에 제작자의 시간과 비용이 들었지만, 그 대가로 개인적 금전적 이익을 직접적으로 얻지 않습니다.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">기여할 수 있나요?</string>
-  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
-  <string name="faq_answer_5">네, 자원봉사는 언제나 환영입니다. 앱 코드는 GitHub에 오픈소스로 공개되어 있으며, worldwidewaves@proton.me로 제작자에게 연락할 수 있습니다(답변을 보장하지는 않습니다). 가장 좋은 도움은 소식을 널리 알리는 것입니다. 제안된 해시태그로 이벤트의 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 확산시키며, 커뮤니티와 이야기하고, 무엇보다 파도타기에 참여하세요!</string>
+  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
+  <string name="faq_answer_5">네, 언제나 자원봉사자를 환영합니다. 앱 코드는 GitHub에 오픈 소스로 공개되어 있으며, worldwidewaves@proton.me로 제작진에게 연락할 수 있습니다(회신을 보장하지 않습니다). 가장 좋은 도움은 널리 알리는 것입니다: 제안된 해시태그로 이벤트 사진과 영상을 공유하고, 지역 인플루언서에게 연락해 메시지를 확산시키고, 커뮤니티에서 이를 이야기하고, 그리고 무엇보다 파도에 참여하세요!</string>
+  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
+  <string name="faq_question_6">파도를 어떻게 시뮬레이션할 수 있나요?</string>
+  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
+  <string name="faq_answer_6">아래 버튼을 눌러 시뮬레이션 모드를 활성화하세요. 이벤트 화면에서 ‘파도에 참여’ 버튼 근처의 타이머 버튼으로 이 이벤트의 속성(날짜, 시간, 위치)으로 시뮬레이션을 시작할 수 있습니다. 시뮬레이션을 중지하려면 동일한 버튼을 사용하세요. 마지막으로, 완료되면 화면에 계속 표시되는 레이어의 정지 아이콘으로 시뮬레이션 모드를 종료하세요.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">미국</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

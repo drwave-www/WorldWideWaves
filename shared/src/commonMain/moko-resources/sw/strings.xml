@@ -152,12 +152,16 @@
   <string name="wave_progression">Maendeleo</string>
   <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
   <string name="speed_unit_mps">m/s</string>
-  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
-  <string name="wave_warming">Inapasha moto..</string>
-  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
-  <string name="test_simulation">Jaribio la Uigaji</string>
-  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
-  <string name="test_simulation_started">Uigaji umeanza</string>
+  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
+  <string name="wave_warming">Inajiandaa..</string>
+  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
+  <string name="test_simulation_started">Hali ya kuiga imeanza</string>
+  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
+  <string name="simulation_stop">Simamisha uigaji</string>
+  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
+  <string name="simulation_mode">Zima hali ya kuiga</string>
+  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <string name="test_simulation">Washa hali ya kuiga</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">Kuwa tayari!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -258,8 +262,12 @@
   <string name="faq_answer_4">La. Programu ni bure kabisa. Ingawa usanifu na utengenezaji wake vilihitaji muda na fedha kutoka kwa watunzi, hawapati faida ya kifedha binafsi moja kwa moja kutokana nayo.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Naweza kuchangia jitihada hizi?</string>
-  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
-  <string name="faq_answer_5">Ndiyo, wajitolea wanakaribishwa kila wakati. Msimbo wa programu uko wazi kwenye GitHub, na unaweza kuwasiliana na watunzi kupitia worldwidewaves@proton.me (majibu hayahakikishwi). Njia bora ya kusaidia ni kueneza habari: shiriki picha na video kutoka matukio ukitumia hashtag zilizopendekezwa, wasiliana na wainfluensa wa eneo kuongeza upeo wa ujumbe, zungumzia na jamii yako, na muhimu zaidi, jiunge na wimbi!</string>
+  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
+  <string name="faq_answer_5">Ndiyo, wajitolea wanakaribishwa wakati wowote. Msimbo wa programu ni chanzo huria kwenye GitHub, na unaweza kuwafikia watengenezaji kupitia worldwidewaves@proton.me (majibu hayahakikishwi). Njia bora ya kusaidia ni kusambaza habari: shiriki picha na video za matukio ukitumia hashtags zilizopendekezwa, wasiliana na washawishi wa eneo lako ili kueneza ujumbe, zungumzia na jamii yako, na muhimu zaidi, jiunge na wimbi!</string>
+  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
+  <string name="faq_question_6">Ninawezaje kuiga wimbi?</string>
+  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
+  <string name="faq_answer_6">Gusa kitufe kilicho chini ili kuwasha hali ya kuiga. Kwenye skrini za tukio, tumia kitufe cha kipima muda kilicho karibu na kitufe cha "Jiunge na wimbi" kuanzisha uigaji ukitumia sifa za tukio hili (tarehe, saa, eneo). Ili kusimamisha uigaji, tumia kitufe hicho hicho. Hatimaye, zima hali ya kuiga kwa kutumia ikoni ya kusitisha iliyo kwenye safu inayoendelea kuonekana unapomaliza.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">Marekani</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

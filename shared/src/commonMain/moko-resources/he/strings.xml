@@ -152,12 +152,16 @@
   <string name="wave_progression">התקדמות</string>
   <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
   <string name="speed_unit_mps">m/s</string>
-  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
+  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
   <string name="wave_warming">מתחמם..</string>
-  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
-  <string name="test_simulation">בדיקת סימולציה</string>
-  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
-  <string name="test_simulation_started">הסימולציה החלה</string>
+  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
+  <string name="test_simulation_started">הסימולציה הופעלה</string>
+  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
+  <string name="simulation_stop">עצור סימולציה</string>
+  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
+  <string name="simulation_mode">עצור מצב סימולציה</string>
+  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <string name="test_simulation">הפעל מצב סימולציה</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">היו מוכנים!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -258,8 +262,12 @@
   <string name="faq_answer_4">לא. האפליקציה חינמית לחלוטין. אף שבעיצובה ובפיתוחה הושקעו זמן וכסף של היוצרים, הם אינם מקבלים ממנה טובת הנאה כספית אישית.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">האם אפשר לתרום למאמץ?</string>
-  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
-  <string name="faq_answer_5">כן, תמיד נשמח למתנדבים. קוד האפליקציה בקוד פתוח ב-GitHub, ותוכלו ליצור קשר עם היוצרים בכתובת worldwidewaves@proton.me (לא מובטח מענה). הדרך הטובה ביותר לעזור היא להפיץ את הבשורה: שתפו תמונות וסרטונים מהאירועים עם ההאשטגים המוצעים, פנו למשפיענים מקומיים, דברו על כך בקהילה שלכם, והכי חשוב — הצטרפו לגל!</string>
+  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
+  <string name="faq_answer_5">כן, תמיד נשמח למתנדבים. קוד האפליקציה הוא קוד פתוח ב‑GitHub, וניתן ליצור קשר עם המפתחים ב‑worldwidewaves@proton.me (אין התחייבות למענה). הדרך הטובה ביותר לעזור היא להפיץ את הבשורה: שתפו תמונות וסרטונים מהאירועים עם ההאשטאגים המוצעים, פנו למשפיענים מקומיים כדי להעצים את המסר, דברו על כך בקהילה שלכם, והכי חשוב—הצטרפו לגל!</string>
+  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
+  <string name="faq_question_6">איך אפשר לסמלץ גל?</string>
+  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
+  <string name="faq_answer_6">הקישו על הכפתור למטה כדי להפעיל את מצב הסימולציה. במסכי האירוע השתמשו בכפתור הטיימר הסמוך לכפתור "הצטרפו לגל" כדי להתחיל את הסימולציה לפי מאפייני האירוע (תאריך, שעה, מיקום). כדי לעצור את הסימולציה השתמשו באותו כפתור. ולבסוף, עצרו את מצב הסימולציה באמצעות סמל העצירה בשכבה הקבועה כשתסיימו.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">ארצות הברית</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->

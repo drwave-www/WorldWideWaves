@@ -152,12 +152,16 @@
   <string name="wave_progression">Progresie</string>
   <!-- src_hash: e2e3156c0bded55b236944b4044160c657a83549 -->
   <string name="speed_unit_mps">m/s</string>
-  <!-- src_hash: 18fef68b00ee4488a4a42ccc215336bddf8cf72b -->
+  <!-- src_hash: 1bffa906170bf2cbae109af377f16e6664ec26e4 -->
   <string name="wave_warming">Încălzire..</string>
-  <!-- src_hash: 22be7c4b62e91d667acbdf1c01bd3a98b40b8c08 -->
-  <string name="test_simulation">Simulare de test</string>
-  <!-- src_hash: f74bcef76b19956fc3b23bd8bc1361e2b081a730 -->
-  <string name="test_simulation_started">Simulare pornită</string>
+  <!-- src_hash: ab40e241896fa70155c9ef990ce9f947c3b883c0 -->
+  <string name="test_simulation_started">Simularea a început</string>
+  <!-- src_hash: 2069071ca664cf545357a884226f4cca31f9f5d1 -->
+  <string name="simulation_stop">Oprește simularea</string>
+  <!-- src_hash: 6d4c61d15149531c4b9a28f9cfd02787bc274513 -->
+  <string name="simulation_mode">Oprește modul de simulare</string>
+  <!-- src_hash: bfcafa1977a42ccadf9e8b0f973cdb4e3f9e4f19 -->
+  <string name="test_simulation">Activează modul de simulare</string>
   <!-- src_hash: 79be6f40b995cebcbcebdd8f169edbdcba9eece0 -->
   <string name="wave_be_ready">Fii gata!</string>
   <!-- src_hash: 148c3b7e1852740b1933733f38314874e6585a66 -->
@@ -258,8 +262,12 @@
   <string name="faq_answer_4">Nu. Aplicația este complet gratuită. Deși designul și dezvoltarea ei au necesitat timp și bani din partea creatorilor, aceștia nu primesc niciun beneficiu financiar personal direct în schimb.</string>
   <!-- src_hash: 3236edf93ac3d4dd29dfc4ff76c663641ef747fc -->
   <string name="faq_question_5">Pot contribui la acest efort?</string>
-  <!-- src_hash: a4b682c8b7c663ddffe01d5e0f6b4a51950c7c24 -->
-  <string name="faq_answer_5">Da, voluntarii sunt întotdeauna bineveniți. Codul aplicației este open-source pe GitHub, iar creatorii pot fi contactați la worldwidewaves@proton.me (răspunsurile nu sunt garantate). Cel mai bun mod de a ajuta este să dai vestea mai departe: distribuie fotografii și videoclipuri de la evenimente folosind hashtag-urile sugerate, contactează influenceri locali pentru a amplifica mesajul, vorbește despre asta în comunitatea ta și, cel mai important, alătură-te valului!</string>
+  <!-- src_hash: d56087c228256042d65da9946639185896f429c7 -->
+  <string name="faq_answer_5">Da, voluntarii sunt întotdeauna bineveniți. Codul aplicației este open-source pe GitHub, iar creatorii pot fi contactați la worldwidewaves@proton.me (răspunsurile nu sunt garantate). Cel mai bun mod de a ajuta este să dai vestea mai departe: distribuie fotografii și videoclipuri de la evenimente folosind hashtag-urile sugerate, contactează influenceri locali pentru a amplifica mesajul, vorbește cu comunitatea ta și, cel mai important, alătură-te valului!</string>
+  <!-- src_hash: 32543ca92c005fa5c6a82c340e21742e7ec177ac -->
+  <string name="faq_question_6">Cum pot simula un val?</string>
+  <!-- src_hash: 27df94d0a489449a5eefab0f67b96460cca1d2d2 -->
+  <string name="faq_answer_6">Atinge butonul de mai jos pentru a activa modul de simulare. Pe ecranele evenimentului, folosește butonul cu cronometru de lângă butonul "Alătură-te valului" pentru a porni simularea folosind proprietățile acestui eveniment (data, ora, locația). Pentru a opri simularea, folosește același buton. Iar la final, oprește modul de simulare folosind pictograma de oprire de pe suprapunerea persistentă când ai terminat.</string>
   <!-- src_hash: 8f37b82694fd45ca3372079bfd9359153b919ca2 -->
   <string name="country_usa">SUA</string>
   <!-- src_hash: 3d70f2cab1cd4f50b45db3c790f7cc68ccd93989 -->
