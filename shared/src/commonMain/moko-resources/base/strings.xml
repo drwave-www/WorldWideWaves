@@ -111,8 +111,12 @@
     <!-- newly added unit string for speed -->
     <string name="speed_unit_mps">m/s</string>
     <string name="wave_warming">Warming..</string>
-    <string name="test_simulation">Test Simulation</string>
+
+    <!-- Simulation mode controls -->
     <string name="test_simulation_started">Simulation Started</string>
+    <string name="simulation_stop">Stop simulation</string>
+    <string name="simulation_mode">Stop simulation mode</string>
+    <string name="test_simulation">Activate simulation mode</string>
 
     <!-- Context: In event wave screen, title of the screen depending on current wave status, Size: Short -->
     <string name="wave_be_ready">Be ready!</string>
@@ -184,6 +188,9 @@
 
     <string name="faq_question_5">Can I contribute to the effort?</string>
     <string name="faq_answer_5">Yes, volunteers are always welcome. The app’s code is open-source on GitHub, and you can reach the creators at worldwidewaves@proton.me (replies not guaranteed). The best way to help is to spread the word: share photos and videos from events using the suggested hashtags, contact local influencers to amplify the message, talk about it with your community, and most importantly, join the wave!</string>
+
+    <string name="faq_question_6">How can I simulate a wave?</string>
+    <string name="faq_answer_6">Tap the button below to activate the simulation mode. On the event screens use the timer button close the the "Join the wave" button to start the simulation using this event's properties (date, time, location). To stop the simulation use the same button. And finally stop the simulation mode using the stop icon on the persisting layer when you're done.</string>
 
     <!-- Context: Countries where the events happen, Size: short (limited size, about 20/25 chars) -->
     <string name="country_usa">USA</string>
