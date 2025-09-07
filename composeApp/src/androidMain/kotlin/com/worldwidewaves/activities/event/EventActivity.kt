@@ -72,13 +72,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.AutoResizeSingleLineText
-import com.worldwidewaves.compose.ButtonWave
-import com.worldwidewaves.compose.DividerLine
-import com.worldwidewaves.compose.EventOverlayDone
-import com.worldwidewaves.compose.EventOverlaySoonOrRunning
-import com.worldwidewaves.compose.WWWSocialNetworks
+import com.worldwidewaves.compose.common.AutoResizeSingleLineText
+import com.worldwidewaves.compose.common.ButtonWave
+import com.worldwidewaves.compose.common.DividerLine
+import com.worldwidewaves.compose.common.EventOverlayDone
+import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
+import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals
@@ -142,13 +143,6 @@ class EventActivity : AbstractEventWaveActivity() {
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
         val progression by event.observer.progression.collectAsState()
         val isInArea by event.observer.userIsInArea.collectAsState()
-        
-        // Observe simulation changes
-        val simulationChanged by platform.simulationChanged.collectAsState()
-        val isOnSimulation = remember(simulationChanged) { platform.isOnSimulation() }
-        
-        // Observe simulation mode
-        val simulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {
@@ -181,9 +175,7 @@ class EventActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                EventOverlay(
-                    event = event
-                )
+                EventOverlay(event)
                 EventDescription(event)
                 DividerLine()
                 
@@ -196,14 +188,9 @@ class EventActivity : AbstractEventWaveActivity() {
                         modifier = Modifier.align(Alignment.Center)
                     )
                     
-                    // Show simulation button only when simulation mode is enabled or simulation is active
-                    if (simulationModeEnabled || isOnSimulation) {
-                        SimulationButton(
-                            scope = scope, 
-                            event = event, 
-                            context = context,
-                            isOnSimulation = isOnSimulation
-                        )
+                    // Debug test button
+                    if (BuildConfig.DEBUG) {
+                        SimulationButton(scope, event, context)
                     }
                 }
                 
@@ -219,8 +206,7 @@ class EventActivity : AbstractEventWaveActivity() {
     private fun BoxScope.SimulationButton(
         scope: CoroutineScope,
         event: IWWWEvent,
-        context: Context,
-        isOnSimulation: Boolean = false
+        context: Context
     ) {
         Box(
             modifier = Modifier
@@ -231,67 +217,47 @@ class EventActivity : AbstractEventWaveActivity() {
                 .clip(CircleShape)
                 .background(onPrimaryLight)
                 .clickable {
-                    if (isOnSimulation) {
-                        // Stop simulation
+                    scope.launch {
+                        // Generate random position within event area
+                        val position = event.area.generateRandomPositionInArea()
+
+                        // Calculate time 5 minutes before event start
+                        val simulationDelay = 0.minutes // Start NOW
+                        val simulationTime = event.getStartDateTime() + simulationDelay
+
+                        // Reset any existing simulation
                         platform.disableSimulation()
-                        // Don't disable simulation mode when stopping from event button
-                        
-                        // Restart event observation
+
+                        // Create new simulation with the calculated time and position
+                        val simulation = WWWSimulation(
+                            startDateTime = simulationTime,
+                            userPosition = position,
+                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
+                        )
+
+                        // Set the simulation
+                        Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
+                        Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                        platform.setSimulation(simulation)
+
+                        // Restart event observation to apply simulation (observation delay changes)
                         event.observer.stopObservation()
                         event.observer.startObservation()
-                        
+
                         // Show feedback
                         Toast.makeText(
                             context,
-                            context.getString(MokoRes.strings.simulation_stop.resourceId),
+                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
                             Toast.LENGTH_SHORT
                         ).show()
-                    } else {
-                        scope.launch {
-                            // Generate random position within event area
-                            val position = event.area.generateRandomPositionInArea()
 
-                            // Calculate time 5 minutes before event start
-                            val simulationDelay = 0.minutes // Start NOW
-                            val simulationTime = event.getStartDateTime() + simulationDelay
-
-                            // Reset any existing simulation
-                            platform.disableSimulation()
-
-                            // Create new simulation with the calculated time and position
-                            val simulation = WWWSimulation(
-                                startDateTime = simulationTime,
-                                userPosition = position,
-                                initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
-                            )
-
-                            // Set the simulation
-                            Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
-                            Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
-                            platform.setSimulation(simulation)
-
-                            // Restart event observation to apply simulation (observation delay changes)
-                            event.observer.stopObservation()
-                            event.observer.startObservation()
-
-                            // Show feedback
-                            Toast.makeText(
-                                context,
-                                context.getString(MokoRes.strings.test_simulation_started.resourceId),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResourceAndroid(
-                    if (isOnSimulation) R.drawable.ic_stop else R.drawable.ic_timer
-                ),
-                contentDescription = stringResource(
-                    if (isOnSimulation) MokoRes.strings.simulation_stop else MokoRes.strings.test_simulation
-                ),
+                painter = painterResourceAndroid(R.drawable.ic_timer),
+                contentDescription = stringResource(MokoRes.strings.test_simulation),
                 tint = Color.Red,
                 modifier = Modifier.size(24.dp)
             )
@@ -335,8 +301,6 @@ private fun EventOverlay(event: IWWWEvent) {
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
             EventOverlayDate(eventStatus, localizedDate)
-            
-            // Removed simulation overlay - we'll use the global one from MainActivity
         }
     }
 }

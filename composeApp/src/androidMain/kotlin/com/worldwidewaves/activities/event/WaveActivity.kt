@@ -91,7 +91,7 @@ import com.worldwidewaves.theme.primaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.quinaryLight
 import com.worldwidewaves.theme.tertiaryLight
-import com.worldwidewaves.compose.AutoResizeSingleLineText
+import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject

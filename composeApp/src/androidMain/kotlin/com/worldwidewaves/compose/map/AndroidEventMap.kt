@@ -57,6 +57,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -68,9 +71,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.compose.DownloadProgressIndicator
-import com.worldwidewaves.compose.ErrorMessage
-import com.worldwidewaves.compose.LoadingIndicator
+import com.worldwidewaves.compose.common.DownloadProgressIndicator
+import com.worldwidewaves.compose.common.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
@@ -109,6 +111,9 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.geojson.Polygon
 import java.io.File
+import androidx.compose.material3.Icon
+import com.worldwidewaves.R
+import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
 /**
  * Android implementation of the shared **EventMap** adapter.
@@ -379,6 +384,49 @@ class AndroidEventMap(
                 message = stringResource(MokoRes.strings.map_error_download),
                 onRetry = onRetry
             )
+        }
+    }
+
+    // ------------------------------------------------------------------------
+    // Local copy of ErrorMessage (was previously in Commons)
+    // ------------------------------------------------------------------------
+
+    @Composable
+    private fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+        androidx.compose.foundation.layout.Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = modifier.padding(16.dp)
+        ) {
+            Icon(
+                painter = painterResourceAndroid(R.drawable.ic_info),
+                contentDescription = stringResource(MokoRes.strings.error),
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = onRetry,
+                modifier = Modifier
+            ) {
+                Icon(
+                    painter = painterResourceAndroid(R.drawable.ic_refresh),
+                    contentDescription = stringResource(MokoRes.strings.map_retry_download),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(MokoRes.strings.map_retry_download))
+            }
         }
     }
 
