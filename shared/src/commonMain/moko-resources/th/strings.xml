@@ -64,8 +64,12 @@
   <string name="map_error_access_denied">ปฏิเสธการเข้าถึง</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ: %1$d</string>
-  <!-- src_hash: 4af57ca5d889477184fe302002addef23f53a3c3 -->
-  <string name="map_error_failed_after_retries">เริ่มดาวน์โหลดไม่สำเร็จหลังจากพยายามหลายครั้ง</string>
+  <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
+  <string name="map_error_failed_after_retries">ไม่สามารถเริ่มการดาวน์โหลดได้หลังจากพยายามหลายครั้ง</string>
+  <!-- src_hash: 5cac460b419be0c16e72a916485ee3cb900f590b -->
+  <string name="simulation_map_required_title">ต้องใช้แผนที่</string>
+  <!-- src_hash: 49ca6797af107faee32f4363a3bcfdf5ed525424 -->
+  <string name="simulation_map_required_message">โปรดดาวน์โหลดแผนที่ก่อนเริ่มการจำลอง</string>
   <!-- src_hash: 09cb02be8d0a41f5f25d040bd09bac620f155975 -->
   <string name="events_uninstall_map_title">ถอนการติดตั้งแผนที่</string>
   <!-- src_hash: eb2f57e69b979a3475af5ecb6d7add6c330de49b -->

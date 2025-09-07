@@ -13,7 +13,6 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -146,29 +145,27 @@ class EventsViewModel(
      * Monitor simulation speed during event phases (DEBUG mode only)
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        if (BuildConfig.DEBUG) {
-            val scope = CoroutineScope(Dispatchers.Default)
-            var backupSimulationSpeed = 1
+        val scope = CoroutineScope(Dispatchers.Default)
+        var backupSimulationSpeed = 1
 
-            // Handle warming started
-            scope.launch {
-                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
-                    if (isWarmingStarted) {
-                        backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
-                        platform.getSimulation()?.setSpeed(1)
-                    }
+        // Handle warming started
+        scope.launch {
+            event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
+                if (isWarmingStarted) {
+                    backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                    platform.getSimulation()?.setSpeed(1)
                 }
             }
+        }
 
-            // Handle user has been hit
-            scope.launch {
-                event.observer.userHasBeenHit.collect { hasBeenHit ->
-                    if (hasBeenHit) {
-                        // Restore simulation speed after a delay
-                        launch {
-                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
-                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
-                        }
+        // Handle user has been hit
+        scope.launch {
+            event.observer.userHasBeenHit.collect { hasBeenHit ->
+                if (hasBeenHit) {
+                    // Restore simulation speed after a delay
+                    launch {
+                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                        platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                     }
                 }
             }

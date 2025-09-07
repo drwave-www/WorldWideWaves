@@ -44,6 +44,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,12 +70,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.common.ButtonWave
@@ -108,12 +112,16 @@ import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.format.DateTimeFormats
+import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
 import com.worldwidewaves.theme.extraLightTextStyle
 import com.worldwidewaves.theme.extraQuinaryColoredBoldTextStyle
 import com.worldwidewaves.theme.onPrimaryLight
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryLight
+import com.worldwidewaves.theme.scrimLight
+import com.worldwidewaves.viewmodels.MapFeatureState
+import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -143,6 +151,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
         val progression by event.observer.progression.collectAsState()
         val isInArea by event.observer.userIsInArea.collectAsState()
+        val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {
@@ -188,8 +197,8 @@ class EventActivity : AbstractEventWaveActivity() {
                         modifier = Modifier.align(Alignment.Center)
                     )
                     
-                    // Debug test button
-                    if (BuildConfig.DEBUG) {
+                    // Launch simulation button
+                    if (isSimulationModeEnabled) {
                         SimulationButton(scope, event, context)
                     }
                 }
@@ -208,6 +217,27 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
         context: Context
     ) {
+        // Simulation button states: idle, loading, active
+        var simulationButtonState by remember { mutableStateOf("idle") }
+        val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
+        
+        // Map availability check
+        val mapViewModel: MapViewModel = viewModel()
+        val mapFeatureState by mapViewModel.featureState.collectAsState()
+        var showMapRequiredDialog by remember { mutableStateOf(false) }
+        
+        // Check if map is available for simulation
+        val isMapAvailableForSimulation = when (mapFeatureState) {
+            is MapFeatureState.Installed -> true
+            is MapFeatureState.Available -> true
+            else -> false
+        }
+        
+        // Check map availability when component initializes
+        LaunchedEffect(Unit) {
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+        }
+        
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -216,53 +246,137 @@ class EventActivity : AbstractEventWaveActivity() {
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(onPrimaryLight)
-                .clickable {
-                    scope.launch {
-                        // Generate random position within event area
-                        val position = event.area.generateRandomPositionInArea()
+                .clickable(enabled = simulationButtonState != "loading") {
+                    if (simulationButtonState == "idle") {
+                        if (!isMapAvailableForSimulation) {
+                            showMapRequiredDialog = true
+                            return@clickable
+                        }
+                        simulationButtonState = "loading"
+                        scope.launch {
+                            try {
+                                // Generate random position within event area
+                                val position = event.area.generateRandomPositionInArea()
 
-                        // Calculate time 5 minutes before event start
-                        val simulationDelay = 0.minutes // Start NOW
-                        val simulationTime = event.getStartDateTime() + simulationDelay
+                                // Calculate time 5 minutes before event start
+                                val simulationDelay = 0.minutes // Start NOW
+                                val simulationTime = event.getStartDateTime() + simulationDelay
 
-                        // Reset any existing simulation
-                        platform.disableSimulation()
+                                // Reset any existing simulation
+                                platform.disableSimulation()
 
-                        // Create new simulation with the calculated time and position
-                        val simulation = WWWSimulation(
-                            startDateTime = simulationTime,
-                            userPosition = position,
-                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
-                        )
+                                // Create new simulation with the calculated time and position
+                                val simulation = WWWSimulation(
+                                    startDateTime = simulationTime,
+                                    userPosition = position,
+                                    initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
+                                )
 
-                        // Set the simulation
-                        Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
-                        Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
-                        platform.setSimulation(simulation)
+                                // Set the simulation
+                                Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
+                                Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                                platform.setSimulation(simulation)
 
-                        // Restart event observation to apply simulation (observation delay changes)
-                        event.observer.stopObservation()
-                        event.observer.startObservation()
+                                // Restart event observation to apply simulation (observation delay changes)
+                                event.observer.stopObservation()
+                                event.observer.startObservation()
 
-                        // Show feedback
-                        Toast.makeText(
-                            context,
-                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                                // Show feedback
+                                Toast.makeText(
+                                    context,
+                                    context.getString(MokoRes.strings.test_simulation_started.resourceId),
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
+                                simulationButtonState = "active"
+                            } catch (e: Exception) {
+                                simulationButtonState = "idle"
+                                Log.e("Simulation", "Error starting simulation", e)
+                            }
+                        }
+                    } else if (simulationButtonState == "active") {
+                        // Stop simulation
+                        simulationButtonState = "idle"
+                        scope.launch {
+                            platform.disableSimulation()
+                            event.observer.stopObservation()
+                            event.observer.startObservation()
+                            Toast.makeText(
+                                context,
+                                "Simulation stopped",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResourceAndroid(R.drawable.ic_timer),
-                contentDescription = stringResource(MokoRes.strings.test_simulation),
-                tint = Color.Red,
-                modifier = Modifier.size(24.dp)
-            )
+            when (simulationButtonState) {
+                "idle" -> {
+                    Icon(
+                        painter = painterResourceAndroid(R.drawable.ic_timer),
+                        contentDescription = stringResource(MokoRes.strings.test_simulation),
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                "loading" -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.Red
+                    )
+                }
+                "active" -> {
+                    Icon(
+                        painter = painterResourceAndroid(R.drawable.ic_stop),
+                        contentDescription = "Stop simulation",
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+        
+        // Reset button state when simulation is disabled externally
+        LaunchedEffect(isSimulationEnabled) {
+            if (!isSimulationEnabled && simulationButtonState == "active") {
+                simulationButtonState = "idle"
+            }
+        }
+        
+        // Show map required dialog
+        if (showMapRequiredDialog) {
+            AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
         }
     }
+}
+
+@Composable
+private fun AlertMapNotDownloadedOnSimulationLaunch(hideDialog: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = hideDialog,
+        title = {
+            Text(
+                text = stringResource(MokoRes.strings.simulation_map_required_title),
+                style = commonTextStyle().copy(color = scrimLight),
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(MokoRes.strings.simulation_map_required_message),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = hideDialog
+            ) {
+                Text(stringResource(MokoRes.strings.ok))
+            }
+        }
+    )
 }
 
 // ----------------------------------------------------------------------------

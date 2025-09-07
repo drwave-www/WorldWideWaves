@@ -8,6 +8,9 @@
     <!-- TODO: temporary for maps testing purposes -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Remove AD_ID permission added automatically by Google Play Services -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
