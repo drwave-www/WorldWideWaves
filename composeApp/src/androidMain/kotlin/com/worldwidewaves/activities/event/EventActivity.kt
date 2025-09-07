@@ -72,7 +72,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.common.ButtonWave
@@ -143,6 +142,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val endDateTime = remember { mutableStateOf<Instant?>(null) }
         val progression by event.observer.progression.collectAsState()
         val isInArea by event.observer.userIsInArea.collectAsState()
+        val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {
@@ -189,7 +189,7 @@ class EventActivity : AbstractEventWaveActivity() {
                     )
                     
                     // Debug test button
-                    if (BuildConfig.DEBUG) {
+                    if (isSimulationModeEnabled) {
                         SimulationButton(scope, event, context)
                     }
                 }

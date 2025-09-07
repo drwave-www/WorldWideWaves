@@ -13,7 +13,6 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -146,7 +145,7 @@ class EventsViewModel(
      * Monitor simulation speed during event phases (DEBUG mode only)
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        if (BuildConfig.DEBUG) {
+        if (platform.isOnSimulation()) {
             val scope = CoroutineScope(Dispatchers.Default)
             var backupSimulationSpeed = 1
 
