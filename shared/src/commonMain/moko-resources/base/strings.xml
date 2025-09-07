@@ -47,6 +47,10 @@
     <string name="map_error_unknown">Unknown error occurred: %1$d</string>
     <string name="map_error_failed_after_retries">Failed to start download after multiple attempts</string>
 
+    <!-- Context: Error message when user tries to start simulation without downloading the map first, Size: Medium -->
+    <string name="simulation_map_required_title">Map Required</string> <!-- Title of the dialog when map is required for simulation -->
+    <string name="simulation_map_required_message">Please download the map first before starting the simulation.</string> <!-- Message telling user to download map before simulation -->
+
     <!-- Context: In the maps uninstall dialog after click of the user to the uninstall button on an already downloaded event, Size: Short -->
     <string name="events_uninstall_map_title">Uninstall Map</string> <!-- Title of the uninstall map confirmation dialog -->
     <string name="events_uninstall">Uninstall</string> <!-- Button of the dialog to confirm the uninstall of the map -->

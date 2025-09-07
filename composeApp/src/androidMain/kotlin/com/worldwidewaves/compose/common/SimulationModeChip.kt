@@ -62,14 +62,14 @@ fun BoxScope.SimulationModeChip(platform: WWWPlatform) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(8.dp)
+                .padding(12.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(Color(0x88000000))
+                .background(Color.Red)
                 .clickable {
                     platform.disableSimulation()
                     platform.disableSimulationMode()
                 }
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
                 text = stringResource(MokoRes.strings.simulation_mode),
