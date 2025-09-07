@@ -145,29 +145,27 @@ class EventsViewModel(
      * Monitor simulation speed during event phases (DEBUG mode only)
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        if (platform.isOnSimulation()) {
-            val scope = CoroutineScope(Dispatchers.Default)
-            var backupSimulationSpeed = 1
+        val scope = CoroutineScope(Dispatchers.Default)
+        var backupSimulationSpeed = 1
 
-            // Handle warming started
-            scope.launch {
-                event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
-                    if (isWarmingStarted) {
-                        backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
-                        platform.getSimulation()?.setSpeed(1)
-                    }
+        // Handle warming started
+        scope.launch {
+            event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
+                if (isWarmingStarted) {
+                    backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
+                    platform.getSimulation()?.setSpeed(1)
                 }
             }
+        }
 
-            // Handle user has been hit
-            scope.launch {
-                event.observer.userHasBeenHit.collect { hasBeenHit ->
-                    if (hasBeenHit) {
-                        // Restore simulation speed after a delay
-                        launch {
-                            delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
-                            platform.getSimulation()?.setSpeed(backupSimulationSpeed)
-                        }
+        // Handle user has been hit
+        scope.launch {
+            event.observer.userHasBeenHit.collect { hasBeenHit ->
+                if (hasBeenHit) {
+                    // Restore simulation speed after a delay
+                    launch {
+                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                        platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                     }
                 }
             }

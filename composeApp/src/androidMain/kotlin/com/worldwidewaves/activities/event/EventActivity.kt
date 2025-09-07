@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -188,7 +189,7 @@ class EventActivity : AbstractEventWaveActivity() {
                         modifier = Modifier.align(Alignment.Center)
                     )
                     
-                    // Debug test button
+                    // Launch simulation button
                     if (isSimulationModeEnabled) {
                         SimulationButton(scope, event, context)
                     }
@@ -208,6 +209,10 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
         context: Context
     ) {
+        // Simulation button states: idle, loading, active
+        var simulationButtonState by remember { mutableStateOf("idle") }
+        val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
+        
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -216,51 +221,99 @@ class EventActivity : AbstractEventWaveActivity() {
                 .size(48.dp)
                 .clip(CircleShape)
                 .background(onPrimaryLight)
-                .clickable {
-                    scope.launch {
-                        // Generate random position within event area
-                        val position = event.area.generateRandomPositionInArea()
+                .clickable(enabled = simulationButtonState != "loading") {
+                    if (simulationButtonState == "idle") {
+                        simulationButtonState = "loading"
+                        scope.launch {
+                            try {
+                                // Generate random position within event area
+                                val position = event.area.generateRandomPositionInArea()
 
-                        // Calculate time 5 minutes before event start
-                        val simulationDelay = 0.minutes // Start NOW
-                        val simulationTime = event.getStartDateTime() + simulationDelay
+                                // Calculate time 5 minutes before event start
+                                val simulationDelay = 0.minutes // Start NOW
+                                val simulationTime = event.getStartDateTime() + simulationDelay
 
-                        // Reset any existing simulation
-                        platform.disableSimulation()
+                                // Reset any existing simulation
+                                platform.disableSimulation()
 
-                        // Create new simulation with the calculated time and position
-                        val simulation = WWWSimulation(
-                            startDateTime = simulationTime,
-                            userPosition = position,
-                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
-                        )
+                                // Create new simulation with the calculated time and position
+                                val simulation = WWWSimulation(
+                                    startDateTime = simulationTime,
+                                    userPosition = position,
+                                    initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
+                                )
 
-                        // Set the simulation
-                        Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
-                        Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
-                        platform.setSimulation(simulation)
+                                // Set the simulation
+                                Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
+                                Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                                platform.setSimulation(simulation)
 
-                        // Restart event observation to apply simulation (observation delay changes)
-                        event.observer.stopObservation()
-                        event.observer.startObservation()
+                                // Restart event observation to apply simulation (observation delay changes)
+                                event.observer.stopObservation()
+                                event.observer.startObservation()
 
-                        // Show feedback
-                        Toast.makeText(
-                            context,
-                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                                // Show feedback
+                                Toast.makeText(
+                                    context,
+                                    context.getString(MokoRes.strings.test_simulation_started.resourceId),
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
+                                simulationButtonState = "active"
+                            } catch (e: Exception) {
+                                simulationButtonState = "idle"
+                                Log.e("Simulation", "Error starting simulation", e)
+                            }
+                        }
+                    } else if (simulationButtonState == "active") {
+                        // Stop simulation
+                        simulationButtonState = "idle"
+                        scope.launch {
+                            platform.disableSimulation()
+                            event.observer.stopObservation()
+                            event.observer.startObservation()
+                            Toast.makeText(
+                                context,
+                                "Simulation stopped",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResourceAndroid(R.drawable.ic_timer),
-                contentDescription = stringResource(MokoRes.strings.test_simulation),
-                tint = Color.Red,
-                modifier = Modifier.size(24.dp)
-            )
+            when (simulationButtonState) {
+                "idle" -> {
+                    Icon(
+                        painter = painterResourceAndroid(R.drawable.ic_timer),
+                        contentDescription = stringResource(MokoRes.strings.test_simulation),
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                "loading" -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.Red
+                    )
+                }
+                "active" -> {
+                    Icon(
+                        painter = painterResourceAndroid(R.drawable.ic_stop),
+                        contentDescription = "Stop simulation",
+                        tint = Color.Red,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+        
+        // Reset button state when simulation is disabled externally
+        LaunchedEffect(isSimulationEnabled) {
+            if (!isSimulationEnabled && simulationButtonState == "active") {
+                simulationButtonState = "idle"
+            }
         }
     }
 }
