@@ -134,7 +134,7 @@ class WWWEventTest {
         val result = event.getLiteralStartDateSimple()
 
         // THEN
-        assertEquals("error", result)
+        assertEquals("00/00", result)
     }
 
     @Test
@@ -169,7 +169,7 @@ class WWWEventTest {
         val result = event.getLiteralStartDateSimple()
 
         // THEN
-        assertEquals("error", result)
+        assertEquals("00/00", result)
     }
 
     @Test

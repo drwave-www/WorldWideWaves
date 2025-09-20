@@ -422,7 +422,7 @@ data class WWWEventArea(
             fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
                 // Deep-walk coordinates arrays of unknown depth
                 array.forEach { element ->
-                    if (element is JsonElement && element is kotlinx.serialization.json.JsonArray &&
+                    if (element is kotlinx.serialization.json.JsonArray &&
                         element.firstOrNull() is JsonElement &&
                         element.first() is kotlinx.serialization.json.JsonPrimitive &&
                         element.size == 2 &&
