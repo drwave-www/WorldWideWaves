@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.events
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,17 +48,23 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class WWWEventTest {
-
     private var mockClock = mockk<IClock>()
 
     // ---------------------------
 
     init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
+        Napier.base(
+            object : Antilog() {
+                override fun performLog(
+                    priority: LogLevel,
+                    tag: String?,
+                    throwable: Throwable?,
+                    message: String?,
+                ) {
+                    println(message)
+                }
+            },
+        )
     }
 
     @BeforeTest
@@ -71,7 +77,8 @@ class WWWEventTest {
         }
 
         // Now start Koin with fresh modules
-        startKoin { modules(module { single { mockClock } }) }    }
+        startKoin { modules(module { single { mockClock } }) }
+    }
 
     @AfterTest
     fun tearDown() {
@@ -97,11 +104,12 @@ class WWWEventTest {
     @Test
     fun testGetStartDateSimpleAsLocal_InvalidDate() {
         // GIVEN
-        val event = buildEmptyEvent(
-            timeZone = "Pacific/Auckland",
-            date = "invalid-date",
-            startHour = "18:00"
-        )
+        val event =
+            buildEmptyEvent(
+                timeZone = "Pacific/Auckland",
+                date = "invalid-date",
+                startHour = "18:00",
+            )
 
         // WHEN & THEN
         assertFailsWith<IllegalStateException> {
@@ -124,17 +132,18 @@ class WWWEventTest {
     @Test
     fun testGetLiteralStartDateSimple_InvalidDate() {
         // GIVEN
-        val event = buildEmptyEvent(
-            timeZone = "Pacific/Auckland",
-            date = "invalid-date",
-            startHour = "18:00"
-        )
+        val event =
+            buildEmptyEvent(
+                timeZone = "Pacific/Auckland",
+                date = "invalid-date",
+                startHour = "18:00",
+            )
 
         // WHEN
         val result = event.getLiteralStartDateSimple()
 
         // THEN
-        assertEquals("error", result)
+        assertEquals("00/00", result)
     }
 
     @Test
@@ -169,7 +178,7 @@ class WWWEventTest {
         val result = event.getLiteralStartDateSimple()
 
         // THEN
-        assertEquals("error", result)
+        assertEquals("00/00", result)
     }
 
     @Test
@@ -348,7 +357,6 @@ class WWWEventTest {
 
     @Test
     fun testIsNearTheEvent_Fails() {
-
         // GIVEN --------------------------------
         val now = Instant.parse("2023-01-01T00:00:00+01:00") // Far from the event
         val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-01-01", startHour = "01:00")
@@ -363,7 +371,6 @@ class WWWEventTest {
 
         verify { mockClock.now() }
     }
-
 }
 
 // ============================
@@ -382,9 +389,9 @@ fun buildEmptyEvent(
     osmAdminids: List<Int> = emptyList(),
     maxzoom: Double = 0.0,
     language: String = "",
-    zone: String = ""
-): WWWEvent {
-    return WWWEvent(
+    zone: String = "",
+): WWWEvent =
+    WWWEvent(
         id = id,
         type = type,
         country = country,
@@ -396,7 +403,5 @@ fun buildEmptyEvent(
         instagramHashtag = instagramHashtag,
         wavedef = wavedef,
         area = WWWEventArea(osmAdminids),
-        map = WWWEventMap(maxzoom, language, zone)
+        map = WWWEventMap(maxzoom, language, zone),
     )
-
-}

@@ -36,11 +36,11 @@ import kotlin.time.Instant
  * Defines the shared contract for a WorldWideWaves event.
  *
  * An implementation encapsulates:
- * • Stable identifiers (id, country/community, type)  
- * • Scheduling information (time-zone, date, start hour, total / end time helpers)  
- * • Geospatial components (area polygons, bounding-box, map style)  
- * • Wave definition & warming phase details (see [WWWEventWave] subclasses)  
- * • Social metadata (Instagram account / hashtag)  
+ * • Stable identifiers (id, country/community, type)
+ * • Scheduling information (time-zone, date, start hour, total / end time helpers)
+ * • Geospatial components (area polygons, bounding-box, map style)
+ * • Wave definition & warming phase details (see [WWWEventWave] subclasses)
+ * • Social metadata (Instagram account / hashtag)
  * • Runtime state helpers (favorite flag, [Status] computation, observer accessor)
  *
  * The interface is consumed by view-models, observers, and UI composables across
@@ -50,7 +50,6 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 interface IWWWEvent : DataValidator {
-
     data class WaveNumbersLiterals(
         val waveTimezone: String = "",
         val waveSpeed: String = "..",
@@ -86,39 +85,57 @@ interface IWWWEvent : DataValidator {
     // ---------------------------
 
     suspend fun getStatus(): Status
+
     suspend fun isDone(): Boolean
+
     fun isSoon(): Boolean
+
     suspend fun isRunning(): Boolean
 
     // - Images -------------------
 
     fun getLocationImage(): Any?
+
     fun getCommunityImage(): Any?
+
     fun getCountryImage(): Any?
+
     fun getMapImage(): Any?
 
     // - Localized ---------------
 
     fun getLocation(): StringResource
+
     fun getDescription(): StringResource
+
     fun getLiteralCountry(): StringResource
+
     fun getLiteralCommunity(): StringResource
 
     // ---------------------------
 
     fun getTZ(): TimeZone
+
     fun getStartDateTime(): Instant
+
     suspend fun getTotalTime(): Duration
+
     suspend fun getEndDateTime(): Instant
 
     fun getLiteralTimezone(): String
+
     fun getLiteralStartDateSimple(): String
+
     fun getLiteralStartTime(): String
+
     suspend fun getLiteralEndTime(): String
+
     suspend fun getLiteralTotalTime(): String
 
-    fun getWaveStartDateTime() : Instant
+    fun getWaveStartDateTime(): Instant
+
     fun getWarmingDuration(): Duration
+
     fun isNearTime(): Boolean
 
     // ---------------------------
@@ -129,8 +146,6 @@ interface IWWWEvent : DataValidator {
 
     @Transient val observer: WWWEventObserver
         get() = getEventObserver()
+
     fun getEventObserver(): WWWEventObserver
-
 }
-
-

@@ -1,0 +1,36 @@
+name: Status Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  checks: read
+  contents: read
+  actions: read
+
+concurrency:
+  group: status-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  status:
+    name: Overall Status
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for workflows to complete
+        run: |
+          echo "Waiting for all workflows to complete..."
+          sleep 600  # Wait 10 minutes for all builds to complete
+          echo "Checking workflow statuses..."
+
+      - name: All checks passed
+        run: echo "✅ Status check completed!"

@@ -89,14 +89,16 @@ import kotlin.math.roundToInt
  * *About > FAQ* tab implementation.
  *
  * Implements [TabScreen] to display:
- * • A “Rules & Security” section rendered from [rules_hierarchy]  
- * • An interactive **FAQ** list whose items expand / collapse on tap  
+ * • A “Rules & Security” section rendered from [rules_hierarchy]
+ * • An interactive **FAQ** list whose items expand / collapse on tap
  * • A “Jump to FAQ” link that smoothly scrolls to the FAQ section
  *
  * State is maintained with `remember` so expansion and scroll positions survive
  * recompositions.  All strings are localized via `MokoRes`.
  */
-class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
+class AboutFaqScreen(
+    private val platform: WWWPlatform,
+) : TabScreen {
     override val name = "FAQ"
 
     @Composable
@@ -109,7 +111,7 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
         Box(modifier = modifier) {
             Column(
                 modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 AboutWWWLogo()
 
@@ -129,22 +131,26 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
                 // FAQ title
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
                 Text(
-                    modifier = Modifier.onGloballyPositioned { coordinates ->
-                        // Save the position of the FAQ section
-                        scrollToFAQPosition = coordinates.positionInRoot().y
-                    },
+                    modifier =
+                        Modifier.onGloballyPositioned { coordinates ->
+                            // Save the position of the FAQ section
+                            scrollToFAQPosition = coordinates.positionInRoot().y
+                        },
                     text = stringResource(MokoRes.strings.faq),
-                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE)
+                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE),
                 )
                 Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
 
                 // FAQ Items
                 FAQDividerLine()
                 faq_contents.forEachIndexed { index, (question, answer) ->
-                    FAQItem(index, question, answer,
+                    FAQItem(
+                        index,
+                        question,
+                        answer,
                         expandedFaqItem,
                         onExpand = { expandedFaqItem = it },
-                        showSimulateButton = (question == MokoRes.strings.faq_question_6)
+                        showSimulateButton = (question == MokoRes.strings.faq_question_6),
                     )
                     FAQDividerLine()
                 }
@@ -171,33 +177,38 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 text = stringResource(MokoRes.strings.warn_rules_security_title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                style =
+                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
+                        textAlign = TextAlign.Start,
+                    ),
             )
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = scrollToFAQPosition),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = scrollToFAQPosition),
                 text = stringResource(MokoRes.strings.faq_access),
-                style = quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
-                    textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.End
-                )
+                style =
+                    quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline,
+                        textAlign = TextAlign.End,
+                    ),
             )
         }
         Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
         Text(
             text = stringResource(MokoRes.strings.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
-            style = commonTextStyle().copy(textAlign = TextAlign.Justify)
+            style = commonTextStyle().copy(textAlign = TextAlign.Justify),
         )
     }
 
     @Composable
     private fun FAQDividerLine() {
         HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(), color = Color.White, thickness = 2.dp
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.White,
+            thickness = 2.dp,
         )
     }
 
@@ -213,9 +224,10 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
-                style = extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start
-                )
+                style =
+                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
+                        textAlign = TextAlign.Start,
+                    ),
             )
             Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
             items.forEachIndexed { index, item ->
@@ -223,12 +235,12 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
                     Text(
                         modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
-                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                     Text(
                         modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
-                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE)
+                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                 }
             }
@@ -252,25 +264,25 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
         answerResource: StringResource,
         expandedFaqItem: Int,
         onExpand: (Int) -> Unit,
-        showSimulateButton: Boolean = false
+        showSimulateButton: Boolean = false,
     ) {
-
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(DIM_DEFAULT_INT_PADDING.dp)
-                .clickable {
-                    onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
-                }
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(DIM_DEFAULT_INT_PADDING.dp)
+                    .clickable {
+                        onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
+                    },
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
                     text = stringResource(questionResource),
                     style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
 
@@ -278,21 +290,20 @@ class AboutFaqScreen(private val platform: WWWPlatform) : TabScreen {
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
                     text = stringResource(answerResource),
-                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE)
+                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE),
                 )
                 if (showSimulateButton) {
                     Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
                     OutlinedButton(
-                        onClick = { platform.enableSimulationMode() }
+                        onClick = { platform.enableSimulationMode() },
                     ) {
                         Text(
                             text = stringResource(MokoRes.strings.test_simulation),
-                            style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE - 2)
+                            style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE - 2),
                         )
                     }
                 }
             }
         }
     }
-
 }

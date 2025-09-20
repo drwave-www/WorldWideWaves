@@ -24,7 +24,7 @@ package com.worldwidewaves.shared.utils
 /**
  * Generic contract used by the shared layer to obtain a platform-specific image
  * handle (bitmap, drawable, NSImage…) for event-related assets such as location,
- * community, country or map thumbnails.  
+ * community, country or map thumbnails.
  *
  * Concrete implementations live in each platform module and convert the given
  * relative `path` (inside the app bundle / cache) to a type `T` that the UI

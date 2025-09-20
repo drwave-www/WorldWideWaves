@@ -40,10 +40,11 @@ import org.maplibre.android.location.engine.LocationEngineResult
 /**
  * Android-specific location provider
  */
-class AndroidWWWLocationProvider : KoinComponent, WWWLocationProvider {
-
+class AndroidWWWLocationProvider :
+    KoinComponent,
+    WWWLocationProvider {
     val locationEngine: WWWSimulationEnabledLocationEngine by KoinJavaComponent.inject(
-        WWWSimulationEnabledLocationEngine::class.java
+        WWWSimulationEnabledLocationEngine::class.java,
     )
 
     private val _currentLocation = MutableStateFlow<Position?>(null)
@@ -60,25 +61,26 @@ class AndroidWWWLocationProvider : KoinComponent, WWWLocationProvider {
         proxyLocationEngine = LocationEngineProxy(locationEngine)
 
         // Create callback
-        locationCallback = object : LocationEngineCallback<LocationEngineResult> {
-            override fun onSuccess(result: LocationEngineResult?) {
-                result?.lastLocation?.let { location ->
-                    val position = Position(location.latitude, location.longitude)
-                    _currentLocation.value = position
-                    onLocationUpdate(position)
+        locationCallback =
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    result?.lastLocation?.let { location ->
+                        val position = Position(location.latitude, location.longitude)
+                        _currentLocation.value = position
+                        onLocationUpdate(position)
+                    }
+                }
+
+                override fun onFailure(exception: Exception) {
+                    Log.e("EventMap", "Failed to get location: $exception")
                 }
             }
-
-            override fun onFailure(exception: Exception) {
-                Log.e("EventMap", "Failed to get location: $exception")
-            }
-        }
 
         // Request location updates
         proxyLocationEngine?.requestLocationUpdates(
             buildLocationEngineRequest(),
             locationCallback!!,
-            Looper.getMainLooper()
+            Looper.getMainLooper(),
         )
     }
 
@@ -91,7 +93,8 @@ class AndroidWWWLocationProvider : KoinComponent, WWWLocationProvider {
     }
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
-        LocationEngineRequest.Builder(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
+        LocationEngineRequest
+            .Builder(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
             .setFastestInterval(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()

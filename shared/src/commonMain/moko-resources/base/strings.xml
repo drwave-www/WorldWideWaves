@@ -44,6 +44,7 @@
     <string name="map_error_incompatible_with_existing_session">Incompatible with existing session.</string>
     <string name="map_error_service_died">Service died unexpectedly. Please try again.</string>
     <string name="map_error_access_denied">Access denied.</string>
+    <string name="map_error_account_issue">Google Play Store account issue. Please check your account and try again.</string>
     <string name="map_error_unknown">Unknown error occurred: %1$d</string>
     <string name="map_error_failed_after_retries">Failed to start download after multiple attempts</string>
 
@@ -130,7 +131,7 @@
 
     <!-- Context: In app information tab, 'about' section, to present the context of the app and the concept of the events, to be translated, Size: Medium -->
     <string name="infos_core_1">You know this : if the Earth's story were told in a 1,000-page book, humanity would appear only in the last paragraph of the very last page.</string>
-    <string name="infos_core_2">But this brief story could end sooner than expected. We are isolated in a vast a desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.</string>
+    <string name="infos_core_2">But this brief story could end sooner than expected. We are isolated in a vast and desolate universe. We destroy everything. We are selfish. We are cruel. We are greedy. We are blind. And we seek to dominate. But we are also capable of empathy, we create wonders, we are resilient, we can be altruistic.</string>
     <string name="infos_core_3">But we have little time. We have made so much progress.. We can build an alternative : a community of rights, of solidarity, of democracy. It's up to us!</string>
     <string name="infos_core_4">Join a global movement, a peaceful awakening. Let's create human waves, a testimony of our true humanity, a strong command to our leaders. Let's gather around cities and countries, all over the world. Let's choose peace. Let's choose joy. Let's choose nature. Let's choose US.</string>
     <string name="infos_core_5">What if just one wave was enough to bring us together?</string>

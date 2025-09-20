@@ -1,0 +1,40 @@
+# CLAUDE COGNITIVE ENHANCEMENT SETUP
+
+## Project Context
+- **Project Name**: WorldWideWaves
+- **Project Type**: web-app
+- **Tech Stack**: General project detected
+- **Critical Assets**: user data, configuration files
+- **Common Issues**: authentication, input validation, error handling
+
+## Instructions for Claude
+
+Please create a comprehensive CLAUDE.md file for this project that includes:
+
+1. **Project Overview**
+   - Brief description of the project and its purpose
+   - Technology stack and architecture overview
+
+2. **🚨 MANDATORY DEVELOPMENT REQUIREMENTS - NEVER SKIP THESE**
+   - Security patterns specific to: General project detected
+   - Performance considerations for: web-app
+   - Error handling patterns
+   - Input validation requirements
+
+3. **Critical Asset Protection**
+   - Specific protections for: user data, configuration files
+   - Access control patterns
+   - Data encryption requirements
+
+4. **Common Issue Prevention**
+   - Preventive measures for: authentication, input validation, error handling
+   - Monitoring and alerting patterns
+   - Testing requirements
+
+5. **Learning Protocol**
+   - Pattern recognition for continuous improvement
+   - Confidence levels (HIGH/MEDIUM/LOW)
+   - Automatic CLAUDE.md updates
+
+## Output Format
+Please format the response as a complete CLAUDE.md file that can be directly saved to the project directory.

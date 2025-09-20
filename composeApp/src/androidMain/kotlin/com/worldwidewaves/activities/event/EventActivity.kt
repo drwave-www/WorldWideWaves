@@ -7,7 +7,7 @@ package com.worldwidewaves.activities.event
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,14 +135,16 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
-
     private val clock: IClock by inject()
     private val platform: WWWPlatform by inject()
 
     // ------------------------------------------------------------------------
 
     @Composable
-    override fun Screen(modifier: Modifier, event: IWWWEvent) {
+    override fun Screen(
+        modifier: Modifier,
+        event: IWWWEvent,
+    ) {
         val context = LocalContext.current
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(context)
@@ -165,15 +167,19 @@ class EventActivity : AbstractEventWaveActivity() {
         val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
 
         // Construct the event map
-        val eventMap = remember(event.id) {
-            AndroidEventMap(event,
-                onMapClick = {
-                    context.startActivity(Intent(context, EventFullMapActivity::class.java).apply {
-                        putExtra("eventId", event.id)
-                    })
-                }
-            )
-        }
+        val eventMap =
+            remember(event.id) {
+                AndroidEventMap(
+                    event,
+                    onMapClick = {
+                        context.startActivity(
+                            Intent(context, EventFullMapActivity::class.java).apply {
+                                putExtra("eventId", event.id)
+                            },
+                        )
+                    },
+                )
+            }
 
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
@@ -182,27 +188,28 @@ class EventActivity : AbstractEventWaveActivity() {
         Box {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp)
+                verticalArrangement = Arrangement.spacedBy(30.dp),
             ) {
                 EventOverlay(event)
                 EventDescription(event)
                 DividerLine()
-                
+
                 Box(modifier = Modifier.fillMaxWidth()) {
                     ButtonWave(
-                        event.id, 
-                        eventStatus, 
-                        endDateTime.value, 
-                        clock, isInArea,
-                        modifier = Modifier.align(Alignment.Center)
+                        event.id,
+                        eventStatus,
+                        endDateTime.value,
+                        clock,
+                        isInArea,
+                        modifier = Modifier.align(Alignment.Center),
                     )
-                    
+
                     // Launch simulation button
                     if (isSimulationModeEnabled) {
                         SimulationButton(scope, event, context)
                     }
                 }
-                
+
                 eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
                 NotifyAreaUserPosition(event)
                 EventNumbers(event)
@@ -215,101 +222,106 @@ class EventActivity : AbstractEventWaveActivity() {
     private fun BoxScope.SimulationButton(
         scope: CoroutineScope,
         event: IWWWEvent,
-        context: Context
+        context: Context,
     ) {
         // Simulation button states: idle, loading, active
         var simulationButtonState by remember { mutableStateOf("idle") }
         val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
-        
+
         // Map availability check
         val mapViewModel: MapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
         var showMapRequiredDialog by remember { mutableStateOf(false) }
-        
+
         // Check if map is available for simulation
-        val isMapAvailableForSimulation = when (mapFeatureState) {
-            is MapFeatureState.Installed -> true
-            is MapFeatureState.Available -> true
-            else -> false
-        }
-        
+        val isMapAvailableForSimulation =
+            when (mapFeatureState) {
+                is MapFeatureState.Installed -> true
+                is MapFeatureState.Available -> true
+                else -> false
+            }
+
         // Check map availability when component initializes
         LaunchedEffect(Unit) {
             mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
         }
-        
+
         Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp)
-                .offset(y = (-8).dp)
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(onPrimaryLight)
-                .clickable(enabled = simulationButtonState != "loading") {
-                    if (simulationButtonState == "idle") {
-                        if (!isMapAvailableForSimulation) {
-                            showMapRequiredDialog = true
-                            return@clickable
-                        }
-                        simulationButtonState = "loading"
-                        scope.launch {
-                            try {
-                                // Generate random position within event area
-                                val position = event.area.generateRandomPositionInArea()
+            modifier =
+                Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                    .offset(y = (-8).dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(onPrimaryLight)
+                    .clickable(enabled = simulationButtonState != "loading") {
+                        if (simulationButtonState == "idle") {
+                            if (!isMapAvailableForSimulation) {
+                                showMapRequiredDialog = true
+                                return@clickable
+                            }
+                            simulationButtonState = "loading"
+                            scope.launch {
+                                try {
+                                    // Generate random position within event area
+                                    val position = event.area.generateRandomPositionInArea()
 
-                                // Calculate time 5 minutes before event start
-                                val simulationDelay = 0.minutes // Start NOW
-                                val simulationTime = event.getStartDateTime() + simulationDelay
+                                    // Calculate time 5 minutes before event start
+                                    val simulationDelay = 0.minutes // Start NOW
+                                    val simulationTime = event.getStartDateTime() + simulationDelay
 
-                                // Reset any existing simulation
+                                    // Reset any existing simulation
+                                    platform.disableSimulation()
+
+                                    // Create new simulation with the calculated time and position
+                                    val simulation =
+                                        WWWSimulation(
+                                            startDateTime = simulationTime,
+                                            userPosition = position,
+                                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION, // Use current default speed
+                                        )
+
+                                    // Set the simulation
+                                    Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
+                                    Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                                    platform.setSimulation(simulation)
+
+                                    // Restart event observation to apply simulation (observation delay changes)
+                                    event.observer.stopObservation()
+                                    event.observer.startObservation()
+
+                                    // Show feedback
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+
+                                    simulationButtonState = "active"
+                                } catch (e: Exception) {
+                                    simulationButtonState = "idle"
+                                    Log.e("Simulation", "Error starting simulation", e)
+                                }
+                            }
+                        } else if (simulationButtonState == "active") {
+                            // Stop simulation
+                            simulationButtonState = "idle"
+                            scope.launch {
                                 platform.disableSimulation()
-
-                                // Create new simulation with the calculated time and position
-                                val simulation = WWWSimulation(
-                                    startDateTime = simulationTime,
-                                    userPosition = position,
-                                    initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION // Use current default speed
-                                )
-
-                                // Set the simulation
-                                Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
-                                Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
-                                platform.setSimulation(simulation)
-
-                                // Restart event observation to apply simulation (observation delay changes)
                                 event.observer.stopObservation()
                                 event.observer.startObservation()
-
-                                // Show feedback
-                                Toast.makeText(
-                                    context,
-                                    context.getString(MokoRes.strings.test_simulation_started.resourceId),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                simulationButtonState = "active"
-                            } catch (e: Exception) {
-                                simulationButtonState = "idle"
-                                Log.e("Simulation", "Error starting simulation", e)
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Simulation stopped",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
                             }
                         }
-                    } else if (simulationButtonState == "active") {
-                        // Stop simulation
-                        simulationButtonState = "idle"
-                        scope.launch {
-                            platform.disableSimulation()
-                            event.observer.stopObservation()
-                            event.observer.startObservation()
-                            Toast.makeText(
-                                context,
-                                "Simulation stopped",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                },
-            contentAlignment = Alignment.Center
+                    },
+            contentAlignment = Alignment.Center,
         ) {
             when (simulationButtonState) {
                 "idle" -> {
@@ -317,14 +329,14 @@ class EventActivity : AbstractEventWaveActivity() {
                         painter = painterResourceAndroid(R.drawable.ic_timer),
                         contentDescription = stringResource(MokoRes.strings.test_simulation),
                         tint = Color.Red,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 }
                 "loading" -> {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
-                        color = Color.Red
+                        color = Color.Red,
                     )
                 }
                 "active" -> {
@@ -332,19 +344,19 @@ class EventActivity : AbstractEventWaveActivity() {
                         painter = painterResourceAndroid(R.drawable.ic_stop),
                         contentDescription = "Stop simulation",
                         tint = Color.Red,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
         }
-        
+
         // Reset button state when simulation is disabled externally
         LaunchedEffect(isSimulationEnabled) {
             if (!isSimulationEnabled && simulationButtonState == "active") {
                 simulationButtonState = "idle"
             }
         }
-        
+
         // Show map required dialog
         if (showMapRequiredDialog) {
             AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
@@ -360,36 +372,39 @@ private fun AlertMapNotDownloadedOnSimulationLaunch(hideDialog: () -> Unit) {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_title),
                 style = commonTextStyle().copy(color = scrimLight),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         },
         text = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         },
         confirmButton = {
             Button(
-                onClick = hideDialog
+                onClick = hideDialog,
             ) {
                 Text(stringResource(MokoRes.strings.ok))
             }
-        }
+        },
     )
 }
 
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
+private fun EventDescription(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
     val dir = LocalLayoutDirection.current
     Text(
         modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
         text = stringResource(event.getDescription()),
         style = extraQuinaryColoredBoldTextStyle(),
         fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
-        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify
+        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
     )
 }
 
@@ -399,17 +414,18 @@ private fun EventDescription(event: IWWWEvent, modifier: Modifier = Modifier) {
 @Composable
 private fun EventOverlay(event: IWWWEvent) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    
-    val localizedDate = remember(event.id) { 
-        DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ()) 
-    }
+
+    val localizedDate =
+        remember(event.id) {
+            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
+        }
 
     Box {
         Image(
             modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(event.getLocationImage() as DrawableResource),
-            contentDescription = stringResource(event.getLocation())
+            contentDescription = stringResource(event.getLocation()),
         )
         Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)
@@ -422,29 +438,35 @@ private fun EventOverlay(event: IWWWEvent) {
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: Modifier = Modifier) {
-
+private fun EventOverlayDate(
+    eventStatus: Status,
+    eventDate: String,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .let { if (eventStatus == Status.DONE) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
-        contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center
+        modifier =
+            modifier
+                .fillMaxSize()
+                .let { if (eventStatus == Status.DONE) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
+        contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
         val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
         Text(
             text = eventDate,
-            style = textStyle.copy(color = quinaryLight)
+            style = textStyle.copy(color = quinaryLight),
         )
         Text(
             text = eventDate,
-            style = textStyle.copy(
-                color = MaterialTheme.colorScheme.primary,
-                drawStyle = Stroke(
-                    miter = DIM_EVENT_DATE_MITER,
-                    width = DIM_EVENT_DATE_STROKE,
-                    join = StrokeJoin.Miter
-                )
-            )
+            style =
+                textStyle.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    drawStyle =
+                        Stroke(
+                            miter = DIM_EVENT_DATE_MITER,
+                            width = DIM_EVENT_DATE_STROKE,
+                            join = StrokeJoin.Miter,
+                        ),
+                ),
         )
     }
 }
@@ -452,11 +474,14 @@ private fun EventOverlayDate(eventStatus: Status, eventDate: String, modifier: M
 // ----------------------------------------------------------------------------
 
 @Composable
-private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifier) {
+private fun WWWEventSocialNetworks(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
     WWWSocialNetworks(
         modifier = modifier,
         instagramAccount = event.instagramAccount,
-        instagramHashtag = event.instagramHashtag
+        instagramHashtag = event.instagramHashtag,
     )
 }
 
@@ -464,37 +489,43 @@ private fun WWWEventSocialNetworks(event: IWWWEvent, modifier: Modifier = Modifi
 
 @OptIn(ExperimentalTime::class)
 @Composable
-private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifier) {
+private fun NotifyAreaUserPosition(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
     val formattedTime = IClock.instantToLiteral(hitDateTime, event.getTZ())
 
-    val geolocText = if (isInArea) {
-        stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
-    } else {
-        stringResource(MokoRes.strings.geoloc_yourenotin)
-    }
-    
+    val geolocText =
+        if (isInArea) {
+            stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
+        } else {
+            stringResource(MokoRes.strings.geoloc_yourenotin)
+        }
+
     val displayText = BidiFormatter.getInstance().unicodeWrap(geolocText)
 
     Row(
-        modifier = modifier
-            .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
-            .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
+        modifier =
+            modifier
+                .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
+                .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
-                .fillMaxHeight()
-                .weight(1f),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
+                    .fillMaxHeight()
+                    .weight(1f),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = displayText,
-                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE)
+                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE),
             )
         }
     }
@@ -504,7 +535,10 @@ private fun NotifyAreaUserPosition(event: IWWWEvent, modifier: Modifier = Modifi
 
 @OptIn(ExperimentalTime::class)
 @Composable
-private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
+private fun EventNumbers(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
     var waveNumbers by remember { mutableStateOf<WaveNumbersLiterals?>(null) }
     var totalMinutes by remember { mutableStateOf<Long?>(null) }
     var startTimeText by remember { mutableStateOf<String?>(null) }
@@ -535,44 +569,49 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                     MokoRes.strings.wave_end_time to it.waveEndTime,
                     MokoRes.strings.wave_speed to it.waveSpeed,
                     MokoRes.strings.wave_total_time to it.waveTotalTime,
-                    MokoRes.strings.wave_progression to if (startWarmingInProgress)
-                        warmingText
-                    else
-                        event.wave.getLiteralFromProgression(progression)
+                    MokoRes.strings.wave_progression to
+                        if (startWarmingInProgress) {
+                            warmingText
+                        } else {
+                            event.wave.getLiteralFromProgression(progression)
+                        },
                 )
             } ?: emptyMap()
         }
     }
 
     val eventTimeZone = waveNumbers?.waveTimezone
-    val orderedLabels = listOf(
-        MokoRes.strings.wave_start_time,
-        MokoRes.strings.wave_end_time,
-        MokoRes.strings.wave_speed,
-        MokoRes.strings.wave_total_time,
-        MokoRes.strings.wave_progression
-    )
+    val orderedLabels =
+        listOf(
+            MokoRes.strings.wave_start_time,
+            MokoRes.strings.wave_end_time,
+            MokoRes.strings.wave_speed,
+            MokoRes.strings.wave_total_time,
+            MokoRes.strings.wave_progression,
+        )
 
     Box(modifier = modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
         Box(
-            modifier = Modifier
-                .border(
-                    width = DIM_EVENT_NUMBERS_BORDERWIDTH.dp,
-                    color = quinaryLight,
-                    shape = RoundedCornerShape(
-                        topStart = DIM_EVENT_NUMBERS_BORDERROUND.dp,
-                        bottomEnd = DIM_EVENT_NUMBERS_BORDERROUND.dp
-                    )
-                )
-                .padding(DIM_DEFAULT_EXT_PADDING.dp)
+            modifier =
+                Modifier
+                    .border(
+                        width = DIM_EVENT_NUMBERS_BORDERWIDTH.dp,
+                        color = quinaryLight,
+                        shape =
+                            RoundedCornerShape(
+                                topStart = DIM_EVENT_NUMBERS_BORDERROUND.dp,
+                                bottomEnd = DIM_EVENT_NUMBERS_BORDERROUND.dp,
+                            ),
+                    ).padding(DIM_DEFAULT_EXT_PADDING.dp),
         ) {
             Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
                 AutoResizeSingleLineText(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE)
-                        .copy(textAlign = TextAlign.End),
-                    textAlign = TextAlign.End
+                    style =
+                        extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE)
+                            .copy(textAlign = TextAlign.End),
+                    textAlign = TextAlign.End,
                 )
                 Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
@@ -585,45 +624,53 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
                                 startTimeText!!
                             } else if (key == MokoRes.strings.wave_end_time && endTimeText != null) {
                                 endTimeText!!
-                            } else value
+                            } else {
+                                value
+                            }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             // Label
                             Text(
                                 text = stringResource(key),
-                                style = extraQuinaryColoredBoldTextStyle(
-                                    DIM_EVENT_NUMBERS_LABEL_FONTSIZE
-                                )
+                                style =
+                                    extraQuinaryColoredBoldTextStyle(
+                                        DIM_EVENT_NUMBERS_LABEL_FONTSIZE,
+                                    ),
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 // Value
                                 Text(
                                     text = displayValue,
-                                    style = extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
-                                        color = when (key) {
-                                            MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
-                                            MokoRes.strings.wave_start_time -> Color.Yellow
-                                            else -> MaterialTheme.colorScheme.primary
-                                        }
-                                    )
+                                    style =
+                                        extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
+                                            color =
+                                                when (key) {
+                                                    MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
+                                                    MokoRes.strings.wave_start_time -> Color.Yellow
+                                                    else -> MaterialTheme.colorScheme.primary
+                                                },
+                                        ),
                                 )
                                 // optional Timezone
-                                if (key in listOf(
+                                if (key in
+                                    listOf(
                                         MokoRes.strings.wave_start_time,
-                                        MokoRes.strings.wave_end_time
+                                        MokoRes.strings.wave_end_time,
                                     )
                                 ) {
                                     Text(
                                         text = " $eventTimeZone",
-                                        style = extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
-                                            color = when (key) {
-                                                MokoRes.strings.wave_start_time -> Color.Yellow
-                                                else -> MaterialTheme.colorScheme.primary
-                                            }
-                                        )
+                                        style =
+                                            extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                                color =
+                                                    when (key) {
+                                                        MokoRes.strings.wave_start_time -> Color.Yellow
+                                                        else -> MaterialTheme.colorScheme.primary
+                                                    },
+                                            ),
                                     )
                                 }
                             }
@@ -639,22 +686,33 @@ private fun EventNumbers(event: IWWWEvent, modifier: Modifier = Modifier) {
 // Formats a duration in minutes into a human-readable string (e\.g\., "1 hour 5 minutes")\.
 // If totalMinutes is null, returns the original value string\.
 @Composable
-private fun formatDurationMinutes(totalMinutes: Long?, defaultValue: String): String = totalMinutes?.let { mins ->
-    val hours = (mins / 60).toInt()
-    val minutesLeft = (mins % 60).toInt()
-    val parts = buildList {
-        if (hours > 0) add(
-            if (hours == 1)
-                stringResource(MokoRes.strings.hour_singular, hours)
-            else
-                stringResource(MokoRes.strings.hour_plural, hours)
-        )
-        if (minutesLeft > 0) add(
-            if (minutesLeft == 1)
-                stringResource(MokoRes.strings.minute_singular, minutesLeft)
-            else
-                stringResource(MokoRes.strings.minute_plural, minutesLeft)
-        )
-    }
-    if (parts.isNotEmpty()) parts.joinToString(" ") else defaultValue
-} ?: defaultValue
+private fun formatDurationMinutes(
+    totalMinutes: Long?,
+    defaultValue: String,
+): String =
+    totalMinutes?.let { mins ->
+        val hours = (mins / 60).toInt()
+        val minutesLeft = (mins % 60).toInt()
+        val parts =
+            buildList {
+                if (hours > 0) {
+                    add(
+                        if (hours == 1) {
+                            stringResource(MokoRes.strings.hour_singular, hours)
+                        } else {
+                            stringResource(MokoRes.strings.hour_plural, hours)
+                        },
+                    )
+                }
+                if (minutesLeft > 0) {
+                    add(
+                        if (minutesLeft == 1) {
+                            stringResource(MokoRes.strings.minute_singular, minutesLeft)
+                        } else {
+                            stringResource(MokoRes.strings.minute_plural, minutesLeft)
+                        },
+                    )
+                }
+            }
+        if (parts.isNotEmpty()) parts.joinToString(" ") else defaultValue
+    } ?: defaultValue

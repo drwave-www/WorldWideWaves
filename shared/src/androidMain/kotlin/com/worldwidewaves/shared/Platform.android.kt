@@ -25,12 +25,10 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.java.KoinJavaComponent.inject
@@ -38,7 +36,6 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.IOException
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -49,7 +46,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
             File(filePath).readText()
         }
     } else {
-        Log.e(::readGeoJson.name, "Map file not available for event $eventId")
+        Log.w(::readGeoJson.name, "GeoJSON file not available for event $eventId")
         null
     }
 }
@@ -64,44 +61,56 @@ actual suspend fun readGeoJson(eventId: String): String? {
  * cached file size does not match the expected size, it reads the file from the resources and caches it.
  *
  */
-actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String? {
+actual suspend fun getMapFileAbsolutePath(
+    eventId: String,
+    extension: String,
+): String? {
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
-    
+
     // First check if we have a valid cached file that doesn't need updating
-    val needsUpdate = when {
-        !cachedFile.exists() -> {
-            Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
-            true
-        }
-        !metadataFile.exists() -> {
-            Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
-            true
-        }
-        else -> {
-            val lastCacheTime = try {
-                metadataFile.readText().toLong()
-            } catch (_: Exception) {
-                0L
+    val needsUpdate =
+        when {
+            !cachedFile.exists() -> {
+                Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
+                true
             }
+            !metadataFile.exists() -> {
+                Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
+                true
+            }
+            else -> {
+                val lastCacheTime =
+                    try {
+                        metadataFile.readText().toLong()
+                    } catch (_: Exception) {
+                        0L
+                    }
 
-            // Check if the app was installed/updated after we cached the file
-            val appInstallTime = try {
-                context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-            } catch (_: Exception) {
-                System.currentTimeMillis()
-            }
+                // Check if the app was installed/updated after we cached the file
+                val appInstallTime =
+                    try {
+                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+                    } catch (_: Exception) {
+                        System.currentTimeMillis()
+                    }
 
-            val isStale = appInstallTime > lastCacheTime
-            if (isStale) {
-                Log.d(::getMapFileAbsolutePath.name, "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)")
-            } else {
-                Log.d(::getMapFileAbsolutePath.name, "Cache is up-to-date for $eventId.$extension")
+                val isStale = appInstallTime > lastCacheTime
+                if (isStale) {
+                    Log.d(
+                        ::getMapFileAbsolutePath.name,
+                        "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
+                    )
+                } else {
+                    Log.d(
+                        ::getMapFileAbsolutePath.name,
+                        "Cache is up-to-date for $eventId.$extension",
+                    )
+                }
+                isStale
             }
-            isStale
         }
-    }
 
     // If we have a valid cached file, return its path immediately
     if (!needsUpdate) {
@@ -111,7 +120,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
 
     // If we need to update the cache, try to open the asset from feature module
     Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
-    
+
     val assetPath = "$eventId.$extension"
 
     /* ------------------------------------------------------------------
@@ -121,41 +130,19 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
      * times with a fresh split-aware context before giving up.
      * ---------------------------------------------------------------- */
 
-    val maxAttempts = 5
-    val retryDelayMs = 150L
-    var attemptCtx: Context? = null
-
-    repeat(maxAttempts) { attempt ->
-        val ctx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try { context.createContextForSplit(eventId) } catch (_: Exception) { context }
+    val ctx =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try {
+                context.createContextForSplit(eventId)
+            } catch (_: Exception) {
+                context
+            }
         } else {
             context
         }
 
-        // Ensure split-compat hooks into this context
-        SplitCompat.install(ctx)
-
-        try {
-            // Just probe to see if the asset is available
-            ctx.assets.open(assetPath).use { 
-                // Success - we can access the asset
-                attemptCtx = ctx
-                return@repeat
-            }
-        } catch (e: IOException) {
-            if (attempt < maxAttempts - 1) {
-                Log.w(::getMapFileAbsolutePath.name,
-                    "Asset $assetPath not yet available (attempt ${attempt + 1}/$maxAttempts) – retrying…")
-                kotlinx.coroutines.delay(retryDelayMs)
-            }
-        }
-    }
-
-    if (attemptCtx == null) {
-        Log.e(::getMapFileAbsolutePath.name,
-            "Asset $assetPath still unavailable after $maxAttempts attempts")
-        return null
-    }
+    // Ensure split-compat hooks into this context
+    SplitCompat.install(ctx)
 
     // We found a context that can access the asset, now copy it to cache
     try {
@@ -164,7 +151,7 @@ actual suspend fun getMapFileAbsolutePath(eventId: String, extension: String): S
         withContext(Dispatchers.IO) {
             try {
                 // Use a buffered approach for better memory efficiency
-                attemptCtx!!.assets.open(assetPath).use { input ->
+                ctx.assets.open(assetPath).use { input ->
                     BufferedInputStream(input, 8192).use { bufferedInput ->
                         cachedFile.outputStream().use { fileOutput ->
                             BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
@@ -244,7 +231,10 @@ actual fun cachedFilePath(fileName: String): String? {
  * is being cached.
  *
  */
-actual fun cacheStringToFile(fileName: String, content: String) : String {
+actual fun cacheStringToFile(
+    fileName: String,
+    content: String,
+): String {
     val context: Context by inject(Context::class.java)
     Log.v(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
@@ -296,14 +286,15 @@ actual fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
 
-    val targets = listOf(
-        "$eventId.mbtiles",
-        "$eventId.mbtiles.metadata",
-        "$eventId.geojson",
-        "$eventId.geojson.metadata",
-        "style-$eventId.json",
-        "style-$eventId.json.metadata"
-    )
+    val targets =
+        listOf(
+            "$eventId.mbtiles",
+            "$eventId.mbtiles.metadata",
+            "$eventId.geojson",
+            "$eventId.geojson.metadata",
+            "style-$eventId.json",
+            "style-$eventId.json.metadata",
+        )
 
     for (name in targets) {
         try {
@@ -334,17 +325,19 @@ actual fun isCachedFileStale(fileName: String): Boolean {
     if (!dataFile.exists()) return true
 
     val metadataFile = File(cacheDir, "$fileName.metadata")
-    val cachedTime = try {
-        metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
-    } catch (_: Exception) {
-        0L
-    }
+    val cachedTime =
+        try {
+            metadataFile.takeIf { it.exists() }?.readText()?.toLong() ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
 
-    val appUpdateTime = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-    } catch (_: Exception) {
-        System.currentTimeMillis()
-    }
+    val appUpdateTime =
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+        } catch (_: Exception) {
+            System.currentTimeMillis()
+        }
 
     return appUpdateTime > cachedTime
 }

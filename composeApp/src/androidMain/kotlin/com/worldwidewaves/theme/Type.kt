@@ -27,74 +27,79 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.worldwidewaves.R
 
-val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
-)
+val provider =
+    GoogleFont.Provider(
+        providerAuthority = "com.google.android.gms.fonts",
+        providerPackage = "com.google.android.gms",
+        certificates = R.array.com_google_android_gms_fonts_certs,
+    )
 
-val bodyFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+val bodyFontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )
 
-val displayFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+val displayFontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )
 
-val extraFontFamily = FontFamily(
-    Font(GoogleFont("Montserrat Alternates"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+val extraFontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat Alternates"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )
 
-val AppTypography = Typography(
-    displayLarge = Typography().displayLarge.copy(fontFamily = displayFontFamily),
-    displayMedium = Typography().displayMedium.copy(fontFamily = displayFontFamily),
-    displaySmall = Typography().displaySmall.copy(fontFamily = displayFontFamily),
-    headlineLarge = Typography().headlineLarge.copy(fontFamily = displayFontFamily),
-    headlineMedium = Typography().headlineMedium.copy(fontFamily = displayFontFamily),
-    headlineSmall = Typography().headlineSmall.copy(fontFamily = displayFontFamily),
-    titleLarge = Typography().titleLarge.copy(fontFamily = displayFontFamily),
-    titleMedium = Typography().titleMedium.copy(fontFamily = displayFontFamily),
-    titleSmall = Typography().titleSmall.copy(fontFamily = displayFontFamily),
-    bodyLarge = Typography().bodyLarge.copy(fontFamily = bodyFontFamily),
-    bodyMedium = Typography().bodyMedium.copy(fontFamily = bodyFontFamily),
-    bodySmall = Typography().bodySmall.copy(fontFamily = bodyFontFamily),
-    labelLarge = Typography().labelLarge.copy(fontFamily = bodyFontFamily),
-    labelMedium = Typography().labelMedium.copy(fontFamily = bodyFontFamily),
-    labelSmall = Typography().labelSmall.copy(fontFamily = bodyFontFamily),
-)
+val AppTypography =
+    Typography(
+        displayLarge = Typography().displayLarge.copy(fontFamily = displayFontFamily),
+        displayMedium = Typography().displayMedium.copy(fontFamily = displayFontFamily),
+        displaySmall = Typography().displaySmall.copy(fontFamily = displayFontFamily),
+        headlineLarge = Typography().headlineLarge.copy(fontFamily = displayFontFamily),
+        headlineMedium = Typography().headlineMedium.copy(fontFamily = displayFontFamily),
+        headlineSmall = Typography().headlineSmall.copy(fontFamily = displayFontFamily),
+        titleLarge = Typography().titleLarge.copy(fontFamily = displayFontFamily),
+        titleMedium = Typography().titleMedium.copy(fontFamily = displayFontFamily),
+        titleSmall = Typography().titleSmall.copy(fontFamily = displayFontFamily),
+        bodyLarge = Typography().bodyLarge.copy(fontFamily = bodyFontFamily),
+        bodyMedium = Typography().bodyMedium.copy(fontFamily = bodyFontFamily),
+        bodySmall = Typography().bodySmall.copy(fontFamily = bodyFontFamily),
+        labelLarge = Typography().labelLarge.copy(fontFamily = bodyFontFamily),
+        labelMedium = Typography().labelMedium.copy(fontFamily = bodyFontFamily),
+        labelSmall = Typography().labelSmall.copy(fontFamily = bodyFontFamily),
+    )

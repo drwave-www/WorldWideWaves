@@ -73,15 +73,15 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
-private val tabInfo = listOf(
-    Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
-    Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected)
-)
+private val tabInfo =
+    listOf(
+        Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+        Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+    )
 
 // ----------------------------
 
 open class MainActivity : AppCompatActivity() {
-
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
     private val events: WWWEvents by inject()
@@ -97,14 +97,15 @@ open class MainActivity : AppCompatActivity() {
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
 
-    protected val tabManager = TabManager(
-        listOf(
-            eventsListScreen,
-            aboutScreen
-        )
-    ) { isSelected, tabIndex, contentDescription ->
-        TabBarItem(isSelected, tabIndex, contentDescription)
-    }
+    protected val tabManager =
+        TabManager(
+            listOf(
+                eventsListScreen,
+                aboutScreen,
+            ),
+        ) { isSelected, tabIndex, contentDescription ->
+            TabBarItem(isSelected, tabIndex, contentDescription)
+        }
 
     // ----------------------------
 
@@ -133,9 +134,9 @@ open class MainActivity : AppCompatActivity() {
                     kotlinx.coroutines.delay(500L) // 500 ms
                     isOfficialSplashDismissed = true
                 }
-                true   // keep the official splash right now
+                true // keep the official splash right now
             } else {
-                false  // dismiss – programmatic splash continues in Compose
+                false // dismiss – programmatic splash continues in Compose
             }
         }
 
@@ -143,7 +144,7 @@ open class MainActivity : AppCompatActivity() {
         setStatusBarColor(window)
         hideStatusBar(this)
 
-        /* Hide system UI like old SplashActivity */
+        // Hide system UI like old SplashActivity
         window.decorView.post {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 window.insetsController?.hide(WindowInsets.Type.statusBars())
@@ -177,13 +178,13 @@ open class MainActivity : AppCompatActivity() {
             }
         }
 
-        /* Begin loading events – when done, flag so splash can disappear */
+        // Begin loading events – when done, flag so splash can disappear
         events.loadEvents(onTermination = {
             isDataLoaded = true
             checkSplashFinished(startTime)
         })
 
-        /* Also enforce minimum duration */
+        // Also enforce minimum duration
         lifecycleScope.launch {
             kotlinx.coroutines.delay(CONST_SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
@@ -204,13 +205,13 @@ open class MainActivity : AppCompatActivity() {
     private fun TabBarItem(
         isSelected: Boolean,
         tabIndex: Int,
-        contentDescription: String?
+        contentDescription: String?,
     ) {
         Image(
             painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
             contentDescription = contentDescription,
             modifier = Modifier.height(DIM_EXT_TABBAR_HEIGHT.dp),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
         )
     }
 
@@ -225,16 +226,16 @@ open class MainActivity : AppCompatActivity() {
                 painter = painterResource(ShRes.drawable.background),
                 contentDescription = stringResource(MokoRes.strings.background_description),
                 contentScale = ContentScale.FillHeight,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
             Image(
                 painter = painterResource(ShRes.drawable.www_logo_transparent),
                 contentDescription = stringResource(MokoRes.strings.logo_description),
-                modifier = Modifier
-                    .align(androidx.compose.ui.Alignment.BottomCenter)
-                    .padding(bottom = DIM_DEFAULT_INT_PADDING.dp) // original SplashActivity padding
+                modifier =
+                    Modifier
+                        .align(androidx.compose.ui.Alignment.BottomCenter)
+                        .padding(bottom = DIM_DEFAULT_INT_PADDING.dp), // original SplashActivity padding
             )
         }
     }
-
 }

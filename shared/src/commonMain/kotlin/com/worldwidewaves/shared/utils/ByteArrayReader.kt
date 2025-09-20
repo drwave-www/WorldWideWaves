@@ -24,12 +24,12 @@ package com.worldwidewaves.shared.utils
 /**
  * Helper class for reading byte arrays
  */
-class ByteArrayReader(private val bytes: ByteArray) {
+class ByteArrayReader(
+    private val bytes: ByteArray,
+) {
     var position: Int = 0
 
-    fun readUInt8(): Int {
-        return bytes[position++].toInt() and 0xFF
-    }
+    fun readUInt8(): Int = bytes[position++].toInt() and 0xFF
 
     fun readInt16(): Int {
         val msb = readUInt8()

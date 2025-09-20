@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface WWWLocationProvider {
     val currentLocation: StateFlow<Position?>
+
     fun startLocationUpdates(onLocationUpdate: (Position) -> Unit)
+
     fun stopLocationUpdates()
 }

@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.data
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import okio.Path.Companion.toPath
 // ----------------------------
 
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
+
 @VisibleForTesting
 lateinit var dataStore: DataStore<Preferences>
 private val lock = SynchronizedObject()
@@ -51,16 +52,16 @@ private val lock = SynchronizedObject()
  *                    file must be created (e.g. `context.filesDir.absolutePath`)
  * @return The singleton [DataStore] of type `Preferences`.
  */
-fun createDataStore(producePath: () -> String): DataStore<Preferences> = synchronized(lock) {
-    if (::dataStore.isInitialized) {
-        Log.v(::createDataStore.name,"DataStore already initialized with path: ${producePath()}")
-        return dataStore
+fun createDataStore(producePath: () -> String): DataStore<Preferences> =
+    synchronized(lock) {
+        if (::dataStore.isInitialized) {
+            Log.v(::createDataStore.name, "DataStore already initialized with path: ${producePath()}")
+            return dataStore
+        }
+        Log.i(::createDataStore.name, "Creating DataStore with path: ${producePath()}")
+        dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
+        dataStore
     }
-    Log.i(::createDataStore.name,"Creating DataStore with path: ${producePath()}")
-    dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
-    dataStore
-}
 
 /** Returns the platform-specific absolute path used to store the preferences DataStore file. */
 expect fun keyValueStorePath(): String
-

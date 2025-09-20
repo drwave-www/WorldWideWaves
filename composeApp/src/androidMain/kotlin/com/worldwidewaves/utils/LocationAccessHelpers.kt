@@ -7,7 +7,7 @@ package com.worldwidewaves.utils
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,8 +28,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.provider.Settings
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,8 +46,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.MokoRes
-import dev.icerock.moko.resources.compose.stringResource
 
 /**
  * Session-scoped in-memory marker of the last time the user declined the
@@ -61,21 +59,26 @@ fun requestLocationPermission(): Boolean {
     val context = LocalContext.current
     var permissionGranted by remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true &&
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-    }
+        }
 
     LaunchedEffect(Unit) {
-        val fineLocationGranted = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        val fineLocationGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) == PackageManager.PERMISSION_GRANTED
 
-        val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        val coarseLocationGranted =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ) == PackageManager.PERMISSION_GRANTED
 
         if (fineLocationGranted && coarseLocationGranted) {
             permissionGranted = true
@@ -83,8 +86,8 @@ fun requestLocationPermission(): Boolean {
             launcher.launch(
                 arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                ),
             )
         }
     }
@@ -100,66 +103,76 @@ fun CheckGPSEnable() {
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     // Check permission directly – avoid calling requestLocationPermission() here
-    val permissionGranted = ContextCompat.checkSelfPermission(
-        context, Manifest.permission.ACCESS_FINE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-        context, Manifest.permission.ACCESS_COARSE_LOCATION
-    ) == PackageManager.PERMISSION_GRANTED
+    val permissionGranted =
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ) == PackageManager.PERMISSION_GRANTED
 
     // Apply cooldown only for the GPS-enable dialog
     val lastDeclined = lastGpsEnableDeclinedAtMillis
-    val withinCooldown = lastDeclined != null &&
+    val withinCooldown =
+        lastDeclined != null &&
             (System.currentTimeMillis() - lastDeclined) <
             WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
 
     val activity = context as? Activity
 
     // Launcher for the system "enable location" sheet
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_CANCELED) {
-            // User refused → start cooldown
-            lastGpsEnableDeclinedAtMillis = System.currentTimeMillis()
+    val launcher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult(),
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_CANCELED) {
+                // User refused → start cooldown
+                lastGpsEnableDeclinedAtMillis = System.currentTimeMillis()
+            }
         }
-    }
 
     LaunchedEffect(permissionGranted, withinCooldown) {
         if (permissionGranted &&
             !withinCooldown &&
             !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         ) {
-            val req = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                /* intervalMillis = */ 1000L
-            ).build()
+            val req =
+                LocationRequest
+                    .Builder(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        // intervalMillis =
+                        1000L,
+                    ).build()
 
-            val settingsReq = LocationSettingsRequest.Builder()
-                .addLocationRequest(req)
-                .setAlwaysShow(true)
-                .build()
+            val settingsReq =
+                LocationSettingsRequest
+                    .Builder()
+                    .addLocationRequest(req)
+                    .setAlwaysShow(true)
+                    .build()
 
             val client = LocationServices.getSettingsClient(context)
-            client.checkLocationSettings(settingsReq)
+            client
+                .checkLocationSettings(settingsReq)
                 .addOnSuccessListener {
                     // GPS already enabled – nothing to do
-                }
-                .addOnFailureListener { ex ->
+                }.addOnFailureListener { ex ->
                     if (ex is ResolvableApiException && activity != null) {
                         // Show system dialog
                         launcher.launch(
-                            IntentSenderRequest.Builder(ex.resolution).build()
+                            IntentSenderRequest.Builder(ex.resolution).build(),
                         )
                     } else {
                         // Fallback to full Settings screen
                         startActivity(
                             context,
                             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
-                            null
+                            null,
                         )
                     }
                 }
         }
     }
 }
-
