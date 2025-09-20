@@ -287,6 +287,10 @@ class MapViewModel(
                     MokoRes.strings.map_error_service_died
                 SplitInstallErrorCode.ACCESS_DENIED ->
                     MokoRes.strings.map_error_access_denied
+                -100 ->
+                    // Error code -100 typically indicates Google Play Store authentication issues
+                    // This corresponds to Play Store error code 1010 (account no longer exists)
+                    MokoRes.strings.map_error_account_issue
                 else ->
                     // Generic unknown error with code placeholder
                     MokoRes.strings.map_error_unknown

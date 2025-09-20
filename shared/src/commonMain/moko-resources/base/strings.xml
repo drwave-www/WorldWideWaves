@@ -44,6 +44,7 @@
     <string name="map_error_incompatible_with_existing_session">Incompatible with existing session.</string>
     <string name="map_error_service_died">Service died unexpectedly. Please try again.</string>
     <string name="map_error_access_denied">Access denied.</string>
+    <string name="map_error_account_issue">Google Play Store account issue. Please check your account and try again.</string>
     <string name="map_error_unknown">Unknown error occurred: %1$d</string>
     <string name="map_error_failed_after_retries">Failed to start download after multiple attempts</string>
 
