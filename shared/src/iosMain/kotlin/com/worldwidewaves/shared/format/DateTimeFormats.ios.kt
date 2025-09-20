@@ -4,7 +4,6 @@ import kotlinx.datetime.TimeZone
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSTimeZone
-import platform.Foundation.setLocalizedDateFormatFromTemplate
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -17,7 +16,7 @@ actual object DateTimeFormats {
         val formatter = NSDateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("dMMM")
         formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
-        val date = NSDate.dateWithTimeIntervalSince1970(instant.epochSeconds.toDouble())
+        val date = NSDate(timeIntervalSince1970 = instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }
 
@@ -28,7 +27,7 @@ actual object DateTimeFormats {
         val formatter = NSDateFormatter()
         formatter.setLocalizedDateFormatFromTemplate("jm")
         formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
-        val date = NSDate.dateWithTimeIntervalSince1970(instant.epochSeconds.toDouble())
+        val date = NSDate(timeIntervalSince1970 = instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }
 }

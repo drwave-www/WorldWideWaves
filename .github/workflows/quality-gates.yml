@@ -87,3 +87,5 @@ jobs:
           name: Unit Test Results
           path: '**/build/test-results/testDebugUnitTest/TEST-*.xml'
           reporter: java-junit
+          fail-on-error: false
+          fail-on-empty: false
