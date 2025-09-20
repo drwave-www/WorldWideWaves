@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.events
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,9 +35,9 @@ import kotlin.time.Instant
 data class WWWEventWaveDeep(
     override val speed: Double,
     override val direction: Direction,
-    override val approxDuration: Int
-) : KoinComponent, WWWEventWave() {
-
+    override val approxDuration: Int,
+) : WWWEventWave(),
+    KoinComponent {
     override suspend fun getWavePolygons(): WavePolygons {
         TODO("Not yet implemented")
     }
@@ -64,7 +64,7 @@ data class WWWEventWaveDeep(
 
     // ---------------------------
 
-    override fun validationErrors() : List<String>? {
+    override fun validationErrors(): List<String>? {
         val superValid = super.validationErrors()
         val errors = superValid?.toMutableList() ?: mutableListOf()
 
@@ -72,5 +72,4 @@ data class WWWEventWaveDeep(
 
         return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveDeep::class.simpleName}: $it" }
     }
-
 }

@@ -35,7 +35,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GeoUtilsTest {
-
     @Test
     fun pointOnHorizontalSegment() {
         val segment = Segment(Position(1.0, 0.0), Position(1.0, 2.0))
@@ -138,5 +137,4 @@ class GeoUtilsTest {
         assertTrue(isLatitudeInRange(45.0, 0.0, 90.0))
         assertFalse(isLatitudeInRange(100.0, 0.0, 90.0))
     }
-
 }

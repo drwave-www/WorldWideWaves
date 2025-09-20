@@ -28,15 +28,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 object GeoUtils {
-
     /**
      * Collection of lightweight geodesic helpers reused across the shared module.
      *
      * Main responsibilities:
-     * • Angle ↔ radians conversions (`toRadians` / `toDegrees`)  
-     * • Distance estimations on a WGS-84 ellipsoid (great-circle lon/lat helpers)  
+     * • Angle ↔ radians conversions (`toRadians` / `toDegrees`)
+     * • Distance estimations on a WGS-84 ellipsoid (great-circle lon/lat helpers)
      * • Tiny predicates to compare / clamp coordinates while accounting for
-     *   floating-point imprecision (EPSILON)  
+     *   floating-point imprecision (EPSILON)
      * • Convenience functions used by wave algorithms & map logic
      *   (range checks, “point on segment”, …).
      *
@@ -51,29 +50,41 @@ object GeoUtils {
 
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
+
     fun Double.toDegrees(): Double = this * 180.0 / PI
 
-    data class Vector2D(val x: Double, val y: Double) {
+    data class Vector2D(
+        val x: Double,
+        val y: Double,
+    ) {
         fun cross(other: Vector2D): Double = this.x * other.y - this.y * other.x
     }
 
     // ----------------------------------------------------------------------------
 
-    fun isLongitudeEqual(lng1: Double, lng2: Double): Boolean =
-        abs(lng1 - lng2) < EPSILON
+    fun isLongitudeEqual(
+        lng1: Double,
+        lng2: Double,
+    ): Boolean = abs(lng1 - lng2) < EPSILON
 
-    fun isLongitudeInRange(lng: Double, start: Double, end: Double): Boolean {
-        return if (start <= end) {
+    fun isLongitudeInRange(
+        lng: Double,
+        start: Double,
+        end: Double,
+    ): Boolean =
+        if (start <= end) {
             // The range doesn't cross the date line
             lng in start..end
         } else {
             // The range crosses the date line
             lng >= start || lng <= end
         }
-    }
 
-    fun isLatitudeInRange(lat: Double, start: Double, end: Double): Boolean =
-        lat in min(start, end)..max(start, end)
+    fun isLatitudeInRange(
+        lat: Double,
+        start: Double,
+        end: Double,
+    ): Boolean = lat in min(start, end)..max(start, end)
 
     // ----------------------------------------------------------------------------
 
@@ -81,7 +92,11 @@ object GeoUtils {
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
      */
-    fun calculateDistance(lon1: Double, lon2: Double, lat: Double): Double {
+    fun calculateDistance(
+        lon1: Double,
+        lon2: Double,
+        lat: Double,
+    ): Double {
         val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
         val latRad = lat * (PI / 180) // Convert degrees to radians
         return abs(EARTH_RADIUS * dLon * cos(latRad))
@@ -91,8 +106,10 @@ object GeoUtils {
      * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
      *
      */
-    fun calculateDistance(lonWidth: Double, lat: Double): Double =
-        calculateDistance(0.0, lonWidth, lat)
+    fun calculateDistance(
+        lonWidth: Double,
+        lat: Double,
+    ): Double = calculateDistance(0.0, lonWidth, lat)
 
     /**
      * Checks if a given point lies on a line segment.
@@ -104,19 +121,26 @@ object GeoUtils {
      * segment's endpoints.
      *
      */
-    fun isPointOnSegment(point: Position, segment: Segment): Boolean {
+    fun isPointOnSegment(
+        point: Position,
+        segment: Segment,
+    ): Boolean {
         // Calculate the differences
         val dLat = segment.end.lat - segment.start.lat
         val dLng = segment.end.lng - segment.start.lng
 
         // Handle special cases: horizontal and vertical segments
-        if (abs(dLat) < EPSILON)  // Horizontal segment
+        if (abs(dLat) < EPSILON) {
+            // Horizontal segment
             return abs(point.lat - segment.start.lat) < EPSILON &&
-                    isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
+                isLongitudeInRange(point.lng, segment.start.lng, segment.end.lng)
+        }
 
-        if (abs(dLng) < EPSILON)  // Vertical segment
+        if (abs(dLng) < EPSILON) {
+            // Vertical segment
             return isLongitudeEqual(point.lng, segment.start.lng) &&
-                    point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
+                point.lat in minOf(segment.start.lat, segment.end.lat)..maxOf(segment.start.lat, segment.end.lat)
+        }
 
         // Calculate the parametric value t for the point
         val tLat = (point.lat - segment.start.lat) / dLat
@@ -125,5 +149,4 @@ object GeoUtils {
         // Check if t values are the same and within the range [0, 1]
         return abs(tLat - tLng) < EPSILON && tLat in 0.0..1.0
     }
-
 }

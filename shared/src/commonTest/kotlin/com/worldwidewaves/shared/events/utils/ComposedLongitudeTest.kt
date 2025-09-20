@@ -31,7 +31,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ComposedLongitudeTest {
-
     @Test
     fun testComposedLongitudeAdd() {
         val composedLongitude = ComposedLongitude()
@@ -87,11 +86,12 @@ class ComposedLongitudeTest {
 
     @Test
     fun testComposedLongitudeIntersectWithSegment2() {
-        val composedLongitude = ComposedLongitude.fromPositions(
-            Position(lat = -3.0, lng = -1.0),
-            Position(lat = 1.0, lng = -1.0),
-            Position(lat = 3.0, lng = 1.0)
-        )
+        val composedLongitude =
+            ComposedLongitude.fromPositions(
+                Position(lat = -3.0, lng = -1.0),
+                Position(lat = 1.0, lng = -1.0),
+                Position(lat = 3.0, lng = 1.0),
+            )
         val segment = Segment(Position(-2.0, -2.0), Position(-2.0, 2.0))
         val cutPosition = composedLongitude.intersectWithSegment(1, segment)
         assertNotNull(cutPosition)
@@ -113,11 +113,16 @@ class ComposedLongitudeTest {
         assertTrue(composedLongitude.isValidArc()) // This should be valid for wave fronts
 
         // Test a truly chaotic pattern that should be invalid
-        val chaoticPositions = listOf(
-            Position(1.0, 1.0), Position(2.0, 10.0), Position(3.0, -5.0),
-            Position(4.0, 15.0), Position(5.0, -10.0), Position(6.0, 20.0),
-            Position(7.0, -15.0)
-        )
+        val chaoticPositions =
+            listOf(
+                Position(1.0, 1.0),
+                Position(2.0, 10.0),
+                Position(3.0, -5.0),
+                Position(4.0, 15.0),
+                Position(5.0, -10.0),
+                Position(6.0, 20.0),
+                Position(7.0, -15.0),
+            )
         assertFailsWith<IllegalArgumentException> {
             ComposedLongitude().addAll(chaoticPositions)
         }
@@ -197,5 +202,4 @@ class ComposedLongitudeTest {
         composedLongitude.addAll(positions)
         assertEquals(Orientation.SOUTH, composedLongitude.orientation)
     }
-
 }

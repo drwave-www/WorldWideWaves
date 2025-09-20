@@ -38,7 +38,6 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class WWWEventWaveTest : KoinTest {
-
     private var mockClock = mockk<IClock>()
     private var mockEvent = mockk<IWWWEvent>(relaxed = true)
     private lateinit var wave: WWWEventWave
@@ -46,31 +45,47 @@ class WWWEventWaveTest : KoinTest {
     // ---------------------------
 
     init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
+        Napier.base(
+            object : Antilog() {
+                override fun performLog(
+                    priority: LogLevel,
+                    tag: String?,
+                    throwable: Throwable?,
+                    message: String?,
+                ) {
+                    println(message)
+                }
+            },
+        )
     }
 
     @BeforeTest
     fun setUp() {
-
         startKoin { modules(module { single { mockClock } }) }
 
-        wave = object : WWWEventWave() {
-            override val speed: Double = 10.0
-            override val direction: Direction = Direction.EAST
-            override val approxDuration: Int = 60
-            override suspend fun getWavePolygons(): WavePolygons = WavePolygons(
-                clock.now(), emptyList(), emptyList()
-            )
-            override suspend fun getWaveDuration(): Duration = Duration.ZERO
-            override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
-            override suspend fun userHitDateTime(): Instant? = null
-            override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
-            override suspend fun userPositionToWaveRatio() = 0.0
-        }.setRelatedEvent(mockEvent)
+        wave =
+            object : WWWEventWave() {
+                override val speed: Double = 10.0
+                override val direction: Direction = Direction.EAST
+                override val approxDuration: Int = 60
+
+                override suspend fun getWavePolygons(): WavePolygons =
+                    WavePolygons(
+                        clock.now(),
+                        emptyList(),
+                        emptyList(),
+                    )
+
+                override suspend fun getWaveDuration(): Duration = Duration.ZERO
+
+                override suspend fun hasUserBeenHitInCurrentPosition(): Boolean = false
+
+                override suspend fun userHitDateTime(): Instant? = null
+
+                override suspend fun closestWaveLongitude(latitude: Double): Double = 0.0
+
+                override suspend fun userPositionToWaveRatio() = 0.0
+            }.setRelatedEvent(mockEvent)
     }
 
     @AfterTest
@@ -79,5 +94,4 @@ class WWWEventWaveTest : KoinTest {
     }
 
     // ---------------------------
-
 }

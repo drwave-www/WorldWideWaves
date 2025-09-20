@@ -31,7 +31,6 @@ import kotlin.time.Duration
  * Shared waveform generation algorithms for all platforms
  */
 object WaveformGenerator {
-
     /**
      * Generate sample array for the specified waveform
      * @param sampleRate Sample rate in Hz (e.g., 44100)
@@ -46,12 +45,14 @@ object WaveformGenerator {
         frequency: Double,
         amplitude: Double,
         duration: Duration,
-        waveform: SoundPlayer.Waveform
+        waveform: SoundPlayer.Waveform,
     ): DoubleArray {
-
         // Calculate number of samples
-        val numSamples = (sampleRate * duration.inWholeSeconds +
-                (sampleRate * (duration.inWholeNanoseconds % 1_000_000_000) / 1_000_000_000.0)).toInt()
+        val numSamples =
+            (
+                sampleRate * duration.inWholeSeconds +
+                    (sampleRate * (duration.inWholeNanoseconds % 1_000_000_000) / 1_000_000_000.0)
+            ).toInt()
 
         // Create sample array
         val samples = DoubleArray(numSamples)
@@ -86,7 +87,10 @@ object WaveformGenerator {
     /**
      * Apply a simple attack/release envelope to avoid clicks
      */
-    private fun applyEnvelope(samples: DoubleArray, sampleRate: Int) {
+    private fun applyEnvelope(
+        samples: DoubleArray,
+        sampleRate: Int,
+    ) {
         val attackTime = 0.01 // 10ms attack
         val releaseTime = 0.01 // 10ms release
 
@@ -109,15 +113,10 @@ object WaveformGenerator {
      * Convert MIDI pitch to frequency in Hz
      * A4 (MIDI note 69) = 440Hz
      */
-    fun midiPitchToFrequency(pitch: Int): Double {
-        return 440.0 * 2.0.pow((pitch - 69).toDouble() / 12.0)
-    }
+    fun midiPitchToFrequency(pitch: Int): Double = 440.0 * 2.0.pow((pitch - 69).toDouble() / 12.0)
 
     /**
      * Convert MIDI velocity (0-127) to amplitude (0.0-1.0)
      */
-    fun midiVelocityToAmplitude(velocity: Int): Double {
-        return (velocity / 127.0).coerceIn(0.0, 1.0)
-    }
-
+    fun midiVelocityToAmplitude(velocity: Int): Double = (velocity / 127.0).coerceIn(0.0, 1.0)
 }

@@ -12,7 +12,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -22,17 +21,18 @@ import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 
 // Reusable composable for showing loading state
-@Composable
+
 /** Generic circular loading indicator with a message. */
+@Composable
 fun LoadingIndicator(message: String) {
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
             strokeWidth = 4.dp,
-            strokeCap = StrokeCap.Round
+            strokeCap = StrokeCap.Round,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -40,24 +40,29 @@ fun LoadingIndicator(message: String) {
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
 
 // Reusable composable for showing download progress
-@Composable
+
 /** Shows percentage, progress bar and cancel button while downloading. */
-fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -> Unit = {}) {
+@Composable
+fun DownloadProgressIndicator(
+    progress: Int = 0,
+    message: String,
+    onCancel: () -> Unit = {},
+) {
     Column(
         horizontalAlignment = CenterHorizontally,
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
     ) {
         // Show progress percentage
         Text(
             text = "$progress%",
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -65,12 +70,13 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
         // Linear progress indicator
         LinearProgressIndicator(
             progress = { progress / 100f },
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(8.dp),
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             color = MaterialTheme.colorScheme.primary,
-            strokeCap = StrokeCap.Round
+            strokeCap = StrokeCap.Round,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -79,7 +85,7 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -87,7 +93,7 @@ fun DownloadProgressIndicator(progress: Int = 0, message: String, onCancel: () -
         // Cancel button
         Button(
             onClick = onCancel,
-            modifier = Modifier
+            modifier = Modifier,
         ) {
             Text(text = stringResource(MokoRes.strings.map_cancel_download))
         }

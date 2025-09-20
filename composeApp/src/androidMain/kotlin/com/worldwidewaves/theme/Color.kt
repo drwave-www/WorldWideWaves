@@ -69,5 +69,3 @@ val quaternaryContainerLight = Color(0xFFFFDAD4)
 val onQuaternaryContainerLight = Color(0xFF3A0905)
 val quinaryContainerLight = Color(0xFFFFDAD4)
 val onQuinaryContainerLight = Color(0xFF3A0905)
-
-

@@ -30,7 +30,7 @@ import androidx.core.view.WindowCompat
 
 /**
  * Sets the status bar to transparent with light icons to match the app's full-screen design.
- * 
+ *
  * Configures the system UI to be edge-to-edge by:
  * • Making the status bar transparent to blend with the app background
  * • Setting light status bar icons for better visibility against dark backgrounds
@@ -53,7 +53,7 @@ fun setStatusBarColor(window: Window) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         window.insetsController?.setSystemBarsAppearance(
             WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
         )
     } else {
         @Suppress("DEPRECATION")
@@ -66,16 +66,19 @@ fun setStatusBarColor(window: Window) {
  */
 fun hideStatusBar(activity: Activity) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        activity.window.insetsController?.hide(android.view.WindowInsets.Type.statusBars())
+        activity.window.insetsController?.hide(
+            android.view.WindowInsets.Type
+                .statusBars(),
+        )
     } else {
         @Suppress("DEPRECATION")
         activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                )
+            View.SYSTEM_UI_FLAG_IMMERSIVE
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_FULLSCREEN
+        )
     }
 }

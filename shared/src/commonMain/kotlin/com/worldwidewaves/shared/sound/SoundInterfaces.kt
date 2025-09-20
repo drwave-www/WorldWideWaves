@@ -34,7 +34,12 @@ interface SoundPlayer {
      * @param duration How long to play the tone
      * @param waveform Type of waveform (sine, square, etc.)
      */
-    suspend fun playTone(frequency: Double, amplitude: Double, duration: Duration, waveform: Waveform = Waveform.SINE)
+    suspend fun playTone(
+        frequency: Double,
+        amplitude: Double,
+        duration: Duration,
+        waveform: Waveform = Waveform.SINE,
+    )
 
     fun release()
 
@@ -42,10 +47,10 @@ interface SoundPlayer {
      * Available waveform types for synthesis
      */
     enum class Waveform {
-        SINE,      // Smooth, pure tone
-        SQUARE,    // Rich in harmonics, sounds "buzzy"
-        TRIANGLE,  // Smoother than square, but with some harmonics
-        SAWTOOTH   // Very rich in harmonics, sounds "brassy"
+        SINE, // Smooth, pure tone
+        SQUARE, // Rich in harmonics, sounds "buzzy"
+        TRIANGLE, // Smoother than square, but with some harmonics
+        SAWTOOTH, // Very rich in harmonics, sounds "brassy"
     }
 }
 
@@ -54,8 +59,8 @@ interface SoundPlayer {
  */
 interface VolumeController {
     fun getCurrentVolume(): Float
-    fun setVolume(level: Float)
 
+    fun setVolume(level: Float)
 }
 
 /**
@@ -63,6 +68,7 @@ interface VolumeController {
  */
 interface AudioBuffer {
     fun getRawBuffer(): ByteArray
+
     val sampleCount: Int
     val sampleRate: Int
 }
@@ -75,6 +81,6 @@ expect object AudioBufferFactory {
         samples: DoubleArray,
         sampleRate: Int,
         bitsPerSample: Int = 16,
-        channels: Int = 1
+        channels: Int = 1,
     ): AudioBuffer
 }

@@ -7,7 +7,7 @@ package com.worldwidewaves.compose.common
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,40 +50,41 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
 /**
  * A reusable composable that displays a simulation mode chip overlay.
  * This chip appears when simulation mode is enabled and provides a way to disable it.
- * 
+ *
  * @param platform The WWWPlatform instance to observe simulation mode state and handle actions
  */
 @Composable
 fun BoxScope.SimulationModeChip(platform: WWWPlatform) {
     val simulationModeEnabled by platform.simulationModeEnabled.collectAsState()
-    
+
     if (simulationModeEnabled) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.Red)
-                .clickable {
-                    platform.disableSimulation()
-                    platform.disableSimulationMode()
-                }
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Red)
+                    .clickable {
+                        platform.disableSimulation()
+                        platform.disableSimulationMode()
+                    }.padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 text = stringResource(MokoRes.strings.simulation_mode),
                 color = Color.White,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
             Image(
                 painter = painterResourceAndroid(R.drawable.ic_stop),
                 contentDescription = stringResource(MokoRes.strings.simulation_stop),
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .size(16.dp),
+                modifier =
+                    Modifier
+                        .padding(start = 4.dp)
+                        .size(16.dp),
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Color.White)
+                colorFilter = ColorFilter.tint(Color.White),
             )
         }
     }

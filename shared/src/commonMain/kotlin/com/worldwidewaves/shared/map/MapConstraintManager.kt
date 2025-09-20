@@ -41,12 +41,11 @@ class MapConstraintManager(
      * move the camera.  Used while a user-initiated or automatic animation is
      * already running to avoid fighting with it.
      */
-    private val isSuppressed: () -> Boolean = { false }
+    private val isSuppressed: () -> Boolean = { false },
 ) {
-
     data class VisibleRegionPadding(
         var latPadding: Double = 0.0,
-        var lngPadding: Double = 0.0
+        var lngPadding: Double = 0.0,
     )
 
     private var visibleRegionPadding = VisibleRegionPadding()
@@ -57,9 +56,7 @@ class MapConstraintManager(
         visibleRegionPadding = padding
     }
 
-    fun calculateConstraintBounds(): BoundingBox {
-        return calculatePaddedBounds(visibleRegionPadding)
-    }
+    fun calculateConstraintBounds(): BoundingBox = calculatePaddedBounds(visibleRegionPadding)
 
     /**
      * Apply constraints to a MapLibre map
@@ -79,11 +76,11 @@ class MapConstraintManager(
 
                 if (
                     hasSignificantPaddingChange(
-                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                 ) {
                     setVisibleRegionPadding(
-                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding)
+                        VisibleRegionPadding(newPadding.latPadding, newPadding.lngPadding),
                     )
                     applyConstraintsWithPadding()
                 }
@@ -118,12 +115,13 @@ class MapConstraintManager(
         val target = mapLibreAdapter.getCameraPosition() ?: return
         if (constraintBounds != null && !isCameraWithinConstraints(target)) {
             val mapPosition = Position(target.latitude, target.longitude)
-            val constraintBoundsMapped = constraintBounds?.let { bounds ->
-                BoundingBox.fromCorners(
-                    Position(bounds.southwest.latitude, bounds.southwest.longitude),
-                    Position(bounds.northeast.latitude, bounds.northeast.longitude)
-                )
-            }
+            val constraintBoundsMapped =
+                constraintBounds?.let { bounds ->
+                    BoundingBox.fromCorners(
+                        Position(bounds.southwest.latitude, bounds.southwest.longitude),
+                        Position(bounds.northeast.latitude, bounds.northeast.longitude),
+                    )
+                }
 
             constraintBoundsMapped?.let { bounds ->
                 val nearestValid = getNearestValidPoint(mapPosition, bounds)
@@ -135,8 +133,7 @@ class MapConstraintManager(
     /**
      * Checks if camera is within the constraint bounds
      */
-    private fun isCameraWithinConstraints(cameraPosition: Position): Boolean =
-        constraintBounds?.contains(cameraPosition) ?: false
+    private fun isCameraWithinConstraints(cameraPosition: Position): Boolean = constraintBounds?.contains(cameraPosition) ?: false
 
     /**
      * Moves the camera to fit specified bounds
@@ -151,7 +148,7 @@ class MapConstraintManager(
     private fun updateVisibleRegionPadding() {
         val padding = calculateVisibleRegionPadding()
         setVisibleRegionPadding(
-            VisibleRegionPadding(padding.latPadding, padding.lngPadding)
+            VisibleRegionPadding(padding.latPadding, padding.lngPadding),
         )
     }
 
@@ -160,48 +157,69 @@ class MapConstraintManager(
         val visibleRegion = mapLibreAdapter.getVisibleRegion()
 
         // Calculate padding as half the visible region dimensions
-        val latPadding = (visibleRegion.northLatitude -
-                visibleRegion.southLatitude) / 2.0
-        val lngPadding = (visibleRegion.eastLongitude -
-                visibleRegion.westLongitude) / 2.0
+        val latPadding =
+            (
+                visibleRegion.northLatitude -
+                    visibleRegion.southLatitude
+            ) / 2.0
+        val lngPadding =
+            (
+                visibleRegion.eastLongitude -
+                    visibleRegion.westLongitude
+            ) / 2.0
 
         return VisibleRegionPadding(latPadding, lngPadding)
     }
 
-    private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox {
-        return BoundingBox.fromCorners(
+    private fun calculatePaddedBounds(padding: VisibleRegionPadding): BoundingBox =
+        BoundingBox.fromCorners(
             Position(
                 mapBounds.southwest.latitude + padding.latPadding,
-                mapBounds.southwest.longitude + padding.lngPadding
+                mapBounds.southwest.longitude + padding.lngPadding,
             ),
             Position(
                 mapBounds.northeast.latitude - padding.latPadding,
-                mapBounds.northeast.longitude - padding.lngPadding
-            )
+                mapBounds.northeast.longitude - padding.lngPadding,
+            ),
         )
-    }
 
-    fun isValidBounds(bounds: BoundingBox, currentPosition: Position?): Boolean {
+    fun isValidBounds(
+        bounds: BoundingBox,
+        currentPosition: Position?,
+    ): Boolean {
         if (currentPosition == null) return false
 
         // Check if bounds are valid (not inverted or too small)
-        val validSize = bounds.northeast.latitude > bounds.southwest.latitude &&
+        val validSize =
+            bounds.northeast.latitude > bounds.southwest.latitude &&
                 bounds.northeast.longitude > bounds.southwest.longitude &&
                 (bounds.height) > visibleRegionPadding.latPadding * 0.1 &&
                 (bounds.width) > visibleRegionPadding.lngPadding * 0.1
 
         // Check if the current position is within or close to the bounds
-        val containsTarget = bounds.contains(currentPosition) ||
-                isNearBounds(currentPosition, bounds, visibleRegionPadding.latPadding * 0.5,
-                    visibleRegionPadding.lngPadding * 0.5)
+        val containsTarget =
+            bounds.contains(currentPosition) ||
+                isNearBounds(
+                    currentPosition,
+                    bounds,
+                    visibleRegionPadding.latPadding * 0.5,
+                    visibleRegionPadding.lngPadding * 0.5,
+                )
 
         return validSize && containsTarget
     }
 
-    private fun isNearBounds(point: Position, bounds: BoundingBox, latPadding: Double, lngPadding: Double): Boolean {
-        val nearLat = point.latitude >= bounds.southwest.latitude - latPadding &&
+    private fun isNearBounds(
+        point: Position,
+        bounds: BoundingBox,
+        latPadding: Double,
+        lngPadding: Double,
+    ): Boolean {
+        val nearLat =
+            point.latitude >= bounds.southwest.latitude - latPadding &&
                 point.latitude <= bounds.northeast.latitude + latPadding
-        val nearLng = point.longitude >= bounds.southwest.longitude - lngPadding &&
+        val nearLng =
+            point.longitude >= bounds.southwest.longitude - lngPadding &&
                 point.longitude <= bounds.northeast.longitude + lngPadding
         return nearLat && nearLng
     }
@@ -224,14 +242,16 @@ class MapConstraintManager(
         var centerLng = centerPosition.longitude
 
         // But constrain the center to be within the map bounds (with padding)
-        centerLat = centerLat.coerceIn(
-            mapBounds.southwest.latitude + usableLatPadding,
-            mapBounds.northeast.latitude - usableLatPadding
-        )
-        centerLng = centerLng.coerceIn(
-            mapBounds.southwest.longitude + usableLngPadding,
-            mapBounds.northeast.longitude - usableLngPadding
-        )
+        centerLat =
+            centerLat.coerceIn(
+                mapBounds.southwest.latitude + usableLatPadding,
+                mapBounds.northeast.latitude - usableLatPadding,
+            )
+        centerLng =
+            centerLng.coerceIn(
+                mapBounds.southwest.longitude + usableLngPadding,
+                mapBounds.northeast.longitude - usableLngPadding,
+            )
 
         // Calculate the corners of our safe bounds
         val safeSouth = max(mapBounds.southwest.latitude, centerLat - usableLatPadding)
@@ -250,21 +270,26 @@ class MapConstraintManager(
 
         return BoundingBox.fromCorners(
             Position(safeSouth, safeWest),
-            Position(finalNorth, finalEast)
+            Position(finalNorth, finalEast),
         )
     }
 
     fun hasSignificantPaddingChange(newPadding: VisibleRegionPadding): Boolean {
         // Determine if padding change is significant enough to update constraints
-        val latChange = abs(newPadding.latPadding - visibleRegionPadding.latPadding) /
+        val latChange =
+            abs(newPadding.latPadding - visibleRegionPadding.latPadding) /
                 visibleRegionPadding.latPadding
-        val lngChange = abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
+        val lngChange =
+            abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
         return latChange > 0.1 || lngChange > 0.1 // 10% change threshold
     }
 
-    fun getNearestValidPoint(point: Position, bounds: BoundingBox): Position {
+    fun getNearestValidPoint(
+        point: Position,
+        bounds: BoundingBox,
+    ): Position {
         val lat = point.latitude.coerceIn(bounds.minLatitude, bounds.maxLatitude)
         val lng = point.longitude.coerceIn(bounds.minLongitude, bounds.maxLongitude)
         return Position(lat, lng)

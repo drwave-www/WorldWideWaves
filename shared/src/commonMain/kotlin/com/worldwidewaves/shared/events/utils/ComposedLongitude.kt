@@ -28,8 +28,9 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
 import kotlin.math.abs
 import kotlin.math.sign
 
-open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
-
+open class ComposedLongitude(
+    position: Position? = null,
+) : Iterable<Position> {
     private val positions = mutableListOf<Position>()
     private var swLat: Double = Double.POSITIVE_INFINITY
     private var swLng: Double = Double.POSITIVE_INFINITY
@@ -42,21 +43,31 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
     // --- Nested classes and enums
 
     enum class Orientation { NORTH, SOUTH }
-    enum class Side { EAST, WEST, ON ;
+
+    enum class Side {
+        EAST,
+        WEST,
+        ON,
+        ;
+
         fun isOn(): Boolean = this == ON
+
         fun isEast(): Boolean = this == EAST
+
         fun isWest(): Boolean = this == WEST
     }
 
     // ------------------------
 
-    init { position?.let { add(it) } }
+    init {
+        position?.let { add(it) }
+    }
 
     companion object {
-        fun fromPositions(vararg positions: Position): ComposedLongitude =
-            ComposedLongitude().apply { addAll(positions.toList()) }
-        fun fromPositions(positions: List<Position>): ComposedLongitude =
-            ComposedLongitude().apply { addAll(positions.toList()) }
+        fun fromPositions(vararg positions: Position): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
+
+        fun fromPositions(positions: List<Position>): ComposedLongitude = ComposedLongitude().apply { addAll(positions.toList()) }
+
         fun fromLongitude(longitude: Double) = ComposedLongitude(Position(0.0, longitude))
     }
 
@@ -70,7 +81,9 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             positions.add(position)
             updateBoundingBox(listOf(position))
             sortPositions()
-        } else throw IllegalArgumentException("Invalid arc")
+        } else {
+            throw IllegalArgumentException("Invalid arc")
+        }
     }
 
     fun addAll(newPositions: List<Position>) {
@@ -81,10 +94,12 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             positions.addAll(newPositions)
             updateBoundingBox(newPositions)
             sortPositions()
-        } else throw IllegalArgumentException("Invalid arc")
+        } else {
+            throw IllegalArgumentException("Invalid arc")
+        }
     }
 
-    fun clear() : ComposedLongitude {
+    fun clear(): ComposedLongitude {
         positions.clear()
         resetBoundingBox()
         orientation = Orientation.NORTH
@@ -111,11 +126,13 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             val end = positions[i + 1]
             val segment = Segment(start, end)
 
-            if (isPointOnSegment(point, segment))
+            if (isPointOnSegment(point, segment)) {
                 return Side.ON
+            }
 
-            if (point.lat < minOf(start.lat, end.lat) || point.lat > maxOf(start.lat, end.lat))
+            if (point.lat < minOf(start.lat, end.lat) || point.lat > maxOf(start.lat, end.lat)) {
                 continue
+            }
 
             // Calculate vectors
             val lineVector = Vector2D(end.lng - start.lng, end.lat - start.lat)
@@ -135,15 +152,19 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return Side.EAST
     }
 
-    fun intersectWithSegment(cutId: Int, segment: Segment): CutPosition? {
+    fun intersectWithSegment(
+        cutId: Int,
+        segment: Segment,
+    ): CutPosition? {
         if (positions.isEmpty()) return null
         if (positions.size == 1) return segment.intersectWithLng(cutId, positions.first().lng)
 
-        return positions.zipWithNext { start, end ->
-            Segment(start, end)
-        }.firstNotNullOfOrNull { lineSegment ->
-            lineSegment.intersectWithSegment(cutId, segment)
-        }
+        return positions
+            .zipWithNext { start, end ->
+                Segment(start, end)
+            }.firstNotNullOfOrNull { lineSegment ->
+                lineSegment.intersectWithSegment(cutId, segment)
+            }
     }
 
     /**
@@ -158,11 +179,12 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
             return segment.intersectWithLng(positions.first().lng)
         }
 
-        return positions.zipWithNext { start, end ->
-            Segment(start, end)
-        }.firstNotNullOfOrNull { lineSegment ->
-            lineSegment.intersectWithSegment(segment)
-        }
+        return positions
+            .zipWithNext { start, end ->
+                Segment(start, end)
+            }.firstNotNullOfOrNull { lineSegment ->
+                lineSegment.intersectWithSegment(segment)
+            }
     }
 
     /**
@@ -186,8 +208,10 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return null
     }
 
-    fun positionsBetween(minLat: Double, maxLat: Double): List<Position> =
-         positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
+    fun positionsBetween(
+        minLat: Double,
+        maxLat: Double,
+    ): List<Position> = positions.filter { it.lat > minLat && it.lat < maxLat }.sortedBy { it.lat }
 
     fun isValidArc(positions: List<Position> = this.positions): Boolean {
         if (positions.size <= 2) return true
@@ -212,27 +236,32 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         return changes <= 5 && distinctSigns <= 3 && nonZeroChanges <= 3
     }
 
-    fun bbox(): BoundingBox = BoundingBox.fromCorners(
-        sw = Position(swLat, swLng),
-        ne = Position(neLat, neLng)
-    )
+    fun bbox(): BoundingBox =
+        BoundingBox.fromCorners(
+            sw = Position(swLat, swLng),
+            ne = Position(neLat, neLng),
+        )
 
     // -------------------------
 
     fun size() = positions.size
+
     fun getPositions(): List<Position> = positions.toList()
+
     override fun iterator(): Iterator<Position> = positions.iterator()
+
     fun reverseIterator(): Iterator<Position> = positions.asReversed().iterator()
 
     // -------------------------
 
     private fun sortPositions() {
         val southToNorth = positions.sortedBy { it.lat }
-        orientation = if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
-            Orientation.NORTH
-        } else {
-            Orientation.SOUTH
-        }
+        orientation =
+            if (positions.size <= 1 || positions.first().lat == southToNorth.first().lat) {
+                Orientation.NORTH
+            } else {
+                Orientation.SOUTH
+            }
         positions.clear()
         positions.addAll(if (orientation == Orientation.NORTH) southToNorth else southToNorth.reversed())
     }
@@ -250,5 +279,4 @@ open class ComposedLongitude(position: Position? = null) : Iterable<Position> {
         neLat = Double.NEGATIVE_INFINITY
         neLng = Double.NEGATIVE_INFINITY
     }
-
 }

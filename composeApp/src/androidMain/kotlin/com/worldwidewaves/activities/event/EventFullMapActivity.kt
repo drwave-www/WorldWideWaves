@@ -7,7 +7,7 @@ package com.worldwidewaves.activities.event
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,6 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
-
     private val clock: IClock by inject()
 
     // Ensure dynamic-feature splits are available without restarting the app
@@ -76,7 +75,10 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
     // ------------------------------------------------------------------------
 
     @Composable
-    override fun Screen(modifier: Modifier, event: IWWWEvent) {
+    override fun Screen(
+        modifier: Modifier,
+        event: IWWWEvent,
+    ) {
         val eventStatus by event.observer.eventStatus.collectAsState()
         val progression by event.observer.progression.collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
@@ -85,14 +87,17 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         val isInArea by event.observer.userIsInArea.collectAsState()
 
         // Construct the event map
-        val eventMap =  remember(event.id) {
-            AndroidEventMap(event,
-                mapConfig = EventMapConfig(
-                    initialCameraPosition = MapCameraPosition.WINDOW,
-                    autoTargetUserOnFirstLocation = true
+        val eventMap =
+            remember(event.id) {
+                AndroidEventMap(
+                    event,
+                    mapConfig =
+                        EventMapConfig(
+                            initialCameraPosition = MapCameraPosition.WINDOW,
+                            autoTargetUserOnFirstLocation = true,
+                        ),
                 )
-            )
-        }
+            }
 
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
@@ -104,50 +109,67 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
             MapActions(event, eventMap, clock)
         }
     }
-
 }
 
 // ----------------------------------------------------------------------------
 
 @OptIn(ExperimentalTime::class)
 @Composable
-fun MapActions(event: IWWWEvent, eventMap: AndroidEventMap, clock: IClock, modifier: Modifier = Modifier) {
+fun MapActions(
+    event: IWWWEvent,
+    eventMap: AndroidEventMap,
+    clock: IClock,
+    modifier: Modifier = Modifier,
+) {
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()
 
     val isRunning = eventStatus == Status.RUNNING
 
-    Box(modifier = modifier.fillMaxSize()
-            .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
-        contentAlignment = Alignment.BottomEnd
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+        contentAlignment = Alignment.BottomEnd,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
             Image(
-                modifier = Modifier.size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
-                    .clickable {
-                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                            eventMap.markUserInteracted()
-                            scope.launch {
-                                eventMap.targetWave()
+                modifier =
+                    Modifier
+                        .size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
+                        .clickable {
+                            if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                                eventMap.markUserInteracted()
+                                scope.launch {
+                                    eventMap.targetWave()
+                                }
                             }
-                        }
-                    },
+                        },
                 painter = painterResource(if (isRunning) ShRes.drawable.target_wave_active else ShRes.drawable.target_wave_inactive),
-                contentDescription = stringResource(if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off)
+                contentDescription =
+                    stringResource(
+                        if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
+                    ),
             )
             Image(
-                modifier = Modifier.size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
-                    .clickable {
-                        if (isInArea) {
-                            eventMap.markUserInteracted()
-                            scope.launch {
-                                eventMap.targetUser()
+                modifier =
+                    Modifier
+                        .size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
+                        .clickable {
+                            if (isInArea) {
+                                eventMap.markUserInteracted()
+                                scope.launch {
+                                    eventMap.targetUser()
+                                }
                             }
-                        }
-                    },
+                        },
                 painter = painterResource(if (isInArea) ShRes.drawable.target_me_active else ShRes.drawable.target_me_inactive),
-                contentDescription = stringResource(if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off)
+                contentDescription =
+                    stringResource(
+                        if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
+                    ),
             )
         }
     }

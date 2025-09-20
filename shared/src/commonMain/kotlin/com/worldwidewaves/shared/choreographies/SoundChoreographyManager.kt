@@ -9,7 +9,6 @@ import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
-import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
@@ -17,6 +16,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /*
  * Copyright 2025 DrWave
@@ -46,30 +46,29 @@ import kotlin.time.ExperimentalTime
  * • At start-up, the manager pre-loads a MIDI file located at
  *   [FS_CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
  *   [preloadMidiFile]).  The file is parsed into a single [MidiTrack] that
- *   stores note, timing and velocity information.  
+ *   stores note, timing and velocity information.
  * • When a device gets “hit” by the wave the UI calls [playCurrentSoundTone]
  *   passing the *wave start* timestamp.  The manager maps the current
  *   `clock.now() – waveStartTime` to a position inside the track (with optional
  *   looping) and fetches all notes whose `[start,end]` window contains that
- *   position.  
+ *   position.
  * • One of those active notes is randomly selected so each device contributes
- *   a different tone, creating a crowd-sourced chord.  
+ *   a different tone, creating a crowd-sourced chord.
  * • The selected note’s pitch / velocity are converted to
  *   `frequency` / `amplitude` using helpers in [WaveformGenerator] and finally
  *   played through the platform-specific [SoundPlayer] with the currently
- *   chosen [Waveform][SoundPlayer.Waveform] (default *sine*).  
+ *   chosen [Waveform][SoundPlayer.Waveform] (default *sine*).
  *
  * Public knobs:
- * • [setWaveform] lets callers choose another synthesis waveform.  
- * • [setLooping] controls whether the track should wrap when reaching its end.  
- * • [getTotalDuration] exposes the track length for progress UI.  
- * • [release] frees audio resources when the enclosing screen is disposed.  
+ * • [setWaveform] lets callers choose another synthesis waveform.
+ * • [setLooping] controls whether the track should wrap when reaching its end.
+ * • [getTotalDuration] exposes the track length for progress UI.
+ * • [release] frees audio resources when the enclosing screen is disposed.
  */
 @OptIn(ExperimentalTime::class)
 class SoundChoreographyManager(
-    coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
+    coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
-
     private val clock: IClock by inject()
     private val soundPlayer: SoundPlayer by inject()
 
@@ -114,11 +113,12 @@ class SoundChoreographyManager(
         val elapsedTime = clock.now() - waveStartTime
 
         // Calculate position in the track, with looping
-        val trackPosition = if (looping && track.totalDuration > Duration.ZERO) {
-            (elapsedTime.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).nanoseconds
-        } else {
-            elapsedTime
-        }
+        val trackPosition =
+            if (looping && track.totalDuration > Duration.ZERO) {
+                (elapsedTime.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).nanoseconds
+            } else {
+                elapsedTime
+            }
 
         // Find all notes that are active at this position
         val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
@@ -139,7 +139,7 @@ class SoundChoreographyManager(
             frequency = frequency,
             amplitude = amplitude,
             duration = selectedNote.duration.coerceAtMost(2.seconds),
-            waveform = selectedWaveform
+            waveform = selectedWaveform,
         )
 
         return selectedNote.pitch
@@ -162,9 +162,7 @@ class SoundChoreographyManager(
     /**
      * Get the total duration of the current track
      */
-    fun getTotalDuration(): Duration {
-        return currentTrack?.totalDuration ?: Duration.ZERO
-    }
+    fun getTotalDuration(): Duration = currentTrack?.totalDuration ?: Duration.ZERO
 
     /**
      * Clear loaded resources
@@ -173,5 +171,4 @@ class SoundChoreographyManager(
         soundPlayer.release()
         currentTrack = null
     }
-
 }

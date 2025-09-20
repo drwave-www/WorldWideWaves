@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.events
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
-import com.worldwidewaves.shared.isCachedFileStale
-import com.worldwidewaves.shared.updateCacheMetadata
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
@@ -36,6 +34,8 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import com.worldwidewaves.shared.isCachedFileStale
+import com.worldwidewaves.shared.updateCacheMetadata
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent
@@ -47,13 +47,13 @@ import org.koin.core.component.inject
  * Encapsulates per-event map configuration and tooling.
  *
  * Core responsibilities:
- * • Build a self-contained MapLibre **style JSON** on-the-fly, wiring the cached  
- *   MBTiles, GeoJSON, sprites & glyphs locations via `getStyleUri()`.  
+ * • Build a self-contained MapLibre **style JSON** on-the-fly, wiring the cached
+ *   MBTiles, GeoJSON, sprites & glyphs locations via `getStyleUri()`.
  * • Lazy-cache heavy assets (`cacheSpriteAndGlyphs`) and keep them fresh using
- *   simple TTL checks (`isCachedFileStale`, `updateCacheMetadata`).  
+ *   simple TTL checks (`isCachedFileStale`, `updateCacheMetadata`).
  * • Provide convenience helpers such as [isPositionWithin] to quickly validate
  *   whether a GPS coordinate falls inside the event bounding-box (fast bbox
- *   test – no polygon walk).  
+ *   test – no polygon walk).
  * • Offer lightweight validation of the declarative JSON section that feeds the
  *   constructor (max-zoom bounds, language / zone format, …).
  *
@@ -64,9 +64,9 @@ import org.koin.core.component.inject
 class WWWEventMap(
     val maxZoom: Double,
     val language: String,
-    val zone: String
-) : KoinComponent, DataValidator {
-
+    val zone: String,
+) : KoinComponent,
+    DataValidator {
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
         get() = requireNotNull(_event) { "Event not set" }
@@ -86,8 +86,7 @@ class WWWEventMap(
 
     // ---------------------------
 
-    private suspend fun getMbtilesFilePath(): String? =
-        getMapFileAbsolutePath(event.id, "mbtiles")
+    private suspend fun getMbtilesFilePath(): String? = getMapFileAbsolutePath(event.id, "mbtiles")
 
     // ---------------------------
 
@@ -102,17 +101,20 @@ class WWWEventMap(
     suspend fun getStyleUri(): String? {
         val mbtilesFilePath = getMbtilesFilePath() ?: return null
         val styleFilename = "style-${event.id}.json"
-        if (cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename))
+        if (cachedFileExists(styleFilename) && !isCachedFileStale(styleFilename)) {
             return cachedFilePath(styleFilename)
+        }
 
         val geojsonFilePath = event.area.getGeoJsonFilePath() ?: return null
 
         val spriteAndGlyphsPath = cacheSpriteAndGlyphs()
-        val newFileStr = mapDataProvider.geoMapStyleData()
-            .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
-            .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
-            .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
-            .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
+        val newFileStr =
+            mapDataProvider
+                .geoMapStyleData()
+                .replace("__MBTILES_URI__", "mbtiles:///$mbtilesFilePath")
+                .replace("__GEOJSON_URI__", "file:///$geojsonFilePath")
+                .replace("__GLYPHS_URI__", "file:///$spriteAndGlyphsPath/files/style/glyphs")
+                .replace("__SPRITE_URI__", "file:///$spriteAndGlyphsPath/files/style/sprites")
 
         cacheStringToFile(styleFilename, newFileStr)
         updateCacheMetadata(styleFilename)
@@ -129,19 +131,19 @@ class WWWEventMap(
      *
      */
     @OptIn(ExperimentalResourceApi::class)
-    suspend fun cacheSpriteAndGlyphs(): String {
-        return try {
-            Res.readBytes(FS_STYLE_LISTING)
+    suspend fun cacheSpriteAndGlyphs(): String =
+        try {
+            Res
+                .readBytes(FS_STYLE_LISTING)
                 .decodeToString()
                 .lines()
                 .filter { it.isNotBlank() }
                 .forEach { cacheDeepFile("$FS_STYLE_FOLDER/$it") }
             getCacheDir()
         } catch (e: Exception) {
-            Log.e(::cacheSpriteAndGlyphs.name,"Error caching sprite and glyphs", e)
+            Log.e(::cacheSpriteAndGlyphs.name, "Error caching sprite and glyphs", e)
             throw e
         }
-    }
 
     /**
      * Checks if a given position is within the event map's bounding box.
@@ -154,25 +156,27 @@ class WWWEventMap(
 
     // ---------------------------
 
-    override fun validationErrors(): List<String>? = mutableListOf<String>().apply {
-        when {
-            maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
-                this.add("Map Maxzoom must be a positive double less than 20")
+    override fun validationErrors(): List<String>? =
+        mutableListOf<String>()
+            .apply {
+                when {
+                    maxZoom.toString().toDoubleOrNull() == null || maxZoom <= 0 || maxZoom >= 20 ->
+                        this.add("Map Maxzoom must be a positive double less than 20")
 
-            language.isEmpty() ->
-                this.add("Map language is empty")
+                    language.isEmpty() ->
+                        this.add("Map language is empty")
 
-            !language.matches(Regex("^[a-z]{2,3}$")) ->
-                this.add("Map language must be a valid ISO-639 code")
+                    !language.matches(Regex("^[a-z]{2,3}$")) ->
+                        this.add("Map language must be a valid ISO-639 code")
 
-            zone.isEmpty() ->
-                this.add("Map Osmarea is empty")
+                    zone.isEmpty() ->
+                        this.add("Map Osmarea is empty")
 
-            !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
-                this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
+                    !zone.matches(Regex("^[a-zA-Z0-9/-]+$")) ->
+                        this.add("Map Osmarea must be a valid string composed of one or several strings separated by '/'")
 
-            else -> { /* No validation errors */ }
-        }
-    }.takeIf { it.isNotEmpty() }?.map { "${WWWEventMap::class.simpleName}: $it" }
-
+                    else -> { /* No validation errors */ }
+                }
+            }.takeIf { it.isNotEmpty() }
+            ?.map { "${WWWEventMap::class.simpleName}: $it" }
 }

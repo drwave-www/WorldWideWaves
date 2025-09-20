@@ -26,7 +26,7 @@ fun AutoResizeSingleLineText(
     textAlign: TextAlign = TextAlign.Start,
     minFontSizeSp: Float = 8f,
     stepScale: Float = 0.9f,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var fontSize by remember { mutableStateOf(style.fontSize) }
 
@@ -42,6 +42,6 @@ fun AutoResizeSingleLineText(
                 fontSize *= stepScale
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }

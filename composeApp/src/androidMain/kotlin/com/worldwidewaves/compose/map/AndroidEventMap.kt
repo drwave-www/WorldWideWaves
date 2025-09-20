@@ -7,7 +7,7 @@ package com.worldwidewaves.compose.map
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,12 +121,12 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
  *
  * Bridges the platform-agnostic map layer defined in the shared module with the
  * MapLibre Android SDK by:
- * • Loading the per-event style **URI** produced by [IWWWEvent.map]  
+ * • Loading the per-event style **URI** produced by [IWWWEvent.map]
  * • Instantiating / configuring the underlying `MapView` & `MapLibreMap`
- *   (gestures, camera bounds, location component, click callbacks)  
+ *   (gestures, camera bounds, location component, click callbacks)
  * • Delegating tile/style generation & map-specific validation to
  *   [com.worldwidewaves.shared.events.WWWEventMap] in the shared code while exposing a Compose `Screen`
- *   convenience wrapper for UI layers.  
+ *   convenience wrapper for UI layers.
  *
  * All logic that can stay platform-agnostic (camera enums, location providers,
  * polygon updates…) lives in [AbstractEventMap]; this class only contains the
@@ -138,9 +138,9 @@ class AndroidEventMap(
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
-    mapConfig: EventMapConfig = EventMapConfig()
-) : KoinComponent, AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate) {
-
+    mapConfig: EventMapConfig = EventMapConfig(),
+) : AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate),
+    KoinComponent {
     private companion object {
         private const val TAG = "EventMap"
     }
@@ -160,9 +160,12 @@ class AndroidEventMap(
      * The Compose UI for the map
      */
     @Composable
-    fun Screen(autoMapDownload: Boolean = false, modifier: Modifier) {
+    fun Screen(
+        autoMapDownload: Boolean = false,
+        modifier: Modifier,
+    ) {
         Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
-        
+
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         var isMapLoaded by remember { mutableStateOf(false) }
@@ -180,7 +183,7 @@ class AndroidEventMap(
         // Re-create the MapView whenever availability flips so a fresh
         // split-aware AssetManager is used.
         val mapLibreView: MapView =
-            rememberMapLibreViewWithLifecycle(key = "${event.id}-${isMapAvailable}")
+            rememberMapLibreViewWithLifecycle(key = "${event.id}-$isMapAvailable")
 
         val mapViewModel: MapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
@@ -203,8 +206,8 @@ class AndroidEventMap(
                     Log.i(TAG, "Map installed: ${event.id}")
                     // Make the just-installed split immediately visible to this
                     // running Activity – required for MapLibre to see assets.
-                    (context as? AppCompatActivity)?.let { 
-                        SplitCompat.installActivity(it) 
+                    (context as? AppCompatActivity)?.let {
+                        SplitCompat.installActivity(it)
                     }
                     isMapDownloading = false
                     isMapAvailable = true
@@ -236,31 +239,36 @@ class AndroidEventMap(
         // Monitor permissions and GPS provider changes
         val lifecycleOwner = LocalLifecycleOwner.current
         DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    val granted = isLocationPermissionGranted(context)
-                    hasLocationPermission = granted
-                    updateLocationComponent(context, granted)
+            val observer =
+                LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        val granted = isLocationPermissionGranted(context)
+                        hasLocationPermission = granted
+                        updateLocationComponent(context, granted)
+                    }
                 }
-            }
             lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose { 
-                lifecycleOwner.lifecycle.removeObserver(observer) 
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
             }
         }
 
         DisposableEffect(Unit) {
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(c: Context?, i: Intent?) {
-                    val granted = isLocationPermissionGranted(context)
-                    hasLocationPermission = granted
-                    updateLocationComponent(context, granted)
+            val receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(
+                        c: Context?,
+                        i: Intent?,
+                    ) {
+                        val granted = isLocationPermissionGranted(context)
+                        hasLocationPermission = granted
+                        updateLocationComponent(context, granted)
+                    }
                 }
-            }
             val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
             context.registerReceiver(receiver, filter)
-            onDispose { 
-                context.unregisterReceiver(receiver) 
+            onDispose {
+                context.unregisterReceiver(receiver)
             }
         }
 
@@ -279,7 +287,7 @@ class AndroidEventMap(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(event.getMapImage() as DrawableResource),
                 contentDescription = "defaultMap",
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
 
             // LibreMap as Android Composable - only visible when map is loaded
@@ -310,44 +318,51 @@ class AndroidEventMap(
                             onMapError = {
                                 Log.e(TAG, "Error loading map: ${event.id}")
                                 mapError = true
-                                initStarted = false     // allow retry
-                            }
+                                initStarted = false // allow retry
+                            },
                         )
                     }
                 },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(if (isMapLoaded) 1f else 0f)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .alpha(if (isMapLoaded) 1f else 0f),
             )
 
             // Show appropriate UI based on map state
             when {
                 isMapLoaded -> Unit
-                isMapDownloading && !mapError -> MapDownloadOverlay(mapFeatureState) {
-                    userCanceled = true
-                    mapViewModel.cancelDownload()
-                }
-                mapError && isMapDownloading -> MapErrorOverlay {
-                    mapError = false
-                    initStarted = false
-                    mapViewModel.downloadMap(event.id)
-                }
-                !isMapAvailable -> MapDownloadButton {
-                    mapError = false
-                    isMapDownloading = true
-                    userCanceled = false
-                    mapViewModel.downloadMap(event.id)
-                }
+                isMapDownloading && !mapError ->
+                    MapDownloadOverlay(mapFeatureState) {
+                        userCanceled = true
+                        mapViewModel.cancelDownload()
+                    }
+                mapError && isMapDownloading ->
+                    MapErrorOverlay {
+                        mapError = false
+                        initStarted = false
+                        mapViewModel.downloadMap(event.id)
+                    }
+                !isMapAvailable ->
+                    MapDownloadButton {
+                        mapError = false
+                        isMapDownloading = true
+                        userCanceled = false
+                        mapViewModel.downloadMap(event.id)
+                    }
             }
         }
     }
 
     @Composable
-    private fun MapDownloadOverlay(state: MapFeatureState, onCancel: () -> Unit) {
+    private fun MapDownloadOverlay(
+        state: MapFeatureState,
+        onCancel: () -> Unit,
+    ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     when (state) {
@@ -355,20 +370,22 @@ class AndroidEventMap(
                             DownloadProgressIndicator(
                                 progress = state.progress,
                                 message = stringResource(MokoRes.strings.map_downloading),
-                                onCancel = onCancel
+                                onCancel = onCancel,
                             )
                         is MapFeatureState.Pending ->
                             LoadingIndicator(message = stringResource(MokoRes.strings.map_starting_download))
                         is MapFeatureState.Retrying ->
                             DownloadProgressIndicator(
-                                message = "${stringResource(MokoRes.strings.map_retrying_download)} (${state.attempt}/${state.maxAttempts})...",
-                                onCancel = onCancel
+                                message = "${stringResource(
+                                    MokoRes.strings.map_retrying_download,
+                                )} (${state.attempt}/${state.maxAttempts})...",
+                                onCancel = onCancel,
                             )
                         is MapFeatureState.Installing ->
                             DownloadProgressIndicator(
                                 progress = 100,
                                 message = stringResource(MokoRes.strings.map_installing),
-                                onCancel = onCancel
+                                onCancel = onCancel,
                             )
                         else ->
                             LoadingIndicator(message = stringResource(MokoRes.strings.map_loading))
@@ -383,7 +400,7 @@ class AndroidEventMap(
         Surface(modifier = Modifier.fillMaxSize()) {
             ErrorMessage(
                 message = stringResource(MokoRes.strings.map_error_download),
-                onRetry = onRetry
+                onRetry = onRetry,
             )
         }
     }
@@ -393,16 +410,20 @@ class AndroidEventMap(
     // ------------------------------------------------------------------------
 
     @Composable
-    private fun ErrorMessage(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    private fun ErrorMessage(
+        message: String,
+        onRetry: () -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
         androidx.compose.foundation.layout.Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier.padding(16.dp)
+            modifier = modifier.padding(16.dp),
         ) {
             Icon(
                 painter = painterResourceAndroid(R.drawable.ic_info),
                 contentDescription = stringResource(MokoRes.strings.error),
                 modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.error,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -411,19 +432,19 @@ class AndroidEventMap(
                 text = message,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = onRetry,
-                modifier = Modifier
+                modifier = Modifier,
             ) {
                 Icon(
                     painter = painterResourceAndroid(R.drawable.ic_refresh),
                     contentDescription = stringResource(MokoRes.strings.map_retry_download),
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(MokoRes.strings.map_retry_download))
@@ -437,15 +458,16 @@ class AndroidEventMap(
             Button(
                 onClick = onClick,
                 modifier = Modifier.size(width = 200.dp, height = 60.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
             ) {
                 Text(
                     text = stringResource(MokoRes.strings.map_download),
                     style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }
@@ -463,14 +485,15 @@ class AndroidEventMap(
         hasLocationPermission: Boolean,
         lifecycle: Lifecycle,
         onMapLoaded: () -> Unit,
-        onMapError: () -> Unit = {}
+        onMapError: () -> Unit = {},
     ) {
         Log.i(TAG, "Loading map for event: ${event.id}")
         // Ensure SplitCompat is installed before accessing any dynamic feature assets
         SplitCompat.install(context)
-        
+
         scope.launch {
-            withContext(Dispatchers.IO) { // IO actions
+            withContext(Dispatchers.IO) {
+                // IO actions
                 var stylePath: String? = null
                 var attempts = 0
                 repeat(10) { attempt ->
@@ -481,11 +504,11 @@ class AndroidEventMap(
                         stylePath = candidate
                         return@repeat
                     }
-                    
+
                     if (attempt == 9) { // Log warning only on last attempts
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
-                    
+
                     // Give Play-Core/asset manager time to expose freshly installed split assets
                     delay(200)
                 }
@@ -497,8 +520,9 @@ class AndroidEventMap(
                 }
 
                 val uri = Uri.fromFile(File(stylePath))
-                
-                scope.launch { // UI actions
+
+                scope.launch {
+                    // UI actions
                     // Encapsulate the original logic so we can call it from multiple places
                     fun invokeGetMapAsync() {
                         mapLibreView.getMapAsync { map ->
@@ -521,7 +545,7 @@ class AndroidEventMap(
                                 },
                                 onMapClick = { _, _ ->
                                     onMapClick?.invoke()
-                                }
+                                },
                             )
                         }
                     }
@@ -530,14 +554,15 @@ class AndroidEventMap(
                         invokeGetMapAsync()
                     } else {
                         // Listener to detect when the view gets attached
-                        val listener = object : View.OnAttachStateChangeListener {
-                            override fun onViewAttachedToWindow(v: View) {
-                                v.removeOnAttachStateChangeListener(this)
-                                v.post { invokeGetMapAsync() }
-                            }
+                        val listener =
+                            object : View.OnAttachStateChangeListener {
+                                override fun onViewAttachedToWindow(v: View) {
+                                    v.removeOnAttachStateChangeListener(this)
+                                    v.post { invokeGetMapAsync() }
+                                }
 
-                            override fun onViewDetachedFromWindow(v: View) = Unit
-                        }
+                                override fun onViewDetachedFromWindow(v: View) = Unit
+                            }
                         mapLibreView.addOnAttachStateChangeListener(listener)
 
                         // Safety timeout in case attachment never happens
@@ -546,7 +571,9 @@ class AndroidEventMap(
                                 Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
                                 try {
                                     mapLibreView.removeOnAttachStateChangeListener(listener)
-                                } catch (_: Exception) { /* ignore */ }
+                                } catch (_: Exception) {
+                                    // ignore
+                                }
                                 invokeGetMapAsync()
                             }
                         }, 1500)
@@ -562,12 +589,15 @@ class AndroidEventMap(
      * Sets up the Android location component
      */
     @SuppressLint("MissingPermission")
-    private fun setupMapLocationComponent(map: MapLibreMap, context: Context) {
+    private fun setupMapLocationComponent(
+        map: MapLibreMap,
+        context: Context,
+    ) {
         Log.i(TAG, "Setting up map location component")
         map.style?.let { style ->
             // Activate location component
             map.locationComponent.activateLocationComponent(
-                buildLocationComponentActivationOptions(context, style)
+                buildLocationComponentActivationOptions(context, style),
             )
             map.locationComponent.isLocationComponentEnabled = true
             map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
@@ -582,31 +612,31 @@ class AndroidEventMap(
      */
     private fun buildLocationComponentActivationOptions(
         context: Context,
-        style: Style
-    ): LocationComponentActivationOptions {
-        return LocationComponentActivationOptions.builder(context, style)
+        style: Style,
+    ): LocationComponentActivationOptions =
+        LocationComponentActivationOptions
+            .builder(context, style)
             .locationComponentOptions(
-                LocationComponentOptions.builder(context)
+                LocationComponentOptions
+                    .builder(context)
                     .pulseEnabled(true)
                     .pulseColor(Color.RED)
                     .foregroundTintColor(Color.BLACK)
-                    .build()
-            )
-            .useDefaultLocationEngine(false)
+                    .build(),
+            ).useDefaultLocationEngine(false)
             .locationEngine(LocationEngineProxy((locationProvider as AndroidWWWLocationProvider).locationEngine))
             .locationEngineRequest(buildLocationEngineRequest())
             .build()
-    }
 
     /**
      * Builds a LocationEngineRequest for location updates
      */
-    private fun buildLocationEngineRequest(): LocationEngineRequest {
-        return LocationEngineRequest.Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
+    private fun buildLocationEngineRequest(): LocationEngineRequest =
+        LocationEngineRequest
+            .Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
             .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
-    }
 
     // ------------------------------------------------------------------------
 
@@ -617,13 +647,17 @@ class AndroidEventMap(
      * without re-prompting.
      */
     private fun isLocationPermissionGranted(context: Context): Boolean {
-        val fine = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        val coarse = ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        
+        val fine =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val coarse =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
         return fine && coarse
     }
 
@@ -631,14 +665,17 @@ class AndroidEventMap(
      * Enable / disable the MapLibre location component depending on the latest
      * permission + provider state.  Called from lifecycle & GPS receivers.
      */
-    private fun updateLocationComponent(context: Context, hasPermission: Boolean) {
+    private fun updateLocationComponent(
+        context: Context,
+        hasPermission: Boolean,
+    ) {
         Log.i(TAG, "Updating location component, permission=$hasPermission")
         val map = currentMap
         if (map == null) {
             Log.w(TAG, "Cannot update location component - map is null")
             return
         }
-        
+
         map.style?.let {
             try {
                 // Always disable first to avoid stale state
@@ -672,11 +709,13 @@ class AndroidEventMap(
         // Build the MapLibre view
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(context)
         maplibreMapOptions.apply {
-            camera(CameraPosition.Builder()
-                .padding(0.0, 0.0, 0.0, 0.0)
-                .bearing(0.0)
-                .tilt(0.0)
-                .build()
+            camera(
+                CameraPosition
+                    .Builder()
+                    .padding(0.0, 0.0, 0.0, 0.0)
+                    .bearing(0.0)
+                    .tilt(0.0)
+                    .build(),
             )
 
             localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
@@ -685,7 +724,7 @@ class AndroidEventMap(
             compassFadesWhenFacingNorth(true)
 
             val activateMapGestures = mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-            
+
             zoomGesturesEnabled(activateMapGestures)
             scrollGesturesEnabled(activateMapGestures)
             doubleTapGesturesEnabled(activateMapGestures)
@@ -700,9 +739,10 @@ class AndroidEventMap(
         MapLibre.getInstance(context) // Required by the API
 
         // The key makes Compose recreate the MapView when it changes
-        val mapView = remember(key) { 
-            MapView(context, maplibreMapOptions) 
-        }
+        val mapView =
+            remember(key) {
+                MapView(context, maplibreMapOptions)
+            }
 
         // Makes MapView follow the lifecycle of this composable
         val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -722,7 +762,11 @@ class AndroidEventMap(
     /**
      * Update wave polygons on the map
      */
-    fun updateWavePolygons(context: Context, wavePolygons: List<Polygon>, clearPolygons: Boolean) {
+    fun updateWavePolygons(
+        context: Context,
+        wavePolygons: List<Polygon>,
+        clearPolygons: Boolean,
+    ) {
         Log.i(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
         (context as? AppCompatActivity)?.runOnUiThread {
             mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)

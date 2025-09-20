@@ -32,7 +32,6 @@ import kotlin.test.assertTrue
 
 @Suppress("VisibleForTests")
 class PolygonTest {
-
     @Test
     fun testAddPosition() {
         val polygon = Polygon()
@@ -76,11 +75,12 @@ class PolygonTest {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
         val position3 = Position(3.0, 3.0)
-        val polygon = Polygon().apply {
-            add(position1)
-            add(position2)
-            add(position3)
-        }
+        val polygon =
+            Polygon().apply {
+                add(position1)
+                add(position2)
+                add(position3)
+            }
         val subPolygon: Polygon = polygon.subList(polygon.first()!!, polygon.last()!!.id)
         assertEquals(2, subPolygon.size)
     }
@@ -89,10 +89,11 @@ class PolygonTest {
     fun testDropLast() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon = Polygon().apply {
-            add(position1)
-            add(position2)
-        }
+        val polygon =
+            Polygon().apply {
+                add(position1)
+                add(position2)
+            }
         val newPolygon: Polygon = polygon.withoutLast()
         assertEquals(1, newPolygon.size)
     }
@@ -126,11 +127,12 @@ class PolygonTest {
 
     @Test
     fun testListToPolygon() {
-        val positions = listOf(
-            Position(1.0, 1.0),
-            Position(2.0, 2.0),
-            Position(3.0, 3.0)
-        )
+        val positions =
+            listOf(
+                Position(1.0, 1.0),
+                Position(2.0, 2.0),
+                Position(3.0, 3.0),
+            )
         val polygon = positions.toPolygon
         assertEquals(positions.size, polygon.size)
         val iterator = polygon.iterator()
@@ -193,10 +195,11 @@ class PolygonTest {
     fun testLoopIterator() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon = Polygon().apply {
-            add(position1)
-            add(position2)
-        }
+        val polygon =
+            Polygon().apply {
+                add(position1)
+                add(position2)
+            }
         val iterator = polygon.loopIterator()
         assertTrue(iterator.hasNext())
         assertEquals(position1, iterator.next())
@@ -210,10 +213,11 @@ class PolygonTest {
     fun testCutIterator() {
         val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
         val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
-        val polygon = Polygon().apply {
-            add(cutPosition1)
-            add(cutPosition2)
-        }
+        val polygon =
+            Polygon().apply {
+                add(cutPosition1)
+                add(cutPosition2)
+            }
         val iterator = polygon.cutIterator()
         assertTrue(iterator.hasNext())
         assertEquals(cutPosition1, iterator.next())
@@ -239,10 +243,11 @@ class PolygonTest {
     fun testSize() {
         val position1 = Position(1.0, 1.0)
         val position2 = Position(2.0, 2.0)
-        val polygon = Polygon().apply {
-            add(position1)
-            add(position2)
-        }
+        val polygon =
+            Polygon().apply {
+                add(position1)
+                add(position2)
+            }
         assertEquals(2, polygon.size)
     }
 
@@ -250,10 +255,11 @@ class PolygonTest {
     fun testCutSize() {
         val cutPosition1 = Position(1.0, 1.0).toCutPosition(1, Position(0.0, 0.0), Position(2.0, 2.0))
         val cutPosition2 = Position(2.0, 2.0).toCutPosition(2, Position(1.0, 1.0), Position(3.0, 3.0))
-        val polygon = Polygon().apply {
-            add(cutPosition1)
-            add(cutPosition2)
-        }
+        val polygon =
+            Polygon().apply {
+                add(cutPosition1)
+                add(cutPosition2)
+            }
         assertEquals(2, polygon.cutSize)
     }
 
@@ -306,7 +312,8 @@ class PolygonTest {
         polygon.add(Position(3.0, 3.0))
 
         val loopIterator = polygon.loopIterator()
-        repeat(6) { // Test two full loops
+        repeat(6) {
+            // Test two full loops
             assertTrue(loopIterator.hasNext())
             assertNotNull(loopIterator.next())
         }
@@ -453,5 +460,4 @@ class PolygonTest {
         val pos2 = polygon.insertBefore(Position(0.0, 0.0), pos1.id)
         assertEquals(pos2, pos1.prev)
     }
-
 }

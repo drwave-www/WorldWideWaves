@@ -34,9 +34,7 @@ fun debugBuild() {
 }
 
 class WWWGlobals {
-
     companion object {
-
         // -- URL Constants --
         const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
 
@@ -65,7 +63,7 @@ class WWWGlobals {
 
         // -- UI Constants --
 
-        val CONST_SPLASH_MIN_DURATION =  2000.milliseconds
+        val CONST_SPLASH_MIN_DURATION = 2000.milliseconds
         val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
         val CONST_GPS_PERMISSION_REASK_DELAY = 5.minutes
 
@@ -96,7 +94,6 @@ class WWWGlobals {
         private const val DIM_BIG4_FONTSIZE = 48
         private const val DIM_HUGE_FONTSIZE = 64
         private const val DIM_HUGE2_FONTSIZE = 90
-
 
         // ----------------------------
 
@@ -181,5 +178,4 @@ class WWWGlobals {
 
         const val EMPTY_COUNTER = "--:--"
     }
-
 }

@@ -64,10 +64,14 @@ interface DataValidator {
 @OptIn(ExperimentalTime::class)
 interface IClock {
     fun now(): Instant
+
     suspend fun delay(duration: Duration)
 
     companion object {
-        fun instantToLiteral(instant: Instant, timeZone: TimeZone): String {
+        fun instantToLiteral(
+            instant: Instant,
+            timeZone: TimeZone,
+        ): String {
             // Delegate to shared, locale-aware formatter so both Android & iOS
             // use the same logic (12/24 h handled per platform conventions).
             return DateTimeFormats.timeShort(instant, timeZone)
@@ -76,77 +80,83 @@ interface IClock {
 }
 
 @OptIn(ExperimentalTime::class)
-class SystemClock : IClock, KoinComponent {
-    private var platform : WWWPlatform? = null
+class SystemClock :
+    IClock,
+    KoinComponent {
+    private var platform: WWWPlatform? = null
 
     init {
-        try { platform = get() } catch (_: Exception) {
+        try {
+            platform = get()
+        } catch (_: Exception) {
             Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
         }
     }
 
-    override fun now(): Instant {
-        return if (platform?.isOnSimulation() == true) {
+    override fun now(): Instant =
+        if (platform?.isOnSimulation() == true) {
             platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()
         }
-    }
 
     override suspend fun delay(duration: Duration) {
         val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
 
         if (simulation != null) {
-            val speed = simulation.speed.takeIf { it > 0.0 } ?: run {
-                Napier.w("${SystemClock::class.simpleName}: Simulation speed is ${simulation.speed}, using 1.0 instead")
-                1.0
-            }
+            val speed =
+                simulation.speed.takeIf { it > 0.0 } ?: run {
+                    Napier.w("${SystemClock::class.simpleName}: Simulation speed is ${simulation.speed}, using 1.0 instead")
+                    1.0
+                }
             val adjustedDuration = maxOf(duration / speed.toDouble(), 50.milliseconds) // Minimum 50 ms
             kotlinx.coroutines.delay(adjustedDuration)
         } else {
             kotlinx.coroutines.delay(duration)
         }
     }
-
 }
 
 // ---------------------------
 
 interface CoroutineScopeProvider {
     suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T
+
     suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T
+
     fun launchIO(block: suspend CoroutineScope.() -> Unit): Job
+
     fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job
+
     fun scopeIO(): CoroutineScope
+
     fun scopeDefault(): CoroutineScope
+
     fun cancelAllCoroutines()
 }
 
 class DefaultCoroutineScopeProvider(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : CoroutineScopeProvider {
     private val supervisorJob = SupervisorJob()
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        Napier.e("CoroutineExceptionHandler got $exception")
-    }
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, exception ->
+            Napier.e("CoroutineExceptionHandler got $exception")
+        }
     private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
 
-    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
-        scope.launch(ioDispatcher, block = block)
+    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(ioDispatcher, block = block)
 
-    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job =
-        scope.launch(defaultDispatcher, block = block)
+    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(defaultDispatcher, block = block)
 
     override fun scopeIO(): CoroutineScope = scope + ioDispatcher
 
-    override fun scopeDefault(): CoroutineScope  = scope + defaultDispatcher
+    override fun scopeDefault(): CoroutineScope = scope + defaultDispatcher
 
-    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(ioDispatcher) { block() }
+    override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(ioDispatcher) { block() }
 
-    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T =
-        withContext(defaultDispatcher) { block() }
+    override suspend fun <T> withDefaultContext(block: suspend CoroutineScope.() -> T): T = withContext(defaultDispatcher) { block() }
 
     override fun cancelAllCoroutines() {
         supervisorJob.cancel()
@@ -160,7 +170,7 @@ interface EventsConfigurationProvider {
 }
 
 class DefaultEventsConfigurationProvider(
-    private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider()
+    private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : EventsConfigurationProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String =
@@ -189,7 +199,7 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
                 val preview = geojsonData.take(80).replace("\n", "")
                 Log.i(
                     ::getGeoJsonData.name,
-                    "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\""
+                    "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
                 )
 
                 // 3) Parse and post-parse diagnostics -------------------------
@@ -198,7 +208,7 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
                 val rootType = jsonObj["type"]?.toString()
                 Log.d(
                     ::getGeoJsonData.name,
-                    "Parsed geojson top-level keys=[$keysSummary], type=$rootType"
+                    "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
                 )
 
                 jsonObj
@@ -218,10 +228,11 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
 interface EventsDecoder {
     fun decodeFromJson(jsonString: String): List<IWWWEvent>
 }
+
 class DefaultEventsDecoder : EventsDecoder {
     private val jsonDecoder = Json { ignoreUnknownKeys = true }
-    override fun decodeFromJson(jsonString: String) =
-        jsonDecoder.decodeFromString<List<WWWEvent>>(jsonString)
+
+    override fun decodeFromJson(jsonString: String) = jsonDecoder.decodeFromString<List<WWWEvent>>(jsonString)
 }
 
 // ---------------------------
@@ -229,11 +240,12 @@ class DefaultEventsDecoder : EventsDecoder {
 interface MapDataProvider {
     suspend fun geoMapStyleData(): String
 }
+
 class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String =
         withContext(Dispatchers.IO) {
-            Log.i(::geoMapStyleData.name,"Loading map style data from $FS_MAPS_STYLE")
+            Log.i(::geoMapStyleData.name, "Loading map style data from $FS_MAPS_STYLE")
             Res.readBytes(FS_MAPS_STYLE).decodeToString()
         }
 }

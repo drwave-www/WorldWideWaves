@@ -29,14 +29,15 @@ import com.worldwidewaves.shared.data.createDataStore
 import com.worldwidewaves.shared.data.keyValueStorePath
 import org.koin.dsl.module
 
-val datastoreModule = module {
-    single { createDataStore { keyValueStorePath() } }
+val datastoreModule =
+    module {
+        single { createDataStore { keyValueStorePath() } }
 
-    // Persistent stores ------------------------------------------------------
+        // Persistent stores ------------------------------------------------------
 
-    single { FavoriteEventsStore(get()) }
-    single { HiddenMapsStore(get()) }
+        single { FavoriteEventsStore(get()) }
+        single { HiddenMapsStore(get()) }
 
-    factory { InitFavoriteEvent(favoriteEventsStore = get()) }
-    factory { SetEventFavorite(favoriteEventsStore = get()) }
-}
+        factory { InitFavoriteEvent(favoriteEventsStore = get()) }
+        factory { SetEventFavorite(favoriteEventsStore = get()) }
+    }

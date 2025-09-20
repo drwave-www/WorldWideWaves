@@ -9,11 +9,12 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_THICKNESS
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DIVIDER_WIDTH
 
-@Composable
 /** Horizontal white divider reused across screens. */
+@Composable
 fun DividerLine(modifier: Modifier = Modifier) {
     HorizontalDivider(
         modifier = modifier.width(DIM_DIVIDER_WIDTH.dp),
-        color = Color.White, thickness = DIM_DIVIDER_THICKNESS.dp
+        color = Color.White,
+        thickness = DIM_DIVIDER_THICKNESS.dp,
     )
 }

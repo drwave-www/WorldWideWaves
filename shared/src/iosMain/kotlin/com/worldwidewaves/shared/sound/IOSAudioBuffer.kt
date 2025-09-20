@@ -28,19 +28,19 @@ class IOSAudioBuffer(
     samples: DoubleArray,
     override val sampleRate: Int,
     bitsPerSample: Int,
-    channels: Int
+    channels: Int,
 ) : AudioBuffer {
+    private val buffer: ByteArray =
+        when (bitsPerSample) {
+            8 -> samples.toByteArray()
+            16 -> samples.toShortByteArray()
+            else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
+        }
 
-    private val buffer: ByteArray = when (bitsPerSample) {
-        8 -> samples.toByteArray()
-        16 -> samples.toShortByteArray()
-        else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
-    }
-    
     override val sampleCount: Int = samples.size
 
     override fun getRawBuffer(): ByteArray = buffer
-    
+
     // Convert double array to byte array (8-bit PCM)
     private fun DoubleArray.toByteArray(): ByteArray {
         val result = ByteArray(this.size)
@@ -51,7 +51,7 @@ class IOSAudioBuffer(
         }
         return result
     }
-    
+
     // Convert double array to byte array (16-bit PCM)
     private fun DoubleArray.toShortByteArray(): ByteArray {
         val result = ByteArray(this.size * 2)
@@ -72,7 +72,7 @@ class IOSAudioBuffer(
 actual object AudioBufferFactory {
     /**
      * Creates an AudioBuffer from sample data
-     * 
+     *
      * @param samples Array of audio samples in the range -1.0 to 1.0
      * @param sampleRate Sample rate in Hz (e.g., 44100)
      * @param bitsPerSample Bit depth (8 or 16)
@@ -83,8 +83,6 @@ actual object AudioBufferFactory {
         samples: DoubleArray,
         sampleRate: Int,
         bitsPerSample: Int,
-        channels: Int
-    ): AudioBuffer {
-        return IOSAudioBuffer(samples, sampleRate, bitsPerSample, channels)
-    }
+        channels: Int,
+    ): AudioBuffer = IOSAudioBuffer(samples, sampleRate, bitsPerSample, channels)
 }

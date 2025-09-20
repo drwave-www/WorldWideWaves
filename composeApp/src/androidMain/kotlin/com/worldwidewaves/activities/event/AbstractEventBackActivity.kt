@@ -7,7 +7,7 @@ package com.worldwidewaves.activities.event
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,24 +46,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.compose.common.SimulationModeChip
 import androidx.lifecycle.lifecycleScope
 import com.worldwidewaves.R
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
-import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
 import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.theme.AppTheme
 import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
@@ -78,9 +75,8 @@ import org.koin.android.ext.android.inject
  * Subclasses must implement the [Screen] composable to display event-specific content.
  */
 abstract class AbstractEventBackActivity(
-    private val activateInfiniteScroll : Boolean = true
+    private val activateInfiniteScroll: Boolean = true,
 ) : MainActivity() {
-
     private val wwwEvents: WWWEvents by inject()
     private val platform: WWWPlatform by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
@@ -89,9 +85,6 @@ abstract class AbstractEventBackActivity(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Ensure dynamic-feature splits are available without restarting the app
-        SplitCompat.installActivity(this)
 
         val eventId = intent.getStringExtra("eventId")
 
@@ -110,9 +103,10 @@ abstract class AbstractEventBackActivity(
         setContent {
             AppTheme {
                 Surface(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .fillMaxSize()
+                    modifier =
+                        Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .fillMaxSize(),
                 ) {
                     // Stack content & global simulation-mode chip
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -128,7 +122,10 @@ abstract class AbstractEventBackActivity(
 
     // ----------------------------
 
-    private fun trackEventLoading(eventId: String, onEventLoaded: (IWWWEvent?) -> Unit) {
+    private fun trackEventLoading(
+        eventId: String,
+        onEventLoaded: (IWWWEvent?) -> Unit,
+    ) {
         wwwEvents.addOnEventsLoadedListener {
             lifecycleScope.launch {
                 onEventLoaded(wwwEvents.getEventById(eventId))
@@ -143,45 +140,48 @@ abstract class AbstractEventBackActivity(
         val scrollState = rememberScrollState()
 
         Column(modifier = Modifier.fillMaxSize()) {
-
             // Back layer
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = DIM_BACK_PADDING[0].dp,
-                        end = DIM_BACK_PADDING[1].dp,
-                        top = DIM_BACK_PADDING[2].dp,
-                        bottom = DIM_BACK_PADDING[3].dp
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = DIM_BACK_PADDING[0].dp,
+                            end = DIM_BACK_PADDING[1].dp,
+                            top = DIM_BACK_PADDING[2].dp,
+                            bottom = DIM_BACK_PADDING[3].dp,
+                        ),
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Row(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .clickable { finish() },
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .clickable { finish() },
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(MokoRes.strings.back),
-                            modifier = Modifier
-                                .size(20.dp)
-                                .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier =
+                                Modifier
+                                    .size(20.dp)
+                                    .padding(end = 4.dp),
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                         Text(
                             text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE)
+                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE),
                         )
                     }
                     if (selectedEvent != null) {
                         Text(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = stringResource(selectedEvent!!.getLocation()),
-                            style = quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
-                                textAlign = TextAlign.Center
-                            )
+                            style =
+                                quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
+                                    textAlign = TextAlign.Center,
+                                ),
                         )
                     }
                 }
@@ -190,26 +190,28 @@ abstract class AbstractEventBackActivity(
             // Default page to manage initializations, download process and errors
             if (selectedEvent != null) { // Event has been loaded
 
-                    // Content Event screen
-                    var screenModifier = Modifier.fillMaxSize()
-                    if (activateInfiniteScroll)
-                        screenModifier = screenModifier.verticalScroll(scrollState)
+                // Content Event screen
+                var screenModifier = Modifier.fillMaxSize()
+                if (activateInfiniteScroll) {
+                    screenModifier = screenModifier.verticalScroll(scrollState)
+                }
 
-                    Box(modifier = screenModifier) {
-                        Screen(modifier = Modifier.fillMaxSize(), selectedEvent!!)
-                    }
-
+                Box(modifier = screenModifier) {
+                    Screen(modifier = Modifier.fillMaxSize(), selectedEvent!!)
+                }
             } else {
-                    Text(
-                        text = stringResource(MokoRes.strings.events_not_found_loading),
-                        style = primaryColoredTextStyle()
-                    )
+                Text(
+                    text = stringResource(MokoRes.strings.events_not_found_loading),
+                    style = primaryColoredTextStyle(),
+                )
             }
         }
     }
 
     // Main activity UI building method to implement ----------------------------
     @Composable
-    abstract fun Screen(modifier: Modifier, event: IWWWEvent)
-
+    abstract fun Screen(
+        modifier: Modifier,
+        event: IWWWEvent,
+    )
 }

@@ -46,17 +46,18 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class WWWSimulationEnabledLocationEngine(
-    context: Context
-) : KoinComponent, MapLibreFusedLocationEngineImpl(context) {
-
+    context: Context,
+) : MapLibreFusedLocationEngineImpl(context),
+    KoinComponent {
     private val platform: WWWPlatform by KoinJavaComponent.inject(WWWPlatform::class.java)
 
-    private fun getSimulatedLocation(): Location? {
-        return if (platform.isOnSimulation()) {
+    private fun getSimulatedLocation(): Location? =
+        if (platform.isOnSimulation()) {
             val simulation = platform.getSimulation()!!
             simulation.getUserPosition().toLocation(simulation.now())
-        } else null
-    }
+        } else {
+            null
+        }
 
     override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) =
         getSimulatedLocation()?.let { location ->
@@ -66,9 +67,8 @@ class WWWSimulationEnabledLocationEngine(
     override fun requestLocationUpdates(
         request: LocationEngineRequest,
         listener: LocationListener,
-        looper: Looper?
+        looper: Looper?,
     ) = getSimulatedLocation()?.let { location ->
         listener.onLocationChanged(location)
     } ?: super.requestLocationUpdates(request, listener, looper)
-
 }

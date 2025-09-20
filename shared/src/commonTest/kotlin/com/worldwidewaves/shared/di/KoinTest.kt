@@ -29,17 +29,16 @@ import org.koin.test.KoinTest
 import kotlin.test.Test
 
 class KoinTest : KoinTest {
-
     @Test
     fun `check MVP hierarchy`() {
-        val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single { createDataStore { "/fake/path" } }
-        }
+        val testPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single { createDataStore { "/fake/path" } }
+            }
 
         fun KoinApplication.() {
             modules(sharedModule + testPlatformModule)
         }
     }
-
 }

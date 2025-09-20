@@ -30,8 +30,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class MapAreaTypesTest {
-
-
     @Test
     fun testCutPositionInitialization() {
         val position = Position(1.0, 1.0)
@@ -109,5 +107,4 @@ class MapAreaTypesTest {
         val noIntersectSegment = Segment(Position(0.0, 0.0), Position(2.0, 0.0))
         assertNull(noIntersectSegment.intersectWithLng(1, 1.0))
     }
-
 }
