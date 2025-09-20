@@ -29,12 +29,12 @@ import com.worldwidewaves.theme.commonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 
-@Composable
 /** Displays clickable Instagram account & hashtag with logo; opens external URI on tap. */
+@Composable
 fun WWWSocialNetworks(
     modifier: Modifier = Modifier,
     instagramAccount: String,
-    instagramHashtag: String
+    instagramHashtag: String,
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -42,29 +42,31 @@ fun WWWSocialNetworks(
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
             contentDescription = stringResource(MokoRes.strings.instagram_logo_description),
-            modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp)
+            modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp),
         )
         Column(
             modifier = Modifier.padding(start = 10.dp),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             Text(
-                modifier = Modifier.clickable(onClick = {
-                    try {
-                        val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
-                        uriHandler.openUri(uri)
-                    } catch (e: Exception) {
-                        Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
-                    }
-                }),
+                modifier =
+                    Modifier.clickable(onClick = {
+                        try {
+                            val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
+                            uriHandler.openUri(uri)
+                        } catch (e: Exception) {
+                            Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
+                        }
+                    }),
                 text = instagramAccount,
-                style = commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
-                    textDecoration = TextDecoration.Underline
-                )
+                style =
+                    commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
+                        textDecoration = TextDecoration.Underline,
+                    ),
             )
             Text(
                 text = instagramHashtag,
-                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE)
+                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE),
             )
         }
     }

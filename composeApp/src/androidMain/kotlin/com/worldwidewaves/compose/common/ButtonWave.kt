@@ -37,18 +37,26 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/** Primary button that navigates to [WaveActivity] when the wave is active or imminent. */
 @OptIn(ExperimentalTime::class)
 @Composable
-/** Primary button that navigates to [WaveActivity] when the wave is active or imminent. */
-fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock: IClock, isInArea: Boolean, modifier: Modifier = Modifier) {
+fun ButtonWave(
+    eventId: String,
+    eventState: Status,
+    endDateTime: Instant?,
+    clock: IClock,
+    isInArea: Boolean,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
 
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON
-    val isEndDateTimeRecent = endDateTime?.let {
-        val now = clock.now()
-        it > (now - 1.hours) && it <= now
-    } ?: false
+    val isEndDateTimeRecent =
+        endDateTime?.let {
+            val now = clock.now()
+            it > (now - 1.hours) && it <= now
+        } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
 
     // Blinking animation
@@ -56,33 +64,39 @@ fun ButtonWave(eventId: String, eventState: Status, endDateTime: Instant?, clock
     val alpha by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = if (isEnabled) 0.3f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800, easing = EaseInOut),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 800, easing = EaseInOut),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "alpha",
     )
 
     Surface(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,
-        modifier = modifier
-            .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
-            .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
-            .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
-            .clickable(enabled = isEnabled, onClick = {
-                context.startActivity(Intent(context, WaveActivity::class.java).apply {
-                    putExtra("eventId", eventId)
-                })
-            })
+        modifier =
+            modifier
+                .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
+                .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
+                .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
+                .clickable(enabled = isEnabled, onClick = {
+                    context.startActivity(
+                        Intent(context, WaveActivity::class.java).apply {
+                            putExtra("eventId", eventId)
+                        },
+                    )
+                }),
     ) {
         Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentHeight(align = Alignment.CenterVertically),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
-            style = quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
-                textAlign = TextAlign.Center
-            )
+            style =
+                quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
+                    textAlign = TextAlign.Center,
+                ),
         )
     }
 }

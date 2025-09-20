@@ -40,9 +40,8 @@ import org.koin.android.ext.android.inject
  * providing a stable observer and coroutine scope for subclasses.
  */
 abstract class AbstractEventWaveActivity(
-    activateInfiniteScroll : Boolean = true
+    activateInfiniteScroll: Boolean = true,
 ) : AbstractEventBackActivity(activateInfiniteScroll) {
-
     /**
      * Application-level CoroutineScope (stays alive as long as the process lives)
      * Injected from DI to avoid cancelling jobs when the Composable scope disappears.
@@ -62,7 +61,7 @@ abstract class AbstractEventWaveActivity(
 
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
-    private var _eventMap : AndroidEventMap? = null
+    private var _eventMap: AndroidEventMap? = null
 
     // ------------------------------------------------------------------------
 
@@ -83,7 +82,10 @@ abstract class AbstractEventWaveActivity(
     // ------------------------------------------------------------------------
 
     @Composable
-    protected fun ObserveEventMapProgression(event: IWWWEvent, eventMap: AndroidEventMap) {
+    protected fun ObserveEventMapProgression(
+        event: IWWWEvent,
+        eventMap: AndroidEventMap,
+    ) {
         val context = LocalContext.current
 
         // Restart observation whenever simulation context changes
@@ -95,12 +97,13 @@ abstract class AbstractEventWaveActivity(
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {
             if (waveProgressionObserver == null) {
-                waveProgressionObserver = WaveProgressionObserver(
-                    context = context,
-                    scope = appScope,
-                    eventMap = eventMap,
-                    event = event
-                )
+                waveProgressionObserver =
+                    WaveProgressionObserver(
+                        context = context,
+                        scope = appScope,
+                        eventMap = eventMap,
+                        event = event,
+                    )
                 waveProgressionObserver!!.startObservation()
             }
         }
@@ -126,5 +129,4 @@ abstract class AbstractEventWaveActivity(
         waveProgressionObserver = null
         super.onDestroy()
     }
-
 }

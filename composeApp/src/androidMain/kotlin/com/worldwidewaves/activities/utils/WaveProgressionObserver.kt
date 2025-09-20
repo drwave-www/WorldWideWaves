@@ -30,7 +30,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 /**
  * Observes a single wave **progression** and mirrors it on the Android map.
  *
@@ -54,9 +53,8 @@ class WaveProgressionObserver(
     private val context: Context,
     private val scope: CoroutineScope,
     private val eventMap: AndroidEventMap?,
-    private val event: IWWWEvent?
+    private val event: IWWWEvent?,
 ) {
-
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
     private var lastWavePolygons: List<org.maplibre.geojson.Polygon> = emptyList()
@@ -85,31 +83,39 @@ class WaveProgressionObserver(
     /**
      * Start collecting progression to update polygons on the map with a small rate-limit.
      */
-    private fun startPolygonsObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
+    private fun startPolygonsObservation(
+        event: IWWWEvent,
+        eventMap: AndroidEventMap,
+    ) {
         polygonsJob?.cancel()
 
         val updateIntervalMs = 250L
         var lastUpdateTime = 0L
 
-        polygonsJob = scope.launch(Dispatchers.Default) {
-            event.observer.progression.collect {
-                val now = System.currentTimeMillis()
-                // Throttle updates to at most every 250 ms --------------------
-                if (now - lastUpdateTime >= updateIntervalMs) {
-                    lastUpdateTime = now
-                    updateWavePolygons(event, eventMap)
+        polygonsJob =
+            scope.launch(Dispatchers.Default) {
+                event.observer.progression.collect {
+                    val now = System.currentTimeMillis()
+                    // Throttle updates to at most every 250 ms --------------------
+                    if (now - lastUpdateTime >= updateIntervalMs) {
+                        lastUpdateTime = now
+                        updateWavePolygons(event, eventMap)
+                    }
                 }
             }
-        }
     }
 
-    private fun addFullWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
+    private fun addFullWavePolygons(
+        event: IWWWEvent,
+        eventMap: AndroidEventMap,
+    ) {
         eventMap.mapLibreAdapter.onMapSet { mapLibre ->
             scope.launch(Dispatchers.Main) {
                 // Render all original polygons independently (no holes merge)
-                val polygons = event.area
-                    .getPolygons()
-                    .map { it.toMapLibrePolygon() }
+                val polygons =
+                    event.area
+                        .getPolygons()
+                        .map { it.toMapLibrePolygon() }
 
                 mapLibre.addWavePolygons(polygons, true)
             }
@@ -120,18 +126,22 @@ class WaveProgressionObserver(
      * Subscribes to the event **status** flow and switches the active polygon
      * coroutine when the wave enters *RUNNING* or *DONE*.
      */
-    private fun startStatusObservation(event: IWWWEvent, eventMap: AndroidEventMap) {
+    private fun startStatusObservation(
+        event: IWWWEvent,
+        eventMap: AndroidEventMap,
+    ) {
         statusJob?.cancel()
-        statusJob = scope.launch(Dispatchers.Default) {
-            event.observer.eventStatus
-                .collect { status ->
-                    when (status) {
-                        IWWWEvent.Status.RUNNING -> startPolygonsObservation(event, eventMap)
-                        IWWWEvent.Status.DONE -> addFullWavePolygons(event, eventMap)
-                        else -> { /* No-op */ }
+        statusJob =
+            scope.launch(Dispatchers.Default) {
+                event.observer.eventStatus
+                    .collect { status ->
+                        when (status) {
+                            IWWWEvent.Status.RUNNING -> startPolygonsObservation(event, eventMap)
+                            IWWWEvent.Status.DONE -> addFullWavePolygons(event, eventMap)
+                            else -> { /* No-op */ }
+                        }
                     }
-                }
-        }
+            }
     }
 
     fun stopObservation() {
@@ -156,16 +166,20 @@ class WaveProgressionObserver(
     /**
      * Compute and push wave polygons to the map.
      */
-    private suspend fun updateWavePolygons(event: IWWWEvent, eventMap: AndroidEventMap) {
+    private suspend fun updateWavePolygons(
+        event: IWWWEvent,
+        eventMap: AndroidEventMap,
+    ) {
         if (!event.isRunning() && !event.isDone()) return
 
-        val polygons = withContext(Dispatchers.Default) {
-            event.wave
-                .getWavePolygons()
-                ?.traversedPolygons
-                ?.map { it.toMapLibrePolygon() }
-                ?: emptyList()
-        }
+        val polygons =
+            withContext(Dispatchers.Default) {
+                event.wave
+                    .getWavePolygons()
+                    ?.traversedPolygons
+                    ?.map { it.toMapLibrePolygon() }
+                    ?: emptyList()
+            }
 
         if (polygons.isEmpty()) {
             if (lastWavePolygons.isNotEmpty()) {
