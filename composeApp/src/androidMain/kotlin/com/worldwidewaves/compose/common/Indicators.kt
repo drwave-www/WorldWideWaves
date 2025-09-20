@@ -21,6 +21,7 @@ import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 
 // Reusable composable for showing loading state
+
 /** Generic circular loading indicator with a message. */
 @Composable
 fun LoadingIndicator(message: String) {
@@ -45,6 +46,7 @@ fun LoadingIndicator(message: String) {
 }
 
 // Reusable composable for showing download progress
+
 /** Shows percentage, progress bar and cancel button while downloading. */
 @Composable
 fun DownloadProgressIndicator(

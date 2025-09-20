@@ -23,8 +23,8 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
 import com.worldwidewaves.shared.di.sharedModule
-import org.koin.core.context.startKoin
 import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
 
 /**
  * Initialise Koin for iOS.
@@ -36,10 +36,11 @@ fun doInitKoin() {
     // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
     if (koinApp != null) return
 
-    koinApp = startKoin {
-        // `sharedModule` is already a List<Module>; add the iOS-specific one.
-        modules(sharedModule + IOSModule)
-    }
+    koinApp =
+        startKoin {
+            // `sharedModule` is already a List<Module>; add the iOS-specific one.
+            modules(sharedModule + IOSModule)
+        }
 }
 
 /**
@@ -47,7 +48,7 @@ fun doInitKoin() {
  */
 @Deprecated(
     message = "Renamed to doInitKoin() to match Swift side.",
-    replaceWith = ReplaceWith("doInitKoin()")
+    replaceWith = ReplaceWith("doInitKoin()"),
 )
 fun initKoin() = doInitKoin()
 

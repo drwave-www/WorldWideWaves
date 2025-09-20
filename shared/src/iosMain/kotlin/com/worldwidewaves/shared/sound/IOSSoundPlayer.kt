@@ -35,7 +35,9 @@ import kotlin.time.Duration
  * iOS implementation of SoundPlayer using AVAudioEngine
  */
 @OptIn(ExperimentalForeignApi::class)
-class IOSSoundPlayer : SoundPlayer, VolumeController {
+class IOSSoundPlayer :
+    SoundPlayer,
+    VolumeController {
     private val audioSession = AVAudioSession.sharedInstance()
     private val audioEngine = AVAudioEngine()
 
@@ -43,17 +45,17 @@ class IOSSoundPlayer : SoundPlayer, VolumeController {
         setupAudioSession()
         setupAudioEngine()
     }
-    
+
     @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioSession() {
         audioSession.setCategory(
             AVAudioSessionCategoryPlayback,
             AVAudioSessionCategoryOptionMixWithOthers,
-            null
+            null,
         )
         audioSession.setActive(true, null)
     }
-    
+
     @OptIn(ExperimentalForeignApi::class)
     private fun setupAudioEngine() {
         audioEngine.prepare()
@@ -61,9 +63,7 @@ class IOSSoundPlayer : SoundPlayer, VolumeController {
     }
 
     @OptIn(ExperimentalForeignApi::class)
-    override fun getCurrentVolume(): Float {
-        return audioSession.outputVolume()
-    }
+    override fun getCurrentVolume(): Float = audioSession.outputVolume()
 
     override fun setVolume(level: Float) {
         // Note: iOS doesn't allow direct volume control from apps
@@ -75,7 +75,7 @@ class IOSSoundPlayer : SoundPlayer, VolumeController {
         frequency: Double,
         amplitude: Double,
         duration: Duration,
-        waveform: SoundPlayer.Waveform
+        waveform: SoundPlayer.Waveform,
     ) {
         try {
             // Implementation would use AVAudioSourceNode to generate tones

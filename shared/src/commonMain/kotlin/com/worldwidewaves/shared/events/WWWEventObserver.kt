@@ -57,16 +57,15 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 // ---------------------------
 
-@OptIn(ExperimentalTime::class)
 /**
  * Observes a single [IWWWEvent] and the user’s current position to expose
  * UI-friendly reactive state.
  *
  * The observer runs periodic sampling loops to:
- * • Track overall wave progression & event [Status]  
- * • Predict if/when the user will be hit and the remaining time-to-hit  
- * • Detect warming phases (global & per-user) and completion of the hit  
- * • Mirror helper booleans used by choreography layers (start-warming, hit, …)  
+ * • Track overall wave progression & event [Status]
+ * • Predict if/when the user will be hit and the remaining time-to-hit
+ * • Detect warming phases (global & per-user) and completion of the hit
+ * • Mirror helper booleans used by choreography layers (start-warming, hit, …)
  * • Cache latest computations to minimise expensive geo / time calculations
  *
  * All values are surfaced as cold, hot [StateFlow]s so Composables can observe
@@ -74,15 +73,17 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  * an adaptive observation interval to avoid unnecessary CPU wake-ups when the
  * event is far in the future.
  */
-class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
-
+@OptIn(ExperimentalTime::class)
+class WWWEventObserver(
+    private val event: IWWWEvent,
+) : KoinComponent {
     data class EventObservation(
         val progression: Double,
-        val status: Status
+        val status: Status,
     )
 
     private val clock: IClock by inject()
-    
+
     private val coroutineScopeProvider: CoroutineScopeProvider by inject()
 
     private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
@@ -144,22 +145,21 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
                 } catch (e: Throwable) {
                     Log.e(
                         tag = WWWEventWave::class.simpleName!!,
-                        message = "Error initializing progression: $e"
+                        message = "Error initializing progression: $e",
                     )
                 }
 
                 // Start observation if event is running or about to start
                 // Accepted as the application will not be let running for days (isSoon includes a delay)
                 if (event.isRunning() || (event.isSoon() && event.isNearTime())) {
-                    observationJob = createObservationFlow()
-                        .flowOn(Dispatchers.IO)
-                        .catch { e ->
-                            Log.e("observeWave", "Error in observation flow: $e")
-                        }
-                        .onEach { (progressionValue, status) ->
-                            updateStates(progressionValue, status)
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
+                    observationJob =
+                        createObservationFlow()
+                            .flowOn(Dispatchers.IO)
+                            .catch { e ->
+                                Log.e("observeWave", "Error in observation flow: $e")
+                            }.onEach { (progressionValue, status) ->
+                                updateStates(progressionValue, status)
+                            }.launchIn(coroutineScopeProvider.scopeDefault())
                 }
             }
         }
@@ -183,41 +183,44 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
     /**
      * Creates a flow that periodically emits wave observations.
      */
-    fun createObservationFlow() = callbackFlow {
-        try {
-            while (!event.isDone()) {
-                // Get current state and emit it
-                val progression = event.wave.getProgression()
-                val status = event.getStatus()
-                val eventObservation = EventObservation(progression, status)
-                send(eventObservation)
+    fun createObservationFlow() =
+        callbackFlow {
+            try {
+                while (!event.isDone()) {
+                    // Get current state and emit it
+                    val progression = event.wave.getProgression()
+                    val status = event.getStatus()
+                    val eventObservation = EventObservation(progression, status)
+                    send(eventObservation)
 
-                // Wait for the next observation interval
-                val observationDelay = getObservationInterval()
+                    // Wait for the next observation interval
+                    val observationDelay = getObservationInterval()
 
-                if (!observationDelay.isFinite()) {
-                    Log.w("observationFlow", "Stopping flow due to infinite observation delay")
-                    break
+                    if (!observationDelay.isFinite()) {
+                        Log.w("observationFlow", "Stopping flow due to infinite observation delay")
+                        break
+                    }
+
+                    clock.delay(observationDelay)
                 }
 
-                clock.delay(observationDelay)
+                // Final emission when event is done
+                send(EventObservation(100.0, Status.DONE))
+            } catch (e: Exception) {
+                Log.e("observationFlow", "Error in observation flow: $e")
             }
 
-            // Final emission when event is done
-            send(EventObservation(100.0, Status.DONE))
-
-        } catch (e: Exception) {
-            Log.e("observationFlow", "Error in observation flow: $e")
+            // Clean up when flow is cancelled
+            awaitClose()
         }
-
-        // Clean up when flow is cancelled
-        awaitClose()
-    }
 
     /**
      * Updates all state flows based on the current event state.
      */
-    private suspend fun updateStates(progression: Double, status: Status) {
+    private suspend fun updateStates(
+        progression: Double,
+        status: Status,
+    ) {
         // Update the main state flows
         _progression.updateIfChanged(progression)
         _eventStatus.updateIfChanged(status)
@@ -287,7 +290,4 @@ class WWWEventObserver(private val event: IWWWEvent) : KoinComponent {
             else -> 1.minutes // Default case, more reasonable than 1 day
         }
     }
-
 }
-
-

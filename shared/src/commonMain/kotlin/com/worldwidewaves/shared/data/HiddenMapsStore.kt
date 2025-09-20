@@ -37,10 +37,10 @@ import kotlinx.coroutines.withContext
 
 /**
  * Persists a set of map IDs that have been marked as "hidden" (typically after uninstallation).
- * 
+ *
  * This store is used to keep track of maps that have been uninstalled but might still appear
  * in the installed modules list until the system completes the deferred uninstallation.
- * 
+ *
  * A string set preference is stored under the key "hidden_maps".
  * The class offers:
  * • `add(mapId)`        - suspend function to add a map ID to the hidden set
@@ -52,7 +52,7 @@ import kotlinx.coroutines.withContext
  */
 class HiddenMapsStore(
     private val dataStore: DataStore<Preferences>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     companion object {
         private val HIDDEN_MAPS_KEY = stringSetPreferencesKey("hidden_maps")
@@ -61,51 +61,52 @@ class HiddenMapsStore(
     /**
      * Adds a map ID to the hidden set.
      */
-    suspend fun add(mapId: String) = withContext(dispatcher) {
-        dataStore.edit { preferences ->
-            val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
-            preferences[HIDDEN_MAPS_KEY] = currentSet + mapId
+    suspend fun add(mapId: String) =
+        withContext(dispatcher) {
+            dataStore.edit { preferences ->
+                val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
+                preferences[HIDDEN_MAPS_KEY] = currentSet + mapId
+            }
         }
-    }
 
     /**
      * Removes a map ID from the hidden set.
      */
-    suspend fun remove(mapId: String) = withContext(dispatcher) {
-        dataStore.edit { preferences ->
-            val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
-            if (mapId in currentSet) {
-                preferences[HIDDEN_MAPS_KEY] = currentSet - mapId
+    suspend fun remove(mapId: String) =
+        withContext(dispatcher) {
+            dataStore.edit { preferences ->
+                val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
+                if (mapId in currentSet) {
+                    preferences[HIDDEN_MAPS_KEY] = currentSet - mapId
+                }
             }
         }
-    }
 
     /**
      * Gets all hidden map IDs.
      */
-    suspend fun getAll(): Set<String> = withContext(dispatcher) {
-        dataStore.data
-            .catch {
-                Log.e(::getAll.name, "Error reading hidden maps", throwable = it)
-                emit(emptyPreferences())
-            }
-            .map { it[HIDDEN_MAPS_KEY] ?: emptySet() }
-            .firstOrNull() ?: emptySet()
-    }
+    suspend fun getAll(): Set<String> =
+        withContext(dispatcher) {
+            dataStore.data
+                .catch {
+                    Log.e(::getAll.name, "Error reading hidden maps", throwable = it)
+                    emit(emptyPreferences())
+                }.map { it[HIDDEN_MAPS_KEY] ?: emptySet() }
+                .firstOrNull() ?: emptySet()
+        }
 
     /**
      * Checks if a map ID is hidden.
      */
-    suspend fun isHidden(mapId: String): Boolean = withContext(dispatcher) {
-        dataStore.data
-            .catch {
-                Log.e(::isHidden.name, "Error reading hidden maps", throwable = it)
-                emit(emptyPreferences())
-            }
-            .map { preferences -> 
-                val hiddenMaps = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
-                mapId in hiddenMaps
-            }
-            .firstOrNull() ?: false
-    }
+    suspend fun isHidden(mapId: String): Boolean =
+        withContext(dispatcher) {
+            dataStore.data
+                .catch {
+                    Log.e(::isHidden.name, "Error reading hidden maps", throwable = it)
+                    emit(emptyPreferences())
+                }.map { preferences ->
+                    val hiddenMaps = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
+                    mapId in hiddenMaps
+                }.firstOrNull() ?: false
+        }
 }

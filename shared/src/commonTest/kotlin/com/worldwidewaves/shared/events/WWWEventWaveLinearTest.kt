@@ -7,7 +7,7 @@ package com.worldwidewaves.shared.events
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,6 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class WWWEventWaveLinearTest : KoinTest {
-
     private val dispatcher = StandardTestDispatcher() // Create dispatcher instance
 
     private var mockClock = mockk<IClock>()
@@ -75,11 +74,18 @@ class WWWEventWaveLinearTest : KoinTest {
     // ---------------------------
 
     init {
-        Napier.base(object : Antilog() {
-            override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                println(message)
-            }
-        })
+        Napier.base(
+            object : Antilog() {
+                override fun performLog(
+                    priority: LogLevel,
+                    tag: String?,
+                    throwable: Throwable?,
+                    message: String?,
+                ) {
+                    println(message)
+                }
+            },
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -93,11 +99,12 @@ class WWWEventWaveLinearTest : KoinTest {
         mockArea = mockk()
         mockWarming = mockk()
 
-        waveLinear = WWWEventWaveLinear(
-            speed = 100.0, // m/s
-            direction = WWWEventWave.Direction.EAST,
-            approxDuration = 60
-        )
+        waveLinear =
+            WWWEventWaveLinear(
+                speed = 100.0, // m/s
+                direction = WWWEventWave.Direction.EAST,
+                approxDuration = 60,
+            )
         waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
         every { mockEvent.area } returns mockArea
@@ -115,138 +122,150 @@ class WWWEventWaveLinearTest : KoinTest {
     // ---------------------------
 
     @Test
-    fun testGetWaveDuration() = runBlocking {
-        // GIVEN
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(20.0, 10.0),
-            ne = Position(40.0, 50.0)
-        )
-        coEvery { mockEvent.area.bbox() } returns bbox
-        mockkObject(GeoUtils)
-        every { calculateDistance(any(), any(), any()) } returns 4000.0
+    fun testGetWaveDuration() =
+        runBlocking {
+            // GIVEN
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(20.0, 10.0),
+                    ne = Position(40.0, 50.0),
+                )
+            coEvery { mockEvent.area.bbox() } returns bbox
+            mockkObject(GeoUtils)
+            every { calculateDistance(any(), any(), any()) } returns 4000.0
 
-        // WHEN
-        val result = waveLinear.getWaveDuration()
+            // WHEN
+            val result = waveLinear.getWaveDuration()
 
-        // THEN
-        assertEquals(40.seconds, result)
-        coVerify { mockEvent.area.bbox() }
-        unmockkObject(GeoUtils)
-    }
+            // THEN
+            assertEquals(40.seconds, result)
+            coVerify { mockEvent.area.bbox() }
+            unmockkObject(GeoUtils)
+        }
 
     @Test fun testHasUserBeenHit_isWithin() = testHasUserBeenHit(isWithin = true)
+
     @Test fun testHasUserBeenHit_isNotWithin() = testHasUserBeenHit(isWithin = false)
-    private fun testHasUserBeenHit(isWithin : Boolean = true) = runBlocking {
-        // GIVEN
-        val userPosition = Position(1.0, 21.0)
-        waveLinear.setPositionRequester { userPosition }
-        val bbox = mockk<BoundingBox>()
-        every { bbox.minLongitude } returns 20.0
-        every { bbox.maxLongitude } returns 30.0
 
-        val startTime = Instant.parse("2024-01-01T00:00:00Z")
-        val currentTime = startTime + 30.minutes
-        every { mockClock.now() } returns currentTime
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+    private fun testHasUserBeenHit(isWithin: Boolean = true) =
+        runBlocking {
+            // GIVEN
+            val userPosition = Position(1.0, 21.0)
+            waveLinear.setPositionRequester { userPosition }
+            val bbox = mockk<BoundingBox>()
+            every { bbox.minLongitude } returns 20.0
+            every { bbox.maxLongitude } returns 30.0
 
-        coEvery { mockArea.bbox() } returns bbox
-        coEvery { mockArea.isPositionWithin(userPosition) } returns isWithin
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 30.minutes
+            every { mockClock.now() } returns currentTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
-        // WHEN
-        val result = waveLinear.hasUserBeenHitInCurrentPosition()
+            coEvery { mockArea.bbox() } returns bbox
+            coEvery { mockArea.isPositionWithin(userPosition) } returns isWithin
 
-        // THEN
-        assertEquals(isWithin, result)
-    }
+            // WHEN
+            val result = waveLinear.hasUserBeenHitInCurrentPosition()
 
-    @Test
-    fun testCurrentWaveLongitude_EastDirection() = runBlocking {
-        // GIVEN
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(10.0, 20.0),
-            ne = Position(15.0, 30.0)
-        )
-        val startTime = Instant.parse("2024-01-01T00:00:00Z")
-        val currentTime = startTime + 10.minutes
-
-        every { mockClock.now() } returns currentTime
-        every { mockEvent.getWaveStartDateTime() } returns startTime
-        coEvery { mockEvent.area.bbox() } returns bbox
-
-        // WHEN
-        val result = waveLinear.closestWaveLongitude(12.5)
-
-        // THEN
-        val maxEastWestDistance = calculateDistance(20.0, 30.0, 12.5)
-        val distanceTraveled = 100 * 600 // speed * 600 seconds = 10 minutes
-        val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (30.0 - 20.0)
-        val expectedLongitude = 20.0 + longitudeDelta
-        assertEquals(expectedLongitude, result, 0.0001)
-    }
+            // THEN
+            assertEquals(isWithin, result)
+        }
 
     @Test
-    fun testCurrentWaveLongitude_WestDirection_isUserWithin() = runBlocking {
-        // GIVEN
-        waveLinear = waveLinear.copy(direction = WWWEventWave.Direction.WEST).setRelatedEvent(mockEvent)
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(10.0, 20.0),
-            ne = Position(15.0, 30.0)
-        )
-        val startTime = Instant.parse("2024-01-01T00:00:00Z")
-        val currentTime = startTime + 10.minutes
+    fun testCurrentWaveLongitude_EastDirection() =
+        runBlocking {
+            // GIVEN
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(10.0, 20.0),
+                    ne = Position(15.0, 30.0),
+                )
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
 
-        every { mockClock.now() } returns currentTime
-        every { mockEvent.getWaveStartDateTime() } returns startTime
-        coEvery { mockEvent.area.bbox() } returns bbox
-        coEvery { mockEvent.area.isPositionWithin(any()) } returns true
+            every { mockClock.now() } returns currentTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockEvent.area.bbox() } returns bbox
 
-        // WHEN
-        val result = waveLinear.closestWaveLongitude(12.5)
+            // WHEN
+            val result = waveLinear.closestWaveLongitude(12.5)
 
-        // THEN
-        val maxEastWestDistance = calculateDistance(20.0, 30.0, 12.5)
-        val distanceTraveled = 100 * 600 // speed * 600 seconds = 10 minutes
-        val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (30.0 - 20.0)
-        val expectedLongitude = 30.0 - longitudeDelta
-        assertEquals(expectedLongitude, result, 0.0001)
-    }
-
-    @Test
-    fun testTimeBeforeUserHit_UserPositionAvailable() = runBlocking {
-        // GIVEN
-        val bbox = BoundingBox.fromCorners(
-            sw = Position(10.0, 20.0),
-            ne = Position(15.0, 30.0)
-        )
-        val userPosition = Position(12.5, 25.0)
-        val startTime = Instant.parse("2024-01-01T00:00:00Z")
-        val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
-
-        every { mockClock.now() } returns currentTime
-        every { mockEvent.getWaveStartDateTime() } returns startTime
-        coEvery { mockEvent.area.bbox() } returns bbox
-        waveLinear.setPositionRequester { userPosition }
-        coEvery { mockEvent.area.isPositionWithin(userPosition) } returns true
-
-        // WHEN
-        val result = waveLinear.timeBeforeUserHit()
-
-        // THEN
-        val waveCurrentLongitude = waveLinear.closestWaveLongitude(12.5)
-        val distanceToUser = calculateDistance(waveCurrentLongitude, userPosition.lng, userPosition.lat)
-        val expectedTime = (distanceToUser / waveLinear.speed).seconds
-        assertEquals(expectedTime, result)
-    }
+            // THEN
+            val maxEastWestDistance = calculateDistance(20.0, 30.0, 12.5)
+            val distanceTraveled = 100 * 600 // speed * 600 seconds = 10 minutes
+            val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (30.0 - 20.0)
+            val expectedLongitude = 20.0 + longitudeDelta
+            assertEquals(expectedLongitude, result, 0.0001)
+        }
 
     @Test
-    fun testTimeBeforeUserHit_UserPositionNull() = runBlocking {
-        // GIVEN
-        // WHEN
-        val result = waveLinear.timeBeforeUserHit()
+    fun testCurrentWaveLongitude_WestDirection_isUserWithin() =
+        runBlocking {
+            // GIVEN
+            waveLinear = waveLinear.copy(direction = WWWEventWave.Direction.WEST).setRelatedEvent(mockEvent)
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(10.0, 20.0),
+                    ne = Position(15.0, 30.0),
+                )
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = startTime + 10.minutes
 
-        // THEN
-        assertNull(result)
-    }
+            every { mockClock.now() } returns currentTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockEvent.area.bbox() } returns bbox
+            coEvery { mockEvent.area.isPositionWithin(any()) } returns true
+
+            // WHEN
+            val result = waveLinear.closestWaveLongitude(12.5)
+
+            // THEN
+            val maxEastWestDistance = calculateDistance(20.0, 30.0, 12.5)
+            val distanceTraveled = 100 * 600 // speed * 600 seconds = 10 minutes
+            val longitudeDelta = (distanceTraveled / maxEastWestDistance) * (30.0 - 20.0)
+            val expectedLongitude = 30.0 - longitudeDelta
+            assertEquals(expectedLongitude, result, 0.0001)
+        }
+
+    @Test
+    fun testTimeBeforeUserHit_UserPositionAvailable() =
+        runBlocking {
+            // GIVEN
+            val bbox =
+                BoundingBox.fromCorners(
+                    sw = Position(10.0, 20.0),
+                    ne = Position(15.0, 30.0),
+                )
+            val userPosition = Position(12.5, 25.0)
+            val startTime = Instant.parse("2024-01-01T00:00:00Z")
+            val currentTime = Instant.parse("2024-01-01T00:10:00Z") // 10 minutes later
+
+            every { mockClock.now() } returns currentTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockEvent.area.bbox() } returns bbox
+            waveLinear.setPositionRequester { userPosition }
+            coEvery { mockEvent.area.isPositionWithin(userPosition) } returns true
+
+            // WHEN
+            val result = waveLinear.timeBeforeUserHit()
+
+            // THEN
+            val waveCurrentLongitude = waveLinear.closestWaveLongitude(12.5)
+            val distanceToUser = calculateDistance(waveCurrentLongitude, userPosition.lng, userPosition.lat)
+            val expectedTime = (distanceToUser / waveLinear.speed).seconds
+            assertEquals(expectedTime, result)
+        }
+
+    @Test
+    fun testTimeBeforeUserHit_UserPositionNull() =
+        runBlocking {
+            // GIVEN
+            // WHEN
+            val result = waveLinear.timeBeforeUserHit()
+
+            // THEN
+            assertNull(result)
+        }
 
     // ---------------------------
 
@@ -313,158 +332,173 @@ class WWWEventWaveLinearTest : KoinTest {
     // ---------------------------
 
     @Test
-    fun `getWavePolygons with no last wave state and no progression`() = runBlocking {
-        // GIVEN
-        val mockBoundingBox = BoundingBox.fromCorners(Position(1.0, 1.0), Position(2.0, 2.0))
-        val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
+    fun `getWavePolygons with no last wave state and no progression`() =
+        runBlocking {
+            // GIVEN
+            val mockBoundingBox = BoundingBox.fromCorners(Position(1.0, 1.0), Position(2.0, 2.0))
+            val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
-        coEvery { mockArea.getPolygons() } returns mockPolygons
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        every { mockClock.now() } returns startTime
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            every { mockClock.now() } returns startTime
 
-        // WHEN
-        val result = waveLinear.getWavePolygons()
+            // WHEN
+            val result = waveLinear.getWavePolygons()
 
-        // THEN
-        assertNull(result)
-    }
-
-    @Test
-    fun `getWavePolygons with no last wave state`() = runBlocking {
-        // GIVEN
-        val mockBoundingBox = BoundingBox.fromCorners(Position(1.0, 1.0), Position(2.0, 2.0))
-        val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
-
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getWaveStartDateTime() } returns startTime
-        coEvery { mockArea.getPolygons() } returns mockPolygons
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        every { mockClock.now() } returns startTime + 1.hours
-
-        // WHEN
-        val result = waveLinear.getWavePolygons()
-
-        // THEN
-        assertNotNull(result)
-        assertTrue(result.traversedPolygons.isNotEmpty() || result.remainingPolygons.isNotEmpty())
-    }
+            // THEN
+            assertNull(result)
+        }
 
     @Test
-    fun `getWavePolygons with last wave state and ADD mode`() = runBlocking {
-        // GIVEN
-        val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
-        val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        val lastWaveState = WWWEventWave.WavePolygons(
-            timestamp = startTime,
-            traversedPolygons = listOf(Polygon.fromPositions(listOf(Position(0.0, 0.0), Position(1.0, 1.0), Position(0.0, 1.0)))),
-            remainingPolygons = mockPolygons
-        )
+    fun `getWavePolygons with no last wave state`() =
+        runBlocking {
+            // GIVEN
+            val mockBoundingBox = BoundingBox.fromCorners(Position(1.0, 1.0), Position(2.0, 2.0))
+            val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            every { mockClock.now() } returns startTime + 1.hours
 
-        coEvery { mockArea.getPolygons() } returns mockPolygons
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        every { mockClock.now() } returns startTime + 2.hours
+            // WHEN
+            val result = waveLinear.getWavePolygons()
 
-        // WHEN
-        val result = waveLinear.getWavePolygons()
-
-        // THEN
-        assertNotNull(result)
-        assertTrue(result.traversedPolygons.size >= lastWaveState.traversedPolygons.size)
-    }
+            // THEN
+            assertNotNull(result)
+            assertTrue(result.traversedPolygons.isNotEmpty() || result.remainingPolygons.isNotEmpty())
+        }
 
     @Test
-    fun `getWavePolygons with last wave state and RECOMPOSE mode`() = runBlocking {
-        // GIVEN
-        val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(10.0, -10.0), Position(10.0, 10.0), Position(-10.0, 10.0))))
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        val cutPosition1Left = Position(-10.0, -10.0).init()
-        val cutPosition1Right = Position(-10.0, 10.0).init()
-        val cutPosition2Left = Position(10.0, -10.0).init()
-        val cutPosition2Right = Position(10.0, 10.0).init()
-        val lastWaveState = WWWEventWave.WavePolygons(
-            timestamp = startTime,
-            traversedPolygons = listOf(Polygon.fromPositions(listOf(
-                CutPosition(-10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
-                CutPosition(10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
-                Position(10.0, -10.0),
-                Position(-10.0, -10.0)
-            ))),
-            remainingPolygons = listOf(Polygon.fromPositions(listOf(
-                CutPosition(10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
-                Position(10.0, 10.0),
-                Position(-10.0, 10.0),
-                CutPosition(-10.0, 0.0, 42, cutPosition2Left, cutPosition2Right)
-            )))
-        )
-        val mockBoundingBox = mockPolygons.first().bbox()
+    fun `getWavePolygons with last wave state and ADD mode`() =
+        runBlocking {
+            // GIVEN
+            val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
+            val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            val lastWaveState =
+                WWWEventWave.WavePolygons(
+                    timestamp = startTime,
+                    traversedPolygons = listOf(Polygon.fromPositions(listOf(Position(0.0, 0.0), Position(1.0, 1.0), Position(0.0, 1.0)))),
+                    remainingPolygons = mockPolygons,
+                )
 
-        coEvery { mockArea.getPolygons() } returns mockPolygons
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        every { mockClock.now() } returns startTime + 4.hours
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
-        // WHEN
-        val result = waveLinear.getWavePolygons()
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            every { mockClock.now() } returns startTime + 2.hours
 
-        // THEN
-        assertNotNull(result)
-        assertTrue(result.traversedPolygons.isNotEmpty())
-        assertTrue(result.remainingPolygons.isNotEmpty())
-    }
+            // WHEN
+            val result = waveLinear.getWavePolygons()
+
+            // THEN
+            assertNotNull(result)
+            assertTrue(result.traversedPolygons.size >= lastWaveState.traversedPolygons.size)
+        }
 
     @Test
-    fun `getWavePolygons with empty area polygons`() = runBlocking {
-        // GIVEN
-        val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
+    fun `getWavePolygons with last wave state and RECOMPOSE mode`() =
+        runBlocking {
+            // GIVEN
+            val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(10.0, -10.0), Position(10.0, 10.0), Position(-10.0, 10.0))))
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            val cutPosition1Left = Position(-10.0, -10.0).init()
+            val cutPosition1Right = Position(-10.0, 10.0).init()
+            val cutPosition2Left = Position(10.0, -10.0).init()
+            val cutPosition2Right = Position(10.0, 10.0).init()
+            val lastWaveState =
+                WWWEventWave.WavePolygons(
+                    timestamp = startTime,
+                    traversedPolygons =
+                        listOf(
+                            Polygon.fromPositions(
+                                listOf(
+                                    CutPosition(-10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
+                                    CutPosition(10.0, 0.0, 42, cutPosition1Left, cutPosition1Right),
+                                    Position(10.0, -10.0),
+                                    Position(-10.0, -10.0),
+                                ),
+                            ),
+                        ),
+                    remainingPolygons =
+                        listOf(
+                            Polygon.fromPositions(
+                                listOf(
+                                    CutPosition(10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
+                                    Position(10.0, 10.0),
+                                    Position(-10.0, 10.0),
+                                    CutPosition(-10.0, 0.0, 42, cutPosition2Left, cutPosition2Right),
+                                ),
+                            ),
+                        ),
+                )
+            val mockBoundingBox = mockPolygons.first().bbox()
 
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            every { mockClock.now() } returns startTime + 4.hours
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
-        coEvery { mockArea.getPolygons() } returns emptyList()
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        every { mockClock.now() } returns startTime
+            // WHEN
+            val result = waveLinear.getWavePolygons()
 
-        // WHEN
-        val result = waveLinear.getWavePolygons()
-
-        // THEN
-        assertNull(result)
-    }
+            // THEN
+            assertNotNull(result)
+            assertTrue(result.traversedPolygons.isNotEmpty())
+            assertTrue(result.remainingPolygons.isNotEmpty())
+        }
 
     @Test
-    fun `getWavePolygons with WEST direction`() = runBlocking {
-        // GIVEN
-        waveLinear = WWWEventWaveLinear(
-            speed = 100.0,
-            direction = WWWEventWave.Direction.WEST,
-            approxDuration = 60
-        )
-        waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
+    fun `getWavePolygons with empty area polygons`() =
+        runBlocking {
+            // GIVEN
+            val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
 
-        val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
-        val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
-        coEvery { mockArea.getPolygons() } returns mockPolygons
-        coEvery { mockArea.bbox() } returns mockBoundingBox
-        val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
-        every { mockClock.now() } returns startTime + 4.hours
-        every { mockEvent.getWaveStartDateTime() } returns startTime
+            coEvery { mockArea.getPolygons() } returns emptyList()
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            every { mockClock.now() } returns startTime
 
-        // WHEN
-        val result = waveLinear.getWavePolygons()
+            // WHEN
+            val result = waveLinear.getWavePolygons()
 
-        // THEN
-        assertNotNull(result)
-        assertTrue(result.traversedPolygons.isNotEmpty() || result.remainingPolygons.isNotEmpty())
-    }
+            // THEN
+            assertNull(result)
+        }
 
+    @Test
+    fun `getWavePolygons with WEST direction`() =
+        runBlocking {
+            // GIVEN
+            waveLinear =
+                WWWEventWaveLinear(
+                    speed = 100.0,
+                    direction = WWWEventWave.Direction.WEST,
+                    approxDuration = 60,
+                )
+            waveLinear.setRelatedEvent<WWWEventWaveLinear>(mockEvent)
 
+            val mockBoundingBox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(10.0, 10.0))
+            val mockPolygons = listOf(Polygon.fromPositions(listOf(Position(1.0, 1.0), Position(2.0, 2.0), Position(1.0, 2.0))))
 
+            coEvery { mockArea.getPolygons() } returns mockPolygons
+            coEvery { mockArea.bbox() } returns mockBoundingBox
+            val startTime = Instant.parse("2023-06-15T10:15:30.00Z")
+            every { mockClock.now() } returns startTime + 4.hours
+            every { mockEvent.getWaveStartDateTime() } returns startTime
 
+            // WHEN
+            val result = waveLinear.getWavePolygons()
+
+            // THEN
+            assertNotNull(result)
+            assertTrue(result.traversedPolygons.isNotEmpty() || result.remainingPolygons.isNotEmpty())
+        }
 }

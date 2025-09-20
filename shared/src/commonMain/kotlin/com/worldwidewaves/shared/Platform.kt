@@ -30,9 +30,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WWWPlatform(val name: String) {
-
-    private var _simulation : WWWSimulation? = null
+class WWWPlatform(
+    val name: String,
+) {
+    private var _simulation: WWWSimulation? = null
 
     // -------------------------------------------------------------------- //
     //  Reactive simulation change tracking
@@ -61,8 +62,13 @@ class WWWPlatform(val name: String) {
     private val _simulationModeEnabled = MutableStateFlow(false)
     val simulationModeEnabled: StateFlow<Boolean> = _simulationModeEnabled.asStateFlow()
 
-    fun enableSimulationMode() { _simulationModeEnabled.value = true }
-    fun disableSimulationMode() { _simulationModeEnabled.value = false }
+    fun enableSimulationMode() {
+        _simulationModeEnabled.value = true
+    }
+
+    fun disableSimulationMode() {
+        _simulationModeEnabled.value = false
+    }
 
     fun disableSimulation() {
         _simulation = null
@@ -70,18 +76,21 @@ class WWWPlatform(val name: String) {
         _simulationChanged.value = _simulationChanged.value + 1
     }
 
-    fun setSimulation(simulation : WWWSimulation) {
+    fun setSimulation(simulation: WWWSimulation) {
         Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
         _simulation = simulation
         // Notify observers that the simulation context has changed
         _simulationChanged.value = _simulationChanged.value + 1
     }
 
-    fun getSimulation() : WWWSimulation? = _simulation
-    fun isOnSimulation() : Boolean = _simulation != null
+    fun getSimulation(): WWWSimulation? = _simulation
+
+    fun isOnSimulation(): Boolean = _simulation != null
 }
 
-class WWWShutdownHandler(private val coroutineScopeProvider: CoroutineScopeProvider) {
+class WWWShutdownHandler(
+    private val coroutineScopeProvider: CoroutineScopeProvider,
+) {
     fun onAppShutdown() {
         coroutineScopeProvider.cancelAllCoroutines()
     }
@@ -94,12 +103,23 @@ expect fun localizeString(resource: StringResource): String
 // ---------------------------
 
 expect suspend fun readGeoJson(eventId: String): String?
-expect suspend fun getMapFileAbsolutePath(eventId: String, extension: String): String?
+
+expect suspend fun getMapFileAbsolutePath(
+    eventId: String,
+    extension: String,
+): String?
 
 expect fun cachedFileExists(fileName: String): Boolean
+
 expect fun cachedFilePath(fileName: String): String?
-expect fun cacheStringToFile(fileName: String, content: String): String
+
+expect fun cacheStringToFile(
+    fileName: String,
+    content: String,
+): String
+
 expect suspend fun cacheDeepFile(fileName: String)
+
 expect fun getCacheDir(): String
 
 // ---------------------------------------------------------------------------
@@ -107,5 +127,7 @@ expect fun getCacheDir(): String
 // ---------------------------------------------------------------------------
 
 expect fun clearEventCache(eventId: String)
+
 expect fun isCachedFileStale(fileName: String): Boolean
+
 expect fun updateCacheMetadata(fileName: String)

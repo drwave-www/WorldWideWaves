@@ -47,18 +47,16 @@ object MidiResources {
  * Represents a musical note with timing information from a MIDI file
  */
 data class MidiNote(
-    val pitch: Int,        // MIDI note number (0-127)
-    val velocity: Int,     // Note velocity/volume (0-127)
+    val pitch: Int, // MIDI note number (0-127)
+    val velocity: Int, // Note velocity/volume (0-127)
     val startTime: Duration, // When the note starts (from song beginning)
-    val duration: Duration   // How long the note lasts
+    val duration: Duration, // How long the note lasts
 ) {
     // Calculate when the note ends
     private val endTime: Duration get() = startTime + duration
 
     // Check if this note is active at a given time
-    fun isActiveAt(timePosition: Duration): Boolean {
-        return timePosition >= startTime && timePosition < endTime
-    }
+    fun isActiveAt(timePosition: Duration): Boolean = timePosition >= startTime && timePosition < endTime
 }
 
 /**
@@ -68,7 +66,7 @@ data class MidiTrack(
     val name: String,
     val notes: List<MidiNote>,
     val totalDuration: Duration,
-    val tempo: Int = 120 // BPM
+    val tempo: Int = 120, // BPM
 )
 
 // ----------------------------------------------------------------------------
@@ -77,7 +75,6 @@ data class MidiTrack(
  * Handles parsing of Standard MIDI File (SMF) format
  */
 object MidiParser {
-
     // Constants for MIDI file parsing
     private const val HEADER_CHUNK_ID = "MThd"
     private const val TRACK_CHUNK_ID = "MTrk"
@@ -88,18 +85,21 @@ object MidiParser {
 
     // ------------------------------------------------------------------------
 
-    private data class TempoChange(val tick: Long, val microsecondsPerBeat: Long)
+    private data class TempoChange(
+        val tick: Long,
+        val microsecondsPerBeat: Long,
+    )
 
     private data class MidiNoteInternal(
         val pitch: Int,
         val velocity: Int,
         val startTick: Long,
-        val durationTicks: Long
+        val durationTicks: Long,
     )
 
     private data class NoteStartInfo(
         val startTick: Long,
-        val velocity: Int
+        val velocity: Int,
     )
 
     // ------------------------------------------------------------------------
@@ -107,15 +107,14 @@ object MidiParser {
     /**
      * Parse a MIDI file into a MidiTrack
      */
-    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack {
-        return try {
+    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack =
+        try {
             val midiBytes = MidiResources.readMidiFile(midiResourcePath)
             parseMidiBytes(midiBytes)
         } catch (e: Exception) {
             Log.e("MidiParser", "Failed to parse MIDI file: ${e.message}")
             throw e
         }
-    }
 
     // ------------------------------------------------------------------------
 
@@ -147,13 +146,14 @@ object MidiParser {
 
             // Read time division
             val timeDivision = reader.readInt16()
-            val ticksPerBeat = if ((timeDivision and 0x8000) == 0) {
-                // Ticks per quarter note
-                timeDivision
-            } else {
-                // SMPTE frames - not supported in this simple implementation
-                24 // Default to 24 ticks per beat
-            }
+            val ticksPerBeat =
+                if ((timeDivision and 0x8000) == 0) {
+                    // Ticks per quarter note
+                    timeDivision
+                } else {
+                    // SMPTE frames - not supported in this simple implementation
+                    24 // Default to 24 ticks per beat
+                }
 
             // Prepare to collect notes and tempo changes
             val internalNotes = mutableListOf<MidiNoteInternal>()
@@ -205,7 +205,8 @@ object MidiParser {
 
                             if (metaType == TEMPO_META_TYPE && metaLength == 3) {
                                 // Tempo change event
-                                val microsecondsPerBeat = (reader.readUInt8().toLong() shl 16) or
+                                val microsecondsPerBeat =
+                                    (reader.readUInt8().toLong() shl 16) or
                                         (reader.readUInt8().toLong() shl 8) or
                                         reader.readUInt8().toLong()
                                 // Store tempo change with its tick position
@@ -223,10 +224,11 @@ object MidiParser {
 
                             if (velocity > 0) {
                                 // Start of note
-                                activeNotes[Pair(channel, noteNumber)] = NoteStartInfo(
-                                    startTick = currentTick,
-                                    velocity = velocity
-                                )
+                                activeNotes[Pair(channel, noteNumber)] =
+                                    NoteStartInfo(
+                                        startTick = currentTick,
+                                        velocity = velocity,
+                                    )
                             } else {
                                 // Note on with velocity 0 is equivalent to note off
                                 handleNoteOff(activeNotes, internalNotes, channel, noteNumber, currentTick)
@@ -255,17 +257,18 @@ object MidiParser {
             tempoChanges.sortBy { it.tick }
 
             // Convert internal note representation to final MidiNote objects
-            val notes = internalNotes.map { internalNote ->
-                val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, tempoChanges)
-                val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, tempoChanges)
+            val notes =
+                internalNotes.map { internalNote ->
+                    val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, tempoChanges)
+                    val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, tempoChanges)
 
-                MidiNote(
-                    pitch = internalNote.pitch,
-                    velocity = internalNote.velocity,
-                    startTime = startTimeSeconds,
-                    duration = endTimeSeconds - startTimeSeconds
-                )
-            }
+                    MidiNote(
+                        pitch = internalNote.pitch,
+                        velocity = internalNote.velocity,
+                        startTime = startTimeSeconds,
+                        duration = endTimeSeconds - startTimeSeconds,
+                    )
+                }
 
             // Calculate final tempo (use the last tempo change)
             val finalTempo = 60_000_000 / tempoChanges.last().microsecondsPerBeat
@@ -283,16 +286,18 @@ object MidiParser {
 
             // Dump first few notes for debugging
             notes.take(5).forEachIndexed { index, note ->
-                Log.d("MidiParser", "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, Duration=${note.duration.inWholeMilliseconds}ms")
+                Log.d(
+                    "MidiParser",
+                    "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, Duration=${note.duration.inWholeMilliseconds}ms",
+                )
             }
 
             return MidiTrack(
                 name = "Parsed MIDI Track",
                 notes = notes,
                 totalDuration = totalDuration,
-                tempo = finalTempo.toInt()
+                tempo = finalTempo.toInt(),
             )
-
         } catch (e: Exception) {
             Log.e("MidiParser", "Error parsing MIDI bytes: ${e.message}")
             e.printStackTrace()
@@ -305,7 +310,11 @@ object MidiParser {
     /**
      * Convert ticks to real time accounting for tempo changes
      */
-    private fun ticksToRealTime(ticks: Long, ticksPerBeat: Int, tempoChanges: List<TempoChange>): Duration {
+    private fun ticksToRealTime(
+        ticks: Long,
+        ticksPerBeat: Int,
+        tempoChanges: List<TempoChange>,
+    ): Duration {
         var elapsedSeconds = 0.0
         var lastTempoTick = 0L
         var lastTempoMPB = tempoChanges.first().microsecondsPerBeat
@@ -318,13 +327,13 @@ object MidiParser {
                 // This tick is before the current tempo change, so calculate with the previous tempo
                 val ticksInThisTempo = ticks - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                        (lastTempoMPB.toDouble() / 1_000_000)
+                    (lastTempoMPB.toDouble() / 1_000_000)
                 break
             } else {
                 // Calculate segment up to this tempo change
                 val ticksInThisTempo = currentChange.tick - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                        (lastTempoMPB.toDouble() / 1_000_000)
+                    (lastTempoMPB.toDouble() / 1_000_000)
 
                 // Move to next tempo
                 lastTempoTick = currentChange.tick
@@ -336,7 +345,7 @@ object MidiParser {
         if (ticks > lastTempoTick) {
             val ticksInLastTempo = ticks - lastTempoTick
             elapsedSeconds += (ticksInLastTempo.toDouble() / ticksPerBeat) *
-                    (lastTempoMPB.toDouble() / 1_000_000)
+                (lastTempoMPB.toDouble() / 1_000_000)
         }
 
         return elapsedSeconds.seconds
@@ -352,7 +361,7 @@ object MidiParser {
         notes: MutableList<MidiNoteInternal>,
         channel: Int,
         pitch: Int,
-        currentTick: Long
+        currentTick: Long,
     ) {
         val noteKey = Pair(channel, pitch)
         val startInfo = activeNotes.remove(noteKey) ?: return
@@ -364,14 +373,12 @@ object MidiParser {
         if (durationTicks > 0) {
             notes.add(
                 MidiNoteInternal(
-                pitch = pitch,
-                velocity = startInfo.velocity,
-                startTick = startInfo.startTick,
-                durationTicks = durationTicks
-            )
+                    pitch = pitch,
+                    velocity = startInfo.velocity,
+                    startTick = startInfo.startTick,
+                    durationTicks = durationTicks,
+                ),
             )
         }
     }
-
 }
-

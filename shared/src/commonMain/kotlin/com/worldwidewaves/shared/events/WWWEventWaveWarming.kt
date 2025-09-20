@@ -28,27 +28,27 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.IClock
 import io.github.aakira.napier.Napier
-import kotlin.time.Instant
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
-class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
-
+class WWWEventWaveWarming(
+    val event: IWWWEvent,
+) : KoinComponent {
     private val clock: IClock by inject()
     private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
     val soundChoreographyManager: SoundChoreographyManager by inject()
 
     fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
 
-    suspend fun userWarmingStartDateTime(): Instant? {
-        return event.wave.userHitDateTime()?.let { hitDateTime ->
+    suspend fun userWarmingStartDateTime(): Instant? =
+        event.wave.userHitDateTime()?.let { hitDateTime ->
             hitDateTime - getWarmingDuration() - WAVE_WARN_BEFORE_HIT
         }
-    }
 
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
@@ -57,7 +57,7 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
 
     /**
      * Play a tone from the choreography that is active **now** and return the MIDI pitch
-     * (or `null` if nothing was played).  
+     * (or `null` if nothing was played).
      *
      * In debug builds we try to forward the played note information to the
      * Sound-Choreography test-mode overlay (if present) via reflection, so that
@@ -94,5 +94,4 @@ class WWWEventWaveWarming(val event: IWWWEvent) : KoinComponent {
             Napier.d(tag = "WaveWarming", message = "Sound note played: $it")
         }
     }
-
 }
