@@ -80,12 +80,3 @@ jobs:
             **/build/reports/tests/
             **/build/test-results/
 
-      - name: Upload test results
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: Unit Test Results
-          path: '**/build/test-results/testDebugUnitTest/TEST-*.xml'
-          reporter: java-junit
-          fail-on-error: false
-          fail-on-empty: false

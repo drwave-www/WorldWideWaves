@@ -33,7 +33,9 @@ struct ContentView: View {
     var body: some View {
         Group {
             if isLoading {
-                ProgressView("Loading events…")
+                VStack {
+                    ProgressView("Loading events…")
+                }
             } else if let error = errorMessage {
                 VStack(spacing: 8) {
                     Text("Failed to load events")
