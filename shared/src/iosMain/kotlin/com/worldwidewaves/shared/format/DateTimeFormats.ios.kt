@@ -3,7 +3,8 @@ package com.worldwidewaves.shared.format
 import kotlinx.datetime.TimeZone
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
-import platform.Foundation.NSTimeZone
+import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -14,8 +15,8 @@ actual object DateTimeFormats {
         timeZone: TimeZone,
     ): String {
         val formatter = NSDateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("dMMM")
-        formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
+        formatter.locale = NSLocale.currentLocale
+        formatter.dateFormat = "d MMM"
         val date = NSDate(timeIntervalSince1970 = instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }
@@ -25,8 +26,8 @@ actual object DateTimeFormats {
         timeZone: TimeZone,
     ): String {
         val formatter = NSDateFormatter()
-        formatter.setLocalizedDateFormatFromTemplate("jm")
-        formatter.timeZone = NSTimeZone.timeZoneWithName(timeZone.id)
+        formatter.locale = NSLocale.currentLocale
+        formatter.dateFormat = "HH:mm"
         val date = NSDate(timeIntervalSince1970 = instant.epochSeconds.toDouble())
         return formatter.stringFromDate(date)
     }
