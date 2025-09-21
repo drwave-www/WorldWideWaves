@@ -138,16 +138,19 @@ class WWWEventObserver(
                 Log.v("startObservation", "Starting observation for event $event.id")
 
                 // Initialize state with current values
-                _eventStatus.value = event.getStatus()
-
-                try {
-                    _progression.value = event.wave.getProgression()
+                val currentStatus = event.getStatus()
+                val currentProgression = try {
+                    event.wave.getProgression()
                 } catch (e: Throwable) {
                     Log.e(
                         tag = WWWEventWave::class.simpleName!!,
                         message = "Error initializing progression: $e",
                     )
+                    0.0
                 }
+
+                // Initialize ALL state values, including userIsInArea, regardless of observation status
+                updateStates(currentProgression, currentStatus)
 
                 // Start observation if event is running or about to start
                 // Accepted as the application will not be let running for days (isSoon includes a delay)

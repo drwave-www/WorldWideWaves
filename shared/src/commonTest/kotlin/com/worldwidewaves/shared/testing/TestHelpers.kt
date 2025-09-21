@@ -81,7 +81,7 @@ object TestHelpers {
         instagramHashtag: String = "#WorldWideWaves",
         userPosition: Position? = TestLocations.PARIS,
         waveDuration: Duration = 2.hours,
-        waveSpeed: Double = 50.0, // km/h
+        waveSpeed: Double = 10.0, // m/s
         area: WWWEventArea? = null,
         map: WWWEventMap? = null
     ): WWWEvent {
@@ -89,7 +89,8 @@ object TestHelpers {
         val mockMap = map ?: createMockMap()
         val waveDefinition = createSimpleWaveDefinition(
             duration = waveDuration,
-            speed = waveSpeed
+            speed = waveSpeed,
+            userPosition = userPosition
         )
 
         return WWWEvent(
@@ -190,6 +191,7 @@ object TestHelpers {
         every { mockArea.validationErrors() } returns null
         every { mockArea.setRelatedEvent(any()) } returns Unit
 
+        // Note: isPositionWithin is a suspend function, so we use coEvery
         if (userPosition != null) {
             coEvery { mockArea.isPositionWithin(userPosition) } returns isUserInArea
         }
@@ -213,13 +215,19 @@ object TestHelpers {
      */
     fun createSimpleWaveDefinition(
         duration: Duration = 2.hours,
-        speed: Double = 50.0
+        speed: Double = 10.0,
+        userPosition: Position? = null
     ): WWWEvent.WWWWaveDefinition {
         val linearWave = WWWEventWaveLinear(
             speed = speed,
             direction = WWWEventWave.Direction.EAST,
             approxDuration = duration.inWholeMinutes.toInt()
         )
+
+        // Set up position requester if user position is provided
+        if (userPosition != null) {
+            linearWave.setPositionRequester { userPosition }
+        }
 
         return WWWEvent.WWWWaveDefinition(linear = linearWave)
     }

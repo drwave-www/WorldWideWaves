@@ -640,7 +640,8 @@ class WWWEventValidationTest : KoinTest {
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
             date = "2022-01-01",
-            startHour = "03:00" // 3 hours after baseTime (beyond WAVE_OBSERVE_DELAY)
+            startHour = "03:00", // 3 hours after baseTime (beyond WAVE_OBSERVE_DELAY)
+            timeZone = "UTC"
         )
 
         // WHEN

@@ -27,6 +27,10 @@ import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.testing.MockClock
 import com.worldwidewaves.shared.testing.TestHelpers
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWSimulation
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -78,8 +82,8 @@ class WWWEventObserverTest : KoinTest {
 
     @Test
     fun `observer should initialize with default values for future event`() = runTest {
-        // GIVEN: A future event that's not near time
-        val event = TestHelpers.createFutureEvent(startsIn = 5.hours)
+        // GIVEN: A future event that's not near time and has no user position
+        val event = TestHelpers.createFutureEvent(startsIn = 5.hours, userPosition = null)
 
         // WHEN
         val observer = WWWEventObserver(event)
@@ -214,13 +218,42 @@ class WWWEventObserverTest : KoinTest {
             userPosition = TestHelpers.TestLocations.PARIS
         )
 
+        // Debug: Check the wave's user position setup
+        val waveUserPosition = event.wave.getUserPosition()
+        println("DEBUG: Wave user position: $waveUserPosition")
+        println("DEBUG: Expected position: ${TestHelpers.TestLocations.PARIS}")
+
+        // Debug: Check event status and timing conditions
+        println("DEBUG: Event status: ${event.getStatus()}")
+        println("DEBUG: Event isRunning: ${event.isRunning()}")
+        println("DEBUG: Event isSoon: ${event.isSoon()}")
+        println("DEBUG: Event isNearTime: ${event.isNearTime()}")
+
+        // Debug: Test the area mock directly
+        if (waveUserPosition != null) {
+            val areaResult = event.area.isPositionWithin(waveUserPosition)
+            println("DEBUG: Area.isPositionWithin(userPosition) = $areaResult")
+        }
+
         // WHEN
         val observer = WWWEventObserver(event)
         testScheduler.advanceUntilIdle()
 
+        // Force an observation cycle to ensure state is updated
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
         // THEN: Should initialize properly with test data
         assertNotNull(observer.eventStatus.value)
-        // User should be in area based on our mock setup
+        assertNotNull(observer.progression.value)
+        println("DEBUG: userIsInArea.value = ${observer.userIsInArea.value}")
+
+        // The core functionality should work: both direct call and observer should return true
+        if (waveUserPosition != null) {
+            assertTrue(event.area.isPositionWithin(waveUserPosition))
+        }
+
+        // With the observer fix, userIsInArea should now be properly set
         assertTrue(observer.userIsInArea.value)
     }
 
