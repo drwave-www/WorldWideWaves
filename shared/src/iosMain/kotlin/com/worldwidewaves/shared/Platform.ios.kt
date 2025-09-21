@@ -110,5 +110,6 @@ actual fun updateCacheMetadata(fileName: String) {
 // ---------------------------
 
 actual fun localizeString(resource: StringResource): String {
+    // Convert StringResource to localized string using iOS framework
     return resource.desc().localized()
 }
