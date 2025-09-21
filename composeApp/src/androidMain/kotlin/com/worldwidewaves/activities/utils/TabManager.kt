@@ -40,7 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 
 // ----------------------------
 
@@ -102,7 +102,7 @@ class TabManager(
 
             // Tab bar
             Row(
-                modifier = modifier.fillMaxWidth().height(DIM_INT_TABBAR_HEIGHT.dp),
+                modifier = modifier.fillMaxWidth().height(TabBar.INT_HEIGHT.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {

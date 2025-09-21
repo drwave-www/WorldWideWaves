@@ -94,9 +94,6 @@ class MapViewModel(
     // ---------------------------------------------------------------------
     // Logging
     // ---------------------------------------------------------------------
-    private companion object {
-        private const val TAG = "MapInstall"
-    }
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
 
@@ -108,8 +105,15 @@ class MapViewModel(
     private var currentMapId: String? = null
 
     private var retryCount = 0
-    private val maxRetries = 3
-    private val retryDelayMillis = 1000L // Base delay for exponential backoff
+
+    // Constants for retry logic and progress calculation
+    private companion object {
+        private const val TAG = "MapInstall"
+        private const val MAX_RETRIES = 3
+        private const val RETRY_DELAY_MILLIS = 1000L
+        private const val PROGRESS_MULTIPLIER = 100
+        private const val PLAY_STORE_AUTH_ERROR_CODE = -100
+    }
 
     // ------------------------------------------------------------------------
 
@@ -137,120 +141,148 @@ class MapViewModel(
     // ------------------------------------------------------------------------
 
     private fun updateStateFromInstallState(state: SplitInstallSessionState) {
-        // Special handling for SERVICE_DIED error
+        // Handle SERVICE_DIED error with retry logic
+        if (handleServiceDiedError(state)) {
+            return
+        }
+
+        // Handle the main install status
+        handleInstallStatus(state)
+    }
+
+    private fun handleServiceDiedError(state: SplitInstallSessionState): Boolean {
         @Suppress("DEPRECATION")
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED
         ) {
             Log.w(TAG, "SERVICE_DIED for session ${state.sessionId()} – scheduling retry")
-            // Get current module from state if possible, otherwise use last known module
+
             val moduleId = getCurrentModuleFromState(state) ?: currentMapId
-
-            if (moduleId != null && retryCount < maxRetries) {
-                // Prepare retry with exponential backoff
-                val delay = retryDelayMillis * (1 shl retryCount)
-                retryCount++
-
-                _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
-                Log.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
-
-                // Create a new request and retry
-                val request =
-                    SplitInstallRequest
-                        .newBuilder()
-                        .addModule(moduleId)
-                        .build()
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    startInstallWithRetry(request, moduleId, delay)
-                }, delay)
-
-                return
+            if (moduleId != null && retryCount < MAX_RETRIES) {
+                scheduleRetryForServiceDied(moduleId)
+                return true
             }
         }
+        return false
+    }
 
+    private fun scheduleRetryForServiceDied(moduleId: String) {
+        val delay = RETRY_DELAY_MILLIS * (1 shl retryCount)
+        retryCount++
+
+        _featureState.value = MapFeatureState.Retrying(retryCount, MAX_RETRIES)
+        Log.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
+
+        val request =
+            SplitInstallRequest
+                .newBuilder()
+                .addModule(moduleId)
+                .build()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            startInstallWithRetry(request, moduleId, delay)
+        }, delay)
+    }
+
+    private fun handleInstallStatus(state: SplitInstallSessionState) {
         when (state.status()) {
-            SplitInstallSessionStatus.DOWNLOADING -> {
-                val totalBytes = state.totalBytesToDownload()
-                val downloadedBytes = state.bytesDownloaded()
-                val progressPercent =
-                    if (totalBytes > 0) {
-                        (downloadedBytes * 100 / totalBytes).toInt()
-                    } else {
-                        0
-                    }
-
-                _featureState.value = MapFeatureState.Downloading(progressPercent)
-            }
-            SplitInstallSessionStatus.DOWNLOADED -> {
-                _featureState.value = MapFeatureState.Downloading(100)
-            }
-            SplitInstallSessionStatus.INSTALLING -> {
-                _featureState.value = MapFeatureState.Installing
-            }
-            SplitInstallSessionStatus.INSTALLED -> {
-                Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
-                // ------------------------------------------------------------------
-                //  Invalidate any cached resources that belong to the module(s)
-                //  that have just been installed to ensure we don't use stale files.
-                // ------------------------------------------------------------------
-                try {
-                    // Prefer the module list from the state; fall back to currentMapId
-                    val moduleIds: List<String> =
-                        try {
-                            state.moduleNames().toList()
-                        } catch (_: Exception) {
-                            emptyList()
-                        }.ifEmpty {
-                            currentMapId?.let { listOf(it) }.orEmpty()
-                        }
-
-                    moduleIds.forEach { id ->
-                        try {
-                            clearEventCache(id)
-                        } catch (_: Exception) {
-                            // Do not crash the ViewModel because of cache cleanup issues
-                        }
-                    }
-                } catch (_: Exception) {
-                    // Defensive catch – no-op on failure
-                }
-
-                _featureState.value = MapFeatureState.Installed
-                currentSessionId = 0
-            }
-            SplitInstallSessionStatus.PENDING -> {
-                _featureState.value = MapFeatureState.Pending
-            }
-            SplitInstallSessionStatus.FAILED -> {
-                Log.e(TAG, "Status: FAILED code=${state.errorCode()}")
-                _featureState.value =
-                    MapFeatureState.Failed(
-                        state.errorCode(),
-                        getErrorMessage(state.errorCode()),
-                    )
-                currentSessionId = 0
-            }
-            SplitInstallSessionStatus.CANCELED -> {
-                Log.w(TAG, "Status: CANCELED")
-                _featureState.value = MapFeatureState.NotAvailable
-                currentSessionId = 0
-            }
-            SplitInstallSessionStatus.CANCELING -> {
-                Log.w(TAG, "Status: CANCELING")
-                _featureState.value = MapFeatureState.Canceling
-            }
-            SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> {
-                Log.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
-                _featureState.value = MapFeatureState.RequiresUserConfirmation(state)
-            }
-            SplitInstallSessionStatus.UNKNOWN -> {
-                _featureState.value = MapFeatureState.Unknown
-            }
-            else -> {
-                _featureState.value = MapFeatureState.Unknown
-            }
+            SplitInstallSessionStatus.DOWNLOADING -> handleDownloadingStatus(state)
+            SplitInstallSessionStatus.DOWNLOADED -> handleDownloadedStatus()
+            SplitInstallSessionStatus.INSTALLING -> handleInstallingStatus()
+            SplitInstallSessionStatus.INSTALLED -> handleInstalledStatus(state)
+            SplitInstallSessionStatus.PENDING -> handlePendingStatus()
+            SplitInstallSessionStatus.FAILED -> handleFailedStatus(state)
+            SplitInstallSessionStatus.CANCELED -> handleCanceledStatus()
+            SplitInstallSessionStatus.CANCELING -> handleCancelingStatus()
+            SplitInstallSessionStatus.REQUIRES_USER_CONFIRMATION -> handleUserConfirmationStatus(state)
+            SplitInstallSessionStatus.UNKNOWN -> handleUnknownStatus()
+            else -> handleUnknownStatus()
         }
+    }
+
+    private fun handleDownloadingStatus(state: SplitInstallSessionState) {
+        val totalBytes = state.totalBytesToDownload()
+        val downloadedBytes = state.bytesDownloaded()
+        val progressPercent =
+            if (totalBytes > 0) {
+                (downloadedBytes * PROGRESS_MULTIPLIER / totalBytes).toInt()
+            } else {
+                0
+            }
+        _featureState.value = MapFeatureState.Downloading(progressPercent)
+    }
+
+    private fun handleDownloadedStatus() {
+        _featureState.value = MapFeatureState.Downloading(PROGRESS_MULTIPLIER)
+    }
+
+    private fun handleInstallingStatus() {
+        _featureState.value = MapFeatureState.Installing
+    }
+
+    private fun handleInstalledStatus(state: SplitInstallSessionState) {
+        Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
+        clearCacheForInstalledModules(state)
+        _featureState.value = MapFeatureState.Installed
+        currentSessionId = 0
+    }
+
+    private fun clearCacheForInstalledModules(state: SplitInstallSessionState) {
+        try {
+            val moduleIds: List<String> = getModuleIdsFromState(state)
+            moduleIds.forEach { id ->
+                try {
+                    clearEventCache(id)
+                } catch (_: Exception) {
+                    // Do not crash the ViewModel because of cache cleanup issues
+                }
+            }
+        } catch (_: Exception) {
+            // Defensive catch – no-op on failure
+        }
+    }
+
+    private fun getModuleIdsFromState(state: SplitInstallSessionState): List<String> =
+        try {
+            state.moduleNames().toList()
+        } catch (_: Exception) {
+            emptyList()
+        }.ifEmpty {
+            currentMapId?.let { listOf(it) }.orEmpty()
+        }
+
+    private fun handlePendingStatus() {
+        _featureState.value = MapFeatureState.Pending
+    }
+
+    private fun handleFailedStatus(state: SplitInstallSessionState) {
+        Log.e(TAG, "Status: FAILED code=${state.errorCode()}")
+        _featureState.value =
+            MapFeatureState.Failed(
+                state.errorCode(),
+                getErrorMessage(state.errorCode()),
+            )
+        currentSessionId = 0
+    }
+
+    private fun handleCanceledStatus() {
+        Log.w(TAG, "Status: CANCELED")
+        _featureState.value = MapFeatureState.NotAvailable
+        currentSessionId = 0
+    }
+
+    private fun handleCancelingStatus() {
+        Log.w(TAG, "Status: CANCELING")
+        _featureState.value = MapFeatureState.Canceling
+    }
+
+    private fun handleUserConfirmationStatus(state: SplitInstallSessionState) {
+        Log.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
+        _featureState.value = MapFeatureState.RequiresUserConfirmation(state)
+    }
+
+    private fun handleUnknownStatus() {
+        _featureState.value = MapFeatureState.Unknown
     }
 
     // ------------------------------------------------------------------------
@@ -287,7 +319,7 @@ class MapViewModel(
                     MokoRes.strings.map_error_service_died
                 SplitInstallErrorCode.ACCESS_DENIED ->
                     MokoRes.strings.map_error_access_denied
-                -100 ->
+                PLAY_STORE_AUTH_ERROR_CODE ->
                     // Error code -100 typically indicates Google Play Store authentication issues
                     // This corresponds to Play Store error code 1010 (account no longer exists)
                     MokoRes.strings.map_error_account_issue
@@ -356,7 +388,7 @@ class MapViewModel(
     private fun startInstallWithRetry(
         request: SplitInstallRequest,
         mapId: String,
-        delay: Long = retryDelayMillis,
+        delay: Long = RETRY_DELAY_MILLIS,
         onMapDownloaded: (() -> Unit)? = null,
     ) {
         splitInstallManager
@@ -369,12 +401,12 @@ class MapViewModel(
             }.addOnFailureListener { exception ->
                 Log.e(TAG, "startInstall failure ${exception.message}")
                 // Check if it's worth retrying
-                if (retryCount < maxRetries) {
+                if (retryCount < MAX_RETRIES) {
                     // Use exponential backoff for retries
                     val nextDelay = delay * (1 shl retryCount)
                     retryCount++
 
-                    _featureState.value = MapFeatureState.Retrying(retryCount, maxRetries)
+                    _featureState.value = MapFeatureState.Retrying(retryCount, MAX_RETRIES)
                     Log.i(TAG, "Scheduling retry #$retryCount after ${nextDelay}ms")
 
                     // Schedule retry after delay

@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared.events.utils
 
-import kotlin.math.abs
-
 /*
  * Copyright 2025 DrWave
  *
@@ -22,6 +20,8 @@ import kotlin.math.abs
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import kotlin.math.abs
 
 /**
  * Represents a bounding box defined by its southwest and northeast corners.

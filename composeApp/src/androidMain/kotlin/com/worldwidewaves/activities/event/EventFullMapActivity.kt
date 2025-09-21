@@ -21,6 +21,7 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -37,14 +39,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.common.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -55,8 +59,10 @@ import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -85,6 +91,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
             value = event.getEndDateTime()
         }
         val isInArea by event.observer.userIsInArea.collectAsState()
+
 
         // Construct the event map
         val eventMap =
@@ -131,14 +138,14 @@ fun MapActions(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+                .padding(end = Dimensions.DEFAULT_INT_PADDING.dp, bottom = Dimensions.DEFAULT_INT_PADDING.dp),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
             Image(
                 modifier =
                     Modifier
-                        .size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
                         .clickable {
                             if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
                                 eventMap.markUserInteracted()
@@ -156,7 +163,7 @@ fun MapActions(
             Image(
                 modifier =
                     Modifier
-                        .size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
                             if (isInArea) {
                                 eventMap.markUserInteracted()

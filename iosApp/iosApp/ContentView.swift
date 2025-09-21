@@ -31,9 +31,10 @@ struct ContentView: View {
     }
     
     var body: some View {
-        Group {
+        VStack {
             if isLoading {
                 ProgressView("Loading events…")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let error = errorMessage {
                 VStack(spacing: 8) {
                     Text("Failed to load events")
@@ -45,7 +46,7 @@ struct ContentView: View {
                 .padding()
             } else {
                 List(events, id: \.id) { event in
-                    Text(event.location)
+                    Text(Platform_iosKt.localizeString(resource: event.getLocation()))
                 }
             }
         }

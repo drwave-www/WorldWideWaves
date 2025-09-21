@@ -49,16 +49,18 @@ import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
+import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.debug_icon
+import com.worldwidewaves.shared.generated.resources.debug_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
@@ -73,17 +75,26 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
-private val tabInfo =
-    listOf(
-        Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
-        Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
-    )
+private fun getTabInfo(includeDebug: Boolean) =
+    if (includeDebug) {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+            Pair(ShRes.drawable.debug_icon, ShRes.drawable.debug_icon_selected),
+        )
+    } else {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+        )
+    }
 
 // ----------------------------
 
 open class MainActivity : AppCompatActivity() {
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
+    private val debugScreen: DebugScreen? by inject()
     private val events: WWWEvents by inject()
     private val platform: WWWPlatform by inject()
 
@@ -97,15 +108,20 @@ open class MainActivity : AppCompatActivity() {
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
 
-    protected val tabManager =
-        TabManager(
-            listOf(
+    protected val tabManager by lazy {
+        val screens =
+            mutableListOf(
                 eventsListScreen,
                 aboutScreen,
-            ),
+            )
+        debugScreen?.let { screens.add(it) }
+
+        TabManager(
+            screens.toList(),
         ) { isSelected, tabIndex, contentDescription ->
-            TabBarItem(isSelected, tabIndex, contentDescription)
+            TabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
+    }
 
     // ----------------------------
 
@@ -155,7 +171,12 @@ open class MainActivity : AppCompatActivity() {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
         }
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+        } else {
+            @Suppress("DEPRECATION")
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+        }
 
         setContent {
             AppTheme {
@@ -186,7 +207,7 @@ open class MainActivity : AppCompatActivity() {
 
         // Also enforce minimum duration
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(CONST_SPLASH_MIN_DURATION)
+            kotlinx.coroutines.delay(2000) // Timing.SPLASH_MIN_DURATION
             checkSplashFinished(startTime)
         }
     }
@@ -194,7 +215,7 @@ open class MainActivity : AppCompatActivity() {
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded && elapsed >= CONST_SPLASH_MIN_DURATION.inWholeMilliseconds) {
+        if (isDataLoaded && elapsed >= 2000) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
             isSplashFinished.update { true }
         }
     }
@@ -206,11 +227,13 @@ open class MainActivity : AppCompatActivity() {
         isSelected: Boolean,
         tabIndex: Int,
         contentDescription: String?,
+        totalTabs: Int,
     ) {
+        val tabInfo = getTabInfo(totalTabs > 2)
         Image(
             painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
             contentDescription = contentDescription,
-            modifier = Modifier.height(DIM_EXT_TABBAR_HEIGHT.dp),
+            modifier = Modifier.height(TabBar.EXT_HEIGHT.dp),
             contentScale = ContentScale.Fit,
         )
     }
@@ -234,7 +257,7 @@ open class MainActivity : AppCompatActivity() {
                 modifier =
                     Modifier
                         .align(androidx.compose.ui.Alignment.BottomCenter)
-                        .padding(bottom = DIM_DEFAULT_INT_PADDING.dp), // original SplashActivity padding
+                        .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // original SplashActivity padding
             )
         }
     }

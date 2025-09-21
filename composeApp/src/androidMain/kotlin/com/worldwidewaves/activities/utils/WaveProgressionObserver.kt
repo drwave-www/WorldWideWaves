@@ -27,8 +27,10 @@ import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Observes a single wave **progression** and mirrors it on the Android map.
@@ -89,19 +91,14 @@ class WaveProgressionObserver(
     ) {
         polygonsJob?.cancel()
 
-        val updateIntervalMs = 250L
-        var lastUpdateTime = 0L
-
+        // Use Flow.sample() for efficient throttling instead of manual time tracking
         polygonsJob =
             scope.launch(Dispatchers.Default) {
-                event.observer.progression.collect {
-                    val now = System.currentTimeMillis()
-                    // Throttle updates to at most every 250 ms --------------------
-                    if (now - lastUpdateTime >= updateIntervalMs) {
-                        lastUpdateTime = now
+                event.observer.progression
+                    .sample(250.milliseconds) // Built-in throttling for better performance
+                    .collect {
                         updateWavePolygons(event, eventMap)
                     }
-                }
             }
     }
 

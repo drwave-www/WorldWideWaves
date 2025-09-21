@@ -81,7 +81,7 @@ class MapAvailabilityChecker(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
                         )
-                        // If this module had previously been “forced” unavailable
+                        // If this module had previously been "forced" unavailable
                         // (deferred uninstall), drop the override so it becomes
                         // visible again without requiring an app restart.
                         state.moduleNames()?.forEach { id ->
@@ -166,9 +166,13 @@ class MapAvailabilityChecker(
         try {
             val splitInstallManager = SplitInstallManagerFactory.create(context)
             return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
-        } catch (e: Exception) {
-            Log.e("MapAvailabilityChecker", "Error checking if map can be uninstalled: ${e.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${e.message}")
+        } catch (ise: IllegalStateException) {
+            Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
+            return false // If there's an error, assume it can't be uninstalled
+        } catch (uoe: UnsupportedOperationException) {
+            Log.e("MapAvailabilityChecker", "Unsupported operation on SplitInstallManager: ${uoe.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
             return false // If there's an error, assume it can't be uninstalled
         }
     }
@@ -204,7 +208,8 @@ class MapAvailabilityChecker(
                         // Best-effort cache cleanup – do not fail uninstall on errors
                         try {
                             clearEventCache(eventId)
-                        } catch (_: Exception) {
+                        } catch (_: IllegalStateException) {
+                            // ignore cache cleanup errors
                         }
 
                         Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
@@ -218,9 +223,17 @@ class MapAvailabilityChecker(
                         Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
                         if (cont.isActive) cont.resume(false)
                     }
-            } catch (e: Exception) {
-                Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${e.message}")
+            } catch (ise: IllegalStateException) {
+                Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state for $eventId: ${ise.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${ise.message}")
+                if (cont.isActive) cont.resume(false)
+            } catch (iae: IllegalArgumentException) {
+                Log.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
+                if (cont.isActive) cont.resume(false)
+            } catch (uoe: UnsupportedOperationException) {
+                Log.e("MapAvailabilityChecker", "Unsupported operation during uninstall for $eventId: ${uoe.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${uoe.message}")
                 if (cont.isActive) cont.resume(false)
             }
         }

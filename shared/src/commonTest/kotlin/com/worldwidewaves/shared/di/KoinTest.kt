@@ -22,7 +22,8 @@ package com.worldwidewaves.shared.di
  */
 
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.data.DataStoreFactory
+import com.worldwidewaves.shared.data.TestDataStoreFactory
 import org.koin.core.KoinApplication
 import org.koin.dsl.module
 import org.koin.test.KoinTest
@@ -34,7 +35,8 @@ class KoinTest : KoinTest {
         val testPlatformModule =
             module {
                 single<WWWPlatform> { WWWPlatform("test") }
-                single { createDataStore { "/fake/path" } }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/fake/path" } }
             }
 
         fun KoinApplication.() {

@@ -17,11 +17,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
+import com.worldwidewaves.shared.WWWGlobals.Companion.Common
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.theme.commonBoldStyle
@@ -42,7 +39,7 @@ fun WWWSocialNetworks(
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
             contentDescription = stringResource(MokoRes.strings.instagram_logo_description),
-            modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp),
+            modifier = Modifier.width(Common.SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp),
         )
         Column(
             modifier = Modifier.padding(start = 10.dp),
@@ -52,23 +49,27 @@ fun WWWSocialNetworks(
                 modifier =
                     Modifier.clickable(onClick = {
                         try {
-                            val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
+                            val uri = "Urls.INSTAGRAM_BASE${instagramAccount.removePrefix("@")}"
                             uriHandler.openUri(uri)
-                        } catch (e: Exception) {
-                            Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
+                        } catch (e: SecurityException) {
+                            Log.e("AboutWWWSocialNetworks", "Security error opening Instagram URI", e)
+                        } catch (e: IllegalArgumentException) {
+                            Log.e("AboutWWWSocialNetworks", "Invalid Instagram URI format", e)
+                        } catch (e: UnsupportedOperationException) {
+                            Log.e("AboutWWWSocialNetworks", "Unsupported URI operation", e)
                         }
                     }),
                 text = instagramAccount,
                 style =
-                    commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
+                    commonBoldStyle(Common.SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
                         textDecoration = TextDecoration.Underline,
                     ),
             )
             Text(
                 text = instagramHashtag,
-                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE),
+                style = commonTextStyle(Common.SOCIALNETWORKS_HASHTAG_FONTSIZE),
             )
         }
     }
-    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+    Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
 }

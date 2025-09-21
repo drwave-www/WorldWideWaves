@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON
@@ -68,7 +68,7 @@ class EarthAdaptedSpeedLongitude(
     /*
      * The duration of a single band refresh window in seconds.
      */
-    private val bandStepDuration: Duration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
+    private val bandStepDuration: Duration = (Wave.LINEAR_METERS_REFRESH / speed).seconds
 
     /*
      * The starting longitude of the wave, based on the direction.
@@ -184,11 +184,13 @@ class EarthAdaptedSpeedLongitude(
         val lonBandWidthAtLongest = calculateLonBandWidthAtLatitude(longestLat)
         Napier.v { "Longitude band width at the middle latitude: $lonBandWidthAtLongest" }
 
+        // Always add bands outside the bounding box to ensure comprehensive coverage
+        // Use safe distances from actual poles to avoid mathematical instabilities
         latLonBands.add(
             LatLonBand(
-                -89.9,
+                -87.0, // Safe distance from south pole but still outside most bounding boxes
                 0.0, // Lower latitude band
-                adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(-87.0, lonBandWidthAtLongest),
             ),
         )
 
@@ -215,9 +217,9 @@ class EarthAdaptedSpeedLongitude(
 
         latLonBands.add(
             LatLonBand(
-                89.9,
+                87.0, // Safe distance from north pole but still outside most bounding boxes
                 0.0, // Higher latitude band
-                adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(87.0, lonBandWidthAtLongest),
             ),
         )
 

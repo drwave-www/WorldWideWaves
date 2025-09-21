@@ -342,7 +342,10 @@ class WWWEventTest {
     @Test
     fun testIsNearTheEvent() {
         // GIVEN --------------------------------
-        val now = Instant.parse("2023-12-31T23:15:00+12:45") // Close from the event
+        // Pacific/Auckland is UTC+13 in January (NZDT)
+        // Event at 2024-01-01T01:00 NZDT = 2023-12-31T12:00 UTC
+        // Testing time 45 minutes before event start
+        val now = Instant.parse("2023-12-31T11:15:00Z") // 45 minutes before event in UTC
         val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-01-01", startHour = "01:00")
 
         every { mockClock.now() } returns now
@@ -358,7 +361,9 @@ class WWWEventTest {
     @Test
     fun testIsNearTheEvent_Fails() {
         // GIVEN --------------------------------
-        val now = Instant.parse("2023-01-01T00:00:00+01:00") // Far from the event
+        // Event at 2024-01-01T01:00 NZDT = 2023-12-31T12:00 UTC
+        // Testing time 1 year before event (definitely not near)
+        val now = Instant.parse("2023-01-01T00:00:00Z") // Far from the event (1 year before)
         val event = buildEmptyEvent(timeZone = "Pacific/Auckland", date = "2024-01-01", startHour = "01:00")
 
         every { mockClock.now() } returns now

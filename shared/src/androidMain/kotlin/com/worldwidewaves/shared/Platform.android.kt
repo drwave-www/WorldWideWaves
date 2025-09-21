@@ -46,7 +46,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
             File(filePath).readText()
         }
     } else {
-        Log.w(::readGeoJson.name, "GeoJSON file not available for event $eventId")
+        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
         null
     }
 }
@@ -130,62 +130,84 @@ actual suspend fun getMapFileAbsolutePath(
      * times with a fresh split-aware context before giving up.
      * ---------------------------------------------------------------- */
 
-    val ctx =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                context.createContextForSplit(eventId)
-            } catch (_: Exception) {
-                context
+    // Implement actual retry logic as mentioned in the comment above
+    var lastException: Exception? = null
+    val maxRetries = 3
+    val retryDelayMs = 100L
+
+    for (attempt in 1..maxRetries) {
+        try {
+            val ctx =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        context.createContextForSplit(eventId)
+                    } catch (_: Exception) {
+                        context
+                    }
+                } else {
+                    context
+                }
+
+            // Ensure split-compat hooks into this context
+            SplitCompat.install(ctx)
+
+            // Try to access the asset immediately
+            return cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
+        } catch (e: java.io.FileNotFoundException) {
+            lastException = e
+            if (attempt < maxRetries) {
+                Log.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
+                kotlinx.coroutines.delay(retryDelayMs)
             }
-        } else {
-            context
         }
+    }
 
-    // Ensure split-compat hooks into this context
-    SplitCompat.install(ctx)
+    // If we get here, all retries failed - handle the final exception intelligently
+    if (lastException is java.io.FileNotFoundException) {
+        Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+    } else {
+        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}")
+        lastException?.printStackTrace()
+    }
+    return null
+}
 
-    // We found a context that can access the asset, now copy it to cache
-    try {
-        Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
+/**
+ * Helper function to cache asset from a given context.
+ * Separated for the retry logic above.
+ */
+private suspend fun cacheAssetFromContext(
+    ctx: Context,
+    assetPath: String,
+    cachedFile: File,
+    metadataFile: File,
+    eventId: String,
+    extension: String,
+): String {
+    withContext(Dispatchers.IO) {
+        // Use a buffered approach for better memory efficiency
+        ctx.assets.open(assetPath).use { input ->
+            BufferedInputStream(input, 8192).use { bufferedInput ->
+                cachedFile.outputStream().use { fileOutput ->
+                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                        val buffer = ByteArray(8192)
+                        var bytesRead: Int
 
-        withContext(Dispatchers.IO) {
-            try {
-                // Use a buffered approach for better memory efficiency
-                ctx.assets.open(assetPath).use { input ->
-                    BufferedInputStream(input, 8192).use { bufferedInput ->
-                        cachedFile.outputStream().use { fileOutput ->
-                            BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                val buffer = ByteArray(8192)
-                                var bytesRead: Int
-
-                                while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                    bufferedOutput.write(buffer, 0, bytesRead)
-                                }
-
-                                bufferedOutput.flush()
-                            }
+                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                            bufferedOutput.write(buffer, 0, bytesRead)
                         }
+
+                        bufferedOutput.flush()
                     }
                 }
-
-                // Update metadata after successful copy
-                metadataFile.writeText(System.currentTimeMillis().toString())
-            } catch (e: Exception) {
-                Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                // Delete partially written file if there was an error
-                if (cachedFile.exists()) {
-                    cachedFile.delete()
-                }
-                throw e
             }
         }
 
-        return cachedFile.absolutePath
-    } catch (e: Exception) {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
-        e.printStackTrace()
-        return null
+        // Update metadata after successful copy
+        metadataFile.writeText(System.currentTimeMillis().toString())
     }
+
+    return cachedFile.absolutePath
 }
 
 // ---------------------------
@@ -259,7 +281,12 @@ actual suspend fun cacheDeepFile(fileName: String) {
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
     } catch (e: Exception) {
-        Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        // Only log full stack trace for unexpected errors
+        if (e is java.io.FileNotFoundException) {
+            Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
+        } else {
+            Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        }
     }
 }
 

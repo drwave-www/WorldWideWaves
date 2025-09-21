@@ -22,9 +22,7 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_OBSERVE_DELAY
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SOON_DELAY
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
@@ -142,7 +140,7 @@ data class WWWEvent(
     override fun isSoon(): Boolean {
         val eventDateTime = getStartDateTime()
         val now = clock.now()
-        return eventDateTime > now && eventDateTime <= now.plus(WAVE_SOON_DELAY)
+        return eventDateTime > now && eventDateTime <= now.plus(WaveTiming.SOON_DELAY)
     }
 
     override suspend fun isRunning(): Boolean {
@@ -198,7 +196,7 @@ data class WWWEvent(
             waveDuration = wave.getApproxDuration()
         }
 
-        return getWarmingDuration() + WAVE_WARN_BEFORE_HIT + waveDuration
+        return getWarmingDuration() + WaveTiming.WARN_BEFORE_HIT + waveDuration
     }
 
     override suspend fun getEndDateTime(): Instant = getStartDateTime().plus(getTotalTime())
@@ -236,7 +234,7 @@ data class WWWEvent(
 
     // -----------------------------------------------------------------------
 
-    override fun getWaveStartDateTime(): Instant = getStartDateTime() + getWarmingDuration() + WAVE_WARN_BEFORE_HIT
+    override fun getWaveStartDateTime(): Instant = getStartDateTime() + getWarmingDuration() + WaveTiming.WARN_BEFORE_HIT
 
     override fun getWarmingDuration(): Duration = warming.getWarmingDuration()
 
@@ -244,7 +242,7 @@ data class WWWEvent(
         val now = clock.now()
         val eventStartTime: Instant = getStartDateTime()
         val durationUntilEvent = eventStartTime - now
-        return durationUntilEvent <= WAVE_OBSERVE_DELAY
+        return durationUntilEvent <= WaveTiming.OBSERVE_DELAY
     }
 
     // -----------------------------------------------------------------------

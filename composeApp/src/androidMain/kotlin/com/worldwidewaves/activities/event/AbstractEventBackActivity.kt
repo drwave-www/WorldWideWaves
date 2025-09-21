@@ -56,9 +56,7 @@ import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
+import com.worldwidewaves.shared.WWWGlobals.Companion.BackNav
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
@@ -146,10 +144,10 @@ abstract class AbstractEventBackActivity(
                     Modifier
                         .fillMaxWidth()
                         .padding(
-                            start = DIM_BACK_PADDING[0].dp,
-                            end = DIM_BACK_PADDING[1].dp,
-                            top = DIM_BACK_PADDING[2].dp,
-                            bottom = DIM_BACK_PADDING[3].dp,
+                            start = BackNav.PADDING[0].dp,
+                            end = BackNav.PADDING[1].dp,
+                            top = BackNav.PADDING[2].dp,
+                            bottom = BackNav.PADDING[3].dp,
                         ),
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -171,7 +169,7 @@ abstract class AbstractEventBackActivity(
                         )
                         Text(
                             text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE),
+                            style = primaryColoredTextStyle(BackNav.FONTSIZE),
                         )
                     }
                     if (selectedEvent != null) {
@@ -179,7 +177,7 @@ abstract class AbstractEventBackActivity(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = stringResource(selectedEvent!!.getLocation()),
                             style =
-                                quinaryColoredBoldTextStyle(DIM_BACK_EVENT_LOCATION_FONTSIZE).copy(
+                                quinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
                                     textAlign = TextAlign.Center,
                                 ),
                         )

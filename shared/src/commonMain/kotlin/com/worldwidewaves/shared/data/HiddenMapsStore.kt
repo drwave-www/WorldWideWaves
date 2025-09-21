@@ -63,9 +63,15 @@ class HiddenMapsStore(
      */
     suspend fun add(mapId: String) =
         withContext(dispatcher) {
-            dataStore.edit { preferences ->
-                val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
-                preferences[HIDDEN_MAPS_KEY] = currentSet + mapId
+            try {
+                dataStore.edit { preferences ->
+                    val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
+                    preferences[HIDDEN_MAPS_KEY] = currentSet + mapId
+                }
+                Log.d("HiddenMapsStore", "Successfully added map $mapId to hidden set")
+            } catch (e: Exception) {
+                Log.e("HiddenMapsStore", "Failed to add map $mapId to hidden set", throwable = e)
+                throw DataStoreException("Failed to add map $mapId to hidden set: ${e.message}", e)
             }
         }
 
@@ -74,11 +80,17 @@ class HiddenMapsStore(
      */
     suspend fun remove(mapId: String) =
         withContext(dispatcher) {
-            dataStore.edit { preferences ->
-                val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
-                if (mapId in currentSet) {
-                    preferences[HIDDEN_MAPS_KEY] = currentSet - mapId
+            try {
+                dataStore.edit { preferences ->
+                    val currentSet = preferences[HIDDEN_MAPS_KEY] ?: emptySet()
+                    if (mapId in currentSet) {
+                        preferences[HIDDEN_MAPS_KEY] = currentSet - mapId
+                    }
                 }
+                Log.d("HiddenMapsStore", "Successfully removed map $mapId from hidden set")
+            } catch (e: Exception) {
+                Log.e("HiddenMapsStore", "Failed to remove map $mapId from hidden set", throwable = e)
+                throw DataStoreException("Failed to remove map $mapId from hidden set: ${e.message}", e)
             }
         }
 

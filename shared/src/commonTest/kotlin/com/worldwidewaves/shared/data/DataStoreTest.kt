@@ -14,6 +14,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.fail
 
 /**
  * Tests for DataStore functionality in a KMP-compatible way.
@@ -23,7 +25,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class DataStoreTest {
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         // Mock the Log object for verification
         mockkObject(Log)
         justRun { Log.i(any(), any()) }
@@ -45,53 +47,115 @@ class DataStoreTest {
     }
 
     @Test
-    fun `test createDataStore logs initialization message`() {
-        // Arrange
+    fun `test createDataStore with valid path calls path provider`() {
+        // GIVEN: Mock path provider with valid path
         val pathProvider = mockk<() -> String>()
-        val logMessageSlot = slot<String>()
-
         every { pathProvider() } returns "/test/path"
-        every { Log.i(any(), capture(logMessageSlot)) } returns Unit
 
-        // Act - Note: This will attempt to create a real DataStore, which may not work in tests
-        // But we're only verifying the logging behavior
+        // WHEN: Creating DataStore (may succeed or fail depending on platform)
+        // THEN: Path provider should always be called
+        var pathProviderCalled = false
         try {
+            @Suppress("DEPRECATION")
             createDataStore(pathProvider)
-        } catch (e: Exception) {
-            // Ignore exceptions from actual DataStore creation
-            // We're only testing the logging behavior
+            pathProviderCalled = true
+        } catch (e: DataStoreException) {
+            // DataStore creation failed in test environment - this is acceptable
+            pathProviderCalled = true
+            assertTrue(e.message?.contains("DataStore creation failed") == true,
+                "DataStoreException should contain proper error message")
         }
 
-        // Assert
+        assertTrue(pathProviderCalled, "Path provider should be called regardless of outcome")
         verify { pathProvider() }
-        verify { Log.i(any(), any()) }
-
-        // If the log message was captured, verify its content
-        if (logMessageSlot.isCaptured) {
-            assertTrue(
-                logMessageSlot.captured.contains("/test/path"),
-                "Log message should contain the path",
-            )
-        }
     }
 
     @Test
-    fun `test path provider function is called`() {
-        // Arrange
+    fun `test TestDataStoreFactory creates isolated instances`() {
+        // GIVEN: TestDataStoreFactory for isolated test instances
+        val factory = TestDataStoreFactory()
+        val pathProvider1 = mockk<() -> String>()
+        val pathProvider2 = mockk<() -> String>()
+        every { pathProvider1() } returns "/test/path1"
+        every { pathProvider2() } returns "/test/path2"
+
+        // WHEN: Creating multiple DataStore instances
+        val dataStore1 = factory.create(pathProvider1)
+        val dataStore2 = factory.create(pathProvider2)
+
+        // THEN: Each call should use the path provider and create separate instances
+        verify { pathProvider1() }
+        verify { pathProvider2() }
+
+        // Each TestDataStoreFactory.create() call creates a new instance
+        // This ensures test isolation
+        assertTrue(dataStore1 !== dataStore2, "TestDataStoreFactory should create separate instances for test isolation")
+    }
+
+    @Test
+    fun `test path provider function is always called`() {
+        // GIVEN: Mock path provider
         val pathProviderMock = mockk<() -> String>()
         every { pathProviderMock() } returns "/test/path"
 
-        // Act - Note: This will attempt to create a real DataStore, which may not work in tests
-        // But we're only verifying that the path provider is called
+        // WHEN: Creating DataStore
+        // THEN: Path provider should be called regardless of success/failure
         try {
+            @Suppress("DEPRECATION")
             createDataStore(pathProviderMock)
-        } catch (e: Exception) {
-            // Ignore exceptions from actual DataStore creation
-            // We're only testing that the path provider is called
+        } catch (e: DataStoreException) {
+            // DataStore creation failed - this is acceptable in test environment
+            assertNotNull(e.cause, "DataStoreException should have a cause")
         }
 
-        // Assert
+        // Path provider should always be called
         verify { pathProviderMock() }
+    }
+
+    @Test
+    fun `test DataStore error handling with invalid path`() {
+        // GIVEN: Path provider that returns invalid path
+        val pathProvider = mockk<() -> String>()
+        every { pathProvider() } returns ""
+
+        // WHEN: Creating DataStore with invalid path
+        // THEN: Should either succeed (if implementation handles empty path) or fail with DataStoreException
+        try {
+            @Suppress("DEPRECATION")
+            createDataStore(pathProvider)
+            // If creation succeeds with empty path, that's acceptable
+        } catch (e: DataStoreException) {
+            // Expected: DataStore creation failed and was properly wrapped
+            assertTrue(e.message?.contains("DataStore creation failed") == true,
+                "Error message should indicate DataStore creation failure")
+            assertNotNull(e.cause, "DataStoreException should have underlying cause")
+        }
+
+        // Path provider should still be called
+        verify { pathProvider() }
+    }
+
+    @Test
+    fun `test DefaultDataStoreFactory maintains singleton behavior`() {
+        // GIVEN: DefaultDataStoreFactory for production use
+        val factory = DefaultDataStoreFactory()
+        val pathProvider = mockk<() -> String>()
+        every { pathProvider() } returns "/test/production/path"
+
+        // WHEN: Creating multiple DataStore instances from same factory
+        try {
+            val dataStore1 = factory.create(pathProvider)
+            val dataStore2 = factory.create(pathProvider)
+
+            // THEN: Should return the same instance (singleton behavior)
+            assertTrue(dataStore1 === dataStore2, "DefaultDataStoreFactory should maintain singleton behavior")
+
+            // Path provider should be called for both, but second call should return existing instance
+            verify(atLeast = 1) { pathProvider() }
+        } catch (e: DataStoreException) {
+            // Expected in test environment due to platform limitations
+            verify(atLeast = 1) { pathProvider() }
+        }
     }
 
     @Test

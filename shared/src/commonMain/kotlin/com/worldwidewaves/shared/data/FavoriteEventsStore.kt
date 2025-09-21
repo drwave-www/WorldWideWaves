@@ -57,7 +57,13 @@ class FavoriteEventsStore(
         eventId: String,
         isFavorite: Boolean,
     ) = withContext(dispatcher) {
-        dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
+        try {
+            dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
+            Log.d("FavoriteEventsStore", "Successfully set favorite status for event $eventId: $isFavorite")
+        } catch (e: Exception) {
+            Log.e("FavoriteEventsStore", "Failed to set favorite status for event $eventId", throwable = e)
+            throw DataStoreException("Failed to update favorite status for event $eventId: ${e.message}", e)
+        }
     }
 
     suspend fun isFavorite(eventId: String): Boolean =

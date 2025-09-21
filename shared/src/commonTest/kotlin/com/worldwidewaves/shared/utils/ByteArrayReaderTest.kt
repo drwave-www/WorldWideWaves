@@ -6,7 +6,7 @@ import kotlin.test.assertFailsWith
 
 class ByteArrayReaderTest {
     @Test
-    fun `test readUInt8 reads unsigned 8-bit values correctly`() {
+    fun `should read unsigned 8-bit values correctly including boundary cases`() {
         // Test with various values including boundary cases
         val bytes = byteArrayOf(0, 1, 127, -1, -128)
         val reader = ByteArrayReader(bytes)
@@ -19,7 +19,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test readInt32 reads signed 32-bit values correctly`() {
+    fun `should read signed 32-bit values correctly including boundary cases`() {
         // Test with various values including boundary cases
         // Values: 0, 1, 16777216, 2147483647 (max positive), -1, -2147483648 (min negative)
         val bytes =
@@ -60,7 +60,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test readString reads strings of different lengths correctly`() {
+    fun `should read strings of different lengths correctly`() {
         // Test with empty string, short string, and longer string
         val bytes = "HelloWorld!".encodeToByteArray()
 
@@ -80,7 +80,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test readVariableLengthQuantity reads VLQ values correctly`() {
+    fun `should read variable length quantity values correctly`() {
         // Test cases based on MIDI VLQ format:
         // Single byte (0-127)
         // Two bytes (128-16383)
@@ -127,7 +127,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test skip advances position correctly`() {
+    fun `should advance position correctly when skipping bytes`() {
         val bytes = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         val reader = ByteArrayReader(bytes)
 
@@ -148,7 +148,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test position is tracked correctly across operations`() {
+    fun `should track position correctly across different read operations`() {
         val bytes = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
         val reader = ByteArrayReader(bytes)
 
@@ -173,7 +173,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test reading beyond array bounds throws exception`() {
+    fun `should throw exception when reading beyond array bounds`() {
         val bytes = byteArrayOf(1, 2, 3)
         val reader = ByteArrayReader(bytes)
 
@@ -189,7 +189,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test reading from empty array`() {
+    fun `should throw exception when reading from empty array`() {
         val reader = ByteArrayReader(byteArrayOf())
 
         assertFailsWith<IndexOutOfBoundsException> {
@@ -198,7 +198,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test reading string beyond array bounds throws exception`() {
+    fun `should throw exception when reading string beyond array bounds`() {
         val bytes = "Hello".encodeToByteArray()
         val reader = ByteArrayReader(bytes)
 
@@ -208,7 +208,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test skip beyond array bounds`() {
+    fun `should handle skip beyond array bounds gracefully`() {
         val bytes = byteArrayOf(1, 2, 3)
         val reader = ByteArrayReader(bytes)
 
@@ -225,7 +225,7 @@ class ByteArrayReaderTest {
     }
 
     @Test
-    fun `test endianness in multi-byte reads`() {
+    fun `should read multi-byte values in big-endian format`() {
         // Test that multi-byte values are read in big-endian format
         // 0x0102 = 258 in big-endian, 513 in little-endian
         // 0x01020304 = 16909060 in big-endian, 67305985 in little-endian

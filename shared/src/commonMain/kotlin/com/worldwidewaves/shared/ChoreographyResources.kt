@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared
 
-import dev.icerock.moko.resources.StringResource
-
 /*
  * Copyright 2025 DrWave
  *
@@ -23,6 +21,8 @@ import dev.icerock.moko.resources.StringResource
  * limitations under the License.
  */
 
+import dev.icerock.moko.resources.StringResource
+
 fun getChoreographyText(
     sequenceType: String,
     sequenceNumber: Int? = null,
@@ -31,7 +31,7 @@ fun getChoreographyText(
         "warming" -> getChoreographyWarmingText(sequenceNumber)
         "waiting" -> com.worldwidewaves.shared.getChoreographyWaitingText()
         "hit" -> com.worldwidewaves.shared.getChoreographyHitText()
-        else -> throw Exception("Invalid choreography type: $sequenceType")
+        else -> throw IllegalArgumentException("Invalid choreography type: $sequenceType")
     }
 
 fun getChoreographyWarmingText(seq: Int?): StringResource =
@@ -42,7 +42,7 @@ fun getChoreographyWarmingText(seq: Int?): StringResource =
         4 -> MokoRes.strings.choreography_warming_seq_4
         5 -> MokoRes.strings.choreography_warming_seq_5
         6 -> MokoRes.strings.choreography_warming_seq_6
-        else -> throw Exception("Invalid choreography sequence number: $seq")
+        else -> throw IllegalArgumentException("Invalid choreography sequence number: $seq")
     }
 
 fun getChoreographyWaitingText(): StringResource = MokoRes.strings.choreography_waiting

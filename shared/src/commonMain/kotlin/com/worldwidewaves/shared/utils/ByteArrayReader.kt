@@ -29,7 +29,16 @@ class ByteArrayReader(
 ) {
     var position: Int = 0
 
-    fun readUInt8(): Int = bytes[position++].toInt() and 0xFF
+    private fun checkBounds(bytesToRead: Int) {
+        if (position + bytesToRead > bytes.size) {
+            throw IndexOutOfBoundsException("Attempting to read $bytesToRead bytes at position $position, but only ${bytes.size - position} bytes remaining")
+        }
+    }
+
+    fun readUInt8(): Int {
+        checkBounds(1)
+        return bytes[position++].toInt() and 0xFF
+    }
 
     fun readInt16(): Int {
         val msb = readUInt8()
@@ -46,6 +55,7 @@ class ByteArrayReader(
     }
 
     fun readString(length: Int): String {
+        checkBounds(length)
         val chars = CharArray(length)
         for (i in 0 until length) {
             chars[i] = bytes[position + i].toInt().toChar()
@@ -67,6 +77,7 @@ class ByteArrayReader(
     }
 
     fun skip(count: Int) {
+        // Allow skipping beyond bounds for flexibility, but reads will fail
         position += count
     }
 }

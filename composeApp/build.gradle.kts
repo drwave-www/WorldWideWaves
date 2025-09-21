@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    alias(libs.plugins.detekt)
 }
 
 kotlin {
@@ -32,6 +33,18 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(projects.shared)
             implementation(libs.koin.core)
+        }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
+            implementation(libs.mockk.common.v1120)
+        }
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.androidx.compose.ui.test.junit4)
+            implementation(libs.mockk.android.v1120)
         }
     }
 }
@@ -62,8 +75,9 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 25
-        versionName = "v0.21"
+        versionCode = 26
+        versionName = "v0.22"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
@@ -146,6 +160,7 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
         debugImplementation(compose.preview)
+        debugImplementation(libs.androidx.compose.ui.test.manifest)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
         implementation(libs.kotlinx.datetime)
