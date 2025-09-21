@@ -89,8 +89,8 @@ class InputValidationTest {
     }
 
     @Test
-    fun `should demonstrate MIDI parser robustness with oversized track claims`() {
-        // GIVEN: Valid minimal MIDI header but claims huge track size
+    fun `should reject MIDI files with oversized track length claims`() {
+        // GIVEN: Valid minimal MIDI header but claims huge track size that exceeds available data
         val oversizedTrackBytes = byteArrayOf(
             0x4D, 0x54, 0x68, 0x64, // "MThd"
             0x00, 0x00, 0x00, 0x06, // Header length (6)
@@ -99,17 +99,39 @@ class InputValidationTest {
             0x00, 0x60, // 96 ticks per quarter note
 
             0x4D, 0x54, 0x72, 0x6B, // "MTrk"
-            0x7F.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), // Track length (very large)
+            0x7F.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), // Track length (very large: 2147483647 bytes)
             0x00, // Delta time 0
-            0xFF.toByte(), 0x2F, 0x00 // End of track meta event
+            0xFF.toByte(), 0x2F, 0x00 // End of track meta event (only 3 bytes of track data)
         )
 
-        // WHEN/THEN: Current implementation is surprisingly robust and parses successfully
-        // This test documents that the parser currently handles this case without crashing
-        val track = MidiParser.parseMidiBytes(oversizedTrackBytes)
-        assertNotNull(track, "Parser should handle oversized track claims robustly")
-        assertEquals("Parsed MIDI Track", track.name)
-        assertTrue(track.notes.isEmpty(), "Should have no notes for minimal track")
+        // WHEN/THEN: Should reject files with track length claims that exceed available data
+        val exception = assertFailsWith<Exception> {
+            MidiParser.parseMidiBytes(oversizedTrackBytes)
+        }
+        assertContains(exception.message!!, "Invalid track length", ignoreCase = true)
+        assertContains(exception.message!!, "bytes claimed", ignoreCase = true)
+    }
+
+    @Test
+    fun `should reject MIDI files with negative track length`() {
+        // GIVEN: Valid MIDI header but negative track length
+        val negativeTrackLengthBytes = byteArrayOf(
+            0x4D, 0x54, 0x68, 0x64, // "MThd"
+            0x00, 0x00, 0x00, 0x06, // Header length (6)
+            0x00, 0x00, // Format type 0
+            0x00, 0x01, // 1 track
+            0x00, 0x60, // 96 ticks per quarter note
+
+            0x4D, 0x54, 0x72, 0x6B, // "MTrk"
+            0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), // Track length (negative: -1)
+        )
+
+        // WHEN/THEN: Should reject files with negative track length
+        val exception = assertFailsWith<Exception> {
+            MidiParser.parseMidiBytes(negativeTrackLengthBytes)
+        }
+        assertContains(exception.message!!, "Invalid track length", ignoreCase = true)
+        assertContains(exception.message!!, "negative length", ignoreCase = true)
     }
 
     @Test

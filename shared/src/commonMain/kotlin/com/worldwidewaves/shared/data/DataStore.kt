@@ -32,6 +32,19 @@ import okio.Path.Companion.toPath
 
 // ----------------------------
 
+/**
+ * Exception thrown when DataStore operations fail.
+ *
+ * This exception provides clear error information for storage-related failures,
+ * enabling proper error handling and fallback mechanisms in the application.
+ */
+class DataStoreException(
+    message: String,
+    cause: Throwable? = null
+) : Exception(message, cause)
+
+// ----------------------------
+
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
 
 @VisibleForTesting
@@ -48,19 +61,31 @@ private val lock = SynchronizedObject()
  * preferences will be stored.  Each invocation is logged to help diagnosing
  * unexpected multiple initialisations.
  *
+ * **Error Handling**: If DataStore creation fails, logs the error and rethrows the exception.
+ * Callers should implement appropriate fallback mechanisms for storage failures.
+ *
  * @param producePath Lambda returning the absolute path where the DataStore
  *                    file must be created (e.g. `context.filesDir.absolutePath`)
  * @return The singleton [DataStore] of type `Preferences`.
+ * @throws Exception if DataStore creation fails (e.g., filesystem issues, permissions)
  */
 fun createDataStore(producePath: () -> String): DataStore<Preferences> =
     synchronized(lock) {
         if (::dataStore.isInitialized) {
-            Log.v(::createDataStore.name, "DataStore already initialized with path: ${producePath()}")
+            Log.v("DataStore", "DataStore already initialized with path: ${producePath()}")
             return dataStore
         }
-        Log.i(::createDataStore.name, "Creating DataStore with path: ${producePath()}")
-        dataStore = PreferenceDataStoreFactory.createWithPath { producePath().toPath() }
-        dataStore
+
+        try {
+            val path = producePath()
+            Log.i("DataStore", "Creating DataStore with path: $path")
+            dataStore = PreferenceDataStoreFactory.createWithPath { path.toPath() }
+            Log.d("DataStore", "DataStore created successfully")
+            dataStore
+        } catch (e: Exception) {
+            Log.e("DataStore", "Failed to create DataStore", throwable = e)
+            throw DataStoreException("DataStore creation failed: ${e.message}", e)
+        }
     }
 
 /** Returns the platform-specific absolute path used to store the preferences DataStore file. */

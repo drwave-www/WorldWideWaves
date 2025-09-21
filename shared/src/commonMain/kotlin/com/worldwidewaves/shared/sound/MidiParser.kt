@@ -173,6 +173,16 @@ object MidiParser {
 
                 // Read track length
                 val trackLength = reader.readInt32()
+
+                // Validate track length against available data
+                val remainingBytes = bytes.size - reader.position
+                if (trackLength < 0) {
+                    throw Exception("Invalid track length: $trackLength (negative length)")
+                }
+                if (trackLength > remainingBytes) {
+                    throw Exception("Invalid track length: $trackLength bytes claimed but only $remainingBytes bytes available")
+                }
+
                 val trackEndPosition = reader.position + trackLength
 
                 var currentTick = 0L

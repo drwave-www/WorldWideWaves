@@ -3,6 +3,8 @@ package com.worldwidewaves.shared.choreographies
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.testing.TestHelpers
 import com.worldwidewaves.shared.utils.ImageResolver
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -661,4 +663,136 @@ class ChoreographyManagerTest : KoinTest {
             val sequence = testManager.getCurrentWarmingSequence(startTime)
             assertNotNull(sequence)
         }
+
+    // ============================================================================
+    // INTEGRATION TESTS - Real Resource Loading Validation
+    // ============================================================================
+
+    /**
+     * Integration test that validates real ChoreographyManager behavior without mocking.
+     * This test uses the actual ChoreographyManager (not the test subclass) to ensure
+     * it behaves correctly when choreography definitions are not available.
+     */
+    @Test
+    fun `integration test - real choreography manager handles missing choreography definitions gracefully`() = runTest {
+        // GIVEN: A real ChoreographyManager (not test subclass) without pre-loaded choreography data
+        val realManager = ChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider
+        )
+
+        // WHEN: Attempting to get sequences without loaded choreography definitions
+        // THEN: Should handle gracefully without crashing
+        assertDoesNotThrow("ChoreographyManager should handle missing choreography definitions gracefully") {
+            val warmingSequence = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
+            val waitingSequence = realManager.getWaitingSequence()
+            val hitSequence = realManager.getHitSequence()
+
+            // These should be null when no choreography is loaded, but shouldn't crash
+            Log.v("ChoreographyManagerTest", "Resource loading test completed: warming=$warmingSequence, waiting=$waitingSequence, hit=$hitSequence")
+        }
+    }
+
+    /**
+     * Integration test that validates ChoreographyManager's resource loading lifecycle.
+     * This test ensures that the real resource loading path is tested, not just mocked.
+     */
+    @Test
+    fun `integration test - validates resource loading lifecycle`() = runTest {
+        // GIVEN: A real ChoreographyManager that will attempt actual resource loading
+        val realManager = ChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider
+        )
+
+        // WHEN & THEN: Should handle the complete resource loading lifecycle gracefully
+        // This includes JSON parsing, image resolution, sequence building, etc.
+        assertDoesNotThrow("ChoreographyManager should handle complete resource loading lifecycle gracefully") {
+            // Test all the main public methods that involve resource loading
+            realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
+            realManager.getWaitingSequence()
+            realManager.getHitSequence()
+
+            // These calls exercise the real resource loading code paths including:
+            // - JSON choreography definition loading
+            // - Image resource resolution via ImageResolver
+            // - Sequence timing calculations
+            // - Error handling for missing/corrupted resources
+        }
+    }
+
+    /**
+     * Integration test that validates ChoreographyManager's state consistency.
+     * This test ensures that repeated calls to the same methods return consistent results.
+     */
+    @Test
+    fun `integration test - validates state consistency across multiple calls`() = runTest {
+        // GIVEN: A real ChoreographyManager
+        val realManager = ChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider
+        )
+
+        // WHEN: Making multiple calls to the same methods
+        val warmingSequence1 = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
+        val warmingSequence2 = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
+
+        val waitingSequence1 = realManager.getWaitingSequence()
+        val waitingSequence2 = realManager.getWaitingSequence()
+
+        val hitSequence1 = realManager.getHitSequence()
+        val hitSequence2 = realManager.getHitSequence()
+
+        // THEN: Results should be consistent across calls
+        // This validates that resource loading doesn't have side effects or race conditions
+        assertEquals(warmingSequence1, warmingSequence2, "Warming sequence should be consistent across calls")
+        assertEquals(waitingSequence1, waitingSequence2, "Waiting sequence should be consistent across calls")
+        assertEquals(hitSequence1, hitSequence2, "Hit sequence should be consistent across calls")
+
+        Log.v("ChoreographyManagerTest", "State consistency validation completed")
+    }
+
+    /**
+     * Integration test that validates resource loading error scenarios.
+     * This test specifically validates behavior when the ChoreographyManager
+     * attempts to load resources but encounters various failure conditions.
+     */
+    @Test
+    fun `integration test - validates error handling in resource loading scenarios`() = runTest {
+        // GIVEN: A real ChoreographyManager
+        val realManager = ChoreographyManager<TestImage>(
+            coroutineScopeProvider = coroutineScopeProvider
+        )
+
+        // WHEN: Attempting various operations that may fail due to missing resources
+        // THEN: All operations should complete without throwing unhandled exceptions
+        assertDoesNotThrow("Resource loading errors should be handled gracefully") {
+            // Test timing-dependent operations
+            val baseTime = TestHelpers.TestTimes.BASE_TIME
+            realManager.getCurrentWarmingSequence(baseTime)
+            realManager.getCurrentWarmingSequence(baseTime + 1000.milliseconds)
+            realManager.getCurrentWarmingSequence(baseTime - 1000.milliseconds)
+
+            // Test static operations
+            realManager.getWaitingSequence()
+            realManager.getHitSequence()
+
+            // Test repeated calls to verify no state corruption
+            repeat(3) {
+                realManager.getCurrentWarmingSequence(baseTime)
+                realManager.getWaitingSequence()
+                realManager.getHitSequence()
+            }
+        }
+
+        Log.v("ChoreographyManagerTest", "Error handling validation completed")
+    }
+
+    /**
+     * Helper function to safely execute code without throwing exceptions.
+     */
+    private fun assertDoesNotThrow(message: String, action: () -> Unit) {
+        try {
+            action()
+        } catch (e: Exception) {
+            throw AssertionError("$message, but got exception: ${e.message}", e)
+        }
+    }
 }

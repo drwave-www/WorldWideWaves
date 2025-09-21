@@ -14,6 +14,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
+import kotlin.test.fail
 
 /**
  * Tests for DataStore functionality in a KMP-compatible way.
@@ -48,22 +50,24 @@ class DataStoreTest {
     fun `test createDataStore logs initialization message`() {
         // GIVEN: Mock path provider
         val pathProvider = mockk<() -> String>()
-
         every { pathProvider() } returns "/test/path"
 
-        // WHEN: Attempting to create DataStore (may fail in tests)
-        // But we're only verifying the logging behavior
+        // WHEN & THEN: Creating DataStore should call path provider
+        // Note: In test environment, DataStore creation may fail due to platform limitations
+        // but the path provider should still be called and failures should be properly logged
         try {
             createDataStore(pathProvider)
+            // If successful, verify path provider was called
+            verify { pathProvider() }
+        } catch (e: DataStoreException) {
+            // Expected error behavior: DataStore creation failed but was properly logged
+            verify { pathProvider() }
+            assertTrue(e.message?.contains("DataStore creation failed") == true,
+                "DataStoreException should contain proper error message")
         } catch (e: Exception) {
-            // Ignore exceptions from actual DataStore creation
-            // We're only testing the logging behavior
+            // Unexpected error: should be wrapped in DataStoreException
+            fail("Unexpected exception type: ${e::class.simpleName}. Should be wrapped in DataStoreException")
         }
-
-        // THEN: Path provider should be called
-        // The actual logging behavior depends on whether DataStore is already initialized
-        // which can vary between test runs
-        verify { pathProvider() }
     }
 
     @Test
@@ -72,17 +76,38 @@ class DataStoreTest {
         val pathProviderMock = mockk<() -> String>()
         every { pathProviderMock() } returns "/test/path"
 
-        // WHEN: Attempting to create DataStore (may fail in tests)
-        // But we're only verifying that the path provider is called
+        // WHEN & THEN: Creating DataStore should call path provider regardless of success/failure
         try {
             createDataStore(pathProviderMock)
+            verify { pathProviderMock() }
+        } catch (e: DataStoreException) {
+            // Expected: DataStore creation failed but path provider was called
+            verify { pathProviderMock() }
+            assertNotNull(e.cause, "DataStoreException should have a cause")
         } catch (e: Exception) {
-            // Ignore exceptions from actual DataStore creation
-            // We're only testing that the path provider is called
+            // Unexpected: should be wrapped in DataStoreException
+            fail("Exception should be wrapped in DataStoreException: ${e::class.simpleName}")
         }
+    }
 
-        // THEN: Path provider should be called
-        verify { pathProviderMock() }
+    @Test
+    fun `test DataStore error handling with invalid path`() {
+        // GIVEN: Path provider that returns invalid path
+        val pathProvider = mockk<() -> String>()
+        every { pathProvider() } returns ""
+
+        // WHEN & THEN: Should wrap exceptions in DataStoreException
+        try {
+            createDataStore(pathProvider)
+            // If creation somehow succeeds with empty path, that's also acceptable
+        } catch (e: DataStoreException) {
+            // Expected: DataStore creation failed and was properly wrapped
+            assertTrue(e.message?.contains("DataStore creation failed") == true,
+                "Error message should indicate DataStore creation failure")
+            assertNotNull(e.cause, "DataStoreException should have underlying cause")
+        } catch (e: Exception) {
+            fail("Raw exceptions should be wrapped in DataStoreException: ${e::class.simpleName}")
+        }
     }
 
     @Test

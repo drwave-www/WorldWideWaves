@@ -220,3 +220,103 @@
 ---
 
 **This enhanced TODO represents a comprehensive quality improvement plan that addresses not just test quality, but fundamental code correctness, performance optimization, and long-term maintainability through proper documentation.**
+
+---
+
+## PHASE 4: CRITICAL TESTABILITY IMPROVEMENTS (IDENTIFIED THROUGH CODEBASE SCAN)
+
+### Critical Testability Anti-patterns (MUST FIX)
+**Priority: CRITICAL - Blocking effective testing**
+
+#### 21. Fix Global DataStore Singleton Pattern
+- [ ] **MUST**: Replace global singleton DataStore with dependency injection
+  - **File**: `DataStore.kt` lines 51-52, 73-89
+  - **Issue**: Global `lateinit var dataStore` makes tests interfere with each other
+  - **Impact**: Tests cannot run in parallel, state leakage between tests, unreliable test results
+  - **Action**: Refactor to injectable DataStore factory, add test-scoped DataStore creation
+
+#### 22. Fix Koin Dependency Injection Test Pollution
+- [ ] **MUST**: Implement proper DI container isolation for tests
+  - **Files**: Multiple test files using `startKoin`/`stopKoin` patterns
+  - **Issue**: Global Koin context causes test interference and flaky behavior
+  - **Impact**: Tests cannot run in parallel, dependency conflicts, hard to isolate components
+  - **Action**: Create test-scoped DI containers, implement proper teardown mechanisms
+
+#### 23. Fix Non-Testable Object-Based Utilities
+- [ ] **MUST**: Convert static objects to injectable services for better testability
+  - **Files**: `MidiParser.kt` (lines 77+), `WaveformGenerator.kt` (line 33), `MidiResources.kt` (line 34)
+  - **Issue**: Object-based utilities cannot be mocked or tested in isolation
+  - **Impact**: Cannot test error scenarios, file corruption, resource failures
+  - **Action**: Convert to injectable interfaces with mock implementations for testing
+
+#### 24. Fix Platform-Specific Function Testing Gaps
+- [ ] **MUST**: Add abstraction layer for platform-specific functions
+  - **Files**: `Platform.kt` expect functions, `DataStore.kt` expect functions
+  - **Issue**: Platform functions cannot be easily mocked in common tests
+  - **Impact**: File system operations, caching, and platform behavior cannot be reliably tested
+  - **Action**: Create testable wrapper interfaces with mock implementations
+
+### Major Testability Improvements (SHOULD FIX)
+**Priority: MAJOR - Significantly improves testing quality**
+
+#### 25. Implement Constructor Dependency Injection Pattern
+- [ ] **SHOULD**: Replace `by inject()` with constructor injection for better testability
+  - **Files**: `WWWEventWaveWarming.kt`, `WWWEventArea.kt`, `WWWEvents.kt`, `ChoreographyManager.kt`
+  - **Issue**: `by inject()` pattern makes dependencies hidden and hard to mock
+  - **Impact**: Difficult to unit test components in isolation, dependencies not explicit
+  - **Action**: Refactor to constructor injection with default parameter values
+
+#### 26. Add Clock Abstraction for Time-Dependent Tests
+- [ ] **SHOULD**: Ensure all time-dependent code uses injectable IClock interface
+  - **Files**: All components using timing, observations, delays
+  - **Issue**: Some time dependencies might not be using the clock abstraction consistently
+  - **Impact**: Flaky time-dependent tests, difficulty testing timing scenarios
+  - **Action**: Audit and ensure consistent clock abstraction usage throughout
+
+#### 27. Implement Test Factory Pattern for Complex Objects
+- [ ] **SHOULD**: Create test factory utilities for complex object creation
+  - **Files**: Event creation, choreography setup, observer initialization
+  - **Issue**: Complex object setup repeated across multiple tests
+  - **Impact**: Brittle tests, difficult to maintain test data, inconsistent test setup
+  - **Action**: Implement Builder pattern and factory utilities for test objects
+
+#### 28. Add Comprehensive Error Injection Framework
+- [ ] **SHOULD**: Create systematic error injection capabilities for testing
+  - **Files**: Resource loading, network operations, file I/O, parsing operations
+  - **Issue**: Limited ability to test error scenarios and edge cases
+  - **Impact**: Poor error handling coverage, untested failure modes
+  - **Action**: Implement injectable error providers and failure simulation framework
+
+### Testing Infrastructure Improvements (COULD FIX)
+**Priority: COULD - Nice to have for developer experience**
+
+#### 29. Implement Parallel Test Execution Support
+- [ ] **COULD**: Refactor test infrastructure to support parallel execution
+  - **Files**: All test classes with shared state dependencies
+  - **Issue**: Tests must run sequentially due to shared state dependencies
+  - **Impact**: Slower test execution, reduced developer productivity
+  - **Action**: Eliminate shared state, implement test isolation mechanisms
+
+#### 30. Add Performance Testing Framework
+- [ ] **COULD**: Create framework for testing performance characteristics
+  - **Files**: Geographic calculations, resource loading, state updates
+  - **Issue**: No systematic performance regression testing
+  - **Impact**: Performance regressions go undetected
+  - **Action**: Implement benchmarking framework with performance assertions
+
+## TESTABILITY IMPACT MATRIX
+
+### Critical Issues (Items 21-24)
+**Risk**: Test suite unreliability, inability to test core functionality
+**Effort**: High (requires architectural changes)
+**Benefit**: Enables reliable, parallel, comprehensive testing
+
+### Major Issues (Items 25-28)
+**Risk**: Poor test isolation, difficulty testing edge cases
+**Effort**: Medium (refactoring and infrastructure)
+**Benefit**: Improved test quality and maintainability
+
+### Infrastructure Issues (Items 29-30)
+**Risk**: Slow development feedback loop
+**Effort**: Low-Medium (tooling and optimization)
+**Benefit**: Better developer experience and automation

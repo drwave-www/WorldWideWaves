@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.events
 
+import androidx.annotation.VisibleForTesting
+
 /*
  * Copyright 2025 DrWave
  *
@@ -129,42 +131,56 @@ class WWWEventObserver(
     /**
      * Starts observing the wave event if not already started.
      *
-     * Launches a coroutine to initialize the last observed status and progression,
-     * then calls `observeWave` to begin periodic checks.
+     * This method has been simplified to reduce state management complexity:
+     * 1. Always initializes state immediately
+     * 2. Starts continuous observation for active events
+     * 3. Provides better error handling and logging
      */
     fun startObservation() {
         if (observationJob == null) {
             coroutineScopeProvider.launchDefault {
-                Log.v("startObservation", "Starting observation for event $event.id")
+                Log.v("WWWEventObserver", "Starting observation for event ${event.id}")
 
-                // Initialize state with current values
-                val currentStatus = event.getStatus()
-                val currentProgression = try {
-                    event.wave.getProgression()
-                } catch (e: Throwable) {
-                    Log.e(
-                        tag = WWWEventWave::class.simpleName!!,
-                        message = "Error initializing progression: $e",
-                    )
-                    0.0
-                }
+                try {
+                    // Initialize state with current values - enhanced error handling
+                    val currentStatus = event.getStatus()
+                    val currentProgression = try {
+                        event.wave.getProgression()
+                    } catch (e: Throwable) {
+                        Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
+                        0.0
+                    }
 
-                // Initialize ALL state values, including userIsInArea, regardless of observation status
-                updateStates(currentProgression, currentStatus)
+                    Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
 
-                // Start observation if event is running or about to start
-                // Accepted as the application will not be let running for days (isSoon includes a delay)
-                if (event.isRunning() || (event.isSoon() && event.isNearTime())) {
-                    observationJob =
-                        createObservationFlow()
-                            .flowOn(Dispatchers.IO)
-                            .catch { e ->
-                                Log.e("observeWave", "Error in observation flow: $e")
-                            }.onEach { (progressionValue, status) ->
-                                updateStates(progressionValue, status)
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
+                    // Always initialize ALL state values - this ensures consistent state
+                    updateStates(currentProgression, currentStatus)
+
+                    // Check if we should start continuous observation
+                    val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
+                    Log.v("WWWEventObserver", "Should start continuous observation: $shouldObserve")
+
+                    if (shouldObserve) {
+                        Log.i("WWWEventObserver", "Starting continuous observation flow for event ${event.id}")
+                        observationJob =
+                            createObservationFlow()
+                                .flowOn(Dispatchers.IO)
+                                .catch { e ->
+                                    Log.e("WWWEventObserver", "Error in observation flow for event ${event.id}: $e")
+                                    // Don't propagate the error - just log it and continue
+                                }.onEach { (progressionValue, status) ->
+                                    Log.v("WWWEventObserver", "Observation update: progression=$progressionValue, status=$status")
+                                    updateStates(progressionValue, status)
+                                }.launchIn(coroutineScopeProvider.scopeDefault())
+                    } else {
+                        Log.v("WWWEventObserver", "Event ${event.id} not ready for continuous observation")
+                    }
+                } catch (e: Exception) {
+                    Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
                 }
             }
+        } else {
+            Log.v("WWWEventObserver", "Observation already running for event ${event.id}")
         }
     }
 
@@ -219,11 +235,20 @@ class WWWEventObserver(
 
     /**
      * Updates all state flows based on the current event state.
+     *
+     * This method validates state transitions and provides detailed logging
+     * to help diagnose state management issues.
      */
     private suspend fun updateStates(
         progression: Double,
         status: Status,
     ) {
+        Log.v("WWWEventObserver", "updateStates called: progression=$progression, status=$status, eventId=${event.id}")
+
+        // Validate input parameters
+        if (progression < 0.0 || progression > 100.0) {
+            Log.w("WWWEventObserver", "Invalid progression value: $progression (should be 0-100)")
+        }
         // Update the main state flows
         _progression.updateIfChanged(progression)
         _eventStatus.updateIfChanged(status)
@@ -258,16 +283,77 @@ class WWWEventObserver(
         val now = clock.now()
         _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
 
-        // User in area
+        // User in area - enhanced with validation and error handling
         val userPosition = event.wave.getUserPosition()
+        Log.v("WWWEventObserver", "Area detection: userPosition=$userPosition")
+
         if (userPosition != null) {
-            _userIsInArea.updateIfChanged(event.area.isPositionWithin(userPosition))
+            try {
+                val isInArea = event.area.isPositionWithin(userPosition)
+                Log.v("WWWEventObserver", "Area detection result: isInArea=$isInArea for position=$userPosition")
+                _userIsInArea.updateIfChanged(isInArea)
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error checking if user is in area", throwable = e)
+                // On error, assume user is not in area for safety
+                _userIsInArea.updateIfChanged(false)
+            }
         } else {
+            Log.v("WWWEventObserver", "No user position available, setting userIsInArea=false")
             _userIsInArea.updateIfChanged(false)
         }
 
         _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
         _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
+
+        // Log final state for debugging
+        Log.v("WWWEventObserver", "State updated - userIsInArea=${_userIsInArea.value}, " +
+            "progression=${_progression.value}, status=${_eventStatus.value}")
+    }
+
+    /**
+     * Validates the current state consistency for debugging purposes.
+     * This method helps identify state management issues during development.
+     */
+    @VisibleForTesting
+    suspend fun validateStateConsistency(): List<String> {
+        val issues = mutableListOf<String>()
+
+        try {
+            // Check progression bounds
+            val progression = _progression.value
+            if (progression < 0.0 || progression > 100.0) {
+                issues.add("Progression out of bounds: $progression (should be 0-100)")
+            }
+
+            // Check user position vs area consistency
+            val userPosition = event.wave.getUserPosition()
+            val observerUserInArea = _userIsInArea.value
+
+            if (userPosition != null) {
+                val actualUserInArea = event.area.isPositionWithin(userPosition)
+                if (actualUserInArea != observerUserInArea) {
+                    issues.add("userIsInArea inconsistency: observer=$observerUserInArea, actual=$actualUserInArea")
+                }
+            } else if (observerUserInArea) {
+                issues.add("userIsInArea=true but no user position available")
+            }
+
+            // Check status consistency
+            val observerStatus = _eventStatus.value
+            val actualStatus = event.getStatus()
+            if (observerStatus != actualStatus) {
+                issues.add("Status inconsistency: observer=$observerStatus, actual=$actualStatus")
+            }
+
+        } catch (e: Exception) {
+            issues.add("Error during state validation: ${e.message}")
+        }
+
+        if (issues.isNotEmpty()) {
+            Log.w("WWWEventObserver", "State validation issues for event ${event.id}: ${issues.joinToString("; ")}")
+        }
+
+        return issues
     }
 
     /**
