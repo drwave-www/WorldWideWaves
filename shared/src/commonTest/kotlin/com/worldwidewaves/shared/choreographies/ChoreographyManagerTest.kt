@@ -153,7 +153,7 @@ class ChoreographyManagerTest : KoinTest {
     }
 
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         MockKAnnotations.init(this)
 
         // Setup Koin DI
@@ -193,7 +193,7 @@ class ChoreographyManagerTest : KoinTest {
     @Test
     fun `test getCurrentWarmingSequence returns correct sequence based on elapsed time`() =
         runTest {
-            // Create warming sequences for testing
+            // GIVEN: Two warming sequences with different durations and a test manager
             val warmingSequence1 =
                 ChoreographySequence(
                     frames = "sprites/warming1.png",
@@ -216,7 +216,6 @@ class ChoreographyManagerTest : KoinTest {
                     duration = 2.seconds,
                 )
 
-            // Create test manager with our test sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
                     coroutineScopeProvider = coroutineScopeProvider,
@@ -224,21 +223,22 @@ class ChoreographyManagerTest : KoinTest {
                 )
             testManager.initializeWithTestData()
 
-            // Set up clock to return specific times
             val startTime = Instant.fromEpochMilliseconds(1000)
 
-            // Time within first warming sequence (0.5 seconds in)
+            // WHEN: Clock shows time within first warming sequence (0.5 seconds elapsed)
             every { clock.now() } returns Instant.fromEpochMilliseconds(1500)
 
+            // THEN: Should return first warming sequence with correct properties
             val sequence1 = testManager.getCurrentWarmingSequence(startTime)
             assertNotNull(sequence1)
             assertEquals(100, sequence1.frameWidth)
             assertEquals(100, sequence1.frameHeight)
             assertEquals(3, sequence1.frameCount)
 
-            // Time within second warming sequence (2.0 seconds in)
+            // WHEN: Clock shows time within second warming sequence (2.0 seconds elapsed)
             every { clock.now() } returns Instant.fromEpochMilliseconds(3000)
 
+            // THEN: Should return second warming sequence with correct properties
             val sequence2 = testManager.getCurrentWarmingSequence(startTime)
             assertNotNull(sequence2)
             assertEquals(100, sequence2.frameWidth)
