@@ -118,6 +118,9 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  * }
  * ```
  *
+ * **Note**: The above example assumes execution within a suspend context.
+ * In practice, this cleanup happens automatically within the observation coroutine.
+ *
  * **Manual Cleanup (Optional):**
  * ```kotlin
  * observer.stopObservation() // Explicit cleanup if needed

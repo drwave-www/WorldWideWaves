@@ -312,8 +312,12 @@ class WWWEventObserverTest : KoinTest {
         println("DEBUG: Expected position: ${TestHelpers.TestLocations.PARIS}")
 
         // Debug: Check event status and timing conditions
-        println("DEBUG: Event status: ${event.getStatus()}")
-        println("DEBUG: Event isRunning: ${event.isRunning()}")
+        val eventStatus = event.getStatus()
+        val eventIsRunning = event.isRunning()
+        val eventIsDone = event.isDone()
+        println("DEBUG: Event status: $eventStatus")
+        println("DEBUG: Event isRunning: $eventIsRunning")
+        println("DEBUG: Event isDone: $eventIsDone")
         println("DEBUG: Event isSoon: ${event.isSoon()}")
         println("DEBUG: Event isNearTime: ${event.isNearTime()}")
 

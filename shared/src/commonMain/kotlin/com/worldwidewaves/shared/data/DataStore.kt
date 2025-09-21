@@ -90,10 +90,13 @@ class DefaultDataStoreFactory : DataStoreFactory {
 @VisibleForTesting
 class TestDataStoreFactory : DataStoreFactory {
     override fun create(producePath: () -> String): DataStore<Preferences> {
-        Log.v("DataStore", "Creating test DataStore for path: ${producePath()}")
-        return PreferenceDataStoreFactory.createWithPath {
-            // Create unique temporary path for each test
-            "/tmp/test_datastore_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb".toPath()
+        try {
+            val testPath = "/tmp/test_datastore_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb"
+            Log.v("DataStore", "Creating test DataStore for path: ${producePath()}, actual test path: $testPath")
+            return PreferenceDataStoreFactory.createWithPath { testPath.toPath() }
+        } catch (e: Exception) {
+            Log.e("DataStore", "Failed to create test DataStore for path: ${producePath()}", throwable = e)
+            throw DataStoreException("Test DataStore creation failed: ${e.message}", e)
         }
     }
 }
