@@ -285,10 +285,12 @@ class DataStoreEnhancedTest {
 
         try {
             // First call should create DataStore
+            @Suppress("DEPRECATION")
             createDataStore(provider1)
             verify { provider1() }
 
             // Second call with same provider should return existing
+            @Suppress("DEPRECATION")
             createDataStore(provider1)
             // Should still call the path provider to check the path
             verify(atLeast = 2) { provider1() }

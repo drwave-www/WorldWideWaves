@@ -31,6 +31,7 @@ import com.worldwidewaves.shared.data.HiddenMapsStore
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.di.testDatastoreModule
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -70,6 +71,7 @@ class KoinDependencyInjectionTest : KoinTest {
 
         val testPlatformModule = module {
             single<WWWPlatform> { WWWPlatform("test") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_${System.currentTimeMillis()}.preferences_pb" } }
         }
 
@@ -196,6 +198,7 @@ class KoinDependencyInjectionTest : KoinTest {
         // Create new configuration with different platform
         val altPlatformModule = module {
             single<WWWPlatform> { WWWPlatform("alternative") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_alt_${System.currentTimeMillis()}.preferences_pb" } }
         }
 
@@ -212,6 +215,7 @@ class KoinDependencyInjectionTest : KoinTest {
         // Restore original for tearDown
         val testPlatformModule = module {
             single<WWWPlatform> { WWWPlatform("test") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_restore_${System.currentTimeMillis()}.preferences_pb" } }
         }
 
@@ -251,6 +255,7 @@ class KoinDependencyInjectionTest : KoinTest {
         // Restore complete setup
         val testPlatformModule = module {
             single<WWWPlatform> { WWWPlatform("test") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_restore2_${System.currentTimeMillis()}.preferences_pb" } }
         }
 
@@ -294,6 +299,7 @@ class KoinDependencyInjectionTest : KoinTest {
 
         val namedModule = module {
             single<WWWPlatform> { WWWPlatform("test") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_named_${System.currentTimeMillis()}.preferences_pb" } }
 
             single(named("primary")) { "Primary Config" }
@@ -316,6 +322,7 @@ class KoinDependencyInjectionTest : KoinTest {
         // Restore original setup
         val testPlatformModule = module {
             single<WWWPlatform> { WWWPlatform("test") }
+            @Suppress("DEPRECATION")
             single { createDataStore { "/tmp/test_koin_restore3_${System.currentTimeMillis()}.preferences_pb" } }
         }
 

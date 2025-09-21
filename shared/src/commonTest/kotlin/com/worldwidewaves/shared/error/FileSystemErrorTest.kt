@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.error
  */
 
 import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.data.TestDataStoreFactory
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
@@ -97,6 +98,7 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { invalidPath }
+                @Suppress("DEPRECATION")
                 createDataStore(pathProvider)
 
                 // If creation succeeds, system handled the invalid path
@@ -125,6 +127,7 @@ class FileSystemErrorTest : KoinTest {
             val pathProvider = { "/tmp/test_disk_full_datastore.pb" }
 
             // Try to create DataStore - may fail due to disk space or permission issues
+            @Suppress("DEPRECATION")
             createDataStore(pathProvider)
 
             // If creation succeeds, system can handle the scenario
@@ -160,7 +163,9 @@ class FileSystemErrorTest : KoinTest {
             val pathProvider1 = { testPath }
             val pathProvider2 = { testPath }
 
+            @Suppress("DEPRECATION")
             val dataStore1 = createDataStore(pathProvider1)
+            @Suppress("DEPRECATION")
             val dataStore2 = createDataStore(pathProvider2)
 
             // THEN: System should handle concurrent access
@@ -187,6 +192,7 @@ class FileSystemErrorTest : KoinTest {
         try {
             // WHEN: Attempt operations that might encounter corruption
             val pathProvider = { "/tmp/potentially_corrupt_datastore.pb" }
+            @Suppress("DEPRECATION")
             createDataStore(pathProvider)
 
             // If successful, system handles potential corruption
@@ -227,6 +233,7 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { restrictedPath }
+                @Suppress("DEPRECATION")
                 createDataStore(pathProvider)
 
                 // If creation succeeds, system has appropriate permissions
@@ -261,12 +268,14 @@ class FileSystemErrorTest : KoinTest {
             try {
                 // Try primary location first
                 val primaryPathProvider = { primaryPath }
+                @Suppress("DEPRECATION")
                 createDataStore(primaryPathProvider)
 
             } catch (e: Exception) {
                 // THEN: Should use fallback mechanism
                 try {
                     val fallbackPathProvider = { fallbackPath }
+                    @Suppress("DEPRECATION")
                     createDataStore(fallbackPathProvider)
                     fallbackMechanismUsed = true
 
@@ -301,6 +310,7 @@ class FileSystemErrorTest : KoinTest {
             // Initial failure simulation (path temporarily unavailable)
             try {
                 val pathProvider = { "/invalid/temp/unavailable/datastore.pb" }
+                @Suppress("DEPRECATION")
                 createDataStore(pathProvider)
             } catch (e: Exception) {
                 // Expected failure due to unavailability
@@ -308,6 +318,7 @@ class FileSystemErrorTest : KoinTest {
 
             // THEN: Recovery attempt with valid path should succeed
             val recoveryPathProvider = { testPath }
+            @Suppress("DEPRECATION")
             createDataStore(recoveryPathProvider)
             recoverySuccessful = true
 
@@ -331,6 +342,7 @@ class FileSystemErrorTest : KoinTest {
             val operations = (1..5).map { index ->
                 try {
                     val pathProvider = { "/tmp/stress_test_${index}_datastore.pb" }
+                    @Suppress("DEPRECATION")
                     createDataStore(pathProvider)
                     true
                 } catch (e: Exception) {
@@ -368,6 +380,7 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { path }
+                @Suppress("DEPRECATION")
                 createDataStore(pathProvider)
 
                 // If successful, system handled the scenario
