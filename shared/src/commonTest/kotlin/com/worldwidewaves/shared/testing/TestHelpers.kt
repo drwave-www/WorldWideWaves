@@ -27,7 +27,8 @@ import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.WWWEventMap
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEventWaveLinear
-import com.worldwidewaves.shared.utils.GeoPosition
+import com.worldwidewaves.shared.events.utils.Position
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.time.Duration
@@ -35,6 +36,8 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
 
 /**
  * Comprehensive test helpers for creating consistent test data and assertions.
@@ -45,14 +48,14 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 object TestHelpers {
 
-    // Standard test locations
+    // Standard test locations using the existing Position class
     object TestLocations {
-        val PARIS = GeoPosition(48.8566, 2.3522)
-        val LONDON = GeoPosition(51.5074, -0.1278)
-        val NEW_YORK = GeoPosition(40.7128, -74.0060)
-        val TOKYO = GeoPosition(35.6762, 139.6503)
-        val SYDNEY = GeoPosition(-33.8688, 151.2093)
-        val SAO_PAULO = GeoPosition(-23.5505, -46.6333)
+        val PARIS = Position(48.8566, 2.3522)
+        val LONDON = Position(51.5074, -0.1278)
+        val NEW_YORK = Position(40.7128, -74.0060)
+        val TOKYO = Position(35.6762, 139.6503)
+        val SYDNEY = Position(-33.8688, 151.2093)
+        val SAO_PAULO = Position(-23.5505, -46.6333)
     }
 
     // Standard test times
@@ -76,20 +79,17 @@ object TestHelpers {
         startHour: String = "18:00",
         instagramAccount: String = "worldwidewaves",
         instagramHashtag: String = "#WorldWideWaves",
-        userPosition: GeoPosition? = TestLocations.PARIS,
+        userPosition: Position? = TestLocations.PARIS,
         waveDuration: Duration = 2.hours,
         waveSpeed: Double = 50.0, // km/h
         area: WWWEventArea? = null,
-        map: WWWEventMap? = null,
-        configureWave: (WWWEventWave) -> Unit = {}
+        map: WWWEventMap? = null
     ): WWWEvent {
         val mockArea = area ?: createMockArea(userPosition = userPosition)
         val mockMap = map ?: createMockMap()
-        val waveDefinition = createMockWaveDefinition(
+        val waveDefinition = createSimpleWaveDefinition(
             duration = waveDuration,
-            speed = waveSpeed,
-            userPosition = userPosition,
-            configureWave = configureWave
+            speed = waveSpeed
         )
 
         return WWWEvent(
@@ -115,12 +115,13 @@ object TestHelpers {
         id: String = "running_event",
         startedAgo: Duration = 30.minutes,
         totalDuration: Duration = 2.hours,
-        userPosition: GeoPosition? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val startTime = now - startedAgo
-        val startDateTime = startTime.toString().substring(0, 10) // Extract date part
-        val startHour = startTime.toString().substring(11, 16) // Extract hour:minute part
+        val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
             id = id,
@@ -137,12 +138,13 @@ object TestHelpers {
     fun createFutureEvent(
         id: String = "future_event",
         startsIn: Duration = 5.hours,
-        userPosition: GeoPosition? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val startTime = now + startsIn
-        val startDateTime = startTime.toString().substring(0, 10)
-        val startHour = startTime.toString().substring(11, 16)
+        val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
             id = id,
@@ -159,13 +161,14 @@ object TestHelpers {
         id: String = "completed_event",
         endedAgo: Duration = 1.hours,
         totalDuration: Duration = 30.minutes,
-        userPosition: GeoPosition? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val endTime = now - endedAgo
         val startTime = endTime - totalDuration
-        val startDateTime = startTime.toString().substring(0, 10)
-        val startHour = startTime.toString().substring(11, 16)
+        val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
             id = id,
@@ -180,7 +183,7 @@ object TestHelpers {
      * Creates a mock event area with configurable position containment.
      */
     fun createMockArea(
-        userPosition: GeoPosition? = null,
+        userPosition: Position? = null,
         isUserInArea: Boolean = true
     ): WWWEventArea {
         val mockArea = mockk<WWWEventArea>(relaxed = true)
@@ -188,9 +191,9 @@ object TestHelpers {
         every { mockArea.setRelatedEvent(any()) } returns Unit
 
         if (userPosition != null) {
-            every { mockArea.isPositionWithin(userPosition) } returns isUserInArea
+            coEvery { mockArea.isPositionWithin(userPosition) } returns isUserInArea
         }
-        every { mockArea.isPositionWithin(any()) } returns isUserInArea
+        coEvery { mockArea.isPositionWithin(any()) } returns isUserInArea
 
         return mockArea
     }
@@ -206,31 +209,19 @@ object TestHelpers {
     }
 
     /**
-     * Creates a mock wave definition with configurable behavior.
+     * Creates a simple real wave definition using WWWEventWaveLinear.
      */
-    fun createMockWaveDefinition(
+    fun createSimpleWaveDefinition(
         duration: Duration = 2.hours,
-        speed: Double = 50.0,
-        userPosition: GeoPosition? = null,
-        progression: Double = 0.0,
-        configureWave: (WWWEventWave) -> Unit = {}
+        speed: Double = 50.0
     ): WWWEvent.WWWWaveDefinition {
-        val mockWave = createMockWave(
-            duration = duration,
+        val linearWave = WWWEventWaveLinear(
             speed = speed,
-            userPosition = userPosition,
-            progression = progression,
-            configureWave = configureWave
+            direction = WWWEventWave.Direction.EAST,
+            approxDuration = duration.inWholeMinutes.toInt()
         )
 
-        val mockLinear = mockk<WWWEventWaveLinear>(relaxed = true)
-        every { mockLinear.validationErrors() } returns null
-        every { mockLinear.setRelatedEvent<WWWEventWave>(any()) } answers {
-            // Return the mock wave instead of the linear wave
-            mockWave
-        }
-
-        return WWWEvent.WWWWaveDefinition(linear = mockLinear)
+        return WWWEvent.WWWWaveDefinition(linear = linearWave)
     }
 
     /**
@@ -239,28 +230,26 @@ object TestHelpers {
     fun createMockWave(
         duration: Duration = 2.hours,
         speed: Double = 50.0,
-        userPosition: GeoPosition? = null,
+        userPosition: Position? = null,
         progression: Double = 0.0,
         timeBeforeHit: Duration? = null,
         hasBeenHit: Boolean = false,
         userPositionRatio: Double? = null,
-        hitDateTime: Instant? = null,
-        configureWave: (WWWEventWave) -> Unit = {}
+        hitDateTime: Instant? = null
     ): WWWEventWave {
         val mockWave = mockk<WWWEventWave>(relaxed = true)
 
-        every { mockWave.getWaveDuration() } returns duration
-        every { mockWave.getApproxDuration() } returns duration
-        every { mockWave.getLiteralSpeed() } returns "${speed.toInt()} km/h"
-        every { mockWave.getProgression() } returns progression
-        every { mockWave.getUserPosition() } returns userPosition
-        every { mockWave.timeBeforeUserHit() } returns timeBeforeHit
-        every { mockWave.hasUserBeenHitInCurrentPosition() } returns hasBeenHit
-        every { mockWave.userPositionToWaveRatio() } returns userPositionRatio
-        every { mockWave.userHitDateTime() } returns hitDateTime
-        every { mockWave.setRelatedEvent<WWWEventWave>(any()) } returns Unit
+        coEvery { mockWave.getWaveDuration() } returns duration
+        coEvery { mockWave.getApproxDuration() } returns duration
+        coEvery { mockWave.getLiteralSpeed() } returns "${speed.toInt()} km/h"
+        coEvery { mockWave.getProgression() } returns progression
+        coEvery { mockWave.getUserPosition() } returns userPosition
+        coEvery { mockWave.timeBeforeUserHit() } returns timeBeforeHit
+        coEvery { mockWave.hasUserBeenHitInCurrentPosition() } returns hasBeenHit
+        coEvery { mockWave.userPositionToWaveRatio() } returns userPositionRatio
+        coEvery { mockWave.userHitDateTime() } returns hitDateTime
+        every { mockWave.setRelatedEvent<WWWEventWave>(any()) } returns mockWave
 
-        configureWave(mockWave)
         return mockWave
     }
 
@@ -275,51 +264,28 @@ object TestHelpers {
     )
 
     /**
-     * Performance testing utilities for measuring execution time.
-     */
-    object PerformanceHelpers {
-        inline fun <T> measureTime(operation: () -> T): Pair<T, Duration> {
-            val start = TestTimes.BASE_TIME
-            val result = operation()
-            val end = TestTimes.BASE_TIME + 100.minutes // Simulated end time
-            return Pair(result, end - start)
-        }
-
-        fun simulateHeavyLoad(events: List<IWWWEvent>): List<IWWWEvent> {
-            // Simulate processing load for performance testing
-            return events.map { event ->
-                // Simulate heavy computation
-                repeat(1000) {
-                    event.id.hashCode()
-                }
-                event
-            }
-        }
-    }
-
-    /**
      * Geographic calculation testing utilities.
      */
     object GeoHelpers {
         fun createPolygonPoints(
-            center: GeoPosition,
+            center: Position,
             radius: Double = 0.01, // Degrees
             sides: Int = 6
-        ): List<GeoPosition> {
-            val points = mutableListOf<GeoPosition>()
+        ): List<Position> {
+            val points = mutableListOf<Position>()
             val angleStep = 360.0 / sides
 
             for (i in 0 until sides) {
                 val angle = Math.toRadians(i * angleStep)
                 val lat = center.latitude + radius * kotlin.math.cos(angle)
                 val lng = center.longitude + radius * kotlin.math.sin(angle)
-                points.add(GeoPosition(lat, lng))
+                points.add(Position(lat, lng))
             }
 
             return points
         }
 
-        fun calculateDistance(pos1: GeoPosition, pos2: GeoPosition): Double {
+        fun calculateDistance(pos1: Position, pos2: Position): Double {
             // Simplified Haversine formula for testing
             val dLat = Math.toRadians(pos2.latitude - pos1.latitude)
             val dLng = Math.toRadians(pos2.longitude - pos1.longitude)
@@ -368,7 +334,7 @@ object TestHelpers {
         }
 
         fun assertPositionInBounds(
-            position: GeoPosition,
+            position: Position,
             minLat: Double = -90.0,
             maxLat: Double = 90.0,
             minLng: Double = -180.0,

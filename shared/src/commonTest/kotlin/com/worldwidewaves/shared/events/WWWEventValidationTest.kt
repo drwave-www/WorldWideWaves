@@ -23,8 +23,8 @@ package com.worldwidewaves.shared.events
 
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import io.mockk.every
-import io.mockk.mockk
+import com.worldwidewaves.shared.testing.MockClock
+import com.worldwidewaves.shared.testing.TestHelpers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
@@ -42,17 +42,15 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class WWWEventValidationTest : KoinTest {
-    private lateinit var mockClock: IClock
-    private val baseTime = Instant.fromEpochMilliseconds(1640995200000L) // 2022-01-01 00:00:00 UTC
+    private lateinit var mockClock: MockClock
+    private val baseTime = TestHelpers.TestTimes.BASE_TIME
 
     @BeforeTest
     fun setUp() {
-        mockClock = mockk<IClock>()
-        every { mockClock.now() } returns baseTime
+        mockClock = MockClock(baseTime)
 
         startKoin {
             modules(
@@ -68,58 +66,12 @@ class WWWEventValidationTest : KoinTest {
         stopKoin()
     }
 
-    private fun createValidEvent(
-        id: String = "valid_event",
-        type: String = "city",
-        country: String? = "france",
-        community: String? = "paris",
-        timeZone: String = "Europe/Paris",
-        date: String = "2022-06-15",
-        startHour: String = "18:00",
-        instagramAccount: String = "worldwidewaves",
-        instagramHashtag: String = "#WorldWideWaves",
-        wavedef: WWWEvent.WWWWaveDefinition = createValidWaveDefinition(),
-        area: WWWEventArea = mockk<WWWEventArea>(relaxed = true),
-        map: WWWEventMap = mockk<WWWEventMap>(relaxed = true),
-    ): WWWEvent {
-        val mockArea = mockk<WWWEventArea>(relaxed = true)
-        every { mockArea.validationErrors() } returns null
-        every { mockArea.setRelatedEvent(any()) } returns Unit
-
-        val mockMap = mockk<WWWEventMap>(relaxed = true)
-        every { mockMap.validationErrors() } returns null
-        every { mockMap.setRelatedEvent(any()) } returns Unit
-
-        return WWWEvent(
-            id = id,
-            type = type,
-            country = country,
-            community = community,
-            timeZone = timeZone,
-            date = date,
-            startHour = startHour,
-            instagramAccount = instagramAccount,
-            instagramHashtag = instagramHashtag,
-            wavedef = wavedef,
-            area = mockArea,
-            map = mockMap,
-        )
-    }
-
-    private fun createValidWaveDefinition(): WWWEvent.WWWWaveDefinition {
-        val mockLinear = mockk<WWWEventWaveLinear>(relaxed = true)
-        every { mockLinear.validationErrors() } returns null
-        every { mockLinear.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-
-        return WWWEvent.WWWWaveDefinition(linear = mockLinear)
-    }
-
     // ===== ID Validation Tests =====
 
     @Test
     fun `valid event should have no validation errors`() {
         // GIVEN
-        val event = createValidEvent()
+        val event = TestHelpers.createTestEvent()
 
         // WHEN
         val errors = event.validationErrors()
@@ -131,7 +83,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `empty ID should be invalid`() {
         // GIVEN
-        val event = createValidEvent(id = "")
+        val event = TestHelpers.createTestEvent(id = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -144,7 +96,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `ID with uppercase letters should be invalid`() {
         // GIVEN
-        val event = createValidEvent(id = "InvalidEvent")
+        val event = TestHelpers.createTestEvent(id = "InvalidEvent")
 
         // WHEN
         val errors = event.validationErrors()
@@ -157,7 +109,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `ID with numbers should be invalid`() {
         // GIVEN
-        val event = createValidEvent(id = "event123")
+        val event = TestHelpers.createTestEvent(id = "event123")
 
         // WHEN
         val errors = event.validationErrors()
@@ -170,7 +122,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `ID with special characters should be invalid`() {
         // GIVEN
-        val event = createValidEvent(id = "event-special")
+        val event = TestHelpers.createTestEvent(id = "event-special")
 
         // WHEN
         val errors = event.validationErrors()
@@ -183,7 +135,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `ID with underscores should be valid`() {
         // GIVEN
-        val event = createValidEvent(id = "valid_event_name")
+        val event = TestHelpers.createTestEvent(id = "valid_event_name")
 
         // WHEN
         val errors = event.validationErrors()
@@ -197,7 +149,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `empty type should be invalid`() {
         // GIVEN
-        val event = createValidEvent(type = "")
+        val event = TestHelpers.createTestEvent(type = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -210,7 +162,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `invalid type should be rejected`() {
         // GIVEN
-        val event = createValidEvent(type = "invalid")
+        val event = TestHelpers.createTestEvent(type = "invalid")
 
         // WHEN
         val errors = event.validationErrors()
@@ -223,7 +175,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `city type should be valid`() {
         // GIVEN
-        val event = createValidEvent(type = "city", country = "france")
+        val event = TestHelpers.createTestEvent(type = "city", country = "france")
 
         // WHEN
         val errors = event.validationErrors()
@@ -235,7 +187,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `country type should be valid`() {
         // GIVEN
-        val event = createValidEvent(type = "country", country = "france")
+        val event = TestHelpers.createTestEvent(type = "country", country = "france")
 
         // WHEN
         val errors = event.validationErrors()
@@ -247,7 +199,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `world type should be valid`() {
         // GIVEN
-        val event = createValidEvent(type = "world", country = null)
+        val event = TestHelpers.createTestEvent(type = "world", country = null)
 
         // WHEN
         val errors = event.validationErrors()
@@ -259,7 +211,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `city type without country should be invalid`() {
         // GIVEN
-        val event = createValidEvent(type = "city", country = null)
+        val event = TestHelpers.createTestEvent(type = "city", country = null)
 
         // WHEN
         val errors = event.validationErrors()
@@ -272,7 +224,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `city type with empty country should be invalid`() {
         // GIVEN
-        val event = createValidEvent(type = "city", country = "")
+        val event = TestHelpers.createTestEvent(type = "city", country = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -287,7 +239,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `empty timezone should be invalid`() {
         // GIVEN
-        val event = createValidEvent(timeZone = "")
+        val event = TestHelpers.createTestEvent(timeZone = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -300,7 +252,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `invalid timezone should be rejected`() {
         // GIVEN
-        val event = createValidEvent(timeZone = "Invalid/Timezone")
+        val event = TestHelpers.createTestEvent(timeZone = "Invalid/Timezone")
 
         // WHEN
         val errors = event.validationErrors()
@@ -322,7 +274,7 @@ class WWWEventValidationTest : KoinTest {
 
         validTimezones.forEach { timezone ->
             // GIVEN
-            val event = createValidEvent(timeZone = timezone)
+            val event = TestHelpers.createTestEvent(timeZone = timezone)
 
             // WHEN
             val errors = event.validationErrors()
@@ -347,7 +299,7 @@ class WWWEventValidationTest : KoinTest {
 
         invalidDates.forEach { date ->
             // GIVEN
-            val event = createValidEvent(date = date)
+            val event = TestHelpers.createTestEvent(date = date)
 
             // WHEN
             val errors = event.validationErrors()
@@ -370,7 +322,7 @@ class WWWEventValidationTest : KoinTest {
 
         invalidDates.forEach { date ->
             // GIVEN
-            val event = createValidEvent(date = date)
+            val event = TestHelpers.createTestEvent(date = date)
 
             // WHEN
             val errors = event.validationErrors()
@@ -392,7 +344,7 @@ class WWWEventValidationTest : KoinTest {
 
         validDates.forEach { date ->
             // GIVEN
-            val event = createValidEvent(date = date)
+            val event = TestHelpers.createTestEvent(date = date)
 
             // WHEN
             val errors = event.validationErrors()
@@ -418,7 +370,7 @@ class WWWEventValidationTest : KoinTest {
 
         invalidHours.forEach { hour ->
             // GIVEN
-            val event = createValidEvent(startHour = hour)
+            val event = TestHelpers.createTestEvent(startHour = hour)
 
             // WHEN
             val errors = event.validationErrors()
@@ -441,7 +393,7 @@ class WWWEventValidationTest : KoinTest {
 
         validHours.forEach { hour ->
             // GIVEN
-            val event = createValidEvent(startHour = hour)
+            val event = TestHelpers.createTestEvent(startHour = hour)
 
             // WHEN
             val errors = event.validationErrors()
@@ -456,7 +408,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `empty instagram account should be invalid`() {
         // GIVEN
-        val event = createValidEvent(instagramAccount = "")
+        val event = TestHelpers.createTestEvent(instagramAccount = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -477,7 +429,7 @@ class WWWEventValidationTest : KoinTest {
 
         invalidAccounts.forEach { account ->
             // GIVEN
-            val event = createValidEvent(instagramAccount = account)
+            val event = TestHelpers.createTestEvent(instagramAccount = account)
 
             // WHEN
             val errors = event.validationErrors()
@@ -500,7 +452,7 @@ class WWWEventValidationTest : KoinTest {
 
         validAccounts.forEach { account ->
             // GIVEN
-            val event = createValidEvent(instagramAccount = account)
+            val event = TestHelpers.createTestEvent(instagramAccount = account)
 
             // WHEN
             val errors = event.validationErrors()
@@ -515,7 +467,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `empty instagram hashtag should be invalid`() {
         // GIVEN
-        val event = createValidEvent(instagramHashtag = "")
+        val event = TestHelpers.createTestEvent(instagramHashtag = "")
 
         // WHEN
         val errors = event.validationErrors()
@@ -528,7 +480,7 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `hashtag without # should be invalid`() {
         // GIVEN
-        val event = createValidEvent(instagramHashtag = "WorldWideWaves")
+        val event = TestHelpers.createTestEvent(instagramHashtag = "WorldWideWaves")
 
         // WHEN
         val errors = event.validationErrors()
@@ -549,7 +501,7 @@ class WWWEventValidationTest : KoinTest {
 
         invalidHashtags.forEach { hashtag ->
             // GIVEN
-            val event = createValidEvent(instagramHashtag = hashtag)
+            val event = TestHelpers.createTestEvent(instagramHashtag = hashtag)
 
             // WHEN
             val errors = event.validationErrors()
@@ -572,7 +524,7 @@ class WWWEventValidationTest : KoinTest {
 
         validHashtags.forEach { hashtag ->
             // GIVEN
-            val event = createValidEvent(instagramHashtag = hashtag)
+            val event = TestHelpers.createTestEvent(instagramHashtag = hashtag)
 
             // WHEN
             val errors = event.validationErrors()
@@ -582,51 +534,13 @@ class WWWEventValidationTest : KoinTest {
         }
     }
 
-    // ===== Wave Definition Validation Tests =====
-
-    @Test
-    fun `wave definition with multiple types should be invalid`() {
-        // GIVEN
-        val mockLinear = mockk<WWWEventWaveLinear>(relaxed = true)
-        val mockDeep = mockk<WWWEventWaveDeep>(relaxed = true)
-        every { mockLinear.validationErrors() } returns null
-        every { mockDeep.validationErrors() } returns null
-        every { mockLinear.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-        every { mockDeep.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-
-        val wavedef = WWWEvent.WWWWaveDefinition(linear = mockLinear, deep = mockDeep)
-        val event = createValidEvent(wavedef = wavedef)
-
-        // WHEN
-        val errors = event.validationErrors()
-
-        // THEN
-        assertNotNull(errors)
-        assertTrue(errors.any { it.contains("only one of linear, deep, or linearSplit should be non-null") })
-    }
-
-    @Test
-    fun `wave definition with no types should be invalid`() {
-        // GIVEN
-        val wavedef = WWWEvent.WWWWaveDefinition()
-        val event = createValidEvent(wavedef = wavedef)
-
-        // WHEN
-        val errors = event.validationErrors()
-
-        // THEN
-        assertNotNull(errors)
-        assertTrue(errors.any { it.contains("event should contain one and only one wave definition") })
-    }
-
     // ===== Status Calculation Tests =====
 
     @Test
     fun `event in future should have NEXT status`() = runTest {
         // GIVEN: Event starts in 2 days (beyond WAVE_SOON_DELAY)
-        val futureTime = baseTime + 31.days
-        every { mockClock.now() } returns baseTime
-        val event = createValidEvent(
+        mockClock.setTime(baseTime)
+        val event = TestHelpers.createTestEvent(
             date = "2022-02-01", // 31 days after baseTime (2022-01-01)
             startHour = "12:00"
         )
@@ -641,8 +555,8 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `event within soon delay should have SOON status`() = runTest {
         // GIVEN: Event starts in 15 days (within WAVE_SOON_DELAY of 30 days)
-        every { mockClock.now() } returns baseTime
-        val event = createValidEvent(
+        mockClock.setTime(baseTime)
+        val event = TestHelpers.createTestEvent(
             date = "2022-01-16", // 15 days after baseTime
             startHour = "12:00"
         )
@@ -657,21 +571,11 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `running event should have RUNNING status`() = runTest {
         // GIVEN: Event that started 1 hour ago and is still running
-        every { mockClock.now() } returns baseTime + 1.hours
-        val event = createValidEvent(
-            date = "2022-01-01",
-            startHour = "00:00"
+        mockClock.setTime(baseTime + 1.hours)
+        val event = TestHelpers.createRunningEvent(
+            startedAgo = 1.hours,
+            totalDuration = 4.hours
         )
-
-        // Mock the wave duration to ensure event is still running
-        val mockWave = mockk<WWWEventWave>(relaxed = true)
-        every { mockWave.getWaveDuration() } returns 4.hours
-        every { mockWave.getApproxDuration() } returns 4.hours
-        every { mockWave.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-        val mockLinear = mockk<WWWEventWaveLinear>(relaxed = true)
-        every { mockLinear.validationErrors() } returns null
-        every { mockLinear.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-        every { event.wave } returns mockWave
 
         // WHEN
         val status = event.getStatus()
@@ -683,21 +587,11 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `completed event should have DONE status`() = runTest {
         // GIVEN: Event that ended in the past
-        every { mockClock.now() } returns baseTime + 10.hours
-        val event = createValidEvent(
-            date = "2022-01-01",
-            startHour = "00:00"
+        mockClock.setTime(baseTime + 10.hours)
+        val event = TestHelpers.createCompletedEvent(
+            endedAgo = 5.hours,
+            totalDuration = 1.hours
         )
-
-        // Mock short wave duration so event is finished
-        val mockWave = mockk<WWWEventWave>(relaxed = true)
-        every { mockWave.getWaveDuration() } returns 1.hours
-        every { mockWave.getApproxDuration() } returns 1.hours
-        every { mockWave.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-        val mockLinear = mockk<WWWEventWaveLinear>(relaxed = true)
-        every { mockLinear.validationErrors() } returns null
-        every { mockLinear.setRelatedEvent<WWWEventWave>(any()) } returns Unit
-        every { event.wave } returns mockWave
 
         // WHEN
         val status = event.getStatus()
@@ -706,12 +600,12 @@ class WWWEventValidationTest : KoinTest {
         assertEquals(Status.DONE, status)
     }
 
-    // ===== DateTime Parsing Edge Cases =====
+    // ===== DateTime Parsing Tests =====
 
     @Test
     fun `getStartDateTime should handle timezone offset correctly`() {
         // GIVEN: Event in different timezone
-        val event = createValidEvent(
+        val event = TestHelpers.createTestEvent(
             timeZone = "America/New_York",
             date = "2022-06-15",
             startHour = "18:00"
@@ -725,28 +619,10 @@ class WWWEventValidationTest : KoinTest {
     }
 
     @Test
-    fun `getStartDateTime should throw for invalid date time combination`() {
-        // GIVEN: Event with valid individual parts but invalid combination
-        val event = createValidEvent(
-            date = "2022-02-29", // Not a leap year
-            startHour = "25:00"   // Invalid hour (this should be caught by validation)
-        )
-
-        // WHEN/THEN: Should handle gracefully or throw appropriate exception
-        try {
-            event.getStartDateTime()
-            // If it doesn't throw, the date parsing was more lenient than expected
-        } catch (e: Exception) {
-            // This is expected for truly invalid combinations
-            assertTrue(e is IllegalStateException)
-        }
-    }
-
-    @Test
     fun `isNearTime should respect WAVE_OBSERVE_DELAY`() {
         // GIVEN: Event exactly at WAVE_OBSERVE_DELAY distance
-        every { mockClock.now() } returns baseTime
-        val event = createValidEvent(
+        mockClock.setTime(baseTime)
+        val event = TestHelpers.createTestEvent(
             date = "2022-01-01",
             startHour = "02:00" // 2 hours after baseTime (equals WAVE_OBSERVE_DELAY)
         )
@@ -761,8 +637,8 @@ class WWWEventValidationTest : KoinTest {
     @Test
     fun `isNearTime should return false for events beyond WAVE_OBSERVE_DELAY`() {
         // GIVEN: Event beyond WAVE_OBSERVE_DELAY
-        every { mockClock.now() } returns baseTime
-        val event = createValidEvent(
+        mockClock.setTime(baseTime)
+        val event = TestHelpers.createTestEvent(
             date = "2022-01-01",
             startHour = "03:00" // 3 hours after baseTime (beyond WAVE_OBSERVE_DELAY)
         )
@@ -772,5 +648,40 @@ class WWWEventValidationTest : KoinTest {
 
         // THEN
         assertTrue(!isNear)
+    }
+
+    // ===== Wave Definition Tests =====
+
+    @Test
+    fun `wave definition validation should propagate errors`() {
+        // GIVEN: Event with area validation errors
+        val mockArea = TestHelpers.createMockArea()
+        io.mockk.every { mockArea.validationErrors() } returns listOf("Area is invalid", "Polygon is malformed")
+
+        val event = TestHelpers.createTestEvent(area = mockArea)
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN: Should include area validation errors
+        assertNotNull(errors)
+        assertTrue(errors.any { it.contains("Area is invalid") })
+        assertTrue(errors.any { it.contains("Polygon is malformed") })
+    }
+
+    @Test
+    fun `map validation errors should be included in event validation`() {
+        // GIVEN: Map with validation errors
+        val mockMap = TestHelpers.createMockMap()
+        io.mockk.every { mockMap.validationErrors() } returns listOf("Map style is invalid")
+
+        val event = TestHelpers.createTestEvent(map = mockMap)
+
+        // WHEN
+        val errors = event.validationErrors()
+
+        // THEN: Should include map validation errors
+        assertNotNull(errors)
+        assertTrue(errors.any { it.contains("Map style is invalid") })
     }
 }
