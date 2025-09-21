@@ -57,25 +57,43 @@ object WaveformGenerator {
         // Create sample array
         val samples = DoubleArray(numSamples)
 
-        // Generate the specified waveform
-        for (i in 0 until numSamples) {
-            val phase = 2.0 * PI * i / (sampleRate / frequency)
-            samples[i] = when (waveform) {
-                SoundPlayer.Waveform.SINE -> sin(phase)
-                SoundPlayer.Waveform.SQUARE -> if (sin(phase) >= 0) 1.0 else -1.0
-                SoundPlayer.Waveform.TRIANGLE -> {
-                    val normPhase = (phase / (2.0 * PI)) % 1.0
-                    when {
-                        normPhase < 0.25 -> normPhase * 4.0
-                        normPhase < 0.75 -> 2.0 - (normPhase * 4.0)
-                        else -> (normPhase * 4.0) - 4.0
+        // Pre-calculate constants for better performance
+        val phaseIncrement = 2.0 * PI * frequency / sampleRate
+
+        // Generate the specified waveform with optimized algorithms
+        when (waveform) {
+            SoundPlayer.Waveform.SINE -> {
+                for (i in 0 until numSamples) {
+                    samples[i] = sin(i * phaseIncrement) * amplitude
+                }
+            }
+            SoundPlayer.Waveform.SQUARE -> {
+                // Square wave is more efficient without sin() calculation
+                val samplesPerCycle = (sampleRate / frequency).toInt()
+                val halfCycle = samplesPerCycle / 2
+                for (i in 0 until numSamples) {
+                    samples[i] = if ((i % samplesPerCycle) < halfCycle) amplitude else -amplitude
+                }
+            }
+            SoundPlayer.Waveform.TRIANGLE -> {
+                val samplesPerCycle = (sampleRate / frequency).toInt()
+                val quarterCycle = samplesPerCycle / 4
+                for (i in 0 until numSamples) {
+                    val cyclePos = i % samplesPerCycle
+                    samples[i] = when {
+                        cyclePos < quarterCycle -> (cyclePos.toDouble() / quarterCycle) * amplitude
+                        cyclePos < 3 * quarterCycle -> (2.0 - cyclePos.toDouble() / quarterCycle) * amplitude
+                        else -> ((cyclePos.toDouble() / quarterCycle) - 4.0) * amplitude
                     }
                 }
-                SoundPlayer.Waveform.SAWTOOTH -> {
-                    val normPhase = (phase / (2.0 * PI)) % 1.0
-                    2.0 * (normPhase - floor(0.5 + normPhase))
+            }
+            SoundPlayer.Waveform.SAWTOOTH -> {
+                val samplesPerCycle = (sampleRate / frequency).toInt()
+                for (i in 0 until numSamples) {
+                    val cyclePos = i % samplesPerCycle
+                    samples[i] = (2.0 * cyclePos / samplesPerCycle - 1.0) * amplitude
                 }
-            } * amplitude // Apply amplitude scaling
+            }
         }
 
         // Apply envelope to avoid clicks

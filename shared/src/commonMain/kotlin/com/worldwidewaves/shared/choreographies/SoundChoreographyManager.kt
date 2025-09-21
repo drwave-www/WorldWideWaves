@@ -76,8 +76,8 @@ class SoundChoreographyManager(
     private var currentTrack: MidiTrack? = null
     private var looping: Boolean = true
 
-    // Selected instrument settings
-    private var selectedWaveform = SoundPlayer.Waveform.SINE
+    // Selected instrument settings - SQUARE waveform has richer harmonics for better perceived loudness
+    private var selectedWaveform = SoundPlayer.Waveform.SQUARE
 
     init {
         coroutineScopeProvider.launchIO {
@@ -131,8 +131,8 @@ class SoundChoreographyManager(
         // Convert MIDI pitch to frequency using shared utility
         val frequency = WaveformGenerator.midiPitchToFrequency(selectedNote.pitch)
 
-        // Convert MIDI velocity to amplitude using shared utility
-        val amplitude = WaveformGenerator.midiVelocityToAmplitude(selectedNote.velocity) * 0.8
+        // Convert MIDI velocity to amplitude using shared utility - use full amplitude for maximum loudness
+        val amplitude = WaveformGenerator.midiVelocityToAmplitude(selectedNote.velocity)
 
         // Play the tone using the platform-specific implementation
         soundPlayer.playTone(
