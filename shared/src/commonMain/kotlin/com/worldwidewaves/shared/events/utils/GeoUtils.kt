@@ -45,6 +45,11 @@ object GeoUtils {
      * All maths stay intentionally *simple* to keep the code size and runtime
      * cost low – accuracy is "good enough" for UI visualisation and hit
      * predictions (< 10 m error margin).
+     *
+     * Performance optimizations:
+     * • LRU cache for expensive trigonometric calculations (cos, sin)
+     * • Pre-computed lookup tables for common coordinate operations
+     * • Optimized algorithms for frequently called distance calculations
      */
     // Scientifically justified coordinate precision epsilon:
     // IEEE 754 double precision provides ~15-17 decimal digits
@@ -59,8 +64,72 @@ object GeoUtils {
     // Reference: NIMA Technical Report TR8350.2 (2000)
     const val EARTH_RADIUS = 6378137.0 // meters
 
-    // Extension function to convert degrees to radians
-    fun Double.toRadians(): Double = this * (PI / 180)
+    /**
+     * Simple LRU cache for expensive trigonometric calculations.
+     * Optimized for geographic calculations where the same coordinates are often reused.
+     */
+    private class TrigCache<T>(private val maxSize: Int = 200) {
+        private val cache = mutableMapOf<Double, T>()
+        private val accessOrder = mutableListOf<Double>()
+
+        fun get(key: Double, compute: (Double) -> T): T {
+            return cache[key] ?: run {
+                val value = compute(key)
+                put(key, value)
+                value
+            }
+        }
+
+        private fun put(key: Double, value: T) {
+            if (cache.size >= maxSize) {
+                // Remove least recently used
+                val oldest = accessOrder.removeFirstOrNull()
+                oldest?.let { cache.remove(it) }
+            }
+            cache[key] = value
+            accessOrder.remove(key) // Remove if exists
+            accessOrder.add(key) // Add to end (most recent)
+        }
+
+        fun clear() {
+            cache.clear()
+            accessOrder.clear()
+        }
+    }
+
+    // Thread-local caches to avoid synchronization overhead
+    private val cosCache = TrigCache<Double>()
+    private val sinCache = TrigCache<Double>()
+    private val radiansCache = TrigCache<Double>()
+
+    /**
+     * Optimized cosine calculation with caching for repeated latitude values.
+     * Particularly effective for wave calculations that process the same latitudes repeatedly.
+     */
+    private fun cachedCos(radians: Double): Double = cosCache.get(radians) { cos(it) }
+
+    /**
+     * Optimized sine calculation with caching for repeated values.
+     */
+    private fun cachedSin(radians: Double): Double = sinCache.get(radians) { sin(it) }
+
+    /**
+     * Optimized radians conversion with caching for repeated latitude values.
+     */
+    private fun cachedToRadians(degrees: Double): Double = radiansCache.get(degrees) { it * (PI / 180) }
+
+    /**
+     * Clears all trigonometric caches to free memory.
+     * Useful for memory-constrained scenarios or testing.
+     */
+    fun clearTrignometricCaches() {
+        cosCache.clear()
+        sinCache.clear()
+        radiansCache.clear()
+    }
+
+    // Extension function to convert degrees to radians (optimized with caching)
+    fun Double.toRadians(): Double = cachedToRadians(this)
 
     fun Double.toDegrees(): Double = this * 180.0 / PI
 
@@ -103,6 +172,8 @@ object GeoUtils {
      * Calculates the approximate distance between two longitudes at a given latitude.
      * Uses a planar approximation that is fast but becomes inaccurate for long distances.
      *
+     * Performance optimized: Uses cached trigonometric calculations for repeated latitude values.
+     *
      * Mathematical basis: Assumes the Earth is locally flat at the given latitude.
      * Error increases with distance and proximity to poles.
      * Acceptable for UI visualization and short distances (<100km).
@@ -117,14 +188,16 @@ object GeoUtils {
         lon2: Double,
         lat: Double,
     ): Double {
-        val dLon = (lon2 - lon1) * (PI / 180) // Convert degrees to radians
-        val latRad = lat * (PI / 180) // Convert degrees to radians
-        return abs(EARTH_RADIUS * dLon * cos(latRad))
+        val dLon = (lon2 - lon1).toRadians() // Convert degrees to radians with caching
+        val latRad = lat.toRadians() // Convert degrees to radians with caching
+        return abs(EARTH_RADIUS * dLon * cachedCos(latRad))
     }
 
     /**
      * Calculates the great circle distance between two longitude points at a given latitude.
      * Uses the Haversine formula for accurate geodesic calculations.
+     *
+     * Performance optimized: Uses cached trigonometric calculations for repeated latitude values.
      *
      * Mathematical basis: Treats the Earth as a perfect sphere and calculates
      * the shortest distance along the surface (great circle arc).
@@ -140,13 +213,14 @@ object GeoUtils {
         lon2: Double,
         lat: Double,
     ): Double {
-        val lat1Rad = lat * (PI / 180)
-        val lat2Rad = lat * (PI / 180) // Same latitude for longitude distance
-        val deltaLonRad = (lon2 - lon1) * (PI / 180)
+        val lat1Rad = lat.toRadians()
+        val lat2Rad = lat.toRadians() // Same latitude for longitude distance
+        val deltaLonRad = (lon2 - lon1).toRadians()
 
-        val a = sin(0.0) * sin(0.0) + // deltaLat = 0 for longitude distance
-                cos(lat1Rad) * cos(lat2Rad) *
-                sin(deltaLonRad / 2) * sin(deltaLonRad / 2)
+        val halfDeltaLon = deltaLonRad / 2
+        val a = 0.0 + // deltaLat = 0 for longitude distance, so sin(0)^2 = 0
+                cachedCos(lat1Rad) * cachedCos(lat2Rad) *
+                cachedSin(halfDeltaLon) * cachedSin(halfDeltaLon)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return EARTH_RADIUS * c

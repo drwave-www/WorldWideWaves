@@ -202,7 +202,8 @@ abstract class WWWEventWave :
 
     // ---------------------------
 
-    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getWaitingSequence()
+    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getWaitingSequenceImmediate()
 
-    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getHitSequence()
+    // TIMING-CRITICAL: Hit sequence for precise wave synchronization
+    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getHitSequenceImmediate()
 }

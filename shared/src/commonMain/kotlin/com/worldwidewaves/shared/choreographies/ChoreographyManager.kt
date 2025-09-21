@@ -58,8 +58,13 @@ open class ChoreographyManager<T>(
 ) : KoinComponent {
     val clock: IClock by inject()
     private val imageResolver: ImageResolver<T> by inject()
+
+    // Performance optimization: Lazy loading and caching
     private var definition: ChoreographyDefinition? = null
     private var resolvedSequences: ResolvedChoreography<T>? = null
+    private var isLoading = false
+    private val resolvedImageCache = mutableMapOf<String, T?>()
+
     private val json =
         Json {
             ignoreUnknownKeys = true
@@ -108,16 +113,30 @@ open class ChoreographyManager<T>(
 
     // ----------------------
 
+    /**
+     * Optimized sequence resolution with image caching.
+     * Images are cached by their path to avoid repeated resource loading.
+     */
     private fun ChoreographySequence.toResolved(
         startTime: Duration = Duration.ZERO,
         seqType: String,
         seqNumber: Int? = null,
     ): ResolvedSequence<T> {
-        val resolvedImages = resolveImageResources(imageResolver)
+        // Use cached image if available, otherwise resolve and cache
+        val imageKey = "${this.frames}_${this.frameWidth}_${this.frameHeight}"
+        val resolvedImage = resolvedImageCache.getOrPut(imageKey) {
+            try {
+                resolveImageResources(imageResolver).firstOrNull()
+            } catch (e: Exception) {
+                Log.w("ChoreographyManager", "Failed to resolve image for $imageKey: ${e.message}")
+                null
+            }
+        }
+
         return ResolvedSequence(
             sequence = this,
             text = getChoreographyText(seqType, seqNumber),
-            resolvedImage = resolvedImages.firstOrNull(),
+            resolvedImage = resolvedImage,
             startTime = startTime,
             endTime = startTime + (duration ?: 10.seconds),
         )
@@ -138,11 +157,33 @@ open class ChoreographyManager<T>(
 
     // ------------------------------------------------------------------------
 
-    init {
-        // This could be moved outside and managed by Koin
-        coroutineScopeProvider.launchIO {
-            prepareChoreography(FS_CHOREOGRAPHIES_CONF)
+    /**
+     * Lazy initialization: choreography is only loaded when first needed.
+     * This improves app startup time by deferring resource loading until actual usage.
+     */
+    private suspend fun ensureChoreographyLoaded() {
+        if (resolvedSequences == null && !isLoading) {
+            isLoading = true
+            try {
+                Log.d("ChoreographyManager", "Lazy loading choreography resources")
+                prepareChoreography(FS_CHOREOGRAPHIES_CONF)
+            } finally {
+                isLoading = false
+            }
         }
+    }
+
+    /**
+     * Pre-loads choreography resources for timing-critical scenarios.
+     *
+     * This should be called proactively before wave events start to ensure
+     * precise timing for sound emission and wave synchronization.
+     * Critical for real-world symphony accuracy.
+     */
+    suspend fun preloadForWaveSync() {
+        Log.d("ChoreographyManager", "Pre-loading choreography for wave synchronization")
+        ensureChoreographyLoaded()
+        Log.d("ChoreographyManager", "Choreography pre-loaded successfully")
     }
 
     // ------------------------------------------------------------------------
@@ -189,8 +230,12 @@ open class ChoreographyManager<T>(
     /**
      * Returns the current warming sequence based on elapsed time since [startTime],
      * with remaining duration for smooth transitions.
+     *
+     * Performance optimized: Uses lazy loading to only load resources when needed.
      */
-    open fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
+    open suspend fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
+        ensureChoreographyLoaded()
+
         val resolved = resolvedSequences ?: return null
         if (resolved.warmingSequences.isEmpty()) return null
 
@@ -217,11 +262,77 @@ open class ChoreographyManager<T>(
 
     /**
      * Returns the waiting sequence shown when a user is about to be hit by the wave.
+     * Performance optimized: Uses lazy loading.
      */
-    open fun getWaitingSequence(): DisplayableSequence<T>? = resolvedSequences?.waitingSequence?.toDisplayable()
+    open suspend fun getWaitingSequence(): DisplayableSequence<T>? {
+        ensureChoreographyLoaded()
+        return resolvedSequences?.waitingSequence?.toDisplayable()
+    }
 
     /**
      * Returns the hit sequence shown when a user has been hit by the wave.
+     * Performance optimized: Uses lazy loading.
      */
-    open fun getHitSequence(): DisplayableSequence<T>? = resolvedSequences?.hitSequence?.toDisplayable()
+    open suspend fun getHitSequence(): DisplayableSequence<T>? {
+        ensureChoreographyLoaded()
+        return resolvedSequences?.hitSequence?.toDisplayable()
+    }
+
+    /**
+     * Clears the image cache to free memory.
+     * Useful for memory management in resource-constrained scenarios.
+     */
+    fun clearImageCache() {
+        Log.d("ChoreographyManager", "Clearing image cache (${resolvedImageCache.size} entries)")
+        resolvedImageCache.clear()
+    }
+
+    // Backward compatibility: Non-suspend versions that return null if not loaded
+    // These are deprecated and should be migrated to suspend versions for optimal performance
+
+    /**
+     * Legacy non-suspend version for timing-critical warming sequences.
+     * Warming sequences are less timing-critical so this version is acceptable.
+     */
+    open fun getCurrentWarmingSequenceImmediate(startTime: Instant): DisplayableSequence<T>? {
+        val resolved = resolvedSequences ?: return null
+        if (resolved.warmingSequences.isEmpty()) return null
+
+        val totalTiming = resolved.warmingSequences.last().endTime
+        val elapsedTime = clock.now() - startTime
+        val wrappedElapsedTime =
+            if (totalTiming.isPositive()) {
+                (elapsedTime.inWholeNanoseconds % totalTiming.inWholeNanoseconds)
+                    .nanoseconds
+                    .coerceAtLeast(Duration.ZERO)
+            } else {
+                Duration.ZERO
+            }
+
+        val sequence =
+            resolved.warmingSequences.find {
+                wrappedElapsedTime >= it.startTime && wrappedElapsedTime < it.endTime
+            } ?: resolved.warmingSequences.first()
+
+        return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
+    }
+
+    /**
+     * Immediate waiting sequence access - can be used for less timing-critical scenarios.
+     * Returns null if choreography not yet loaded.
+     */
+    open fun getWaitingSequenceImmediate(): DisplayableSequence<T>? = resolvedSequences?.waitingSequence?.toDisplayable()
+
+    /**
+     * TIMING-CRITICAL: Immediate hit sequence access.
+     * This is the most critical method for wave synchronization (~2s before hit).
+     * Should be pre-loaded via preloadForWaveSync() to ensure zero-latency access.
+     */
+    open fun getHitSequenceImmediate(): DisplayableSequence<T>? {
+        val resolved = resolvedSequences
+        if (resolved == null) {
+            Log.w("ChoreographyManager", "Hit sequence requested but choreography not pre-loaded! This may cause timing issues.")
+        }
+        return resolved?.hitSequence?.toDisplayable()
+    }
 }

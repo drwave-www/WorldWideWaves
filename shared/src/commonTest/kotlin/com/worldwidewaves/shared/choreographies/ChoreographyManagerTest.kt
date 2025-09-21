@@ -153,8 +153,8 @@ class ChoreographyManagerTest : KoinTest {
             )
 
         // Override public getters to rely on our in-memory definition first
-        override fun getCurrentWarmingSequence(startTime: Instant): DisplayableSequence<T>? {
-            val local = testResolved ?: return super.getCurrentWarmingSequence(startTime)
+        override fun getCurrentWarmingSequenceImmediate(startTime: Instant): DisplayableSequence<T>? {
+            val local = testResolved ?: return super.getCurrentWarmingSequenceImmediate(startTime)
             if (local.warmingSequences.isEmpty()) return null
 
             val totalTiming = local.warmingSequences.last().endTime
@@ -176,10 +176,10 @@ class ChoreographyManagerTest : KoinTest {
             return sequence.toDisplayable(sequence.endTime - wrappedElapsedTime)
         }
 
-        override fun getWaitingSequence(): DisplayableSequence<T>? =
-            testResolved?.waitingSequence?.toDisplayable() ?: super.getWaitingSequence()
+        override fun getWaitingSequenceImmediate(): DisplayableSequence<T>? =
+            testResolved?.waitingSequence?.toDisplayable() ?: super.getWaitingSequenceImmediate()
 
-        override fun getHitSequence(): DisplayableSequence<T>? = testResolved?.hitSequence?.toDisplayable() ?: super.getHitSequence()
+        override fun getHitSequenceImmediate(): DisplayableSequence<T>? = testResolved?.hitSequence?.toDisplayable() ?: super.getHitSequenceImmediate()
     }
 
     @BeforeTest
@@ -215,13 +215,13 @@ class ChoreographyManagerTest : KoinTest {
     }
 
     @Test
-    fun `test initialization triggers choreography loading`() {
-        // Verify that the coroutineScopeProvider was used to launch the preload
-        verify { coroutineScopeProvider.launchIO(any()) }
+    fun `test initialization does not trigger choreography loading (lazy loading)`() {
+        // With lazy loading optimization, choreography should NOT be loaded during initialization
+        verify(exactly = 0) { coroutineScopeProvider.launchIO(any()) }
     }
 
     @Test
-    fun `test getCurrentWarmingSequence returns correct sequence based on elapsed time`() =
+    fun `test getCurrentWarmingSequenceImmediate returns correct sequence based on elapsed time`() =
         runTest {
             // GIVEN: Two warming sequences with different durations and a test manager
             val warmingSequence1 =
@@ -259,7 +259,7 @@ class ChoreographyManagerTest : KoinTest {
             every { clock.now() } returns Instant.fromEpochMilliseconds(1500)
 
             // THEN: Should return first warming sequence with correct properties
-            val sequence1 = testManager.getCurrentWarmingSequence(startTime)
+            val sequence1 = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence1)
             assertEquals(100, sequence1.frameWidth)
             assertEquals(100, sequence1.frameHeight)
@@ -269,7 +269,7 @@ class ChoreographyManagerTest : KoinTest {
             every { clock.now() } returns Instant.fromEpochMilliseconds(3000)
 
             // THEN: Should return second warming sequence with correct properties
-            val sequence2 = testManager.getCurrentWarmingSequence(startTime)
+            val sequence2 = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence2)
             assertEquals(100, sequence2.frameWidth)
             assertEquals(100, sequence2.frameHeight)
@@ -277,7 +277,7 @@ class ChoreographyManagerTest : KoinTest {
         }
 
     @Test
-    fun `test getCurrentWarmingSequence handles wrapping of time for looping`() =
+    fun `test getCurrentWarmingSequenceImmediate handles wrapping of time for looping`() =
         runTest {
             // Create warming sequences for testing
             val warmingSequence1 =
@@ -316,18 +316,18 @@ class ChoreographyManagerTest : KoinTest {
             // Time beyond total duration (4.5 seconds in, should wrap to 1.0 second in first sequence)
             every { clock.now() } returns Instant.fromEpochMilliseconds(5500)
 
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
 
             // Time way beyond total duration (10.5 seconds in, should wrap to 0.0 second in first sequence)
             every { clock.now() } returns Instant.fromEpochMilliseconds(11500)
 
-            val sequenceWrapped = testManager.getCurrentWarmingSequence(startTime)
+            val sequenceWrapped = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequenceWrapped)
         }
 
     @Test
-    fun `test getCurrentWarmingSequence calculates remaining duration correctly`() =
+    fun `test getCurrentWarmingSequenceImmediate calculates remaining duration correctly`() =
         runTest {
             // Create warming sequence for testing
             val warmingSequence =
@@ -354,14 +354,14 @@ class ChoreographyManagerTest : KoinTest {
             // Time 0.5 seconds into first warming sequence (which is 1.5 seconds long)
             every { clock.now() } returns Instant.fromEpochMilliseconds(1500)
 
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
             assertEquals(1.seconds, sequence.remainingDuration)
 
             // Time 1.0 seconds into first warming sequence (which is 1.5 seconds long)
             every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
 
-            val sequenceNearEnd = testManager.getCurrentWarmingSequence(startTime)
+            val sequenceNearEnd = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequenceNearEnd)
             assertEquals(0.5.seconds, sequenceNearEnd.remainingDuration)
         }
@@ -389,7 +389,7 @@ class ChoreographyManagerTest : KoinTest {
                 )
             testManager.initializeWithTestData()
 
-            val result = testManager.getWaitingSequence()
+            val result = testManager.getWaitingSequenceImmediate()
 
             assertNotNull(result)
             assertEquals(200, result.frameWidth)
@@ -422,7 +422,7 @@ class ChoreographyManagerTest : KoinTest {
                 )
             testManager.initializeWithTestData()
 
-            val result = testManager.getHitSequence()
+            val result = testManager.getHitSequenceImmediate()
 
             assertNotNull(result)
             assertEquals(300, result.frameWidth)
@@ -433,7 +433,7 @@ class ChoreographyManagerTest : KoinTest {
         }
 
     @Test
-    fun `test getCurrentWarmingSequence with no warming sequences returns null`() =
+    fun `test getCurrentWarmingSequenceImmediate with no warming sequences returns null`() =
         runTest {
             // Create test manager with no sequences
             val testManager =
@@ -446,12 +446,12 @@ class ChoreographyManagerTest : KoinTest {
             val startTime = Instant.fromEpochMilliseconds(1000)
             every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
 
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNull(sequence)
         }
 
     @Test
-    fun `test getCurrentWarmingSequence with zero total duration returns first sequence`() =
+    fun `test getCurrentWarmingSequenceImmediate with zero total duration returns first sequence`() =
         runTest {
             // Create warming sequences with zero duration
             val zeroSequence1 =
@@ -485,7 +485,7 @@ class ChoreographyManagerTest : KoinTest {
             val startTime = Instant.fromEpochMilliseconds(1000)
             every { clock.now() } returns Instant.fromEpochMilliseconds(2000)
 
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
         }
 
@@ -531,7 +531,7 @@ class ChoreographyManagerTest : KoinTest {
             every { clock.now() } returns Instant.fromEpochMilliseconds(1000 + oneDayInMillis)
 
             // Should still wrap correctly
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
             // The exact sequence depends on the remainder when dividing by 3.5 seconds
         }
@@ -566,7 +566,7 @@ class ChoreographyManagerTest : KoinTest {
             every { clock.now() } returns Instant.fromEpochMilliseconds(3000)
 
             // Should handle negative elapsed time gracefully
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
             // Should default to first sequence with zero or positive elapsed time
         }
@@ -610,13 +610,13 @@ class ChoreographyManagerTest : KoinTest {
             // Exactly at the end of first sequence (1.5 seconds)
             every { clock.now() } returns Instant.fromEpochMilliseconds(2500)
 
-            val sequenceAtBoundary = testManager.getCurrentWarmingSequence(startTime)
+            val sequenceAtBoundary = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequenceAtBoundary)
 
             // Exactly at the end of all sequences (3.5 seconds)
             every { clock.now() } returns Instant.fromEpochMilliseconds(4500)
 
-            val sequenceAtTotalBoundary = testManager.getCurrentWarmingSequence(startTime)
+            val sequenceAtTotalBoundary = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequenceAtTotalBoundary)
         }
 
@@ -660,7 +660,7 @@ class ChoreographyManagerTest : KoinTest {
             val timeNanos = 1500.milliseconds.inWholeNanoseconds + 1
             every { clock.now() } returns startTime + timeNanos.nanoseconds
 
-            val sequence = testManager.getCurrentWarmingSequence(startTime)
+            val sequence = testManager.getCurrentWarmingSequenceImmediate(startTime)
             assertNotNull(sequence)
         }
 
@@ -683,9 +683,9 @@ class ChoreographyManagerTest : KoinTest {
         // WHEN: Attempting to get sequences without loaded choreography definitions
         // THEN: Should handle gracefully without crashing
         assertDoesNotThrow("ChoreographyManager should handle missing choreography definitions gracefully") {
-            val warmingSequence = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
-            val waitingSequence = realManager.getWaitingSequence()
-            val hitSequence = realManager.getHitSequence()
+            val warmingSequence = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
+            val waitingSequence = realManager.getWaitingSequenceImmediate()
+            val hitSequence = realManager.getHitSequenceImmediate()
 
             // These should be null when no choreography is loaded, but shouldn't crash
             Log.v("ChoreographyManagerTest", "Resource loading test completed: warming=$warmingSequence, waiting=$waitingSequence, hit=$hitSequence")
@@ -707,9 +707,9 @@ class ChoreographyManagerTest : KoinTest {
         // This includes JSON parsing, image resolution, sequence building, etc.
         assertDoesNotThrow("ChoreographyManager should handle complete resource loading lifecycle gracefully") {
             // Test all the main public methods that involve resource loading
-            realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
-            realManager.getWaitingSequence()
-            realManager.getHitSequence()
+            realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
+            realManager.getWaitingSequenceImmediate()
+            realManager.getHitSequenceImmediate()
 
             // These calls exercise the real resource loading code paths including:
             // - JSON choreography definition loading
@@ -731,14 +731,14 @@ class ChoreographyManagerTest : KoinTest {
         )
 
         // WHEN: Making multiple calls to the same methods
-        val warmingSequence1 = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
-        val warmingSequence2 = realManager.getCurrentWarmingSequence(TestHelpers.TestTimes.BASE_TIME)
+        val warmingSequence1 = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
+        val warmingSequence2 = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
 
-        val waitingSequence1 = realManager.getWaitingSequence()
-        val waitingSequence2 = realManager.getWaitingSequence()
+        val waitingSequence1 = realManager.getWaitingSequenceImmediate()
+        val waitingSequence2 = realManager.getWaitingSequenceImmediate()
 
-        val hitSequence1 = realManager.getHitSequence()
-        val hitSequence2 = realManager.getHitSequence()
+        val hitSequence1 = realManager.getHitSequenceImmediate()
+        val hitSequence2 = realManager.getHitSequenceImmediate()
 
         // THEN: Results should be consistent across calls
         // This validates that resource loading doesn't have side effects or race conditions
@@ -766,19 +766,19 @@ class ChoreographyManagerTest : KoinTest {
         assertDoesNotThrow("Resource loading errors should be handled gracefully") {
             // Test timing-dependent operations
             val baseTime = TestHelpers.TestTimes.BASE_TIME
-            realManager.getCurrentWarmingSequence(baseTime)
-            realManager.getCurrentWarmingSequence(baseTime + 1000.milliseconds)
-            realManager.getCurrentWarmingSequence(baseTime - 1000.milliseconds)
+            realManager.getCurrentWarmingSequenceImmediate(baseTime)
+            realManager.getCurrentWarmingSequenceImmediate(baseTime + 1000.milliseconds)
+            realManager.getCurrentWarmingSequenceImmediate(baseTime - 1000.milliseconds)
 
             // Test static operations
-            realManager.getWaitingSequence()
-            realManager.getHitSequence()
+            realManager.getWaitingSequenceImmediate()
+            realManager.getHitSequenceImmediate()
 
             // Test repeated calls to verify no state corruption
             repeat(3) {
-                realManager.getCurrentWarmingSequence(baseTime)
-                realManager.getWaitingSequence()
-                realManager.getHitSequence()
+                realManager.getCurrentWarmingSequenceImmediate(baseTime)
+                realManager.getWaitingSequenceImmediate()
+                realManager.getHitSequenceImmediate()
             }
         }
 
