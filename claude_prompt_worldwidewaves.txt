@@ -2,10 +2,10 @@
 
 ## Project Context
 - **Project Name**: WorldWideWaves
-- **Project Type**: web-app
-- **Tech Stack**: General project detected
+- **Project Type**: kotlin-multiplatform-mobile
+- **Tech Stack**: Kotlin Multiplatform Mobile + Compose
 - **Critical Assets**: user data, configuration files
-- **Common Issues**: authentication, input validation, error handling
+- **Common Issues**: configuration errors, dependency issues
 
 ## Instructions for Claude
 
@@ -16,8 +16,8 @@ Please create a comprehensive CLAUDE.md file for this project that includes:
    - Technology stack and architecture overview
 
 2. **🚨 MANDATORY DEVELOPMENT REQUIREMENTS - NEVER SKIP THESE**
-   - Security patterns specific to: General project detected
-   - Performance considerations for: web-app
+   - Security patterns specific to: Kotlin Multiplatform Mobile + Compose
+   - Performance considerations for: kotlin-multiplatform-mobile
    - Error handling patterns
    - Input validation requirements
 
@@ -27,7 +27,7 @@ Please create a comprehensive CLAUDE.md file for this project that includes:
    - Data encryption requirements
 
 4. **Common Issue Prevention**
-   - Preventive measures for: authentication, input validation, error handling
+   - Preventive measures for: configuration errors, dependency issues
    - Monitoring and alerting patterns
    - Testing requirements
 
