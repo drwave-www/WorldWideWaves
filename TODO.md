@@ -40,19 +40,6 @@ This document outlines comprehensive test improvements needed for the WorldWideW
 - [ ] Test Instagram account/hashtag validation
 - [ ] Test country/community validation for different event types
 
-#### Wave Types Testing
-**Files**:
-- `shared/src/commonTest/kotlin/com/worldwidewaves/shared/events/WWWEventWaveDeepTest.kt`
-- `shared/src/commonTest/kotlin/com/worldwidewaves/shared/events/WWWEventWaveLinearSplitTest.kt`
-- `shared/src/commonTest/kotlin/com/worldwidewaves/shared/events/WWWEventWaveWarmingTest.kt`
-
-- [ ] **WWWEventWaveDeep**: Test deep wave propagation mechanics
-- [ ] **WWWEventWaveLinearSplit**: Test wave splitting logic and timing
-- [ ] **WWWEventWaveWarming**: Test warming duration calculations
-- [ ] Test user hit detection for each wave type
-- [ ] Test progression calculations
-- [ ] Test geographic boundary interactions
-
 ### 2. Map & Geographic Components
 **Priority: HIGH**
 
