@@ -34,22 +34,5 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Build Debug APK
-        run: ./gradlew :composeApp:assembleDebug --stacktrace
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk-debug
-          path: composeApp/build/outputs/apk/debug/*.apk
-
-      - name: Build All Variants (main branch only)
-        if: github.ref == 'refs/heads/main'
-        run: ./gradlew assemble --stacktrace
-
-      - name: Upload All APKs (main branch only)
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apks-all
-          path: composeApp/build/outputs/apk/**/*.apk
+      - name: Compile Android Sources (without APK assembly)
+        run: ./gradlew :shared:compileDebugKotlinAndroid :shared:compileReleaseKotlinAndroid :composeApp:compileDebugKotlinAndroid :composeApp:compileReleaseKotlinAndroid --stacktrace
