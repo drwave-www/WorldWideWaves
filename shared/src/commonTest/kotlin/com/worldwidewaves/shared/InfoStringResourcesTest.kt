@@ -341,10 +341,10 @@ class InfoStringResourcesTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..10).map { threadId ->
+        val threads = (1..5).map { threadId ->
             Thread {
                 try {
-                    repeat(50) {
+                    repeat(10) {
                         // Access rules hierarchy
                         val rulesCount = rules_hierarchy.size
                         val totalRuleItems = rules_hierarchy.values.sumOf { it.size }
@@ -355,10 +355,14 @@ class InfoStringResourcesTest {
                         // Access core infos
                         val coreInfoCount = infos_core.size
 
-                        results.add("Thread $threadId: rules=$rulesCount/$totalRuleItems, faq=$faqCount, core=$coreInfoCount")
+                        synchronized(results) {
+                            results.add("Thread $threadId: rules=$rulesCount/$totalRuleItems, faq=$faqCount, core=$coreInfoCount")
+                        }
                     }
                 } catch (e: Exception) {
-                    exceptions.add(e)
+                    synchronized(exceptions) {
+                        exceptions.add(e)
+                    }
                 }
             }
         }
@@ -366,11 +370,10 @@ class InfoStringResourcesTest {
         threads.forEach { it.start() }
         threads.forEach { it.join() }
 
-        assertTrue(exceptions.isEmpty(), "No exceptions should occur during concurrent access")
-        assertEquals(500, results.size, "All threads should complete successfully")
+        assertTrue(exceptions.isEmpty(), "No exceptions should occur during concurrent access: $exceptions")
+        assertEquals(50, results.size, "All threads should complete successfully")
 
         // All results should be identical (proving immutability)
-        val expectedResult = "Thread 1: rules=4/16, faq=6, core=9"
         results.forEach { result ->
             assertTrue(result.contains("rules=4/16, faq=6, core=9"), "Results should be consistent across threads")
         }

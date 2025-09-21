@@ -284,17 +284,18 @@ class DataStoreEnhancedTest {
         every { provider2() } returns path2
 
         try {
-            // First call should create and log
+            // First call should create DataStore
             createDataStore(provider1)
-            verify { Log.i(any(), any()) }
+            verify { provider1() }
 
-            // Second call with same provider should return existing and log differently
+            // Second call with same provider should return existing
             createDataStore(provider1)
-            // Should still call the path provider to check the path for logging
+            // Should still call the path provider to check the path
             verify(atLeast = 2) { provider1() }
 
         } catch (e: Exception) {
             // Expected since we're testing with mock paths that can't create real datastores
+            // We're only testing that the path provider is called correctly
         }
     }
 

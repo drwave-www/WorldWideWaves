@@ -29,6 +29,7 @@ import com.worldwidewaves.shared.testing.MockClock
 import com.worldwidewaves.shared.testing.TestHelpers
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
@@ -288,5 +290,346 @@ class WWWEventObserverTest : KoinTest {
         // THEN: Observer should continue to function
         assertNotNull(observer.eventStatus.value)
         assertNotNull(observer.progression.value)
+    }
+
+    // NEW COMPREHENSIVE TESTS FOR PHASE 1 CRITICAL EVENT LOGIC
+
+    @Test
+    fun `test observation lifecycle start stop multiple times`() = runTest {
+        // GIVEN: A running event
+        val event = TestHelpers.createRunningEvent()
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Start and stop observation multiple cycles
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should handle multiple start/stop cycles gracefully
+        assertNotNull(observer.eventStatus.value)
+        assertNotNull(observer.progression.value)
+    }
+
+    @Test
+    fun `test state flow updates during event progression`() = runTest {
+        // GIVEN: A running event with progression
+        val event = TestHelpers.createRunningEvent(startedAgo = 10.minutes, totalDuration = 1.hours)
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        val initialProgression = observer.progression.value
+        val initialStatus = observer.eventStatus.value
+
+        // WHEN: Advance time to change progression
+        mockClock.advanceTimeBy(15.minutes)
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: State flows should update
+        val newProgression = observer.progression.value
+        val newStatus = observer.eventStatus.value
+
+        assertNotNull(initialProgression)
+        assertNotNull(newProgression)
+        assertNotNull(initialStatus)
+        assertNotNull(newStatus)
+    }
+
+    @Test
+    fun `test observation intervals at different time scales`() = runTest {
+        // Test adaptive observation intervals
+        val futureEvent = TestHelpers.createFutureEvent(startsIn = 2.hours)
+        val nearEvent = TestHelpers.createFutureEvent(startsIn = 2.minutes)
+        val runningEvent = TestHelpers.createRunningEvent()
+
+        val futureObserver = WWWEventObserver(futureEvent)
+        val nearObserver = WWWEventObserver(nearEvent)
+        val runningObserver = WWWEventObserver(runningEvent)
+
+        testScheduler.advanceUntilIdle()
+
+        // Observers should be created successfully for different time scales
+        assertNotNull(futureObserver.eventStatus.value)
+        assertNotNull(nearObserver.eventStatus.value)
+        assertNotNull(runningObserver.eventStatus.value)
+    }
+
+    @Test
+    fun `test user position tracking and hit detection`() = runTest {
+        // GIVEN: Event with user position that will be hit
+        val userPosition = TestHelpers.TestLocations.PARIS
+        val event = TestHelpers.createTestEvent(
+            userPosition = userPosition,
+            country = "france",
+            type = "city"
+        )
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Force state update
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should track user position correctly
+        assertNotNull(observer.userPositionRatio.value)
+        assertNotNull(observer.timeBeforeHit.value)
+        assertNotNull(observer.hitDateTime.value)
+        assertTrue(observer.userIsInArea.value)
+    }
+
+    @Test
+    fun `test warming phase detection and transitions`() = runTest {
+        // GIVEN: Event entering warming phase
+        val event = TestHelpers.createFutureEvent(startsIn = 1.minutes)
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Advance time to enter warming phase
+        mockClock.advanceTimeBy(30.seconds)
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should detect warming phase
+        assertNotNull(observer.isStartWarmingInProgress.value)
+        assertNotNull(observer.isUserWarmingInProgress.value)
+    }
+
+    @Test
+    fun `test error handling during observation flow`() = runTest {
+        // GIVEN: Mock event that throws exception during progression
+        val mockEvent = mockk<IWWWEvent>()
+        val mockWave = mockk<WWWEventWave>()
+        val mockArea = mockk<WWWEventArea>()
+        val mockWarming = mockk<WWWEventWaveWarming>()
+
+        every { mockEvent.id } returns "error_test_event"
+        every { mockEvent.wave } returns mockWave
+        every { mockEvent.area } returns mockArea
+        every { mockEvent.warming } returns mockWarming
+        every { mockEvent.getStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
+        every { mockEvent.getWaveStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
+        coEvery { mockEvent.getStatus() } returns Status.RUNNING
+        coEvery { mockEvent.isRunning() } returns true
+        every { mockEvent.isSoon() } returns false
+        every { mockEvent.isNearTime() } returns true
+        coEvery { mockEvent.isDone() } returns false
+        coEvery { mockWave.getProgression() } throws RuntimeException("Test error")
+        every { mockWave.getUserPosition() } returns null
+        coEvery { mockWave.timeBeforeUserHit() } returns null
+        coEvery { mockWave.userPositionToWaveRatio() } returns null
+        coEvery { mockWave.userHitDateTime() } returns null
+        coEvery { mockWave.hasUserBeenHitInCurrentPosition() } returns false
+        coEvery { mockWarming.isUserWarmingStarted() } returns false
+
+        // WHEN: Create observer with faulty event
+        val observer = WWWEventObserver(mockEvent)
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should handle errors gracefully
+        assertNotNull(observer.eventStatus.value)
+        assertEquals(0.0, observer.progression.value) // Should default to 0.0 on error
+    }
+
+    @Test
+    fun `test memory cleanup when stopping observation`() = runTest {
+        // GIVEN: Running event with active observation
+        val event = TestHelpers.createRunningEvent()
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Stop observation
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should cleanup gracefully without hanging references
+        // Observer should still be functional for basic state queries
+        assertNotNull(observer.eventStatus.value)
+        assertNotNull(observer.progression.value)
+    }
+
+    @Test
+    fun `test coroutine scope cleanup and cancellation`() = runTest {
+        // GIVEN: Event with observation started
+        val event = TestHelpers.createRunningEvent()
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Stop observation multiple times
+        observer.stopObservation()
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should handle multiple stop calls gracefully
+        assertNotNull(observer)
+    }
+
+    @Test
+    fun `test observation with event status transitions`() = runTest {
+        // GIVEN: Event that transitions from future to running
+        val event = TestHelpers.createFutureEvent(startsIn = 5.minutes)
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        val initialStatus = observer.eventStatus.value
+
+        // WHEN: Advance time to make event running
+        mockClock.advanceTimeBy(10.minutes)
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Status should reflect transition
+        val finalStatus = observer.eventStatus.value
+        assertNotNull(initialStatus)
+        assertNotNull(finalStatus)
+    }
+
+    @Test
+    fun `test user hit detection and state updates`() = runTest {
+        // GIVEN: Event with user positioned to be hit
+        val event = TestHelpers.createTestEvent(
+            userPosition = TestHelpers.TestLocations.PARIS,
+            country = "france"
+        )
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Force observation to trigger hit detection
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Hit-related states should be computed
+        assertNotNull(observer.userIsGoingToBeHit.value)
+        assertNotNull(observer.userHasBeenHit.value)
+        assertNotNull(observer.timeBeforeHit.value)
+        assertNotNull(observer.hitDateTime.value)
+    }
+
+    @Test
+    fun `test observation flow creation and cancellation`() = runTest {
+        // GIVEN: Running event
+        val event = TestHelpers.createRunningEvent()
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Create observation flow
+        val flow = observer.createObservationFlow()
+
+        // THEN: Flow should be created successfully
+        assertNotNull(flow)
+
+        // Clean up
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+    }
+
+    @Test
+    fun `test warming phase timing accuracy`() = runTest {
+        // GIVEN: Event with specific timing for warming phases
+        val event = TestHelpers.createFutureEvent(startsIn = 2.minutes)
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Progress through different timing phases
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // Move to start warming phase
+        mockClock.advanceTimeBy(1.minutes)
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should accurately detect timing phases
+        assertNotNull(observer.isStartWarmingInProgress.value)
+    }
+
+    @Test
+    fun `test state consistency during rapid updates`() = runTest {
+        // GIVEN: Running event
+        val event = TestHelpers.createRunningEvent()
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Start observation and advance time rapidly
+        observer.startObservation()
+
+        repeat(5) {
+            mockClock.advanceTimeBy(10.seconds)
+            testScheduler.advanceUntilIdle()
+        }
+
+        // THEN: States should remain consistent
+        assertNotNull(observer.eventStatus.value)
+        assertNotNull(observer.progression.value)
+        assertTrue(observer.progression.value >= 0.0)
+        assertTrue(observer.progression.value <= 100.0)
+    }
+
+    @Test
+    fun `test event completion detection`() = runTest {
+        // GIVEN: Event nearing completion
+        val event = TestHelpers.createRunningEvent(
+            startedAgo = 55.minutes,
+            totalDuration = 1.hours
+        )
+        val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Advance time past event completion
+        mockClock.advanceTimeBy(10.minutes)
+        observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should detect completion
+        assertNotNull(observer.eventStatus.value)
+        assertNotNull(observer.progression.value)
+    }
+
+    @Test
+    fun `test user area containment detection`() = runTest {
+        // GIVEN: Event with user in and out of area
+        val inAreaMock = TestHelpers.createMockArea(
+            userPosition = TestHelpers.TestLocations.PARIS,
+            isUserInArea = true
+        )
+        val outAreaMock = TestHelpers.createMockArea(
+            userPosition = TestHelpers.TestLocations.LONDON,
+            isUserInArea = false
+        )
+
+        val inAreaEvent = TestHelpers.createTestEvent(
+            userPosition = TestHelpers.TestLocations.PARIS,
+            country = "france",
+            area = inAreaMock
+        )
+        val outAreaEvent = TestHelpers.createTestEvent(
+            userPosition = TestHelpers.TestLocations.LONDON,
+            country = "france",
+            area = outAreaMock
+        )
+
+        val inObserver = WWWEventObserver(inAreaEvent)
+        val outObserver = WWWEventObserver(outAreaEvent)
+        testScheduler.advanceUntilIdle()
+
+        // WHEN: Force state updates
+        inObserver.startObservation()
+        outObserver.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // THEN: Should correctly detect containment
+        assertTrue(inObserver.userIsInArea.value)
+        assertFalse(outObserver.userIsInArea.value)
     }
 }

@@ -33,6 +33,12 @@ kotlin {
             implementation(projects.shared)
             implementation(libs.koin.core)
         }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
+            implementation(libs.mockk.common.v1120)
+        }
     }
 }
 

@@ -93,9 +93,10 @@ class AudioBufferTest {
     @Test
     fun `test AudioBufferFactory with different bit depths`() {
         val samples = doubleArrayOf(0.0, 0.25, 0.5, 0.75, 1.0, -0.25, -0.5, -0.75, -1.0)
-        val testBitDepths = listOf(8, 16, 24, 32)
+        // Only test supported bit depths (8 and 16 for Android)
+        val supportedBitDepths = listOf(8, 16)
 
-        for (bitDepth in testBitDepths) {
+        for (bitDepth in supportedBitDepths) {
             // WHEN: Create buffer with specific bit depth
             val buffer = AudioBufferFactory.createFromSamples(
                 samples = samples,

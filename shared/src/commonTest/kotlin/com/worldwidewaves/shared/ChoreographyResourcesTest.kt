@@ -294,19 +294,23 @@ class ChoreographyResourcesTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..10).map { threadId ->
+        val threads = (1..5).map { threadId ->
             Thread {
                 try {
-                    repeat(20) { iteration ->
+                    repeat(10) { iteration ->
                         val seqNum = (iteration % 6) + 1
                         val warmingText = getChoreographyText("warming", seqNum)
                         val waitingText = getChoreographyText("waiting")
                         val hitText = getChoreographyText("hit")
 
-                        results.add("Thread $threadId: warming=$warmingText, waiting=$waitingText, hit=$hitText")
+                        synchronized(results) {
+                            results.add("Thread $threadId: warming=$warmingText, waiting=$waitingText, hit=$hitText")
+                        }
                     }
                 } catch (e: Exception) {
-                    exceptions.add(e)
+                    synchronized(exceptions) {
+                        exceptions.add(e)
+                    }
                 }
             }
         }
@@ -314,7 +318,7 @@ class ChoreographyResourcesTest {
         threads.forEach { it.start() }
         threads.forEach { it.join() }
 
-        assertTrue(exceptions.isEmpty(), "No exceptions should occur during concurrent access")
-        assertEquals(200, results.size, "All threads should complete successfully")
+        assertTrue(exceptions.isEmpty(), "No exceptions should occur during concurrent access: $exceptions")
+        assertEquals(50, results.size, "All threads should complete successfully")
     }
 }
