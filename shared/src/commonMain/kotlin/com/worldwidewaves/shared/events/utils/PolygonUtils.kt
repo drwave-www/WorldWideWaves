@@ -22,6 +22,8 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitResult.Companion.empty
+import kotlin.math.max
+import kotlin.math.min
 
 // ----------------------------------------------------------------------------
 
@@ -32,6 +34,128 @@ object PolygonUtils {
         val third: C,
         val fourth: D,
     )
+
+    // ------------------------------------------------------------------------
+    // Spatial indexing for large polygon optimization
+    // ------------------------------------------------------------------------
+
+    /**
+     * Spatial index for polygon edges to accelerate point-in-polygon tests.
+     * Uses a simple grid-based spatial index for large polygons.
+     */
+    private data class SpatialIndex(
+        val bbox: BoundingBox,
+        val gridSize: Int = 16, // 16x16 grid for reasonable granularity
+        val edgesByCell: Array<MutableList<Pair<Position, Position>>>
+    ) {
+        companion object {
+            fun build(polygon: Polygon): SpatialIndex? {
+                if (polygon.size < 100) return null // Only optimize large polygons
+
+                val bbox = polygon.bbox()
+                val gridSize = min(16, max(4, polygon.size / 20)) // Adaptive grid size
+                val edgesByCell = Array(gridSize * gridSize) { mutableListOf<Pair<Position, Position>>() }
+
+                val latStep = (bbox.ne.lat - bbox.sw.lat) / gridSize
+                val lngStep = (bbox.ne.lng - bbox.sw.lng) / gridSize
+
+                // Add edges to appropriate grid cells
+                val points = polygon.toList()
+                for (i in 0 until points.size - 1) {
+                    val start = points[i]
+                    val next = points[i + 1]
+
+                    // Find all grid cells this edge crosses
+                    val minLat = min(start.lat, next.lat)
+                    val maxLat = max(start.lat, next.lat)
+                    val minLng = min(start.lng, next.lng)
+                    val maxLng = max(start.lng, next.lng)
+
+                    val startRow = ((minLat - bbox.sw.lat) / latStep).toInt().coerceIn(0, gridSize - 1)
+                    val endRow = ((maxLat - bbox.sw.lat) / latStep).toInt().coerceIn(0, gridSize - 1)
+                    val startCol = ((minLng - bbox.sw.lng) / lngStep).toInt().coerceIn(0, gridSize - 1)
+                    val endCol = ((maxLng - bbox.sw.lng) / lngStep).toInt().coerceIn(0, gridSize - 1)
+
+                    // Add edge to all cells it might intersect
+                    for (row in startRow..endRow) {
+                        for (col in startCol..endCol) {
+                            val cellIndex = row * gridSize + col
+                            edgesByCell[cellIndex].add(Pair(start, next))
+                        }
+                    }
+                }
+
+                return SpatialIndex(bbox, gridSize, edgesByCell)
+            }
+        }
+
+        fun getCellEdges(position: Position): List<Pair<Position, Position>> {
+            val latStep = (bbox.ne.lat - bbox.sw.lat) / gridSize
+            val lngStep = (bbox.ne.lng - bbox.sw.lng) / gridSize
+
+            val row = ((position.lat - bbox.sw.lat) / latStep).toInt().coerceIn(0, gridSize - 1)
+            val col = ((position.lng - bbox.sw.lng) / lngStep).toInt().coerceIn(0, gridSize - 1)
+
+            val cellIndex = row * gridSize + col
+            return edgesByCell[cellIndex]
+        }
+    }
+
+    // Cache for spatial indices
+    private val spatialIndexCache = mutableMapOf<Int, SpatialIndex?>()
+
+    /**
+     * Optimized point-in-polygon test using spatial indexing for large polygons.
+     * Falls back to standard ray-casting for small polygons.
+     */
+    fun Polygon.containsPositionOptimized(tap: Position): Boolean {
+        require(isNotEmpty()) { return false }
+
+        // For small polygons, use standard algorithm
+        if (size < 100) {
+            return containsPosition(tap)
+        }
+
+        // Use spatial index for large polygons
+        val polygonHash = this.hashCode()
+        val spatialIndex = spatialIndexCache.getOrPut(polygonHash) {
+            SpatialIndex.build(this)
+        }
+
+        return if (spatialIndex != null) {
+            containsPositionWithSpatialIndex(tap, spatialIndex)
+        } else {
+            containsPosition(tap) // Fallback
+        }
+    }
+
+    /**
+     * Ray-casting algorithm optimized with spatial indexing.
+     * Only tests edges in the same grid cell as the query point.
+     */
+     private fun Polygon.containsPositionWithSpatialIndex(
+        tap: Position,
+        spatialIndex: SpatialIndex
+    ): Boolean {
+        val relevantEdges = spatialIndex.getCellEdges(tap)
+        var depth = 0
+
+        // Process only edges in the relevant grid cell(s) using the same algorithm as the standard version
+        for ((currentPoint, nextPoint) in relevantEdges) {
+            val (bx, by) = currentPoint.lat - tap.lat to currentPoint.lng - tap.lng
+            val (ax, ay) = nextPoint.lat - tap.lat to nextPoint.lng - tap.lng
+
+            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
+                continue
+            }
+
+            val lx = ax - ay * (bx - ax) / (by - ay)
+            if (lx == 0.0) return true
+            if (lx > 0) depth++
+        }
+
+        return (depth and 1) == 1
+    }
 
     // --------------------------------------------------------------------
     //  New simple split result (plain polygons, no cutId bookkeeping)
@@ -445,11 +569,20 @@ object PolygonUtils {
 
     /**
      * Determines if a point is inside any of the given polygons.
+     * Uses optimized containment checks for large polygons.
      */
     fun isPointInPolygons(
         tap: Position,
         polygons: Area,
-    ): Boolean = polygons.any { it.containsPosition(tap) }
+    ): Boolean = polygons.any { it.containsPositionOptimized(tap) }
+
+    /**
+     * Clears the spatial index cache to free memory.
+     * Should be called periodically or when polygon data changes.
+     */
+    fun clearSpatialIndexCache() {
+        spatialIndexCache.clear()
+    }
 
     /**
      * Calculates the bounding box of a multi-polygon.
