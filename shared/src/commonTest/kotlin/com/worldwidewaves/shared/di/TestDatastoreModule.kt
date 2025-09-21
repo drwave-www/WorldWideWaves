@@ -21,24 +21,27 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.HiddenMapsStore
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.DataStoreFactory
-import com.worldwidewaves.shared.data.DefaultDataStoreFactory
-import com.worldwidewaves.shared.data.keyValueStorePath
+import com.worldwidewaves.shared.data.TestDataStoreFactory
 import org.koin.dsl.module
 
-val datastoreModule =
+/**
+ * Test-specific DataStore module that provides isolated DataStore instances for each test.
+ * This prevents test interference and enables parallel test execution.
+ */
+val testDatastoreModule =
     module {
-        single<DataStoreFactory> { DefaultDataStoreFactory() }
-        single { get<DataStoreFactory>().create { keyValueStorePath() } }
+        single<DataStoreFactory> { TestDataStoreFactory() }
+        factory { get<DataStoreFactory>().create { "/tmp/test_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb" } }
 
         // Persistent stores ------------------------------------------------------
 
-        single { FavoriteEventsStore(get()) }
-        single { HiddenMapsStore(get()) }
+        factory { FavoriteEventsStore(get()) }
+        factory { HiddenMapsStore(get()) }
 
         factory { InitFavoriteEvent(favoriteEventsStore = get()) }
         factory { SetEventFavorite(favoriteEventsStore = get()) }

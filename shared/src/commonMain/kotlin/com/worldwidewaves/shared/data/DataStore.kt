@@ -47,46 +47,69 @@ class DataStoreException(
 
 internal const val dataStoreFileName = "wwwaves.preferences_pb"
 
-@VisibleForTesting
-lateinit var dataStore: DataStore<Preferences>
-private val lock = SynchronizedObject()
+/**
+ * DataStore factory interface that provides testable DataStore creation.
+ * This replaces the global singleton pattern to improve testability.
+ */
+interface DataStoreFactory {
+    fun create(producePath: () -> String): DataStore<Preferences>
+}
 
 /**
- * Builds (or returns) the singleton [DataStore] instance used to persist **key-value
- * preferences** across the application.
- *
- * The function is **idempotent** – subsequent calls will simply return the
- * previously-created instance.  A platform-specific `producePath` lambda is
- * invoked the first time to obtain the absolute file path where the serialized
- * preferences will be stored.  Each invocation is logged to help diagnosing
- * unexpected multiple initialisations.
- *
- * **Error Handling**: If DataStore creation fails, logs the error and rethrows the exception.
- * Callers should implement appropriate fallback mechanisms for storage failures.
- *
- * @param producePath Lambda returning the absolute path where the DataStore
- *                    file must be created (e.g. `context.filesDir.absolutePath`)
- * @return The singleton [DataStore] of type `Preferences`.
- * @throws Exception if DataStore creation fails (e.g., filesystem issues, permissions)
+ * Production implementation of DataStoreFactory that creates actual DataStore instances.
  */
-fun createDataStore(producePath: () -> String): DataStore<Preferences> =
-    synchronized(lock) {
-        if (::dataStore.isInitialized) {
-            Log.v("DataStore", "DataStore already initialized with path: ${producePath()}")
-            return dataStore
-        }
+class DefaultDataStoreFactory : DataStoreFactory {
+    private var dataStore: DataStore<Preferences>? = null
+    private val lock = SynchronizedObject()
 
-        try {
-            val path = producePath()
-            Log.i("DataStore", "Creating DataStore with path: $path")
-            dataStore = PreferenceDataStoreFactory.createWithPath { path.toPath() }
-            Log.d("DataStore", "DataStore created successfully")
-            dataStore
-        } catch (e: Exception) {
-            Log.e("DataStore", "Failed to create DataStore", throwable = e)
-            throw DataStoreException("DataStore creation failed: ${e.message}", e)
+    override fun create(producePath: () -> String): DataStore<Preferences> =
+        synchronized(lock) {
+            dataStore?.let { existing ->
+                Log.v("DataStore", "DataStore already initialized with path: ${producePath()}")
+                return existing
+            }
+
+            try {
+                val path = producePath()
+                Log.i("DataStore", "Creating DataStore with path: $path")
+                val newDataStore = PreferenceDataStoreFactory.createWithPath { path.toPath() }
+                Log.d("DataStore", "DataStore created successfully")
+                dataStore = newDataStore
+                newDataStore
+            } catch (e: Exception) {
+                Log.e("DataStore", "Failed to create DataStore", throwable = e)
+                throw DataStoreException("DataStore creation failed: ${e.message}", e)
+            }
+        }
+}
+
+/**
+ * Test implementation of DataStoreFactory that creates in-memory DataStore instances.
+ * Each test gets a clean, isolated DataStore instance.
+ */
+@VisibleForTesting
+class TestDataStoreFactory : DataStoreFactory {
+    override fun create(producePath: () -> String): DataStore<Preferences> {
+        Log.v("DataStore", "Creating test DataStore for path: ${producePath()}")
+        return PreferenceDataStoreFactory.createWithPath {
+            // Create unique temporary path for each test
+            "/tmp/test_datastore_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb".toPath()
         }
     }
+}
+
+
+/**
+ * Bridge function for backward compatibility during migration to DataStoreFactory.
+ * Creates a TestDataStoreFactory for testing purposes.
+ *
+ * @deprecated Tests should use testDatastoreModule with TestDataStoreFactory instead
+ */
+@VisibleForTesting
+@Deprecated("Tests should use testDatastoreModule with TestDataStoreFactory instead", ReplaceWith("TestDataStoreFactory().create(producePath)"))
+fun createDataStore(producePath: () -> String): DataStore<Preferences> {
+    return TestDataStoreFactory().create(producePath)
+}
 
 /** Returns the platform-specific absolute path used to store the preferences DataStore file. */
 expect fun keyValueStorePath(): String
