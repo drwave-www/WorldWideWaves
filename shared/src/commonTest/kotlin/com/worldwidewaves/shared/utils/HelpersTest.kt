@@ -16,26 +16,26 @@ class HelpersTest {
     @Test
     fun `should update value when new value is different`() =
         runTest {
-            // Arrange
+            // GIVEN: Initial flow with specific value
             val flow = MutableStateFlow("initial")
 
-            // Act
+            // WHEN: Updating with different value
             flow.updateIfChanged("updated")
 
-            // Assert
+            // THEN: Value should be updated
             assertEquals("updated", flow.value, "Flow value should be updated when new value is different")
         }
 
     @Test
     fun `should not update value when new value is same`() =
         runTest {
-            // Arrange
+            // GIVEN: Flow with specific value
             val flow = MutableStateFlow("same")
 
-            // Act
+            // WHEN: Updating with same value
             flow.updateIfChanged("same")
 
-            // Assert
+            // THEN: Value should remain unchanged
             assertEquals("same", flow.value, "Flow value should remain unchanged when new value is the same")
         }
 

@@ -40,8 +40,43 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Enhanced comprehensive tests for GeoUtils functionality including
- * distance calculations, coordinate validation, and geometric operations.
+ * Enhanced comprehensive test suite for GeoUtils functionality.
+ *
+ * This test class provides thorough validation of geographic utility functions
+ * essential for WorldWideWaves location-based operations. It covers:
+ *
+ * **Core Mathematical Functions:**
+ * - Coordinate conversion (degrees/radians) with edge cases
+ * - Distance calculations using spherical geometry
+ * - Bearing calculations and cross products
+ *
+ * **Geographic Validation:**
+ * - Latitude/longitude range validation
+ * - Date line crossing scenarios
+ * - Polar coordinate edge cases
+ *
+ * **Geometric Operations:**
+ * - Point-in-segment calculations with epsilon precision
+ * - Diagonal and complex segment testing
+ * - High-precision coordinate validation
+ *
+ * **Performance & Reliability:**
+ * - Thread safety validation for concurrent access
+ * - Performance benchmarking for calculations
+ * - Accuracy testing for mathematical operations
+ *
+ * This enhanced test suite replaces the basic GeoUtilsTest.kt to provide
+ * comprehensive coverage with real-world edge cases and precision requirements.
+ *
+ * **Coverage Areas:**
+ * - Constants validation (EPSILON, EARTH_RADIUS, MIN_PERCEPTIBLE_SPEED_DIFFERENCE)
+ * - Mathematical accuracy and precision
+ * - Geographic boundary conditions
+ * - Performance characteristics
+ *
+ * @see GeoUtils
+ * @see Position
+ * @see Segment
  */
 class GeoUtilsEnhancedTest {
 
@@ -321,6 +356,28 @@ class GeoUtilsEnhancedTest {
         assertEquals(50, results.size, "All threads should complete successfully")
     }
 
+    /**
+     * Performance benchmark test for GeoUtils calculations.
+     *
+     * This test validates that the geographic utility functions maintain
+     * acceptable performance characteristics under typical usage patterns.
+     * It exercises the most commonly used functions in a loop to identify
+     * any performance regressions or bottlenecks.
+     *
+     * **Operations Tested:**
+     * - Coordinate conversion (toRadians/toDegrees)
+     * - Distance calculations (calculateDistance)
+     * - Range validation (isLongitudeInRange, isLatitudeInRange)
+     * - Point-in-segment operations (isPointOnSegment)
+     *
+     * **Performance Expectations:**
+     * - 1000 iterations should complete within reasonable time
+     * - No memory leaks or excessive allocations
+     * - Consistent timing across multiple runs
+     *
+     * This test helps ensure the app remains responsive during wave
+     * calculations and geographic operations in real-time scenarios.
+     */
     @Test
     fun `test calculation performance`() {
         repeat(1000) { i ->

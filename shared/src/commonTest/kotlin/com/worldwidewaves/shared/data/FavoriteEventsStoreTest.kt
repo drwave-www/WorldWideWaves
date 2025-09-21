@@ -63,7 +63,7 @@ class FavoriteEventsStoreTest {
     private lateinit var favoriteEventsStore: FavoriteEventsStore
 
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         // Mock the Log object
         mockkObject(Log)
         justRun { Log.e(any(), any(), any()) }

@@ -60,7 +60,7 @@ class DataStoreEnhancedTest {
     private var tempDir: String = ""
 
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         // Mock the Log object for verification
         mockkObject(Log)
         justRun { Log.i(any(), any()) }

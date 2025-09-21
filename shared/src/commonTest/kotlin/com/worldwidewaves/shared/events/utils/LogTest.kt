@@ -21,7 +21,8 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Antilog
+import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -35,7 +36,7 @@ import kotlin.test.assertTrue
  */
 class LogTest {
 
-    private class TestAntilog : DebugAntilog() {
+    private class TestAntilog : Antilog() {
         val logs = mutableListOf<LogEntry>()
 
         data class LogEntry(
@@ -45,7 +46,7 @@ class LogTest {
             val throwable: Throwable?
         )
 
-        override fun performLog(priority: io.github.aakira.napier.LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+        override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
             logs.add(LogEntry(
                 level = priority.name,
                 tag = tag ?: "",
@@ -57,11 +58,16 @@ class LogTest {
 
     private fun withTestLogger(test: (TestAntilog) -> Unit) {
         val testLogger = TestAntilog()
-        Napier.takeLogsAlso(testLogger)
+        Napier.base(testLogger)
         try {
             test(testLogger)
         } finally {
-            Napier.removeLogger(testLogger)
+            // Reset to default debug logger for other tests
+            Napier.base(object : Antilog() {
+                override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
+                    println("[$priority] $tag: $message")
+                }
+            })
         }
     }
 

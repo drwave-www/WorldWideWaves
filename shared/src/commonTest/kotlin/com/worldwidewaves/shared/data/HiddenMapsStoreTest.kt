@@ -60,7 +60,7 @@ class HiddenMapsStoreTest {
     private lateinit var hiddenMapsStore: HiddenMapsStore
 
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         // Mock the Log object
         mockkObject(Log)
         justRun { Log.e(any(), any(), any()) }

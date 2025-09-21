@@ -24,8 +24,11 @@ package com.worldwidewaves.shared.events.utils
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 object GeoUtils {
     /**
@@ -37,16 +40,24 @@ object GeoUtils {
      * • Tiny predicates to compare / clamp coordinates while accounting for
      *   floating-point imprecision (EPSILON)
      * • Convenience functions used by wave algorithms & map logic
-     *   (range checks, “point on segment”, …).
+     *   (range checks, "point on segment", …).
      *
      * All maths stay intentionally *simple* to keep the code size and runtime
-     * cost low – accuracy is “good enough” for UI visualisation and hit
+     * cost low – accuracy is "good enough" for UI visualisation and hit
      * predictions (< 10 m error margin).
      */
-    const val EPSILON = 1e-9 // A small tolerance value for double precision errors
+    // Scientifically justified coordinate precision epsilon:
+    // IEEE 754 double precision provides ~15-17 decimal digits
+    // At equatorial circumference (40,075,017m), 1e-9 degrees ≈ 0.11mm
+    // This provides sub-millimeter precision for geodetic calculations
+    const val EPSILON = 1e-9
 
     const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0 // Adjustment variable to manage the nb of wave splits
-    const val EARTH_RADIUS = 6378137.0 // WGS84 Ellipsoid: Semi-major axis (equatorial radius), in meters
+
+    // WGS-84 Ellipsoid constants with scientific justification:
+    // Semi-major axis (equatorial radius) as defined by WGS-84 datum
+    // Reference: NIMA Technical Report TR8350.2 (2000)
+    const val EARTH_RADIUS = 6378137.0 // meters
 
     // Extension function to convert degrees to radians
     fun Double.toRadians(): Double = this * (PI / 180)
@@ -89,10 +100,19 @@ object GeoUtils {
     // ----------------------------------------------------------------------------
 
     /**
-     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
+     * Calculates the approximate distance between two longitudes at a given latitude.
+     * Uses a planar approximation that is fast but becomes inaccurate for long distances.
      *
+     * Mathematical basis: Assumes the Earth is locally flat at the given latitude.
+     * Error increases with distance and proximity to poles.
+     * Acceptable for UI visualization and short distances (<100km).
+     *
+     * @param lon1 First longitude in degrees
+     * @param lon2 Second longitude in degrees
+     * @param lat Latitude in degrees where the distance is measured
+     * @return Approximate distance in meters
      */
-    fun calculateDistance(
+    fun calculateDistanceFast(
         lon1: Double,
         lon2: Double,
         lat: Double,
@@ -103,8 +123,51 @@ object GeoUtils {
     }
 
     /**
-     * Calculates the distance between two longitudes at a given latitude using the Haversine formula.
+     * Calculates the great circle distance between two longitude points at a given latitude.
+     * Uses the Haversine formula for accurate geodesic calculations.
      *
+     * Mathematical basis: Treats the Earth as a perfect sphere and calculates
+     * the shortest distance along the surface (great circle arc).
+     * Accurate for all distances but computationally more expensive.
+     *
+     * @param lon1 First longitude in degrees
+     * @param lon2 Second longitude in degrees
+     * @param lat Latitude in degrees where the distance is measured
+     * @return Accurate distance in meters using great circle calculation
+     */
+    fun calculateDistanceAccurate(
+        lon1: Double,
+        lon2: Double,
+        lat: Double,
+    ): Double {
+        val lat1Rad = lat * (PI / 180)
+        val lat2Rad = lat * (PI / 180) // Same latitude for longitude distance
+        val deltaLonRad = (lon2 - lon1) * (PI / 180)
+
+        val a = sin(0.0) * sin(0.0) + // deltaLat = 0 for longitude distance
+                cos(lat1Rad) * cos(lat2Rad) *
+                sin(deltaLonRad / 2) * sin(deltaLonRad / 2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return EARTH_RADIUS * c
+    }
+
+    /**
+     * Calculates distance between two longitudes at a given latitude.
+     * Uses fast approximation for backward compatibility with existing code.
+     *
+     * For new code, consider using calculateDistanceFast() or calculateDistanceAccurate()
+     * explicitly based on your accuracy requirements.
+     */
+    fun calculateDistance(
+        lon1: Double,
+        lon2: Double,
+        lat: Double,
+    ): Double = calculateDistanceFast(lon1, lon2, lat)
+
+    /**
+     * Calculates the distance for a longitude width at a given latitude.
+     * Uses fast approximation for backward compatibility.
      */
     fun calculateDistance(
         lonWidth: Double,

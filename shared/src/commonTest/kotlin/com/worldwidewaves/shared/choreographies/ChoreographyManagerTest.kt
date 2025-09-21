@@ -28,6 +28,34 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/**
+ * Comprehensive test suite for ChoreographyManager functionality.
+ *
+ * This test class validates the choreography management system including:
+ * - Choreography lifecycle management (initialization, start, stop)
+ * - State transitions between warming, waiting, and hit phases
+ * - Resource loading and image resolution integration
+ * - Timing and synchronization behavior
+ * - Error handling and edge cases
+ *
+ * The tests use a custom TestChoreographyManager subclass to enable
+ * controlled testing scenarios without depending on external resources.
+ *
+ * **Key Test Areas:**
+ * - Basic initialization and configuration
+ * - Phase transitions and timing validation
+ * - Resource resolution with mocked ImageResolver
+ * - Error scenarios and cleanup behavior
+ *
+ * **Dependencies:**
+ * - MockK for mocking external dependencies
+ * - Koin for dependency injection testing
+ * - Kotlin coroutines test framework
+ *
+ * @see ChoreographyManager
+ * @see ChoreographySequence
+ * @see ImageResolver
+ */
 @OptIn(ExperimentalTime::class)
 class ChoreographyManagerTest : KoinTest {
     // Test image type for the generic manager

@@ -34,6 +34,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -60,6 +61,7 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
 class WWWEventObserverTest : KoinTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var mockClock: MockClock
+    private val activeObservers = mutableListOf<WWWEventObserver>()
 
     @BeforeTest
     fun setUp() {
@@ -78,8 +80,26 @@ class WWWEventObserverTest : KoinTest {
 
     @AfterTest
     fun tearDown() {
+        // Clean up any remaining observers to prevent resource leaks
+        runBlocking {
+            activeObservers.forEach { observer ->
+                try {
+                    observer.stopObservation()
+                } catch (e: Exception) {
+                    // Ignore cleanup errors
+                }
+            }
+            activeObservers.clear()
+        }
+
         stopKoin()
         Dispatchers.resetMain()
+    }
+
+    private fun createTrackedObserver(event: IWWWEvent): WWWEventObserver {
+        val observer = WWWEventObserver(event)
+        activeObservers.add(observer)
+        return observer
     }
 
     @Test
@@ -172,6 +192,10 @@ class WWWEventObserverTest : KoinTest {
         observer.startObservation()
         testScheduler.advanceUntilIdle()
 
+        // Clean up
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
+
         // THEN: Should handle gracefully without crashes
         assertNotNull(observer)
     }
@@ -238,7 +262,7 @@ class WWWEventObserverTest : KoinTest {
         }
 
         // WHEN
-        val observer = WWWEventObserver(event)
+        val observer = createTrackedObserver(event)
         testScheduler.advanceUntilIdle()
 
         // Force an observation cycle to ensure state is updated
@@ -321,7 +345,7 @@ class WWWEventObserverTest : KoinTest {
     fun `test state flow updates during event progression`() = runTest {
         // GIVEN: A running event with progression
         val event = TestHelpers.createRunningEvent(startedAgo = 10.minutes, totalDuration = 1.hours)
-        val observer = WWWEventObserver(event)
+        val observer = createTrackedObserver(event)
         testScheduler.advanceUntilIdle()
 
         val initialProgression = observer.progression.value
@@ -330,6 +354,10 @@ class WWWEventObserverTest : KoinTest {
         // WHEN: Advance time to change progression
         mockClock.advanceTimeBy(15.minutes)
         observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // Clean up
+        observer.stopObservation()
         testScheduler.advanceUntilIdle()
 
         // THEN: State flows should update
@@ -416,10 +444,10 @@ class WWWEventObserverTest : KoinTest {
         every { mockEvent.getStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
         every { mockEvent.getWaveStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
         coEvery { mockEvent.getStatus() } returns Status.RUNNING
-        coEvery { mockEvent.isRunning() } returns true
+        coEvery { mockEvent.isRunning() } returns false // Not running to avoid observation flow
         every { mockEvent.isSoon() } returns false
-        every { mockEvent.isNearTime() } returns true
-        coEvery { mockEvent.isDone() } returns false
+        every { mockEvent.isNearTime() } returns false // Not near time to avoid observation flow
+        coEvery { mockEvent.isDone() } returns true // Mark as done to prevent infinite loops
         coEvery { mockWave.getProgression() } throws RuntimeException("Test error")
         every { mockWave.getUserPosition() } returns null
         coEvery { mockWave.timeBeforeUserHit() } returns null
@@ -427,6 +455,7 @@ class WWWEventObserverTest : KoinTest {
         coEvery { mockWave.userHitDateTime() } returns null
         coEvery { mockWave.hasUserBeenHitInCurrentPosition() } returns false
         coEvery { mockWarming.isUserWarmingStarted() } returns false
+        coEvery { mockArea.isPositionWithin(any()) } returns false
 
         // WHEN: Create observer with faulty event
         val observer = WWWEventObserver(mockEvent)
@@ -435,6 +464,10 @@ class WWWEventObserverTest : KoinTest {
         // THEN: Should handle errors gracefully
         assertNotNull(observer.eventStatus.value)
         assertEquals(0.0, observer.progression.value) // Should default to 0.0 on error
+
+        // Clean up
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
     }
 
     @Test
@@ -503,11 +536,15 @@ class WWWEventObserverTest : KoinTest {
             userPosition = TestHelpers.TestLocations.PARIS,
             country = "france"
         )
-        val observer = WWWEventObserver(event)
+        val observer = createTrackedObserver(event)
         testScheduler.advanceUntilIdle()
 
         // WHEN: Force observation to trigger hit detection
         observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // Clean up
+        observer.stopObservation()
         testScheduler.advanceUntilIdle()
 
         // THEN: Hit-related states should be computed

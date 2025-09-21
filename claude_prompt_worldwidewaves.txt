@@ -3,38 +3,139 @@
 ## Project Context
 - **Project Name**: WorldWideWaves
 - **Project Type**: kotlin-multiplatform-mobile
-- **Tech Stack**: Kotlin Multiplatform Mobile + Compose
+- **Tech Stack**: Kotlin Multiplatform + Jetpack Compose + MapLibre + Firebase
 - **Critical Assets**: user data, configuration files
 - **Common Issues**: configuration errors, dependency issues
+
+## Domain-Specific Knowledge
+
+### Technology Stack Overview
+WorldWideWaves is a sophisticated Kotlin Multiplatform mobile application designed for cross-platform development targeting iOS and Android. The application leverages:
+
+- **Kotlin Multiplatform**: Shared business logic and common code
+- **Jetpack Compose**: Modern Android UI framework with declarative UI
+- **MapLibre**: Open-source mapping solutions for location-based features
+- **Firebase**: Backend services including authentication, real-time database, and cloud functions
+
+### Project Architecture
+The application follows a modular architecture with shared business logic in common modules and platform-specific implementations for UI and platform features. Critical components include user authentication, location services, real-time data synchronization, and offline capability.
+
+## Security-Critical Patterns (HIGH PRIORITY)
+
+### Firebase Security Rules
+- Implement strict Firestore security rules with proper user authentication checks
+- Validate all database reads/writes against user permissions
+- Use Firebase Authentication tokens for all server communication
+- Enable Firebase App Check to prevent unauthorized API usage
+
+### Kotlin Multiplatform Security
+- Validate all shared data models with proper type safety
+- Implement certificate pinning for network communications
+- Use encrypted SharedPreferences/Keychain for sensitive data storage
+- Apply proper obfuscation to protect business logic in common modules
+
+### MapLibre Integration Security
+- Validate all location data before processing
+- Implement proper API key management for mapping services
+- Use HTTPS-only endpoints for tile servers and geocoding
+- Sanitize user-generated location markers and annotations
+
+## Performance Considerations (MEDIUM PRIORITY)
+
+### Cross-Platform Optimization
+- Minimize shared state mutations across platforms
+- Use appropriate threading models for each platform
+- Implement efficient data serialization between common and platform code
+- Cache frequently accessed data in platform-appropriate storage
+
+### UI Performance
+- Optimize Compose recomposition by using stable data classes
+- Implement proper LazyColumn/LazyRow virtualization for large datasets
+- Use appropriate image loading libraries with caching for map tiles
+- Monitor memory usage when handling large geographic datasets
+
+## Error Handling Patterns (HIGH PRIORITY)
+
+### Network Error Recovery
+- Implement exponential backoff for Firebase connection retries
+- Handle offline scenarios with proper data queuing
+- Provide user-friendly error messages for location service failures
+- Log network errors with sufficient context for debugging
+
+### Platform-Specific Error Handling
+- Catch and handle platform-specific location permission errors
+- Implement proper error boundaries for Compose UI crashes
+- Handle Firebase authentication state changes gracefully
+- Manage MapLibre rendering errors without app crashes
+
+## Learning Protocol
+
+### Pattern Recognition Criteria
+- **HIGH Confidence**: Established patterns for Firebase/Kotlin integration with proven track record
+- **MEDIUM Confidence**: MapLibre integration patterns with some platform variations
+- **LOW Confidence**: Emerging cross-platform patterns requiring validation
+
+### Continuous Improvement Signals
+- Monitor Firebase performance metrics and adjust queries accordingly
+- Track MapLibre rendering performance across different devices
+- Analyze crash reports for common failure patterns
+- Update security patterns based on Firebase security announcements
 
 ## Instructions for Claude
 
 Please create a comprehensive CLAUDE.md file for this project that includes:
 
 1. **Project Overview**
-   - Brief description of the project and its purpose
-   - Technology stack and architecture overview
+   - Brief description of WorldWideWaves as a location-based Kotlin Multiplatform application
+   - Technology stack and architecture overview emphasizing cross-platform development
 
 2. **🚨 MANDATORY DEVELOPMENT REQUIREMENTS - NEVER SKIP THESE**
-   - Security patterns specific to: Kotlin Multiplatform Mobile + Compose
-   - Performance considerations for: kotlin-multiplatform-mobile
-   - Error handling patterns
-   - Input validation requirements
+   - Security patterns specific to: Kotlin Multiplatform + Jetpack Compose + MapLibre + Firebase
+   - Performance considerations for: kotlin-multiplatform-mobile with location services
+   - Error handling patterns for cross-platform development
+   - Input validation requirements for location data and user inputs
 
 3. **Critical Asset Protection**
-   - Specific protections for: user data, configuration files
-   - Access control patterns
-   - Data encryption requirements
+   - Specific protections for: user data (location, personal info), configuration files (API keys, Firebase config)
+   - Access control patterns for Firebase authentication and authorization
+   - Data encryption requirements for sensitive location and user data
 
 4. **Common Issue Prevention**
-   - Preventive measures for: configuration errors, dependency issues
-   - Monitoring and alerting patterns
-   - Testing requirements
+   - Preventive measures for: configuration errors (API keys, build variants), dependency issues (KMP versions, platform conflicts)
+   - Monitoring and alerting patterns for location services and Firebase connectivity
+   - Testing requirements for cross-platform functionality and location features
 
 5. **Learning Protocol**
-   - Pattern recognition for continuous improvement
-   - Confidence levels (HIGH/MEDIUM/LOW)
-   - Automatic CLAUDE.md updates
+   - Pattern recognition for continuous improvement of KMP and location-based development
+   - Confidence levels (HIGH/MEDIUM/LOW) for different aspects of the tech stack
+   - Automatic CLAUDE.md updates based on project evolution and new patterns
+
+## Implementation Validation
+
+After you paste this prompt to Claude, it should:
+
+1. **Immediately create a complete CLAUDE.md file** for the WorldWideWaves project
+2. **Validate the system setup** by demonstrating understanding of Kotlin Multiplatform architecture
+3. **Test with practical examples** like "Help me implement secure Firebase authentication" or "Optimize MapLibre performance for large datasets"
+
+## Testing Requirements
+
+To validate the effectiveness of your generated CLAUDE.md:
+
+1. **Authentication Test**: "Help me implement Firebase Authentication with proper security for cross-platform use"
+2. **Location Test**: "Help me add MapLibre integration with offline map support"
+3. **Performance Test**: "Optimize Jetpack Compose performance for large location datasets"
+4. **Architecture Test**: "Help me structure shared business logic for location services in Kotlin Multiplatform"
 
 ## Output Format
-Please format the response as a complete CLAUDE.md file that can be directly saved to the project directory.
+
+**IMPORTANT**: Your response must be the complete CLAUDE.md file content, starting with "# WorldWideWaves" and ending with the learning protocol. Do NOT provide a summary or description of what you would create. Output the actual file content that can be saved directly as CLAUDE.md.
+
+Your response should start with:
+
+# WorldWideWaves
+
+## Project Overview
+WorldWideWaves is a cross-platform mobile application built with Kotlin Multiplatform...
+
+And continue with ALL sections including detailed content, code examples, and specific guidance for Kotlin Multiplatform development with location services.

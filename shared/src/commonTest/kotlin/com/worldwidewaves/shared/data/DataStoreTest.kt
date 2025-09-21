@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class DataStoreTest {
     @BeforeTest
-    fun setup() {
+    fun setUp() {
         // Mock the Log object for verification
         mockkObject(Log)
         justRun { Log.i(any(), any()) }
@@ -46,12 +46,12 @@ class DataStoreTest {
 
     @Test
     fun `test createDataStore logs initialization message`() {
-        // Arrange
+        // GIVEN: Mock path provider
         val pathProvider = mockk<() -> String>()
 
         every { pathProvider() } returns "/test/path"
 
-        // Act - Note: This will attempt to create a real DataStore, which may not work in tests
+        // WHEN: Attempting to create DataStore (may fail in tests)
         // But we're only verifying the logging behavior
         try {
             createDataStore(pathProvider)
@@ -60,7 +60,7 @@ class DataStoreTest {
             // We're only testing the logging behavior
         }
 
-        // Assert - Just verify that the path provider was called
+        // THEN: Path provider should be called
         // The actual logging behavior depends on whether DataStore is already initialized
         // which can vary between test runs
         verify { pathProvider() }
@@ -68,11 +68,11 @@ class DataStoreTest {
 
     @Test
     fun `test path provider function is called`() {
-        // Arrange
+        // GIVEN: Mock path provider
         val pathProviderMock = mockk<() -> String>()
         every { pathProviderMock() } returns "/test/path"
 
-        // Act - Note: This will attempt to create a real DataStore, which may not work in tests
+        // WHEN: Attempting to create DataStore (may fail in tests)
         // But we're only verifying that the path provider is called
         try {
             createDataStore(pathProviderMock)
@@ -81,7 +81,7 @@ class DataStoreTest {
             // We're only testing that the path provider is called
         }
 
-        // Assert
+        // THEN: Path provider should be called
         verify { pathProviderMock() }
     }
 
