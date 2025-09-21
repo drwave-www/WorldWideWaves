@@ -306,26 +306,20 @@ class WWWEventObserverTest : KoinTest {
             userPosition = TestHelpers.TestLocations.PARIS
         )
 
-        // Debug: Check the wave's user position setup
+        // Verify test setup: Wave should have user position configured
         val waveUserPosition = event.wave.getUserPosition()
-        println("DEBUG: Wave user position: $waveUserPosition")
-        println("DEBUG: Expected position: ${TestHelpers.TestLocations.PARIS}")
+        assertNotNull(waveUserPosition, "Test event should have user position configured")
+        assertEquals(TestHelpers.TestLocations.PARIS, waveUserPosition, "User position should match expected test location")
 
-        // Debug: Check event status and timing conditions
+        // Verify event state is properly configured for testing
         val eventStatus = event.getStatus()
         val eventIsRunning = event.isRunning()
         val eventIsDone = event.isDone()
-        println("DEBUG: Event status: $eventStatus")
-        println("DEBUG: Event isRunning: $eventIsRunning")
-        println("DEBUG: Event isDone: $eventIsDone")
-        println("DEBUG: Event isSoon: ${event.isSoon()}")
-        println("DEBUG: Event isNearTime: ${event.isNearTime()}")
+        assertNotNull(eventStatus, "Event should have valid status")
 
-        // Debug: Test the area mock directly
-        if (waveUserPosition != null) {
-            val areaResult = event.area.isPositionWithin(waveUserPosition)
-            println("DEBUG: Area.isPositionWithin(userPosition) = $areaResult")
-        }
+        // Verify area containment logic works correctly
+        val areaResult = event.area.isPositionWithin(waveUserPosition)
+        assertTrue(areaResult, "User position should be within event area for this test")
 
         // WHEN
         val observer = createTrackedObserver(event)
@@ -335,18 +329,13 @@ class WWWEventObserverTest : KoinTest {
         observer.startObservation()
         testScheduler.advanceUntilIdle()
 
-        // THEN: Should initialize properly with test data
-        assertNotNull(observer.eventStatus.value)
-        assertNotNull(observer.progression.value)
-        println("DEBUG: userIsInArea.value = ${observer.userIsInArea.value}")
+        // THEN: Observer should initialize properly with test data
+        assertNotNull(observer.eventStatus.value, "Observer should have valid event status")
+        assertNotNull(observer.progression.value, "Observer should have valid progression")
 
-        // The core functionality should work: both direct call and observer should return true
-        if (waveUserPosition != null) {
-            assertTrue(event.area.isPositionWithin(waveUserPosition))
-        }
-
-        // With the observer fix, userIsInArea should now be properly set
-        assertTrue(observer.userIsInArea.value)
+        // Core state synchronization: Observer state should match direct area calculation
+        assertTrue(event.area.isPositionWithin(waveUserPosition), "Direct area check should return true for test setup")
+        assertTrue(observer.userIsInArea.value, "Observer userIsInArea should be synchronized with area containment logic")
     }
 
     @Test

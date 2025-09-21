@@ -366,10 +366,13 @@ class WWWEventObserver(
     ) {
         Log.v("WWWEventObserver", "updateStates called: progression=$progression, status=$status, eventId=${event.id}")
 
-        // Validate input parameters
+        // Validate input parameters and state transitions
         if (progression < 0.0 || progression > 100.0) {
             Log.w("WWWEventObserver", "Invalid progression value: $progression (should be 0-100)")
         }
+
+        // Validate state transitions for consistency
+        validateStateTransition(progression, status)
         // Update the main state flows with smart throttling
         updateProgressionIfSignificant(progression)
         _eventStatus.updateIfChanged(status)
@@ -475,6 +478,60 @@ class WWWEventObserver(
         }
 
         return issues
+    }
+
+    /**
+     * Validates state transitions to ensure they follow logical progression.
+     * This helps catch state management bugs early and ensures consistent behavior.
+     */
+    private fun validateStateTransition(newProgression: Double, newStatus: Status) {
+        val previousProgression = _progression.value
+        val previousStatus = _eventStatus.value
+
+        // Validate progression transitions
+        if (newProgression < previousProgression && newStatus != Status.DONE) {
+            // Progression should generally not go backwards unless the event is done
+            Log.w("WWWEventObserver", "Progression went backwards: $previousProgression -> $newProgression (status: $newStatus)")
+        }
+
+        // Validate status transitions follow logical order
+        when (previousStatus) {
+            Status.DONE -> {
+                if (newStatus != Status.DONE) {
+                    Log.w("WWWEventObserver", "Invalid transition from DONE to $newStatus")
+                }
+            }
+            Status.RUNNING -> {
+                if (newStatus == Status.NEXT || newStatus == Status.SOON) {
+                    Log.w("WWWEventObserver", "Invalid backward transition from RUNNING to $newStatus")
+                }
+            }
+            Status.SOON -> {
+                if (newStatus == Status.NEXT) {
+                    Log.w("WWWEventObserver", "Invalid backward transition from SOON to $newStatus")
+                }
+            }
+            else -> {
+                // NEXT, SOON, and UNDEFINED can transition to any state
+            }
+        }
+
+        // Validate progression consistency with status
+        when (newStatus) {
+            Status.DONE -> {
+                if (newProgression < 100.0) {
+                    Log.w("WWWEventObserver", "Status is DONE but progression is $newProgression (should be 100.0)")
+                }
+            }
+            Status.RUNNING -> {
+                if (newProgression <= 0.0) {
+                    Log.w("WWWEventObserver", "Status is RUNNING but progression is $newProgression (should be > 0)")
+                }
+            }
+            else -> {
+                // Other statuses can have any progression value
+            }
+        }
     }
 
     /**

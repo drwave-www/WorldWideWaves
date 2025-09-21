@@ -703,20 +703,36 @@ class ChoreographyManagerTest : KoinTest {
             coroutineScopeProvider = coroutineScopeProvider
         )
 
-        // WHEN & THEN: Should handle the complete resource loading lifecycle gracefully
-        // This includes JSON parsing, image resolution, sequence building, etc.
-        assertDoesNotThrow("ChoreographyManager should handle complete resource loading lifecycle gracefully") {
-            // Test all the main public methods that involve resource loading
-            realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
-            realManager.getWaitingSequenceImmediate()
-            realManager.getHitSequenceImmediate()
+        // WHEN: Exercising real resource loading paths
+        val warmingSequence = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
+        val waitingSequence = realManager.getWaitingSequenceImmediate()
+        val hitSequence = realManager.getHitSequenceImmediate()
 
-            // These calls exercise the real resource loading code paths including:
-            // - JSON choreography definition loading
-            // - Image resource resolution via ImageResolver
-            // - Sequence timing calculations
-            // - Error handling for missing/corrupted resources
+        // THEN: Validate actual resource loading behavior
+        // These methods should either return valid sequences or null (not throw exceptions)
+        // This exercises the real resource loading code paths including:
+        // - JSON choreography definition loading
+        // - Image resource resolution via ImageResolver
+        // - Sequence timing calculations
+        // - Error handling for missing/corrupted resources
+
+        // Validate return values are consistent with expected resource loading behavior
+        if (warmingSequence != null) {
+            assertNotNull(warmingSequence.text, "Warming sequence should have text resource loaded")
+            assertTrue(warmingSequence.duration.isPositive(), "Warming sequence should have positive duration")
         }
+
+        if (waitingSequence != null) {
+            assertNotNull(waitingSequence.text, "Waiting sequence should have text resource loaded")
+            assertTrue(waitingSequence.duration.isPositive(), "Waiting sequence should have positive duration")
+        }
+
+        if (hitSequence != null) {
+            assertNotNull(hitSequence.text, "Hit sequence should have text resource loaded")
+            assertTrue(hitSequence.duration.isPositive(), "Hit sequence should have positive duration")
+        }
+
+        Log.v("ChoreographyManagerTest", "Resource loading lifecycle validation completed successfully")
     }
 
     /**
@@ -761,28 +777,59 @@ class ChoreographyManagerTest : KoinTest {
             coroutineScopeProvider = coroutineScopeProvider
         )
 
-        // WHEN: Attempting various operations that may fail due to missing resources
-        // THEN: All operations should complete without throwing unhandled exceptions
-        assertDoesNotThrow("Resource loading errors should be handled gracefully") {
-            // Test timing-dependent operations
+        // WHEN: Testing various error scenarios that may occur during resource loading
+        var resourceLoadingAttempted = false
+        var exceptionsHandledGracefully = true
+
+        try {
+            // Test timing-dependent operations with various edge cases
             val baseTime = TestHelpers.TestTimes.BASE_TIME
-            realManager.getCurrentWarmingSequenceImmediate(baseTime)
-            realManager.getCurrentWarmingSequenceImmediate(baseTime + 1000.milliseconds)
-            realManager.getCurrentWarmingSequenceImmediate(baseTime - 1000.milliseconds)
 
-            // Test static operations
-            realManager.getWaitingSequenceImmediate()
-            realManager.getHitSequenceImmediate()
+            // Test extreme timing scenarios that may cause resource loading issues
+            val result1 = realManager.getCurrentWarmingSequenceImmediate(baseTime)
+            val result2 = realManager.getCurrentWarmingSequenceImmediate(baseTime + 1000.milliseconds)
+            val result3 = realManager.getCurrentWarmingSequenceImmediate(baseTime - 1000.milliseconds)
 
-            // Test repeated calls to verify no state corruption
-            repeat(3) {
-                realManager.getCurrentWarmingSequenceImmediate(baseTime)
-                realManager.getWaitingSequenceImmediate()
-                realManager.getHitSequenceImmediate()
+            // Test static operations that depend on resource loading
+            val waitingResult = realManager.getWaitingSequenceImmediate()
+            val hitResult = realManager.getHitSequenceImmediate()
+
+            resourceLoadingAttempted = true
+
+            // THEN: Validate that resource loading attempts are handled properly
+            // Results should be either valid sequences or null, never invalid state
+            listOf(result1, result2, result3, waitingResult, hitResult).forEach { result ->
+                if (result != null) {
+                    // If a sequence is returned, validate it has proper structure
+                    assertTrue(result.duration.isFinite(), "Returned sequence should have finite duration")
+                    assertTrue(result.duration >= Duration.ZERO, "Returned sequence should have non-negative duration")
+                    assertNotNull(result.text, "Returned sequence should have text resource")
+                }
             }
+
+            // Test repeated calls to verify no state corruption during resource loading errors
+            repeat(3) {
+                val repeatResult1 = realManager.getCurrentWarmingSequenceImmediate(baseTime)
+                val repeatResult2 = realManager.getWaitingSequenceImmediate()
+                val repeatResult3 = realManager.getHitSequenceImmediate()
+
+                // Verify consistency: same inputs should yield same results
+                assertEquals(result1, repeatResult1, "Repeated calls should return consistent results")
+                assertEquals(waitingResult, repeatResult2, "Repeated calls should return consistent results")
+                assertEquals(hitResult, repeatResult3, "Repeated calls should return consistent results")
+            }
+
+        } catch (e: Exception) {
+            exceptionsHandledGracefully = false
+            Log.e("ChoreographyManagerTest", "Unhandled exception during resource loading test: ${e.message}")
+            throw e
         }
 
-        Log.v("ChoreographyManagerTest", "Error handling validation completed")
+        // THEN: Validate error handling behavior
+        assertTrue(resourceLoadingAttempted, "Resource loading should have been attempted")
+        assertTrue(exceptionsHandledGracefully, "All resource loading errors should be handled gracefully")
+
+        Log.v("ChoreographyManagerTest", "Error handling validation completed - resource loading errors handled gracefully")
     }
 
     /**
