@@ -46,7 +46,7 @@ struct ContentView: View {
                 .padding()
             } else {
                 List(events, id: \.id) { event in
-                    Text(event.location)
+                    Text(event.getLocation().getString())
                 }
             }
         }
