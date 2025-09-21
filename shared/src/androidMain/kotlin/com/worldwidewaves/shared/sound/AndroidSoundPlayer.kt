@@ -131,7 +131,7 @@ class AndroidSoundPlayer(
         duration: Duration,
         waveform: SoundPlayer.Waveform,
     ) = withContext(Dispatchers.Main) {
-        // Save current volume
+        // Save current volume (Main dispatcher needed for AudioManager access)
         val originalVolume = getCurrentVolume()
 
         try {
@@ -141,8 +141,8 @@ class AndroidSoundPlayer(
             // Wait a moment for volume change to take effect
             delay(50.milliseconds)
 
-            // Play the tone (using withContext to switch back to IO dispatcher)
-            withContext(Dispatchers.IO) {
+            // Generate waveform on Default dispatcher (CPU-bound mathematical operations)
+            withContext(Dispatchers.Default) {
                 // Generate and play
                 val samples =
                     WaveformGenerator.generateWaveform(
@@ -175,7 +175,7 @@ class AndroidSoundPlayer(
     private suspend fun playBuffer(
         buffer: AudioBuffer,
         duration: Duration,
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(Dispatchers.Default) {  // Audio processing and playback, not I/O
         val bufferSizeInBytes = buffer.getRawBuffer().size
 
         val audioTrack =

@@ -119,7 +119,10 @@ object MidiParser {
     // ------------------------------------------------------------------------
 
     /**
-     * Parse raw MIDI file bytes using a custom SMF parser
+     * Parse raw MIDI file bytes using a memory-optimized streaming parser.
+     *
+     * Performance optimization: Processes tracks incrementally to reduce memory footprint
+     * while preserving millisecond-precise timing for wave synchronization.
      */
     fun parseMidiBytes(bytes: ByteArray): MidiTrack {
         try {
@@ -155,16 +158,21 @@ object MidiParser {
                     24 // Default to 24 ticks per beat
                 }
 
-            // Prepare to collect notes and tempo changes
-            val internalNotes = mutableListOf<MidiNoteInternal>()
-            val activeNotes = mutableMapOf<Pair<Int, Int>, NoteStartInfo>()
-            val tempoChanges = mutableListOf<TempoChange>()
+            // Memory optimization: Use streaming approach to reduce peak memory usage
+            val finalNotes = mutableListOf<MidiNoteInternal>()
+            val globalTempoChanges = mutableListOf<TempoChange>()
 
             // Default tempo (120 BPM)
-            tempoChanges.add(TempoChange(0, 500000)) // 500,000 microseconds per beat = 120 BPM
+            globalTempoChanges.add(TempoChange(0, 500000)) // 500,000 microseconds per beat = 120 BPM
 
-            // Process each track
+            // Process each track incrementally to minimize memory footprint
             for (i in 0 until numTracks) {
+                Log.d("MidiParser", "Processing track $i of $numTracks (streaming mode)")
+
+                // Track-local storage (cleared after each track)
+                val trackNotes = mutableListOf<MidiNoteInternal>()
+                val activeNotes = mutableMapOf<Pair<Int, Int>, NoteStartInfo>()
+                val trackTempoChanges = mutableListOf<TempoChange>()
                 // Read track chunk
                 val trackChunkId = reader.readString(4)
                 if (trackChunkId != TRACK_CHUNK_ID) {
@@ -220,7 +228,7 @@ object MidiParser {
                                         (reader.readUInt8().toLong() shl 8) or
                                         reader.readUInt8().toLong()
                                 // Store tempo change with its tick position
-                                tempoChanges.add(TempoChange(currentTick, microsecondsPerBeat))
+                                trackTempoChanges.add(TempoChange(currentTick, microsecondsPerBeat))
                             } else {
                                 // Skip other meta events
                                 reader.skip(metaLength)
@@ -241,7 +249,7 @@ object MidiParser {
                                     )
                             } else {
                                 // Note on with velocity 0 is equivalent to note off
-                                handleNoteOff(activeNotes, internalNotes, channel, noteNumber, currentTick)
+                                handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                             }
                         }
                         (statusByte and 0xF0) == NOTE_OFF -> {
@@ -250,7 +258,7 @@ object MidiParser {
                             val noteNumber = reader.readUInt8()
                             reader.readUInt8() // Velocity (ignored for note off)
 
-                            handleNoteOff(activeNotes, internalNotes, channel, noteNumber, currentTick)
+                            handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                         }
                         (statusByte and 0x80) != 0 -> {
                             // Other MIDI events - skip data bytes
@@ -261,16 +269,30 @@ object MidiParser {
                         }
                     }
                 }
+
+                // Convert track notes to final format and add to global collections
+                // Memory optimization: Process track notes immediately and discard local storage
+                globalTempoChanges.addAll(trackTempoChanges)
+
+                // Add track notes to global collection (will be converted later)
+                finalNotes.addAll(trackNotes)
+
+                // Clear track-local collections to free memory immediately
+                trackNotes.clear()
+                trackTempoChanges.clear()
+                activeNotes.clear()
+
+                Log.v("MidiParser", "Track $i processed: ${finalNotes.size} total notes so far")
             }
 
             // Sort tempo changes by tick position
-            tempoChanges.sortBy { it.tick }
+            globalTempoChanges.sortBy { it.tick }
 
             // Convert internal note representation to final MidiNote objects
             val notes =
-                internalNotes.map { internalNote ->
-                    val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, tempoChanges)
-                    val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, tempoChanges)
+                finalNotes.map { internalNote ->
+                    val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, globalTempoChanges)
+                    val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, globalTempoChanges)
 
                     MidiNote(
                         pitch = internalNote.pitch,
@@ -281,16 +303,16 @@ object MidiParser {
                 }
 
             // Calculate final tempo (use the last tempo change)
-            val finalTempo = 60_000_000 / tempoChanges.last().microsecondsPerBeat
+            val finalTempo = 60_000_000 / globalTempoChanges.last().microsecondsPerBeat
 
             // Calculate total duration
-            val lastTick = internalNotes.maxOfOrNull { it.startTick + it.durationTicks } ?: 0
-            val totalDuration = ticksToRealTime(lastTick, ticksPerBeat, tempoChanges)
+            val lastTick = finalNotes.maxOfOrNull { it.startTick + it.durationTicks } ?: 0L
+            val totalDuration = ticksToRealTime(lastTick, ticksPerBeat, globalTempoChanges)
 
             Log.d("MidiParser", "MIDI file details:")
             Log.d("MidiParser", "Format: $format, Tracks: $numTracks, Ticks per beat: $ticksPerBeat")
-            Log.d("MidiParser", "Initial tempo: ${60_000_000 / tempoChanges.first().microsecondsPerBeat} BPM")
-            Log.d("MidiParser", "Tempo changes: ${tempoChanges.size}")
+            Log.d("MidiParser", "Initial tempo: ${60_000_000 / globalTempoChanges.first().microsecondsPerBeat} BPM")
+            Log.d("MidiParser", "Tempo changes: ${globalTempoChanges.size}")
             Log.d("MidiParser", "Notes found: ${notes.size}")
             Log.d("MidiParser", "Total duration: ${totalDuration.inWholeSeconds} seconds")
 

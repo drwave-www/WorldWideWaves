@@ -180,7 +180,7 @@ class WWWEventObserver(
                         Log.i("WWWEventObserver", "Starting continuous observation flow for event ${event.id}")
                         observationJob =
                             createObservationFlow()
-                                .flowOn(Dispatchers.IO)
+                                .flowOn(Dispatchers.Default)  // CPU-bound calculations (progression, status, time)
                                 .catch { e ->
                                     Log.e("WWWEventObserver", "Error in observation flow for event ${event.id}: $e")
                                     // Don't propagate the error - just log it and continue
