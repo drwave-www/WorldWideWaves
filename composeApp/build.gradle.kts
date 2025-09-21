@@ -62,8 +62,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 25
-        versionName = "v0.21"
+        versionCode = 26
+        versionName = "v0.22"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
