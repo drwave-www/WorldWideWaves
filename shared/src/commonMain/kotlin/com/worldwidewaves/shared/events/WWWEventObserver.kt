@@ -149,10 +149,10 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  * - **0-35 seconds**: 500ms intervals (active monitoring)
  * - **Hit critical (< 1s)**: 50ms intervals (sound accuracy)
  *
- * **State Update Throttling:**
+ * **State Update Throttling (Adaptive):**
  * - Progression: Only updates if change > 0.1%
  * - Position: Only updates if change > 1%
- * - Time: Only updates if change > 1 second
+ * - Time: Adaptive (50ms during critical hit phase < 2s, 1000ms otherwise)
  *
  * ### Usage Guidelines:
  *
@@ -230,7 +230,7 @@ class WWWEventObserver(
     private companion object {
         const val PROGRESSION_THRESHOLD = 0.1 // Only update progression if change is > 0.1%
         const val POSITION_RATIO_THRESHOLD = 0.01 // Only update position ratio if change is > 1%
-        const val TIME_THRESHOLD_MS = 1000L // Only update time if change is > 1 second
+        const val TIME_THRESHOLD_MS = 1000L // Normal phase: update time if change is > 1 second (adaptive to 50ms during critical hit phase)
     }
 
     // Cache last emitted values for throttling
@@ -504,12 +504,20 @@ class WWWEventObserver(
     }
 
     /**
-     * Updates time before hit only if the change is significant enough (> 1 second).
-     * Reduces rapid time updates that don't provide meaningful information to users.
+     * Updates time before hit with adaptive throttling for critical timing accuracy.
+     *
+     * Critical timing requirements:
+     * - During hit phase (< 2s): Updates every 50ms for sound synchronization
+     * - Normal phase (> 2s): Updates every 1000ms to reduce UI churn
      */
     private fun updateTimeBeforeHitIfSignificant(newTime: Duration) {
         val timeDifference = abs((newTime - lastEmittedTimeBeforeHit).inWholeMilliseconds)
-        if (timeDifference >= TIME_THRESHOLD_MS ||
+
+        // Critical timing phase: Need sub-50ms accuracy for wave synchronization
+        val isCriticalPhase = newTime.inWholeSeconds <= 2 && newTime > Duration.ZERO
+        val threshold = if (isCriticalPhase) 50L else TIME_THRESHOLD_MS // 50ms vs 1000ms
+
+        if (timeDifference >= threshold ||
             lastEmittedTimeBeforeHit == Duration.INFINITE) { // Always emit first update
             _timeBeforeHit.updateIfChanged(newTime)
             lastEmittedTimeBeforeHit = newTime
