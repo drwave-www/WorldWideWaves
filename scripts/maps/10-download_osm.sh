@@ -63,7 +63,7 @@ pip install openmaptiles-tools
 # -----------------------------------------------------------------------------
 
 if [ ! -z "$EVENT_PARAM" ]; then
-  if $(exists "$EVENT_PARAM"); then
+  if exists "$EVENT_PARAM"; then
     EVENTS=$EVENT_PARAM
     rm -f data/.env-"$EVENT_PARAM"
     rm -f data/"$EVENT_PARAM".yaml
@@ -85,9 +85,7 @@ for event in $EVENTS; do # Download OSM area as PBF file
   fi
 
   # Get the BBOX for this event using the helper function
-  BBOX=$(get_event_bbox "$event")
-
-  if [ $? -ne 0 ]; then
+  if ! BBOX=$(get_event_bbox "$event"); then
     echo "Failed to get BBOX for event $event"
     continue
   fi
@@ -96,7 +94,7 @@ for event in $EVENTS; do # Download OSM area as PBF file
 
   set -x
   AREAZONE=$(conf "$event" map.zone)
-  SPBF=data/osm-$(echo "$AREAZONE" | sed -e 's,/,_,g').osm.pbf
+  SPBF=data/osm-${AREAZONE//\//_}.osm.pbf
   DPBF=data/www-${event}.osm.pbf
   set +x
 

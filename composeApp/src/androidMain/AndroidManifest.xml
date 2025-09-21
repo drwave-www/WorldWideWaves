@@ -10,8 +10,11 @@
          Consider: 1) Remove if maps are fully offline, 2) Add network security config if needed -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Remove AD_ID permission added automatically by Google Play Services -->
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+    <!-- Required for Firebase Analytics to function properly -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+
+    <!-- Required for Android 13+ when using Glide NotificationTarget -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".MainApplication"
@@ -48,6 +51,11 @@
             android:name=".activities.event.WaveActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".debug.AudioTestActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:label="🎵 Audio Test" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

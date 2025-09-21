@@ -13,14 +13,13 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +55,10 @@ class EventsViewModel(
     private val mapChecker: MapAvailabilityChecker,
     private val platform: WWWPlatform,
 ) : ViewModel() {
+    companion object {
+        private const val MILLIS_PER_SECOND = 1000L
+    }
+
     private val originalEventsMutex = Mutex()
     var originalEvents: List<IWWWEvent> = emptyList()
 
@@ -106,8 +109,14 @@ class EventsViewModel(
                         processEventsList(eventsList)
                     }.flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
-            } catch (e: Exception) {
-                Log.e(::EventsViewModel.name, "Failed to load events", e)
+            } catch (e: IllegalStateException) {
+                Log.e(::EventsViewModel.name, "Invalid state while loading events", e)
+                _loadingError.value = true
+            } catch (e: SecurityException) {
+                Log.e(::EventsViewModel.name, "Security error while loading events", e)
+                _loadingError.value = true
+            } catch (e: UnsupportedOperationException) {
+                Log.e(::EventsViewModel.name, "Unsupported operation while loading events", e)
                 _loadingError.value = true
             }
         }
@@ -128,10 +137,12 @@ class EventsViewModel(
         _events.value = sortedEvents
         _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
 
-        // Start observing all events
+        // Start observing all events - multiple events can be active simultaneously
+        // The user has a single position that needs to be checked against all event areas
         sortedEvents.forEach { event ->
+            Log.d("EventsViewModel", "Starting observation for event ${event.id}")
 
-            // Start event observation
+            // Start event observation for all events
             event.observer.startObservation()
 
             // Setup simulation speed listeners on DEBUG mode
@@ -140,14 +151,14 @@ class EventsViewModel(
     }
 
     /**
-     * Monitor simulation speed during event phases (DEBUG mode only)
+     * Monitor simulation speed during event phases (DEBUG mode only).
+     * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        val scope = CoroutineScope(Dispatchers.Default)
         var backupSimulationSpeed = 1
 
-        // Handle warming started
-        scope.launch {
+        // Handle warming started - using viewModelScope for automatic cleanup
+        viewModelScope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
                     backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
@@ -156,13 +167,13 @@ class EventsViewModel(
             }
         }
 
-        // Handle user has been hit
-        scope.launch {
+        // Handle user has been hit - using viewModelScope for automatic cleanup
+        viewModelScope.launch {
             event.observer.userHasBeenHit.collect { hasBeenHit ->
                 if (hasBeenHit) {
                     // Restore simulation speed after a delay
                     launch {
-                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                        delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
                         platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                     }
                 }

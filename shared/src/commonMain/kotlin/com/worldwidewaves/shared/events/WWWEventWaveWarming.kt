@@ -21,8 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARMING_DURATION
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
@@ -43,16 +42,16 @@ class WWWEventWaveWarming(
     private val choreographyManager: ChoreographyManager<DrawableResource> by inject()
     val soundChoreographyManager: SoundChoreographyManager by inject()
 
-    fun getWarmingDuration(): Duration = WAVE_WARMING_DURATION
+    fun getWarmingDuration(): Duration = WaveTiming.WARMING_DURATION
 
     suspend fun userWarmingStartDateTime(): Instant? =
         event.wave.userHitDateTime()?.let { hitDateTime ->
-            hitDateTime - getWarmingDuration() - WAVE_WARN_BEFORE_HIT
+            hitDateTime - getWarmingDuration() - WaveTiming.WARN_BEFORE_HIT
         }
 
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
-    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
+    suspend fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
         choreographyManager.getCurrentWarmingSequence(event.getStartDateTime())
 
     /**

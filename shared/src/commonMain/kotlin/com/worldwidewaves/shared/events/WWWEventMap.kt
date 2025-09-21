@@ -21,8 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_FOLDER
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_STYLE_LISTING
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
 import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
@@ -134,11 +133,11 @@ class WWWEventMap(
     suspend fun cacheSpriteAndGlyphs(): String =
         try {
             Res
-                .readBytes(FS_STYLE_LISTING)
+                .readBytes(FileSystem.STYLE_LISTING)
                 .decodeToString()
                 .lines()
                 .filter { it.isNotBlank() }
-                .forEach { cacheDeepFile("$FS_STYLE_FOLDER/$it") }
+                .forEach { cacheDeepFile("${FileSystem.STYLE_FOLDER}/$it") }
             getCacheDir()
         } catch (e: Exception) {
             Log.e(::cacheSpriteAndGlyphs.name, "Error caching sprite and glyphs", e)

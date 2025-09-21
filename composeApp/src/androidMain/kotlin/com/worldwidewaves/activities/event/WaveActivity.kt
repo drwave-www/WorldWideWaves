@@ -71,15 +71,10 @@ import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_BEREADY_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_PROGRESSION_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TIMEBEFOREHIT_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_WAVE_TRIANGLE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.EMPTY_COUNTER
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveDisplay
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -120,7 +115,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         val windowInfo = LocalWindowInfo.current
         val density = LocalDensity.current
         val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-        val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
+        val calculatedHeight = screenWidthDp / Event.MAP_RATIO
 
         // Get choreography-related states
         val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
@@ -136,7 +131,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                     run {
                         if (hasBeenHit) {
                             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                            secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                            secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
                         } else {
                             false
                         }
@@ -189,24 +184,13 @@ class WaveActivity : AbstractEventWaveActivity() {
                 )
                 WaveProgressionBar(event)
 
-                if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
-                    Spacer(modifier = Modifier.weight(1f))
-                    WaveHitCounter(event)
-                    Spacer(modifier = Modifier.height(30.dp))
-                }
+                // Always show counter in the proper position with spacing
+                Spacer(modifier = Modifier.weight(1f))
+                WaveHitCounter(event)
+                Spacer(modifier = Modifier.height(30.dp))
             }
 
             WaveChoreographies(event, clock, Modifier.zIndex(10f))
-
-            if (isChoreographyActive) { // Ensure counter is visible when choreography is active
-                WaveHitCounter(
-                    event,
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 60.dp)
-                        .zIndex(15f),
-                )
-            }
         }
     }
 }
@@ -253,12 +237,12 @@ fun UserWaveStatusText(
         }
 
     Box(
-        modifier = modifier.padding(vertical = DIM_WAVE_BEREADY_PADDING.dp),
+        modifier = modifier.padding(vertical = WaveDisplay.BEREADY_PADDING.dp),
         contentAlignment = Alignment.Center,
     ) {
         AutoResizeSingleLineText(
             text = stringResource(message),
-            style = quinaryColoredBoldTextStyle(DIM_WAVE_BEREADY_FONTSIZE),
+            style = quinaryColoredBoldTextStyle(WaveDisplay.BEREADY_FONTSIZE),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
@@ -284,7 +268,7 @@ fun WaveProgressionBar(
     val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
     val barWidth = screenWidth * 0.8f
 
-    val triangleSize = with(density) { DIM_WAVE_TRIANGLE_SIZE.dp.toPx() }
+    val triangleSize = with(density) { WaveDisplay.TRIANGLE_SIZE.dp.toPx() }
 
     Column(
         modifier = modifier.width(barWidth),
@@ -294,7 +278,7 @@ fun WaveProgressionBar(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(DIM_WAVE_PROGRESSION_HEIGHT.dp)
+                    .height(WaveDisplay.PROGRESSION_HEIGHT.dp)
                     .clip(RoundedCornerShape(25.dp))
                     .background(extendedLight.quaternary.color),
             contentAlignment = Alignment.Center,
@@ -303,7 +287,7 @@ fun WaveProgressionBar(
 
             Text(
                 text = "${String.format("%.1f", progression)}%",
-                style = primaryColoredBoldTextStyle(DIM_WAVE_PROGRESSION_FONTSIZE),
+                style = primaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
@@ -317,7 +301,7 @@ fun WaveProgressionBar(
 @Composable
 private fun WaveProgressionFillArea(progression: Double) {
     val density = LocalDensity.current
-    val barHeight = with(density) { DIM_WAVE_PROGRESSION_HEIGHT.dp.toPx() }
+    val barHeight = with(density) { WaveDisplay.PROGRESSION_HEIGHT.dp.toPx() }
 
     Canvas(
         modifier =
@@ -401,7 +385,7 @@ fun WaveHitCounter(
 
     val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
 
-    if (text != EMPTY_COUNTER) {
+    if (text != DisplayText.EMPTY_COUNTER) {
         val windowInfo = LocalWindowInfo.current
         val density = LocalDensity.current
         val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
@@ -416,7 +400,7 @@ fun WaveHitCounter(
         ) {
             AutoSizeText(
                 text = text,
-                style = primaryColoredBoldTextStyle(DIM_WAVE_TIMEBEFOREHIT_FONTSIZE),
+                style = primaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE),
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
@@ -471,5 +455,5 @@ private fun formatDuration(duration: Duration): String =
             "$hours:$minutes"
         }
 
-        else -> EMPTY_COUNTER
+        else -> DisplayText.EMPTY_COUNTER
     }

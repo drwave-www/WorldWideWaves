@@ -55,5 +55,13 @@ subprojects {
         parallel = true
         ignoreFailures = false
         autoCorrect = false
+        setSource(files(
+            "src/main/kotlin",
+            "src/androidMain/kotlin",
+            "src/commonMain/kotlin",
+            "src/iosMain/kotlin"
+        ))
+        include("**/*.kt")
+        exclude("**/build/**")
     }
 }

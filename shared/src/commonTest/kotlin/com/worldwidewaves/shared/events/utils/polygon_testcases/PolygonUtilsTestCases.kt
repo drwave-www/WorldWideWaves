@@ -1,12 +1,5 @@
 package com.worldwidewaves.shared.events.utils.polygon_testcases
 
-import com.worldwidewaves.shared.events.utils.ComposedLongitude
-import com.worldwidewaves.shared.events.utils.CutPosition
-import com.worldwidewaves.shared.events.utils.Polygon
-import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.close
-import com.worldwidewaves.shared.events.utils.init
-
 /*
  * Copyright 2025 DrWave
  *
@@ -27,6 +20,13 @@ import com.worldwidewaves.shared.events.utils.init
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.ComposedLongitude
+import com.worldwidewaves.shared.events.utils.CutPosition
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.events.utils.close
+import com.worldwidewaves.shared.events.utils.init
 
 object PolygonUtilsTestCases {
     data class ExpectedPolygon(

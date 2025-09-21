@@ -54,7 +54,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
@@ -65,6 +65,13 @@ import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
+
+// Constants for choreography display
+private object ChoreographyConstants {
+    // UI Dimensions
+    const val CHOREOGRAPHY_PADDING = 24f
+    const val CHOREOGRAPHY_TEXT_SIZE = 24f
+}
 
 /**
  * High-level choreography container displayed on the **Wave** screen.
@@ -88,6 +95,15 @@ fun WaveChoreographies(
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
+    // Debug logging for choreography states
+    androidx.compose.runtime.LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit) {
+        android.util.Log.v(
+            "WaveChoreographies",
+            "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, " +
+                "goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit"
+        )
+    }
+
     // State to track if we should show the hit sequence
     var showHitSequence by remember { mutableStateOf(false) }
 
@@ -100,14 +116,14 @@ fun WaveChoreographies(
             val currentTime = clock.now()
             val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
 
-            if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
+            if (secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
                 showHitSequence = true
 
                 // Calculate remaining time to show
                 val remainingTimeMs =
                     maxOf(
                         0,
-                        WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
+                        WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
                             (currentTime - hitDateTime).inWholeMilliseconds,
                     )
 
@@ -126,14 +142,18 @@ fun WaveChoreographies(
     when {
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
-            // Get the current sequence
-            val warmingSequence =
-                remember(warmingKey) {
-                    event.warming.getCurrentChoregraphySequence()
-                }
+            // Get the current sequence using suspend function
+            var warmingSequence by remember { mutableStateOf<DisplayableSequence<DrawableResource>?>(null) }
+
+            androidx.compose.runtime.LaunchedEffect(warmingKey) {
+                val sequence = event.warming.getCurrentChoregraphySequence()
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence for ${event.id}: $sequence")
+                warmingSequence = sequence
+            }
 
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing warming sequence for ${event.id}")
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
                     clock = clock,
@@ -144,6 +164,8 @@ fun WaveChoreographies(
                     // Leave space for counter
                     onSequenceComplete = { warmingKey++ },
                 )
+            } else {
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence is NULL for ${event.id}")
             }
         }
 
@@ -183,8 +205,12 @@ fun TimedSequenceDisplay(
     modifier: Modifier = Modifier,
     onSequenceComplete: () -> Unit,
 ) {
-    if (sequence == null) return
+    if (sequence == null) {
+        android.util.Log.v("TimedSequenceDisplay", "[CHOREO_DEBUG] Sequence is NULL")
+        return
+    }
 
+    android.util.Log.v("TimedSequenceDisplay", "[CHOREO_DEBUG] Displaying sequence: duration=${sequence.duration}, frameCount=${sequence.frameCount}")
     ChoreographyDisplay(sequence, clock, modifier)
 
     LaunchedEffect(sequence) {
@@ -250,12 +276,12 @@ fun ChoreographyDisplay(
                 Modifier
                     .widthIn(max = 400.dp)
                     .heightIn(max = 600.dp)
-                    .padding(24.dp)
+                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp)
                     .shadow(8.dp)
                     .background(Color.Black.copy(alpha = 0.7f))
                     .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                     .clip(RoundedCornerShape(12.dp))
-                    .padding(24.dp),
+                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -307,7 +333,7 @@ fun ChoreographyDisplay(
 
                 Text(
                     text = stringResource(sequence.text),
-                    style = quinaryColoredBoldTextStyle(24),
+                    style = quinaryColoredBoldTextStyle(ChoreographyConstants.CHOREOGRAPHY_TEXT_SIZE.toInt()),
                     color = Color.White,
                     textAlign = TextAlign.Center,
                 )

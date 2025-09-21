@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.common.ButtonWave
@@ -86,24 +87,9 @@ import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
 import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_MITER
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DATE_STROKE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_DESC_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_BORDER
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_GEOLOCME_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_MAP_RATIO
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERROUND
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_BORDERWIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_LABEL_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_SPACER
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_TZ_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_NUMBERS_VALUE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -155,6 +141,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val isInArea by event.observer.userIsInArea.collectAsState()
         val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
+
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {
             endDateTime.value = event.getEndDateTime()
@@ -164,7 +151,7 @@ class EventActivity : AbstractEventWaveActivity() {
         val windowInfo = LocalWindowInfo.current
         val density = LocalDensity.current
         val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-        val calculatedHeight = screenWidthDp / DIM_EVENT_MAP_RATIO
+        val calculatedHeight = screenWidthDp / Event.MAP_RATIO
 
         // Construct the event map
         val eventMap =
@@ -279,7 +266,7 @@ class EventActivity : AbstractEventWaveActivity() {
                                         WWWSimulation(
                                             startDateTime = simulationTime,
                                             userPosition = position,
-                                            initialSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION, // Use current default speed
+                                            initialSpeed = Wave.DEFAULT_SPEED_SIMULATION, // Use current default speed
                                         )
 
                                     // Set the simulation
@@ -300,9 +287,15 @@ class EventActivity : AbstractEventWaveActivity() {
                                         ).show()
 
                                     simulationButtonState = "active"
-                                } catch (e: Exception) {
+                                } catch (ise: IllegalStateException) {
                                     simulationButtonState = "idle"
-                                    Log.e("Simulation", "Error starting simulation", e)
+                                    Log.e("Simulation", "Invalid state for simulation setup", ise)
+                                } catch (iae: IllegalArgumentException) {
+                                    simulationButtonState = "idle"
+                                    Log.e("Simulation", "Invalid simulation parameters", iae)
+                                } catch (uoe: UnsupportedOperationException) {
+                                    simulationButtonState = "idle"
+                                    Log.e("Simulation", "Unsupported simulation operation", uoe)
                                 }
                             }
                         } else if (simulationButtonState == "active") {
@@ -400,10 +393,10 @@ private fun EventDescription(
 ) {
     val dir = LocalLayoutDirection.current
     Text(
-        modifier = modifier.padding(horizontal = DIM_DEFAULT_EXT_PADDING.dp),
+        modifier = modifier.padding(horizontal = Dimensions.DEFAULT_EXT_PADDING.dp),
         text = stringResource(event.getDescription()),
         style = extraQuinaryColoredBoldTextStyle(),
-        fontSize = DIM_EVENT_DESC_FONTSIZE.sp,
+        fontSize = Event.DESC_FONTSIZE.sp,
         textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
     )
 }
@@ -447,10 +440,10 @@ private fun EventOverlayDate(
         modifier =
             modifier
                 .fillMaxSize()
-                .let { if (eventStatus == Status.DONE) it.padding(bottom = DIM_DEFAULT_EXT_PADDING.dp) else it },
+                .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
-        val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
+        val textStyle = extraBoldTextStyle(Event.DATE_FONTSIZE)
         Text(
             text = eventDate,
             style = textStyle.copy(color = quinaryLight),
@@ -462,8 +455,8 @@ private fun EventOverlayDate(
                     color = MaterialTheme.colorScheme.primary,
                     drawStyle =
                         Stroke(
-                            miter = DIM_EVENT_DATE_MITER,
-                            width = DIM_EVENT_DATE_STROKE,
+                            miter = Event.DATE_MITER,
+                            width = Event.DATE_STROKE,
                             join = StrokeJoin.Miter,
                         ),
                 ),
@@ -510,22 +503,22 @@ private fun NotifyAreaUserPosition(
     Row(
         modifier =
             modifier
-                .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
-                .padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp),
+                .height(Event.GEOLOCME_HEIGHT.dp)
+                .padding(start = Dimensions.DEFAULT_EXT_PADDING.dp, end = Dimensions.DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier =
                 Modifier
-                    .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
+                    .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
                     .fillMaxHeight()
                     .weight(1f),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = displayText,
-                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE),
+                style = quinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
             )
         }
     }
@@ -590,30 +583,30 @@ private fun EventNumbers(
             MokoRes.strings.wave_progression,
         )
 
-    Box(modifier = modifier.padding(start = DIM_DEFAULT_EXT_PADDING.dp, end = DIM_DEFAULT_EXT_PADDING.dp)) {
+    Box(modifier = modifier.padding(start = Dimensions.DEFAULT_EXT_PADDING.dp, end = Dimensions.DEFAULT_EXT_PADDING.dp)) {
         Box(
             modifier =
                 Modifier
                     .border(
-                        width = DIM_EVENT_NUMBERS_BORDERWIDTH.dp,
+                        width = Event.NUMBERS_BORDERWIDTH.dp,
                         color = quinaryLight,
                         shape =
                             RoundedCornerShape(
-                                topStart = DIM_EVENT_NUMBERS_BORDERROUND.dp,
-                                bottomEnd = DIM_EVENT_NUMBERS_BORDERROUND.dp,
+                                topStart = Event.NUMBERS_BORDERROUND.dp,
+                                bottomEnd = Event.NUMBERS_BORDERROUND.dp,
                             ),
-                    ).padding(DIM_DEFAULT_EXT_PADDING.dp),
+                    ).padding(Dimensions.DEFAULT_EXT_PADDING.dp),
         ) {
-            Column(modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)) {
+            Column(modifier = Modifier.padding(start = Dimensions.DEFAULT_INT_PADDING.dp, end = Dimensions.DEFAULT_INT_PADDING.dp)) {
                 AutoResizeSingleLineText(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
                     style =
-                        extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE)
+                        extraQuinaryColoredBoldTextStyle(Event.NUMBERS_TITLE_FONTSIZE)
                             .copy(textAlign = TextAlign.End),
                     textAlign = TextAlign.End,
                 )
-                Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
+                Spacer(modifier = Modifier.height(Event.NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
                     orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
@@ -637,7 +630,7 @@ private fun EventNumbers(
                                 text = stringResource(key),
                                 style =
                                     extraQuinaryColoredBoldTextStyle(
-                                        DIM_EVENT_NUMBERS_LABEL_FONTSIZE,
+                                        Event.NUMBERS_LABEL_FONTSIZE,
                                     ),
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -645,7 +638,7 @@ private fun EventNumbers(
                                 Text(
                                     text = displayValue,
                                     style =
-                                        extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
+                                        extraBoldTextStyle(Event.NUMBERS_VALUE_FONTSIZE).copy(
                                             color =
                                                 when (key) {
                                                     MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
@@ -664,7 +657,7 @@ private fun EventNumbers(
                                     Text(
                                         text = " $eventTimeZone",
                                         style =
-                                            extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                            extraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
                                                 color =
                                                     when (key) {
                                                         MokoRes.strings.wave_start_time -> Color.Yellow
@@ -675,7 +668,7 @@ private fun EventNumbers(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
+                        Spacer(modifier = Modifier.height(Event.NUMBERS_SPACER.dp / 2))
                     }
                 }
             }

@@ -78,7 +78,7 @@ import com.worldwidewaves.compose.common.DownloadProgressIndicator
 import com.worldwidewaves.compose.common.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
+import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
@@ -143,6 +143,16 @@ class AndroidEventMap(
     KoinComponent {
     private companion object {
         private const val TAG = "EventMap"
+
+        // Map loading constants
+        private const val MAX_STYLE_RESOLUTION_ATTEMPTS = 10
+        private const val STYLE_RESOLUTION_DELAY_MS = 200L
+        private const val MAP_ATTACH_TIMEOUT_MS = 1500L
+
+        // UI Constants
+        private const val DOWNLOAD_PROGRESS_MAX = 100
+        private const val BUTTON_WIDTH_DP = 200f
+        private const val BUTTON_HEIGHT_DP = 60f
     }
 
     // Overrides properties from AbstractEventMap
@@ -383,7 +393,7 @@ class AndroidEventMap(
                             )
                         is MapFeatureState.Installing ->
                             DownloadProgressIndicator(
-                                progress = 100,
+                                progress = DOWNLOAD_PROGRESS_MAX,
                                 message = stringResource(MokoRes.strings.map_installing),
                                 onCancel = onCancel,
                             )
@@ -457,7 +467,7 @@ class AndroidEventMap(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(
                 onClick = onClick,
-                modifier = Modifier.size(width = 200.dp, height = 60.dp),
+                modifier = Modifier.size(width = BUTTON_WIDTH_DP.dp, height = BUTTON_HEIGHT_DP.dp),
                 colors =
                     ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
@@ -496,7 +506,7 @@ class AndroidEventMap(
                 // IO actions
                 var stylePath: String? = null
                 var attempts = 0
-                repeat(10) { attempt ->
+                repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
                     if (candidate != null && File(candidate).exists()) {
@@ -505,12 +515,12 @@ class AndroidEventMap(
                         return@repeat
                     }
 
-                    if (attempt == 9) { // Log warning only on last attempts
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
                     // Give Play-Core/asset manager time to expose freshly installed split assets
-                    delay(200)
+                    delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 
                 if (stylePath == null) {
@@ -538,7 +548,9 @@ class AndroidEventMap(
                                     Log.i(TAG, "Map setup complete, initializing location if needed")
                                     // Initialize location component only if permission granted
                                     // and the lifecycle is at least STARTED (Activity/Fragment visible).
-                                    if (hasLocationPermission && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                                    if (hasLocationPermission &&
+                                        lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                                    ) {
                                         setupMapLocationComponent(map, context)
                                     }
                                     onMapLoaded()
@@ -571,12 +583,12 @@ class AndroidEventMap(
                                 Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
                                 try {
                                     mapLibreView.removeOnAttachStateChangeListener(listener)
-                                } catch (_: Exception) {
-                                    // ignore
+                                } catch (_: IllegalStateException) {
+                                    // ignore listener removal errors
                                 }
                                 invokeGetMapAsync()
                             }
-                        }, 1500)
+                        }, MAP_ATTACH_TIMEOUT_MS)
                     }
                 }
             }
@@ -633,8 +645,8 @@ class AndroidEventMap(
      */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest
-            .Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
-            .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
+            .Builder(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds)
+            .setFastestInterval(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
@@ -687,9 +699,12 @@ class AndroidEventMap(
             } catch (se: SecurityException) {
                 // Permission might have been revoked between check and use
                 Log.w(TAG, "Location permission missing when enabling component", se)
-            } catch (t: Throwable) {
-                // Catch-all to avoid crashing the map in unexpected situations
-                Log.e(TAG, "Failed to update location component", t)
+            } catch (ise: IllegalStateException) {
+                // Map component might be in invalid state
+                Log.e(TAG, "Map component in invalid state", ise)
+            } catch (uoe: UnsupportedOperationException) {
+                // Map operation not supported
+                Log.e(TAG, "Unsupported map operation", uoe)
             }
         } ?: run {
             Log.w(TAG, "Cannot update location component - map style is null")
@@ -718,7 +733,7 @@ class AndroidEventMap(
                     .build(),
             )
 
-            localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
+            localIdeographFontFamily("Droid Sans") // FIXME: replace with MapLibre font-maker solution
 
             compassEnabled(true)
             compassFadesWhenFacingNorth(true)
@@ -767,7 +782,7 @@ class AndroidEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        Log.i(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
+        Log.v(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
         (context as? AppCompatActivity)?.runOnUiThread {
             mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
         }

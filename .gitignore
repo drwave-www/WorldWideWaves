@@ -20,3 +20,4 @@ captures
 **/logs/
 scripts/images/generated_images/
 composeApp/release/
+CLAUDE.md.backup*

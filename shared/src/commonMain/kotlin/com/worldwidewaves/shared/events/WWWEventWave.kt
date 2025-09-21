@@ -1,29 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.choreographies.ChoreographyManager
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
-import com.worldwidewaves.shared.events.utils.Area
-import com.worldwidewaves.shared.events.utils.BoundingBox
-import com.worldwidewaves.shared.events.utils.DataValidator
-import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.localizeString
-import io.github.aakira.napier.Napier
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import org.jetbrains.compose.resources.DrawableResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.get
-import org.koin.core.component.inject
-import kotlin.math.roundToInt
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.time.toDuration
-
 /*
  * Copyright 2025 DrWave
  *
@@ -44,6 +20,34 @@ import kotlin.time.toDuration
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
+import com.worldwidewaves.shared.events.utils.Area
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.DataValidator
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.localizeString
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.DrawableResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.component.inject
+import kotlin.math.roundToInt
+import kotlin.time.Duration
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.time.toDuration
 
 @OptIn(ExperimentalTime::class)
 @Serializable
@@ -100,6 +104,11 @@ abstract class WWWEventWave :
 
     @Transient protected var positionRequester: (() -> Position?)? = null
 
+    @Transient private val _positionUpdates = MutableSharedFlow<Position?>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     // ---------------------------
 
     abstract suspend fun getWavePolygons(): WavePolygons?
@@ -127,10 +136,24 @@ abstract class WWWEventWave :
         return this as T
     }
 
+    /**
+     * Reactive flow of position updates. Emits whenever user position changes.
+     */
+    @Transient
+    val positionUpdates: SharedFlow<Position?> = _positionUpdates.asSharedFlow()
+
     fun setPositionRequester(positionRequester: () -> Position?) =
         apply {
             this.positionRequester = positionRequester
         }
+
+    /**
+     * Notifies that the position has changed. Should be called by location providers
+     * when position updates occur to trigger reactive position-dependent calculations.
+     */
+    fun notifyPositionChanged(position: Position?) {
+        _positionUpdates.tryEmit(position)
+    }
 
     fun getUserPosition(): Position? {
         var platform: WWWPlatform? = null
@@ -202,7 +225,8 @@ abstract class WWWEventWave :
 
     // ---------------------------
 
-    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getWaitingSequence()
+    fun waitingChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getWaitingSequenceImmediate()
 
-    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getHitSequence()
+    // TIMING-CRITICAL: Hit sequence for precise wave synchronization
+    fun hitChoregraphySequence(): DisplayableSequence<DrawableResource>? = choreographyManager.getHitSequenceImmediate()
 }

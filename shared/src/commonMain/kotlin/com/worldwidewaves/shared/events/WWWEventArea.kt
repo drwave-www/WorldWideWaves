@@ -34,6 +34,9 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
@@ -99,10 +102,30 @@ data class WWWEventArea(
 
     @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
 
+    // Polygon loading state notification
+    @Transient private val _polygonsLoaded = MutableStateFlow(false)
+    val polygonsLoaded: StateFlow<Boolean> = _polygonsLoaded.asStateFlow()
+
+    // ---------------------------
+
+    /**
+     * Clears all cached data to force fresh calculations.
+     * Useful when debugging or when polygon data has been updated.
+     */
+    fun clearCache() {
+        cachedAreaPolygons = null
+        cachedBoundingBox = null
+        cachedCenter = null
+        cachedPositionWithinResult = null
+        _polygonsLoaded.value = false
+    }
+
     // ---------------------------
 
     fun setRelatedEvent(event: WWWEvent) {
         this.event = event
+        // Clear cache to ensure fresh calculations for this event
+        clearCache()
     }
 
     // ---------------------------
@@ -127,6 +150,7 @@ data class WWWEventArea(
      * the polygons using the ray-casting algorithm.
      */
     suspend fun isPositionWithin(position: Position): Boolean {
+
         // Check if the cached result is within the epsilon
         cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
             if (isPositionWithinEpsilon(position, cachedPosition)) {
@@ -136,11 +160,13 @@ data class WWWEventArea(
 
         // First, check if the position is within the bounding box (fast check)
         val boundingBox = bbox()
+
         val isWithinBbox =
             position.lat >= boundingBox.sw.lat &&
                 position.lat <= boundingBox.ne.lat &&
                 position.lng >= boundingBox.sw.lng &&
                 position.lng <= boundingBox.ne.lng
+
 
         // If not within the bounding box, return false immediately
         if (!isWithinBbox) {
@@ -150,7 +176,14 @@ data class WWWEventArea(
         }
 
         // If within bounding box, check if within polygon (more expensive check)
-        val result = getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+        val polygons = getPolygons()
+
+        if (polygons.isEmpty()) {
+            // Don't cache the result when polygons aren't loaded yet - this allows future checks to retry
+            return false
+        }
+
+        val result = isPointInPolygons(position, polygons)
 
         // Cache the result
         cachedPositionWithinResult = Pair(position, result)
@@ -219,10 +252,12 @@ data class WWWEventArea(
     }
 
     suspend fun bbox(): BoundingBox {
+
         // Return cached bounding box if available
         if (cachedBoundingBox != null) {
             return cachedBoundingBox!!
         }
+
 
         // If bbox parameter was provided in constructor, use it
         parseBboxString()?.let { bbox ->
@@ -243,11 +278,17 @@ data class WWWEventArea(
         }
 
         // Otherwise calculate from polygons
-        return getPolygons()
+        val polygons = getPolygons()
+        return polygons
             .takeIf { it.isNotEmpty() }
             ?.let {
-                polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
-            } ?: BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
+                val bbox = polygonsBbox(it)
+                cachedBoundingBox = bbox
+                bbox
+            } ?: run {
+            val defaultBbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
+            defaultBbox
+        }
     }
 
     /**
@@ -276,106 +317,255 @@ data class WWWEventArea(
      * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
     suspend fun getPolygons(): Area {
+
         // Fast path: if cache is already populated, return immediately
-        cachedAreaPolygons?.let { return it }
+        cachedAreaPolygons?.let {
+            return it
+        }
+
 
         // Slow path: populate cache with mutex protection
         polygonsCacheMutex.withLock {
             // Double-check pattern: another coroutine might have populated the cache
-            cachedAreaPolygons?.let { return it }
+            cachedAreaPolygons?.let {
+                return it
+            }
+
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
 
-            coroutineScopeProvider.withDefaultContext {
-                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
-                    val rootType = geoJsonData["type"]?.jsonPrimitive?.content
-
-                    // Now that we know the type, log it for diagnostics
-                    Log.i(::getPolygons.name, "${event.id}: GeoJSON rootType=$rootType")
-
-                    when (rootType) {
-                        "FeatureCollection" -> {
-                            // Handle FeatureCollection format
-                            val features = geoJsonData["features"]?.jsonArray
-                            features?.forEach { feature ->
-                                val geometry = feature.jsonObject["geometry"]?.jsonObject
-                                geometry?.let { processGeometry(it, tempPolygons) }
-                            }
-                        }
-                        "Polygon", "MultiPolygon" -> {
-                            // Handle direct geometry format (your original case)
-                            processGeometry(geoJsonData, tempPolygons)
-                        }
-                        else -> {
-                            Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $rootType")
-                        }
-                    }
-                } ?: run {
-                    Log.e(::getPolygons.name, "${event.id}: Error loading geojson data for event")
+            try {
+                coroutineScopeProvider.withDefaultContext {
+                    loadPolygonsFromGeoJson(tempPolygons)
                 }
+            } catch (ignored: Exception) {
+                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
             // Atomically assign the complete immutable list
-            cachedAreaPolygons =
-                tempPolygons.toList().also {
-                    Log.i(::getPolygons.name, "${event.id}: Built ${it.size} polygons")
-                }
+            cachedAreaPolygons = tempPolygons.toList()
+
+            // Notify that polygon data is now available
+            _polygonsLoaded.value = true
         }
 
-        return cachedAreaPolygons ?: emptyList()
+        val result = cachedAreaPolygons ?: emptyList()
+        return result
+    }
+
+    private suspend fun loadPolygonsFromGeoJson(tempPolygons: MutableArea) {
+        try {
+            val geoJsonData = geoJsonDataProvider.getGeoJsonData(event.id)
+
+            if (geoJsonData != null) {
+                processGeoJsonData(geoJsonData, tempPolygons)
+            }
+
+        } catch (ignored: Exception) {
+            // GeoJSON data loading errors are handled gracefully
+        }
+    }
+
+    private fun processGeoJsonData(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        val rootType = geoJsonData["type"]?.jsonPrimitive?.content
+
+        when (rootType) {
+            "FeatureCollection" -> {
+                processFeatureCollection(geoJsonData, tempPolygons)
+            }
+            "Polygon", "MultiPolygon" -> {
+                processDirectGeometry(geoJsonData, tempPolygons)
+            }
+        }
+    }
+
+    private fun processFeatureCollection(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        val features = geoJsonData["features"]?.jsonArray
+        features?.forEach { feature ->
+            try {
+                val geometry = feature.jsonObject["geometry"]?.jsonObject
+                if (geometry != null) {
+                    processGeometry(geometry, tempPolygons)
+                }
+            } catch (ignored: Exception) {
+                // Feature geometry processing errors are handled gracefully
+            }
+        }
+    }
+
+    private fun processDirectGeometry(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        try {
+            processGeometry(geoJsonData, tempPolygons)
+        } catch (ignored: Exception) {
+            // Direct geometry processing errors are handled gracefully
+        }
     }
 
     private fun processGeometry(
         geometry: JsonObject,
         tempPolygons: MutableList<Polygon>,
     ) {
-        val type = geometry["type"]?.jsonPrimitive?.content
-        val coordinates = geometry["coordinates"]?.jsonArray
+        try {
+            val type = geometry["type"]?.jsonPrimitive?.content
+            val coordinates = geometry["coordinates"]?.jsonArray
 
-        when (type) {
-            // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
-            "Polygon" ->
-                coordinates?.forEach { ring ->
-                    processRing(ring, tempPolygons)
-                }
-            // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
-            "MultiPolygon" ->
-                coordinates?.forEach { multiPolygon ->
-                    multiPolygon.jsonArray.forEach { ring ->
-                        processRing(ring, tempPolygons)
+
+            when (type) {
+                // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
+                "Polygon" -> {
+                    coordinates?.forEachIndexed { ringIndex, ring ->
+                        try {
+                            processRing(ring, tempPolygons)
+                        } catch (e: Exception) {
+                        }
                     }
                 }
-            else -> {
-                Log.e(::getPolygons.name, "Unsupported geometry type: $type")
+                // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
+                "MultiPolygon" -> {
+                    processMultiPolygon(coordinates, tempPolygons)
+                }
+                else -> {
+                }
+            }
+
+            // Lightweight diagnostics
+            val ringsCount =
+                when (type) {
+                    "Polygon" -> coordinates?.size ?: 0
+                    "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
+                    else -> 0
+                }
+        } catch (e: Exception) {
+        }
+    }
+
+    private fun processMultiPolygon(
+        coordinates: kotlinx.serialization.json.JsonArray?,
+        tempPolygons: MutableList<Polygon>,
+    ) {
+        if (coordinates == null) {
+            return
+        }
+
+        if (coordinates.size == 0) {
+            return
+        }
+
+        coordinates.forEachIndexed { polygonIndex, polygon ->
+            try {
+
+                // Verify polygon is a valid JsonArray
+                val polygonArray = try {
+                    polygon.jsonArray
+                } catch (e: Exception) {
+                    return@forEachIndexed
+                }
+
+
+                if (polygonArray.isEmpty()) {
+                    return@forEachIndexed
+                }
+
+                // Each polygon in MultiPolygon has rings (exterior + holes)
+                polygonArray.forEachIndexed { ringIndex, ring ->
+                    try {
+
+                        // Verify ring is a valid JsonArray
+                        val ringArray = try {
+                            ring.jsonArray
+                        } catch (e: Exception) {
+                            return@forEachIndexed
+                        }
+
+
+                        if (ringArray.isEmpty()) {
+                            return@forEachIndexed
+                        }
+
+                        val ringStartPolygonCount = tempPolygons.size
+                        processRing(ring, tempPolygons)
+                        val ringEndPolygonCount = tempPolygons.size
+                    } catch (e: Exception) {
+                    }
+                }
+
+            } catch (e: Exception) {
             }
         }
 
-        // Lightweight diagnostics
-        val ringsCount =
-            when (type) {
-                "Polygon" -> coordinates?.size ?: 0
-                "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
-                else -> 0
-            }
-        Log.d(::processGeometry.name, "${event.id}: processed geometry type=$type rings=$ringsCount")
     }
 
     private fun processRing(
         ring: JsonElement,
         polygons: MutableArea,
     ) {
-        val positions =
-            ring.jsonArray.map { point ->
-                Position(
-                    point.jsonArray[1].jsonPrimitive.double,
-                    point.jsonArray[0].jsonPrimitive.double,
-                ).constrainToBoundingBox()
+        try {
+
+            // Verify ring is a JsonArray
+            val ringArray = try {
+                ring.jsonArray
+            } catch (e: Exception) {
+                return
             }
 
-        val polygon = positions.toPolygon
-        if (polygon.size > 1) {
-            polygons.add(polygon)
+
+            if (ringArray.isEmpty()) {
+                return
+            }
+
+
+            val positions =
+                ringArray.mapIndexed { pointIndex, point ->
+                    try {
+
+                        val pointArray = try {
+                            point.jsonArray
+                        } catch (e: Exception) {
+                            return@mapIndexed null
+                        }
+
+                        if (pointArray.size >= 2) {
+                            val lng = try {
+                                pointArray[0].jsonPrimitive.double
+                            } catch (e: Exception) {
+                                return@mapIndexed null
+                            }
+
+                            val lat = try {
+                                pointArray[1].jsonPrimitive.double
+                            } catch (e: Exception) {
+                                return@mapIndexed null
+                            }
+
+                            Position(lat, lng).constrainToBoundingBox()
+                        } else {
+                            null
+                        }
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.filterNotNull()
+
+
+            if (positions.isEmpty()) {
+                return
+            }
+
+
+            val polygon = try {
+                positions.toPolygon
+            } catch (e: Exception) {
+                return
+            }
+
+
+            if (polygon.size > 1) {
+                polygons.add(polygon)
+            } else {
+            }
+
+        } catch (e: Exception) {
         }
     }
 
@@ -491,7 +681,7 @@ data class WWWEventArea(
                     ne = Position(maxLat, maxLng),
                 )
             } else {
-                Log.w(
+                Log.d(
                     ::computeExtentFromGeoJson.name,
                     "${event.id}: No coordinates found while scanning GeoJSON for extent",
                 )

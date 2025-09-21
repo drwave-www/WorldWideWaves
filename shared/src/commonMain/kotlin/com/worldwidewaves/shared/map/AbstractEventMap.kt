@@ -21,14 +21,18 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_USER_ZOOM
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_WAVE_ZOOM
+import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.position.PositionManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 // ----------------------------------------------------------------------------
 
@@ -58,10 +62,13 @@ abstract class AbstractEventMap<T>(
     protected val event: IWWWEvent,
     protected val mapConfig: EventMapConfig = EventMapConfig(),
     private val onLocationUpdate: (Position) -> Unit,
-) {
+) : KoinComponent {
     // Properties that must be implemented by platform-specific subclasses
     abstract val mapLibreAdapter: MapLibreAdapter<T> // MapLibre is native map library
     abstract val locationProvider: WWWLocationProvider? // LocationProvider is native location provider
+
+    // Dependencies
+    private val positionManager: PositionManager by inject()
 
     // Class variables
     private var constraintManager: MapConstraintManager? = null // Map constraint manager
@@ -224,7 +231,7 @@ abstract class AbstractEventMap<T>(
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(wavePosition, CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
+            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM)
         }
     }
 
@@ -234,7 +241,7 @@ abstract class AbstractEventMap<T>(
     suspend fun targetUser() {
         val userPosition = locationProvider?.currentLocation?.value ?: return
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(userPosition, CONST_MAPLIBRE_TARGET_USER_ZOOM)
+            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
         }
     }
 
@@ -331,32 +338,63 @@ abstract class AbstractEventMap<T>(
                 }
             }
 
-            // Start location updates
-            locationProvider?.startLocationUpdates { mapPosition ->
-
-                // Auto-target the user the first time (optional) if no interaction yet
-                if (mapConfig.autoTargetUserOnFirstLocation &&
-                    !userHasBeenLocated &&
-                    !userInteracted &&
-                    mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-                ) {
-                    scope.launch {
-                        targetUser()
-                    }
-                    userHasBeenLocated = true
-                }
-
-                if (lastKnownPosition == null || lastKnownPosition != mapPosition) {
-                    // Allow the wave to know the current location of the user for computations
-                    event.wave.setPositionRequester { mapPosition }
-
-                    // Notify caller
-                    onLocationUpdate(mapPosition)
-
-                    // Save current known position on map
-                    lastKnownPosition = mapPosition
-                }
+            // Start location updates and integrate with PositionManager
+            locationProvider?.startLocationUpdates { rawPosition ->
+                // Update PositionManager with GPS position
+                positionManager.updatePosition(PositionManager.PositionSource.GPS, rawPosition)
             }
+
+            // Subscribe to unified position updates from PositionManager
+            positionManager.position
+                .onEach { unifiedPosition ->
+                    handlePositionUpdate(scope, unifiedPosition)
+                }
+                .launchIn(scope)
+
+            Unit // Explicit return to satisfy callback
         }
     }
+
+    /**
+     * Handles unified position updates from PositionManager
+     */
+    private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
+        if (position == null) {
+            // Position cleared - reset state
+            lastKnownPosition = null
+            return
+        }
+
+        // Auto-target the user the first time (optional) if no interaction yet
+        if (mapConfig.autoTargetUserOnFirstLocation &&
+            !userHasBeenLocated &&
+            !userInteracted &&
+            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+        ) {
+            scope.launch {
+                targetUser()
+            }
+            userHasBeenLocated = true
+        }
+
+        if (lastKnownPosition == null || lastKnownPosition != position) {
+            // Position is now managed by PositionManager through unified system
+
+            // Notify caller
+            onLocationUpdate(position)
+
+            // Save current known position on map
+            lastKnownPosition = position
+        }
+    }
+
+    /**
+     * Gets the current unified position from PositionManager
+     */
+    fun getCurrentPosition(): Position? = positionManager.getCurrentPosition()
+
+    /**
+     * Gets the current position source from PositionManager
+     */
+    fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
 }

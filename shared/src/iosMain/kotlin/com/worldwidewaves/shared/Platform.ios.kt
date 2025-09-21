@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.context.loadKoinModules
@@ -109,5 +110,6 @@ actual fun updateCacheMetadata(fileName: String) {
 // ---------------------------
 
 actual fun localizeString(resource: StringResource): String {
-    TODO("Not yet implemented")
+    // Convert StringResource to localized string using iOS framework
+    return resource.desc().localized()
 }

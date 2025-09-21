@@ -20,6 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 
+// Constants for indicators
+private object IndicatorConstants {
+    // UI Layout Constants
+    const val PROGRESS_INDICATOR_WIDTH_RATIO = 0.8f
+}
+
 // Reusable composable for showing loading state
 
 /** Generic circular loading indicator with a message. */
@@ -72,7 +78,7 @@ fun DownloadProgressIndicator(
             progress = { progress / 100f },
             modifier =
                 Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(IndicatorConstants.PROGRESS_INDICATOR_WIDTH_RATIO)
                     .height(8.dp),
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             color = MaterialTheme.colorScheme.primary,

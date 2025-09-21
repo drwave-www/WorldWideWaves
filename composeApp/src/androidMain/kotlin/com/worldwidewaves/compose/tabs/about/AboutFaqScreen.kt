@@ -57,19 +57,8 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_INTRO_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_LINK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_ANSWER_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_CONTENTS_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_NBRING_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.FAQ
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy
@@ -101,6 +90,12 @@ class AboutFaqScreen(
 ) : TabScreen {
     override val name = "FAQ"
 
+    companion object {
+        // UI Layout Constants
+        private const val LAYOUT_HALF_WIDTH = 0.5f
+        private const val SPACER_SMALL_SIZE = 10f
+    }
+
     @Composable
     override fun Screen(modifier: Modifier) {
         val coroutineScope = rememberCoroutineScope()
@@ -129,7 +124,7 @@ class AboutFaqScreen(
                 AboutDividerLine()
 
                 // FAQ title
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
                 Text(
                     modifier =
                         Modifier.onGloballyPositioned { coordinates ->
@@ -137,9 +132,9 @@ class AboutFaqScreen(
                             scrollToFAQPosition = coordinates.positionInRoot().y
                         },
                     text = stringResource(MokoRes.strings.faq),
-                    style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE),
+                    style = extraBoldTextStyle(FAQ.TITLE_FONTSIZE),
                 )
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
 
                 // FAQ Items
                 FAQDividerLine()
@@ -156,7 +151,7 @@ class AboutFaqScreen(
                 }
 
                 // WWW Social Networks
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
                 AboutDividerLine()
                 AboutWWWSocialNetworks()
             }
@@ -175,10 +170,10 @@ class AboutFaqScreen(
     private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                modifier = Modifier.fillMaxWidth(0.5f),
+                modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
                 text = stringResource(MokoRes.strings.warn_rules_security_title),
                 style =
-                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
+                    extraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
                         textAlign = TextAlign.Start,
                     ),
             )
@@ -189,16 +184,16 @@ class AboutFaqScreen(
                         .clickable(onClick = scrollToFAQPosition),
                 text = stringResource(MokoRes.strings.faq_access),
                 style =
-                    quinaryColoredBoldTextStyle(DIM_FAQ_LINK_FONTSIZE).copy(
+                    quinaryColoredBoldTextStyle(FAQ.LINK_FONTSIZE).copy(
                         textDecoration = TextDecoration.Underline,
                         textAlign = TextAlign.End,
                     ),
             )
         }
-        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+        Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
         Text(
             text = stringResource(MokoRes.strings.warn_rules_security_text),
-            fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
+            fontSize = FAQ.INTRO_FONTSIZE.sp,
             style = commonTextStyle().copy(textAlign = TextAlign.Justify),
         )
     }
@@ -225,26 +220,26 @@ class AboutFaqScreen(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(title),
                 style =
-                    extraPrimaryColoredBoldTextStyle(DIM_FAQ_RULE_TITLE_FONTSIZE).copy(
+                    extraPrimaryColoredBoldTextStyle(FAQ.RULE_TITLE_FONTSIZE).copy(
                         textAlign = TextAlign.Start,
                     ),
             )
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             items.forEachIndexed { index, item ->
-                Row(modifier = Modifier.padding(bottom = DIM_DEFAULT_INT_PADDING.dp / 2)) {
+                Row(modifier = Modifier.padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp / 2)) {
                     Text(
-                        modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
+                        modifier = Modifier.width(FAQ.RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
-                        style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
+                        style = commonBoldStyle(FAQ.RULE_CONTENTS_FONTSIZE),
                     )
                     Text(
-                        modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
+                        modifier = Modifier.padding(start = Dimensions.DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
-                        style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
+                        style = commonJustifiedTextStyle(FAQ.RULE_CONTENTS_FONTSIZE),
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
         }
     }
 
@@ -270,7 +265,7 @@ class AboutFaqScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(DIM_DEFAULT_INT_PADDING.dp)
+                    .padding(Dimensions.DEFAULT_INT_PADDING.dp)
                     .clickable {
                         onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
                     },
@@ -281,25 +276,25 @@ class AboutFaqScreen(
             ) {
                 Text(
                     text = stringResource(questionResource),
-                    style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE),
+                    style = primaryColoredBoldTextStyle(FAQ.RULE_QUESTION_FONTSIZE),
                     modifier = Modifier.weight(1f),
                 )
             }
 
             if (expandedFaqItem == itemIndex) {
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
                 Text(
                     text = stringResource(answerResource),
-                    style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE),
+                    style = commonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
                 )
                 if (showSimulateButton) {
-                    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                    Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
                     OutlinedButton(
                         onClick = { platform.enableSimulationMode() },
                     ) {
                         Text(
                             text = stringResource(MokoRes.strings.test_simulation),
-                            style = primaryColoredBoldTextStyle(DIM_FAQ_RULE_QUESTION_FONTSIZE - 2),
+                            style = primaryColoredBoldTextStyle(FAQ.RULE_QUESTION_FONTSIZE - 2),
                         )
                     }
                 }

@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.data
  */
 
 import android.content.Context
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_DATASTORE_FOLDER
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -36,6 +36,6 @@ actual fun keyValueStorePath(): String {
     val context: Context by inject(Context::class.java)
     return context
         .filesDir
-        .resolve("$FS_DATASTORE_FOLDER/$dataStoreFileName")
+        .resolve("${FileSystem.DATASTORE_FOLDER}/$dataStoreFileName")
         .absolutePath
 }

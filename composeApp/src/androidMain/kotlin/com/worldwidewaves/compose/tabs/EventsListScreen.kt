@@ -77,21 +77,8 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.common.EventOverlayDone
 import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COMMUNITY_FONSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_COUNTRY_FONSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_DATE_FONSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_EVENT_LOCATION_FONSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FAVS_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_FLAG_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_MAPDL_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_NOEVENTS_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_OVERLAY_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENTS_SELECTOR_ROUND
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
@@ -136,6 +123,12 @@ class EventsListScreen(
     override val name = "Events"
 
     private var firstLaunch = true
+
+    companion object {
+        // Layout proportions for event selector buttons
+        private const val ALL_EVENTS_BUTTON_WIDTH = 1f / 3f
+        private const val FAVORITES_BUTTON_WIDTH = 0.5f
+    }
 
     // ----------------------------
 
@@ -204,47 +197,61 @@ class EventsListScreen(
             modifier = modifier,
             events = events,
             mapStates = mapStates,
-            starredSelected = starredSelected,
-            downloadedSelected = downloadedSelected,
-            onAllEventsClicked = { selectTab() },
-            onFavoriteEventsClicked = { selectTab(starred = true) },
-            onDownloadedEventsClicked = { selectTab(downloaded = true) },
+            filterState =
+                EventsFilterState(
+                    starredSelected = starredSelected,
+                    downloadedSelected = downloadedSelected,
+                ),
+            filterCallbacks =
+                EventsFilterCallbacks(
+                    onAllEventsClicked = { selectTab() },
+                    onFavoriteEventsClicked = { selectTab(starred = true) },
+                    onDownloadedEventsClicked = { selectTab(downloaded = true) },
+                ),
         )
     }
 
     // ----------------------------
+
+    private data class EventsFilterState(
+        val starredSelected: Boolean,
+        val downloadedSelected: Boolean,
+    )
+
+    private data class EventsFilterCallbacks(
+        val onAllEventsClicked: () -> Unit,
+        val onFavoriteEventsClicked: () -> Unit,
+        val onDownloadedEventsClicked: () -> Unit,
+    )
 
     @Composable
     private fun EventsList(
         modifier: Modifier,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
-        starredSelected: Boolean,
-        downloadedSelected: Boolean,
-        onAllEventsClicked: () -> Unit,
-        onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit,
+        filterState: EventsFilterState,
+        filterCallbacks: EventsFilterCallbacks,
     ) {
         Column(
             modifier =
                 modifier
                     .fillMaxHeight()
-                    .padding(DIM_DEFAULT_EXT_PADDING.dp),
+                    .padding(Dimensions.DEFAULT_EXT_PADDING.dp),
         ) {
             FavoritesSelector(
-                starredSelected = starredSelected,
-                downloadedSelected = downloadedSelected,
-                onAllEventsClicked = onAllEventsClicked,
-                onFavoriteEventsClicked = onFavoriteEventsClicked,
-                onDownloadedEventsClicked = onDownloadedEventsClicked,
+                starredSelected = filterState.starredSelected,
+                downloadedSelected = filterState.downloadedSelected,
+                onAllEventsClicked = filterCallbacks.onAllEventsClicked,
+                onFavoriteEventsClicked = filterCallbacks.onFavoriteEventsClicked,
+                onDownloadedEventsClicked = filterCallbacks.onDownloadedEventsClicked,
             )
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
             Events(
                 viewModel = viewModel,
                 events = events,
                 mapStates = mapStates,
-                starredSelected = starredSelected,
-                downloadedSelected = downloadedSelected,
+                starredSelected = filterState.starredSelected,
+                downloadedSelected = filterState.downloadedSelected,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -285,7 +292,7 @@ class EventsListScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1 / 3f),
+                    modifier = Modifier.fillMaxWidth(ALL_EVENTS_BUTTON_WIDTH),
                     backgroundColor = allColor.color,
                     onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
@@ -293,7 +300,7 @@ class EventsListScreen(
                     text = stringResource(MokoRes.strings.events_select_all),
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier.fillMaxWidth(FAVORITES_BUTTON_WIDTH),
                     backgroundColor = starredColor.color,
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
@@ -324,8 +331,8 @@ class EventsListScreen(
         Box(
             modifier =
                 modifier
-                    .clip(RoundedCornerShape(DIM_EVENTS_SELECTOR_ROUND.dp))
-                    .height(DIM_EVENTS_SELECTOR_HEIGHT.dp)
+                    .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
+                    .height(EventsList.SELECTOR_HEIGHT.dp)
                     .background(backgroundColor)
                     .clickable { onClick() },
             contentAlignment = Alignment.Center,
@@ -333,7 +340,7 @@ class EventsListScreen(
             Text(
                 text = text,
                 style =
-                    commonTextStyle(DIM_EVENTS_SELECTOR_FONTSIZE).copy(
+                    commonTextStyle(EventsList.SELECTOR_FONTSIZE).copy(
                         color = textColor,
                         fontWeight = fontWeight,
                     ),
@@ -378,7 +385,7 @@ class EventsListScreen(
                                 },
                             ),
                         style =
-                            quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
+                            quinaryColoredTextStyle(EventsList.NOEVENTS_FONTSIZE).copy(
                                 textAlign = TextAlign.Center,
                             ),
                     )
@@ -424,7 +431,7 @@ class EventsListScreen(
         starredSelected: Boolean,
         modifier: Modifier = Modifier,
     ) {
-        val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
+        val heightModifier = Modifier.height(EventsList.OVERLAY_HEIGHT.dp)
         val eventStatus by event.observer.eventStatus.collectAsState()
 
         Box(modifier = heightModifier) {
@@ -457,7 +464,11 @@ class EventsListScreen(
         ) {
             event.community?.let {
                 EventFlag(
-                    modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, top = DIM_DEFAULT_INT_PADDING.dp),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            top = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = event.getCommunityImage() as DrawableResource,
                     contentDescription = event.community!!,
                 )
@@ -465,7 +476,11 @@ class EventsListScreen(
 
             event.country?.let {
                 EventFlag(
-                    modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = event.getCountryImage() as DrawableResource,
                     contentDescription = event.country!!,
                 )
@@ -480,7 +495,7 @@ class EventsListScreen(
         contentDescription: String,
     ) {
         Image(
-            modifier = modifier.width(DIM_EVENTS_FLAG_WIDTH.dp),
+            modifier = modifier.width(EventsList.FLAG_WIDTH.dp),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(imageResource),
             contentDescription = contentDescription,
@@ -516,15 +531,15 @@ class EventsListScreen(
                     modifier
                         .fillMaxSize()
                         .padding(
-                            end = DIM_DEFAULT_INT_PADDING.dp * 2 + DIM_EVENTS_MAPDL_IMAGE_SIZE.dp,
-                            bottom = DIM_DEFAULT_INT_PADDING.dp,
+                            end = Dimensions.DEFAULT_INT_PADDING.dp * 2 + EventsList.MAPDL_IMAGE_SIZE.dp,
+                            bottom = Dimensions.DEFAULT_INT_PADDING.dp,
                         ),
                 contentAlignment = Alignment.BottomEnd,
             ) {
                 Image(
                     modifier =
                         Modifier
-                            .size(DIM_EVENTS_MAPDL_IMAGE_SIZE.dp)
+                            .size(EventsList.MAPDL_IMAGE_SIZE.dp)
                             .clickable { showUninstallDialog = true },
                     // Add clickable to show dialog
                     painter = painterResource(ShRes.drawable.downloaded_icon),
@@ -566,10 +581,16 @@ class EventsListScreen(
                                                 // Use the new suspend uninstall API – returns true on success
                                                 val success = mapChecker.uninstallMap(eventId)
                                                 uninstallSucceeded = success
-                                            } catch (e: Exception) {
+                                            } catch (e: IllegalStateException) {
                                                 Log.e(
                                                     "EventOverlayMapDownloaded",
-                                                    "Error uninstalling map for event $eventId",
+                                                    "Invalid state while uninstalling map for event $eventId",
+                                                    e,
+                                                )
+                                            } catch (e: SecurityException) {
+                                                Log.e(
+                                                    "EventOverlayMapDownloaded",
+                                                    "Security error while uninstalling map for event $eventId",
                                                     e,
                                                 )
                                                 uninstallSucceeded = false
@@ -653,7 +674,7 @@ class EventsListScreen(
             modifier =
                 modifier
                     .fillMaxSize()
-                    .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+                    .padding(end = Dimensions.DEFAULT_INT_PADDING.dp, bottom = Dimensions.DEFAULT_INT_PADDING.dp),
             contentAlignment = Alignment.BottomEnd,
         ) {
             Surface(
@@ -663,7 +684,7 @@ class EventsListScreen(
                 Image(
                     modifier =
                         Modifier
-                            .size(DIM_EVENTS_FAVS_IMAGE_SIZE.dp)
+                            .size(EventsList.FAVS_IMAGE_SIZE.dp)
                             .clickable {
                                 scope.launch {
                                     isFavorite = !isFavorite
@@ -673,7 +694,10 @@ class EventsListScreen(
                                     }
                                 }
                             },
-                    painter = painterResource(if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off),
+                    painter =
+                        painterResource(
+                            if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off,
+                        ),
                     contentDescription =
                         stringResource(
                             if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off,
@@ -712,12 +736,12 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = stringResource(event.getLocation()),
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_LOCATION_FONTSIZE),
                     )
                     Text(
                         text = eventDate,
                         modifier = Modifier.padding(end = 2.dp),
-                        style = primaryColoredBoldTextStyle(DIM_EVENTS_EVENT_DATE_FONSIZE),
+                        style = primaryColoredBoldTextStyle(EventsList.EVENT_DATE_FONTSIZE),
                     )
                 }
 
@@ -728,17 +752,17 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = countryText,
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                     Text(
                         text = " / ",
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                     Text(
                         text = communityText,
-                        style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
+                        style = quaternaryColoredTextStyle(EventsList.EVENT_COMMUNITY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                 }
