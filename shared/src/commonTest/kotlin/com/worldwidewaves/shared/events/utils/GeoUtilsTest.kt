@@ -36,70 +36,70 @@ import kotlin.test.assertTrue
 
 class GeoUtilsTest {
     @Test
-    fun pointOnHorizontalSegment() {
+    fun `should return true when point is on horizontal segment`() {
         val segment = Segment(Position(1.0, 0.0), Position(1.0, 2.0))
         val point = Position(1.0, 1.0)
         assertTrue(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOnVerticalSegment() {
+    fun `should return true when point is on vertical segment`() {
         val segment = Segment(Position(0.0, 1.0), Position(2.0, 1.0))
         val point = Position(1.0, 1.0)
         assertTrue(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOnDiagonalSegment() {
+    fun `should return true when point is on diagonal segment`() {
         val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
         val point = Position(1.0, 1.0)
         assertTrue(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOutsideSegmentHorizontal() {
+    fun `should return false when point is outside horizontal segment`() {
         val segment = Segment(Position(1.0, 0.0), Position(1.0, 2.0))
         val point = Position(2.0, 1.0)
         assertFalse(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOutsideSegmentVertical() {
+    fun `should return false when point is outside vertical segment`() {
         val segment = Segment(Position(0.0, 1.0), Position(2.0, 1.0))
         val point = Position(1.0, 2.0)
         assertFalse(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOutsideSegmentDiagonal() {
+    fun `should return false when point is outside diagonal segment`() {
         val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
         val point = Position(1.0, 0.0)
         assertFalse(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointOnSegmentEndpoint() {
+    fun `should return true when point is on segment endpoint`() {
         val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
         val point = Position(0.0, 0.0)
         assertTrue(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointCollinearButOutsideSegment() {
+    fun `should return false when point is collinear but outside segment`() {
         val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
         val point = Position(3.0, 3.0)
         assertFalse(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun pointNotCollinear() {
+    fun `should return false when point is not collinear with segment`() {
         val segment = Segment(Position(0.0, 0.0), Position(2.0, 2.0))
         val point = Position(1.0, 2.0)
         assertFalse(isPointOnSegment(point, segment))
     }
 
     @Test
-    fun testToRadians() {
+    fun `should convert degrees to radians correctly`() {
         assertEquals(0.0, 0.0.toRadians(), EPSILON)
         assertEquals(PI / 2, 90.0.toRadians(), EPSILON)
         assertEquals(PI, 180.0.toRadians(), EPSILON)
@@ -108,7 +108,7 @@ class GeoUtilsTest {
     }
 
     @Test
-    fun testToDegrees() {
+    fun `should convert radians to degrees correctly`() {
         assertEquals(0.0, 0.0.toDegrees(), EPSILON)
         assertEquals(90.0, (PI / 2).toDegrees(), EPSILON)
         assertEquals(180.0, PI.toDegrees(), EPSILON)
@@ -117,20 +117,20 @@ class GeoUtilsTest {
     }
 
     @Test
-    fun testIsLongitudeEqual() {
+    fun `should return true when longitudes are equal`() {
         assertTrue(isLongitudeEqual(0.0, 0.0))
         assertFalse(isLongitudeEqual(0.0, 180.0))
     }
 
     @Test
-    fun testIsLongitudeInRange() {
+    fun `should return true when longitude is within specified range`() {
         assertTrue(isLongitudeInRange(0.0, -180.0, 180.0))
         assertTrue(isLongitudeInRange(180.0, -180.0, 180.0))
         assertTrue(isLongitudeInRange(170.0, 160.0, 180.0))
     }
 
     @Test
-    fun testIsLatitudeInRange() {
+    fun `should return true when latitude is within valid range and false when outside range`() {
         assertTrue(isLatitudeInRange(0.0, -90.0, 90.0))
         assertTrue(isLatitudeInRange(90.0, -90.0, 90.0))
         assertFalse(isLatitudeInRange(-100.0, -90.0, 90.0))

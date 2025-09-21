@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class HelpersTest {
     @Test
-    fun `test updateIfChanged updates value when different`() =
+    fun `should update value when new value is different`() =
         runTest {
             // Arrange
             val flow = MutableStateFlow("initial")
@@ -27,7 +27,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged does not update value when same`() =
+    fun `should not update value when new value is same`() =
         runTest {
             // Arrange
             val flow = MutableStateFlow("same")
@@ -40,7 +40,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged with various primitive types`() =
+    fun `should handle various primitive types correctly`() =
         runTest {
             // Integer test
             val intFlow = MutableStateFlow(42)
@@ -65,7 +65,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged with null values`() =
+    fun `should handle null values correctly`() =
         runTest {
             // Nullable flow with initial null value
             val nullableFlow = MutableStateFlow<String?>(null)
@@ -84,7 +84,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged with collections`() =
+    fun `should handle collections with reference equality correctly`() =
         runTest {
             // List test
             val listFlow = MutableStateFlow(listOf(1, 2, 3))
@@ -108,7 +108,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged with custom data class`() =
+    fun `should handle custom data classes with reference equality correctly`() =
         runTest {
             // Define a simple data class for testing
             data class TestData(
@@ -132,7 +132,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test updateIfChanged with custom class using equals override`() =
+    fun `should respect custom equals implementation when updating`() =
         runTest {
             // Define a class with custom equals implementation
             class CustomEqualsClass(
@@ -159,7 +159,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test subscribers are only notified when value actually changes`() =
+    fun `should notify subscribers only when value actually changes`() =
         runTest {
             // Create a test scope with a dispatcher
             val testScope = TestScope(UnconfinedTestDispatcher())
@@ -198,7 +198,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test performance by counting actual updates`() =
+    fun `should optimize performance by avoiding unnecessary updates`() =
         runTest {
             // Create a wrapper to count actual updates
             class UpdateCounter<T>(
@@ -244,7 +244,7 @@ class HelpersTest {
         }
 
     @Test
-    fun `test with large number of identical updates`() =
+    fun `should handle large number of identical updates efficiently`() =
         runTest {
             val flow = MutableStateFlow(0)
             var emissionCount = 0
