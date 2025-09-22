@@ -602,11 +602,11 @@ private fun EventNumbers(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
                     style =
-                        extraQuinaryColoredBoldTextStyle(DIM_EVENT_NUMBERS_TITLE_FONTSIZE)
+                        extraQuinaryColoredBoldTextStyle(Event.NUMBERS_TITLE_FONTSIZE)
                             .copy(textAlign = TextAlign.End),
                     textAlign = TextAlign.End,
                 )
-                Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp))
+                Spacer(modifier = Modifier.height(Event.NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
                     orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
@@ -630,7 +630,7 @@ private fun EventNumbers(
                                 text = stringResource(key),
                                 style =
                                     extraQuinaryColoredBoldTextStyle(
-                                        DIM_EVENT_NUMBERS_LABEL_FONTSIZE,
+                                        Event.NUMBERS_LABEL_FONTSIZE,
                                     ),
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -638,7 +638,7 @@ private fun EventNumbers(
                                 Text(
                                     text = displayValue,
                                     style =
-                                        extraBoldTextStyle(DIM_EVENT_NUMBERS_VALUE_FONTSIZE).copy(
+                                        extraBoldTextStyle(Event.NUMBERS_VALUE_FONTSIZE).copy(
                                             color =
                                                 when (key) {
                                                     MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
@@ -657,7 +657,7 @@ private fun EventNumbers(
                                     Text(
                                         text = " $eventTimeZone",
                                         style =
-                                            extraLightTextStyle(DIM_EVENT_NUMBERS_TZ_FONTSIZE).copy(
+                                            extraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
                                                 color =
                                                     when (key) {
                                                         MokoRes.strings.wave_start_time -> Color.Yellow
@@ -668,7 +668,7 @@ private fun EventNumbers(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(DIM_EVENT_NUMBERS_SPACER.dp / 2))
+                        Spacer(modifier = Modifier.height(Event.NUMBERS_SPACER.dp / 2))
                     }
                 }
             }

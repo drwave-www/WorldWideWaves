@@ -619,7 +619,7 @@ class WWWEventValidationTest : KoinTest {
     }
 
     @Test
-    fun `isNearTime should respect WaveTiming.OBSERVE_DELAY`() {
+    fun `isNearTime should respect WaveTiming OBSERVE_DELAY`() {
         // GIVEN: Event exactly at WaveTiming.OBSERVE_DELAY distance
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
@@ -635,7 +635,7 @@ class WWWEventValidationTest : KoinTest {
     }
 
     @Test
-    fun `isNearTime should return false for events beyond WaveTiming.OBSERVE_DELAY`() {
+    fun `isNearTime should return false for events beyond WaveTiming OBSERVE_DELAY`() {
         // GIVEN: Event beyond WaveTiming.OBSERVE_DELAY
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
