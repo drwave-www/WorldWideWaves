@@ -1,10 +1,5 @@
 package com.worldwidewaves.shared
 
-import com.worldwidewaves.shared.events.utils.Position
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-
 /*
  * Copyright 2025 DrWave
  *
@@ -25,6 +20,11 @@ import kotlin.time.Instant
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.worldwidewaves.shared.events.utils.Position
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class WWWSimulation(

@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared.events
 
-import androidx.annotation.VisibleForTesting
-
 /*
  * Copyright 2025 DrWave
  *
@@ -23,7 +21,9 @@ import androidx.annotation.VisibleForTesting
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_WARN_BEFORE_HIT
+import androidx.annotation.VisibleForTesting
+
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -386,7 +386,7 @@ class WWWEventObserver(
         // Check if user is about to be hit
         var userIsGoingToBeHit = false
         val timeBeforeHit = event.wave.timeBeforeUserHit() ?: INFINITE
-        if (timeBeforeHit > ZERO && timeBeforeHit <= WAVE_WARN_BEFORE_HIT) {
+        if (timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT) {
             warmingInProgress = false
             userIsGoingToBeHit = true
         }

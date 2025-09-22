@@ -1,13 +1,5 @@
 package com.worldwidewaves.shared
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
-
 /*
  * Copyright 2025 DrWave
  *
@@ -28,6 +20,14 @@ import kotlin.time.Duration.Companion.seconds
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 fun debugBuild() {
     Napier.base(DebugAntilog())
@@ -435,152 +435,5 @@ class WWWGlobals {
             const val EMPTY_COUNTER = "--:--"
         }
 
-        // ============================================================================================
-        // LEGACY CONSTANTS (for backward compatibility)
-        // ============================================================================================
-
-        // Legacy constants maintained for backward compatibility
-        // These will be phased out in favor of the organized structure above
-        @Deprecated("Use FileSystem.DATASTORE_FOLDER", ReplaceWith("FileSystem.DATASTORE_FOLDER"))
-        const val FS_DATASTORE_FOLDER = FileSystem.DATASTORE_FOLDER
-
-        @Deprecated("Use FileSystem.EVENTS_CONF", ReplaceWith("FileSystem.EVENTS_CONF"))
-        const val FS_EVENTS_CONF = FileSystem.EVENTS_CONF
-
-        @Deprecated("Use FileSystem.CHOREOGRAPHIES_CONF", ReplaceWith("FileSystem.CHOREOGRAPHIES_CONF"))
-        const val FS_CHOREOGRAPHIES_CONF = FileSystem.CHOREOGRAPHIES_CONF
-
-        @Deprecated("Use FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE", ReplaceWith("FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE"))
-        const val FS_CHOREOGRAPHIES_SOUND_MIDIFILE = FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE
-
-        @Deprecated("Use FileSystem.MAPS_STYLE", ReplaceWith("FileSystem.MAPS_STYLE"))
-        const val FS_MAPS_STYLE = FileSystem.MAPS_STYLE
-
-        @Deprecated("Use FileSystem.STYLE_LISTING", ReplaceWith("FileSystem.STYLE_LISTING"))
-        const val FS_STYLE_LISTING = FileSystem.STYLE_LISTING
-
-        @Deprecated("Use FileSystem.STYLE_FOLDER", ReplaceWith("FileSystem.STYLE_FOLDER"))
-        const val FS_STYLE_FOLDER = FileSystem.STYLE_FOLDER
-
-        @Deprecated("Use WaveTiming.SOON_DELAY", ReplaceWith("WaveTiming.SOON_DELAY"))
-        val WAVE_SOON_DELAY = WaveTiming.SOON_DELAY
-
-        @Deprecated("Use WaveTiming.OBSERVE_DELAY", ReplaceWith("WaveTiming.OBSERVE_DELAY"))
-        val WAVE_OBSERVE_DELAY = WaveTiming.OBSERVE_DELAY
-
-        @Deprecated("Use WaveTiming.WARMING_DURATION", ReplaceWith("WaveTiming.WARMING_DURATION"))
-        val WAVE_WARMING_DURATION = WaveTiming.WARMING_DURATION
-
-        @Deprecated("Use WaveTiming.WARN_BEFORE_HIT", ReplaceWith("WaveTiming.WARN_BEFORE_HIT"))
-        val WAVE_WARN_BEFORE_HIT = WaveTiming.WARN_BEFORE_HIT
-
-        @Deprecated("Use WaveTiming.SHOW_HIT_SEQUENCE_SECONDS", ReplaceWith("WaveTiming.SHOW_HIT_SEQUENCE_SECONDS"))
-        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = WaveTiming.SHOW_HIT_SEQUENCE_SECONDS
-
-        @Deprecated("Use Wave.LINEAR_METERS_REFRESH", ReplaceWith("Wave.LINEAR_METERS_REFRESH"))
-        const val WAVE_LINEAR_METERS_REFRESH = Wave.LINEAR_METERS_REFRESH
-
-        @Deprecated("Use Wave.BACKGROUND_COLOR", ReplaceWith("Wave.BACKGROUND_COLOR"))
-        const val WAVE_BACKGROUND_COLOR = Wave.BACKGROUND_COLOR
-
-        @Deprecated("Use Wave.BACKGROUND_OPACITY", ReplaceWith("Wave.BACKGROUND_OPACITY"))
-        const val WAVE_BACKGROUND_OPACITY = Wave.BACKGROUND_OPACITY
-
-        @Deprecated("Use Wave.DEFAULT_SPEED_SIMULATION", ReplaceWith("Wave.DEFAULT_SPEED_SIMULATION"))
-        const val DEFAULT_SPEED_SIMULATION = Wave.DEFAULT_SPEED_SIMULATION
-
-        @Deprecated("Use Timing.SPLASH_MIN_DURATION", ReplaceWith("Timing.SPLASH_MIN_DURATION"))
-        val CONST_SPLASH_MIN_DURATION = Timing.SPLASH_MIN_DURATION
-
-        @Deprecated("Use Timing.GPS_UPDATE_INTERVAL", ReplaceWith("Timing.GPS_UPDATE_INTERVAL"))
-        val CONST_TIMER_GPS_UPDATE = Timing.GPS_UPDATE_INTERVAL
-
-        @Deprecated("Use Timing.GPS_PERMISSION_REASK_DELAY", ReplaceWith("Timing.GPS_PERMISSION_REASK_DELAY"))
-        val CONST_GPS_PERMISSION_REASK_DELAY = Timing.GPS_PERMISSION_REASK_DELAY
-
-        @Deprecated("Use MapDisplay.TARGET_USER_ZOOM", ReplaceWith("MapDisplay.TARGET_USER_ZOOM"))
-        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = MapDisplay.TARGET_USER_ZOOM
-
-        @Deprecated("Use MapDisplay.TARGET_WAVE_ZOOM", ReplaceWith("MapDisplay.TARGET_WAVE_ZOOM"))
-        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = MapDisplay.TARGET_WAVE_ZOOM
-
-        @Deprecated("Use Urls.INSTAGRAM_BASE", ReplaceWith("Urls.INSTAGRAM_BASE"))
-        const val URL_BASE_INSTAGRAM = Urls.INSTAGRAM_BASE
-
-        @Deprecated("Use DisplayText.EMPTY_COUNTER", ReplaceWith("DisplayText.EMPTY_COUNTER"))
-        const val EMPTY_COUNTER = DisplayText.EMPTY_COUNTER
-
-        // Legacy dimension constants
-        @Deprecated("Use Dimensions.DEFAULT_EXT_PADDING", ReplaceWith("Dimensions.DEFAULT_EXT_PADDING"))
-        const val DIM_DEFAULT_EXT_PADDING = Dimensions.DEFAULT_EXT_PADDING
-
-        @Deprecated("Use Dimensions.DEFAULT_INT_PADDING", ReplaceWith("Dimensions.DEFAULT_INT_PADDING"))
-        const val DIM_DEFAULT_INT_PADDING = Dimensions.DEFAULT_INT_PADDING
-
-        @Deprecated("Use Dimensions.SPACER_SMALL", ReplaceWith("Dimensions.SPACER_SMALL"))
-        const val DIM_DEFAULT_SPACER_SMALL = Dimensions.SPACER_SMALL
-
-        @Deprecated("Use Dimensions.SPACER_MEDIUM", ReplaceWith("Dimensions.SPACER_MEDIUM"))
-        const val DIM_DEFAULT_SPACER_MEDIUM = Dimensions.SPACER_MEDIUM
-
-        @Deprecated("Use Dimensions.SPACER_BIG", ReplaceWith("Dimensions.SPACER_BIG"))
-        const val DIM_DEFAULT_SPACER_BIG = Dimensions.SPACER_BIG
-
-        @Deprecated("Use Dimensions.FONTSIZE_DEFAULT", ReplaceWith("Dimensions.FONTSIZE_DEFAULT"))
-        const val DIM_DEFAULT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
-
-        @Deprecated("Use TabBar.INT_ITEM_FONTSIZE", ReplaceWith("TabBar.INT_ITEM_FONTSIZE"))
-        const val DIM_INT_TABBAR_ITEM_FONTSIZE = TabBar.INT_ITEM_FONTSIZE
-
-        @Deprecated("Use BackNav.FONTSIZE", ReplaceWith("BackNav.FONTSIZE"))
-        const val DIM_BACK_FONTSIZE = BackNav.FONTSIZE
-
-        @Deprecated("Use Event.DESC_FONTSIZE", ReplaceWith("Event.DESC_FONTSIZE"))
-        const val DIM_EVENT_DESC_FONTSIZE = Event.DESC_FONTSIZE
-
-        @Deprecated("Use Event.WAVEBUTTON_FONTSIZE", ReplaceWith("Event.WAVEBUTTON_FONTSIZE"))
-        const val DIM_EVENT_WAVEBUTTON_FONTSIZE = Event.WAVEBUTTON_FONTSIZE
-
-        @Deprecated("Use TabBar.INT_HEIGHT", ReplaceWith("TabBar.INT_HEIGHT"))
-        const val DIM_INT_TABBAR_HEIGHT = TabBar.INT_HEIGHT
-
-        @Deprecated("Use TabBar.INT_ITEM_WIDTH", ReplaceWith("TabBar.INT_ITEM_WIDTH"))
-        const val DIM_INT_TABBAR_ITEM_WIDTH = TabBar.INT_ITEM_WIDTH
-
-        @Deprecated("Use Event.WAVEBUTTON_WIDTH", ReplaceWith("Event.WAVEBUTTON_WIDTH"))
-        const val DIM_EVENT_WAVEBUTTON_WIDTH = Event.WAVEBUTTON_WIDTH
-
-        @Deprecated("Use Event.WAVEBUTTON_HEIGHT", ReplaceWith("Event.WAVEBUTTON_HEIGHT"))
-        const val DIM_EVENT_WAVEBUTTON_HEIGHT = Event.WAVEBUTTON_HEIGHT
-
-        @Deprecated("Use Event.MAP_RATIO", ReplaceWith("Event.MAP_RATIO"))
-        const val DIM_EVENT_MAP_RATIO = Event.MAP_RATIO
-
-        @Deprecated("Use Dimensions.DIVIDER_WIDTH", ReplaceWith("Dimensions.DIVIDER_WIDTH"))
-        const val DIM_DIVIDER_WIDTH = Dimensions.DIVIDER_WIDTH
-
-        @Deprecated("Use Dimensions.DIVIDER_THICKNESS", ReplaceWith("Dimensions.DIVIDER_THICKNESS"))
-        const val DIM_DIVIDER_THICKNESS = Dimensions.DIVIDER_THICKNESS
-
-        @Deprecated("Use Event.NUMBERS_BORDERWIDTH", ReplaceWith("Event.NUMBERS_BORDERWIDTH"))
-        const val DIM_EVENT_NUMBERS_BORDERWIDTH = Event.NUMBERS_BORDERWIDTH
-
-        @Deprecated("Use Event.NUMBERS_BORDERROUND", ReplaceWith("Event.NUMBERS_BORDERROUND"))
-        const val DIM_EVENT_NUMBERS_BORDERROUND = Event.NUMBERS_BORDERROUND
-
-        @Deprecated("Use Event.TARGET_WAVE_IMAGE_SIZE", ReplaceWith("Event.TARGET_WAVE_IMAGE_SIZE"))
-        const val DIM_EVENT_TARGET_WAVE_IMAGE_SIZE = Event.TARGET_WAVE_IMAGE_SIZE
-
-        @Deprecated("Use Event.TARGET_ME_IMAGE_SIZE", ReplaceWith("Event.TARGET_ME_IMAGE_SIZE"))
-        const val DIM_EVENT_TARGET_ME_IMAGE_SIZE = Event.TARGET_ME_IMAGE_SIZE
-
-        @Deprecated("Use EventsList.FAVS_IMAGE_SIZE", ReplaceWith("EventsList.FAVS_IMAGE_SIZE"))
-        const val DIM_EVENTS_FAVS_IMAGE_SIZE = EventsList.FAVS_IMAGE_SIZE
-
-        @Deprecated("Use EventsList.MAPDL_IMAGE_SIZE", ReplaceWith("EventsList.MAPDL_IMAGE_SIZE"))
-        const val DIM_EVENTS_MAPDL_IMAGE_SIZE = EventsList.MAPDL_IMAGE_SIZE
-
-        // Additional legacy constants - maintaining only the most commonly used ones for now
-        // Full migration can be done in subsequent iterations
     }
 }

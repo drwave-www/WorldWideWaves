@@ -1,7 +1,5 @@
 package com.worldwidewaves.shared
 
-import dev.icerock.moko.resources.StringResource
-
 /*
  * Copyright 2025 DrWave
  *
@@ -22,6 +20,8 @@ import dev.icerock.moko.resources.StringResource
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import dev.icerock.moko.resources.StringResource
 
 fun getChoreographyText(
     sequenceType: String,

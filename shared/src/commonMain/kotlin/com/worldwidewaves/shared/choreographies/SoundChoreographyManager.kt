@@ -1,23 +1,5 @@
 package com.worldwidewaves.shared.choreographies
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_CHOREOGRAPHIES_SOUND_MIDIFILE
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
-import com.worldwidewaves.shared.sound.MidiParser
-import com.worldwidewaves.shared.sound.MidiTrack
-import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.shared.sound.WaveformGenerator
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import kotlin.random.Random
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-
 /*
  * Copyright 2025 DrWave
  *
@@ -39,12 +21,30 @@ import kotlin.time.Instant
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.sound.MidiParser
+import com.worldwidewaves.shared.sound.MidiTrack
+import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.WaveformGenerator
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+
 /**
  * Manages the **musical choreography** that accompanies a wave.
  *
  * Workflow:
  * • At start-up, the manager pre-loads a MIDI file located at
- *   [FS_CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
+ *   [FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE] (or any custom path via
  *   [preloadMidiFile]).  The file is parsed into a single [MidiTrack] that
  *   stores note, timing and velocity information.
  * • When a device gets “hit” by the wave the UI calls [playCurrentSoundTone]
@@ -81,7 +81,7 @@ class SoundChoreographyManager(
 
     init {
         coroutineScopeProvider.launchIO {
-            preloadMidiFile(FS_CHOREOGRAPHIES_SOUND_MIDIFILE)
+            preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
         }
     }
 
