@@ -195,26 +195,38 @@ class EventsListScreen(
             modifier = modifier,
             events = events,
             mapStates = mapStates,
-            starredSelected = starredSelected,
-            downloadedSelected = downloadedSelected,
-            onAllEventsClicked = { selectTab() },
-            onFavoriteEventsClicked = { selectTab(starred = true) },
-            onDownloadedEventsClicked = { selectTab(downloaded = true) },
+            filterState = EventsFilterState(
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected
+            ),
+            filterCallbacks = EventsFilterCallbacks(
+                onAllEventsClicked = { selectTab() },
+                onFavoriteEventsClicked = { selectTab(starred = true) },
+                onDownloadedEventsClicked = { selectTab(downloaded = true) }
+            ),
         )
     }
 
     // ----------------------------
+
+    private data class EventsFilterState(
+        val starredSelected: Boolean,
+        val downloadedSelected: Boolean,
+    )
+
+    private data class EventsFilterCallbacks(
+        val onAllEventsClicked: () -> Unit,
+        val onFavoriteEventsClicked: () -> Unit,
+        val onDownloadedEventsClicked: () -> Unit,
+    )
 
     @Composable
     private fun EventsList(
         modifier: Modifier,
         events: List<IWWWEvent>,
         mapStates: Map<String, Boolean>,
-        starredSelected: Boolean,
-        downloadedSelected: Boolean,
-        onAllEventsClicked: () -> Unit,
-        onFavoriteEventsClicked: () -> Unit,
-        onDownloadedEventsClicked: () -> Unit,
+        filterState: EventsFilterState,
+        filterCallbacks: EventsFilterCallbacks,
     ) {
         Column(
             modifier =
@@ -223,19 +235,19 @@ class EventsListScreen(
                     .padding(Dimensions.DEFAULT_EXT_PADDING.dp),
         ) {
             FavoritesSelector(
-                starredSelected = starredSelected,
-                downloadedSelected = downloadedSelected,
-                onAllEventsClicked = onAllEventsClicked,
-                onFavoriteEventsClicked = onFavoriteEventsClicked,
-                onDownloadedEventsClicked = onDownloadedEventsClicked,
+                starredSelected = filterState.starredSelected,
+                downloadedSelected = filterState.downloadedSelected,
+                onAllEventsClicked = filterCallbacks.onAllEventsClicked,
+                onFavoriteEventsClicked = filterCallbacks.onFavoriteEventsClicked,
+                onDownloadedEventsClicked = filterCallbacks.onDownloadedEventsClicked,
             )
             Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
             Events(
                 viewModel = viewModel,
                 events = events,
                 mapStates = mapStates,
-                starredSelected = starredSelected,
-                downloadedSelected = downloadedSelected,
+                starredSelected = filterState.starredSelected,
+                downloadedSelected = filterState.downloadedSelected,
                 modifier = Modifier.weight(1f),
             )
         }
