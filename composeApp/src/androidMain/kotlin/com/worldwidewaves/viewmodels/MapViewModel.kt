@@ -112,6 +112,7 @@ class MapViewModel(
         private const val MAX_RETRIES = 3
         private const val RETRY_DELAY_MILLIS = 1000L
         private const val PROGRESS_MULTIPLIER = 100
+        private const val PLAY_STORE_AUTH_ERROR_CODE = -100
     }
 
     // ------------------------------------------------------------------------
@@ -316,7 +317,7 @@ class MapViewModel(
                     MokoRes.strings.map_error_service_died
                 SplitInstallErrorCode.ACCESS_DENIED ->
                     MokoRes.strings.map_error_access_denied
-                -100 ->
+                PLAY_STORE_AUTH_ERROR_CODE ->
                     // Error code -100 typically indicates Google Play Store authentication issues
                     // This corresponds to Play Store error code 1010 (account no longer exists)
                     MokoRes.strings.map_error_account_issue
