@@ -51,9 +51,6 @@ import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_SPLASH_MIN_DURATION
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EXT_TABBAR_HEIGHT
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
@@ -155,7 +152,12 @@ open class MainActivity : AppCompatActivity() {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
         }
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+        } else {
+            @Suppress("DEPRECATION")
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+        }
 
         setContent {
             AppTheme {
@@ -186,7 +188,7 @@ open class MainActivity : AppCompatActivity() {
 
         // Also enforce minimum duration
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(CONST_SPLASH_MIN_DURATION)
+            kotlinx.coroutines.delay(2000) // Timing.SPLASH_MIN_DURATION
             checkSplashFinished(startTime)
         }
     }
@@ -194,7 +196,7 @@ open class MainActivity : AppCompatActivity() {
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded && elapsed >= CONST_SPLASH_MIN_DURATION.inWholeMilliseconds) {
+        if (isDataLoaded && elapsed >= 2000) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
             isSplashFinished.update { true }
         }
     }
@@ -234,7 +236,7 @@ open class MainActivity : AppCompatActivity() {
                 modifier =
                     Modifier
                         .align(androidx.compose.ui.Alignment.BottomCenter)
-                        .padding(bottom = DIM_DEFAULT_INT_PADDING.dp), // original SplashActivity padding
+                        .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // original SplashActivity padding
             )
         }
     }
