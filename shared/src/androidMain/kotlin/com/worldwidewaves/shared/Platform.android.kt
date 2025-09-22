@@ -171,9 +171,23 @@ actual suspend fun getMapFileAbsolutePath(
                 // Update metadata after successful copy
                 metadataFile.writeText(System.currentTimeMillis().toString())
             } catch (e: Exception) {
-                // FileNotFoundException during caching means the asset is not available
+                // FileNotFoundException during caching - same logic as above
                 if (e is java.io.FileNotFoundException) {
-                    Log.d(::getMapFileAbsolutePath.name, "Cannot cache file: $eventId.$extension (asset not found)")
+                    val shouldBeAvailable = try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.createContextForSplit(eventId) != null
+                        } else {
+                            false
+                        }
+                    } catch (_: Exception) {
+                        false
+                    }
+
+                    if (shouldBeAvailable) {
+                        Log.e(::getMapFileAbsolutePath.name, "Asset missing after download: $eventId.$extension (feature module is installed)")
+                    } else {
+                        Log.d(::getMapFileAbsolutePath.name, "Cannot cache file: $eventId.$extension (asset not found)")
+                    }
                 } else {
                     Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
                 }
@@ -187,9 +201,24 @@ actual suspend fun getMapFileAbsolutePath(
 
         return cachedFile.absolutePath
     } catch (e: Exception) {
-        // FileNotFoundException is expected when feature modules aren't downloaded
+        // FileNotFoundException handling - check if feature module should be available
         if (e is java.io.FileNotFoundException) {
-            Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+            // If we could create a split context successfully, the feature module should be available
+            val shouldBeAvailable = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.createContextForSplit(eventId) != null
+                } else {
+                    false // Can't determine on older versions, assume not downloaded
+                }
+            } catch (_: Exception) {
+                false
+            }
+
+            if (shouldBeAvailable) {
+                Log.e(::getMapFileAbsolutePath.name, "Map file missing after download: $eventId.$extension (feature module is installed)")
+            } else {
+                Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+            }
         } else {
             Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
             e.printStackTrace()
