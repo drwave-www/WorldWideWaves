@@ -91,7 +91,7 @@ class DefaultDataStoreFactory : DataStoreFactory {
 class TestDataStoreFactory : DataStoreFactory {
     override fun create(producePath: () -> String): DataStore<Preferences> {
         try {
-            val testPath = "/tmp/test_datastore_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb"
+            val testPath = "/tmp/test_datastore_${kotlin.random.Random.nextInt()}_${kotlin.random.Random.nextInt()}.preferences_pb"
             Log.v("DataStore", "Creating test DataStore for path: ${producePath()}, actual test path: $testPath")
             return PreferenceDataStoreFactory.createWithPath { testPath.toPath() }
         } catch (e: Exception) {
