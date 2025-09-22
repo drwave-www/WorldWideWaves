@@ -185,7 +185,8 @@ private fun WavePerformanceCard(metrics: PerformanceMetrics) {
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Wave timing accuracy measures how precisely users participate in waves. High accuracy (>95%) indicates excellent synchronization.",
+                text = "Wave timing accuracy measures how precisely users participate in waves. " +
+                        "High accuracy (>95%) indicates excellent synchronization.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

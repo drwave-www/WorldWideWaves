@@ -53,6 +53,12 @@ class AndroidPerformanceMonitor(
     private val context: Context
 ) : PerformanceMonitor() {
 
+    companion object {
+        internal const val SYSTEM_MONITOR_INTERVAL_SECONDS = 30L
+        internal const val MEMORY_MONITOR_INTERVAL_SECONDS = 10L
+        internal const val JANKY_FRAME_THRESHOLD_PERCENT = 100.0
+    }
+
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
     init {
@@ -67,7 +73,7 @@ class AndroidPerformanceMonitor(
             while (isActive) {
                 try {
                     monitorMemoryUsage()
-                    delay(30.seconds) // Monitor every 30 seconds
+                    delay(SYSTEM_MONITOR_INTERVAL_SECONDS.seconds)
                 } catch (e: Exception) {
                     Log.e("AndroidPerformanceMonitor", "Error in system monitoring", e)
                 }
@@ -144,7 +150,7 @@ class AndroidPerformanceMonitor(
      * Monitor frame rendering performance
      */
     fun recordFrameMetrics(totalFrames: Long, jankyFrames: Long) {
-        val jankyPercent = if (totalFrames > 0) (jankyFrames.toDouble() / totalFrames) * 100 else 0.0
+        val jankyPercent = if (totalFrames > 0) (jankyFrames.toDouble() / totalFrames) * JANKY_FRAME_THRESHOLD_PERCENT else 0.0
         recordMetric("frame_jank_percent", jankyPercent, "percent")
         recordEvent("frame_performance", mapOf(
             "totalFrames" to totalFrames,
@@ -189,7 +195,7 @@ fun PerformanceMonitoringEffect(
                     val usedMemory = runtime.totalMemory() - runtime.freeMemory()
                     val maxMemory = runtime.maxMemory()
                     monitor.recordMemoryUsage(usedMemory, maxMemory)
-                    delay(10.seconds)
+                    delay(AndroidPerformanceMonitor.MEMORY_MONITOR_INTERVAL_SECONDS.seconds)
                 } catch (e: Exception) {
                     Log.e("PerformanceMonitoringEffect", "Error monitoring screen memory", e)
                 }
