@@ -380,7 +380,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("join-wave-button").requestFocus()
         composeTestRule.onNodeWithTag("focus-indicator").assertExists()
 
-        trace.stop()keyboardNavigation)
+        trace.stop()
     }
 
     @Test
@@ -410,7 +410,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("dialog-close-button").performClick()
         composeTestRule.onNodeWithText("Open Settings Dialog").assertIsFocused()
 
-        trace.stop()focusManagement)
+        trace.stop()
     }
 
     @Test
@@ -442,7 +442,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("space-key").performClick()
         composeTestRule.onNodeWithText("Wave joined successfully").assertExists()
 
-        trace.stop()keyboardShortcuts)
+        trace.stop()
     }
 
     @Test
@@ -472,7 +472,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Entering warming phase").assertExists()
         composeTestRule.onNodeWithContentDescription("Prepare for wave hit").assertExists()
 
-        trace.stop()focusDuringWave)
+        trace.stop()
     }
 
     // ========================================================================
@@ -514,7 +514,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Status: Error (indicated by warning icon)")
             .assertExists()
 
-        trace.stop()colorContrast)
+        trace.stop()
     }
 
     @Test
@@ -549,7 +549,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithText("New York Wave Event").assertIsDisplayed()
         composeTestRule.onNodeWithText("Join Wave").assertIsDisplayed()
 
-        trace.stop()textScaling)
+        trace.stop()
     }
 
     @Test
@@ -577,7 +577,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Navigate to Events").assertExists()
         composeTestRule.onNodeWithContentDescription("Join Wave").assertExists()
 
-        trace.stop()darkMode)
+        trace.stop()
     }
 
     // ========================================================================
@@ -619,7 +619,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Touch targets have adequate spacing")
             .assertExists()
 
-        trace.stop()touchTargets)
+        trace.stop()
     }
 
     @Test
@@ -652,7 +652,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("context-menu-button").performClick()
         composeTestRule.onNodeWithText("Context menu opened").assertExists()
 
-        trace.stop()gestureAlternatives)
+        trace.stop()
     }
 
     @Test
@@ -683,7 +683,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Timeout settings adjusted for accessibility")
             .assertExists()
 
-        trace.stop()timingAdjustments)
+        trace.stop()
     }
 
     // ========================================================================
@@ -719,7 +719,7 @@ class AccessibilityTest {
             composeTestRule.onNodeWithContentDescription(iconDescription).assertExists()
         }
 
-        trace.stop()uiPatterns)
+        trace.stop()
     }
 
     @Test
@@ -746,7 +746,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Error: Email field is required. Please enter a valid email address.")
             .assertExists()
 
-        trace.stop()errorMessages)
+        trace.stop()
     }
 
     @Test
@@ -778,7 +778,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Wave coordination: Waiting for wave hit")
             .assertExists()
 
-        trace.stop()progressIndicators)
+        trace.stop()
     }
 
     // ========================================================================
@@ -818,7 +818,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Wave hit successful: You participated in the global wave")
             .assertExists()
 
-        trace.stop()waveCoordinationAccessibility)
+        trace.stop()
     }
 
     // ========================================================================

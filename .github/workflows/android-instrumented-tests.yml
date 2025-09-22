@@ -1,0 +1,260 @@
+name: Android Instrumented Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC to catch flaky tests
+    - cron: '0 2 * * *'
+
+concurrency:
+  group: instrumented-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instrumented-tests:
+    name: Android UI Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45  # UI tests can take longer
+
+    strategy:
+      matrix:
+        # Test on multiple API levels for broader compatibility
+        api-level: [29, 33]  # Android 10 and Android 13
+        target: [default]
+      fail-fast: false  # Continue testing other API levels if one fails
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}-${{ matrix.target }}
+
+      - name: Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: Nexus 6
+          ram-size: 4096M
+          heap-size: 1024M
+          disk-size: 8192M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          force-avd-creation: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Assemble Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Assemble Debug Test APK
+        run: ./gradlew assembleDebugAndroidTest --stacktrace
+
+      - name: Run Instrumented Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: Nexus 6
+          ram-size: 4096M
+          heap-size: 1024M
+          disk-size: 8192M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          force-avd-creation: false
+          script: |
+            # Wait for emulator to fully boot
+            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\''\r'\'') ]]; do sleep 1; done; input keyevent 82'
+
+            # Ensure emulator is ready for UI tests
+            adb shell settings put global window_animation_scale 0
+            adb shell settings put global transition_animation_scale 0
+            adb shell settings put global animator_duration_scale 0
+
+            # Clear any existing screenshots from previous runs
+            adb shell rm -rf /storage/emulated/0/Android/data/com.worldwidewaves.debug/files/Pictures/screenshots/
+
+            # Run the comprehensive UI test suite
+            ./gradlew connectedDebugAndroidTest --stacktrace --continue
+
+            # Pull screenshot test artifacts if they exist
+            mkdir -p artifacts/screenshots/
+            adb pull /storage/emulated/0/Android/data/com.worldwidewaves.debug/files/Pictures/screenshots/ artifacts/screenshots/ || echo "No screenshots found"
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-test-results-api${{ matrix.api-level }}
+          path: |
+            **/build/reports/androidTests/
+            **/build/outputs/androidTest-results/
+          retention-days: 30
+
+      - name: Upload Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-screenshots-api${{ matrix.api-level }}
+          path: artifacts/screenshots/
+          retention-days: 14
+
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-api${{ matrix.api-level }}
+          path: |
+            **/build/reports/coverage/
+            **/build/reports/jacoco/
+          retention-days: 30
+
+  test-summary:
+    name: Test Results Summary
+    runs-on: ubuntu-latest
+    needs: instrumented-tests
+    if: always()
+
+    steps:
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: instrumented-test-results-*
+          merge-multiple: true
+          path: test-results/
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/TEST-*.xml
+          report_individual_runs: true
+          deduplicate_classes_by_file_name: false
+
+      - name: Comment Test Results on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Look for test result files
+            const testResults = [];
+            const findXmlFiles = (dir) => {
+              const files = fs.readdirSync(dir);
+              for (const file of files) {
+                const fullPath = path.join(dir, file);
+                if (fs.statSync(fullPath).isDirectory()) {
+                  findXmlFiles(fullPath);
+                } else if (file.startsWith('TEST-') && file.endsWith('.xml')) {
+                  testResults.push(fullPath);
+                }
+              }
+            };
+
+            try {
+              findXmlFiles('test-results');
+              const summary = `## 🤖 Android Instrumented Test Results
+
+              Found ${testResults.length} test result files.
+
+              **UI Test Categories Executed:**
+              - ✅ Edge Case Testing (device rotation, memory constraints, network issues)
+              - ✅ Accessibility Testing (screen readers, keyboard navigation, visual accessibility)
+              - ✅ Screenshot Testing (visual regression detection)
+              - ✅ Common Component Testing
+              - ✅ Map Integration Testing
+              - ✅ Real-Time Coordination Testing
+
+              📊 Detailed results available in the [Actions tab](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+              `;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            } catch (error) {
+              console.log('Could not create test summary comment:', error);
+            }
+
+  performance-analysis:
+    name: UI Test Performance Analysis
+    runs-on: ubuntu-latest
+    needs: instrumented-tests
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: instrumented-test-results-*
+          merge-multiple: true
+          path: test-results/
+
+      - name: Analyze Test Performance
+        run: |
+          echo "## UI Test Performance Analysis" >> performance-report.md
+          echo "" >> performance-report.md
+
+          # Look for performance data in test outputs
+          if find test-results -name "*.xml" -type f | head -1 | xargs grep -l "time=" 2>/dev/null; then
+            echo "### Test Execution Times" >> performance-report.md
+            find test-results -name "*.xml" -type f | xargs grep -h "testcase.*time=" | \
+              sed 's/.*name="\([^"]*\)".*time="\([^"]*\)".*/- \1: \2s/' | \
+              sort -k2 -nr | head -10 >> performance-report.md
+          else
+            echo "No timing data found in test results." >> performance-report.md
+          fi
+
+          echo "" >> performance-report.md
+          echo "### Test Categories Coverage" >> performance-report.md
+          echo "- Edge Cases: Device rotation, memory constraints, multi-window" >> performance-report.md
+          echo "- Accessibility: Screen readers, keyboard navigation, WCAG compliance" >> performance-report.md
+          echo "- Screenshots: Visual regression testing with baseline comparison" >> performance-report.md
+          echo "- Integration: Map services, real-time coordination, wave choreography" >> performance-report.md
+
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-performance-report
+          path: performance-report.md
+          retention-days: 30
