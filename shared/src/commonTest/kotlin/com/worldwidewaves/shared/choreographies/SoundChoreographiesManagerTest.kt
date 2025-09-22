@@ -8,6 +8,7 @@ import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -103,22 +104,25 @@ class SoundChoreographyManagerTest : KoinTest {
                     totalDuration = 500.milliseconds,
                 )
 
-            // Use MockK's mockkObject to mock the singleton MidiParser object
+            // Use test-scoped mocking with guaranteed cleanup to avoid global state pollution
             mockkObject(MidiParser)
 
             try {
-                // Set up the mock behavior
+                // Set up the mock behavior with test-scoped isolation
                 coEvery { MidiParser.parseMidiFile(any()) } returns mockedTrack
 
                 // Test the preloadMidiFile function
                 val result = manager.preloadMidiFile("test.mid")
 
-                // Verify
+                // Verify results
                 assertTrue(result, "preloadMidiFile should return true when successful")
                 coVerify { MidiParser.parseMidiFile("test.mid") }
             } finally {
-                // Always clean up after mocking an object
+                // Guaranteed cleanup to prevent test pollution - this runs even if test fails
                 unmockkObject(MidiParser)
+
+                // Additional safety: clear any remaining mock state
+                clearAllMocks()
             }
         }
 
@@ -515,21 +519,27 @@ class SoundChoreographyManagerTest : KoinTest {
 
     @Test
     fun `test preloadMidiFile with mock exception handling`() = runTest {
+        // Use test-scoped mocking with enhanced cleanup to prevent global state leakage
         mockkObject(MidiParser)
 
         try {
-            // Test exception during parsing
+            // Test exception during parsing with isolated mock behavior
             coEvery { MidiParser.parseMidiFile(any()) } throws RuntimeException("Network error")
 
             val result = manager.preloadMidiFile("corrupted.mid")
 
+            // Verify error handling behavior
             assertFalse(result, "Should return false when parsing throws exception")
             coVerify { MidiParser.parseMidiFile("corrupted.mid") }
 
-            // Verify track wasn't set when parsing failed
+            // Verify state remains clean after parsing failure
             assertEquals(Duration.ZERO, manager.getTotalDuration())
         } finally {
+            // Guaranteed cleanup to prevent test pollution - critical for test isolation
             unmockkObject(MidiParser)
+
+            // Additional safety: ensure no mock state persists between tests
+            clearAllMocks()
         }
     }
 
