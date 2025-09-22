@@ -71,9 +71,6 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
-      - name: Generate test coverage
-        run: ./gradlew jacocoTestReport --stacktrace
-
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,7 +79,6 @@ jobs:
           path: |
             **/build/reports/tests/
             **/build/test-results/
-            **/build/reports/jacoco/
 
   ui-test-compilation:
     name: UI Test Compilation Check

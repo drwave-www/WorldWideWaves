@@ -131,14 +131,14 @@ jobs:
           path: artifacts/screenshots/
           retention-days: 14
 
-      - name: Upload Coverage Reports
+      - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports-api${{ matrix.api-level }}
+          name: test-reports-api${{ matrix.api-level }}
           path: |
-            **/build/reports/coverage/
-            **/build/reports/jacoco/
+            **/build/reports/androidTests/
+            **/build/outputs/androidTest-results/
           retention-days: 30
 
   test-summary:
