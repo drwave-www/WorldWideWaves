@@ -46,7 +46,7 @@ actual suspend fun readGeoJson(eventId: String): String? {
             File(filePath).readText()
         }
     } else {
-        Log.w(::readGeoJson.name, "GeoJSON file not available for event $eventId")
+        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
         null
     }
 }
@@ -171,7 +171,12 @@ actual suspend fun getMapFileAbsolutePath(
                 // Update metadata after successful copy
                 metadataFile.writeText(System.currentTimeMillis().toString())
             } catch (e: Exception) {
-                Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                // FileNotFoundException during caching means the asset is not available
+                if (e is java.io.FileNotFoundException) {
+                    Log.d(::getMapFileAbsolutePath.name, "Cannot cache file: $eventId.$extension (asset not found)")
+                } else {
+                    Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
+                }
                 // Delete partially written file if there was an error
                 if (cachedFile.exists()) {
                     cachedFile.delete()
@@ -182,8 +187,13 @@ actual suspend fun getMapFileAbsolutePath(
 
         return cachedFile.absolutePath
     } catch (e: Exception) {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
-        e.printStackTrace()
+        // FileNotFoundException is expected when feature modules aren't downloaded
+        if (e is java.io.FileNotFoundException) {
+            Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+        } else {
+            Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
+            e.printStackTrace()
+        }
         return null
     }
 }
@@ -259,7 +269,12 @@ actual suspend fun cacheDeepFile(fileName: String) {
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
     } catch (e: Exception) {
-        Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        // Only log full stack trace for unexpected errors
+        if (e is java.io.FileNotFoundException) {
+            Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
+        } else {
+            Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        }
     }
 }
 

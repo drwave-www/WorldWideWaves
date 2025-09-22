@@ -214,7 +214,7 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
                 jsonObj
             } else {
                 // Missing data warning ----------------------------------------
-                Log.w(::getGeoJsonData.name, "Geojson data is null for event $eventId")
+                Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
                 null
             }
         } catch (e: Exception) {

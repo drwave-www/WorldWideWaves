@@ -767,7 +767,7 @@ class AndroidEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        Log.i(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
+        Log.v(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
         (context as? AppCompatActivity)?.runOnUiThread {
             mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
         }

@@ -491,7 +491,7 @@ data class WWWEventArea(
                     ne = Position(maxLat, maxLng),
                 )
             } else {
-                Log.w(
+                Log.d(
                     ::computeExtentFromGeoJson.name,
                     "${event.id}: No coordinates found while scanning GeoJSON for extent",
                 )
