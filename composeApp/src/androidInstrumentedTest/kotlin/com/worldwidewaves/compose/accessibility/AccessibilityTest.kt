@@ -99,12 +99,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.monitoring.PerformanceTrace
 import com.worldwidewaves.testing.TestCategories
 import com.worldwidewaves.testing.UITestConfig
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.test.assertTrue
 
 /**
  * Comprehensive accessibility testing for WorldWideWaves
@@ -176,7 +178,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_contentDescriptions_providedForAllInteractiveElements() {
-        val testStartTime = performanceMonitor.markEventStart("contentDescriptions")
+        val trace = performanceMonitor.startTrace("contentDescriptions")
         var interactiveElementsCount = 0
         var elementsWithDescriptions = 0
 
@@ -219,16 +221,16 @@ class AccessibilityTest {
                 hasAction && !hasDescription
             }
 
-        assert(elementsWithoutDescriptions.isEmpty()) {
+        assertTrue(elementsWithoutDescriptions.isEmpty()) {
             "Found ${elementsWithoutDescriptions.size} interactive elements without content descriptions"
         }
 
-        performanceMonitor.markEventEnd("contentDescriptions", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun accessibility_semanticStructure_providesProperHeadingHierarchy() {
-        val testStartTime = performanceMonitor.markEventStart("semanticStructure")
+        val trace = performanceMonitor.startTrace("semanticStructure")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -260,12 +262,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("event-list")
             .assert(hasScrollAction())
 
-        performanceMonitor.markEventEnd("semanticStructure", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun accessibility_dynamicContent_announcesChanges() {
-        val testStartTime = performanceMonitor.markEventStart("dynamicContent")
+        val trace = performanceMonitor.startTrace("dynamicContent")
         var contentChangeAnnounced = false
 
         composeTestRule.setContent {
@@ -293,14 +295,14 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Error: Unable to connect to wave server")
             .assertExists()
 
-        assert(contentChangeAnnounced) { "Dynamic content changes should be announced" }
+        assertTrue(contentChangeAnnounced) { "Dynamic content changes should be announced" }
 
-        performanceMonitor.markEventEnd("dynamicContent", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun accessibility_screenReaderNavigation_providesLogicalOrder() {
-        val testStartTime = performanceMonitor.markEventStart("screenReaderNavigation")
+        val trace = performanceMonitor.startTrace("screenReaderNavigation")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -336,7 +338,7 @@ class AccessibilityTest {
         navigationNode.assertIsDisplayed()
         eventsListNode.assertIsDisplayed()
 
-        performanceMonitor.markEventEnd("screenReaderNavigation", testStartTime)
+        trace.stop()
     }
 
     // ========================================================================
@@ -345,7 +347,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_keyboardNavigation_supportsTabTraversal() {
-        val testStartTime = performanceMonitor.markEventStart("keyboardNavigation")
+        val trace = performanceMonitor.startTrace("keyboardNavigation")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -378,12 +380,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("join-wave-button").requestFocus()
         composeTestRule.onNodeWithTag("focus-indicator").assertExists()
 
-        performanceMonitor.markEventEnd("keyboardNavigation", testStartTime)
+        trace.stop()keyboardNavigation)
     }
 
     @Test
     fun accessibility_focusManagement_handlesModalDialogs() {
-        val testStartTime = performanceMonitor.markEventStart("focusManagement")
+        val trace = performanceMonitor.startTrace("focusManagement")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -408,12 +410,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("dialog-close-button").performClick()
         composeTestRule.onNodeWithText("Open Settings Dialog").assertIsFocused()
 
-        performanceMonitor.markEventEnd("focusManagement", testStartTime)
+        trace.stop()focusManagement)
     }
 
     @Test
     fun accessibility_keyboardShortcuts_supportCriticalActions() {
-        val testStartTime = performanceMonitor.markEventStart("keyboardShortcuts")
+        val trace = performanceMonitor.startTrace("keyboardShortcuts")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -440,12 +442,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("space-key").performClick()
         composeTestRule.onNodeWithText("Wave joined successfully").assertExists()
 
-        performanceMonitor.markEventEnd("keyboardShortcuts", testStartTime)
+        trace.stop()keyboardShortcuts)
     }
 
     @Test
     fun accessibility_focusDuringWaveCoordination_maintainsAccessibility() {
-        val testStartTime = performanceMonitor.markEventStart("focusDuringWave")
+        val trace = performanceMonitor.startTrace("focusDuringWave")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -470,7 +472,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Entering warming phase").assertExists()
         composeTestRule.onNodeWithContentDescription("Prepare for wave hit").assertExists()
 
-        performanceMonitor.markEventEnd("focusDuringWave", testStartTime)
+        trace.stop()focusDuringWave)
     }
 
     // ========================================================================
@@ -479,7 +481,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_colorContrast_meetsWCAGStandards() {
-        val testStartTime = performanceMonitor.markEventStart("colorContrast")
+        val trace = performanceMonitor.startTrace("colorContrast")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -512,12 +514,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Status: Error (indicated by warning icon)")
             .assertExists()
 
-        performanceMonitor.markEventEnd("colorContrast", testStartTime)
+        trace.stop()colorContrast)
     }
 
     @Test
     fun accessibility_textScaling_supportsLargeFonts() {
-        val testStartTime = performanceMonitor.markEventStart("textScaling")
+        val trace = performanceMonitor.startTrace("textScaling")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -547,12 +549,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithText("New York Wave Event").assertIsDisplayed()
         composeTestRule.onNodeWithText("Join Wave").assertIsDisplayed()
 
-        performanceMonitor.markEventEnd("textScaling", testStartTime)
+        trace.stop()textScaling)
     }
 
     @Test
     fun accessibility_darkMode_maintainsAccessibility() {
-        val testStartTime = performanceMonitor.markEventStart("darkMode")
+        val trace = performanceMonitor.startTrace("darkMode")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -575,7 +577,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Navigate to Events").assertExists()
         composeTestRule.onNodeWithContentDescription("Join Wave").assertExists()
 
-        performanceMonitor.markEventEnd("darkMode", testStartTime)
+        trace.stop()darkMode)
     }
 
     // ========================================================================
@@ -584,7 +586,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_touchTargets_meetMinimumSize() {
-        val testStartTime = performanceMonitor.markEventStart("touchTargets")
+        val trace = performanceMonitor.startTrace("touchTargets")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -617,12 +619,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Touch targets have adequate spacing")
             .assertExists()
 
-        performanceMonitor.markEventEnd("touchTargets", testStartTime)
+        trace.stop()touchTargets)
     }
 
     @Test
     fun accessibility_gestureAlternatives_providedForComplexInteractions() {
-        val testStartTime = performanceMonitor.markEventStart("gestureAlternatives")
+        val trace = performanceMonitor.startTrace("gestureAlternatives")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -650,12 +652,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithTag("context-menu-button").performClick()
         composeTestRule.onNodeWithText("Context menu opened").assertExists()
 
-        performanceMonitor.markEventEnd("gestureAlternatives", testStartTime)
+        trace.stop()gestureAlternatives)
     }
 
     @Test
     fun accessibility_timingAdjustments_accommodateUsers() {
-        val testStartTime = performanceMonitor.markEventStart("timingAdjustments")
+        val trace = performanceMonitor.startTrace("timingAdjustments")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -681,7 +683,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Timeout settings adjusted for accessibility")
             .assertExists()
 
-        performanceMonitor.markEventEnd("timingAdjustments", testStartTime)
+        trace.stop()timingAdjustments)
     }
 
     // ========================================================================
@@ -690,7 +692,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_uiPatterns_remainConsistent() {
-        val testStartTime = performanceMonitor.markEventStart("uiPatterns")
+        val trace = performanceMonitor.startTrace("uiPatterns")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -717,12 +719,12 @@ class AccessibilityTest {
             composeTestRule.onNodeWithContentDescription(iconDescription).assertExists()
         }
 
-        performanceMonitor.markEventEnd("uiPatterns", testStartTime)
+        trace.stop()uiPatterns)
     }
 
     @Test
     fun accessibility_errorMessages_provideClearGuidance() {
-        val testStartTime = performanceMonitor.markEventStart("errorMessages")
+        val trace = performanceMonitor.startTrace("errorMessages")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -744,12 +746,12 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Error: Email field is required. Please enter a valid email address.")
             .assertExists()
 
-        performanceMonitor.markEventEnd("errorMessages", testStartTime)
+        trace.stop()errorMessages)
     }
 
     @Test
     fun accessibility_progressIndicators_announceStatus() {
-        val testStartTime = performanceMonitor.markEventStart("progressIndicators")
+        val trace = performanceMonitor.startTrace("progressIndicators")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -776,7 +778,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Wave coordination: Waiting for wave hit")
             .assertExists()
 
-        performanceMonitor.markEventEnd("progressIndicators", testStartTime)
+        trace.stop()progressIndicators)
     }
 
     // ========================================================================
@@ -785,7 +787,7 @@ class AccessibilityTest {
 
     @Test
     fun accessibility_waveCoordination_providesAlternativeParticipation() {
-        val testStartTime = performanceMonitor.markEventStart("waveCoordinationAccessibility")
+        val trace = performanceMonitor.startTrace("waveCoordinationAccessibility")
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -816,7 +818,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("Wave hit successful: You participated in the global wave")
             .assertExists()
 
-        performanceMonitor.markEventEnd("waveCoordinationAccessibility", testStartTime)
+        trace.stop()waveCoordinationAccessibility)
     }
 
     // ========================================================================

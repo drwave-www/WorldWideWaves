@@ -24,6 +24,7 @@ package com.worldwidewaves.testing
 import com.worldwidewaves.compose.accessibility.AccessibilityTest
 import com.worldwidewaves.compose.common.CommonComponentsTest
 import com.worldwidewaves.compose.coordination.RealTimeCoordinationTest
+import com.worldwidewaves.compose.edgecases.EdgeCaseTest
 import com.worldwidewaves.compose.map.MapIntegrationTest
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
@@ -67,7 +68,14 @@ import org.junit.runners.Suite
  *    - Motor accessibility and touch targets
  *    - Cognitive accessibility and clear UI patterns
  *
- * 7. **Common UI Components** (CommonComponentsTest)
+ * 7. **Edge Cases & Robustness** (EdgeCaseTest) - CRITICAL
+ *    - Device rotation and configuration changes
+ *    - Low memory and resource constraints
+ *    - Network connectivity edge cases
+ *    - Battery optimization and power management
+ *    - Multi-window and split screen support
+ *
+ * 8. **Common UI Components** (CommonComponentsTest)
  *    - Reusable component functionality
  *    - Basic accessibility compliance
  *    - Theming and responsiveness
@@ -79,7 +87,8 @@ import org.junit.runners.Suite
     CommonComponentsTest::class,
     MapIntegrationTest::class,
     RealTimeCoordinationTest::class,
-    AccessibilityTest::class
+    AccessibilityTest::class,
+    EdgeCaseTest::class
 )
 class UITestSuite
 
