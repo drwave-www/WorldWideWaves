@@ -21,7 +21,10 @@
 
 package com.worldwidewaves.testing
 
+import com.worldwidewaves.compose.accessibility.AccessibilityTest
 import com.worldwidewaves.compose.common.CommonComponentsTest
+import com.worldwidewaves.compose.coordination.RealTimeCoordinationTest
+import com.worldwidewaves.compose.map.MapIntegrationTest
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
@@ -45,16 +48,38 @@ import org.junit.runners.Suite
  *    - Choreography and timing display
  *    - User participation tracking
  *
- * 4. **Common UI Components** (CommonComponentsTest)
+ * 4. **Map Integration** (MapIntegrationTest) - CRITICAL
+ *    - Dynamic map loading and Play Feature Delivery
+ *    - Location services and GPS integration
+ *    - Camera operations and wave visualization
+ *    - Performance optimization and error handling
+ *
+ * 5. **Real-Time Coordination** (RealTimeCoordinationTest) - CRITICAL
+ *    - Visual and audio choreography synchronization
+ *    - Cross-device timing precision and wave coordination
+ *    - Sound synthesis and MIDI-based musical choreography
+ *    - Phase transitions and performance under load
+ *
+ * 6. **Accessibility Compliance** (AccessibilityTest) - CRITICAL
+ *    - Screen reader support and semantic structure
+ *    - Keyboard navigation and focus management
+ *    - Visual accessibility and color contrast
+ *    - Motor accessibility and touch targets
+ *    - Cognitive accessibility and clear UI patterns
+ *
+ * 7. **Common UI Components** (CommonComponentsTest)
  *    - Reusable component functionality
- *    - Accessibility compliance
+ *    - Basic accessibility compliance
  *    - Theming and responsiveness
  *
  * Run this suite to validate the complete user experience end-to-end.
  */
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
-    CommonComponentsTest::class
+    CommonComponentsTest::class,
+    MapIntegrationTest::class,
+    RealTimeCoordinationTest::class,
+    AccessibilityTest::class
 )
 class UITestSuite
 
