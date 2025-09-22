@@ -23,6 +23,7 @@ package com.worldwidewaves.monitoring
 
 import android.content.Context
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Performance monitoring integration for WorldWideWaves
@@ -98,7 +99,7 @@ object PerformanceIntegration {
 inline fun <T> measureScreenLoad(screenName: String, block: () -> T): T {
     val startTime = System.currentTimeMillis()
     val result = block()
-    val duration = (System.currentTimeMillis() - startTime).let(kotlin.time.Duration.Companion::milliseconds)
+    val duration = (System.currentTimeMillis() - startTime).milliseconds
     PerformanceIntegration.recordScreenLoad(screenName, duration)
     return result
 }
@@ -109,7 +110,7 @@ inline fun <T> measureScreenLoad(screenName: String, block: () -> T): T {
 inline fun <T> measureUserInteraction(action: String, block: () -> T): T {
     val startTime = System.currentTimeMillis()
     val result = block()
-    val duration = (System.currentTimeMillis() - startTime).let(kotlin.time.Duration.Companion::milliseconds)
+    val duration = (System.currentTimeMillis() - startTime).milliseconds
     PerformanceIntegration.recordUserInteraction(action, duration)
     return result
 }

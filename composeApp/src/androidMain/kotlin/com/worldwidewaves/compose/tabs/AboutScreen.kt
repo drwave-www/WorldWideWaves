@@ -46,6 +46,8 @@ import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.commonTextStyle

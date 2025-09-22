@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.debug.PerformanceDashboard
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
 
 /**
  * Debug screen that contains development tools and performance monitoring

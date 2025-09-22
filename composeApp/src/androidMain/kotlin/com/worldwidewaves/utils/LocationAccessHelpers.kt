@@ -46,6 +46,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
 
 /**
  * Session-scoped in-memory marker of the last time the user declined the
@@ -118,7 +119,7 @@ fun CheckGPSEnable() {
     val withinCooldown =
         lastDeclined != null &&
             (System.currentTimeMillis() - lastDeclined) <
-            WWWGlobals.Timing.GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
+            Timing.GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
 
     val activity = context as? Activity
 

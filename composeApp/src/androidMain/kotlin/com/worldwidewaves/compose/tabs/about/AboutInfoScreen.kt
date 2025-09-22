@@ -42,6 +42,8 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.Info
 import com.worldwidewaves.shared.infos_core
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
@@ -93,7 +95,7 @@ class AboutInfoScreen : TabScreen {
                 Text(
                     text = stringResource(res),
                     style =
-                        commonTextStyle(DIM_INFO_TEXT_FONTSIZE).copy(
+                        commonTextStyle(Info.TEXT_FONTSIZE).copy(
                             textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
                         ),
                 )
@@ -112,7 +114,7 @@ class AboutInfoScreen : TabScreen {
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(MokoRes.strings.drwave),
-                style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE),
+                style = extraBoldTextStyle(Info.DRWAVE_FONTSIZE),
             )
         }
         Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))

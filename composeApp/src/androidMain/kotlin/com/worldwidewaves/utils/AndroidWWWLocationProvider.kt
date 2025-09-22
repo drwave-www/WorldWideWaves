@@ -26,6 +26,7 @@ import android.location.LocationListener
 import android.os.Looper
 import android.util.Log
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.WWWLocationProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,8 +95,8 @@ class AndroidWWWLocationProvider :
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest
-            .Builder(WWWGlobals.Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds)
-            .setFastestInterval(WWWGlobals.Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds / 2)
+            .Builder(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds)
+            .setFastestInterval(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 }

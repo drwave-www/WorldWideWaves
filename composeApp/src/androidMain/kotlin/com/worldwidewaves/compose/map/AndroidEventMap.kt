@@ -84,6 +84,7 @@ import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.map.WWWLocationProvider
+import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker

@@ -18,6 +18,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.WWWGlobals.Companion.Common
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.Urls
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle
@@ -37,7 +40,7 @@ fun WWWSocialNetworks(
         Image(
             painter = painterResource(Res.drawable.instagram_icon),
             contentDescription = stringResource(MokoRes.strings.instagram_logo_description),
-            modifier = Modifier.width(DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp),
+            modifier = Modifier.width(Common.SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH.dp),
         )
         Column(
             modifier = Modifier.padding(start = 10.dp),
@@ -47,7 +50,7 @@ fun WWWSocialNetworks(
                 modifier =
                     Modifier.clickable(onClick = {
                         try {
-                            val uri = "$Urls.INSTAGRAM_BASE${instagramAccount.removePrefix("@")}"
+                            val uri = "Urls.INSTAGRAM_BASE${instagramAccount.removePrefix("@")}"
                             uriHandler.openUri(uri)
                         } catch (e: SecurityException) {
                             Log.e("AboutWWWSocialNetworks", "Security error opening Instagram URI", e)
@@ -59,13 +62,13 @@ fun WWWSocialNetworks(
                     }),
                 text = instagramAccount,
                 style =
-                    commonBoldStyle(DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
+                    commonBoldStyle(Common.SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
                         textDecoration = TextDecoration.Underline,
                     ),
             )
             Text(
                 text = instagramHashtag,
-                style = commonTextStyle(DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE),
+                style = commonTextStyle(Common.SOCIALNETWORKS_HASHTAG_FONTSIZE),
             )
         }
     }

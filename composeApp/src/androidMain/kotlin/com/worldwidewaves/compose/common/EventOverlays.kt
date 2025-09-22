@@ -20,6 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.WWWGlobals.Companion.Common
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.theme.commonTextStyle
@@ -47,8 +49,8 @@ fun EventOverlaySoonOrRunning(
             Box(
                 modifier =
                     Modifier
-                        .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
-                        .height(DIM_COMMON_SOONRUNNING_HEIGHT.dp)
+                        .padding(top = Common.SOONRUNNING_PADDING.dp, end = Common.SOONRUNNING_PADDING.dp)
+                        .height(Common.SOONRUNNING_HEIGHT.dp)
                         .background(backgroundColor)
                         .padding(horizontal = Dimensions.DEFAULT_INT_PADDING.dp),
                 // Changed to horizontal padding
@@ -56,7 +58,7 @@ fun EventOverlaySoonOrRunning(
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = commonTextStyle(DIM_COMMON_SOONRUNNING_FONTSIZE),
+                    style = commonTextStyle(Common.SOONRUNNING_FONTSIZE),
                     textAlign = TextAlign.Center, // Added text alignment
                 )
             }
@@ -79,7 +81,7 @@ fun EventOverlayDone(
             Image(
                 painter = painterResource(Res.drawable.event_done),
                 contentDescription = stringResource(MokoRes.strings.event_done),
-                modifier = Modifier.width(DIM_COMMON_DONE_IMAGE_WIDTH.dp),
+                modifier = Modifier.width(Common.DONE_IMAGE_WIDTH.dp),
             )
         }
     }

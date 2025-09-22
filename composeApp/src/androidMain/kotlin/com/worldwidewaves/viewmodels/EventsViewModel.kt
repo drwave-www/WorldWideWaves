@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker

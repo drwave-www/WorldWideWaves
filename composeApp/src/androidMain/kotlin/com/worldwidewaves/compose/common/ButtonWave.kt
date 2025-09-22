@@ -27,6 +27,7 @@ import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
 import com.worldwidewaves.theme.onQuaternaryLight
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource

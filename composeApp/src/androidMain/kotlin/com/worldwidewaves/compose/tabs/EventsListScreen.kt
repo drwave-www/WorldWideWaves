@@ -77,6 +77,8 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.common.EventOverlayDone
 import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log
@@ -327,8 +329,8 @@ class EventsListScreen(
         Box(
             modifier =
                 modifier
-                    .clip(RoundedCornerShape(DIM_EVENTS_SELECTOR_ROUND.dp))
-                    .height(DIM_EVENTS_SELECTOR_HEIGHT.dp)
+                    .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
+                    .height(EventsList.SELECTOR_HEIGHT.dp)
                     .background(backgroundColor)
                     .clickable { onClick() },
             contentAlignment = Alignment.Center,
@@ -336,7 +338,7 @@ class EventsListScreen(
             Text(
                 text = text,
                 style =
-                    commonTextStyle(DIM_EVENTS_SELECTOR_FONTSIZE).copy(
+                    commonTextStyle(EventsList.SELECTOR_FONTSIZE).copy(
                         color = textColor,
                         fontWeight = fontWeight,
                     ),
@@ -381,7 +383,7 @@ class EventsListScreen(
                                 },
                             ),
                         style =
-                            quinaryColoredTextStyle(DIM_EVENTS_NOEVENTS_FONTSIZE).copy(
+                            quinaryColoredTextStyle(EventsList.NOEVENTS_FONTSIZE).copy(
                                 textAlign = TextAlign.Center,
                             ),
                     )
@@ -427,7 +429,7 @@ class EventsListScreen(
         starredSelected: Boolean,
         modifier: Modifier = Modifier,
     ) {
-        val heightModifier = Modifier.height(DIM_EVENTS_OVERLAY_HEIGHT.dp)
+        val heightModifier = Modifier.height(EventsList.OVERLAY_HEIGHT.dp)
         val eventStatus by event.observer.eventStatus.collectAsState()
 
         Box(modifier = heightModifier) {
@@ -489,7 +491,7 @@ class EventsListScreen(
         contentDescription: String,
     ) {
         Image(
-            modifier = modifier.width(DIM_EVENTS_FLAG_WIDTH.dp),
+            modifier = modifier.width(EventsList.FLAG_WIDTH.dp),
             contentScale = ContentScale.FillWidth,
             painter = painterResource(imageResource),
             contentDescription = contentDescription,
@@ -729,12 +731,12 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = stringResource(event.getLocation()),
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_LOCATION_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_LOCATION_FONTSIZE),
                     )
                     Text(
                         text = eventDate,
                         modifier = Modifier.padding(end = 2.dp),
-                        style = primaryColoredBoldTextStyle(DIM_EVENTS_EVENT_DATE_FONSIZE),
+                        style = primaryColoredBoldTextStyle(EventsList.EVENT_DATE_FONTSIZE),
                     )
                 }
 
@@ -745,17 +747,17 @@ class EventsListScreen(
                 ) {
                     Text(
                         text = countryText,
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                     Text(
                         text = " / ",
-                        style = quinaryColoredTextStyle(DIM_EVENTS_EVENT_COUNTRY_FONSIZE),
+                        style = quinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                     Text(
                         text = communityText,
-                        style = quaternaryColoredTextStyle(DIM_EVENTS_EVENT_COMMUNITY_FONSIZE),
+                        style = quaternaryColoredTextStyle(EventsList.EVENT_COMMUNITY_FONTSIZE),
                         modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp),
                     )
                 }
