@@ -26,9 +26,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 
 /**
@@ -125,6 +127,7 @@ data class PerformanceIssue(
 /**
  * Default implementation of performance monitoring
  */
+@OptIn(ExperimentalTime::class)
 open class PerformanceMonitor : IPerformanceMonitor {
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -149,8 +152,9 @@ open class PerformanceMonitor : IPerformanceMonitor {
         updateMetrics()
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun recordEvent(name: String, parameters: Map<String, Any>) {
-        events.add(PerformanceEvent(name, parameters, System.currentTimeMillis()))
+        events.add(PerformanceEvent(name, parameters, Clock.System.now().toEpochMilliseconds()))
     }
 
     override fun recordWaveTimingAccuracy(expectedTime: Long, actualTime: Long) {
@@ -228,6 +232,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun updateMetrics() {
         scope.launch {
             val current = _performanceMetrics.value
@@ -239,7 +244,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
                 memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
                 locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
                 totalEvents = events.size.toLong(),
-                lastUpdated = System.currentTimeMillis()
+                lastUpdated = Clock.System.now().toEpochMilliseconds()
             )
         }
     }
