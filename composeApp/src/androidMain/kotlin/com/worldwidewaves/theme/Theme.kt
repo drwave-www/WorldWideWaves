@@ -22,6 +22,7 @@ package com.worldwidewaves.theme
  */
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -36,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_FONTSIZE
 
 @Immutable
 data class ExtendedColorScheme(
@@ -119,7 +119,12 @@ fun AppTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.setDecorFitsSystemWindows(false)
+            } else {
+                @Suppress("DEPRECATION")
+                window.statusBarColor = colorScheme.primary.toArgb()
+            }
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
@@ -133,41 +138,46 @@ fun AppTheme(
 
 // -- WWW Text presets --------------------------------------------------------
 
-fun defaultTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = TextStyle(fontSize = fontSize.sp)
+fun defaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = TextStyle(fontSize = fontSize.sp)
 
-fun commonTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun commonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     defaultTextStyle(fontSize).copy(fontFamily = AppTypography.bodyMedium.fontFamily)
 
-fun commonJustifiedTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun commonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     commonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
 
-fun commonBoldStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun commonBoldStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun primaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = commonTextStyle(fontSize).copy(color = lightScheme.primary)
+fun primaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    commonTextStyle(fontSize).copy(color = lightScheme.primary)
 
-fun primaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun primaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     primaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun quinaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun quinaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     commonTextStyle(fontSize).copy(color = extendedLight.quinary.color)
 
-fun quaternaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun quaternaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     commonTextStyle(fontSize).copy(color = extendedLight.quaternary.color)
 
-fun quinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun quinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
+fun extraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
 
-fun extraBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun extraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraLightTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle = extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+fun extraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
 
-fun extraPrimaryColoredTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun extraPrimaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     extraTextStyle(fontSize).copy(color = lightScheme.primary)
 
-fun extraPrimaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun extraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     extraPrimaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraQuinaryColoredBoldTextStyle(fontSize: Int = DIM_DEFAULT_FONTSIZE): TextStyle =
+fun extraQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     extraTextStyle(fontSize).copy(color = extendedLight.quinary.color, fontWeight = FontWeight.Bold)

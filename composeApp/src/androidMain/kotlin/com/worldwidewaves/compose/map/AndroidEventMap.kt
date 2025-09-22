@@ -78,7 +78,6 @@ import com.worldwidewaves.compose.common.DownloadProgressIndicator
 import com.worldwidewaves.compose.common.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_TIMER_GPS_UPDATE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
@@ -548,7 +547,9 @@ class AndroidEventMap(
                                     Log.i(TAG, "Map setup complete, initializing location if needed")
                                     // Initialize location component only if permission granted
                                     // and the lifecycle is at least STARTED (Activity/Fragment visible).
-                                    if (hasLocationPermission && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                                    if (hasLocationPermission &&
+                                        lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                                    ) {
                                         setupMapLocationComponent(map, context)
                                     }
                                     onMapLoaded()
@@ -643,8 +644,8 @@ class AndroidEventMap(
      */
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest
-            .Builder(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
-            .setFastestInterval(CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
+            .Builder(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds)
+            .setFastestInterval(Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 
@@ -731,7 +732,7 @@ class AndroidEventMap(
                     .build(),
             )
 
-            localIdeographFontFamily("Droid Sans") // TODO: replace, cf https://github.com/maplibre/font-maker
+            localIdeographFontFamily("Droid Sans") // FIXME: replace with MapLibre font-maker solution
 
             compassEnabled(true)
             compassFadesWhenFacingNorth(true)
