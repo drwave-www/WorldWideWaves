@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import org.junit.Rule
 import org.junit.Test
-import kotlin.test.Test as KotlinTest
 
 /**
  * Comprehensive tests for TextUtils functionality including

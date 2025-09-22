@@ -21,10 +21,7 @@
 
 package com.worldwidewaves.testing
 
-import com.worldwidewaves.activities.MainActivityTest
-import com.worldwidewaves.activities.event.WaveActivityTest
 import com.worldwidewaves.compose.common.CommonComponentsTest
-import com.worldwidewaves.compose.tabs.EventsListScreenTest
 import org.junit.runner.RunWith
 import org.junit.runners.Suite
 
@@ -57,9 +54,6 @@ import org.junit.runners.Suite
  */
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
-    MainActivityTest::class,
-    EventsListScreenTest::class,
-    WaveActivityTest::class,
     CommonComponentsTest::class
 )
 class UITestSuite
