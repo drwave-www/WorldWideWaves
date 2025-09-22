@@ -14,6 +14,9 @@ kotlin = "2.2.0"
 kotlinVersion = "2.2.0"
 kotlinxCoroutinesCore = "1.10.2"
 kotlinxCoroutinesTest = "1.10.2"
+androidxJunit = "1.2.1"
+espressoCore = "3.6.1"
+composeUiTest = "1.8.3"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.9.0"
 lifecycleLivedataKtx = "2.9.2"
@@ -74,6 +77,10 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 kotlinx-atomic = { group = "org.jetbrains.kotlinx", name = "atomicfu", version.ref = "kotlinxAtomic" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "composeUiTest" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeUiTest" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidCompose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 maplibre-android = { group = "org.maplibre.gl", name = "android-sdk", version.ref = "maplibreAndroid" }

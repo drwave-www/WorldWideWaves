@@ -47,7 +47,6 @@ class ComposeFunctionNamingTest {
         //   ignoreAnnotated: ['Composable']
 
         assertTrue(
-            "Compose functions should use PascalCase naming convention",
             ::TestComposableFunction.name.first().isUpperCase()
         )
     }
@@ -59,7 +58,6 @@ class ComposeFunctionNamingTest {
         // THEN: They should follow standard Kotlin naming conventions
 
         assertTrue(
-            "Regular functions should use camelCase naming convention",
             ::testRegularFunction.name.first().isLowerCase()
         )
     }
@@ -76,12 +74,10 @@ class ComposeFunctionNamingTest {
 
         // THEN: Both should match their respective patterns
         assertTrue(
-            "Composable function should match PascalCase pattern",
             composablePattern.matches(composableFunctionName)
         )
 
         assertTrue(
-            "Regular function should match camelCase pattern",
             regularPattern.matches(regularFunctionName)
         )
     }

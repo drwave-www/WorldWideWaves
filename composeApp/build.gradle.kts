@@ -40,6 +40,12 @@ kotlin {
             implementation(libs.koin.test)
             implementation(libs.mockk.common.v1120)
         }
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.androidx.compose.ui.test.junit4)
+            implementation(libs.mockk.android.v1120)
+        }
     }
 }
 
@@ -153,6 +159,7 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
         debugImplementation(compose.preview)
+        debugImplementation(libs.androidx.compose.ui.test.manifest)
         implementation(libs.koin.android)
         implementation(libs.koin.androidCompose)
         implementation(libs.kotlinx.datetime)
