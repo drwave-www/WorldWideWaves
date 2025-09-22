@@ -41,7 +41,10 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.monitoring.PerformanceTrace
 import com.worldwidewaves.testing.TestCategories
+import kotlin.math.pow
+import kotlin.math.sqrt
 import com.worldwidewaves.testing.UITestConfig
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
@@ -159,7 +162,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_mapDownload_handlesSuccessFlow() {
-        val testStartTime = performanceMonitor.markEventStart("mapDownloadSuccess")
+        val trace = performanceMonitor.startTrace("mapDownloadSuccess")
         var downloadCompleted = false
         var mapLoaded = false
 
@@ -236,7 +239,7 @@ class MapIntegrationTest {
         // Verify success flow completed
         assert(downloadCompleted) { "Download should complete successfully" }
 
-        performanceMonitor.markEventEnd("mapDownloadSuccess", testStartTime)
+        trace.stop("mapDownloadSuccess)
         val duration = performanceMonitor.getEventDuration("mapDownloadSuccess")
         assert(duration != null && duration < 5.seconds) { "Map download test should complete within 5 seconds" }
     }
@@ -312,7 +315,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_locationUpdates_trackUserPosition() {
-        val testStartTime = performanceMonitor.markEventStart("locationTracking")
+        val trace = performanceMonitor.startTrace("locationTracking")
         var locationUpdateReceived = false
         var userInArea = false
 
@@ -339,7 +342,7 @@ class MapIntegrationTest {
         assert(locationUpdateReceived) { "Location updates should be received" }
         assert(userInArea) { "User should be detected in wave area for New York event" }
 
-        performanceMonitor.markEventEnd("locationTracking", testStartTime)
+        trace.stop("locationTracking)
     }
 
     @Test
@@ -376,7 +379,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_locationAccuracy_meetsPerformanceRequirements() {
-        val testStartTime = performanceMonitor.markEventStart("locationAccuracy")
+        val trace = performanceMonitor.startTrace("locationAccuracy")
         val accuracyReadings = mutableListOf<Double>()
 
         // Simulate multiple location readings
@@ -406,7 +409,7 @@ class MapIntegrationTest {
         val avgAccuracy = accuracyReadings.average()
         assert(avgAccuracy <= 10.0) { "Average location accuracy should be within 10 meters" }
 
-        performanceMonitor.markEventEnd("locationAccuracy", testStartTime)
+        trace.stop("locationAccuracy)
     }
 
     // ========================================================================
@@ -415,7 +418,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_cameraOperations_handlesPositionAndZoom() {
-        val testStartTime = performanceMonitor.markEventStart("cameraOperations")
+        val trace = performanceMonitor.startTrace("cameraOperations")
         var cameraMovementCompleted = false
         var zoomChangeCompleted = false
 
@@ -441,7 +444,7 @@ class MapIntegrationTest {
         assert(cameraMovementCompleted) { "Camera movement should complete successfully" }
         assert(zoomChangeCompleted) { "Zoom change should complete successfully" }
 
-        performanceMonitor.markEventEnd("cameraOperations", testStartTime)
+        trace.stop("cameraOperations)
     }
 
     @Test
@@ -470,7 +473,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_cameraAnimations_performSmoothly() {
-        val testStartTime = performanceMonitor.markEventStart("cameraAnimations")
+        val trace = performanceMonitor.startTrace("cameraAnimations")
         val animationFrames = mutableListOf<Long>()
         var animationCompleted = false
 
@@ -497,7 +500,7 @@ class MapIntegrationTest {
         val avgInterval = frameIntervals.average()
         assert(avgInterval <= 20.0) { "Average frame interval should be <= 20ms (50+ FPS)" }
 
-        performanceMonitor.markEventEnd("cameraAnimations", testStartTime)
+        trace.stop("cameraAnimations)
     }
 
     // ========================================================================
@@ -506,7 +509,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_waveVisualization_rendersPolygons() {
-        val testStartTime = performanceMonitor.markEventStart("waveVisualization")
+        val trace = performanceMonitor.startTrace("waveVisualization")
         var polygonsRendered = false
         var renderingPerformanceAcceptable = false
 
@@ -531,7 +534,7 @@ class MapIntegrationTest {
         assert(polygonsRendered) { "Wave polygons should be rendered successfully" }
         assert(renderingPerformanceAcceptable) { "Polygon rendering should complete within 100ms" }
 
-        performanceMonitor.markEventEnd("waveVisualization", testStartTime)
+        trace.stop("waveVisualization)
     }
 
     @Test
@@ -565,7 +568,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_wavePolygons_handlesLargeDatasets() {
-        val testStartTime = performanceMonitor.markEventStart("largeDatasetHandling")
+        val trace = performanceMonitor.startTrace("largeDatasetHandling")
         var renderingCompleted = false
         var memoryUsageAcceptable = true
 
@@ -591,7 +594,7 @@ class MapIntegrationTest {
         assert(renderingCompleted) { "Large dataset should be rendered successfully" }
         assert(memoryUsageAcceptable) { "Memory usage should remain within acceptable limits" }
 
-        performanceMonitor.markEventEnd("largeDatasetHandling", testStartTime)
+        trace.stop("largeDatasetHandling)
         val duration = performanceMonitor.getEventDuration("largeDatasetHandling")
         assert(duration != null && duration < 3.seconds) { "Large dataset handling should complete within 3 seconds" }
     }
@@ -602,7 +605,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_performance_meetsFrameRateRequirements() {
-        val testStartTime = performanceMonitor.markEventStart("frameRateTest")
+        val trace = performanceMonitor.startTrace("frameRateTest")
         val frameTimestamps = mutableListOf<Long>()
         var testCompleted = false
 
@@ -630,7 +633,7 @@ class MapIntegrationTest {
             assert(fps >= 30.0) { "Frame rate should be at least 30 FPS, got $fps" }
         }
 
-        performanceMonitor.markEventEnd("frameRateTest", testStartTime)
+        trace.stop("frameRateTest)
     }
 
     @Test
@@ -658,7 +661,7 @@ class MapIntegrationTest {
 
     @Test
     fun mapIntegration_memoryManagement_handlesResourceCleanup() {
-        val testStartTime = performanceMonitor.markEventStart("memoryManagement")
+        val trace = performanceMonitor.startTrace("memoryManagement")
         var resourcesAllocated = false
         var resourcesCleaned = false
 
@@ -678,7 +681,7 @@ class MapIntegrationTest {
         assert(resourcesAllocated) { "Resources should be allocated properly" }
         assert(resourcesCleaned) { "Resources should be cleaned up after use" }
 
-        performanceMonitor.markEventEnd("memoryManagement", testStartTime)
+        trace.stop("memoryManagement)
     }
 
     // ========================================================================
@@ -816,9 +819,9 @@ private fun TestLocationAccuracy(
             val avgLat = positions.map { it.latitude }.average()
             val avgLng = positions.map { it.longitude }.average()
             val maxDeviation = positions.maxOf { pos ->
-                kotlin.math.sqrt(
-                    kotlin.math.pow(pos.latitude - avgLat, 2.0) +
-                    kotlin.math.pow(pos.longitude - avgLng, 2.0)
+                sqrt(
+                    pow(pos.latitude - avgLat, 2.0) +
+                    pow(pos.longitude - avgLng, 2.0)
                 ) * 111000 // Convert to meters (approximate)
             }
             onAccuracyMeasured(maxDeviation)
