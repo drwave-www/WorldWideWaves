@@ -22,6 +22,8 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.format.DateTimeFormats
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime

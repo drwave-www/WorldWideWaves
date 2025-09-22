@@ -89,7 +89,8 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Companion.Event
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveDisplay as Wave
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveDisplay
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
@@ -265,7 +266,7 @@ class EventActivity : AbstractEventWaveActivity() {
                                         WWWSimulation(
                                             startDateTime = simulationTime,
                                             userPosition = position,
-                                            initialSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION, // Use current default speed
+                                            initialSpeed = Wave.DEFAULT_SPEED_SIMULATION, // Use current default speed
                                         )
 
                                     // Set the simulation
@@ -442,7 +443,7 @@ private fun EventOverlayDate(
                 .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
-        val textStyle = extraBoldTextStyle(DIM_EVENT_DATE_FONTSIZE)
+        val textStyle = extraBoldTextStyle(Event.DATE_FONTSIZE)
         Text(
             text = eventDate,
             style = textStyle.copy(color = quinaryLight),
@@ -454,8 +455,8 @@ private fun EventOverlayDate(
                     color = MaterialTheme.colorScheme.primary,
                     drawStyle =
                         Stroke(
-                            miter = DIM_EVENT_DATE_MITER,
-                            width = DIM_EVENT_DATE_STROKE,
+                            miter = Event.DATE_MITER,
+                            width = Event.DATE_STROKE,
                             join = StrokeJoin.Miter,
                         ),
                 ),
@@ -502,7 +503,7 @@ private fun NotifyAreaUserPosition(
     Row(
         modifier =
             modifier
-                .height(DIM_EVENT_GEOLOCME_HEIGHT.dp)
+                .height(Event.GEOLOCME_HEIGHT.dp)
                 .padding(start = Dimensions.DEFAULT_EXT_PADDING.dp, end = Dimensions.DEFAULT_EXT_PADDING.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -510,14 +511,14 @@ private fun NotifyAreaUserPosition(
         Box(
             modifier =
                 Modifier
-                    .border(DIM_EVENT_GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
+                    .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
                     .fillMaxHeight()
                     .weight(1f),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = displayText,
-                style = quinaryColoredTextStyle(DIM_EVENT_GEOLOCME_FONTSIZE),
+                style = quinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
             )
         }
     }
