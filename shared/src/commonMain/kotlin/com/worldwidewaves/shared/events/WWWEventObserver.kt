@@ -571,14 +571,22 @@ class WWWEventObserver(
      * - Normal phase (> 2s): Updates every 1000ms to reduce UI churn
      */
     private fun updateTimeBeforeHitIfSignificant(newTime: Duration) {
+        // Handle infinite durations to prevent arithmetic errors
+        if (newTime == Duration.INFINITE || lastEmittedTimeBeforeHit == Duration.INFINITE) {
+            if (newTime != lastEmittedTimeBeforeHit) {
+                _timeBeforeHit.updateIfChanged(newTime)
+                lastEmittedTimeBeforeHit = newTime
+            }
+            return
+        }
+
         val timeDifference = abs((newTime - lastEmittedTimeBeforeHit).inWholeMilliseconds)
 
         // Critical timing phase: Need sub-50ms accuracy for wave synchronization
         val isCriticalPhase = newTime.inWholeSeconds <= 2 && newTime > Duration.ZERO
         val threshold = if (isCriticalPhase) 50L else TIME_THRESHOLD_MS // 50ms vs 1000ms
 
-        if (timeDifference >= threshold ||
-            lastEmittedTimeBeforeHit == Duration.INFINITE) { // Always emit first update
+        if (timeDifference >= threshold) {
             _timeBeforeHit.updateIfChanged(newTime)
             lastEmittedTimeBeforeHit = newTime
         }

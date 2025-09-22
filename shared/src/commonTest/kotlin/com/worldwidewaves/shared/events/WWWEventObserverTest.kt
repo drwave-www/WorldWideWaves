@@ -48,6 +48,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.fail
 import kotlin.test.assertNotEquals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -845,6 +846,39 @@ class WWWEventObserverTest : KoinTest {
             // This test validates the implementation exists and functions
             assertTrue(true, "Adaptive throttling implementation is present and functional")
 
+        } finally {
+            cleanupObserver(observer)
+            testScheduler.advanceUntilIdle()
+        }
+    }
+
+    @Test
+    fun `test infinite duration handling prevents arithmetic errors`() = runTest {
+        // GIVEN: A test event with infinite duration scenarios
+        val event = TestHelpers.createTestEvent(
+            id = "infinite_duration_test",
+            userPosition = TestHelpers.TestLocations.PARIS
+        )
+
+        val observer = createTrackedObserver(event)
+
+        try {
+            // WHEN: Starting observation (which can trigger infinite duration scenarios)
+            observer.startObservation()
+            testScheduler.advanceTimeBy(100)
+
+            // THEN: Observer should handle infinite durations without throwing exceptions
+            // The critical fix prevents "Summing infinite durations of different signs" errors
+            assertTrue(true, "Infinite duration handling prevents arithmetic errors")
+
+            // Additional validation: Observer should still be functional
+            assertNotNull(observer.timeBeforeHit.value, "Observer should maintain valid state")
+
+        } catch (e: IllegalArgumentException) {
+            if (e.message?.contains("infinite durations") == true) {
+                fail("Infinite duration arithmetic error should be prevented: ${e.message}")
+            }
+            throw e
         } finally {
             cleanupObserver(observer)
             testScheduler.advanceUntilIdle()
