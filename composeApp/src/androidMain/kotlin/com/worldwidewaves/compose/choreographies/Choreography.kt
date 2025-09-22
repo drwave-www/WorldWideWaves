@@ -66,6 +66,13 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
 
+// Constants for choreography display
+private object ChoreographyConstants {
+    // UI Dimensions
+    const val CHOREOGRAPHY_PADDING = 24f
+    const val CHOREOGRAPHY_TEXT_SIZE = 24f
+}
+
 /**
  * High-level choreography container displayed on the **Wave** screen.
  *
@@ -250,12 +257,12 @@ fun ChoreographyDisplay(
                 Modifier
                     .widthIn(max = 400.dp)
                     .heightIn(max = 600.dp)
-                    .padding(24.dp)
+                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp)
                     .shadow(8.dp)
                     .background(Color.Black.copy(alpha = 0.7f))
                     .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                     .clip(RoundedCornerShape(12.dp))
-                    .padding(24.dp),
+                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -307,7 +314,7 @@ fun ChoreographyDisplay(
 
                 Text(
                     text = stringResource(sequence.text),
-                    style = quinaryColoredBoldTextStyle(24),
+                    style = quinaryColoredBoldTextStyle(ChoreographyConstants.CHOREOGRAPHY_TEXT_SIZE.toInt()),
                     color = Color.White,
                     textAlign = TextAlign.Center,
                 )

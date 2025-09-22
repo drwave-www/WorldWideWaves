@@ -101,6 +101,12 @@ class AboutFaqScreen(
 ) : TabScreen {
     override val name = "FAQ"
 
+    companion object {
+        // UI Layout Constants
+        private const val LAYOUT_HALF_WIDTH = 0.5f
+        private const val SPACER_SMALL_SIZE = 10f
+    }
+
     @Composable
     override fun Screen(modifier: Modifier) {
         val coroutineScope = rememberCoroutineScope()
@@ -175,7 +181,7 @@ class AboutFaqScreen(
     private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                modifier = Modifier.fillMaxWidth(0.5f),
+                modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
                 text = stringResource(MokoRes.strings.warn_rules_security_title),
                 style =
                     extraPrimaryColoredBoldTextStyle(DIM_FAQ_SECTION_TITLE_FONTSIZE).copy(
@@ -287,7 +293,7 @@ class AboutFaqScreen(
             }
 
             if (expandedFaqItem == itemIndex) {
-                Spacer(modifier = Modifier.size(10.dp))
+                Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
                 Text(
                     text = stringResource(answerResource),
                     style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE),

@@ -137,6 +137,12 @@ class EventsListScreen(
 
     private var firstLaunch = true
 
+    companion object {
+        // Layout proportions for event selector buttons
+        private const val ALL_EVENTS_BUTTON_WIDTH = 1f / 3f
+        private const val FAVORITES_BUTTON_WIDTH = 0.5f
+    }
+
     // ----------------------------
 
     @Composable
@@ -285,7 +291,7 @@ class EventsListScreen(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(1 / 3f),
+                    modifier = Modifier.fillMaxWidth(ALL_EVENTS_BUTTON_WIDTH),
                     backgroundColor = allColor.color,
                     onClick = onAllEventsClicked,
                     textColor = allColor.onColor,
@@ -293,7 +299,7 @@ class EventsListScreen(
                     text = stringResource(MokoRes.strings.events_select_all),
                 )
                 SelectorBox(
-                    modifier = Modifier.fillMaxWidth(0.5f),
+                    modifier = Modifier.fillMaxWidth(FAVORITES_BUTTON_WIDTH),
                     backgroundColor = starredColor.color,
                     onClick = onFavoriteEventsClicked,
                     textColor = starredColor.onColor,
@@ -566,10 +572,16 @@ class EventsListScreen(
                                                 // Use the new suspend uninstall API – returns true on success
                                                 val success = mapChecker.uninstallMap(eventId)
                                                 uninstallSucceeded = success
-                                            } catch (e: Exception) {
+                                            } catch (e: IllegalStateException) {
                                                 Log.e(
                                                     "EventOverlayMapDownloaded",
-                                                    "Error uninstalling map for event $eventId",
+                                                    "Invalid state while uninstalling map for event $eventId",
+                                                    e,
+                                                )
+                                            } catch (e: SecurityException) {
+                                                Log.e(
+                                                    "EventOverlayMapDownloaded",
+                                                    "Security error while uninstalling map for event $eventId",
                                                     e,
                                                 )
                                                 uninstallSucceeded = false

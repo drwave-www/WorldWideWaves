@@ -143,6 +143,16 @@ class AndroidEventMap(
     KoinComponent {
     private companion object {
         private const val TAG = "EventMap"
+
+        // Map loading constants
+        private const val MAX_STYLE_RESOLUTION_ATTEMPTS = 10
+        private const val STYLE_RESOLUTION_DELAY_MS = 200L
+        private const val MAP_ATTACH_TIMEOUT_MS = 1500L
+
+        // UI Constants
+        private const val DOWNLOAD_PROGRESS_MAX = 100
+        private const val BUTTON_WIDTH_DP = 200f
+        private const val BUTTON_HEIGHT_DP = 60f
     }
 
     // Overrides properties from AbstractEventMap
@@ -383,7 +393,7 @@ class AndroidEventMap(
                             )
                         is MapFeatureState.Installing ->
                             DownloadProgressIndicator(
-                                progress = 100,
+                                progress = DOWNLOAD_PROGRESS_MAX,
                                 message = stringResource(MokoRes.strings.map_installing),
                                 onCancel = onCancel,
                             )
@@ -457,7 +467,7 @@ class AndroidEventMap(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(
                 onClick = onClick,
-                modifier = Modifier.size(width = 200.dp, height = 60.dp),
+                modifier = Modifier.size(width = BUTTON_WIDTH_DP.dp, height = BUTTON_HEIGHT_DP.dp),
                 colors =
                     ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
@@ -496,7 +506,7 @@ class AndroidEventMap(
                 // IO actions
                 var stylePath: String? = null
                 var attempts = 0
-                repeat(10) { attempt ->
+                repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
                     if (candidate != null && File(candidate).exists()) {
@@ -505,12 +515,12 @@ class AndroidEventMap(
                         return@repeat
                     }
 
-                    if (attempt == 9) { // Log warning only on last attempts
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
                     // Give Play-Core/asset manager time to expose freshly installed split assets
-                    delay(200)
+                    delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 
                 if (stylePath == null) {
@@ -571,12 +581,12 @@ class AndroidEventMap(
                                 Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
                                 try {
                                     mapLibreView.removeOnAttachStateChangeListener(listener)
-                                } catch (_: Exception) {
-                                    // ignore
+                                } catch (_: IllegalStateException) {
+                                    // ignore listener removal errors
                                 }
                                 invokeGetMapAsync()
                             }
-                        }, 1500)
+                        }, MAP_ATTACH_TIMEOUT_MS)
                     }
                 }
             }
@@ -690,9 +700,9 @@ class AndroidEventMap(
             } catch (ise: IllegalStateException) {
                 // Map component might be in invalid state
                 Log.e(TAG, "Map component in invalid state", ise)
-            } catch (re: RuntimeException) {
-                // Other runtime issues with map component setup
-                Log.e(TAG, "Runtime error updating location component", re)
+            } catch (uoe: UnsupportedOperationException) {
+                // Map operation not supported
+                Log.e(TAG, "Unsupported map operation", uoe)
             }
         } ?: run {
             Log.w(TAG, "Cannot update location component - map style is null")
