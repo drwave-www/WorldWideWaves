@@ -106,8 +106,14 @@ class EventsViewModel(
                         processEventsList(eventsList)
                     }.flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
-            } catch (e: Exception) {
-                Log.e(::EventsViewModel.name, "Failed to load events", e)
+            } catch (e: IllegalStateException) {
+                Log.e(::EventsViewModel.name, "Invalid state while loading events", e)
+                _loadingError.value = true
+            } catch (e: SecurityException) {
+                Log.e(::EventsViewModel.name, "Security error while loading events", e)
+                _loadingError.value = true
+            } catch (e: RuntimeException) {
+                Log.e(::EventsViewModel.name, "Runtime error while loading events", e)
                 _loadingError.value = true
             }
         }

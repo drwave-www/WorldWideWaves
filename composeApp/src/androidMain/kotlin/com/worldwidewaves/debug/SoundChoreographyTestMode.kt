@@ -625,8 +625,12 @@ private suspend fun runWaveSimulation(
                 delay(delayBetweenUsersMs.milliseconds)
             }
         }
-    } catch (e: Exception) {
-        Log.e("SoundChoreographyTestMode", "Error during simulation: ${e.message}", e)
+    } catch (ise: IllegalStateException) {
+        Log.e("SoundChoreographyTestMode", "Invalid state during simulation: ${ise.message}", ise)
+    } catch (iae: IllegalArgumentException) {
+        Log.e("SoundChoreographyTestMode", "Invalid simulation parameters: ${iae.message}", iae)
+    } catch (re: RuntimeException) {
+        Log.e("SoundChoreographyTestMode", "Runtime error during simulation: ${re.message}", re)
     }
 
     Log.d("SoundChoreographyTestMode", "Simulation completed")

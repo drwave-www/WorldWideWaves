@@ -166,9 +166,13 @@ class MapAvailabilityChecker(
         try {
             val splitInstallManager = SplitInstallManagerFactory.create(context)
             return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
-        } catch (e: Exception) {
-            Log.e("MapAvailabilityChecker", "Error checking if map can be uninstalled: ${e.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${e.message}")
+        } catch (ise: IllegalStateException) {
+            Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
+            return false // If there's an error, assume it can't be uninstalled
+        } catch (re: RuntimeException) {
+            Log.e("MapAvailabilityChecker", "Runtime error accessing SplitInstallManager: ${re.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${re.message}")
             return false // If there's an error, assume it can't be uninstalled
         }
     }
@@ -218,9 +222,17 @@ class MapAvailabilityChecker(
                         Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
                         if (cont.isActive) cont.resume(false)
                     }
-            } catch (e: Exception) {
-                Log.e("MapAvailabilityChecker", "Error initiating uninstall for $eventId: ${e.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${e.message}")
+            } catch (ise: IllegalStateException) {
+                Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state for $eventId: ${ise.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${ise.message}")
+                if (cont.isActive) cont.resume(false)
+            } catch (iae: IllegalArgumentException) {
+                Log.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
+                if (cont.isActive) cont.resume(false)
+            } catch (re: RuntimeException) {
+                Log.e("MapAvailabilityChecker", "Runtime error initiating uninstall for $eventId: ${re.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${re.message}")
                 if (cont.isActive) cont.resume(false)
             }
         }

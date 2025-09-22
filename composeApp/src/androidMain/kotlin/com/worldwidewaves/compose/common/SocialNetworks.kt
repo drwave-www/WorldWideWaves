@@ -54,8 +54,12 @@ fun WWWSocialNetworks(
                         try {
                             val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
                             uriHandler.openUri(uri)
-                        } catch (e: Exception) {
-                            Log.e("AboutWWWSocialNetworks", "Failed to open URI", e)
+                        } catch (e: SecurityException) {
+                            Log.e("AboutWWWSocialNetworks", "Security error opening Instagram URI", e)
+                        } catch (e: IllegalArgumentException) {
+                            Log.e("AboutWWWSocialNetworks", "Invalid Instagram URI format", e)
+                        } catch (e: RuntimeException) {
+                            Log.e("AboutWWWSocialNetworks", "Runtime error opening Instagram URI", e)
                         }
                     }),
                 text = instagramAccount,

@@ -687,9 +687,12 @@ class AndroidEventMap(
             } catch (se: SecurityException) {
                 // Permission might have been revoked between check and use
                 Log.w(TAG, "Location permission missing when enabling component", se)
-            } catch (t: Throwable) {
-                // Catch-all to avoid crashing the map in unexpected situations
-                Log.e(TAG, "Failed to update location component", t)
+            } catch (ise: IllegalStateException) {
+                // Map component might be in invalid state
+                Log.e(TAG, "Map component in invalid state", ise)
+            } catch (re: RuntimeException) {
+                // Other runtime issues with map component setup
+                Log.e(TAG, "Runtime error updating location component", re)
             }
         } ?: run {
             Log.w(TAG, "Cannot update location component - map style is null")

@@ -300,9 +300,15 @@ class EventActivity : AbstractEventWaveActivity() {
                                         ).show()
 
                                     simulationButtonState = "active"
-                                } catch (e: Exception) {
+                                } catch (ise: IllegalStateException) {
                                     simulationButtonState = "idle"
-                                    Log.e("Simulation", "Error starting simulation", e)
+                                    Log.e("Simulation", "Invalid state for simulation setup", ise)
+                                } catch (iae: IllegalArgumentException) {
+                                    simulationButtonState = "idle"
+                                    Log.e("Simulation", "Invalid simulation parameters", iae)
+                                } catch (re: RuntimeException) {
+                                    simulationButtonState = "idle"
+                                    Log.e("Simulation", "Runtime error starting simulation", re)
                                 }
                             }
                         } else if (simulationButtonState == "active") {

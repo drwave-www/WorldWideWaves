@@ -387,8 +387,12 @@ class AndroidMapLibreAdapter(
                     waveSourceIds.add(sourceId)
                     waveLayerIds.add(layerId)
                 }
-            } catch (e: Exception) {
-                Log.e("MapUpdate", "Error updating wave polygons", e)
+            } catch (ise: IllegalStateException) {
+                Log.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
+            } catch (iae: IllegalArgumentException) {
+                Log.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
+            } catch (re: RuntimeException) {
+                Log.e("MapUpdate", "Runtime error updating wave polygons", re)
             }
         }
     }
