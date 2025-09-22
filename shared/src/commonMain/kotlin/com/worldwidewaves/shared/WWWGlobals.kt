@@ -33,149 +33,554 @@ fun debugBuild() {
     Napier.base(DebugAntilog())
 }
 
+/**
+ * Global constants for WorldWideWaves application
+ *
+ * This file contains all application-wide constants organized by domain.
+ * Constants are grouped logically to improve maintainability and discoverability.
+ */
 class WWWGlobals {
     companion object {
-        // -- URL Constants --
-        const val URL_BASE_INSTAGRAM = "https://www.instagram.com/"
 
-        // -- FS Constants --
+        // ============================================================================================
+        // GEODETIC & WAVE PHYSICS CONSTANTS
+        // ============================================================================================
 
-        const val FS_DATASTORE_FOLDER = "datastore"
+        /**
+         * Geodetic Constants - WGS-84 Earth Model
+         * Reference: NIMA Technical Report TR8350.2 (2000)
+         */
+        object Geodetic {
+            /** WGS-84 semi-major axis (equatorial radius) in meters */
+            const val EARTH_RADIUS = 6378137.0
 
-        private const val FS_FILES_FOLDER = "files"
-        const val FS_EVENTS_CONF = "$FS_FILES_FOLDER/events.json"
-        const val FS_CHOREOGRAPHIES_CONF = "$FS_FILES_FOLDER/choreographies.json"
-        const val FS_CHOREOGRAPHIES_SOUND_MIDIFILE = "$FS_FILES_FOLDER/symfony.mid"
-        const val FS_STYLE_FOLDER = "$FS_FILES_FOLDER/style"
-        const val FS_MAPS_STYLE = "$FS_STYLE_FOLDER/mapstyle.json"
-        const val FS_STYLE_LISTING = "$FS_STYLE_FOLDER/listing"
+            /** Coordinate precision epsilon for floating-point comparisons (≈ 0.11mm at equator) */
+            const val COORDINATE_EPSILON = 1e-9
 
-        // -- Wave Constants --
-        val WAVE_SOON_DELAY = 30.days
-        val WAVE_OBSERVE_DELAY = 2.hours // hours
-        val WAVE_WARMING_DURATION = 2.5.minutes
-        val WAVE_WARN_BEFORE_HIT = 30.seconds
-        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = 10.seconds
-        const val WAVE_LINEAR_METERS_REFRESH = 10.0 // meters
-        const val WAVE_BACKGROUND_COLOR = "#00008B"
-        const val WAVE_BACKGROUND_OPACITY = 0.20f
-        const val DEFAULT_SPEED_SIMULATION = 50 // m/s
+            /** Minimum perceptible speed difference for wave splits (m/s) */
+            const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0
 
-        // -- UI Constants --
+            /** Precision tolerance for geometric half-plane clipping operations */
+            const val HALF_PLANE_TOLERANCE = 1e-12
+        }
 
-        val CONST_SPLASH_MIN_DURATION = 2000.milliseconds
-        val CONST_TIMER_GPS_UPDATE = 3000.milliseconds
-        val CONST_GPS_PERMISSION_REASK_DELAY = 5.minutes
+        /**
+         * Wave Physics & Simulation Constants
+         */
+        object Wave {
+            /** Default wave simulation speed in meters per second */
+            const val DEFAULT_SPEED_SIMULATION = 50 // m/s
 
-        // -- MapLibre Constants
-        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = 16.0
-        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = 10.0
+            /** Minimum allowed simulation speed */
+            const val MIN_SIMULATION_SPEED = 1
 
-        // ----------------------------
+            /** Maximum allowed simulation speed */
+            const val MAX_SIMULATION_SPEED = 500
 
-        const val DIM_DEFAULT_EXT_PADDING = 20
-        const val DIM_DEFAULT_INT_PADDING = 10
+            /** Distance threshold for linear wave meter refresh */
+            const val LINEAR_METERS_REFRESH = 10.0 // meters
 
-        const val DIM_DEFAULT_SPACER_SMALL = 10
-        const val DIM_DEFAULT_SPACER_MEDIUM = 20
-        const val DIM_DEFAULT_SPACER_BIG = 30
+            /** Default wave background color (dark blue) */
+            const val BACKGROUND_COLOR = "#00008B"
 
-        const val DIM_DIVIDER_WIDTH = 200
-        const val DIM_DIVIDER_THICKNESS = 2
+            /** Wave background opacity level */
+            const val BACKGROUND_OPACITY = 0.20f
+        }
 
-        const val DIM_DEFAULT_FONTSIZE = 16
-        private const val DIM_SMALL_FONTSIZE = 12
-        private const val DIM_SMALL2_FONTSIZE = 14
-        private const val DIM_MEDIUM_FONTSIZE = 18
-        private const val DIM_MEDIUM2_FONTSIZE = 20
-        private const val DIM_BIG_FONTSIZE = 24
-        private const val DIM_BIG2_FONTSIZE = 26
-        private const val DIM_BIG3_FONTSIZE = 32
-        private const val DIM_BIG4_FONTSIZE = 48
-        private const val DIM_HUGE_FONTSIZE = 64
-        private const val DIM_HUGE2_FONTSIZE = 90
+        /**
+         * Wave Timing Constants
+         */
+        object WaveTiming {
+            /** Delay before showing "wave soon" notification */
+            val SOON_DELAY = 30.days
 
-        // ----------------------------
+            /** Duration for observing wave events */
+            val OBSERVE_DELAY = 2.hours
 
-        const val DIM_INT_TABBAR_HEIGHT = 60
-        const val DIM_INT_TABBAR_ITEM_WIDTH = 150
-        const val DIM_INT_TABBAR_ITEM_FONTSIZE = DIM_MEDIUM2_FONTSIZE
-        const val DIM_EXT_TABBAR_HEIGHT = 45
+            /** Duration of wave warming phase */
+            val WARMING_DURATION = 2.5.minutes
 
-        val DIM_BACK_PADDING = listOf(10, 10, 10, 15)
-        const val DIM_BACK_FONTSIZE = DIM_MEDIUM_FONTSIZE
-        const val DIM_BACK_EVENT_LOCATION_FONTSIZE = DIM_BIG_FONTSIZE
+            /** Warning time before wave hit */
+            val WARN_BEFORE_HIT = 30.seconds
 
-        const val DIM_EVENT_DESC_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_EVENT_DATE_FONTSIZE = DIM_HUGE2_FONTSIZE
-        const val DIM_EVENT_DATE_MITER = 20f
-        const val DIM_EVENT_DATE_STROKE = 5f
+            /** Duration to show wave hit sequence */
+            val SHOW_HIT_SEQUENCE_SECONDS = 10.seconds
+        }
 
-        const val DIM_EVENT_MAP_RATIO = (16f / 9f)
+        // ============================================================================================
+        // AUDIO & SOUND CONSTANTS
+        // ============================================================================================
 
-        const val DIM_EVENT_TARGET_WAVE_IMAGE_SIZE = 48
-        const val DIM_EVENT_TARGET_ME_IMAGE_SIZE = 48
+        /**
+         * Audio System Constants
+         */
+        object Audio {
+            /** Standard sample rate for audio generation (Hz) */
+            const val STANDARD_SAMPLE_RATE = 44100
 
-        const val DIM_EVENT_WAVEBUTTON_WIDTH = 300
-        const val DIM_EVENT_WAVEBUTTON_HEIGHT = 40
-        const val DIM_EVENT_WAVEBUTTON_FONTSIZE = DIM_BIG_FONTSIZE
+            /** Default bits per sample for audio */
+            const val DEFAULT_BITS_PER_SAMPLE = 16
 
-        const val DIM_EVENT_GEOLOCME_HEIGHT = 45
-        const val DIM_EVENT_GEOLOCME_BORDER = 2
-        const val DIM_EVENT_GEOLOCME_FONTSIZE = DIM_SMALL2_FONTSIZE
+            /** Default number of audio channels (mono) */
+            const val DEFAULT_CHANNELS = 1
 
-        const val DIM_WAVE_PROGRESSION_HEIGHT = 40
-        const val DIM_WAVE_PROGRESSION_FONTSIZE = DIM_MEDIUM2_FONTSIZE
-        const val DIM_WAVE_TRIANGLE_SIZE = 25
-        const val DIM_WAVE_TIMEBEFOREHIT_FONTSIZE = DIM_HUGE_FONTSIZE
+            /** Attack time for audio envelope to avoid clicks (seconds) */
+            const val ENVELOPE_ATTACK_TIME = 0.01 // 10ms
 
-        const val DIM_EVENT_NUMBERS_BORDERWIDTH = 2
-        const val DIM_EVENT_NUMBERS_BORDERROUND = 50
-        const val DIM_EVENT_NUMBERS_TITLE_FONTSIZE = DIM_BIG3_FONTSIZE
-        const val DIM_EVENT_NUMBERS_SPACER = 16
-        const val DIM_EVENT_NUMBERS_LABEL_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_EVENT_NUMBERS_VALUE_FONTSIZE = DIM_BIG_FONTSIZE
-        const val DIM_EVENT_NUMBERS_TZ_FONTSIZE = DIM_SMALL_FONTSIZE
+            /** Release time for audio envelope to avoid clicks (seconds) */
+            const val ENVELOPE_RELEASE_TIME = 0.01 // 10ms
+        }
 
-        const val DIM_WAVE_BEREADY_FONTSIZE = DIM_BIG4_FONTSIZE
-        const val DIM_WAVE_BEREADY_PADDING = 10
+        /**
+         * MIDI Constants
+         */
+        object Midi {
+            /** Standard A4 frequency in Hz (concert pitch) */
+            const val A4_FREQUENCY = 440.0
 
-        const val DIM_INFO_TEXT_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_INFO_DRWAVE_FONTSIZE = DIM_BIG2_FONTSIZE
+            /** MIDI note number for A4 */
+            const val A4_MIDI_NOTE = 69
 
-        const val DIM_FAQ_TITLE_FONTSIZE = DIM_HUGE_FONTSIZE
-        const val DIM_FAQ_SECTION_TITLE_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_FAQ_LINK_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_FAQ_INTRO_FONTSIZE = DIM_MEDIUM_FONTSIZE
-        const val DIM_FAQ_RULE_NBRING_WIDTH = 20
-        const val DIM_FAQ_RULE_TITLE_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_FAQ_RULE_CONTENTS_FONTSIZE = DIM_SMALL_FONTSIZE
-        const val DIM_FAQ_RULE_QUESTION_FONTSIZE = DIM_SMALL2_FONTSIZE
-        const val DIM_FAQ_RULE_ANSWER_FONTSIZE = DIM_DEFAULT_FONTSIZE
+            /** Middle C MIDI note number (fallback frequency) */
+            const val MIDDLE_C_MIDI_NOTE = 60
 
-        const val DIM_COMMON_SOONRUNNING_PADDING = 15
-        const val DIM_COMMON_SOONRUNNING_HEIGHT = DIM_BIG2_FONTSIZE
-        const val DIM_COMMON_SOONRUNNING_FONTSIZE = DIM_DEFAULT_FONTSIZE
+            /** Maximum MIDI velocity value */
+            const val MAX_VELOCITY = 127
 
-        const val DIM_COMMON_DONE_IMAGE_WIDTH = 130
+            /** Maximum MIDI pitch value */
+            const val MAX_PITCH = 127
 
-        const val DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH = 90
-        const val DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE = DIM_DEFAULT_FONTSIZE
+            /** Default tempo in beats per minute */
+            const val DEFAULT_TEMPO_BPM = 120
 
-        const val DIM_EVENTS_SELECTOR_HEIGHT = 50
-        const val DIM_EVENTS_SELECTOR_ROUND = 25
-        const val DIM_EVENTS_SELECTOR_FONTSIZE = DIM_DEFAULT_FONTSIZE
-        const val DIM_EVENTS_NOEVENTS_FONTSIZE = DIM_BIG_FONTSIZE
-        const val DIM_EVENTS_OVERLAY_HEIGHT = 160
-        const val DIM_EVENTS_FLAG_WIDTH = 65
-        const val DIM_EVENTS_FAVS_IMAGE_SIZE = 36
-        const val DIM_EVENTS_MAPDL_IMAGE_SIZE = 36
-        const val DIM_EVENTS_EVENT_LOCATION_FONSIZE = 26
-        const val DIM_EVENTS_EVENT_DATE_FONSIZE = 30
-        const val DIM_EVENTS_EVENT_COUNTRY_FONSIZE = DIM_MEDIUM_FONTSIZE
-        const val DIM_EVENTS_EVENT_COMMUNITY_FONSIZE = DIM_DEFAULT_FONTSIZE
+            /** Default microseconds per beat (120 BPM) */
+            const val DEFAULT_MICROSECONDS_PER_BEAT = 500000L
 
-        const val EMPTY_COUNTER = "--:--"
+            /** MIDI header chunk length (should always be 6) */
+            const val HEADER_CHUNK_LENGTH = 6
+
+            /** Default ticks per beat for MIDI timing */
+            const val DEFAULT_TICKS_PER_BEAT = 24
+        }
+
+        // ============================================================================================
+        // SPATIAL INDEXING & MAP CONSTANTS
+        // ============================================================================================
+
+        /**
+         * Spatial Indexing Constants for Performance Optimization
+         */
+        object SpatialIndex {
+            /** Default grid size for spatial indexing */
+            const val DEFAULT_GRID_SIZE = 16
+
+            /** Minimum polygon size for spatial optimization */
+            const val SPATIAL_OPTIMIZATION_THRESHOLD = 100
+
+            /** Minimum grid size for adaptive spatial indexing */
+            const val MIN_ADAPTIVE_GRID_SIZE = 4
+
+            /** Divisor for calculating adaptive grid size based on polygon size */
+            const val POLYGON_SIZE_DIVISOR = 20
+
+            /** Maximum cache size for trigonometric calculations */
+            const val TRIG_CACHE_MAX_SIZE = 200
+        }
+
+        /**
+         * Map Display Constants
+         */
+        object MapDisplay {
+            /** Target zoom level for user location display */
+            const val TARGET_USER_ZOOM = 16.0
+
+            /** Target zoom level for wave display */
+            const val TARGET_WAVE_ZOOM = 10.0
+
+            /** Percentage thresholds for map constraint calculations */
+            const val CONSTRAINT_SMALL_THRESHOLD = 0.1
+            const val CONSTRAINT_MEDIUM_THRESHOLD = 0.2
+            const val CONSTRAINT_LARGE_THRESHOLD = 0.4
+            const val CONSTRAINT_PADDING_MULTIPLIER = 0.5
+            const val CONSTRAINT_EXTRA_MARGIN = 1.5
+            const val CONSTRAINT_CHANGE_THRESHOLD = 0.1 // 10% change threshold
+        }
+
+        // ============================================================================================
+        // APPLICATION TIMING CONSTANTS
+        // ============================================================================================
+
+        /**
+         * UI Timing Constants
+         */
+        object Timing {
+            /** Minimum duration for splash screen display */
+            val SPLASH_MIN_DURATION = 2000.milliseconds
+
+            /** GPS update timer interval */
+            val GPS_UPDATE_INTERVAL = 3000.milliseconds
+
+            /** Delay before re-asking for GPS permissions */
+            val GPS_PERMISSION_REASK_DELAY = 5.minutes
+        }
+
+        // ============================================================================================
+        // FILE SYSTEM & RESOURCE PATHS
+        // ============================================================================================
+
+        /**
+         * File System Constants
+         */
+        object FileSystem {
+            /** DataStore folder name */
+            const val DATASTORE_FOLDER = "datastore"
+
+            /** Base files folder */
+            private const val FILES_FOLDER = "files"
+
+            /** Events configuration file path */
+            const val EVENTS_CONF = "$FILES_FOLDER/events.json"
+
+            /** Choreographies configuration file path */
+            const val CHOREOGRAPHIES_CONF = "$FILES_FOLDER/choreographies.json"
+
+            /** MIDI file for choreography sound */
+            const val CHOREOGRAPHIES_SOUND_MIDIFILE = "$FILES_FOLDER/symfony.mid"
+
+            /** Style folder path */
+            const val STYLE_FOLDER = "$FILES_FOLDER/style"
+
+            /** Map style configuration file */
+            const val MAPS_STYLE = "$STYLE_FOLDER/mapstyle.json"
+
+            /** Style listing file */
+            const val STYLE_LISTING = "$STYLE_FOLDER/listing"
+        }
+
+        // ============================================================================================
+        // EXTERNAL SERVICE URLS
+        // ============================================================================================
+
+        /**
+         * External Service URLs
+         */
+        object Urls {
+            /** Base URL for Instagram integration */
+            const val INSTAGRAM_BASE = "https://www.instagram.com/"
+        }
+
+        // ============================================================================================
+        // UI DIMENSIONS & STYLING
+        // ============================================================================================
+
+        /**
+         * Base UI Dimensions
+         */
+        object Dimensions {
+            // Padding Constants
+            const val DEFAULT_EXT_PADDING = 20
+            const val DEFAULT_INT_PADDING = 10
+
+            // Spacer Constants
+            const val SPACER_SMALL = 10
+            const val SPACER_MEDIUM = 20
+            const val SPACER_BIG = 30
+
+            // Divider Constants
+            const val DIVIDER_WIDTH = 200
+            const val DIVIDER_THICKNESS = 2
+
+            // Font Size Constants
+            const val FONTSIZE_SMALL = 12
+            const val FONTSIZE_SMALL2 = 14
+            const val FONTSIZE_DEFAULT = 16
+            const val FONTSIZE_MEDIUM = 18
+            const val FONTSIZE_MEDIUM2 = 20
+            const val FONTSIZE_BIG = 24
+            const val FONTSIZE_BIG2 = 26
+            const val FONTSIZE_BIG3 = 32
+            const val FONTSIZE_BIG4 = 48
+            const val FONTSIZE_HUGE = 64
+            const val FONTSIZE_HUGE2 = 90
+        }
+
+        /**
+         * Tab Bar Dimensions
+         */
+        object TabBar {
+            const val INT_HEIGHT = 60
+            const val INT_ITEM_WIDTH = 150
+            const val INT_ITEM_FONTSIZE = Dimensions.FONTSIZE_MEDIUM2
+            const val EXT_HEIGHT = 45
+        }
+
+        /**
+         * Back Navigation Dimensions
+         */
+        object BackNav {
+            val PADDING = listOf(10, 10, 10, 15)
+            const val FONTSIZE = Dimensions.FONTSIZE_MEDIUM
+            const val EVENT_LOCATION_FONTSIZE = Dimensions.FONTSIZE_BIG
+        }
+
+        /**
+         * Event Display Dimensions
+         */
+        object Event {
+            const val DESC_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val DATE_FONTSIZE = Dimensions.FONTSIZE_HUGE2
+            const val DATE_MITER = 20f
+            const val DATE_STROKE = 5f
+            const val MAP_RATIO = (16f / 9f)
+            const val TARGET_WAVE_IMAGE_SIZE = 48
+            const val TARGET_ME_IMAGE_SIZE = 48
+
+            // Wave Button
+            const val WAVEBUTTON_WIDTH = 300
+            const val WAVEBUTTON_HEIGHT = 40
+            const val WAVEBUTTON_FONTSIZE = Dimensions.FONTSIZE_BIG
+
+            // Geolocation
+            const val GEOLOCME_HEIGHT = 45
+            const val GEOLOCME_BORDER = 2
+            const val GEOLOCME_FONTSIZE = Dimensions.FONTSIZE_SMALL2
+
+            // Numbers Display
+            const val NUMBERS_BORDERWIDTH = 2
+            const val NUMBERS_BORDERROUND = 50
+            const val NUMBERS_TITLE_FONTSIZE = Dimensions.FONTSIZE_BIG3
+            const val NUMBERS_SPACER = 16
+            const val NUMBERS_LABEL_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val NUMBERS_VALUE_FONTSIZE = Dimensions.FONTSIZE_BIG
+            const val NUMBERS_TZ_FONTSIZE = Dimensions.FONTSIZE_SMALL
+        }
+
+        /**
+         * Wave Display Dimensions
+         */
+        object WaveDisplay {
+            const val PROGRESSION_HEIGHT = 40
+            const val PROGRESSION_FONTSIZE = Dimensions.FONTSIZE_MEDIUM2
+            const val TRIANGLE_SIZE = 25
+            const val TIMEBEFOREHIT_FONTSIZE = Dimensions.FONTSIZE_HUGE
+            const val BEREADY_FONTSIZE = Dimensions.FONTSIZE_BIG4
+            const val BEREADY_PADDING = 10
+        }
+
+        /**
+         * Info Screen Dimensions
+         */
+        object Info {
+            const val TEXT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val DRWAVE_FONTSIZE = Dimensions.FONTSIZE_BIG2
+        }
+
+        /**
+         * FAQ Screen Dimensions
+         */
+        object FAQ {
+            const val TITLE_FONTSIZE = Dimensions.FONTSIZE_HUGE
+            const val SECTION_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val LINK_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val INTRO_FONTSIZE = Dimensions.FONTSIZE_MEDIUM
+            const val RULE_NBRING_WIDTH = 20
+            const val RULE_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val RULE_CONTENTS_FONTSIZE = Dimensions.FONTSIZE_SMALL
+            const val RULE_QUESTION_FONTSIZE = Dimensions.FONTSIZE_SMALL2
+            const val RULE_ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        }
+
+        /**
+         * Common UI Elements
+         */
+        object Common {
+            const val SOONRUNNING_PADDING = 15
+            const val SOONRUNNING_HEIGHT = Dimensions.FONTSIZE_BIG2
+            const val SOONRUNNING_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val DONE_IMAGE_WIDTH = 130
+
+            // Social Networks
+            const val SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH = 90
+            const val SOCIALNETWORKS_ACCOUNT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val SOCIALNETWORKS_HASHTAG_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        }
+
+        /**
+         * Events List Dimensions
+         */
+        object EventsList {
+            const val SELECTOR_HEIGHT = 50
+            const val SELECTOR_ROUND = 25
+            const val SELECTOR_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+            const val NOEVENTS_FONTSIZE = Dimensions.FONTSIZE_BIG
+            const val OVERLAY_HEIGHT = 160
+            const val FLAG_WIDTH = 65
+            const val FAVS_IMAGE_SIZE = 36
+            const val MAPDL_IMAGE_SIZE = 36
+            const val EVENT_LOCATION_FONTSIZE = 26
+            const val EVENT_DATE_FONTSIZE = 30
+            const val EVENT_COUNTRY_FONTSIZE = Dimensions.FONTSIZE_MEDIUM
+            const val EVENT_COMMUNITY_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        }
+
+        // ============================================================================================
+        // DISPLAY TEXT CONSTANTS
+        // ============================================================================================
+
+        /**
+         * Display Text Constants
+         */
+        object DisplayText {
+            /** Empty counter placeholder text */
+            const val EMPTY_COUNTER = "--:--"
+        }
+
+        // ============================================================================================
+        // LEGACY CONSTANTS (for backward compatibility)
+        // ============================================================================================
+
+        // Legacy constants maintained for backward compatibility
+        // These will be phased out in favor of the organized structure above
+        @Deprecated("Use FileSystem.DATASTORE_FOLDER", ReplaceWith("FileSystem.DATASTORE_FOLDER"))
+        const val FS_DATASTORE_FOLDER = FileSystem.DATASTORE_FOLDER
+
+        @Deprecated("Use FileSystem.EVENTS_CONF", ReplaceWith("FileSystem.EVENTS_CONF"))
+        const val FS_EVENTS_CONF = FileSystem.EVENTS_CONF
+
+        @Deprecated("Use FileSystem.CHOREOGRAPHIES_CONF", ReplaceWith("FileSystem.CHOREOGRAPHIES_CONF"))
+        const val FS_CHOREOGRAPHIES_CONF = FileSystem.CHOREOGRAPHIES_CONF
+
+        @Deprecated("Use FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE", ReplaceWith("FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE"))
+        const val FS_CHOREOGRAPHIES_SOUND_MIDIFILE = FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE
+
+        @Deprecated("Use FileSystem.MAPS_STYLE", ReplaceWith("FileSystem.MAPS_STYLE"))
+        const val FS_MAPS_STYLE = FileSystem.MAPS_STYLE
+
+        @Deprecated("Use FileSystem.STYLE_LISTING", ReplaceWith("FileSystem.STYLE_LISTING"))
+        const val FS_STYLE_LISTING = FileSystem.STYLE_LISTING
+
+        @Deprecated("Use FileSystem.STYLE_FOLDER", ReplaceWith("FileSystem.STYLE_FOLDER"))
+        const val FS_STYLE_FOLDER = FileSystem.STYLE_FOLDER
+
+        @Deprecated("Use WaveTiming.SOON_DELAY", ReplaceWith("WaveTiming.SOON_DELAY"))
+        val WAVE_SOON_DELAY = WaveTiming.SOON_DELAY
+
+        @Deprecated("Use WaveTiming.OBSERVE_DELAY", ReplaceWith("WaveTiming.OBSERVE_DELAY"))
+        val WAVE_OBSERVE_DELAY = WaveTiming.OBSERVE_DELAY
+
+        @Deprecated("Use WaveTiming.WARMING_DURATION", ReplaceWith("WaveTiming.WARMING_DURATION"))
+        val WAVE_WARMING_DURATION = WaveTiming.WARMING_DURATION
+
+        @Deprecated("Use WaveTiming.WARN_BEFORE_HIT", ReplaceWith("WaveTiming.WARN_BEFORE_HIT"))
+        val WAVE_WARN_BEFORE_HIT = WaveTiming.WARN_BEFORE_HIT
+
+        @Deprecated("Use WaveTiming.SHOW_HIT_SEQUENCE_SECONDS", ReplaceWith("WaveTiming.SHOW_HIT_SEQUENCE_SECONDS"))
+        val WAVE_SHOW_HIT_SEQUENCE_SECONDS = WaveTiming.SHOW_HIT_SEQUENCE_SECONDS
+
+        @Deprecated("Use Wave.LINEAR_METERS_REFRESH", ReplaceWith("Wave.LINEAR_METERS_REFRESH"))
+        const val WAVE_LINEAR_METERS_REFRESH = Wave.LINEAR_METERS_REFRESH
+
+        @Deprecated("Use Wave.BACKGROUND_COLOR", ReplaceWith("Wave.BACKGROUND_COLOR"))
+        const val WAVE_BACKGROUND_COLOR = Wave.BACKGROUND_COLOR
+
+        @Deprecated("Use Wave.BACKGROUND_OPACITY", ReplaceWith("Wave.BACKGROUND_OPACITY"))
+        const val WAVE_BACKGROUND_OPACITY = Wave.BACKGROUND_OPACITY
+
+        @Deprecated("Use Wave.DEFAULT_SPEED_SIMULATION", ReplaceWith("Wave.DEFAULT_SPEED_SIMULATION"))
+        const val DEFAULT_SPEED_SIMULATION = Wave.DEFAULT_SPEED_SIMULATION
+
+        @Deprecated("Use Timing.SPLASH_MIN_DURATION", ReplaceWith("Timing.SPLASH_MIN_DURATION"))
+        val CONST_SPLASH_MIN_DURATION = Timing.SPLASH_MIN_DURATION
+
+        @Deprecated("Use Timing.GPS_UPDATE_INTERVAL", ReplaceWith("Timing.GPS_UPDATE_INTERVAL"))
+        val CONST_TIMER_GPS_UPDATE = Timing.GPS_UPDATE_INTERVAL
+
+        @Deprecated("Use Timing.GPS_PERMISSION_REASK_DELAY", ReplaceWith("Timing.GPS_PERMISSION_REASK_DELAY"))
+        val CONST_GPS_PERMISSION_REASK_DELAY = Timing.GPS_PERMISSION_REASK_DELAY
+
+        @Deprecated("Use MapDisplay.TARGET_USER_ZOOM", ReplaceWith("MapDisplay.TARGET_USER_ZOOM"))
+        const val CONST_MAPLIBRE_TARGET_USER_ZOOM = MapDisplay.TARGET_USER_ZOOM
+
+        @Deprecated("Use MapDisplay.TARGET_WAVE_ZOOM", ReplaceWith("MapDisplay.TARGET_WAVE_ZOOM"))
+        const val CONST_MAPLIBRE_TARGET_WAVE_ZOOM = MapDisplay.TARGET_WAVE_ZOOM
+
+        @Deprecated("Use Urls.INSTAGRAM_BASE", ReplaceWith("Urls.INSTAGRAM_BASE"))
+        const val URL_BASE_INSTAGRAM = Urls.INSTAGRAM_BASE
+
+        @Deprecated("Use DisplayText.EMPTY_COUNTER", ReplaceWith("DisplayText.EMPTY_COUNTER"))
+        const val EMPTY_COUNTER = DisplayText.EMPTY_COUNTER
+
+        // Legacy dimension constants
+        @Deprecated("Use Dimensions.DEFAULT_EXT_PADDING", ReplaceWith("Dimensions.DEFAULT_EXT_PADDING"))
+        const val DIM_DEFAULT_EXT_PADDING = Dimensions.DEFAULT_EXT_PADDING
+
+        @Deprecated("Use Dimensions.DEFAULT_INT_PADDING", ReplaceWith("Dimensions.DEFAULT_INT_PADDING"))
+        const val DIM_DEFAULT_INT_PADDING = Dimensions.DEFAULT_INT_PADDING
+
+        @Deprecated("Use Dimensions.SPACER_SMALL", ReplaceWith("Dimensions.SPACER_SMALL"))
+        const val DIM_DEFAULT_SPACER_SMALL = Dimensions.SPACER_SMALL
+
+        @Deprecated("Use Dimensions.SPACER_MEDIUM", ReplaceWith("Dimensions.SPACER_MEDIUM"))
+        const val DIM_DEFAULT_SPACER_MEDIUM = Dimensions.SPACER_MEDIUM
+
+        @Deprecated("Use Dimensions.SPACER_BIG", ReplaceWith("Dimensions.SPACER_BIG"))
+        const val DIM_DEFAULT_SPACER_BIG = Dimensions.SPACER_BIG
+
+        @Deprecated("Use Dimensions.FONTSIZE_DEFAULT", ReplaceWith("Dimensions.FONTSIZE_DEFAULT"))
+        const val DIM_DEFAULT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+
+        @Deprecated("Use TabBar.INT_ITEM_FONTSIZE", ReplaceWith("TabBar.INT_ITEM_FONTSIZE"))
+        const val DIM_INT_TABBAR_ITEM_FONTSIZE = TabBar.INT_ITEM_FONTSIZE
+
+        @Deprecated("Use BackNav.FONTSIZE", ReplaceWith("BackNav.FONTSIZE"))
+        const val DIM_BACK_FONTSIZE = BackNav.FONTSIZE
+
+        @Deprecated("Use Event.DESC_FONTSIZE", ReplaceWith("Event.DESC_FONTSIZE"))
+        const val DIM_EVENT_DESC_FONTSIZE = Event.DESC_FONTSIZE
+
+        @Deprecated("Use Event.WAVEBUTTON_FONTSIZE", ReplaceWith("Event.WAVEBUTTON_FONTSIZE"))
+        const val DIM_EVENT_WAVEBUTTON_FONTSIZE = Event.WAVEBUTTON_FONTSIZE
+
+        @Deprecated("Use TabBar.INT_HEIGHT", ReplaceWith("TabBar.INT_HEIGHT"))
+        const val DIM_INT_TABBAR_HEIGHT = TabBar.INT_HEIGHT
+
+        @Deprecated("Use TabBar.INT_ITEM_WIDTH", ReplaceWith("TabBar.INT_ITEM_WIDTH"))
+        const val DIM_INT_TABBAR_ITEM_WIDTH = TabBar.INT_ITEM_WIDTH
+
+        @Deprecated("Use Event.WAVEBUTTON_WIDTH", ReplaceWith("Event.WAVEBUTTON_WIDTH"))
+        const val DIM_EVENT_WAVEBUTTON_WIDTH = Event.WAVEBUTTON_WIDTH
+
+        @Deprecated("Use Event.WAVEBUTTON_HEIGHT", ReplaceWith("Event.WAVEBUTTON_HEIGHT"))
+        const val DIM_EVENT_WAVEBUTTON_HEIGHT = Event.WAVEBUTTON_HEIGHT
+
+        @Deprecated("Use Event.MAP_RATIO", ReplaceWith("Event.MAP_RATIO"))
+        const val DIM_EVENT_MAP_RATIO = Event.MAP_RATIO
+
+        @Deprecated("Use Dimensions.DIVIDER_WIDTH", ReplaceWith("Dimensions.DIVIDER_WIDTH"))
+        const val DIM_DIVIDER_WIDTH = Dimensions.DIVIDER_WIDTH
+
+        @Deprecated("Use Dimensions.DIVIDER_THICKNESS", ReplaceWith("Dimensions.DIVIDER_THICKNESS"))
+        const val DIM_DIVIDER_THICKNESS = Dimensions.DIVIDER_THICKNESS
+
+        @Deprecated("Use Event.NUMBERS_BORDERWIDTH", ReplaceWith("Event.NUMBERS_BORDERWIDTH"))
+        const val DIM_EVENT_NUMBERS_BORDERWIDTH = Event.NUMBERS_BORDERWIDTH
+
+        @Deprecated("Use Event.NUMBERS_BORDERROUND", ReplaceWith("Event.NUMBERS_BORDERROUND"))
+        const val DIM_EVENT_NUMBERS_BORDERROUND = Event.NUMBERS_BORDERROUND
+
+        @Deprecated("Use Event.TARGET_WAVE_IMAGE_SIZE", ReplaceWith("Event.TARGET_WAVE_IMAGE_SIZE"))
+        const val DIM_EVENT_TARGET_WAVE_IMAGE_SIZE = Event.TARGET_WAVE_IMAGE_SIZE
+
+        @Deprecated("Use Event.TARGET_ME_IMAGE_SIZE", ReplaceWith("Event.TARGET_ME_IMAGE_SIZE"))
+        const val DIM_EVENT_TARGET_ME_IMAGE_SIZE = Event.TARGET_ME_IMAGE_SIZE
+
+        @Deprecated("Use EventsList.FAVS_IMAGE_SIZE", ReplaceWith("EventsList.FAVS_IMAGE_SIZE"))
+        const val DIM_EVENTS_FAVS_IMAGE_SIZE = EventsList.FAVS_IMAGE_SIZE
+
+        @Deprecated("Use EventsList.MAPDL_IMAGE_SIZE", ReplaceWith("EventsList.MAPDL_IMAGE_SIZE"))
+        const val DIM_EVENTS_MAPDL_IMAGE_SIZE = EventsList.MAPDL_IMAGE_SIZE
+
+        // Additional legacy constants - maintaining only the most commonly used ones for now
+        // Full migration can be done in subsequent iterations
     }
 }
