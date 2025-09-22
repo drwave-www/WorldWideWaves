@@ -21,10 +21,14 @@ package com.worldwidewaves.di
  * limitations under the License.
  */
 
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.tabs.AboutScreen
+import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
+import com.worldwidewaves.monitoring.PerformanceIntegration
+import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CloseableCoroutineScope
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -61,4 +65,20 @@ val applicationModule =
         // Location engine and provider for Android
         single { WWWSimulationEnabledLocationEngine(get()) }
         factory { AndroidWWWLocationProvider() }
+
+        // Performance monitoring - only in debug builds
+        single<AndroidPerformanceMonitor> {
+            AndroidPerformanceMonitor(androidContext()).also { monitor ->
+                PerformanceIntegration.initialize(androidContext())
+            }
+        }
+
+        // Debug screen - only in debug builds
+        single<DebugScreen?> {
+            if (BuildConfig.DEBUG) {
+                DebugScreen(get<AndroidPerformanceMonitor>())
+            } else {
+                null
+            }
+        }
     }

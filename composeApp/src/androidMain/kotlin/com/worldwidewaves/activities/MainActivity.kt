@@ -44,11 +44,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
+import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
@@ -56,9 +58,13 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
 import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.debug_icon
+import com.worldwidewaves.shared.generated.resources.debug_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 import com.worldwidewaves.theme.AppTheme
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,17 +76,26 @@ import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 // ----------------------------
 
-private val tabInfo =
-    listOf(
-        Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
-        Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
-    )
+private fun getTabInfo(includeDebug: Boolean) =
+    if (includeDebug) {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+            Pair(ShRes.drawable.debug_icon, ShRes.drawable.debug_icon_selected),
+        )
+    } else {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+        )
+    }
 
 // ----------------------------
 
 open class MainActivity : AppCompatActivity() {
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutScreen: AboutScreen by inject()
+    private val debugScreen: DebugScreen? by inject()
     private val events: WWWEvents by inject()
     private val platform: WWWPlatform by inject()
 
@@ -94,15 +109,19 @@ open class MainActivity : AppCompatActivity() {
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
 
-    protected val tabManager =
+    protected val tabManager by lazy {
+        val screens = mutableListOf(
+            eventsListScreen,
+            aboutScreen,
+        )
+        debugScreen?.let { screens.add(it) }
+
         TabManager(
-            listOf(
-                eventsListScreen,
-                aboutScreen,
-            ),
+            screens.toList()
         ) { isSelected, tabIndex, contentDescription ->
-            TabBarItem(isSelected, tabIndex, contentDescription)
+            TabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
+    }
 
     // ----------------------------
 
@@ -208,11 +227,13 @@ open class MainActivity : AppCompatActivity() {
         isSelected: Boolean,
         tabIndex: Int,
         contentDescription: String?,
+        totalTabs: Int
     ) {
+        val tabInfo = getTabInfo(totalTabs > 2)
         Image(
             painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
             contentDescription = contentDescription,
-            modifier = Modifier.height(DIM_EXT_TABBAR_HEIGHT.dp),
+            modifier = Modifier.height(TabBar.EXT_HEIGHT.dp),
             contentScale = ContentScale.Fit,
         )
     }

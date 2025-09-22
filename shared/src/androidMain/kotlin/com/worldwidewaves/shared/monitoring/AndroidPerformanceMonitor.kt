@@ -30,8 +30,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -58,7 +63,7 @@ class AndroidPerformanceMonitor(
      * Start continuous system monitoring
      */
     private fun startSystemMonitoring() {
-        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Default) {
             while (isActive) {
                 try {
                     monitorMemoryUsage()
@@ -171,13 +176,13 @@ fun PerformanceMonitoringEffect(
 
     // Track screen load time
     LaunchedEffect(screenName) {
-        val loadTime = (System.currentTimeMillis() - startTime).let(kotlin.time.Duration.Companion::milliseconds)
+        val loadTime = (System.currentTimeMillis() - startTime).milliseconds
         monitor.recordScreenLoad(screenName, loadTime)
     }
 
     // Monitor memory during screen lifecycle
     DisposableEffect(screenName) {
-        val job = kotlinx.coroutines.GlobalScope.launch {
+        val job = GlobalScope.launch {
             while (isActive) {
                 try {
                     val runtime = Runtime.getRuntime()

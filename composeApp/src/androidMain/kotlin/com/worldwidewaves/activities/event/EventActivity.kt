@@ -87,6 +87,9 @@ import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveDisplay as Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.TimeSource
 
@@ -124,7 +125,7 @@ data class PerformanceIssue(
 /**
  * Default implementation of performance monitoring
  */
-class PerformanceMonitor : IPerformanceMonitor {
+open class PerformanceMonitor : IPerformanceMonitor {
 
     private val scope = CoroutineScope(Dispatchers.Default)
     private val traces = mutableMapOf<String, PerformanceTraceImpl>()
@@ -220,7 +221,7 @@ class PerformanceMonitor : IPerformanceMonitor {
             appVersion = "1.0.0", // This should come from build config
             platform = getPlatformName(),
             deviceInfo = getDeviceInfo(),
-            reportPeriod = 24.hours(),
+            reportPeriod = 24.hours,
             metrics = _performanceMetrics.value,
             criticalIssues = detectCriticalIssues(),
             recommendations = generateRecommendations()
@@ -351,7 +352,3 @@ private data class PerformanceEvent(
     val timestamp: Long
 )
 
-/**
- * Extension functions for Duration
- */
-private fun Duration.hours(): Duration = this * 3600
