@@ -130,8 +130,8 @@ class FileSystemErrorTest : KoinTest {
             val pathProvider = { "/tmp/test_disk_full_datastore.pb" }
 
             // Try to create DataStore - may fail due to disk space or permission issues
-            @Suppress("DEPRECATION")
-            createDataStore(pathProvider)
+            val factory = TestDataStoreFactory()
+            factory.create(pathProvider)
 
             // If creation succeeds, system can handle the scenario
             diskSpaceErrorHandled = true
@@ -195,8 +195,8 @@ class FileSystemErrorTest : KoinTest {
         try {
             // WHEN: Attempt operations that might encounter corruption
             val pathProvider = { "/tmp/potentially_corrupt_datastore.pb" }
-            @Suppress("DEPRECATION")
-            createDataStore(pathProvider)
+            val factory = TestDataStoreFactory()
+            factory.create(pathProvider)
 
             // If successful, system handles potential corruption
             corruptionHandled = true
@@ -272,8 +272,8 @@ class FileSystemErrorTest : KoinTest {
             try {
                 // Try primary location first
                 val primaryPathProvider = { primaryPath }
-                @Suppress("DEPRECATION")
-                createDataStore(primaryPathProvider)
+                val primaryFactory = TestDataStoreFactory()
+                primaryFactory.create(primaryPathProvider)
 
             } catch (e: Exception) {
                 // THEN: Should use fallback mechanism
