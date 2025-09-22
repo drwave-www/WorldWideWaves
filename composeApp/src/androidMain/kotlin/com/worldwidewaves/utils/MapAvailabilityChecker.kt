@@ -81,7 +81,7 @@ class MapAvailabilityChecker(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
                         )
-                        // If this module had previously been “forced” unavailable
+                        // If this module had previously been "forced" unavailable
                         // (deferred uninstall), drop the override so it becomes
                         // visible again without requiring an app restart.
                         state.moduleNames()?.forEach { id ->

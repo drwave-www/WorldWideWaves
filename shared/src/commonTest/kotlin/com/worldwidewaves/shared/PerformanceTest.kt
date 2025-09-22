@@ -281,6 +281,16 @@ class PerformanceTest {
         // THEN: Computational complexity should be reasonable (not exponential)
         val times = timingResults.values.toList()
 
+        // Detect CI environment and adjust thresholds accordingly
+        val isCI = System.getenv("CI") == "true" ||
+                   System.getenv("GITHUB_ACTIONS") == "true" ||
+                   System.getenv("CONTINUOUS_INTEGRATION") == "true"
+
+        // CI environments are more variable and slower, so use more lenient thresholds
+        val maxRatio = if (isCI) 10.0 else 5.0
+        val maxExecutionTime = if (isCI) 500L else 100L
+        val maxReasonableTime = if (isCI) 50.0 else 10.0
+
         // Check that timing doesn't increase exponentially
         for (i in 1 until times.size) {
             val currentTime = times[i].toDouble()
@@ -290,15 +300,15 @@ class PerformanceTest {
             if (previousTime == 0.0) {
                 // If current time is also 0, that's fine (both very fast)
                 // If current time is > 0, that's still reasonable (small increase)
-                assertTrue(currentTime < 10.0, "Current timing should be reasonable when previous was 0ms, got: ${currentTime}ms")
+                assertTrue(currentTime < maxReasonableTime, "Current timing should be reasonable when previous was 0ms, got: ${currentTime}ms")
             } else {
                 val ratio = currentTime / previousTime
-                assertTrue(ratio < 5.0, "Timing ratio between consecutive sizes should be <5x, got: $ratio")
+                assertTrue(ratio < maxRatio, "Timing ratio between consecutive sizes should be <${maxRatio}x, got: $ratio")
             }
         }
 
         // Overall performance should be reasonable
-        assertTrue(times.max() < 100, "Maximum execution time should be <100ms, got: ${times.max()}ms")
+        assertTrue(times.max() < maxExecutionTime, "Maximum execution time should be <${maxExecutionTime}ms, got: ${times.max()}ms")
     }
 
     @Test

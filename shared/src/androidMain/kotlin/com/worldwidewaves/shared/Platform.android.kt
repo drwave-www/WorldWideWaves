@@ -37,6 +37,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 
+
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
 
@@ -130,101 +131,84 @@ actual suspend fun getMapFileAbsolutePath(
      * times with a fresh split-aware context before giving up.
      * ---------------------------------------------------------------- */
 
-    val ctx =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                context.createContextForSplit(eventId)
-            } catch (_: Exception) {
+    // Implement actual retry logic as mentioned in the comment above
+    var lastException: Exception? = null
+    val maxRetries = 3
+    val retryDelayMs = 100L
+
+    for (attempt in 1..maxRetries) {
+        try {
+            val ctx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                try {
+                    context.createContextForSplit(eventId)
+                } catch (_: Exception) {
+                    context
+                }
+            } else {
                 context
             }
-        } else {
-            context
-        }
 
-    // Ensure split-compat hooks into this context
-    SplitCompat.install(ctx)
+            // Ensure split-compat hooks into this context
+            SplitCompat.install(ctx)
 
-    // We found a context that can access the asset, now copy it to cache
-    try {
-        Log.i(::getMapFileAbsolutePath.name, "Caching $eventId.$extension")
-
-        withContext(Dispatchers.IO) {
-            try {
-                // Use a buffered approach for better memory efficiency
-                ctx.assets.open(assetPath).use { input ->
-                    BufferedInputStream(input, 8192).use { bufferedInput ->
-                        cachedFile.outputStream().use { fileOutput ->
-                            BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                                val buffer = ByteArray(8192)
-                                var bytesRead: Int
-
-                                while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
-                                    bufferedOutput.write(buffer, 0, bytesRead)
-                                }
-
-                                bufferedOutput.flush()
-                            }
-                        }
-                    }
-                }
-
-                // Update metadata after successful copy
-                metadataFile.writeText(System.currentTimeMillis().toString())
-            } catch (e: Exception) {
-                // FileNotFoundException during caching - same logic as above
-                if (e is java.io.FileNotFoundException) {
-                    val shouldBeAvailable = try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            context.createContextForSplit(eventId) != null
-                        } else {
-                            false
-                        }
-                    } catch (_: Exception) {
-                        false
-                    }
-
-                    if (shouldBeAvailable) {
-                        Log.e(::getMapFileAbsolutePath.name, "Asset missing after download: $eventId.$extension (feature module is installed)")
-                    } else {
-                        Log.d(::getMapFileAbsolutePath.name, "Cannot cache file: $eventId.$extension (asset not found)")
-                    }
-                } else {
-                    Log.e(::getMapFileAbsolutePath.name, "Error caching file: ${e.message}")
-                }
-                // Delete partially written file if there was an error
-                if (cachedFile.exists()) {
-                    cachedFile.delete()
-                }
-                throw e
+            // Try to access the asset immediately
+            return cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
+        } catch (e: java.io.FileNotFoundException) {
+            lastException = e
+            if (attempt < maxRetries) {
+                Log.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
+                kotlinx.coroutines.delay(retryDelayMs)
             }
         }
-
-        return cachedFile.absolutePath
-    } catch (e: Exception) {
-        // FileNotFoundException handling - check if feature module should be available
-        if (e is java.io.FileNotFoundException) {
-            // If we could create a split context successfully, the feature module should be available
-            val shouldBeAvailable = try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.createContextForSplit(eventId) != null
-                } else {
-                    false // Can't determine on older versions, assume not downloaded
-                }
-            } catch (_: Exception) {
-                false
-            }
-
-            if (shouldBeAvailable) {
-                Log.e(::getMapFileAbsolutePath.name, "Map file missing after download: $eventId.$extension (feature module is installed)")
-            } else {
-                Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
-            }
-        } else {
-            Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${e.message}")
-            e.printStackTrace()
-        }
-        return null
     }
+
+    // If we get here, all retries failed - handle the final exception intelligently
+    if (lastException is java.io.FileNotFoundException) {
+        Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+    } else {
+        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}")
+        lastException?.printStackTrace()
+    }
+    return null
+}
+
+/**
+ * Helper function to cache asset from a given context.
+ * Separated for the retry logic above.
+ */
+private suspend fun cacheAssetFromContext(
+    ctx: Context,
+    assetPath: String,
+    cachedFile: File,
+    metadataFile: File,
+    eventId: String,
+    extension: String
+): String {
+
+    withContext(Dispatchers.IO) {
+        // Use a buffered approach for better memory efficiency
+        ctx.assets.open(assetPath).use { input ->
+            BufferedInputStream(input, 8192).use { bufferedInput ->
+                cachedFile.outputStream().use { fileOutput ->
+                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
+                        val buffer = ByteArray(8192)
+                        var bytesRead: Int
+
+                        while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {
+                            bufferedOutput.write(buffer, 0, bytesRead)
+                        }
+
+                        bufferedOutput.flush()
+                    }
+                }
+            }
+        }
+
+        // Update metadata after successful copy
+        metadataFile.writeText(System.currentTimeMillis().toString())
+    }
+
+    return cachedFile.absolutePath
 }
 
 // ---------------------------
