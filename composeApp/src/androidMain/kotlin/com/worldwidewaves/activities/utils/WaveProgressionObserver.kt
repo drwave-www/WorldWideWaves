@@ -28,6 +28,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.sample
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.withContext
 
 /**
@@ -89,19 +91,14 @@ class WaveProgressionObserver(
     ) {
         polygonsJob?.cancel()
 
-        val updateIntervalMs = 250L
-        var lastUpdateTime = 0L
-
+        // Use Flow.sample() for efficient throttling instead of manual time tracking
         polygonsJob =
             scope.launch(Dispatchers.Default) {
-                event.observer.progression.collect {
-                    val now = System.currentTimeMillis()
-                    // Throttle updates to at most every 250 ms --------------------
-                    if (now - lastUpdateTime >= updateIntervalMs) {
-                        lastUpdateTime = now
+                event.observer.progression
+                    .sample(250.milliseconds) // Built-in throttling for better performance
+                    .collect {
                         updateWavePolygons(event, eventMap)
                     }
-                }
             }
     }
 

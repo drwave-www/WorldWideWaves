@@ -140,14 +140,14 @@ class EventsViewModel(
     }
 
     /**
-     * Monitor simulation speed during event phases (DEBUG mode only)
+     * Monitor simulation speed during event phases (DEBUG mode only).
+     * Uses viewModelScope for automatic lifecycle management and memory leak prevention.
      */
     private fun monitorSimulatedSpeed(event: IWWWEvent) {
-        val scope = CoroutineScope(Dispatchers.Default)
         var backupSimulationSpeed = 1
 
-        // Handle warming started
-        scope.launch {
+        // Handle warming started - using viewModelScope for automatic cleanup
+        viewModelScope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
                     backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
@@ -156,8 +156,8 @@ class EventsViewModel(
             }
         }
 
-        // Handle user has been hit
-        scope.launch {
+        // Handle user has been hit - using viewModelScope for automatic cleanup
+        viewModelScope.launch {
             event.observer.userHasBeenHit.collect { hasBeenHit ->
                 if (hasBeenHit) {
                     // Restore simulation speed after a delay

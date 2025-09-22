@@ -604,7 +604,8 @@ class WWWEventObserver(
             timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
             timeBeforeHit < ZERO -> INFINITE
             timeBeforeHit < 1.seconds -> 50.milliseconds // For sound accuracy
-            else -> 1.minutes // Default case, more reasonable than 1 day
+            timeBeforeHit < 5.seconds -> 200.milliseconds // Additional tier for better battery
+            else -> 30.seconds // More battery-friendly default
         }
     }
 }
