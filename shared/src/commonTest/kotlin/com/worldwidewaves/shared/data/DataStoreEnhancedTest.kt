@@ -1,7 +1,6 @@
 package com.worldwidewaves.shared.data
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -18,7 +17,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import okio.Path.Companion.toPath
+import org.koin.test.KoinTest
+import org.koin.test.get
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -54,7 +54,7 @@ import kotlin.test.assertTrue
  * error handling, and edge cases that complement the basic DataStoreTest.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class DataStoreEnhancedTest {
+class DataStoreEnhancedTest : KoinTest {
 
     private lateinit var testDataStore: DataStore<Preferences>
     private var tempDir: String = ""
@@ -70,10 +70,9 @@ class DataStoreEnhancedTest {
         // Create a temporary directory for test data store
         tempDir = createTempDirectory()
 
-        // Create a test DataStore instance
-        testDataStore = PreferenceDataStoreFactory.createWithPath {
-            "$tempDir/test_enhanced_datastore.preferences_pb".toPath()
-        }
+        // Create a test DataStore instance using TestDataStoreFactory
+        val factory: DataStoreFactory = TestDataStoreFactory()
+        testDataStore = factory.create { "$tempDir/test_enhanced_datastore.preferences_pb" }
     }
 
     @AfterTest
@@ -272,32 +271,41 @@ class DataStoreEnhancedTest {
     }
 
     @Test
-    fun `test datastore factory idempotent behavior verification`() {
+    fun `test datastore factory behavior with new pattern`() {
+        val factory1 = TestDataStoreFactory()
+        val factory2 = TestDataStoreFactory()
+
         val path1 = "/test/path/1"
         val path2 = "/test/path/2"
 
-        // Mock path providers
-        val provider1 = mockk<() -> String>()
-        val provider2 = mockk<() -> String>()
+        // Each factory call creates a new instance for proper test isolation
+        val dataStore1 = factory1.create { path1 }
+        val dataStore2 = factory1.create { path2 }
+        val dataStore3 = factory2.create { path1 }
 
-        every { provider1() } returns path1
-        every { provider2() } returns path2
+        // Verify that different DataStore instances are created
+        // (Even with same path, TestDataStoreFactory creates isolated instances)
+        assertTrue(dataStore1 !== dataStore2)
+        assertTrue(dataStore1 !== dataStore3)
+        assertTrue(dataStore2 !== dataStore3)
+    }
+
+    @Test
+    fun `test migration from deprecated pattern compatibility`() {
+        val path1 = "/test/path/deprecated"
+        val provider = mockk<() -> String>()
+        every { provider() } returns path1
 
         try {
-            // First call should create DataStore
+            // Test deprecated pattern still works during migration
             @Suppress("DEPRECATION")
-            createDataStore(provider1)
-            verify { provider1() }
-
-            // Second call with same provider should return existing
-            @Suppress("DEPRECATION")
-            createDataStore(provider1)
-            // Should still call the path provider to check the path
-            verify(atLeast = 2) { provider1() }
+            val deprecatedDataStore = createDataStore(provider)
+            verify { provider() }
+            assertNotNull(deprecatedDataStore)
 
         } catch (e: Exception) {
-            // Expected since we're testing with mock paths that can't create real datastores
-            // We're only testing that the path provider is called correctly
+            // Expected since we're testing with mock paths
+            // We're verifying the migration compatibility exists
         }
     }
 

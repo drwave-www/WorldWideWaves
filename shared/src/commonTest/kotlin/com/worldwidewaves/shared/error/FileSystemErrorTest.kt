@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.error
  */
 
 import com.worldwidewaves.shared.data.createDataStore
+import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.TestDataStoreFactory
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
@@ -69,6 +70,7 @@ class FileSystemErrorTest : KoinTest {
             modules(module {
                 single<IClock> { mockClock }
                 single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider(testDispatcher, testDispatcher) }
+                single<DataStoreFactory> { TestDataStoreFactory() }
             })
         }
     }
@@ -98,8 +100,9 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { invalidPath }
-                @Suppress("DEPRECATION")
-                createDataStore(pathProvider)
+                // New pattern: Use TestDataStoreFactory for controlled error testing
+                val factory = TestDataStoreFactory()
+                factory.create(pathProvider)
 
                 // If creation succeeds, system handled the invalid path
                 fileSystemErrorHandled = true
@@ -163,10 +166,10 @@ class FileSystemErrorTest : KoinTest {
             val pathProvider1 = { testPath }
             val pathProvider2 = { testPath }
 
-            @Suppress("DEPRECATION")
-            val dataStore1 = createDataStore(pathProvider1)
-            @Suppress("DEPRECATION")
-            val dataStore2 = createDataStore(pathProvider2)
+            // Test concurrent access with factory pattern
+            val factory = TestDataStoreFactory()
+            val dataStore1 = factory.create(pathProvider1)
+            val dataStore2 = factory.create(pathProvider2)
 
             // THEN: System should handle concurrent access
             // Either both succeed (file sharing) or controlled failure
@@ -233,8 +236,9 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { restrictedPath }
-                @Suppress("DEPRECATION")
-                createDataStore(pathProvider)
+                // New pattern: Use TestDataStoreFactory for controlled error testing
+                val factory = TestDataStoreFactory()
+                factory.create(pathProvider)
 
                 // If creation succeeds, system has appropriate permissions
                 permissionErrorHandled = true
@@ -275,8 +279,9 @@ class FileSystemErrorTest : KoinTest {
                 // THEN: Should use fallback mechanism
                 try {
                     val fallbackPathProvider = { fallbackPath }
-                    @Suppress("DEPRECATION")
-                    createDataStore(fallbackPathProvider)
+                    // Use factory pattern for fallback mechanism
+                    val fallbackFactory = TestDataStoreFactory()
+                    fallbackFactory.create(fallbackPathProvider)
                     fallbackMechanismUsed = true
 
                 } catch (fallbackException: Exception) {
@@ -310,16 +315,18 @@ class FileSystemErrorTest : KoinTest {
             // Initial failure simulation (path temporarily unavailable)
             try {
                 val pathProvider = { "/invalid/temp/unavailable/datastore.pb" }
-                @Suppress("DEPRECATION")
-                createDataStore(pathProvider)
+                // New pattern: Use TestDataStoreFactory for controlled error testing
+                val factory = TestDataStoreFactory()
+                factory.create(pathProvider)
             } catch (e: Exception) {
                 // Expected failure due to unavailability
             }
 
             // THEN: Recovery attempt with valid path should succeed
             val recoveryPathProvider = { testPath }
-            @Suppress("DEPRECATION")
-            createDataStore(recoveryPathProvider)
+            // Recovery with new pattern
+            val recoveryFactory = TestDataStoreFactory()
+            recoveryFactory.create(recoveryPathProvider)
             recoverySuccessful = true
 
         } catch (e: Exception) {
@@ -342,8 +349,9 @@ class FileSystemErrorTest : KoinTest {
             val operations = (1..5).map { index ->
                 try {
                     val pathProvider = { "/tmp/stress_test_${index}_datastore.pb" }
-                    @Suppress("DEPRECATION")
-                    createDataStore(pathProvider)
+                    // Use factory pattern under stress conditions
+                    val stressFactory = TestDataStoreFactory()
+                    stressFactory.create(pathProvider)
                     true
                 } catch (e: Exception) {
                     // Individual failures are acceptable under stress
@@ -380,8 +388,9 @@ class FileSystemErrorTest : KoinTest {
 
             try {
                 val pathProvider = { path }
-                @Suppress("DEPRECATION")
-                createDataStore(pathProvider)
+                // New pattern: Use TestDataStoreFactory for controlled error testing
+                val factory = TestDataStoreFactory()
+                factory.create(pathProvider)
 
                 // If successful, system handled the scenario
                 meaningfulErrorProvided = true
