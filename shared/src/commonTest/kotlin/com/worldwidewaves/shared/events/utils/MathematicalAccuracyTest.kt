@@ -210,7 +210,7 @@ class MathematicalAccuracyTest {
 
         // Test case 1: City-scale wave (10km radius)
         val cityWaveDistance = 10000.0 // 10km in meters
-        val typicalWaveSpeed = 50.0 // m/s (from WWWGlobals.DEFAULT_SPEED_SIMULATION)
+        val typicalWaveSpeed = 50.0 // m/s (from WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION)
         val cityWaveDuration = cityWaveDistance / typicalWaveSpeed // seconds
 
         assertTrue(

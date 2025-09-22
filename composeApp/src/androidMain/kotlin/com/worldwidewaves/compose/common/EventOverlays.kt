@@ -19,11 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_DONE_IMAGE_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOONRUNNING_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
@@ -55,7 +50,7 @@ fun EventOverlaySoonOrRunning(
                         .padding(top = DIM_COMMON_SOONRUNNING_PADDING.dp, end = DIM_COMMON_SOONRUNNING_PADDING.dp)
                         .height(DIM_COMMON_SOONRUNNING_HEIGHT.dp)
                         .background(backgroundColor)
-                        .padding(horizontal = DIM_DEFAULT_INT_PADDING.dp),
+                        .padding(horizontal = Dimensions.DEFAULT_INT_PADDING.dp),
                 // Changed to horizontal padding
                 contentAlignment = Alignment.Center,
             ) {

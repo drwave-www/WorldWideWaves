@@ -42,10 +42,6 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_DRWAVE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INFO_TEXT_FONTSIZE
 import com.worldwidewaves.shared.infos_core
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
@@ -112,13 +108,13 @@ class AboutInfoScreen : TabScreen {
      * Displays “Dr Wave” signature block with custom sizing and spacing.
      */
     private fun DrWaveSignature() {
-        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
+        Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
         Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = stringResource(MokoRes.strings.drwave),
                 style = extraBoldTextStyle(DIM_INFO_DRWAVE_FONTSIZE),
             )
         }
-        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+        Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
     }
 }

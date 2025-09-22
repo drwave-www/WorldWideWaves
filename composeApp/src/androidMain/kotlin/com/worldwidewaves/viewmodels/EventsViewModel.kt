@@ -13,7 +13,6 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
@@ -56,6 +55,10 @@ class EventsViewModel(
     private val mapChecker: MapAvailabilityChecker,
     private val platform: WWWPlatform,
 ) : ViewModel() {
+
+    companion object {
+        private const val MILLIS_PER_SECOND = 1000L
+    }
     private val originalEventsMutex = Mutex()
     var originalEvents: List<IWWWEvent> = emptyList()
 
@@ -112,8 +115,8 @@ class EventsViewModel(
             } catch (e: SecurityException) {
                 Log.e(::EventsViewModel.name, "Security error while loading events", e)
                 _loadingError.value = true
-            } catch (e: RuntimeException) {
-                Log.e(::EventsViewModel.name, "Runtime error while loading events", e)
+            } catch (e: UnsupportedOperationException) {
+                Log.e(::EventsViewModel.name, "Unsupported operation while loading events", e)
                 _loadingError.value = true
             }
         }
@@ -168,7 +171,7 @@ class EventsViewModel(
                 if (hasBeenHit) {
                     // Restore simulation speed after a delay
                     launch {
-                        delay(WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * 1000)
+                        delay(WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds * MILLIS_PER_SECOND)
                         platform.getSimulation()?.setSpeed(backupSimulationSpeed)
                     }
                 }

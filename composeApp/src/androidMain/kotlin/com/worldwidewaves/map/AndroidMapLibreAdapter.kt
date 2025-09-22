@@ -24,8 +24,7 @@ package com.worldwidewaves.map
 import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.toColorInt
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_COLOR
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_BACKGROUND_OPACITY
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
@@ -378,8 +377,8 @@ class AndroidMapLibreAdapter(
                     // Fill layer
                     val layer =
                         FillLayer(layerId, sourceId).withProperties(
-                            PropertyFactory.fillColor(WAVE_BACKGROUND_COLOR.toColorInt()),
-                            PropertyFactory.fillOpacity(WAVE_BACKGROUND_OPACITY),
+                            PropertyFactory.fillColor(Wave.BACKGROUND_COLOR.toColorInt()),
+                            PropertyFactory.fillOpacity(Wave.BACKGROUND_OPACITY),
                         )
                     style.addLayer(layer)
 
@@ -391,8 +390,8 @@ class AndroidMapLibreAdapter(
                 Log.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {
                 Log.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
-            } catch (re: RuntimeException) {
-                Log.e("MapUpdate", "Runtime error updating wave polygons", re)
+            } catch (uoe: UnsupportedOperationException) {
+                Log.e("MapUpdate", "Unsupported map operation", uoe)
             }
         }
     }

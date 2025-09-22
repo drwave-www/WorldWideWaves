@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.testing.CIEnvironment
 
 /**
  * Comprehensive performance tests addressing TODO_PHASE2.md Item 10:
@@ -281,15 +282,10 @@ class PerformanceTest {
         // THEN: Computational complexity should be reasonable (not exponential)
         val times = timingResults.values.toList()
 
-        // Detect CI environment and adjust thresholds accordingly
-        val isCI = System.getenv("CI") == "true" ||
-                   System.getenv("GITHUB_ACTIONS") == "true" ||
-                   System.getenv("CONTINUOUS_INTEGRATION") == "true"
-
-        // CI environments are more variable and slower, so use more lenient thresholds
-        val maxRatio = if (isCI) 10.0 else 5.0
-        val maxExecutionTime = if (isCI) 500L else 100L
-        val maxReasonableTime = if (isCI) 50.0 else 10.0
+        // Use CI-aware performance configuration
+        val maxRatio = CIEnvironment.Performance.maxTimingRatio
+        val maxExecutionTime = CIEnvironment.Performance.maxExecutionTimeMs
+        val maxReasonableTime = CIEnvironment.Performance.maxReasonableTimeMs
 
         // Check that timing doesn't increase exponentially
         for (i in 1 until times.size) {

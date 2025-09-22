@@ -21,8 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_EVENTS_CONF
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_MAPS_STYLE
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent
@@ -175,8 +174,8 @@ class DefaultEventsConfigurationProvider(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String =
         coroutineScopeProvider.withIOContext {
-            Log.i(::geoEventsConfiguration.name, "Loading events configuration from $FS_EVENTS_CONF")
-            Res.readBytes(FS_EVENTS_CONF).decodeToString()
+            Log.i(::geoEventsConfiguration.name, "Loading events configuration from ${FileSystem.EVENTS_CONF}")
+            Res.readBytes(FileSystem.EVENTS_CONF).decodeToString()
         }
 }
 
@@ -245,7 +244,7 @@ class DefaultMapDataProvider : MapDataProvider {
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoMapStyleData(): String =
         withContext(Dispatchers.IO) {
-            Log.i(::geoMapStyleData.name, "Loading map style data from $FS_MAPS_STYLE")
-            Res.readBytes(FS_MAPS_STYLE).decodeToString()
+            Log.i(::geoMapStyleData.name, "Loading map style data from ${FileSystem.MAPS_STYLE}")
+            Res.readBytes(FileSystem.MAPS_STYLE).decodeToString()
         }
 }

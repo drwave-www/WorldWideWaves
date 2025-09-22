@@ -57,19 +57,6 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_BIG
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_SMALL
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_INTRO_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_LINK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_ANSWER_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_CONTENTS_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_NBRING_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_QUESTION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_RULE_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_SECTION_TITLE_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_FAQ_TITLE_FONTSIZE
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy
@@ -135,7 +122,7 @@ class AboutFaqScreen(
                 AboutDividerLine()
 
                 // FAQ title
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
                 Text(
                     modifier =
                         Modifier.onGloballyPositioned { coordinates ->
@@ -145,7 +132,7 @@ class AboutFaqScreen(
                     text = stringResource(MokoRes.strings.faq),
                     style = extraBoldTextStyle(DIM_FAQ_TITLE_FONTSIZE),
                 )
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_BIG.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
 
                 // FAQ Items
                 FAQDividerLine()
@@ -162,7 +149,7 @@ class AboutFaqScreen(
                 }
 
                 // WWW Social Networks
-                Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+                Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
                 AboutDividerLine()
                 AboutWWWSocialNetworks()
             }
@@ -201,7 +188,7 @@ class AboutFaqScreen(
                     ),
             )
         }
-        Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+        Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
         Text(
             text = stringResource(MokoRes.strings.warn_rules_security_text),
             fontSize = DIM_FAQ_INTRO_FONTSIZE.sp,
@@ -235,22 +222,22 @@ class AboutFaqScreen(
                         textAlign = TextAlign.Start,
                     ),
             )
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             items.forEachIndexed { index, item ->
-                Row(modifier = Modifier.padding(bottom = DIM_DEFAULT_INT_PADDING.dp / 2)) {
+                Row(modifier = Modifier.padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp / 2)) {
                     Text(
                         modifier = Modifier.width(DIM_FAQ_RULE_NBRING_WIDTH.dp),
                         text = (index + 1).toString() + ".",
                         style = commonBoldStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                     Text(
-                        modifier = Modifier.padding(start = DIM_DEFAULT_INT_PADDING.dp),
+                        modifier = Modifier.padding(start = Dimensions.DEFAULT_INT_PADDING.dp),
                         text = stringResource(item),
                         style = commonJustifiedTextStyle(DIM_FAQ_RULE_CONTENTS_FONTSIZE),
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
         }
     }
 
@@ -276,7 +263,7 @@ class AboutFaqScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(DIM_DEFAULT_INT_PADDING.dp)
+                    .padding(Dimensions.DEFAULT_INT_PADDING.dp)
                     .clickable {
                         onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
                     },
@@ -299,7 +286,7 @@ class AboutFaqScreen(
                     style = commonJustifiedTextStyle(DIM_FAQ_RULE_ANSWER_FONTSIZE),
                 )
                 if (showSimulateButton) {
-                    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_SMALL.dp))
+                    Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
                     OutlinedButton(
                         onClick = { platform.enableSimulationMode() },
                     ) {

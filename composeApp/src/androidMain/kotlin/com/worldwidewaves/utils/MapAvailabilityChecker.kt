@@ -170,9 +170,9 @@ class MapAvailabilityChecker(
             Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
             Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
             return false // If there's an error, assume it can't be uninstalled
-        } catch (re: RuntimeException) {
-            Log.e("MapAvailabilityChecker", "Runtime error accessing SplitInstallManager: ${re.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${re.message}")
+        } catch (uoe: UnsupportedOperationException) {
+            Log.e("MapAvailabilityChecker", "Unsupported operation on SplitInstallManager: ${uoe.message}")
+            Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
             return false // If there's an error, assume it can't be uninstalled
         }
     }
@@ -208,7 +208,8 @@ class MapAvailabilityChecker(
                         // Best-effort cache cleanup – do not fail uninstall on errors
                         try {
                             clearEventCache(eventId)
-                        } catch (_: Exception) {
+                        } catch (_: IllegalStateException) {
+                            // ignore cache cleanup errors
                         }
 
                         Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
@@ -230,9 +231,9 @@ class MapAvailabilityChecker(
                 Log.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
                 Log.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
                 if (cont.isActive) cont.resume(false)
-            } catch (re: RuntimeException) {
-                Log.e("MapAvailabilityChecker", "Runtime error initiating uninstall for $eventId: ${re.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${re.message}")
+            } catch (uoe: UnsupportedOperationException) {
+                Log.e("MapAvailabilityChecker", "Unsupported operation during uninstall for $eventId: ${uoe.message}")
+                Log.e(TAG, "uninstallMap exception id=$eventId err=${uoe.message}")
                 if (cont.isActive) cont.resume(false)
             }
         }

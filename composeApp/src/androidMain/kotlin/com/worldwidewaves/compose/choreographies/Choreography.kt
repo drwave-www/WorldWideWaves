@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_SHOW_HIT_SEQUENCE_SECONDS
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
@@ -107,14 +106,14 @@ fun WaveChoreographies(
             val currentTime = clock.now()
             val secondsSinceHit = (currentTime - hitDateTime).inWholeSeconds
 
-            if (secondsSinceHit in 0..WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
+            if (secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds) {
                 showHitSequence = true
 
                 // Calculate remaining time to show
                 val remainingTimeMs =
                     maxOf(
                         0,
-                        WAVE_SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
+                        WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeMilliseconds -
                             (currentTime - hitDateTime).inWholeMilliseconds,
                     )
 

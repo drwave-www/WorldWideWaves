@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.icerock.moko.multiplatform)
+    alias(libs.plugins.detekt)
 }
 
 kotlin {

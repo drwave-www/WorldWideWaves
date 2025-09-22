@@ -538,7 +538,7 @@ class WWWEventValidationTest : KoinTest {
 
     @Test
     fun `event in future should have NEXT status`() = runTest {
-        // GIVEN: Event starts in 2 days (beyond WAVE_SOON_DELAY)
+        // GIVEN: Event starts in 2 days (beyond WaveTiming.SOON_DELAY)
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
             date = "2022-02-01", // 31 days after baseTime (2022-01-01)
@@ -554,7 +554,7 @@ class WWWEventValidationTest : KoinTest {
 
     @Test
     fun `event within soon delay should have SOON status`() = runTest {
-        // GIVEN: Event starts in 15 days (within WAVE_SOON_DELAY of 30 days)
+        // GIVEN: Event starts in 15 days (within WaveTiming.SOON_DELAY of 30 days)
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
             date = "2022-01-16", // 15 days after baseTime
@@ -619,12 +619,12 @@ class WWWEventValidationTest : KoinTest {
     }
 
     @Test
-    fun `isNearTime should respect WAVE_OBSERVE_DELAY`() {
-        // GIVEN: Event exactly at WAVE_OBSERVE_DELAY distance
+    fun `isNearTime should respect WaveTiming.OBSERVE_DELAY`() {
+        // GIVEN: Event exactly at WaveTiming.OBSERVE_DELAY distance
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
             date = "2022-01-01",
-            startHour = "02:00" // 2 hours after baseTime (equals WAVE_OBSERVE_DELAY)
+            startHour = "02:00" // 2 hours after baseTime (equals WaveTiming.OBSERVE_DELAY)
         )
 
         // WHEN
@@ -635,12 +635,12 @@ class WWWEventValidationTest : KoinTest {
     }
 
     @Test
-    fun `isNearTime should return false for events beyond WAVE_OBSERVE_DELAY`() {
-        // GIVEN: Event beyond WAVE_OBSERVE_DELAY
+    fun `isNearTime should return false for events beyond WaveTiming.OBSERVE_DELAY`() {
+        // GIVEN: Event beyond WaveTiming.OBSERVE_DELAY
         mockClock.setTime(baseTime)
         val event = TestHelpers.createTestEvent(
             date = "2022-01-01",
-            startHour = "03:00", // 3 hours after baseTime (beyond WAVE_OBSERVE_DELAY)
+            startHour = "03:00", // 3 hours after baseTime (beyond WaveTiming.OBSERVE_DELAY)
             timeZone = "UTC"
         )
 
@@ -1024,7 +1024,7 @@ class WWWEventValidationTest : KoinTest {
     fun `status calculation with edge timing cases`() = runTest {
         // Test status calculations at exact boundary conditions
 
-        // GIVEN: Event exactly at WAVE_SOON_DELAY boundary (30 days)
+        // GIVEN: Event exactly at WaveTiming.SOON_DELAY boundary (30 days)
         mockClock.setTime(baseTime)
         val soonBoundaryEvent = TestHelpers.createTestEvent(
             date = "2022-01-31", // Exactly 30 days after baseTime
@@ -1037,7 +1037,7 @@ class WWWEventValidationTest : KoinTest {
         // THEN: Should be SOON at boundary
         assertEquals(Status.SOON, soonStatus)
 
-        // GIVEN: Event just beyond WAVE_SOON_DELAY
+        // GIVEN: Event just beyond WaveTiming.SOON_DELAY
         val nextBoundaryEvent = TestHelpers.createTestEvent(
             date = "2022-02-01", // 31 days after baseTime
             startHour = "00:00"

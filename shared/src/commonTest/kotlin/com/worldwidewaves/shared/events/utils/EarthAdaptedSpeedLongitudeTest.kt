@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WAVE_LINEAR_METERS_REFRESH
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
@@ -145,11 +144,11 @@ class EarthAdaptedSpeedLongitudeTest {
 
             val distanceAtEquator = calculateDistance(-10.0, 10.0, 0.0)
             val timeToFull: Duration = (distanceAtEquator / speed).seconds
-            val nbWindows1 = ceil(distanceAtEquator / WAVE_LINEAR_METERS_REFRESH)
+            val nbWindows1 = ceil(distanceAtEquator / Wave.LINEAR_METERS_REFRESH)
             val nbWindows2 =
                 ceil(
                     timeToFull.inWholeMilliseconds.toDouble() /
-                        (WAVE_LINEAR_METERS_REFRESH / speed).seconds.inWholeMilliseconds.toDouble(),
+                        (Wave.LINEAR_METERS_REFRESH / speed).seconds.inWholeMilliseconds.toDouble(),
                 )
 
             val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
@@ -249,7 +248,7 @@ class EarthAdaptedSpeedLongitudeTest {
         val width = longitude.calculateLonBandWidthAtLatitude(0.0)
 
         // Expected width at equator: (100 * bandDuration.inWholeMilliseconds / 1000) / (EARTH_RADIUS * 1) * (180 / PI)
-        val bandDuration = (WAVE_LINEAR_METERS_REFRESH / speed).seconds
+        val bandDuration = (Wave.LINEAR_METERS_REFRESH / speed).seconds
         val expected = (speed * bandDuration.inWholeMilliseconds / 1000) / EARTH_RADIUS * (180 / PI)
 
         assertEquals(expected, width, epsilonFine)

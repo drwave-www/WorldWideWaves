@@ -46,11 +46,6 @@ import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_EXT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_INT_TABBAR_ITEM_WIDTH
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
 import com.worldwidewaves.theme.commonTextStyle
@@ -88,7 +83,7 @@ class AboutScreen(
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier.padding(DIM_DEFAULT_EXT_PADDING.dp)) {
+        Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
             tabManager.TabView()
         }
     }
@@ -103,8 +98,8 @@ class AboutScreen(
         Box(
             modifier =
                 Modifier
-                    .height(DIM_INT_TABBAR_HEIGHT.dp)
-                    .width(DIM_INT_TABBAR_ITEM_WIDTH.dp),
+                    .height(TabBar.INT_HEIGHT.dp)
+                    .width(TabBar.INT_ITEM_WIDTH.dp),
             contentAlignment = Alignment.Center,
         ) {
             if (isSelected) { // Draw a line on top of the selected tab
@@ -112,8 +107,8 @@ class AboutScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(start = DIM_DEFAULT_INT_PADDING.dp, end = DIM_DEFAULT_INT_PADDING.dp)
-                            .offset(y = (-DIM_DEFAULT_EXT_PADDING).dp),
+                            .padding(start = Dimensions.DEFAULT_INT_PADDING.dp, end = Dimensions.DEFAULT_INT_PADDING.dp)
+                            .offset(y = (-Dimensions.DEFAULT_EXT_PADDING).dp),
                     color = Color.White,
                     thickness = 2.dp,
                 )
@@ -121,7 +116,7 @@ class AboutScreen(
             Text(
                 text = stringResource(tabInfo[tabIndex]),
                 style =
-                    commonTextStyle(DIM_INT_TABBAR_ITEM_FONTSIZE).copy(
+                    commonTextStyle(TabBar.INT_ITEM_FONTSIZE).copy(
                         color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
                         fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
                     ),

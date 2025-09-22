@@ -74,7 +74,7 @@ class TimePhysicsValidationTest {
         // WHEN: Testing wave speed constants against physical limits
         // THEN: Wave speeds should be realistic for human-generated waves
 
-        val defaultSimulationSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION.toDouble()
+        val defaultSimulationSpeed = WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION.toDouble()
 
         // Wave speed should be much less than speed of sound
         assertTrue(
@@ -231,7 +231,9 @@ class TimePhysicsValidationTest {
 
         assertEquals(2023, eveDateTime.year, "Eve year should be 2023")
         assertEquals(2024, newYearDateTime.year, "New year should be 2024")
+        @Suppress("DEPRECATION")
         assertEquals(12, eveDateTime.monthNumber, "Eve month should be December")
+        @Suppress("DEPRECATION")
         assertEquals(1, newYearDateTime.monthNumber, "New year month should be January")
     }
 
@@ -329,11 +331,11 @@ class TimePhysicsValidationTest {
         // WHEN: Testing wave timing durations for physical realism
         // THEN: Durations should be reasonable for human coordination
 
-        val waveSoonDelay = WWWGlobals.WAVE_SOON_DELAY
-        val waveObserveDelay = WWWGlobals.WAVE_OBSERVE_DELAY
-        val waveWarmingDuration = WWWGlobals.WAVE_WARMING_DURATION
-        val waveWarnBeforeHit = WWWGlobals.WAVE_WARN_BEFORE_HIT
-        val waveShowHitSequence = WWWGlobals.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+        val waveSoonDelay = WWWGlobals.WaveTiming.SOON_DELAY
+        val waveObserveDelay = WWWGlobals.WaveTiming.OBSERVE_DELAY
+        val waveWarmingDuration = WWWGlobals.WaveTiming.WARMING_DURATION
+        val waveWarnBeforeHit = WWWGlobals.WaveTiming.WARN_BEFORE_HIT
+        val waveShowHitSequence = WWWGlobals.WaveTiming.SHOW_HIT_SEQUENCE_SECONDS
 
         // SOON delay should be reasonable for advance planning
         assertTrue(

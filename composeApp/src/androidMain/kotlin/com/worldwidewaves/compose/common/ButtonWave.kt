@@ -25,9 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_HEIGHT
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_WAVEBUTTON_WIDTH
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.theme.onQuaternaryLight
@@ -76,8 +73,8 @@ fun ButtonWave(
         color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,
         modifier =
             modifier
-                .width(DIM_EVENT_WAVEBUTTON_WIDTH.dp)
-                .height(DIM_EVENT_WAVEBUTTON_HEIGHT.dp)
+                .width(Event.WAVEBUTTON_WIDTH.dp)
+                .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
                 .clickable(enabled = isEnabled, onClick = {
                     context.startActivity(
@@ -94,7 +91,7 @@ fun ButtonWave(
                     .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
             style =
-                quinaryColoredBoldTextStyle(DIM_EVENT_WAVEBUTTON_FONTSIZE).copy(
+                quinaryColoredBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     textAlign = TextAlign.Center,
                 ),
         )

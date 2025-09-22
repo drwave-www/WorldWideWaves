@@ -121,7 +121,8 @@ object TestHelpers {
         val now = TestTimes.BASE_TIME
         val startTime = now - startedAgo
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        @Suppress("DEPRECATION")
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
@@ -144,7 +145,8 @@ object TestHelpers {
         val now = TestTimes.BASE_TIME
         val startTime = now + startsIn
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        @Suppress("DEPRECATION")
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
@@ -168,7 +170,8 @@ object TestHelpers {
         val endTime = now - endedAgo
         val startTime = endTime - totalDuration
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.dayOfMonth.toString().padStart(2, '0')}"
+        @Suppress("DEPRECATION")
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(

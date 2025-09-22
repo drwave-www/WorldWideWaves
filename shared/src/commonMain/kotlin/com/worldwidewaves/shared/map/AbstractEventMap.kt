@@ -21,8 +21,7 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_USER_ZOOM
-import com.worldwidewaves.shared.WWWGlobals.Companion.CONST_MAPLIBRE_TARGET_WAVE_ZOOM
+import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
@@ -224,7 +223,7 @@ abstract class AbstractEventMap<T>(
 
         val wavePosition = Position(currentLocation.latitude, closestWaveLongitude)
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(wavePosition, CONST_MAPLIBRE_TARGET_WAVE_ZOOM)
+            mapLibreAdapter.animateCamera(wavePosition, MapDisplay.TARGET_WAVE_ZOOM)
         }
     }
 
@@ -234,7 +233,7 @@ abstract class AbstractEventMap<T>(
     suspend fun targetUser() {
         val userPosition = locationProvider?.currentLocation?.value ?: return
         runCameraAnimation { _ ->
-            mapLibreAdapter.animateCamera(userPosition, CONST_MAPLIBRE_TARGET_USER_ZOOM)
+            mapLibreAdapter.animateCamera(userPosition, MapDisplay.TARGET_USER_ZOOM)
         }
     }
 

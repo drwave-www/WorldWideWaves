@@ -29,6 +29,18 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Duration.Companion.milliseconds
+import com.worldwidewaves.shared.WWWGlobals.Companion.Urls
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
+import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
+import com.worldwidewaves.shared.WWWGlobals.Companion.BackNav
+import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
+import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
 
 /**
  * Tests for WWWGlobals constants and configuration values.
@@ -40,7 +52,7 @@ class WWWGlobalsTest {
     @Test
     fun `should have valid URL constants`() {
         // GIVEN: URL constants from WWWGlobals
-        val instagramUrl = WWWGlobals.URL_BASE_INSTAGRAM
+        val instagramUrl = Urls.INSTAGRAM_BASE
 
         // WHEN/THEN: URLs should be valid and follow expected patterns
         assertTrue(instagramUrl.startsWith("https://"), "Instagram URL should use HTTPS")
@@ -51,12 +63,12 @@ class WWWGlobalsTest {
     @Test
     fun `should have valid file system path constants`() {
         // GIVEN: File system constants
-        val datastoreFolder = WWWGlobals.FS_DATASTORE_FOLDER
-        val eventsConfig = WWWGlobals.FS_EVENTS_CONF
-        val choreographiesConfig = WWWGlobals.FS_CHOREOGRAPHIES_CONF
-        val midiFile = WWWGlobals.FS_CHOREOGRAPHIES_SOUND_MIDIFILE
-        val mapStyle = WWWGlobals.FS_MAPS_STYLE
-        val styleListing = WWWGlobals.FS_STYLE_LISTING
+        val datastoreFolder = FileSystem.DATASTORE_FOLDER
+        val eventsConfig = FileSystem.EVENTS_CONF
+        val choreographiesConfig = FileSystem.CHOREOGRAPHIES_CONF
+        val midiFile = FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE
+        val mapStyle = FileSystem.MAPS_STYLE
+        val styleListing = FileSystem.STYLE_LISTING
 
         // WHEN/THEN: File paths should be valid and consistent
         assertEquals("datastore", datastoreFolder)
@@ -71,11 +83,11 @@ class WWWGlobalsTest {
     @Test
     fun `should have realistic wave timing constants`() {
         // GIVEN: Wave timing constants
-        val soonDelay = WWWGlobals.WAVE_SOON_DELAY
-        val observeDelay = WWWGlobals.WAVE_OBSERVE_DELAY
-        val warmingDuration = WWWGlobals.WAVE_WARMING_DURATION
-        val warnBeforeHit = WWWGlobals.WAVE_WARN_BEFORE_HIT
-        val hitSequenceDuration = WWWGlobals.WAVE_SHOW_HIT_SEQUENCE_SECONDS
+        val soonDelay = WaveTiming.SOON_DELAY
+        val observeDelay = WaveTiming.OBSERVE_DELAY
+        val warmingDuration = WaveTiming.WARMING_DURATION
+        val warnBeforeHit = WaveTiming.WARN_BEFORE_HIT
+        val hitSequenceDuration = WaveTiming.SHOW_HIT_SEQUENCE_SECONDS
 
         // WHEN/THEN: Timing values should be within reasonable ranges for human interaction
         assertEquals(30.days, soonDelay, "SOON delay should be 30 days for advance planning")
@@ -94,10 +106,10 @@ class WWWGlobalsTest {
     @Test
     fun `should have valid wave physical constants`() {
         // GIVEN: Wave physical constants
-        val refreshDistance = WWWGlobals.WAVE_LINEAR_METERS_REFRESH
-        val backgroundColor = WWWGlobals.WAVE_BACKGROUND_COLOR
-        val backgroundOpacity = WWWGlobals.WAVE_BACKGROUND_OPACITY
-        val defaultSimulationSpeed = WWWGlobals.DEFAULT_SPEED_SIMULATION
+        val refreshDistance = Wave.LINEAR_METERS_REFRESH
+        val backgroundColor = Wave.BACKGROUND_COLOR
+        val backgroundOpacity = Wave.BACKGROUND_OPACITY
+        val defaultSimulationSpeed = Wave.DEFAULT_SPEED_SIMULATION
 
         // WHEN/THEN: Physical constants should be within realistic bounds
         assertEquals(10.0, refreshDistance, "Refresh distance should be 10 meters for good granularity")
@@ -120,9 +132,9 @@ class WWWGlobalsTest {
     @Test
     fun `should have reasonable UI timing constants`() {
         // GIVEN: UI timing constants
-        val splashMinDuration = WWWGlobals.CONST_SPLASH_MIN_DURATION
-        val gpsUpdateTimer = WWWGlobals.CONST_TIMER_GPS_UPDATE
-        val gpsPermissionReaskDelay = WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY
+        val splashMinDuration = Timing.SPLASH_MIN_DURATION
+        val gpsUpdateTimer = Timing.GPS_UPDATE_INTERVAL
+        val gpsPermissionReaskDelay = Timing.GPS_PERMISSION_REASK_DELAY
 
         // WHEN/THEN: UI timings should provide good user experience
         assertEquals(2000.milliseconds, splashMinDuration, "Splash should show for minimum 2 seconds")
@@ -141,8 +153,8 @@ class WWWGlobalsTest {
     @Test
     fun `should have appropriate MapLibre zoom levels`() {
         // GIVEN: MapLibre zoom constants
-        val userZoom = WWWGlobals.CONST_MAPLIBRE_TARGET_USER_ZOOM
-        val waveZoom = WWWGlobals.CONST_MAPLIBRE_TARGET_WAVE_ZOOM
+        val userZoom = MapDisplay.TARGET_USER_ZOOM
+        val waveZoom = MapDisplay.TARGET_WAVE_ZOOM
 
         // WHEN/THEN: Zoom levels should be appropriate for use cases
         assertEquals(16.0, userZoom, "User zoom should be 16 for detailed street view")
@@ -158,11 +170,11 @@ class WWWGlobalsTest {
     @Test
     fun `should have consistent dimension constants`() {
         // GIVEN: Dimension constants
-        val defaultExtPadding = WWWGlobals.DIM_DEFAULT_EXT_PADDING
-        val defaultIntPadding = WWWGlobals.DIM_DEFAULT_INT_PADDING
-        val smallSpacer = WWWGlobals.DIM_DEFAULT_SPACER_SMALL
-        val mediumSpacer = WWWGlobals.DIM_DEFAULT_SPACER_MEDIUM
-        val bigSpacer = WWWGlobals.DIM_DEFAULT_SPACER_BIG
+        val defaultExtPadding = Dimensions.DEFAULT_EXT_PADDING
+        val defaultIntPadding = Dimensions.DEFAULT_INT_PADDING
+        val smallSpacer = Dimensions.SPACER_SMALL
+        val mediumSpacer = Dimensions.SPACER_MEDIUM
+        val bigSpacer = Dimensions.SPACER_BIG
 
         // WHEN/THEN: Dimensions should follow logical hierarchy
         assertEquals(20, defaultExtPadding)
@@ -180,11 +192,11 @@ class WWWGlobalsTest {
     @Test
     fun `should have valid font size hierarchy`() {
         // GIVEN: Font size constants
-        val defaultFontSize = WWWGlobals.DIM_DEFAULT_FONTSIZE
-        val tabbarFontSize = WWWGlobals.DIM_INT_TABBAR_ITEM_FONTSIZE
-        val backFontSize = WWWGlobals.DIM_BACK_FONTSIZE
-        val eventDescFontSize = WWWGlobals.DIM_EVENT_DESC_FONTSIZE
-        val waveButtonFontSize = WWWGlobals.DIM_EVENT_WAVEBUTTON_FONTSIZE
+        val defaultFontSize = Dimensions.FONTSIZE_DEFAULT
+        val tabbarFontSize = TabBar.INT_ITEM_FONTSIZE
+        val backFontSize = BackNav.FONTSIZE
+        val eventDescFontSize = Event.DESC_FONTSIZE
+        val waveButtonFontSize = Event.WAVEBUTTON_FONTSIZE
 
         // WHEN/THEN: Font sizes should be readable and hierarchical
         assertEquals(16, defaultFontSize, "Default font size should be 16 for readability")
@@ -199,11 +211,11 @@ class WWWGlobalsTest {
     @Test
     fun `should have reasonable component dimensions`() {
         // GIVEN: Component dimension constants
-        val tabbarHeight = WWWGlobals.DIM_INT_TABBAR_HEIGHT
-        val tabbarItemWidth = WWWGlobals.DIM_INT_TABBAR_ITEM_WIDTH
-        val waveButtonWidth = WWWGlobals.DIM_EVENT_WAVEBUTTON_WIDTH
-        val waveButtonHeight = WWWGlobals.DIM_EVENT_WAVEBUTTON_HEIGHT
-        val mapRatio = WWWGlobals.DIM_EVENT_MAP_RATIO
+        val tabbarHeight = TabBar.INT_HEIGHT
+        val tabbarItemWidth = TabBar.INT_ITEM_WIDTH
+        val waveButtonWidth = Event.WAVEBUTTON_WIDTH
+        val waveButtonHeight = Event.WAVEBUTTON_HEIGHT
+        val mapRatio = Event.MAP_RATIO
 
         // WHEN/THEN: Component dimensions should be appropriate for mobile UX
         assertEquals(60, tabbarHeight, "Tab bar should be 60px high for touch targets")
@@ -221,7 +233,7 @@ class WWWGlobalsTest {
     @Test
     fun `should have valid empty counter constant`() {
         // GIVEN: Empty counter constant
-        val emptyCounter = WWWGlobals.EMPTY_COUNTER
+        val emptyCounter = DisplayText.EMPTY_COUNTER
 
         // WHEN/THEN: Empty counter should follow expected format
         assertEquals("--:--", emptyCounter, "Empty counter should use dash format")
@@ -232,10 +244,10 @@ class WWWGlobalsTest {
     @Test
     fun `should have consistent border and styling dimensions`() {
         // GIVEN: Border and styling dimensions
-        val dividerWidth = WWWGlobals.DIM_DIVIDER_WIDTH
-        val dividerThickness = WWWGlobals.DIM_DIVIDER_THICKNESS
-        val eventNumbersBorderWidth = WWWGlobals.DIM_EVENT_NUMBERS_BORDERWIDTH
-        val eventNumbersBorderRound = WWWGlobals.DIM_EVENT_NUMBERS_BORDERROUND
+        val dividerWidth = Dimensions.DIVIDER_WIDTH
+        val dividerThickness = Dimensions.DIVIDER_THICKNESS
+        val eventNumbersBorderWidth = Event.NUMBERS_BORDERWIDTH
+        val eventNumbersBorderRound = Event.NUMBERS_BORDERROUND
 
         // WHEN/THEN: Styling dimensions should be reasonable
         assertEquals(200, dividerWidth, "Divider should be 200px wide")
@@ -250,10 +262,10 @@ class WWWGlobalsTest {
     @Test
     fun `should maintain consistent image size standards`() {
         // GIVEN: Image size constants
-        val targetWaveImageSize = WWWGlobals.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
-        val targetMeImageSize = WWWGlobals.DIM_EVENT_TARGET_ME_IMAGE_SIZE
-        val favsImageSize = WWWGlobals.DIM_EVENTS_FAVS_IMAGE_SIZE
-        val mapdlImageSize = WWWGlobals.DIM_EVENTS_MAPDL_IMAGE_SIZE
+        val targetWaveImageSize = Event.TARGET_WAVE_IMAGE_SIZE
+        val targetMeImageSize = Event.TARGET_ME_IMAGE_SIZE
+        val favsImageSize = EventsList.FAVS_IMAGE_SIZE
+        val mapdlImageSize = EventsList.MAPDL_IMAGE_SIZE
 
         // WHEN/THEN: Image sizes should be consistent for similar use cases
         assertEquals(48, targetWaveImageSize, "Target wave image should be 48px")

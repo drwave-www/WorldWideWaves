@@ -17,11 +17,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_ACCOUNT_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_HASHTAG_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_COMMON_SOCIALNETWORKS_INSTAGRAM_LOGO_WIDTH
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_SPACER_MEDIUM
-import com.worldwidewaves.shared.WWWGlobals.Companion.URL_BASE_INSTAGRAM
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.theme.commonBoldStyle
@@ -52,14 +47,14 @@ fun WWWSocialNetworks(
                 modifier =
                     Modifier.clickable(onClick = {
                         try {
-                            val uri = "$URL_BASE_INSTAGRAM${instagramAccount.removePrefix("@")}"
+                            val uri = "$Urls.INSTAGRAM_BASE${instagramAccount.removePrefix("@")}"
                             uriHandler.openUri(uri)
                         } catch (e: SecurityException) {
                             Log.e("AboutWWWSocialNetworks", "Security error opening Instagram URI", e)
                         } catch (e: IllegalArgumentException) {
                             Log.e("AboutWWWSocialNetworks", "Invalid Instagram URI format", e)
-                        } catch (e: RuntimeException) {
-                            Log.e("AboutWWWSocialNetworks", "Runtime error opening Instagram URI", e)
+                        } catch (e: UnsupportedOperationException) {
+                            Log.e("AboutWWWSocialNetworks", "Unsupported URI operation", e)
                         }
                     }),
                 text = instagramAccount,
@@ -74,5 +69,5 @@ fun WWWSocialNetworks(
             )
         }
     }
-    Spacer(modifier = Modifier.size(DIM_DEFAULT_SPACER_MEDIUM.dp))
+    Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
 }

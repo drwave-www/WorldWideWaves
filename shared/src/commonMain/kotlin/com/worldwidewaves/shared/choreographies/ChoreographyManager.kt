@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.choreographies
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FS_CHOREOGRAPHIES_CONF
+import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -44,7 +44,7 @@ import kotlin.time.Instant
  * Manages visual choreography sequences for different phases of wave events.
  *
  * Core responsibilities:
- * • Loads JSON choreography definitions from [FS_CHOREOGRAPHIES_CONF]
+ * • Loads JSON choreography definitions from [FileSystem.CHOREOGRAPHIES_CONF]
  * • Resolves sprite sheets into platform-specific image resources via [ImageResolver]
  * • Builds warming (progressive), waiting, and hit sequences with correct timing
  * • Provides [DisplayableSequence] objects with frame timing and remaining duration
@@ -166,7 +166,7 @@ open class ChoreographyManager<T>(
             isLoading = true
             try {
                 Log.d("ChoreographyManager", "Lazy loading choreography resources")
-                prepareChoreography(FS_CHOREOGRAPHIES_CONF)
+                prepareChoreography(FileSystem.CHOREOGRAPHIES_CONF)
             } finally {
                 isLoading = false
             }

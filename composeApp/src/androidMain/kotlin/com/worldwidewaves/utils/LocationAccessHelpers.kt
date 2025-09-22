@@ -118,7 +118,7 @@ fun CheckGPSEnable() {
     val withinCooldown =
         lastDeclined != null &&
             (System.currentTimeMillis() - lastDeclined) <
-            WWWGlobals.CONST_GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
+            WWWGlobals.Timing.GPS_PERMISSION_REASK_DELAY.inWholeMilliseconds
 
     val activity = context as? Activity
 

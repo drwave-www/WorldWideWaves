@@ -42,9 +42,6 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.common.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_DEFAULT_INT_PADDING
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_ME_IMAGE_SIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_EVENT_TARGET_WAVE_IMAGE_SIZE
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -131,14 +128,14 @@ fun MapActions(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(end = DIM_DEFAULT_INT_PADDING.dp, bottom = DIM_DEFAULT_INT_PADDING.dp),
+                .padding(end = Dimensions.DEFAULT_INT_PADDING.dp, bottom = Dimensions.DEFAULT_INT_PADDING.dp),
         contentAlignment = Alignment.BottomEnd,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(DIM_DEFAULT_INT_PADDING.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
             Image(
                 modifier =
                     Modifier
-                        .size(DIM_EVENT_TARGET_WAVE_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
                         .clickable {
                             if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
                                 eventMap.markUserInteracted()
@@ -156,7 +153,7 @@ fun MapActions(
             Image(
                 modifier =
                     Modifier
-                        .size(DIM_EVENT_TARGET_ME_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
                             if (isInArea) {
                                 eventMap.markUserInteracted()

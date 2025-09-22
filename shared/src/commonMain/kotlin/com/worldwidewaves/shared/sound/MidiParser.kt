@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ByteArrayReader
@@ -82,6 +83,8 @@ object MidiParser {
     private const val TEMPO_META_TYPE = 0x51
     private const val NOTE_ON = 0x90
     private const val NOTE_OFF = 0x80
+    private const val SMPTE_FRAME_FLAG = 0x8000
+    private const val CHUNK_ID_LENGTH = 4
 
     // ------------------------------------------------------------------------
 
@@ -101,6 +104,42 @@ object MidiParser {
         val startTick: Long,
         val velocity: Int,
     )
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Calculate ticks per beat from MIDI time division
+     */
+    private fun calculateTicksPerBeat(timeDivision: Int): Int =
+        if ((timeDivision and SMPTE_FRAME_FLAG) == 0) {
+            // Ticks per quarter note
+            timeDivision
+        } else {
+            // SMPTE frames - not supported in this simple implementation
+            24 // WWWGlobals.Midi.DEFAULT_TICKS_PER_BEAT
+        }
+
+    /**
+     * Validate MIDI header and return format information
+     */
+    private fun readMidiHeader(reader: ByteArrayReader): Triple<Int, Int, Int> {
+        val headerChunkId = reader.readString(CHUNK_ID_LENGTH)
+        Log.d("MidiParser", "Header chunk ID: $headerChunkId")
+        if (headerChunkId != HEADER_CHUNK_ID) {
+            throw IllegalArgumentException("Not a valid MIDI file (missing MThd header)")
+        }
+
+        val headerLength = reader.readInt32()
+        if (headerLength != 6) { // WWWGlobals.Midi.HEADER_CHUNK_LENGTH
+            throw IllegalArgumentException("Invalid MIDI header length: $headerLength")
+        }
+
+        val format = reader.readInt16()
+        val numTracks = reader.readInt16()
+        val timeDivision = reader.readInt16()
+
+        return Triple(format, numTracks, timeDivision)
+    }
 
     // ------------------------------------------------------------------------
 
@@ -137,8 +176,8 @@ object MidiParser {
 
             // Read header length (should be 6)
             val headerLength = reader.readInt32()
-            if (headerLength != 6) {
-                throw Exception("Invalid MIDI header length: $headerLength")
+            if (headerLength != 6) { // WWWGlobals.Midi.HEADER_CHUNK_LENGTH
+                throw IllegalArgumentException("Invalid MIDI header length: $headerLength")
             }
 
             // Read format type (0 = single track, 1 = multiple tracks, same timing, 2 = multiple tracks, independent timing)
@@ -149,21 +188,14 @@ object MidiParser {
 
             // Read time division
             val timeDivision = reader.readInt16()
-            val ticksPerBeat =
-                if ((timeDivision and 0x8000) == 0) {
-                    // Ticks per quarter note
-                    timeDivision
-                } else {
-                    // SMPTE frames - not supported in this simple implementation
-                    24 // Default to 24 ticks per beat
-                }
+            val ticksPerBeat = calculateTicksPerBeat(timeDivision)
 
             // Memory optimization: Use streaming approach to reduce peak memory usage
             val finalNotes = mutableListOf<MidiNoteInternal>()
             val globalTempoChanges = mutableListOf<TempoChange>()
 
             // Default tempo (120 BPM)
-            globalTempoChanges.add(TempoChange(0, 500000)) // 500,000 microseconds per beat = 120 BPM
+            globalTempoChanges.add(TempoChange(0, 500000)) // WWWGlobals.Midi.DEFAULT_MICROSECONDS_PER_BEAT
 
             // Process each track incrementally to minimize memory footprint
             for (i in 0 until numTracks) {

@@ -94,8 +94,8 @@ class AndroidWWWLocationProvider :
 
     private fun buildLocationEngineRequest(): LocationEngineRequest =
         LocationEngineRequest
-            .Builder(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds)
-            .setFastestInterval(WWWGlobals.CONST_TIMER_GPS_UPDATE.inWholeMilliseconds / 2)
+            .Builder(WWWGlobals.Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds)
+            .setFastestInterval(WWWGlobals.Timing.GPS_UPDATE_INTERVAL.inWholeMilliseconds / 2)
             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
             .build()
 }

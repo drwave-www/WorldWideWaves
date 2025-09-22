@@ -56,9 +56,6 @@ import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_EVENT_LOCATION_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_FONTSIZE
-import com.worldwidewaves.shared.WWWGlobals.Companion.DIM_BACK_PADDING
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
@@ -171,7 +168,7 @@ abstract class AbstractEventBackActivity(
                         )
                         Text(
                             text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(DIM_BACK_FONTSIZE),
+                            style = primaryColoredTextStyle(BackNav.FONTSIZE),
                         )
                     }
                     if (selectedEvent != null) {
