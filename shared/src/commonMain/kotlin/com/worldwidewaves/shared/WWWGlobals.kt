@@ -68,14 +68,14 @@ class WWWGlobals {
          * Wave Physics & Simulation Constants
          */
         object Wave {
-            /** Default wave simulation speed in meters per second */
-            const val DEFAULT_SPEED_SIMULATION = 50 // m/s
+            /** Default wave simulation speed in meters per second - fast walking pace for realistic human coordination */
+            const val DEFAULT_SPEED_SIMULATION = 6 // m/s
 
             /** Minimum allowed simulation speed */
             const val MIN_SIMULATION_SPEED = 1
 
-            /** Maximum allowed simulation speed */
-            const val MAX_SIMULATION_SPEED = 500
+            /** Maximum allowed simulation speed - fast running pace for realistic human coordination */
+            const val MAX_SIMULATION_SPEED = 12
 
             /** Distance threshold for linear wave meter refresh */
             const val LINEAR_METERS_REFRESH = 10.0 // meters

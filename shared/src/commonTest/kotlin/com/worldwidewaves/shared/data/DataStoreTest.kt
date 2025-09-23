@@ -47,28 +47,27 @@ class DataStoreTest {
     }
 
     @Test
-    fun `test createDataStore logs initialization message`() {
-        // GIVEN: Mock path provider
+    fun `test createDataStore with valid path calls path provider`() {
+        // GIVEN: Mock path provider with valid path
         val pathProvider = mockk<() -> String>()
         every { pathProvider() } returns "/test/path"
 
-        // WHEN & THEN: Creating DataStore should call path provider
-        // Note: In test environment, DataStore creation may fail due to platform limitations
-        // but the path provider should still be called and failures should be properly logged
+        // WHEN: Creating DataStore (may succeed or fail depending on platform)
+        // THEN: Path provider should always be called
+        var pathProviderCalled = false
         try {
             @Suppress("DEPRECATION")
             createDataStore(pathProvider)
-            // If successful, verify path provider was called
-            verify { pathProvider() }
+            pathProviderCalled = true
         } catch (e: DataStoreException) {
-            // Expected error behavior: DataStore creation failed but was properly logged
-            verify { pathProvider() }
+            // DataStore creation failed in test environment - this is acceptable
+            pathProviderCalled = true
             assertTrue(e.message?.contains("DataStore creation failed") == true,
                 "DataStoreException should contain proper error message")
-        } catch (e: Exception) {
-            // Unexpected error: should be wrapped in DataStoreException
-            fail("Unexpected exception type: ${e::class.simpleName}. Should be wrapped in DataStoreException")
         }
+
+        assertTrue(pathProviderCalled, "Path provider should be called regardless of outcome")
+        verify { pathProvider() }
     }
 
     @Test
@@ -94,24 +93,23 @@ class DataStoreTest {
     }
 
     @Test
-    fun `test path provider function is called`() {
+    fun `test path provider function is always called`() {
         // GIVEN: Mock path provider
         val pathProviderMock = mockk<() -> String>()
         every { pathProviderMock() } returns "/test/path"
 
-        // WHEN & THEN: Creating DataStore should call path provider regardless of success/failure
+        // WHEN: Creating DataStore
+        // THEN: Path provider should be called regardless of success/failure
         try {
             @Suppress("DEPRECATION")
             createDataStore(pathProviderMock)
-            verify { pathProviderMock() }
         } catch (e: DataStoreException) {
-            // Expected: DataStore creation failed but path provider was called
-            verify { pathProviderMock() }
+            // DataStore creation failed - this is acceptable in test environment
             assertNotNull(e.cause, "DataStoreException should have a cause")
-        } catch (e: Exception) {
-            // Unexpected: should be wrapped in DataStoreException
-            fail("Exception should be wrapped in DataStoreException: ${e::class.simpleName}")
         }
+
+        // Path provider should always be called
+        verify { pathProviderMock() }
     }
 
     @Test
@@ -120,19 +118,21 @@ class DataStoreTest {
         val pathProvider = mockk<() -> String>()
         every { pathProvider() } returns ""
 
-        // WHEN & THEN: Should wrap exceptions in DataStoreException
+        // WHEN: Creating DataStore with invalid path
+        // THEN: Should either succeed (if implementation handles empty path) or fail with DataStoreException
         try {
             @Suppress("DEPRECATION")
             createDataStore(pathProvider)
-            // If creation somehow succeeds with empty path, that's also acceptable
+            // If creation succeeds with empty path, that's acceptable
         } catch (e: DataStoreException) {
             // Expected: DataStore creation failed and was properly wrapped
             assertTrue(e.message?.contains("DataStore creation failed") == true,
                 "Error message should indicate DataStore creation failure")
             assertNotNull(e.cause, "DataStoreException should have underlying cause")
-        } catch (e: Exception) {
-            fail("Raw exceptions should be wrapped in DataStoreException: ${e::class.simpleName}")
         }
+
+        // Path provider should still be called
+        verify { pathProvider() }
     }
 
     @Test

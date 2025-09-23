@@ -21,6 +21,8 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
 import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import kotlin.math.abs
 import kotlin.math.cos
@@ -210,7 +212,7 @@ class MathematicalAccuracyTest {
 
         // Test case 1: City-scale wave (10km radius)
         val cityWaveDistance = 10000.0 // 10km in meters
-        val typicalWaveSpeed = 50.0 // m/s (from WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION)
+        val typicalWaveSpeed = Wave.DEFAULT_SPEED_SIMULATION.toDouble() // m/s
         val cityWaveDuration = cityWaveDistance / typicalWaveSpeed // seconds
 
         assertTrue(

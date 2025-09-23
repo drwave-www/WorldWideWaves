@@ -26,6 +26,7 @@ import android.content.Context
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.WWWSimulation
@@ -91,7 +92,7 @@ class MainApplication :
                     now,
                     // Position(lat = 48.83625, lng = 2.46905),
                     Position(lat = 48.862725, lng = 2.287592),
-                    50, // WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
+                    WWWGlobals.Companion.Wave.DEFAULT_SPEED_SIMULATION,
                 ),
             ) // In Paris, 1h is 2mn
         }
