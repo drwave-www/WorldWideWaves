@@ -23,6 +23,7 @@ package com.worldwidewaves.compose.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,6 +71,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
@@ -206,7 +208,7 @@ class MainActivityTest {
         val locationPermissionState = MutableStateFlow("not_requested")
 
         composeTestRule.setContent {
-            TestLocationPermissionFlow(locationPermissionState.value) { newState ->
+            TestLocationPermissionFlow(locationPermissionState) { newState ->
                 locationPermissionState.value = newState
             }
         }
@@ -360,7 +362,7 @@ class MainActivityTest {
         val retryCount = MutableStateFlow(0)
 
         composeTestRule.setContent {
-            TestErrorRecovery(errorState.value, retryCount.value) {
+            TestErrorRecovery(errorState, retryCount) {
                 retryCount.value = retryCount.value + 1
             }
         }
@@ -505,9 +507,11 @@ class MainActivityTest {
 
     @Composable
     private fun TestLocationPermissionFlow(
-        permissionState: String,
+        permissionStateFlow: StateFlow<String>,
         onPermissionStateChange: (String) -> Unit
     ) {
+        val permissionState by permissionStateFlow.collectAsState()
+
         Column {
             Text(
                 text = "Location Permission",
@@ -532,6 +536,9 @@ class MainActivityTest {
                         .padding(8.dp)
                         .background(Color.Gray)
                         .padding(16.dp)
+                        .clickable {
+                            onPermissionStateChange("requesting")
+                        }
                 )
             }
         }
@@ -582,7 +589,10 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestErrorRecovery(errorState: String, retryCount: Int, onRetry: () -> Unit) {
+    private fun TestErrorRecovery(errorStateFlow: StateFlow<String>, retryCountFlow: StateFlow<Int>, onRetry: () -> Unit) {
+        val errorState by errorStateFlow.collectAsState()
+        val retryCount by retryCountFlow.collectAsState()
+
         Column {
             Text(
                 text = "Error Recovery",
@@ -605,7 +615,10 @@ class MainActivityTest {
                         .testTag("retry-button")
                         .padding(8.dp)
                         .background(Color.Red)
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .clickable {
+                            onRetry()
+                        },
                     color = Color.White
                 )
             }
