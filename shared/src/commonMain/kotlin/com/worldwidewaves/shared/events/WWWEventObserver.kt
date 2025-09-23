@@ -286,7 +286,7 @@ class WWWEventObserver(
                     updateStates(currentProgression, currentStatus)
 
                     // Start unified observation that combines all trigger sources
-                    unifiedObservationJob = createUnifiedObservationFlow()
+                    val mainObservationJob = createUnifiedObservationFlow()
                         .flowOn(Dispatchers.Default)
                         .catch { e ->
                             Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
@@ -296,6 +296,26 @@ class WWWEventObserver(
                             updateStates(observation.progression, observation.status)
                         }
                         .launchIn(coroutineScopeProvider.scopeDefault())
+
+                    // Add a separate position observer to ensure area detection is updated when position changes
+                    // This handles the case where the unified flow has completed but position still changes
+                    val positionObserverJob = positionManager.position
+                        .onEach { _ ->
+                            Log.v("WWWEventObserver", "Position changed, updating area detection for event ${event.id}")
+                            updateAreaDetection()
+                        }
+                        .launchIn(coroutineScopeProvider.scopeDefault())
+
+                    // Create a parent job that manages both child jobs
+                    unifiedObservationJob = coroutineScopeProvider.launchDefault {
+                        try {
+                            // Wait for the main observation job to complete
+                            mainObservationJob.join()
+                        } finally {
+                            // Cancel the position observer job when done
+                            positionObserverJob.cancel()
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
                 }
