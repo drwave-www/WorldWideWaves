@@ -71,7 +71,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
@@ -208,7 +207,7 @@ class MainActivityTest {
         val locationPermissionState = MutableStateFlow("not_requested")
 
         composeTestRule.setContent {
-            TestLocationPermissionFlow(locationPermissionState) { newState ->
+            TestLocationPermissionFlow(locationPermissionState.value) { newState ->
                 locationPermissionState.value = newState
             }
         }
@@ -507,11 +506,9 @@ class MainActivityTest {
 
     @Composable
     private fun TestLocationPermissionFlow(
-        permissionStateFlow: StateFlow<String>,
+        permissionState: String,
         onPermissionStateChange: (String) -> Unit
     ) {
-        val permissionState by permissionStateFlow.collectAsState()
-
         Column {
             Text(
                 text = "Location Permission",
