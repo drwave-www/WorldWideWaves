@@ -22,32 +22,27 @@
 package com.worldwidewaves.compose.coordination
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.compose.choreographies.ChoreographyDisplay
-import com.worldwidewaves.compose.choreographies.TimedSequenceDisplay
-import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEventObserver
+import com.worldwidewaves.shared.events.WWWEventWave
+import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
 import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.testing.TestCategories
-import com.worldwidewaves.testing.UITestConfig
 import com.worldwidewaves.testing.UITestFactory
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -110,7 +105,6 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 @RunWith(AndroidJUnit4::class)
 class RealTimeCoordinationTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -146,14 +140,14 @@ class RealTimeCoordinationTest {
     }
 
     private fun setupMockEvent() {
-        mockEvent = UITestFactory.createMockWaveEvent(
-            eventId = "coordination-test-event",
-            cityKey = "new_york_usa",
-            isInArea = true
-        )
+        mockEvent =
+            UITestFactory.createMockWaveEvent(
+                id = "coordination-test-event",
+                isInArea = true,
+            ) as IWWWEvent
 
         // Mock observer state flows
-        val mockObserver = mockk<IWWWEvent.Observer>(relaxed = true)
+        val mockObserver = mockk<WWWEventObserver>(relaxed = true)
         every { mockEvent.observer } returns mockObserver
 
         every { mockObserver.isUserWarmingInProgress } returns MutableStateFlow(false)
@@ -162,8 +156,8 @@ class RealTimeCoordinationTest {
         every { mockObserver.hitDateTime } returns MutableStateFlow(Instant.fromEpochMilliseconds(0))
 
         // Mock wave and warming interfaces
-        val mockWave = mockk<IWWWEvent.Wave>(relaxed = true)
-        val mockWarming = mockk<IWWWEvent.Warming>(relaxed = true)
+        val mockWave = mockk<WWWEventWave>(relaxed = true)
+        val mockWarming = mockk<WWWEventWaveWarming>(relaxed = true)
 
         every { mockEvent.wave } returns mockWave
         every { mockEvent.warming } returns mockWarming
@@ -206,13 +200,13 @@ class RealTimeCoordinationTest {
 
     private fun setupMockSoundPlayer() {
         mockSoundPlayer = mockk<SoundPlayer>(relaxed = true)
-        every { mockSoundPlayer.playTone(any(), any(), any(), any()) } returns Unit
+        coEvery { mockSoundPlayer.playTone(any(), any(), any(), any()) } returns Unit
         every { mockSoundPlayer.release() } returns Unit
     }
 
     private fun createMockDisplaySequence(
         type: String,
-        duration: Duration = 2.seconds
+        duration: Duration = 2.seconds,
     ): ChoreographyManager.DisplayableSequence<DrawableResource> {
         val mockResource = mockk<DrawableResource>(relaxed = true)
         return ChoreographyManager.DisplayableSequence(
@@ -224,7 +218,7 @@ class RealTimeCoordinationTest {
             duration = duration,
             text = mockk(relaxed = true),
             loop = type == "warming",
-            remainingDuration = duration
+            remainingDuration = duration,
         )
     }
 
@@ -234,7 +228,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_choreographyTiming_maintainsPrecision() {
-        val testStartTime = performanceMonitor.markEventStart("choreographyTiming")
+        val trace = performanceMonitor.startTrace("choreographyTiming")
         val frameTimestamps = mutableListOf<Long>()
         var sequenceCompleted = false
 
@@ -246,7 +240,7 @@ class RealTimeCoordinationTest {
                     onFrameRendered = { timestamp ->
                         frameTimestamps.add(timestamp)
                     },
-                    onSequenceComplete = { sequenceCompleted = true }
+                    onSequenceComplete = { sequenceCompleted = true },
                 )
             }
         }
@@ -268,12 +262,12 @@ class RealTimeCoordinationTest {
             "Frame timing deviation ($maxDeviation ms) exceeds tolerance (${FRAME_TIMING_TOLERANCE.inWholeMilliseconds} ms)"
         }
 
-        performanceMonitor.markEventEnd("choreographyTiming", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun realTimeCoordination_phaseTransitions_executeWithPrecision() {
-        val testStartTime = performanceMonitor.markEventStart("phaseTransitions")
+        val trace = performanceMonitor.startTrace("phaseTransitions")
         val phaseTransitions = mutableListOf<Pair<String, Long>>()
 
         // Test warming -> waiting -> hit transition timing
@@ -284,7 +278,7 @@ class RealTimeCoordinationTest {
                     clock = mockClock,
                     onPhaseChange = { phase, timestamp ->
                         phaseTransitions.add(phase to timestamp)
-                    }
+                    },
                 )
             }
         }
@@ -316,12 +310,12 @@ class RealTimeCoordinationTest {
             }
         }
 
-        performanceMonitor.markEventEnd("phaseTransitions", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun realTimeCoordination_frameByFrameProgression_maintainsAccuracy() {
-        val testStartTime = performanceMonitor.markEventStart("frameProgression")
+        val trace = performanceMonitor.startTrace("frameProgression")
         val frameProgression = mutableListOf<Int>()
         var progressionAccurate = true
 
@@ -344,7 +338,7 @@ class RealTimeCoordinationTest {
                                 progressionAccurate = false
                             }
                         }
-                    }
+                    },
                 )
             }
         }
@@ -358,12 +352,12 @@ class RealTimeCoordinationTest {
         assert(frameProgression.contains(0)) { "Should show first frame" }
         assert(frameProgression.contains(3)) { "Should show last frame" }
 
-        performanceMonitor.markEventEnd("frameProgression", testStartTime)
+        trace.stop()
     }
 
     @Test
     fun realTimeCoordination_synchronizationAccuracy_meetsRequirements() {
-        val testStartTime = performanceMonitor.markEventStart("synchronizationAccuracy")
+        val syncTrace = performanceMonitor.startTrace("synchronizationAccuracy")
         val synchronizationEvents = mutableListOf<Long>()
 
         // Simulate multiple devices starting choreography simultaneously
@@ -379,7 +373,7 @@ class RealTimeCoordinationTest {
                     clock = mockClock,
                     onDeviceSync = { deviceId, syncTime ->
                         synchronizationEvents.add(syncTime)
-                    }
+                    },
                 )
             }
         }
@@ -398,7 +392,7 @@ class RealTimeCoordinationTest {
             "Synchronization deviation ($maxDeviation ms) exceeds tolerance"
         }
 
-        performanceMonitor.markEventEnd("synchronizationAccuracy", testStartTime)
+        syncTrace.stop()
     }
 
     // ========================================================================
@@ -407,7 +401,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_soundSynthesis_maintainsLatency() {
-        val testStartTime = performanceMonitor.markEventStart("soundSynthesis")
+        val soundTrace = performanceMonitor.startTrace("soundSynthesis")
         val audioLatencies = mutableListOf<Long>()
         var soundPlayed = false
 
@@ -420,7 +414,7 @@ class RealTimeCoordinationTest {
                     onSoundTrigger = { triggerTime, playTime ->
                         audioLatencies.add(playTime - triggerTime)
                         soundPlayed = true
-                    }
+                    },
                 )
             }
         }
@@ -434,18 +428,18 @@ class RealTimeCoordinationTest {
 
         val avgLatency = audioLatencies.average()
         assert(avgLatency <= AUDIO_LATENCY_TOLERANCE.inWholeMilliseconds) {
-            "Audio synthesis latency (${avgLatency} ms) exceeds tolerance"
+            "Audio synthesis latency ($avgLatency ms) exceeds tolerance"
         }
 
         // Verify sound player was called with correct parameters
-        verify(atLeast = 1) { mockSoundPlayer.playTone(any(), any(), any(), any()) }
+        coVerify(atLeast = 1) { mockSoundPlayer.playTone(any(), any(), any(), any()) }
 
-        performanceMonitor.markEventEnd("soundSynthesis", testStartTime)
+        soundTrace.stop()
     }
 
     @Test
     fun realTimeCoordination_midiChoreography_followsScore() {
-        val testStartTime = performanceMonitor.markEventStart("midiChoreography")
+        val midiTrace = performanceMonitor.startTrace("midiChoreography")
         val pitchProgression = mutableListOf<Int>()
         var midiFollowed = true
 
@@ -457,7 +451,7 @@ class RealTimeCoordinationTest {
                     clock = mockClock,
                     onPitchPlayed = { pitch ->
                         pitchProgression.add(pitch)
-                    }
+                    },
                 )
             }
         }
@@ -480,12 +474,12 @@ class RealTimeCoordinationTest {
         // Verify MIDI choreography manager was called
         coEvery { mockSoundChoreographyManager.playCurrentSoundTone(any()) }
 
-        performanceMonitor.markEventEnd("midiChoreography", testStartTime)
+        midiTrace.stop()
     }
 
     @Test
     fun realTimeCoordination_waveformSynthesis_supportsAllTypes() {
-        val testStartTime = performanceMonitor.markEventStart("waveformSynthesis")
+        val waveTrace = performanceMonitor.startTrace("waveformSynthesis")
         val waveformsUsed = mutableSetOf<SoundPlayer.Waveform>()
 
         val testWaveforms = SoundPlayer.Waveform.values()
@@ -497,7 +491,7 @@ class RealTimeCoordinationTest {
                     waveforms = testWaveforms,
                     onWaveformUsed = { waveform ->
                         waveformsUsed.add(waveform)
-                    }
+                    },
                 )
             }
         }
@@ -517,12 +511,12 @@ class RealTimeCoordinationTest {
             }
         }
 
-        performanceMonitor.markEventEnd("waveformSynthesis", testStartTime)
+        waveTrace.stop()
     }
 
     @Test
     fun realTimeCoordination_audioVideoSync_maintainsTiming() {
-        val testStartTime = performanceMonitor.markEventStart("audioVideoSync")
+        val avTrace = performanceMonitor.startTrace("audioVideoSync")
         val syncEvents = mutableListOf<Pair<String, Long>>() // (type, timestamp)
         var syncAccurate = true
 
@@ -549,7 +543,7 @@ class RealTimeCoordinationTest {
                                 syncAccurate = false
                             }
                         }
-                    }
+                    },
                 )
             }
         }
@@ -567,7 +561,7 @@ class RealTimeCoordinationTest {
         assert(audioEventCount > 0) { "Audio events should be recorded" }
         assert(videoEventCount > 0) { "Video events should be recorded" }
 
-        performanceMonitor.markEventEnd("audioVideoSync", testStartTime)
+        avTrace.stop()
     }
 
     // ========================================================================
@@ -576,7 +570,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_phaseManagement_handlesAllTransitions() {
-        val testStartTime = performanceMonitor.markEventStart("phaseManagement")
+        val phaseTrace = performanceMonitor.startTrace("phaseManagement")
         val phaseSequence = mutableListOf<String>()
         var transitionsValid = true
 
@@ -592,18 +586,19 @@ class RealTimeCoordinationTest {
                             val prev = phaseSequence[phaseSequence.size - 2]
                             val current = phase
 
-                            val validTransitions = mapOf(
-                                "observer" to listOf("warming"),
-                                "warming" to listOf("waiting"),
-                                "waiting" to listOf("hit"),
-                                "hit" to listOf("done", "observer")
-                            )
+                            val validTransitions =
+                                mapOf(
+                                    "observer" to listOf("warming"),
+                                    "warming" to listOf("waiting"),
+                                    "waiting" to listOf("hit"),
+                                    "hit" to listOf("done", "observer"),
+                                )
 
                             if (validTransitions[prev]?.contains(current) != true) {
                                 transitionsValid = false
                             }
                         }
-                    }
+                    },
                 )
             }
         }
@@ -620,7 +615,7 @@ class RealTimeCoordinationTest {
         assert(phaseSequence.contains("waiting")) { "Should include waiting phase" }
         assert(phaseSequence.contains("hit")) { "Should include hit phase" }
 
-        performanceMonitor.markEventEnd("phaseManagement", testStartTime)
+        phaseTrace.stop()
     }
 
     private fun simulateCompleteWavePhases() {
@@ -639,7 +634,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_clockSynchronization_handlesSkew() {
-        val testStartTime = performanceMonitor.markEventStart("clockSynchronization")
+        val clockTrace = performanceMonitor.startTrace("clockSynchronization")
         val clockReadings = mutableListOf<Long>()
         var driftCompensated = false
 
@@ -652,7 +647,7 @@ class RealTimeCoordinationTest {
                     },
                     onDriftDetected = {
                         driftCompensated = true
-                    }
+                    },
                 )
             }
         }
@@ -667,7 +662,7 @@ class RealTimeCoordinationTest {
         val isMonotonic = clockReadings.zipWithNext { a, b -> b >= a }.all { it }
         assert(isMonotonic) { "Clock readings should be monotonic" }
 
-        performanceMonitor.markEventEnd("clockSynchronization", testStartTime)
+        clockTrace.stop()
     }
 
     // ========================================================================
@@ -676,7 +671,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_multipleSequences_maintainsPerformance() {
-        val testStartTime = performanceMonitor.markEventStart("multipleSequences")
+        val multiTrace = performanceMonitor.startTrace("multipleSequences")
         val sequencePerformance = mutableListOf<Long>()
         var performanceAcceptable = true
 
@@ -691,7 +686,7 @@ class RealTimeCoordinationTest {
                         if (renderTime > FRAME_TIMING_TOLERANCE.inWholeMilliseconds) {
                             performanceAcceptable = false
                         }
-                    }
+                    },
                 )
             }
         }
@@ -705,15 +700,15 @@ class RealTimeCoordinationTest {
 
         val avgPerformance = sequencePerformance.average()
         assert(avgPerformance <= FRAME_TIMING_TOLERANCE.inWholeMilliseconds) {
-            "Average sequence render time (${avgPerformance} ms) exceeds tolerance"
+            "Average sequence render time ($avgPerformance ms) exceeds tolerance"
         }
 
-        performanceMonitor.markEventEnd("multipleSequences", testStartTime)
+        multiTrace.stop()
     }
 
     @Test
     fun realTimeCoordination_resourceManagement_optimizesMemory() {
-        val testStartTime = performanceMonitor.markEventStart("resourceManagement")
+        val resourceTrace = performanceMonitor.startTrace("resourceManagement")
         var memoryOptimized = false
         var resourcesCleaned = false
 
@@ -723,7 +718,7 @@ class RealTimeCoordinationTest {
                     choreographyManager = mockChoreographyManager,
                     soundChoreographyManager = mockSoundChoreographyManager,
                     onMemoryOptimized = { memoryOptimized = true },
-                    onResourcesCleaned = { resourcesCleaned = true }
+                    onResourcesCleaned = { resourcesCleaned = true },
                 )
             }
         }
@@ -739,7 +734,7 @@ class RealTimeCoordinationTest {
         verify { mockChoreographyManager.clearImageCache() }
         verify { mockSoundChoreographyManager.release() }
 
-        performanceMonitor.markEventEnd("resourceManagement", testStartTime)
+        resourceTrace.stop()
     }
 
     // ========================================================================
@@ -748,7 +743,7 @@ class RealTimeCoordinationTest {
 
     @Test
     fun realTimeCoordination_networkInterruption_recoversGracefully() {
-        val testStartTime = performanceMonitor.markEventStart("networkRecovery")
+        val networkTrace = performanceMonitor.startTrace("networkRecovery")
         var networkErrorHandled = false
         var recoverySuccessful = false
 
@@ -757,7 +752,7 @@ class RealTimeCoordinationTest {
                 TestNetworkRecovery(
                     choreographyManager = mockChoreographyManager,
                     onNetworkError = { networkErrorHandled = true },
-                    onRecovery = { recoverySuccessful = true }
+                    onRecovery = { recoverySuccessful = true },
                 )
             }
         }
@@ -769,12 +764,12 @@ class RealTimeCoordinationTest {
         assert(networkErrorHandled) { "Network errors should be handled" }
         assert(recoverySuccessful) { "Recovery should be successful" }
 
-        performanceMonitor.markEventEnd("networkRecovery", testStartTime)
+        networkTrace.stop()
     }
 
     @Test
     fun realTimeCoordination_resourceLoadingFailure_providesGracefulDegradation() {
-        val testStartTime = performanceMonitor.markEventStart("resourceFailure")
+        val failureTrace = performanceMonitor.startTrace("resourceFailure")
         var failureHandled = false
         var fallbackProvided = false
 
@@ -789,7 +784,7 @@ class RealTimeCoordinationTest {
                     choreographyManager = mockChoreographyManager,
                     event = mockEvent,
                     onFailureHandled = { failureHandled = true },
-                    onFallbackProvided = { fallbackProvided = true }
+                    onFallbackProvided = { fallbackProvided = true },
                 )
             }
         }
@@ -801,7 +796,7 @@ class RealTimeCoordinationTest {
         assert(failureHandled) { "Resource loading failures should be handled" }
         assert(fallbackProvided) { "Fallback experience should be provided" }
 
-        performanceMonitor.markEventEnd("resourceFailure", testStartTime)
+        failureTrace.stop()
     }
 }
 
@@ -809,24 +804,30 @@ class RealTimeCoordinationTest {
 // TEST HELPER COMPOSABLES
 // ========================================================================
 
+@OptIn(ExperimentalTime::class)
 @androidx.compose.runtime.Composable
 private fun TestChoreographyTiming(
     choreographyManager: ChoreographyManager<DrawableResource>,
     clock: IClock,
     onFrameRendered: (Long) -> Unit,
-    onSequenceComplete: () -> Unit
+    onSequenceComplete: () -> Unit,
 ) {
     val startTime = remember { clock.now() }
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
-        repeat(60) { // Test 60 frames
+        repeat(60) {
+            // Test 60 frames
             onFrameRendered(System.currentTimeMillis())
             delay(16.milliseconds) // Target 60 FPS
         }
         onSequenceComplete()
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("choreography-timing")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("choreography-timing"),
+    ) {
         Text("Testing Choreography Timing")
     }
 }
@@ -835,7 +836,7 @@ private fun TestChoreographyTiming(
 private fun TestPhaseTransitions(
     event: IWWWEvent,
     clock: IClock,
-    onPhaseChange: (String, Long) -> Unit
+    onPhaseChange: (String, Long) -> Unit,
 ) {
     val currentPhase = remember { mutableStateOf("observer") }
 
@@ -843,12 +844,13 @@ private fun TestPhaseTransitions(
         while (true) {
             delay(50.milliseconds)
 
-            val phase = when {
-                event.observer.isUserWarmingInProgress.value -> "warming"
-                event.observer.userIsGoingToBeHit.value -> "waiting"
-                event.observer.userHasBeenHit.value -> "hit"
-                else -> "observer"
-            }
+            val phase =
+                when {
+                    event.observer.isUserWarmingInProgress.value -> "warming"
+                    event.observer.userIsGoingToBeHit.value -> "waiting"
+                    event.observer.userHasBeenHit.value -> "hit"
+                    else -> "observer"
+                }
 
             if (phase != currentPhase.value) {
                 currentPhase.value = phase
@@ -857,7 +859,11 @@ private fun TestPhaseTransitions(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("phase-transitions")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("phase-transitions"),
+    ) {
         Text("Current Phase: ${currentPhase.value}")
     }
 }
@@ -866,30 +872,36 @@ private fun TestPhaseTransitions(
 private fun TestFrameProgression(
     sequence: ChoreographyManager.DisplayableSequence<DrawableResource>,
     clock: IClock,
-    onFrameUpdate: (Int) -> Unit
+    onFrameUpdate: (Int) -> Unit,
 ) {
     val currentFrame = remember { mutableStateOf(0) }
 
     androidx.compose.runtime.LaunchedEffect(sequence) {
-        repeat(sequence.frameCount * 3) { // Multiple cycles
+        repeat(sequence.frameCount * 3) {
+            // Multiple cycles
             onFrameUpdate(currentFrame.value)
             currentFrame.value = (currentFrame.value + 1) % sequence.frameCount
             delay(sequence.timing)
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("frame-progression")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("frame-progression"),
+    ) {
         Text("Frame: ${currentFrame.value}")
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @androidx.compose.runtime.Composable
 private fun TestMultiDeviceSync(
     deviceCount: Int,
     startTime: Instant,
     choreographyManager: ChoreographyManager<DrawableResource>,
     clock: IClock,
-    onDeviceSync: (Int, Long) -> Unit
+    onDeviceSync: (Int, Long) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(deviceCount) { deviceId ->
@@ -899,7 +911,11 @@ private fun TestMultiDeviceSync(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("multi-device-sync")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("multi-device-sync"),
+    ) {
         Text("Syncing $deviceCount devices")
     }
 }
@@ -909,7 +925,7 @@ private fun TestSoundSynthesis(
     soundChoreographyManager: SoundChoreographyManager,
     soundPlayer: SoundPlayer,
     clock: IClock,
-    onSoundTrigger: (Long, Long) -> Unit
+    onSoundTrigger: (Long, Long) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(3) {
@@ -921,17 +937,22 @@ private fun TestSoundSynthesis(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("sound-synthesis")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("sound-synthesis"),
+    ) {
         Text("Testing Sound Synthesis")
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @androidx.compose.runtime.Composable
 private fun TestMidiChoreography(
     soundChoreographyManager: SoundChoreographyManager,
     waveStartTime: Instant,
     clock: IClock,
-    onPitchPlayed: (Int) -> Unit
+    onPitchPlayed: (Int) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(5) {
@@ -940,7 +961,11 @@ private fun TestMidiChoreography(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("midi-choreography")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("midi-choreography"),
+    ) {
         Text("Testing MIDI Choreography")
     }
 }
@@ -949,7 +974,7 @@ private fun TestMidiChoreography(
 private fun TestWaveformSynthesis(
     soundPlayer: SoundPlayer,
     waveforms: Array<SoundPlayer.Waveform>,
-    onWaveformUsed: (SoundPlayer.Waveform) -> Unit
+    onWaveformUsed: (SoundPlayer.Waveform) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         waveforms.forEach { waveform ->
@@ -958,7 +983,11 @@ private fun TestWaveformSynthesis(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("waveform-synthesis")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("waveform-synthesis"),
+    ) {
         Text("Testing Waveform Synthesis")
     }
 }
@@ -969,7 +998,7 @@ private fun TestAudioVideoSync(
     choreographyManager: ChoreographyManager<DrawableResource>,
     soundChoreographyManager: SoundChoreographyManager,
     clock: IClock,
-    onSyncEvent: (String, Long) -> Unit
+    onSyncEvent: (String, Long) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(10) {
@@ -983,7 +1012,11 @@ private fun TestAudioVideoSync(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("audio-video-sync")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("audio-video-sync"),
+    ) {
         Text("Testing Audio-Video Sync")
     }
 }
@@ -991,7 +1024,7 @@ private fun TestAudioVideoSync(
 @androidx.compose.runtime.Composable
 private fun TestPhaseManagement(
     event: IWWWEvent,
-    onPhaseDetected: (String) -> Unit
+    onPhaseDetected: (String) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         val phases = listOf("observer", "warming", "waiting", "hit", "done")
@@ -1001,7 +1034,11 @@ private fun TestPhaseManagement(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("phase-management")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("phase-management"),
+    ) {
         Text("Testing Phase Management")
     }
 }
@@ -1010,7 +1047,7 @@ private fun TestPhaseManagement(
 private fun TestClockSynchronization(
     clock: IClock,
     onClockReading: (Long) -> Unit,
-    onDriftDetected: () -> Unit
+    onDriftDetected: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(20) {
@@ -1020,7 +1057,11 @@ private fun TestClockSynchronization(
         onDriftDetected() // Simulate drift detection
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("clock-synchronization")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("clock-synchronization"),
+    ) {
         Text("Testing Clock Synchronization")
     }
 }
@@ -1030,7 +1071,7 @@ private fun TestMultipleSequences(
     sequenceCount: Int,
     choreographyManager: ChoreographyManager<DrawableResource>,
     clock: IClock,
-    onSequencePerformance: (Int, Long) -> Unit
+    onSequencePerformance: (Int, Long) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(sequenceCount) { sequenceId ->
@@ -1041,7 +1082,11 @@ private fun TestMultipleSequences(
         }
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("multiple-sequences")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("multiple-sequences"),
+    ) {
         Text("Testing $sequenceCount Sequences")
     }
 }
@@ -1051,7 +1096,7 @@ private fun TestResourceManagement(
     choreographyManager: ChoreographyManager<DrawableResource>,
     soundChoreographyManager: SoundChoreographyManager,
     onMemoryOptimized: () -> Unit,
-    onResourcesCleaned: () -> Unit
+    onResourcesCleaned: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(200.milliseconds)
@@ -1060,7 +1105,11 @@ private fun TestResourceManagement(
         onResourcesCleaned()
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("resource-management")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("resource-management"),
+    ) {
         Text("Testing Resource Management")
     }
 }
@@ -1069,7 +1118,7 @@ private fun TestResourceManagement(
 private fun TestNetworkRecovery(
     choreographyManager: ChoreographyManager<DrawableResource>,
     onNetworkError: () -> Unit,
-    onRecovery: () -> Unit
+    onRecovery: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(100.milliseconds)
@@ -1078,7 +1127,11 @@ private fun TestNetworkRecovery(
         onRecovery()
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("network-recovery")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("network-recovery"),
+    ) {
         Text("Testing Network Recovery")
     }
 }
@@ -1088,7 +1141,7 @@ private fun TestResourceFailureHandling(
     choreographyManager: ChoreographyManager<DrawableResource>,
     event: IWWWEvent,
     onFailureHandled: () -> Unit,
-    onFallbackProvided: () -> Unit
+    onFallbackProvided: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(100.milliseconds)
@@ -1097,7 +1150,11 @@ private fun TestResourceFailureHandling(
         onFallbackProvided()
     }
 
-    Box(modifier = androidx.compose.ui.Modifier.testTag("resource-failure")) {
+    Box(
+        modifier =
+            androidx.compose.ui.Modifier
+                .testTag("resource-failure"),
+    ) {
         Text("Testing Resource Failure Handling")
     }
 }

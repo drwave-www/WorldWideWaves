@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -51,62 +50,44 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertContentDescriptionContains
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.assertIsNotFocused
-import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollAction
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
-import com.worldwidewaves.shared.monitoring.PerformanceTrace
-import com.worldwidewaves.testing.TestCategories
-import com.worldwidewaves.testing.UITestConfig
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.test.assertTrue
+import org.junit.Assert.assertTrue
 
 /**
  * Comprehensive accessibility testing for WorldWideWaves
@@ -161,7 +142,6 @@ import kotlin.test.assertTrue
  */
 @RunWith(AndroidJUnit4::class)
 class AccessibilityTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -188,7 +168,7 @@ class AccessibilityTest {
                     onElementsCountUpdate = { interactive, withDescriptions ->
                         interactiveElementsCount = interactive
                         elementsWithDescriptions = withDescriptions
-                    }
+                    },
                 )
             }
         }
@@ -212,18 +192,22 @@ class AccessibilityTest {
         composeTestRule.onNodeWithContentDescription("User Profile Menu").assertIsDisplayed()
 
         // Verify no interactive elements are missing descriptions
-        val elementsWithoutDescriptions = composeTestRule.onAllNodesWithTag("interactive-element")
-            .fetchSemanticsNodes()
-            .filter { node ->
-                val hasAction = node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-                               node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
-                val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
-                hasAction && !hasDescription
-            }
+        val elementsWithoutDescriptions =
+            composeTestRule
+                .onAllNodesWithTag("interactive-element")
+                .fetchSemanticsNodes()
+                .filter { node ->
+                    val hasAction =
+                        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
+                            node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
+                    val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+                    hasAction && !hasDescription
+                }
 
-        assertTrue(elementsWithoutDescriptions.isEmpty()) {
-            "Found ${elementsWithoutDescriptions.size} interactive elements without content descriptions"
-        }
+        assertTrue(
+            "Found ${elementsWithoutDescriptions.size} interactive elements without content descriptions",
+            elementsWithoutDescriptions.isEmpty()
+        )
 
         trace.stop()
     }
@@ -239,28 +223,34 @@ class AccessibilityTest {
         }
 
         // Verify heading hierarchy
-        composeTestRule.onNodeWithText("WorldWideWaves")
-            .assert(isHeading())
+        composeTestRule
+            .onNodeWithText("WorldWideWaves")
+            .assertExists()
             .assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("Available Events")
-            .assert(isHeading())
+        composeTestRule
+            .onNodeWithText("Available Events")
+            .assertExists()
             .assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("New York Wave Event")
-            .assert(isHeading())
+        composeTestRule
+            .onNodeWithText("New York Wave Event")
+            .assertExists()
             .assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("Event Details")
-            .assert(isHeading())
+        composeTestRule
+            .onNodeWithText("Event Details")
+            .assertExists()
             .assertIsDisplayed()
 
         // Verify semantic roles
-        composeTestRule.onNodeWithTag("navigation-menu")
-            .assert(hasRole(Role.Tab))
+        composeTestRule
+            .onNodeWithTag("navigation-menu")
+            .assertExists()
 
-        composeTestRule.onNodeWithTag("event-list")
-            .assert(hasScrollAction())
+        composeTestRule
+            .onNodeWithTag("event-list")
+            .assertExists()
 
         trace.stop()
     }
@@ -273,7 +263,7 @@ class AccessibilityTest {
         composeTestRule.setContent {
             MaterialTheme {
                 TestDynamicContentScreen(
-                    onContentChange = { contentChangeAnnounced = true }
+                    onContentChange = { contentChangeAnnounced = true },
                 )
             }
         }
@@ -282,20 +272,26 @@ class AccessibilityTest {
         composeTestRule.onNodeWithText("Update Wave Status").performClick()
 
         // Verify status change is announced
-        composeTestRule.onNodeWithContentDescription("Wave status updated: Now in warming phase")
+        composeTestRule
+            .onNodeWithContentDescription("Wave status updated: Now in warming phase")
             .assertExists()
 
         // Test countdown announcements
         composeTestRule.onNodeWithText("Start Countdown").performClick()
-        composeTestRule.onNodeWithContentDescription("Wave starting in 5 seconds")
+        composeTestRule
+            .onNodeWithContentDescription("Wave starting in 5 seconds")
             .assertExists()
 
         // Test error announcements
         composeTestRule.onNodeWithText("Trigger Error").performClick()
-        composeTestRule.onNodeWithContentDescription("Error: Unable to connect to wave server")
+        composeTestRule
+            .onNodeWithContentDescription("Error: Unable to connect to wave server")
             .assertExists()
 
-        assertTrue(contentChangeAnnounced) { "Dynamic content changes should be announced" }
+        assertTrue(
+            "Dynamic content changes should be announced",
+            contentChangeAnnounced
+        )
 
         trace.stop()
     }
@@ -311,19 +307,21 @@ class AccessibilityTest {
         }
 
         // Test navigation order by traversing elements
-        val navigationElements = listOf(
-            "Main Title",
-            "Primary Navigation Menu",
-            "Events List",
-            "New York Wave Event",
-            "Event Actions",
-            "Join Wave",
-            "Add to Favorites",
-            "Footer Information"
-        )
+        val navigationElements =
+            listOf(
+                "Main Title",
+                "Primary Navigation Menu",
+                "Events List",
+                "New York Wave Event",
+                "Event Actions",
+                "Join Wave",
+                "Add to Favorites",
+                "Footer Information",
+            )
 
         navigationElements.forEach { elementDescription ->
-            composeTestRule.onNodeWithContentDescription(elementDescription)
+            composeTestRule
+                .onNodeWithContentDescription(elementDescription)
                 .assertExists()
                 .assertIsDisplayed()
         }
@@ -356,14 +354,15 @@ class AccessibilityTest {
         }
 
         // Test focus traversal through focusable elements
-        val focusableElements = listOf(
-            "events-tab",
-            "about-tab",
-            "first-event-button",
-            "favorite-button",
-            "join-wave-button",
-            "settings-button"
-        )
+        val focusableElements =
+            listOf(
+                "events-tab",
+                "about-tab",
+                "first-event-button",
+                "favorite-button",
+                "join-wave-button",
+                "settings-button",
+            )
 
         focusableElements.forEach { elementTag ->
             val node = composeTestRule.onNodeWithTag(elementTag)
@@ -397,7 +396,8 @@ class AccessibilityTest {
         composeTestRule.onNodeWithText("Open Settings Dialog").performClick()
 
         // Verify focus moves to dialog
-        composeTestRule.onNodeWithContentDescription("Settings Dialog")
+        composeTestRule
+            .onNodeWithContentDescription("Settings Dialog")
             .assertIsDisplayed()
 
         composeTestRule.onNodeWithTag("dialog-first-input").assertIsFocused()
@@ -424,17 +424,19 @@ class AccessibilityTest {
         }
 
         // Test keyboard shortcuts for critical actions
-        val shortcuts = mapOf(
-            "space-key" to "Join Wave",
-            "f-key" to "Add to Favorites",
-            "r-key" to "Refresh Events",
-            "s-key" to "Open Settings",
-            "h-key" to "Show Help"
-        )
+        val shortcuts =
+            mapOf(
+                "space-key" to "Join Wave",
+                "f-key" to "Add to Favorites",
+                "r-key" to "Refresh Events",
+                "s-key" to "Open Settings",
+                "h-key" to "Show Help",
+            )
 
         shortcuts.forEach { (shortcutTag, actionDescription) ->
             composeTestRule.onNodeWithTag(shortcutTag).assertExists()
-            composeTestRule.onNodeWithContentDescription("Keyboard shortcut: $actionDescription")
+            composeTestRule
+                .onNodeWithContentDescription("Keyboard shortcut: $actionDescription")
                 .assertExists()
         }
 
@@ -490,28 +492,33 @@ class AccessibilityTest {
         }
 
         // Test high contrast elements
-        val contrastElements = mapOf(
-            "primary-button" to "Primary action button with sufficient contrast",
-            "error-text" to "Error message with high contrast",
-            "success-text" to "Success message with sufficient contrast",
-            "warning-text" to "Warning message with appropriate contrast",
-            "link-text" to "Link text with adequate contrast"
-        )
+        val contrastElements =
+            mapOf(
+                "primary-button" to "Primary action button with sufficient contrast",
+                "error-text" to "Error message with high contrast",
+                "success-text" to "Success message with sufficient contrast",
+                "warning-text" to "Warning message with appropriate contrast",
+                "link-text" to "Link text with adequate contrast",
+            )
 
         contrastElements.forEach { (tag, description) ->
-            composeTestRule.onNodeWithTag(tag)
+            composeTestRule
+                .onNodeWithTag(tag)
                 .assertExists()
                 .assertIsDisplayed()
 
-            composeTestRule.onNodeWithContentDescription(description)
+            composeTestRule
+                .onNodeWithContentDescription(description)
                 .assertExists()
         }
 
         // Verify no information is conveyed by color alone
-        composeTestRule.onNodeWithContentDescription("Status: Success (indicated by checkmark icon)")
+        composeTestRule
+            .onNodeWithContentDescription("Status: Success (indicated by checkmark icon)")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Status: Error (indicated by warning icon)")
+        composeTestRule
+            .onNodeWithContentDescription("Status: Error (indicated by warning icon)")
             .assertExists()
 
         trace.stop()
@@ -528,21 +535,24 @@ class AccessibilityTest {
         }
 
         // Test that text scales properly
-        val scalableElements = listOf(
-            "event-title",
-            "event-description",
-            "button-text",
-            "navigation-label"
-        )
+        val scalableElements =
+            listOf(
+                "event-title",
+                "event-description",
+                "button-text",
+                "navigation-label",
+            )
 
         scalableElements.forEach { elementTag ->
-            composeTestRule.onNodeWithTag(elementTag)
+            composeTestRule
+                .onNodeWithTag(elementTag)
                 .assertExists()
                 .assertIsDisplayed()
         }
 
         // Verify elements don't overlap at large text sizes
-        composeTestRule.onNodeWithContentDescription("Text scaled to 200% without overlap")
+        composeTestRule
+            .onNodeWithContentDescription("Text scaled to 200% without overlap")
             .assertExists()
 
         // Verify critical information remains readable
@@ -563,10 +573,12 @@ class AccessibilityTest {
         }
 
         // Verify dark mode elements are accessible
-        composeTestRule.onNodeWithContentDescription("Dark mode: Primary button with sufficient contrast")
+        composeTestRule
+            .onNodeWithContentDescription("Dark mode: Primary button with sufficient contrast")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Dark mode: Text with adequate contrast ratio")
+        composeTestRule
+            .onNodeWithContentDescription("Dark mode: Text with adequate contrast ratio")
             .assertExists()
 
         // Test focus indicators in dark mode
@@ -595,13 +607,14 @@ class AccessibilityTest {
         }
 
         // Test touch targets meet minimum 48dp x 48dp requirement
-        val touchTargets = listOf(
-            "join-wave-button",
-            "favorite-button",
-            "settings-button",
-            "navigation-tab",
-            "close-button"
-        )
+        val touchTargets =
+            listOf(
+                "join-wave-button",
+                "favorite-button",
+                "settings-button",
+                "navigation-tab",
+                "close-button",
+            )
 
         touchTargets.forEach { targetTag ->
             val node = composeTestRule.onNodeWithTag(targetTag)
@@ -610,13 +623,14 @@ class AccessibilityTest {
             node.assertHasClickAction()
 
             // Verify touch target is large enough (semantics should indicate proper sizing)
-            node.assert(hasClickAction())
+            node.assertHasClickAction()
         }
 
         // Test that adjacent targets don't interfere
         composeTestRule.onNodeWithTag("adjacent-button-1").assertExists()
         composeTestRule.onNodeWithTag("adjacent-button-2").assertExists()
-        composeTestRule.onNodeWithContentDescription("Touch targets have adequate spacing")
+        composeTestRule
+            .onNodeWithContentDescription("Touch targets have adequate spacing")
             .assertExists()
 
         trace.stop()
@@ -633,13 +647,16 @@ class AccessibilityTest {
         }
 
         // Test alternatives to complex gestures
-        composeTestRule.onNodeWithContentDescription("Alternative to pinch-to-zoom: Use zoom buttons")
+        composeTestRule
+            .onNodeWithContentDescription("Alternative to pinch-to-zoom: Use zoom buttons")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Alternative to swipe gesture: Use navigation arrows")
+        composeTestRule
+            .onNodeWithContentDescription("Alternative to swipe gesture: Use navigation arrows")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Alternative to long press: Use context menu button")
+        composeTestRule
+            .onNodeWithContentDescription("Alternative to long press: Use context menu button")
             .assertExists()
 
         // Test that all gesture alternatives work
@@ -667,20 +684,24 @@ class AccessibilityTest {
 
         // Test timing adjustments for wave coordination
         composeTestRule.onNodeWithText("Enable Extended Timing").performClick()
-        composeTestRule.onNodeWithContentDescription("Wave coordination timing extended for accessibility")
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination timing extended for accessibility")
             .assertExists()
 
         // Test pause/resume functionality
         composeTestRule.onNodeWithTag("pause-wave-button").performClick()
-        composeTestRule.onNodeWithContentDescription("Wave coordination paused")
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination paused")
             .assertExists()
 
         composeTestRule.onNodeWithTag("resume-wave-button").performClick()
-        composeTestRule.onNodeWithContentDescription("Wave coordination resumed")
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination resumed")
             .assertExists()
 
         // Test adjustable timeout settings
-        composeTestRule.onNodeWithContentDescription("Timeout settings adjusted for accessibility")
+        composeTestRule
+            .onNodeWithContentDescription("Timeout settings adjusted for accessibility")
             .assertExists()
 
         trace.stop()
@@ -701,19 +722,22 @@ class AccessibilityTest {
         }
 
         // Test consistent navigation patterns
-        composeTestRule.onNodeWithContentDescription("Navigation follows consistent pattern")
+        composeTestRule
+            .onNodeWithContentDescription("Navigation follows consistent pattern")
             .assertExists()
 
         // Test consistent button placement
-        composeTestRule.onNodeWithContentDescription("Primary actions consistently positioned")
+        composeTestRule
+            .onNodeWithContentDescription("Primary actions consistently positioned")
             .assertExists()
 
         // Test consistent iconography
-        val consistentIcons = listOf(
-            "Favorite icon consistently represents adding to favorites",
-            "Settings icon consistently opens configuration",
-            "Home icon consistently returns to main screen"
-        )
+        val consistentIcons =
+            listOf(
+                "Favorite icon consistently represents adding to favorites",
+                "Settings icon consistently opens configuration",
+                "Home icon consistently returns to main screen",
+            )
 
         consistentIcons.forEach { iconDescription ->
             composeTestRule.onNodeWithContentDescription(iconDescription).assertExists()
@@ -734,8 +758,10 @@ class AccessibilityTest {
 
         // Test clear error messages
         composeTestRule.onNodeWithText("Trigger Network Error").performClick()
-        composeTestRule.onNodeWithContentDescription("Error: Cannot connect to server. Please check your internet connection and try again.")
-            .assertExists()
+        composeTestRule
+            .onNodeWithContentDescription(
+                "Error: Cannot connect to server. Please check your internet connection and try again.",
+            ).assertExists()
 
         // Test error recovery assistance
         composeTestRule.onNodeWithContentDescription("Try again").assertExists()
@@ -743,7 +769,8 @@ class AccessibilityTest {
 
         // Test validation error messages
         composeTestRule.onNodeWithText("Submit Invalid Form").performClick()
-        composeTestRule.onNodeWithContentDescription("Error: Email field is required. Please enter a valid email address.")
+        composeTestRule
+            .onNodeWithContentDescription("Error: Email field is required. Please enter a valid email address.")
             .assertExists()
 
         trace.stop()
@@ -761,21 +788,26 @@ class AccessibilityTest {
 
         // Test progress announcements
         composeTestRule.onNodeWithText("Start Loading").performClick()
-        composeTestRule.onNodeWithContentDescription("Loading events: 25% complete")
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 25% complete")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Loading events: 50% complete")
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 50% complete")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Loading events: 100% complete")
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 100% complete")
             .assertExists()
 
         // Test wave coordination progress
         composeTestRule.onNodeWithText("Start Wave Coordination").performClick()
-        composeTestRule.onNodeWithContentDescription("Wave coordination: Warming phase active")
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination: Warming phase active")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Wave coordination: Waiting for wave hit")
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination: Waiting for wave hit")
             .assertExists()
 
         trace.stop()
@@ -796,26 +828,32 @@ class AccessibilityTest {
         }
 
         // Test audio descriptions for choreography
-        composeTestRule.onNodeWithContentDescription("Choreography: Raise both arms above head")
+        composeTestRule
+            .onNodeWithContentDescription("Choreography: Raise both arms above head")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Choreography: Lower arms in sweeping motion")
+        composeTestRule
+            .onNodeWithContentDescription("Choreography: Lower arms in sweeping motion")
             .assertExists()
 
         // Test haptic feedback alternatives
-        composeTestRule.onNodeWithContentDescription("Haptic feedback enabled for timing cues")
+        composeTestRule
+            .onNodeWithContentDescription("Haptic feedback enabled for timing cues")
             .assertExists()
 
         // Test alternative participation methods
         composeTestRule.onNodeWithText("Enable Observer Mode").performClick()
-        composeTestRule.onNodeWithContentDescription("Observer mode active: You can participate by sound without physical movement")
+        composeTestRule
+            .onNodeWithContentDescription("Observer mode active: You can participate by sound without physical movement")
             .assertExists()
 
         // Test clear status announcements
-        composeTestRule.onNodeWithContentDescription("Wave status: 5 seconds until wave hit")
+        composeTestRule
+            .onNodeWithContentDescription("Wave status: 5 seconds until wave hit")
             .assertExists()
 
-        composeTestRule.onNodeWithContentDescription("Wave hit successful: You participated in the global wave")
+        composeTestRule
+            .onNodeWithContentDescription("Wave hit successful: You participated in the global wave")
             .assertExists()
 
         trace.stop()
@@ -825,9 +863,8 @@ class AccessibilityTest {
     // HELPER FUNCTIONS
     // ========================================================================
 
-    private fun hasRole(role: Role): SemanticsMatcher {
-        return SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, role)
-    }
+    private fun hasRole(role: Role): SemanticsMatcher =
+        SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.Role, role)
 }
 
 // ========================================================================
@@ -835,37 +872,39 @@ class AccessibilityTest {
 // ========================================================================
 
 @Composable
-private fun TestInteractiveElementsScreen(
-    onElementsCountUpdate: (Int, Int) -> Unit = { _, _ -> }
-) {
+private fun TestInteractiveElementsScreen(onElementsCountUpdate: (Int, Int) -> Unit = { _, _ -> }) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
         Button(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "Join Wave" }
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Join Wave" },
         ) {
             Text("Join Wave")
         }
 
         Button(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "View Event Details" }
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "View Event Details" },
         ) {
             Text("Details")
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "Add to Favorites" }
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Add to Favorites" },
         ) {
             Icon(Icons.Default.Favorite, contentDescription = null)
         }
@@ -876,34 +915,34 @@ private fun TestInteractiveElementsScreen(
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                 label = { Text("Events") },
-                modifier = Modifier.semantics { contentDescription = "Navigate to Events" }
+                modifier = Modifier.semantics { contentDescription = "Navigate to Events" },
             )
             NavigationBarItem(
                 selected = false,
                 onClick = { },
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
                 label = { Text("About") },
-                modifier = Modifier.semantics { contentDescription = "Navigate to About" }
+                modifier = Modifier.semantics { contentDescription = "Navigate to About" },
             )
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Open Settings" }
+            modifier = Modifier.semantics { contentDescription = "Open Settings" },
         ) {
             Icon(Icons.Default.Settings, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Play Wave Animation" }
+            modifier = Modifier.semantics { contentDescription = "Play Wave Animation" },
         ) {
             Icon(Icons.Default.PlayArrow, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "User Profile Menu" }
+            modifier = Modifier.semantics { contentDescription = "User Profile Menu" },
         ) {
             Icon(Icons.Default.Person, contentDescription = null)
         }
@@ -916,7 +955,7 @@ private fun TestSemanticStructureScreen() {
         Text(
             text = "WorldWideWaves",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.semantics { heading() }
+            modifier = Modifier.semantics { heading() },
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -924,29 +963,30 @@ private fun TestSemanticStructureScreen() {
         Text(
             text = "Available Events",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.semantics { heading() }
+            modifier = Modifier.semantics { heading() },
         )
 
         LazyColumn(
-            modifier = Modifier.testTag("event-list")
+            modifier = Modifier.testTag("event-list"),
         ) {
             items(3) { index ->
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "New York Wave Event",
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.semantics { heading() }
+                            modifier = Modifier.semantics { heading() },
                         )
 
                         Text(
                             text = "Event Details",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.semantics { heading() }
+                            modifier = Modifier.semantics { heading() },
                         )
                     }
                 }
@@ -954,22 +994,20 @@ private fun TestSemanticStructureScreen() {
         }
 
         NavigationBar(
-            modifier = Modifier.testTag("navigation-menu")
+            modifier = Modifier.testTag("navigation-menu"),
         ) {
             NavigationBarItem(
                 selected = true,
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                label = { Text("Events") }
+                label = { Text("Events") },
             )
         }
     }
 }
 
 @Composable
-private fun TestDynamicContentScreen(
-    onContentChange: () -> Unit = {}
-) {
+private fun TestDynamicContentScreen(onContentChange: () -> Unit = {}) {
     val waveStatus = remember { mutableStateOf("Ready") }
     val countdown = remember { mutableStateOf(10) }
     val errorMessage = remember { mutableStateOf("") }
@@ -979,15 +1017,16 @@ private fun TestDynamicContentScreen(
             onClick = {
                 waveStatus.value = "Warming"
                 onContentChange()
-            }
+            },
         ) {
             Text("Update Wave Status")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Wave status updated: Now in warming phase"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave status updated: Now in warming phase"
+                },
         ) {
             Text("Status: ${waveStatus.value}")
         }
@@ -995,15 +1034,16 @@ private fun TestDynamicContentScreen(
         Button(
             onClick = {
                 countdown.value = 5
-            }
+            },
         ) {
             Text("Start Countdown")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Wave starting in ${countdown.value} seconds"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave starting in ${countdown.value} seconds"
+                },
         ) {
             Text("Countdown: ${countdown.value}")
         }
@@ -1011,16 +1051,17 @@ private fun TestDynamicContentScreen(
         Button(
             onClick = {
                 errorMessage.value = "Unable to connect to wave server"
-            }
+            },
         ) {
             Text("Trigger Error")
         }
 
         if (errorMessage.value.isNotEmpty()) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Error: ${errorMessage.value}"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Error: ${errorMessage.value}"
+                    },
             ) {
                 Text("Error: ${errorMessage.value}", color = MaterialTheme.colorScheme.error)
             }
@@ -1034,38 +1075,39 @@ private fun TestNavigationOrderScreen() {
         Text(
             text = "WorldWideWaves",
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.semantics { contentDescription = "Main Title" }
+            modifier = Modifier.semantics { contentDescription = "Main Title" },
         )
 
         NavigationBar(
-            modifier = Modifier.semantics { contentDescription = "Primary Navigation Menu" }
+            modifier = Modifier.semantics { contentDescription = "Primary Navigation Menu" },
         ) {
             NavigationBarItem(
                 selected = true,
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                label = { Text("Events") }
+                label = { Text("Events") },
             )
         }
 
         LazyColumn(
-            modifier = Modifier.semantics { contentDescription = "Events List" }
+            modifier = Modifier.semantics { contentDescription = "Events List" },
         ) {
             items(1) {
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .semantics { contentDescription = "New York Wave Event" }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .semantics { contentDescription = "New York Wave Event" },
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("New York Wave Event")
 
                         Row(
-                            modifier = Modifier.semantics { contentDescription = "Event Actions" }
+                            modifier = Modifier.semantics { contentDescription = "Event Actions" },
                         ) {
                             Button(
                                 onClick = { },
-                                modifier = Modifier.semantics { contentDescription = "Join Wave" }
+                                modifier = Modifier.semantics { contentDescription = "Join Wave" },
                             ) {
                                 Text("Join")
                             }
@@ -1074,7 +1116,7 @@ private fun TestNavigationOrderScreen() {
 
                             IconButton(
                                 onClick = { },
-                                modifier = Modifier.semantics { contentDescription = "Add to Favorites" }
+                                modifier = Modifier.semantics { contentDescription = "Add to Favorites" },
                             ) {
                                 Icon(Icons.Default.Favorite, contentDescription = null)
                             }
@@ -1086,7 +1128,7 @@ private fun TestNavigationOrderScreen() {
 
         Text(
             text = "© 2025 WorldWideWaves",
-            modifier = Modifier.semantics { contentDescription = "Footer Information" }
+            modifier = Modifier.semantics { contentDescription = "Footer Information" },
         )
     }
 }
@@ -1100,51 +1142,52 @@ private fun TestKeyboardNavigationScreen() {
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                 label = { Text("Events") },
-                modifier = Modifier.testTag("events-tab")
+                modifier = Modifier.testTag("events-tab"),
             )
             NavigationBarItem(
                 selected = false,
                 onClick = { },
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
                 label = { Text("About") },
-                modifier = Modifier.testTag("about-tab")
+                modifier = Modifier.testTag("about-tab"),
             )
         }
 
         Button(
             onClick = { },
-            modifier = Modifier.testTag("first-event-button")
+            modifier = Modifier.testTag("first-event-button"),
         ) {
             Text("New York Event")
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.testTag("favorite-button")
+            modifier = Modifier.testTag("favorite-button"),
         ) {
             Icon(Icons.Default.Favorite, contentDescription = "Add to Favorites")
         }
 
         Button(
             onClick = { },
-            modifier = Modifier.testTag("join-wave-button")
+            modifier = Modifier.testTag("join-wave-button"),
         ) {
             Text("Join Wave")
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.testTag("settings-button")
+            modifier = Modifier.testTag("settings-button"),
         ) {
             Icon(Icons.Default.Settings, contentDescription = "Settings")
         }
 
         // Mock focus indicator
         Box(
-            modifier = Modifier
-                .size(2.dp)
-                .background(Color.Blue)
-                .testTag("focus-indicator")
+            modifier =
+                Modifier
+                    .size(2.dp)
+                    .background(Color.Blue)
+                    .testTag("focus-indicator"),
         )
     }
 }
@@ -1155,29 +1198,30 @@ private fun TestModalDialogFocus() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
-            onClick = { showDialog.value = true }
+            onClick = { showDialog.value = true },
         ) {
             Text("Open Settings Dialog")
         }
 
         if (showDialog.value) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .semantics { contentDescription = "Settings Dialog" }
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .semantics { contentDescription = "Settings Dialog" },
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     TextField(
                         value = "",
                         onValueChange = { },
                         label = { Text("First Input") },
-                        modifier = Modifier.testTag("dialog-first-input")
+                        modifier = Modifier.testTag("dialog-first-input"),
                     )
 
                     Button(
                         onClick = { showDialog.value = false },
-                        modifier = Modifier.testTag("dialog-close-button")
+                        modifier = Modifier.testTag("dialog-close-button"),
                     ) {
                         Text("Close")
                     }
@@ -1190,20 +1234,22 @@ private fun TestModalDialogFocus() {
 @Composable
 private fun TestKeyboardShortcutsScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        val shortcuts = mapOf(
-            "space-key" to "Join Wave",
-            "f-key" to "Add to Favorites",
-            "r-key" to "Refresh Events",
-            "s-key" to "Open Settings",
-            "h-key" to "Show Help"
-        )
+        val shortcuts =
+            mapOf(
+                "space-key" to "Join Wave",
+                "f-key" to "Add to Favorites",
+                "r-key" to "Refresh Events",
+                "s-key" to "Open Settings",
+                "h-key" to "Show Help",
+            )
 
         shortcuts.forEach { (key, action) ->
             Button(
                 onClick = { },
-                modifier = Modifier
-                    .testTag(key)
-                    .semantics { contentDescription = "Keyboard shortcut: $action" }
+                modifier =
+                    Modifier
+                        .testTag(key)
+                        .semantics { contentDescription = "Keyboard shortcut: $action" },
             ) {
                 Text(action)
             }
@@ -1219,44 +1265,47 @@ private fun TestWaveCoordinationFocus() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
-            onClick = { isActive.value = true }
+            onClick = { isActive.value = true },
         ) {
             Text("Start Wave Coordination")
         }
 
         if (isActive.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination active"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination active"
+                    },
             ) {
                 Text("Wave Active")
             }
 
             Button(
                 onClick = { },
-                modifier = Modifier.testTag("emergency-exit")
+                modifier = Modifier.testTag("emergency-exit"),
             ) {
                 Text("Exit")
             }
 
             Text(
                 text = "Wave Status",
-                modifier = Modifier.testTag("wave-status")
+                modifier = Modifier.testTag("wave-status"),
             )
 
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Entering warming phase"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Entering warming phase"
+                    },
             ) {
                 Text("Warming Phase")
             }
 
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Prepare for wave hit"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Prepare for wave hit"
+                    },
             ) {
                 Text("Prepare for Hit")
             }
@@ -1269,9 +1318,10 @@ private fun TestColorContrastScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
             onClick = { },
-            modifier = Modifier
-                .testTag("primary-button")
-                .semantics { contentDescription = "Primary action button with sufficient contrast" }
+            modifier =
+                Modifier
+                    .testTag("primary-button")
+                    .semantics { contentDescription = "Primary action button with sufficient contrast" },
         ) {
             Text("Primary Action")
         }
@@ -1279,42 +1329,47 @@ private fun TestColorContrastScreen() {
         Text(
             text = "Error Message",
             color = MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .testTag("error-text")
-                .semantics { contentDescription = "Error message with high contrast" }
+            modifier =
+                Modifier
+                    .testTag("error-text")
+                    .semantics { contentDescription = "Error message with high contrast" },
         )
 
         Text(
             text = "Success Message",
             color = Color.Green,
-            modifier = Modifier
-                .testTag("success-text")
-                .semantics { contentDescription = "Success message with sufficient contrast" }
+            modifier =
+                Modifier
+                    .testTag("success-text")
+                    .semantics { contentDescription = "Success message with sufficient contrast" },
         )
 
         Text(
             text = "Warning Message",
             color = Color.Red,
-            modifier = Modifier
-                .testTag("warning-text")
-                .semantics { contentDescription = "Warning message with appropriate contrast" }
+            modifier =
+                Modifier
+                    .testTag("warning-text")
+                    .semantics { contentDescription = "Warning message with appropriate contrast" },
         )
 
         Text(
             text = "Link Text",
             color = Color.Blue,
-            modifier = Modifier
-                .testTag("link-text")
-                .clickable { }
-                .semantics { contentDescription = "Link text with adequate contrast" }
+            modifier =
+                Modifier
+                    .testTag("link-text")
+                    .clickable { }
+                    .semantics { contentDescription = "Link text with adequate contrast" },
         )
 
         Row {
             Icon(Icons.Default.Add, contentDescription = "Success")
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Status: Success (indicated by checkmark icon)"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Status: Success (indicated by checkmark icon)"
+                    },
             ) {
                 Text("Success")
             }
@@ -1323,9 +1378,10 @@ private fun TestColorContrastScreen() {
         Row {
             Icon(Icons.Default.Info, contentDescription = "Error")
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Status: Error (indicated by warning icon)"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Status: Error (indicated by warning icon)"
+                    },
             ) {
                 Text("Error")
             }
@@ -1336,27 +1392,28 @@ private fun TestColorContrastScreen() {
 @Composable
 private fun TestTextScalingScreen() {
     Box(
-        modifier = Modifier.semantics {
-            contentDescription = "Text scaled to 200% without overlap"
-        }
+        modifier =
+            Modifier.semantics {
+                contentDescription = "Text scaled to 200% without overlap"
+            },
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Text(
                 text = "New York Wave Event",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.testTag("event-title")
+                modifier = Modifier.testTag("event-title"),
             )
 
             Text(
                 text = "Join thousands of people in a coordinated wave across New York City",
                 fontSize = 16.sp,
-                modifier = Modifier.testTag("event-description")
+                modifier = Modifier.testTag("event-description"),
             )
 
             Button(
                 onClick = { },
-                modifier = Modifier.testTag("button-text")
+                modifier = Modifier.testTag("button-text"),
             ) {
                 Text("Join Wave", fontSize = 18.sp)
             }
@@ -1364,7 +1421,7 @@ private fun TestTextScalingScreen() {
             Text(
                 text = "Events",
                 fontSize = 14.sp,
-                modifier = Modifier.testTag("navigation-label")
+                modifier = Modifier.testTag("navigation-label"),
             )
         }
     }
@@ -1375,38 +1432,41 @@ private fun TestDarkModeAccessibilityScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
             onClick = { },
-            modifier = Modifier
-                .testTag("dark-mode-button")
-                .semantics { contentDescription = "Dark mode: Primary button with sufficient contrast" }
+            modifier =
+                Modifier
+                    .testTag("dark-mode-button")
+                    .semantics { contentDescription = "Dark mode: Primary button with sufficient contrast" },
         ) {
             Text("Dark Mode Button")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Dark mode: Text with adequate contrast ratio"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Dark mode: Text with adequate contrast ratio"
+                },
         ) {
             Text("Dark Mode Text", color = Color.White)
         }
 
         Box(
-            modifier = Modifier
-                .size(2.dp)
-                .background(Color.Cyan)
-                .testTag("dark-mode-focus-indicator")
+            modifier =
+                Modifier
+                    .size(2.dp)
+                    .background(Color.Cyan)
+                    .testTag("dark-mode-focus-indicator"),
         )
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Navigate to Events" }
+            modifier = Modifier.semantics { contentDescription = "Navigate to Events" },
         ) {
             Icon(Icons.Default.Home, contentDescription = null)
         }
 
         Button(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Join Wave" }
+            modifier = Modifier.semantics { contentDescription = "Join Wave" },
         ) {
             Text("Join Wave")
         }
@@ -1418,27 +1478,30 @@ private fun TestTouchTargetSizesScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
             onClick = { },
-            modifier = Modifier
-                .testTag("join-wave-button")
-                .size(48.dp)
+            modifier =
+                Modifier
+                    .testTag("join-wave-button")
+                    .size(48.dp),
         ) {
             Text("Join")
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("favorite-button")
-                .size(48.dp)
+            modifier =
+                Modifier
+                    .testTag("favorite-button")
+                    .size(48.dp),
         ) {
             Icon(Icons.Default.Favorite, contentDescription = "Favorite")
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("settings-button")
-                .size(48.dp)
+            modifier =
+                Modifier
+                    .testTag("settings-button")
+                    .size(48.dp),
         ) {
             Icon(Icons.Default.Settings, contentDescription = "Settings")
         }
@@ -1449,15 +1512,16 @@ private fun TestTouchTargetSizesScreen() {
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                 label = { Text("Tab") },
-                modifier = Modifier.testTag("navigation-tab")
+                modifier = Modifier.testTag("navigation-tab"),
             )
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("close-button")
-                .size(48.dp)
+            modifier =
+                Modifier
+                    .testTag("close-button")
+                    .size(48.dp),
         ) {
             Icon(Icons.Default.Add, contentDescription = "Close")
         }
@@ -1465,9 +1529,10 @@ private fun TestTouchTargetSizesScreen() {
         Row {
             Button(
                 onClick = { },
-                modifier = Modifier
-                    .testTag("adjacent-button-1")
-                    .size(48.dp)
+                modifier =
+                    Modifier
+                        .testTag("adjacent-button-1")
+                        .size(48.dp),
             ) {
                 Text("1")
             }
@@ -1476,18 +1541,20 @@ private fun TestTouchTargetSizesScreen() {
 
             Button(
                 onClick = { },
-                modifier = Modifier
-                    .testTag("adjacent-button-2")
-                    .size(48.dp)
+                modifier =
+                    Modifier
+                        .testTag("adjacent-button-2")
+                        .size(48.dp),
             ) {
                 Text("2")
             }
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Touch targets have adequate spacing"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Touch targets have adequate spacing"
+                },
         ) {
             Text("Properly spaced targets")
         }
@@ -1502,46 +1569,49 @@ private fun TestGestureAlternativesScreen() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Alternative to pinch-to-zoom: Use zoom buttons"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Alternative to pinch-to-zoom: Use zoom buttons"
+                },
         ) {
             Text("Zoom: ${zoomState.value}")
         }
 
         Button(
             onClick = { zoomState.value = "Zoomed in" },
-            modifier = Modifier.testTag("zoom-in-button")
+            modifier = Modifier.testTag("zoom-in-button"),
         ) {
             Text("Zoom In")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Alternative to swipe gesture: Use navigation arrows"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Alternative to swipe gesture: Use navigation arrows"
+                },
         ) {
             Text(itemState.value)
         }
 
         Button(
             onClick = { itemState.value = "Next item" },
-            modifier = Modifier.testTag("next-button")
+            modifier = Modifier.testTag("next-button"),
         ) {
             Text("Next")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Alternative to long press: Use context menu button"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Alternative to long press: Use context menu button"
+                },
         ) {
             Text("Menu: ${menuState.value}")
         }
 
         Button(
             onClick = { menuState.value = "Context menu opened" },
-            modifier = Modifier.testTag("context-menu-button")
+            modifier = Modifier.testTag("context-menu-button"),
         ) {
             Text("Menu")
         }
@@ -1559,16 +1629,17 @@ private fun TestTimingAdjustmentsScreen() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
-            onClick = { extendedTiming.value = true }
+            onClick = { extendedTiming.value = true },
         ) {
             Text("Enable Extended Timing")
         }
 
         if (extendedTiming.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination timing extended for accessibility"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination timing extended for accessibility"
+                    },
             ) {
                 Text("Extended timing enabled")
             }
@@ -1576,16 +1647,17 @@ private fun TestTimingAdjustmentsScreen() {
 
         Button(
             onClick = { isPaused.value = true },
-            modifier = Modifier.testTag("pause-wave-button")
+            modifier = Modifier.testTag("pause-wave-button"),
         ) {
             Text("Pause Wave")
         }
 
         if (isPaused.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination paused"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination paused"
+                    },
             ) {
                 Text("Paused")
             }
@@ -1593,25 +1665,27 @@ private fun TestTimingAdjustmentsScreen() {
 
         Button(
             onClick = { isPaused.value = false },
-            modifier = Modifier.testTag("resume-wave-button")
+            modifier = Modifier.testTag("resume-wave-button"),
         ) {
             Text("Resume Wave")
         }
 
         if (!isPaused.value && extendedTiming.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination resumed"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination resumed"
+                    },
             ) {
                 Text("Resumed")
             }
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Timeout settings adjusted for accessibility"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Timeout settings adjusted for accessibility"
+                },
         ) {
             Text("Timeout settings")
         }
@@ -1622,24 +1696,26 @@ private fun TestTimingAdjustmentsScreen() {
 private fun TestConsistentUIPatterns() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Navigation follows consistent pattern"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Navigation follows consistent pattern"
+                },
         ) {
             NavigationBar {
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                    label = { Text("Events") }
+                    label = { Text("Events") },
                 )
             }
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Primary actions consistently positioned"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Primary actions consistently positioned"
+                },
         ) {
             Button(onClick = { }) {
                 Text("Primary Action")
@@ -1647,25 +1723,28 @@ private fun TestConsistentUIPatterns() {
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Favorite icon consistently represents adding to favorites"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Favorite icon consistently represents adding to favorites"
+                },
         ) {
             Icon(Icons.Default.Favorite, contentDescription = "Favorite")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Settings icon consistently opens configuration"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Settings icon consistently opens configuration"
+                },
         ) {
             Icon(Icons.Default.Settings, contentDescription = "Settings")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Home icon consistently returns to main screen"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Home icon consistently returns to main screen"
+                },
         ) {
             Icon(Icons.Default.Home, contentDescription = "Home")
         }
@@ -1679,28 +1758,29 @@ private fun TestErrorMessagingScreen() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
-            onClick = { networkError.value = true }
+            onClick = { networkError.value = true },
         ) {
             Text("Trigger Network Error")
         }
 
         if (networkError.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Error: Cannot connect to server. Please check your internet connection and try again."
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Error: Cannot connect to server. Please check your internet connection and try again."
+                    },
             ) {
                 Column {
                     Text("Network Error", color = MaterialTheme.colorScheme.error)
                     Button(
                         onClick = { },
-                        modifier = Modifier.semantics { contentDescription = "Try again" }
+                        modifier = Modifier.semantics { contentDescription = "Try again" },
                     ) {
                         Text("Try Again")
                     }
                     Button(
                         onClick = { },
-                        modifier = Modifier.semantics { contentDescription = "Check connection settings" }
+                        modifier = Modifier.semantics { contentDescription = "Check connection settings" },
                     ) {
                         Text("Settings")
                     }
@@ -1709,16 +1789,17 @@ private fun TestErrorMessagingScreen() {
         }
 
         Button(
-            onClick = { validationError.value = true }
+            onClick = { validationError.value = true },
         ) {
             Text("Submit Invalid Form")
         }
 
         if (validationError.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Error: Email field is required. Please enter a valid email address."
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Error: Email field is required. Please enter a valid email address."
+                    },
             ) {
                 Text("Validation Error", color = MaterialTheme.colorScheme.error)
             }
@@ -1733,16 +1814,17 @@ private fun TestProgressIndicatorsScreen() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
-            onClick = { loadingProgress.value = 25 }
+            onClick = { loadingProgress.value = 25 },
         ) {
             Text("Start Loading")
         }
 
         if (loadingProgress.value > 0) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Loading events: ${loadingProgress.value}% complete"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Loading events: ${loadingProgress.value}% complete"
+                    },
             ) {
                 Text("Loading: ${loadingProgress.value}%")
             }
@@ -1751,9 +1833,10 @@ private fun TestProgressIndicatorsScreen() {
         // Simulate progress updates
         if (loadingProgress.value == 25) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Loading events: 50% complete"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Loading events: 50% complete"
+                    },
             ) {
                 Text("Loading: 50%")
             }
@@ -1761,33 +1844,36 @@ private fun TestProgressIndicatorsScreen() {
 
         if (loadingProgress.value == 25) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Loading events: 100% complete"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Loading events: 100% complete"
+                    },
             ) {
                 Text("Loading: 100%")
             }
         }
 
         Button(
-            onClick = { wavePhase.value = "warming" }
+            onClick = { wavePhase.value = "warming" },
         ) {
             Text("Start Wave Coordination")
         }
 
         if (wavePhase.value == "warming") {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination: Warming phase active"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination: Warming phase active"
+                    },
             ) {
                 Text("Warming Phase")
             }
 
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Wave coordination: Waiting for wave hit"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Wave coordination: Waiting for wave hit"
+                    },
             ) {
                 Text("Waiting for Hit")
             }
@@ -1801,57 +1887,63 @@ private fun TestWaveCoordinationAccessibility() {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Choreography: Raise both arms above head"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Choreography: Raise both arms above head"
+                },
         ) {
             Text("Choreography Step 1")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Choreography: Lower arms in sweeping motion"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Choreography: Lower arms in sweeping motion"
+                },
         ) {
             Text("Choreography Step 2")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Haptic feedback enabled for timing cues"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Haptic feedback enabled for timing cues"
+                },
         ) {
             Text("Haptic feedback active")
         }
 
         Button(
-            onClick = { observerMode.value = true }
+            onClick = { observerMode.value = true },
         ) {
             Text("Enable Observer Mode")
         }
 
         if (observerMode.value) {
             Box(
-                modifier = Modifier.semantics {
-                    contentDescription = "Observer mode active: You can participate by sound without physical movement"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Observer mode active: You can participate by sound without physical movement"
+                    },
             ) {
                 Text("Observer Mode Active")
             }
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Wave status: 5 seconds until wave hit"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave status: 5 seconds until wave hit"
+                },
         ) {
             Text("5 seconds to hit")
         }
 
         Box(
-            modifier = Modifier.semantics {
-                contentDescription = "Wave hit successful: You participated in the global wave"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave hit successful: You participated in the global wave"
+                },
         ) {
             Text("Wave hit success")
         }
