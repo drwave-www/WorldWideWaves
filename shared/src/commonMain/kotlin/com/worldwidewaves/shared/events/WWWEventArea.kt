@@ -34,6 +34,9 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
@@ -99,6 +102,10 @@ data class WWWEventArea(
 
     @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
 
+    // Polygon loading state notification
+    @Transient private val _polygonsLoaded = MutableStateFlow(false)
+    val polygonsLoaded: StateFlow<Boolean> = _polygonsLoaded.asStateFlow()
+
     // ---------------------------
 
     /**
@@ -110,6 +117,7 @@ data class WWWEventArea(
         cachedBoundingBox = null
         cachedCenter = null
         cachedPositionWithinResult = null
+        _polygonsLoaded.value = false
     }
 
     // ---------------------------
@@ -344,6 +352,9 @@ data class WWWEventArea(
                         }
                     }
                 }
+
+            // Notify that polygon data is now available
+            _polygonsLoaded.value = true
         }
 
         val result = cachedAreaPolygons ?: emptyList()
