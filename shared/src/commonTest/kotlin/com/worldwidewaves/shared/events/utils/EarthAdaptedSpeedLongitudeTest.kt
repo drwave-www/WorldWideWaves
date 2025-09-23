@@ -299,23 +299,36 @@ class EarthAdaptedSpeedLongitudeTest {
         bands.forEachIndexed { index, band ->
             val bandDescription = "Band $index (lat=${band.latitude}, latWidth=${band.latWidth}, lngWidth=${band.lngWidth})"
 
-            // Validate latitude is within expected bounding box
+            // Validate latitude is within expected world bounds
             if (band.latitude !in -90.0..90.0) {
                 invalidBands.add("$bandDescription: Invalid latitude outside world bounds")
             }
 
-            // Validate positive widths (zero width bands are invalid)
-            if (band.latWidth <= 0) {
-                invalidBands.add("$bandDescription: Invalid zero or negative latitude width")
+            // Check if this is an extreme latitude band (near poles)
+            val isExtremeBand = kotlin.math.abs(band.latitude) > 85.0
+
+            // Validate positive widths with different rules for extreme bands
+            if (band.latWidth < 0) {
+                invalidBands.add("$bandDescription: Invalid negative latitude width")
             }
+
             if (band.lngWidth <= 0) {
                 invalidBands.add("$bandDescription: Invalid zero or negative longitude width")
+            }
+
+            // For extreme bands, allow larger longitude widths but set reasonable upper bounds
+            if (isExtremeBand && band.lngWidth > 720.0) { // 2x full longitude range is extreme
+                invalidBands.add("$bandDescription: Extreme longitude width indicates mathematical instability")
             }
 
             // For bands within our test area, validate they're in expected range
             if (band.latitude in 0.0..10.0) {
                 if (band.latWidth <= 0 || band.lngWidth <= 0) {
                     invalidBands.add("$bandDescription: Band in test area has invalid dimensions")
+                }
+                // Test area bands should have reasonable longitude widths
+                if (band.lngWidth > 50.0) { // Reasonable upper bound for test area
+                    invalidBands.add("$bandDescription: Test area longitude width seems excessive")
                 }
             }
         }

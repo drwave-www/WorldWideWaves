@@ -184,11 +184,13 @@ class EarthAdaptedSpeedLongitude(
         val lonBandWidthAtLongest = calculateLonBandWidthAtLatitude(longestLat)
         Napier.v { "Longitude band width at the middle latitude: $lonBandWidthAtLongest" }
 
+        // Always add bands outside the bounding box to ensure comprehensive coverage
+        // Use safe distances from actual poles to avoid mathematical instabilities
         latLonBands.add(
             LatLonBand(
-                -89.9,
+                -87.0, // Safe distance from south pole but still outside most bounding boxes
                 0.0, // Lower latitude band
-                adjustLongitudeWidthAtLatitude(-89.9, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(-87.0, lonBandWidthAtLongest),
             ),
         )
 
@@ -215,9 +217,9 @@ class EarthAdaptedSpeedLongitude(
 
         latLonBands.add(
             LatLonBand(
-                89.9,
+                87.0, // Safe distance from north pole but still outside most bounding boxes
                 0.0, // Higher latitude band
-                adjustLongitudeWidthAtLatitude(89.9, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(87.0, lonBandWidthAtLongest),
             ),
         )
 

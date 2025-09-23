@@ -58,6 +58,8 @@ import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -78,6 +80,7 @@ import kotlin.time.Duration.Companion.seconds
  * Tests cover the most critical user workflow for WorldWideWaves application:
  * wave participation timing, coordination, animations, and user feedback.
  */
+@OptIn(kotlin.time.ExperimentalTime::class)
 @RunWith(AndroidJUnit4::class)
 class WaveActivityTest {
 
@@ -241,7 +244,7 @@ class WaveActivityTest {
         val hasBeenHitFlow = MutableStateFlow(false)
 
         every { mockEvent.observer.userHasBeenHit } returns hasBeenHitFlow
-        every { mockEvent.warming.playCurrentSoundChoreographyTone() } returns Unit
+        coEvery { mockEvent.warming.playCurrentSoundChoreographyTone() } returns 1
 
         composeTestRule.setContent {
             TestSoundVibrationCoordination(mockEvent)
@@ -262,7 +265,7 @@ class WaveActivityTest {
         }
 
         // Verify sound choreography was called
-        verify(exactly = 1) { mockEvent.warming.playCurrentSoundChoreographyTone() }
+        coVerify(exactly = 1) { mockEvent.warming.playCurrentSoundChoreographyTone() }
 
         trace.stop()
     }

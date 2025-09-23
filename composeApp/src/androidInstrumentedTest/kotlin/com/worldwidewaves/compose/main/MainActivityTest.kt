@@ -306,7 +306,14 @@ class MainActivityTest {
         val loadingState = MutableStateFlow("loading")
         val mockEvents = mockk<WWWEvents>(relaxed = true)
 
-        every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(emptyList()).asStateFlow()
+        // Create mock events for the test
+        val mockEventList = listOf(
+            mockk<IWWWEvent>(relaxed = true),
+            mockk<IWWWEvent>(relaxed = true),
+            mockk<IWWWEvent>(relaxed = true)
+        )
+
+        every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(mockEventList).asStateFlow()
 
         composeTestRule.setContent {
             TestDataLoadingStates(loadingState.value, mockEvents)

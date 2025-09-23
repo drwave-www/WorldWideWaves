@@ -553,8 +553,8 @@ object PolygonUtils {
 
                     // Insert each intermediate point right after the running anchor
                     for (p in between) {
-                        // Avoid duplicates with last inserted / anchor
-                        if (p != current) {
+                        // Avoid duplicates with last inserted / anchor and check if point already exists in polygon
+                        if (p != current && !polygon.any { it.lat == p.lat && it.lng == p.lng }) {
                             current = polygon.insertAfter(p, current.id)
                         }
                     }
