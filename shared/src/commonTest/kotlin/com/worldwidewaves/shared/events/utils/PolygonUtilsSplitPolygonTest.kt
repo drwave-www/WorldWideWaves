@@ -57,52 +57,6 @@ class PolygonUtilsSplitPolygonTest {
             PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { originalIdx, testCase ->
                 val actualIdx = 5  // Use the actual original index for clarity
                 try {
-                    // Debug output for test case 5
-                    if (actualIdx == 5) {
-                        println("=== DEBUG TEST CASE $actualIdx ===")
-                        println("Original polygon:")
-                        testCase.polygon.forEachIndexed { i, pos ->
-                            println("  [$i] $pos (type: ${pos::class.simpleName})")
-                        }
-
-                        val result = when {
-                            testCase.longitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.longitudeToCut)
-                            testCase.composedLongitudeToCut != null -> splitByLongitude(testCase.polygon, testCase.composedLongitudeToCut)
-                            else -> throw IllegalArgumentException("Invalid test case")
-                        }
-
-                        println("\nActual LEFT result (${result.left.size} polygons):")
-                        result.left.forEachIndexed { polyIdx, polygon ->
-                            println("  Polygon $polyIdx (${polygon.size} vertices):")
-                            polygon.forEachIndexed { vertIdx, pos ->
-                                println("    [$vertIdx] $pos")
-                            }
-                        }
-
-                        println("\nExpected LEFT result (${testCase.leftExpected.size} polygons):")
-                        testCase.leftExpected.forEachIndexed { polyIdx, expectedPolygon ->
-                            println("  Polygon $polyIdx (${expectedPolygon.polygon.size} vertices):")
-                            expectedPolygon.polygon.forEachIndexed { vertIdx, pos ->
-                                println("    [$vertIdx] $pos")
-                            }
-                        }
-
-                        println("\nActual RIGHT result (${result.right.size} polygons):")
-                        result.right.forEachIndexed { polyIdx, polygon ->
-                            println("  Polygon $polyIdx (${polygon.size} vertices):")
-                            polygon.forEachIndexed { vertIdx, pos ->
-                                println("    [$vertIdx] $pos")
-                            }
-                        }
-
-                        println("\nExpected RIGHT result (${testCase.rightExpected.size} polygons):")
-                        testCase.rightExpected.forEachIndexed { polyIdx, expectedPolygon ->
-                            println("  Polygon $polyIdx (${expectedPolygon.polygon.size} vertices):")
-                            expectedPolygon.polygon.forEachIndexed { vertIdx, pos ->
-                                println("    [$vertIdx] $pos")
-                            }
-                        }
-                    }
 
                     testSplitPolygonCase(actualIdx, testCase)
                 } catch (e: AssertionError) {

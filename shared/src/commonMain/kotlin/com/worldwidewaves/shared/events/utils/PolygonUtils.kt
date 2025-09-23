@@ -529,13 +529,16 @@ object PolygonUtils {
 
                 if (onLine.size < 2) return@map polygon
 
-                // Process consecutive anchors in traversal order (no sorting)
-                for (idx in 0 until onLine.size - 1) {
-                    var current = onLine[idx]
-                    val next = onLine[idx + 1]
+                // Remove duplicate anchors and sort by latitude to get proper order along composed longitude
+                val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
+
+                // Process consecutive anchors in latitude order (along composed longitude)
+                for (idx in 0 until uniqueAnchors.size - 1) {
+                    val anchor1 = uniqueAnchors[idx]
+                    val anchor2 = uniqueAnchors[idx + 1]
 
                     // Calculate midpoint latitude
-                    val midLat = (current.lat + next.lat) / 2
+                    val midLat = (anchor1.lat + anchor2.lat) / 2
                     val midLng = lngToCut.lngAt(midLat) ?: continue
 
                     // Include intermediate points only when the composed-longitude
@@ -543,19 +546,37 @@ object PolygonUtils {
                     val insideMid = source.containsPosition(Position(midLat, midLng))
                     if (!insideMid) continue
 
-                    // Get intermediate points between anchors, preserving direction
-                    val between =
-                        if (current.lat <= next.lat) {
-                            lngToCut.positionsBetween(current.lat, next.lat)
-                        } else {
-                            lngToCut.positionsBetween(next.lat, current.lat).asReversed()
-                        }
+                    // Get intermediate points between anchors
+                    val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
 
-                    // Insert each intermediate point right after the running anchor
-                    for (p in between) {
-                        // Avoid duplicates with last inserted / anchor and check if point already exists in polygon
-                        if (p != current && !polygon.any { it.lat == p.lat && it.lng == p.lng }) {
-                            current = polygon.insertAfter(p, current.id)
+                    // Find the correct position in the polygon to insert intermediate points
+                    // We need to find where anchor1 and anchor2 appear consecutively in the polygon
+                    val anchor1Pos = polygon.indexOfFirst { it.lat == anchor1.lat && it.lng == anchor1.lng }
+                    val anchor2Pos = polygon.indexOfFirst { it.lat == anchor2.lat && it.lng == anchor2.lng }
+
+                    if (anchor1Pos != -1 && anchor2Pos != -1) {
+                        // Check if they are consecutive (considering wrap-around)
+                        val isConsecutive = (anchor2Pos == anchor1Pos + 1) ||
+                                          (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
+
+                        if (isConsecutive) {
+                            // Insert intermediate points after anchor1
+                            var current = polygon.elementAt(anchor1Pos)
+                            for (p in between) {
+                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
+                                    current = polygon.insertAfter(p, current.id)
+                                }
+                            }
+                        } else {
+                            // For non-consecutive anchors, we need a more sophisticated approach
+                            // to determine the correct insertion point based on the polygon's traversal order
+                            // For now, use a simple heuristic: insert after the first anchor found
+                            var current = polygon.elementAt(anchor1Pos)
+                            for (p in between) {
+                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
+                                    current = polygon.insertAfter(p, current.id)
+                                }
+                            }
                         }
                     }
                 }
