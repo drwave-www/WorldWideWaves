@@ -185,16 +185,6 @@ data class WWWEventArea(
 
         val result = isPointInPolygons(position, polygons)
 
-        // Add detailed debug logging for point-in-polygon calculation
-        Log.i("WWWEventArea", "[DEBUG] Point-in-polygon result for eventId=${event.id}, position=$position, polygons.size=${polygons.size}, result=$result")
-        if (polygons.isNotEmpty()) {
-            // Log first polygon details for debugging
-            val firstPolygon = polygons.first()
-            val polygonSize = firstPolygon.size
-            val firstVertices = firstPolygon.take(3).joinToString(", ") { "(${it.lat}, ${it.lng})" }
-            Log.i("WWWEventArea", "[DEBUG] First polygon for eventId=${event.id}: size=$polygonSize, first vertices=[$firstVertices]")
-        }
-
         // Cache the result
         cachedPositionWithinResult = Pair(position, result)
         return result
@@ -353,15 +343,7 @@ data class WWWEventArea(
             }
 
             // Atomically assign the complete immutable list
-            cachedAreaPolygons =
-                tempPolygons.toList().also {
-                    it.forEachIndexed { index, polygon ->
-                        // Log first few vertices for debugging
-                        if (polygon.isNotEmpty()) {
-                            val vertices = polygon.toList()
-                        }
-                    }
-                }
+            cachedAreaPolygons = tempPolygons.toList()
 
             // Notify that polygon data is now available
             _polygonsLoaded.value = true
