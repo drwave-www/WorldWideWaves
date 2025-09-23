@@ -90,8 +90,8 @@ class TimePhysicsValidationTest {
             "Wave speed should be greater than 0.1 m/s (slow human movement)"
         )
         assertTrue(
-            defaultSimulationSpeed <= 600.0,
-            "Wave speed should be 600 m/s or less (maximum simulation speed for testing)"
+            defaultSimulationSpeed <= 300.0,
+            "Wave speed should be 300 m/s or less (maximum simulation speed for testing)"
         )
 
         // Wave should be able to circle Earth in reasonable time

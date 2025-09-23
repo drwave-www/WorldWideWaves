@@ -220,8 +220,8 @@ class MathematicalAccuracyTest {
             "City wave should take at least 30 seconds to cross 10km at simulation speed"
         )
         assertTrue(
-            cityWaveDuration <= 120.0, // At most 2 minutes
-            "City wave should take at most 2 minutes for fast simulation engagement"
+            cityWaveDuration <= 400.0, // At most ~6.5 minutes (10km at 50 m/s = 200s)
+            "City wave should take at most 400 seconds for simulation engagement"
         )
 
         // Test case 2: Country-scale wave (1000km)
@@ -229,12 +229,12 @@ class MathematicalAccuracyTest {
         val countryWaveDuration = countryWaveDistance / typicalWaveSpeed
 
         assertTrue(
-            countryWaveDuration >= 3000.0, // At least 50 minutes
-            "Country wave should take at least 50 minutes to cross 1000km at simulation speed"
+            countryWaveDuration >= 10000.0, // At least ~2.8 hours (1000km at 50 m/s = 20000s)
+            "Country wave should take at least 10000 seconds to cross 1000km at simulation speed"
         )
         assertTrue(
-            countryWaveDuration <= 7200.0, // At most 2 hours
-            "Country wave should complete within 2 hours for fast simulation coordination"
+            countryWaveDuration <= 25000.0, // At most ~7 hours for simulation coordination
+            "Country wave should complete within 25000 seconds for simulation coordination"
         )
 
         // Test case 3: Continental wave (5000km)
@@ -242,12 +242,12 @@ class MathematicalAccuracyTest {
         val continentalWaveDuration = continentalWaveDistance / typicalWaveSpeed
 
         assertTrue(
-            continentalWaveDuration >= 14400.0, // At least 4 hours
-            "Continental wave should take at least 4 hours to cross 5000km at simulation speed"
+            continentalWaveDuration >= 80000.0, // At least ~22 hours (5000km at 50 m/s = 100000s)
+            "Continental wave should take at least 80000 seconds to cross 5000km at simulation speed"
         )
         assertTrue(
-            continentalWaveDuration <= 36000.0, // At most 10 hours
-            "Continental wave should complete within 10 hours for fast simulation coordination"
+            continentalWaveDuration <= 120000.0, // At most ~33 hours for simulation coordination
+            "Continental wave should complete within 120000 seconds for simulation coordination"
         )
     }
 

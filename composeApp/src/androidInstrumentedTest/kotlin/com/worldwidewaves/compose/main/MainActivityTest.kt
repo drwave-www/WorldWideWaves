@@ -266,7 +266,7 @@ class MainActivityTest {
         val preservedState = MutableStateFlow("initial_data")
 
         composeTestRule.setContent {
-            TestAppLifecycleHandling(lifecycleState, preservedState)
+            TestAppLifecycleHandling(lifecycleState.value, preservedState.value)
         }
 
         // Verify initial created state
@@ -317,7 +317,7 @@ class MainActivityTest {
         every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(mockEventList).asStateFlow()
 
         composeTestRule.setContent {
-            TestDataLoadingStates(loadingState, mockEvents)
+            TestDataLoadingStates(loadingState.value, mockEvents)
         }
 
         // Verify loading indicator is displayed
@@ -542,9 +542,7 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestAppLifecycleHandling(lifecycleStateFlow: StateFlow<String>, preservedDataFlow: StateFlow<String>) {
-        val lifecycleState by lifecycleStateFlow.collectAsState()
-        val preservedData by preservedDataFlow.collectAsState()
+    private fun TestAppLifecycleHandling(lifecycleState: String, preservedData: String) {
 
         Text(
             text = "App Lifecycle",
@@ -562,8 +560,7 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestDataLoadingStates(loadingStateFlow: StateFlow<String>, events: WWWEvents) {
-        val loadingState by loadingStateFlow.collectAsState()
+    private fun TestDataLoadingStates(loadingState: String, events: WWWEvents) {
         val eventsCount by events.flow().collectAsState(initial = emptyList())
 
         Text(
