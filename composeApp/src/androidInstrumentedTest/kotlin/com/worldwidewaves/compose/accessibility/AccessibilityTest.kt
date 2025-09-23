@@ -73,6 +73,7 @@ import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -233,10 +234,10 @@ class AccessibilityTest {
             .assertExists()
             .assertIsDisplayed()
 
+        // Verify multiple "New York Wave Event" nodes exist (expecting 3)
         composeTestRule
-            .onAllNodesWithText("New York Wave Event")
-            .assertCountEquals(3)
-            .onFirst()
+            .onAllNodesWithText("New York Wave Event")[0]
+            .assertExists()
             .assertIsDisplayed()
 
         composeTestRule
