@@ -250,6 +250,11 @@ class WWWEventObserver(
 
     private var unifiedObservationJob: Job? = null
 
+    // Area detection retry tracking to avoid infinite retries
+    private var areaDetectionRetryCount = 0
+    private var areaDetectionRetryJob: Job? = null
+    private val maxAreaDetectionRetries = 5
+
     // ---------------------------
 
     init {
@@ -336,6 +341,10 @@ class WWWEventObserver(
                 Log.e("stopObservation", "Error stopping unified observation: $e")
             } finally {
                 unifiedObservationJob = null
+                // Also clean up area detection retry job
+                areaDetectionRetryJob?.cancel()
+                areaDetectionRetryJob = null
+                areaDetectionRetryCount = 0
             }
         }
     }
@@ -521,6 +530,10 @@ class WWWEventObserver(
                 val polygons = event.area.getPolygons()
 
                 if (polygons.isNotEmpty()) {
+                    // Polygon data is now available - reset retry count and cancel any pending retries
+                    areaDetectionRetryCount = 0
+                    areaDetectionRetryJob?.cancel()
+
                     // Log polygon details for debugging
                     polygons.forEachIndexed { index, polygon ->
                     }
@@ -543,7 +556,17 @@ class WWWEventObserver(
 
                     _userIsInArea.updateIfChanged(isInArea)
                 } else {
-                    // Polygon data not yet loaded - keep current state but log this
+                    // Polygon data not yet loaded - schedule a smart retry with backoff
+                    // This ensures area detection gets re-evaluated once polygon data is available
+                    if (areaDetectionRetryCount < maxAreaDetectionRetries) {
+                        areaDetectionRetryJob?.cancel() // Cancel any previous retry
+                        areaDetectionRetryJob = coroutineScopeProvider.launchDefault {
+                            val delayMs = (1000L * (areaDetectionRetryCount + 1)) // Progressive backoff: 1s, 2s, 3s, 4s, 5s
+                            kotlinx.coroutines.delay(delayMs)
+                            areaDetectionRetryCount++
+                            updateAreaDetection() // Retry area detection
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 // On error, assume user is not in area for safety
