@@ -333,6 +333,9 @@ class WWWEventObserver(
         // Return the latest periodic observation (progression and status)
         // Area detection will be handled by the periodic observation flow to maintain existing behavior
         periodicObservation
+    }.onEach { _ ->
+        // Update area detection for each emission to ensure position changes are handled
+        updateAreaDetection()
     }
 
     /**

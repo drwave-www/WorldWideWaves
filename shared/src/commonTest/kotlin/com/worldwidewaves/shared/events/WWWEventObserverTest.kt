@@ -80,7 +80,7 @@ class WWWEventObserverTest : KoinTest {
         mockClock = MockClock(TestHelpers.TestTimes.BASE_TIME)
 
         val coroutineScopeProvider = DefaultCoroutineScopeProvider(testDispatcher, testDispatcher)
-        testPositionManager = PositionManager(coroutineScopeProvider)
+        testPositionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
 
         startKoin {
             modules(
