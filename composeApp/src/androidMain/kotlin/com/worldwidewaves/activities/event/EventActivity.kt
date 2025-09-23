@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.common.ButtonWave
@@ -139,6 +140,42 @@ class EventActivity : AbstractEventWaveActivity() {
         val progression by event.observer.progression.collectAsState()
         val isInArea by event.observer.userIsInArea.collectAsState()
         val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
+
+        // DEBUG: In debug mode, ensure observer uses simulation after map/area data is loaded
+        if (BuildConfig.DEBUG && platform.isOnSimulation()) {
+            LaunchedEffect(Unit) {
+                // Wait for map and area data to load completely
+                var attempts = 0
+                while (attempts < 30) { // Increased timeout to 15 seconds
+                    kotlinx.coroutines.delay(500)
+                    attempts++
+
+                    // Check multiple indicators that the map/area is ready
+                    val hasProgression = event.observer.progression.value > 0.0
+                    val eventIsRunning = event.observer.eventStatus.value == Status.RUNNING
+
+                    if (hasProgression && eventIsRunning) {
+                        break
+                    }
+                }
+
+                // Restart observer to ensure simulation is used with loaded map/area data
+                event.observer.stopObservation()
+                kotlinx.coroutines.delay(200)
+                event.observer.startObservation()
+
+                // Force a position update after restart to trigger area detection
+                kotlinx.coroutines.delay(1000)
+
+                // If still not in area after restart, force another evaluation
+                if (!event.observer.userIsInArea.value) {
+                    kotlinx.coroutines.delay(2000)
+                    event.observer.stopObservation()
+                    kotlinx.coroutines.delay(100)
+                    event.observer.startObservation()
+                }
+            }
+        }
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {

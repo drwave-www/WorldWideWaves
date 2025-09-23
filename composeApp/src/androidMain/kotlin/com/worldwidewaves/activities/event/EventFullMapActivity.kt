@@ -21,6 +21,7 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -37,13 +39,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.common.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
@@ -54,8 +59,10 @@ import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import dev.icerock.moko.resources.compose.stringResource
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -84,6 +91,50 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
             value = event.getEndDateTime()
         }
         val isInArea by event.observer.userIsInArea.collectAsState()
+
+        // DEBUG: In debug mode, ensure observer uses simulation after map/area data is loaded
+        if (BuildConfig.DEBUG) {
+            val context = LocalContext.current
+            val platform =
+                remember {
+                    (context as ComponentActivity).get<WWWPlatform>()
+                }
+
+            if (platform.isOnSimulation()) {
+                LaunchedEffect(Unit) {
+                    // Wait for map and area data to load completely
+                    var attempts = 0
+                    while (attempts < 30) { // Increased timeout to 15 seconds
+                        kotlinx.coroutines.delay(500)
+                        attempts++
+
+                        // Check multiple indicators that the map/area is ready
+                        val hasProgression = event.observer.progression.value > 0.0
+                        val eventIsRunning = eventStatus == Status.RUNNING
+
+                        if (hasProgression && eventIsRunning) {
+                            break
+                        }
+                    }
+
+                    // Restart observer to ensure simulation is used with loaded map/area data
+                    event.observer.stopObservation()
+                    kotlinx.coroutines.delay(200)
+                    event.observer.startObservation()
+
+                    // Force a position update after restart to trigger area detection
+                    kotlinx.coroutines.delay(1000)
+
+                    // If still not in area after restart, force another evaluation
+                    if (!event.observer.userIsInArea.value) {
+                        kotlinx.coroutines.delay(2000)
+                        event.observer.stopObservation()
+                        kotlinx.coroutines.delay(100)
+                        event.observer.startObservation()
+                    }
+                }
+            }
+        }
 
         // Construct the event map
         val eventMap =
