@@ -362,7 +362,7 @@ class MainActivityTest {
         val retryCount = MutableStateFlow(0)
 
         composeTestRule.setContent {
-            TestErrorRecovery(errorState, retryCount) {
+            TestErrorRecovery(errorState.value, retryCount.value) {
                 retryCount.value = retryCount.value + 1
             }
         }
@@ -589,10 +589,7 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestErrorRecovery(errorStateFlow: StateFlow<String>, retryCountFlow: StateFlow<Int>, onRetry: () -> Unit) {
-        val errorState by errorStateFlow.collectAsState()
-        val retryCount by retryCountFlow.collectAsState()
-
+    private fun TestErrorRecovery(errorState: String, retryCount: Int, onRetry: () -> Unit) {
         Column {
             Text(
                 text = "Error Recovery",
