@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-
 import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
@@ -30,7 +29,6 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.utils.updateIfChanged
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.awaitClose
@@ -265,12 +263,13 @@ class WWWEventObserver(
                 try {
                     // Initialize state with current values - enhanced error handling
                     val currentStatus = event.getStatus()
-                    val currentProgression = try {
-                        event.wave.getProgression()
-                    } catch (e: Throwable) {
-                        Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
-                        0.0
-                    }
+                    val currentProgression =
+                        try {
+                            event.wave.getProgression()
+                        } catch (e: Throwable) {
+                            Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
+                            0.0
+                        }
 
                     Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
 
@@ -285,7 +284,7 @@ class WWWEventObserver(
                         Log.i("WWWEventObserver", "Starting continuous observation flow for event ${event.id}")
                         observationJob =
                             createObservationFlow()
-                                .flowOn(Dispatchers.Default)  // CPU-bound calculations (progression, status, time)
+                                .flowOn(Dispatchers.Default) // CPU-bound calculations (progression, status, time)
                                 .catch { e ->
                                     Log.e("WWWEventObserver", "Error in observation flow for event ${event.id}: $e")
                                     // Don't propagate the error - just log it and continue
@@ -413,9 +412,16 @@ class WWWEventObserver(
 
         if (userPosition != null) {
             try {
-                val isInArea = event.area.isPositionWithin(userPosition)
-                Log.v("WWWEventObserver", "Area detection result: isInArea=$isInArea for position=$userPosition")
-                _userIsInArea.updateIfChanged(isInArea)
+                // Check if polygon data is available first
+                val polygons = event.area.getPolygons()
+                if (polygons.isNotEmpty()) {
+                    val isInArea = event.area.isPositionWithin(userPosition)
+                    Log.v("WWWEventObserver", "Area detection result: isInArea=$isInArea for position=$userPosition")
+                    _userIsInArea.updateIfChanged(isInArea)
+                } else {
+                    // Polygon data not yet loaded - keep current state but log this
+                    Log.v("WWWEventObserver", "Polygon data not yet loaded, keeping current userIsInArea state")
+                }
             } catch (e: Exception) {
                 Log.e("WWWEventObserver", "Error checking if user is in area", throwable = e)
                 // On error, assume user is not in area for safety
@@ -430,8 +436,11 @@ class WWWEventObserver(
         _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
 
         // Log final state for debugging
-        Log.v("WWWEventObserver", "State updated - userIsInArea=${_userIsInArea.value}, " +
-            "progression=${_progression.value}, status=${_eventStatus.value}")
+        Log.v(
+            "WWWEventObserver",
+            "State updated - userIsInArea=${_userIsInArea.value}, " +
+                "progression=${_progression.value}, status=${_eventStatus.value}",
+        )
     }
 
     /**
@@ -468,7 +477,6 @@ class WWWEventObserver(
             if (observerStatus != actualStatus) {
                 issues.add("Status inconsistency: observer=$observerStatus, actual=$actualStatus")
             }
-
         } catch (e: Exception) {
             issues.add("Error during state validation: ${e.message}")
         }
@@ -484,7 +492,10 @@ class WWWEventObserver(
      * Validates state transitions to ensure they follow logical progression.
      * This helps catch state management bugs early and ensures consistent behavior.
      */
-    private fun validateStateTransition(newProgression: Double, newStatus: Status) {
+    private fun validateStateTransition(
+        newProgression: Double,
+        newStatus: Status,
+    ) {
         val previousProgression = _progression.value
         val previousStatus = _eventStatus.value
 
@@ -545,7 +556,8 @@ class WWWEventObserver(
      */
     private fun updateProgressionIfSignificant(newProgression: Double) {
         if (abs(newProgression - lastEmittedProgression) >= PROGRESSION_THRESHOLD ||
-            lastEmittedProgression < 0.0) { // Always emit first update
+            lastEmittedProgression < 0.0
+        ) { // Always emit first update
             _progression.updateIfChanged(newProgression)
             lastEmittedProgression = newProgression
         }
@@ -557,7 +569,8 @@ class WWWEventObserver(
      */
     private fun updatePositionRatioIfSignificant(newRatio: Double) {
         if (abs(newRatio - lastEmittedPositionRatio) >= POSITION_RATIO_THRESHOLD ||
-            lastEmittedPositionRatio < 0.0) { // Always emit first update
+            lastEmittedPositionRatio < 0.0
+        ) { // Always emit first update
             _userPositionRatio.updateIfChanged(newRatio)
             lastEmittedPositionRatio = newRatio
         }
