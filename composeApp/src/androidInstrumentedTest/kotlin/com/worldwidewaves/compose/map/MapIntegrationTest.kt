@@ -176,8 +176,8 @@ class MapIntegrationTest {
             }
         }
 
-        // Verify success flow completed
-        assert(downloadCompleted) { "Download should complete successfully" }
+        // Verify map loaded successfully (since we start with Installed state)
+        assert(mapLoaded) { "Map should load successfully when installed" }
 
         trace.stop()
     }
@@ -688,6 +688,13 @@ private fun TestMapDownloadFlow(
                     modifier = Modifier.testTag("retry-status")
                 )
                 onRetry()
+            }
+            is MapFeatureState.Canceling -> {
+                androidx.compose.material3.Text(
+                    "Canceling...",
+                    modifier = Modifier.testTag("cancel-status")
+                )
+                onCancel()
             }
             else -> {
                 androidx.compose.material3.Text(

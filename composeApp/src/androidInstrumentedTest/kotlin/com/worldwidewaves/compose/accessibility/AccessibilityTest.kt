@@ -801,14 +801,33 @@ class AccessibilityTest {
 
         // Test progress announcements
         composeTestRule.onNodeWithText("Start Loading").performClick()
+
+        // Wait for initial progress state
+        composeTestRule.waitUntil(timeoutMillis = 1000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 25% complete")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule
             .onNodeWithContentDescription("Loading events: 25% complete")
             .assertExists()
 
+        // Wait for progression to 50%
+        composeTestRule.waitUntil(timeoutMillis = 1000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 50% complete")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule
             .onNodeWithContentDescription("Loading events: 50% complete")
             .assertExists()
 
+        // Wait for progression to 100%
+        composeTestRule.waitUntil(timeoutMillis = 1000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 100% complete")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule
             .onNodeWithContentDescription("Loading events: 100% complete")
             .assertExists()
