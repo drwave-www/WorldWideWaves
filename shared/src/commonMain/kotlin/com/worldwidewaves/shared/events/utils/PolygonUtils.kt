@@ -215,42 +215,41 @@ object PolygonUtils {
         val points = this.toList()
         var inside = false
         var j = points.size - 1
-        var intersectionCount = 0
+        val epsilon = 1e-12
 
         Log.v("PolygonUtils", "[AREA_DEBUG] Polygon vertices: ${points.take(5)}${if (points.size > 5) "..." else ""}")
-        Log.v("PolygonUtils", "[AREA_DEBUG] Starting ray-casting algorithm")
+        Log.v("PolygonUtils", "[AREA_DEBUG] Starting ray-casting algorithm with test point lat=${tap.lat}, lng=${tap.lng}")
 
-        // Use a more robust ray-casting algorithm with better numerical stability
+        // Use the original robust ray-casting algorithm with debugging
         for (i in points.indices) {
             val xi = points[i].lng
             val yi = points[i].lat
             val xj = points[j].lng
             val yj = points[j].lat
 
+            Log.v("PolygonUtils", "[AREA_DEBUG] Edge $j->$i: (${yj}, ${xj}) -> (${yi}, ${xi})")
+
             // Check if point is exactly on a vertex
-            if (xi == tap.lng && yi == tap.lat) {
+            if (kotlin.math.abs(xi - tap.lng) < epsilon && kotlin.math.abs(yi - tap.lat) < epsilon) {
                 Log.v("PolygonUtils", "[AREA_DEBUG] Point is exactly on vertex $i: (${yi}, ${xi}), returning true")
                 return true
             }
 
-            // Improved ray-casting with better edge case handling
-            val yiAbove = yi > tap.lat
-            val yjAbove = yj > tap.lat
 
-            if (yiAbove != yjAbove) {
-                val intersectionX = (xj - xi) * (tap.lat - yi) / (yj - yi) + xi
-                if (tap.lng < intersectionX) {
-                    inside = !inside
-                    intersectionCount++
-                    Log.v("PolygonUtils", "[AREA_DEBUG] Ray intersection $intersectionCount at x=$intersectionX with edge $j->$i")
-                }
+            // Ray-casting algorithm: original working implementation
+            if (((yi > tap.lat) != (yj > tap.lat)) &&
+                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)) {
+                inside = !inside
+                Log.v("PolygonUtils", "[AREA_DEBUG] Ray intersection with edge $j->$i, inside now = $inside")
             }
+
             j = i
         }
 
-        Log.v("PolygonUtils", "[AREA_DEBUG] Ray-casting complete: $intersectionCount intersections, inside=$inside")
+        Log.v("PolygonUtils", "[AREA_DEBUG] Ray-casting complete: inside=$inside")
         return inside
     }
+
 
     /**
      * Splits a polygon by a given longitude.
