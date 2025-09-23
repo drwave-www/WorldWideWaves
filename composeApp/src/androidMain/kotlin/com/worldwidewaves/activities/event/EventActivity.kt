@@ -144,35 +144,34 @@ class EventActivity : AbstractEventWaveActivity() {
         // DEBUG: In debug mode, ensure observer uses simulation after map/area data is loaded
         if (BuildConfig.DEBUG && platform.isOnSimulation()) {
             LaunchedEffect(Unit) {
-                // Wait for map and area data to load completely
+                // Wait for polygon data to load (indicated by progression > 0)
                 var attempts = 0
-                while (attempts < 30) { // Increased timeout to 15 seconds
+                while (attempts < 60 && event.observer.progression.value <= 0.0) { // 30 seconds timeout
                     kotlinx.coroutines.delay(500)
                     attempts++
-
-                    // Check multiple indicators that the map/area is ready
-                    val hasProgression = event.observer.progression.value > 0.0
-                    val eventIsRunning = event.observer.eventStatus.value == Status.RUNNING
-
-                    if (hasProgression && eventIsRunning) {
-                        break
-                    }
                 }
 
-                // Restart observer to ensure simulation is used with loaded map/area data
+                android.util.Log.i("EventActivity", "Polygon loading complete, progression=${event.observer.progression.value}")
+
+                // Restart observer to ensure simulation is used with loaded polygon data
                 event.observer.stopObservation()
-                kotlinx.coroutines.delay(200)
+                kotlinx.coroutines.delay(500)
                 event.observer.startObservation()
 
-                // Force a position update after restart to trigger area detection
-                kotlinx.coroutines.delay(1000)
+                // Wait a moment for area detection to process
+                kotlinx.coroutines.delay(2000)
 
-                // If still not in area after restart, force another evaluation
+                android.util.Log.i("EventActivity", "After observer restart: isInArea=${event.observer.userIsInArea.value}")
+
+                // If still not in area, try one more restart
                 if (!event.observer.userIsInArea.value) {
-                    kotlinx.coroutines.delay(2000)
+                    android.util.Log.i("EventActivity", "Still not in area, attempting second restart")
+                    kotlinx.coroutines.delay(1000)
                     event.observer.stopObservation()
-                    kotlinx.coroutines.delay(100)
+                    kotlinx.coroutines.delay(500)
                     event.observer.startObservation()
+                    kotlinx.coroutines.delay(2000)
+                    android.util.Log.i("EventActivity", "After second restart: isInArea=${event.observer.userIsInArea.value}")
                 }
             }
         }
