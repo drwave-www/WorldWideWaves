@@ -1,6 +1,7 @@
 package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
@@ -682,9 +683,9 @@ class ChoreographyManagerTest : KoinTest {
 
         // WHEN: Attempting to get sequences without loaded choreography definitions
         // THEN: Should handle gracefully with proper fallback behavior
-        var warmingSequence: WarmingSequence? = null
-        var waitingSequence: WaitingSequence? = null
-        var hitSequence: HitSequence? = null
+        var warmingSequence: DisplayableSequence<TestImage>? = null
+        var waitingSequence: DisplayableSequence<TestImage>? = null
+        var hitSequence: DisplayableSequence<TestImage>? = null
 
         assertDoesNotThrow("ChoreographyManager should handle missing choreography definitions gracefully") {
             warmingSequence = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)

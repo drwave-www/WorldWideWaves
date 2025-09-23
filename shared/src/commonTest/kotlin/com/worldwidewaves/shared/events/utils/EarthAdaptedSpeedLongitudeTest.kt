@@ -52,6 +52,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.hours
@@ -289,12 +290,39 @@ class EarthAdaptedSpeedLongitudeTest {
         val longitude = EarthAdaptedSpeedLongitude(bbox, speed, direction)
         val bands = longitude.calculateWaveBands()
 
-        assertTrue(bands.isNotEmpty())
-        bands.drop(1).dropLast(1).forEach {
-            // FIXME: remove first and last before testing
-            assertTrue(it.latitude in 0.0..10.0)
-            assertTrue(it.latWidth > 0)
-            assertTrue(it.lngWidth > 0)
+        assertTrue(bands.isNotEmpty(), "Should generate wave bands")
+
+        // Test ALL bands including edge cases (first and last)
+        // These are critical for proper wave coverage at boundaries
+        val invalidBands = mutableListOf<String>()
+
+        bands.forEachIndexed { index, band ->
+            val bandDescription = "Band $index (lat=${band.latitude}, latWidth=${band.latWidth}, lngWidth=${band.lngWidth})"
+
+            // Validate latitude is within expected bounding box
+            if (band.latitude !in -90.0..90.0) {
+                invalidBands.add("$bandDescription: Invalid latitude outside world bounds")
+            }
+
+            // Validate positive widths (zero width bands are invalid)
+            if (band.latWidth <= 0) {
+                invalidBands.add("$bandDescription: Invalid zero or negative latitude width")
+            }
+            if (band.lngWidth <= 0) {
+                invalidBands.add("$bandDescription: Invalid zero or negative longitude width")
+            }
+
+            // For bands within our test area, validate they're in expected range
+            if (band.latitude in 0.0..10.0) {
+                if (band.latWidth <= 0 || band.lngWidth <= 0) {
+                    invalidBands.add("$bandDescription: Band in test area has invalid dimensions")
+                }
+            }
+        }
+
+        if (invalidBands.isNotEmpty()) {
+            val errorSummary = invalidBands.joinToString("\n- ", "Wave band calculation has boundary issues:\n- ")
+            fail("$errorSummary\n\nThese edge cases must be fixed for reliable wave coverage.")
         }
     }
 

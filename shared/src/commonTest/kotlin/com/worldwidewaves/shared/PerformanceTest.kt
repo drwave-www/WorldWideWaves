@@ -288,19 +288,22 @@ class PerformanceTest {
         val maxReasonableTime = CIEnvironment.Performance.maxReasonableTimeMs
 
         // Check that timing doesn't increase exponentially
+        // Use minimum measurable time threshold to avoid zero-time assumptions
+        val minMeasurableTime = 1.0 // 1ms minimum measurable time
+
         for (i in 1 until times.size) {
             val currentTime = times[i].toDouble()
             val previousTime = times[i-1].toDouble()
 
-            // Handle case where previous timing was 0 (too fast to measure)
-            if (previousTime == 0.0) {
-                // If current time is also 0, that's fine (both very fast)
-                // If current time is > 0, that's still reasonable (small increase)
-                assertTrue(currentTime < maxReasonableTime, "Current timing should be reasonable when previous was 0ms, got: ${currentTime}ms")
-            } else {
-                val ratio = currentTime / previousTime
-                assertTrue(ratio < maxRatio, "Timing ratio between consecutive sizes should be <${maxRatio}x, got: $ratio")
-            }
+            // Use effective timing (with minimum threshold) for ratio calculations
+            val effectivePreviousTime = maxOf(previousTime, minMeasurableTime)
+            val effectiveCurrentTime = maxOf(currentTime, minMeasurableTime)
+
+            val ratio = effectiveCurrentTime / effectivePreviousTime
+
+            // Both actual and effective times should be reasonable
+            assertTrue(currentTime < maxReasonableTime, "Actual timing should be reasonable for size ${inputSizes[i]}, got: ${currentTime}ms")
+            assertTrue(ratio < maxRatio, "Timing ratio between sizes ${inputSizes[i-1]} and ${inputSizes[i]} should be <${maxRatio}x, got: $ratio (effective: ${effectiveCurrentTime}ms / ${effectivePreviousTime}ms)")
         }
 
         // Overall performance should be reasonable

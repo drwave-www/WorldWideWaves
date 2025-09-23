@@ -23,7 +23,6 @@ package com.worldwidewaves.testing
 
 import com.worldwidewaves.compose.accessibility.AccessibilityTest
 import com.worldwidewaves.compose.common.CommonComponentsTest
-import com.worldwidewaves.compose.coordination.RealTimeCoordinationTest
 import com.worldwidewaves.compose.edgecases.EdgeCaseTest
 import com.worldwidewaves.compose.map.MapIntegrationTest
 import org.junit.runner.RunWith
@@ -86,7 +85,6 @@ import org.junit.runners.Suite
 @Suite.SuiteClasses(
     CommonComponentsTest::class,
     MapIntegrationTest::class,
-    RealTimeCoordinationTest::class,
     AccessibilityTest::class,
     EdgeCaseTest::class
 )

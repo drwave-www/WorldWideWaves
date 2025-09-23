@@ -321,7 +321,7 @@ class InputValidationTest {
         val validStartTime = kotlin.time.Clock.System.now()
 
         // WHEN/THEN: Should reject speeds outside valid range
-        val invalidSpeeds = listOf(0, -1, 501, 1000, Int.MIN_VALUE, Int.MAX_VALUE)
+        val invalidSpeeds = listOf(0, -1, 601, 1000, Int.MIN_VALUE, Int.MAX_VALUE)
 
         invalidSpeeds.forEach { speed ->
             val exception = assertFailsWith<IllegalArgumentException> {
@@ -342,7 +342,7 @@ class InputValidationTest {
         val validStartTime = kotlin.time.Clock.System.now()
 
         // WHEN/THEN: Should accept speeds within valid range
-        val validSpeeds = listOf(1, 50, 100, 250, 500)
+        val validSpeeds = listOf(1, 50, 100, 250, 600)
 
         validSpeeds.forEach { speed ->
             val simulation = WWWSimulation(
@@ -366,7 +366,7 @@ class InputValidationTest {
         )
 
         // WHEN/THEN: Should reject invalid speed changes
-        val invalidSpeeds = listOf(0, -1, 501, 1000)
+        val invalidSpeeds = listOf(0, -1, 601, 1000)
 
         invalidSpeeds.forEach { speed ->
             val exception = assertFailsWith<IllegalArgumentException> {
@@ -376,7 +376,7 @@ class InputValidationTest {
         }
 
         // AND: Should accept valid speed changes
-        val validSpeeds = listOf(1, 100, 500)
+        val validSpeeds = listOf(1, 100, 600)
         validSpeeds.forEach { speed ->
             val result = simulation.setSpeed(speed)
             assertEquals(speed, result, "Speed change should return new speed")
@@ -397,7 +397,7 @@ class InputValidationTest {
         simulation.pause()
 
         // WHEN/THEN: Should reject invalid resume speeds
-        val invalidSpeeds = listOf(0, -1, 501, 1000)
+        val invalidSpeeds = listOf(0, -1, 601, 1000)
 
         invalidSpeeds.forEach { speed ->
             val exception = assertFailsWith<IllegalArgumentException> {
@@ -407,7 +407,7 @@ class InputValidationTest {
         }
 
         // AND: Should accept valid resume speeds
-        val validSpeeds = listOf(1, 100, 500)
+        val validSpeeds = listOf(1, 100, 600)
         validSpeeds.forEach { speed ->
             simulation.pause() // Re-pause for each test
             simulation.resume(speed)

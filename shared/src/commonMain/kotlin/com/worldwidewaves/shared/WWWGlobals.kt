@@ -69,7 +69,7 @@ class WWWGlobals {
          */
         object Wave {
             /** Default wave simulation speed in meters per second */
-            const val DEFAULT_SPEED_SIMULATION = 50 // m/s
+            const val DEFAULT_SPEED_SIMULATION = 300 // m/s
 
             /** Minimum allowed simulation speed */
             const val MIN_SIMULATION_SPEED = 1

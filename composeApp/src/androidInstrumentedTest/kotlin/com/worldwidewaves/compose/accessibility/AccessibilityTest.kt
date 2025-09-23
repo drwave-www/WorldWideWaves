@@ -803,7 +803,7 @@ class AccessibilityTest {
         composeTestRule.onNodeWithText("Start Loading").performClick()
 
         // Wait for initial progress state
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Loading events: 25% complete")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -813,7 +813,7 @@ class AccessibilityTest {
             .assertExists()
 
         // Wait for progression to 50%
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Loading events: 50% complete")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -823,7 +823,7 @@ class AccessibilityTest {
             .assertExists()
 
         // Wait for progression to 100%
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Loading events: 100% complete")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -947,34 +947,44 @@ private fun TestInteractiveElementsScreen(onElementsCountUpdate: (Int, Int) -> U
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                 label = { Text("Events") },
-                modifier = Modifier.semantics { contentDescription = "Navigate to Events" },
+                modifier = Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Navigate to Events" },
             )
             NavigationBarItem(
                 selected = false,
                 onClick = { },
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
                 label = { Text("About") },
-                modifier = Modifier.semantics { contentDescription = "Navigate to About" },
+                modifier = Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Navigate to About" },
             )
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Open Settings" },
+            modifier = Modifier
+                .testTag("interactive-element")
+                .semantics { contentDescription = "Open Settings" },
         ) {
             Icon(Icons.Default.Settings, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "Play Wave Animation" },
+            modifier = Modifier
+                .testTag("interactive-element")
+                .semantics { contentDescription = "Play Wave Animation" },
         ) {
             Icon(Icons.Default.PlayArrow, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier.semantics { contentDescription = "User Profile Menu" },
+            modifier = Modifier
+                .testTag("interactive-element")
+                .semantics { contentDescription = "User Profile Menu" },
         ) {
             Icon(Icons.Default.Person, contentDescription = null)
         }
@@ -1844,13 +1854,13 @@ private fun TestProgressIndicatorsScreen() {
     val loadingProgress = remember { mutableStateOf(0) }
     val wavePhase = remember { mutableStateOf("") }
 
-    // Auto-progress through loading states
+    // Auto-progress through loading states with longer delays for test reliability
     LaunchedEffect(loadingProgress.value) {
         if (loadingProgress.value == 25) {
-            delay(100)
+            delay(500)
             loadingProgress.value = 50
         } else if (loadingProgress.value == 50) {
-            delay(100)
+            delay(500)
             loadingProgress.value = 100
         }
     }

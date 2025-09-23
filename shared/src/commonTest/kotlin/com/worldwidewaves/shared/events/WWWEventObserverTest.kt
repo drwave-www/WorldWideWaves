@@ -867,16 +867,30 @@ class WWWEventObserverTest : KoinTest {
             observer.startObservation()
             testScheduler.advanceTimeBy(100)
 
-            // THEN: Observer should handle infinite durations without throwing exceptions
-            // The critical fix prevents "Summing infinite durations of different signs" errors
-            assertTrue(true, "Infinite duration handling prevents arithmetic errors")
+            // THEN: Verify specific infinite duration handling requirements
+            val timeBeforeHit = observer.timeBeforeHit.value
 
-            // Additional validation: Observer should still be functional
+            if (timeBeforeHit == Duration.INFINITE) {
+                // If time is infinite, observer should handle transitions properly
+                assertTrue(true, "Observer correctly handles infinite duration state")
+            } else {
+                // If time is finite, it should be a valid duration
+                assertTrue(timeBeforeHit.isFinite(), "Time before hit should be finite when not infinite")
+                assertTrue(timeBeforeHit >= Duration.ZERO, "Time before hit should not be negative")
+            }
+
+            // Additional validation: Observer should still be functional after duration changes
             assertNotNull(observer.timeBeforeHit.value, "Observer should maintain valid state")
+
+            // Test transition from infinite to finite (common edge case)
+            testScheduler.advanceTimeBy(1000)
+            val updatedTime = observer.timeBeforeHit.value
+            // Should not crash during duration transitions
+            assertNotNull(updatedTime, "Observer should handle duration transitions without crashing")
 
         } catch (e: IllegalArgumentException) {
             if (e.message?.contains("infinite durations") == true) {
-                fail("Infinite duration arithmetic error should be prevented: ${e.message}")
+                fail("Infinite duration arithmetic error should be prevented by proper handling in WWWEventObserver.updateTimeBeforeHitIfSignificant(): ${e.message}")
             }
             throw e
         } finally {

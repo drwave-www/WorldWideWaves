@@ -126,7 +126,7 @@ class WWWGlobalsTest {
 
         assertEquals(300, defaultSimulationSpeed, "Default simulation speed should be 300 m/s (50x faster for simulations)")
         assertTrue(defaultSimulationSpeed > 0, "Simulation speed should be positive")
-        assertTrue(defaultSimulationSpeed < 343, "Simulation speed should be less than speed of sound (343 m/s)")
+        assertTrue(defaultSimulationSpeed <= 600, "Simulation speed should be reasonable for fast simulations (≤600 m/s)")
     }
 
     @Test

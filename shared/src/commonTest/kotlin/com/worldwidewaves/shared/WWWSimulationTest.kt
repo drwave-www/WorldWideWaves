@@ -46,7 +46,7 @@ class WWWSimulationTest {
 
         // Test with speed above maximum
         assertFailsWith<IllegalArgumentException> {
-            WWWSimulation(startDateTime, userPosition, 501)
+            WWWSimulation(startDateTime, userPosition, 601)
         }
     }
 
@@ -70,7 +70,7 @@ class WWWSimulationTest {
 
         // Test with speed above maximum
         assertFailsWith<IllegalArgumentException> {
-            simulation.setSpeed(501)
+            simulation.setSpeed(601)
         }
     }
 
