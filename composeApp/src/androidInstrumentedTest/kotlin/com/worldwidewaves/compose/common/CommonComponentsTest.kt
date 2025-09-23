@@ -55,12 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.testing.BaseComponentTest
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,13 +74,19 @@ import kotlin.time.ExperimentalTime
  * - Common UI patterns and interactions
  */
 @RunWith(AndroidJUnit4::class)
-class CommonComponentsTest : BaseComponentTest() {
+class CommonComponentsTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private lateinit var mockClock: IClock
 
     @OptIn(ExperimentalTime::class)
     @Before
-    override fun setUp() {
-        super.setUp()
-        // Additional setup specific to CommonComponentsTest if needed
+    fun setUp() {
+        mockClock =
+            mockk<IClock>(relaxed = true) {
+                every { now() } returns kotlin.time.Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
+            }
     }
 
     @Test
@@ -91,7 +94,7 @@ class CommonComponentsTest : BaseComponentTest() {
         // Test mock ButtonWave component click functionality
         var buttonClicked = false
 
-        setThemedContent {
+        composeTestRule.setContent {
             TestButtonWave(
                 eventId = "test-event",
                 eventState = Status.RUNNING,
@@ -192,28 +195,27 @@ class CommonComponentsTest : BaseComponentTest() {
             )
         }
 
-        // Test that the component exists and can be interacted with
-        val favoriteOverlayExists = try {
-            composeTestRule.onNodeWithTag("favorite-overlay").assertExists()
-            true
-        } catch (e: Exception) {
-            false
+        // Initially not favorite
+        composeTestRule.onNodeWithTag("favorite-star-empty").assertIsDisplayed()
+
+        // Click to toggle favorite
+        composeTestRule.onNodeWithTag("favorite-overlay").performClick()
+
+        // Verify state changed
+        assert(isFavorite) { "Event should be marked as favorite" }
+        assert(toggleCount == 1) { "Toggle should have been called once" }
+
+        // Update UI to reflect new state
+        composeTestRule.setContent {
+            TestEventOverlayFavorite(
+                isFavorite = true,
+                onToggle = { /* no-op for this test */ },
+                modifier = Modifier.testTag("favorite-overlay-filled"),
+            )
         }
 
-        assertTrue("Favorite overlay component should exist and be accessible", favoriteOverlayExists)
-
-        // Test click interaction if component exists
-        if (favoriteOverlayExists) {
-            try {
-                composeTestRule.onNodeWithTag("favorite-overlay").performClick()
-                composeTestRule.waitForIdle()
-                // Basic verification that interaction works
-                assertTrue("Toggle callback should have been called", toggleCount >= 0)
-            } catch (e: Exception) {
-                // If click fails, still pass the test as component exists
-                assertTrue("Component exists even if interaction fails in test environment", true)
-            }
-        }
+        // Verify filled star is displayed
+        composeTestRule.onNodeWithTag("favorite-star-filled").assertIsDisplayed()
     }
 
     @Test

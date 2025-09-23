@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Companion.Event
@@ -57,14 +56,6 @@ fun ButtonWave(
             it > (now - 1.hours) && it <= now
         } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
-
-    // DEBUG: Temporary debug logging to monitor button state changes
-    if (BuildConfig.DEBUG && eventId == "paris_france") {
-        android.util.Log.i(
-            "ButtonWave",
-            "Paris Wave Now button state: eventId=$eventId, eventState=$eventState, isInArea=$isInArea, isRunning=$isRunning, isSoon=$isSoon, isEndDateTimeRecent=$isEndDateTimeRecent, isEnabled=$isEnabled",
-        )
-    }
 
     // Blinking animation
     val infiniteTransition = rememberInfiniteTransition(label = "blinking")

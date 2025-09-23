@@ -87,7 +87,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
 import kotlinx.coroutines.delay
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -226,35 +225,36 @@ class AccessibilityTest {
             }
         }
 
-        // Verify basic heading structure exists (simplified)
-        val hasSemanticStructure = try {
-            composeTestRule.onNodeWithText("WorldWideWaves").assertExists()
-            composeTestRule.onNodeWithText("Available Events").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: check if any structured content exists
-            try {
-                composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
-            }
-        }
+        // Verify heading hierarchy
+        composeTestRule
+            .onNodeWithText("WorldWideWaves")
+            .assertExists()
+            .assertIsDisplayed()
 
-        // Check for semantic elements with relaxed matching
-        val hasSemanticElements = try {
-            composeTestRule.onNodeWithTag("navigation-menu").assertExists()
-            composeTestRule.onNodeWithTag("event-list").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: verify basic UI structure exists
-            try {
-                composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
-            }
-        }
+        composeTestRule
+            .onNodeWithText("Available Events")
+            .assertExists()
+            .assertIsDisplayed()
 
-        assertTrue("Semantic structure should be accessible", hasSemanticStructure || hasSemanticElements)
+        // Verify multiple "New York Wave Event" nodes exist (expecting 3)
+        composeTestRule
+            .onAllNodesWithText("New York Wave Event")[0]
+            .assertExists()
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Event Details")
+            .assertExists()
+            .assertIsDisplayed()
+
+        // Verify semantic roles
+        composeTestRule
+            .onNodeWithTag("navigation-menu")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithTag("event-list")
+            .assertExists()
 
         trace.stop()
     }
@@ -468,28 +468,24 @@ class AccessibilityTest {
             }
         }
 
-        // Verify test components exist
-        composeTestRule.onNodeWithText("Start Wave Coordination").assertExists()
-
-        // Start wave coordination to test accessibility during coordination
+        // Start wave coordination
         composeTestRule.onNodeWithText("Start Wave Coordination").performClick()
+
+        // Verify focus management during active coordination
+        composeTestRule.onNodeWithContentDescription("Wave coordination active").assertExists()
+
+        // Critical elements should remain focusable
+        composeTestRule.onNodeWithTag("emergency-exit").requestFocus()
         composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("emergency-exit").assertIsDisplayed()
 
-        // Verify focus can be maintained on critical elements during coordination
-        val hasAccessibleElements = try {
-            composeTestRule.onNodeWithTag("emergency-exit").assertExists()
-            composeTestRule.onNodeWithTag("wave-status").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: check if any coordination-related UI exists
-            try {
-                composeTestRule.onAllNodesWithText("Wave", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
-            }
-        }
+        composeTestRule.onNodeWithTag("wave-status").requestFocus()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("wave-status").assertIsDisplayed()
 
-        assertTrue("Wave coordination should maintain accessibility", hasAccessibleElements)
+        // Test focus announcements during wave phases
+        composeTestRule.onNodeWithContentDescription("Entering warming phase").assertExists()
+        composeTestRule.onNodeWithContentDescription("Prepare for wave hit").assertExists()
 
         trace.stop()
     }
@@ -803,28 +799,48 @@ class AccessibilityTest {
             }
         }
 
-        // Verify the test UI components exist and are clickable
-        composeTestRule.onNodeWithText("Start Loading").assertExists()
+        // Test progress announcements
         composeTestRule.onNodeWithText("Start Loading").performClick()
 
-        // Wait for UI to settle
-        composeTestRule.waitForIdle()
-
-        // Verify progress indicator accessibility without timing dependency
-        val hasAccessibleProgress = try {
-            composeTestRule.onAllNodesWithText("Progress", substring = true).fetchSemanticsNodes().isNotEmpty() ||
-            composeTestRule.onAllNodesWithContentDescription("Loading", substring = true).fetchSemanticsNodes().isNotEmpty()
-        } catch (e: Exception) {
-            // Fallback: just verify the UI components exist
-            try {
-                composeTestRule.onNodeWithText("Start Wave Coordination").assertExists()
-                true
-            } catch (e2: Exception) {
-                false
-            }
+        // Wait for initial progress state
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 25% complete")
+                .fetchSemanticsNodes().isNotEmpty()
         }
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 25% complete")
+            .assertExists()
 
-        assertTrue("Progress indicators should be accessible", hasAccessibleProgress)
+        // Wait for progression to 50%
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 50% complete")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 50% complete")
+            .assertExists()
+
+        // Wait for progression to 100%
+        composeTestRule.waitUntil(timeoutMillis = 2000) {
+            composeTestRule
+                .onAllNodesWithContentDescription("Loading events: 100% complete")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule
+            .onNodeWithContentDescription("Loading events: 100% complete")
+            .assertExists()
+
+        // Test wave coordination progress
+        composeTestRule.onNodeWithText("Start Wave Coordination").performClick()
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination: Warming phase active")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithContentDescription("Wave coordination: Waiting for wave hit")
+            .assertExists()
 
         trace.stop()
     }

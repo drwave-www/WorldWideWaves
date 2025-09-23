@@ -32,10 +32,6 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.localizeString
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.DrawableResource
@@ -104,11 +100,6 @@ abstract class WWWEventWave :
 
     @Transient protected var positionRequester: (() -> Position?)? = null
 
-    @Transient private val _positionUpdates = MutableSharedFlow<Position?>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-
     // ---------------------------
 
     abstract suspend fun getWavePolygons(): WavePolygons?
@@ -136,24 +127,10 @@ abstract class WWWEventWave :
         return this as T
     }
 
-    /**
-     * Reactive flow of position updates. Emits whenever user position changes.
-     */
-    @Transient
-    val positionUpdates: SharedFlow<Position?> = _positionUpdates.asSharedFlow()
-
     fun setPositionRequester(positionRequester: () -> Position?) =
         apply {
             this.positionRequester = positionRequester
         }
-
-    /**
-     * Notifies that the position has changed. Should be called by location providers
-     * when position updates occur to trigger reactive position-dependent calculations.
-     */
-    fun notifyPositionChanged(position: Position?) {
-        _positionUpdates.tryEmit(position)
-    }
 
     fun getUserPosition(): Position? {
         var platform: WWWPlatform? = null

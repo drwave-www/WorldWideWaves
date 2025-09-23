@@ -23,7 +23,6 @@ package com.worldwidewaves.compose.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,7 +70,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
@@ -208,7 +206,7 @@ class MainActivityTest {
         val locationPermissionState = MutableStateFlow("not_requested")
 
         composeTestRule.setContent {
-            TestLocationPermissionFlow(locationPermissionState) { newState ->
+            TestLocationPermissionFlow(locationPermissionState.value) { newState ->
                 locationPermissionState.value = newState
             }
         }
@@ -267,7 +265,7 @@ class MainActivityTest {
         val preservedState = MutableStateFlow("initial_data")
 
         composeTestRule.setContent {
-            TestAppLifecycleHandling(lifecycleState, preservedState)
+            TestAppLifecycleHandling(lifecycleState.value, preservedState.value)
         }
 
         // Verify initial created state
@@ -318,7 +316,7 @@ class MainActivityTest {
         every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(mockEventList).asStateFlow()
 
         composeTestRule.setContent {
-            TestDataLoadingStates(loadingState, mockEvents)
+            TestDataLoadingStates(loadingState.value, mockEvents)
         }
 
         // Verify loading indicator is displayed
@@ -362,7 +360,7 @@ class MainActivityTest {
         val retryCount = MutableStateFlow(0)
 
         composeTestRule.setContent {
-            TestErrorRecovery(errorState, retryCount) {
+            TestErrorRecovery(errorState.value, retryCount.value) {
                 retryCount.value = retryCount.value + 1
             }
         }
@@ -507,11 +505,9 @@ class MainActivityTest {
 
     @Composable
     private fun TestLocationPermissionFlow(
-        permissionStateFlow: StateFlow<String>,
+        permissionState: String,
         onPermissionStateChange: (String) -> Unit
     ) {
-        val permissionState by permissionStateFlow.collectAsState()
-
         Column {
             Text(
                 text = "Location Permission",
@@ -536,19 +532,13 @@ class MainActivityTest {
                         .padding(8.dp)
                         .background(Color.Gray)
                         .padding(16.dp)
-                        .clickable {
-                            onPermissionStateChange("requesting")
-                        }
                 )
             }
         }
     }
 
     @Composable
-    private fun TestAppLifecycleHandling(lifecycleStateFlow: StateFlow<String>, preservedDataFlow: StateFlow<String>) {
-        val lifecycleState by lifecycleStateFlow.collectAsState()
-        val preservedData by preservedDataFlow.collectAsState()
-
+    private fun TestAppLifecycleHandling(lifecycleState: String, preservedData: String) {
         Text(
             text = "App Lifecycle",
             modifier = Modifier.semantics {
@@ -565,8 +555,7 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestDataLoadingStates(loadingStateFlow: StateFlow<String>, events: WWWEvents) {
-        val loadingState by loadingStateFlow.collectAsState()
+    private fun TestDataLoadingStates(loadingState: String, events: WWWEvents) {
         val eventsCount by events.flow().collectAsState(initial = emptyList())
 
         Text(
@@ -589,10 +578,7 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestErrorRecovery(errorStateFlow: StateFlow<String>, retryCountFlow: StateFlow<Int>, onRetry: () -> Unit) {
-        val errorState by errorStateFlow.collectAsState()
-        val retryCount by retryCountFlow.collectAsState()
-
+    private fun TestErrorRecovery(errorState: String, retryCount: Int, onRetry: () -> Unit) {
         Column {
             Text(
                 text = "Error Recovery",
@@ -615,10 +601,7 @@ class MainActivityTest {
                         .testTag("retry-button")
                         .padding(8.dp)
                         .background(Color.Red)
-                        .padding(16.dp)
-                        .clickable {
-                            onRetry()
-                        },
+                        .padding(16.dp),
                     color = Color.White
                 )
             }

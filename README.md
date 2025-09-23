@@ -82,7 +82,6 @@ WorldWideWaves/
 - Synchronized animations across devices
 - Audio coordination with visual effects
 - Frame-based timing system
-- **Crowd Sound Simulation**: Test real audio playback for crowd choreography
 
 ### 📱 Cross-Platform
 - Shared Kotlin business logic
@@ -112,67 +111,6 @@ Currently implementing iOS version. See:
 
 # Skip common tests (if needed)
 ./gradlew :shared:testDebugUnitTest -PdisableCommonTest
-
-# Sound Choreography Tests
-./gradlew crowdSoundSimulation  # Mathematical crowd simulation
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest
-```
-
-## Sound Choreography Simulation
-
-WorldWideWaves includes comprehensive sound choreography simulation to test how music sounds when played by large crowds.
-
-### 🎵 Features
-
-**Mathematical Simulation (`CrowdSoundChoreographySimulationTest`):**
-- Simulates 50 simultaneous people playing MIDI notes
-- Each person plays every 100ms along the full duration of the MIDI file
-- Analyzes pitch distribution and timing to ensure song recognizability
-- Validates that overlapping notes create harmonic richness without losing melody
-
-**Real Audio Testing (`RealAudioCrowdSimulationTest`):**
-- Plays actual sound through Android device speakers
-- Tests single notes, MIDI sequences, and full crowd simulation
-- Uses `AndroidSoundPlayer` with different waveforms (SINE, SQUARE, SAWTOOTH)
-- Simulates 5-person crowd with 500ms intervals for audible demonstration
-
-**Interactive Audio Demo (`AudioTestActivity`):**
-- Android Activity with Compose UI for real-time audio testing
-- Three test modes: single note, MIDI sequence, and crowd simulation
-- Loads real MIDI files or creates demo tracks as fallback
-- Real-time progress indicators and audio warnings
-
-### 🔧 Usage
-
-Run the mathematical simulation:
-```bash
-./gradlew crowdSoundSimulation
-```
-
-Test real audio on Android device:
-```bash
-# Make sure Android emulator/device has audio enabled
-ANDROID_SERIAL=emulator-5556 ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest
-```
-
-Launch interactive audio demo:
-```bash
-# Install and launch AudioTestActivity
-./gradlew :composeApp:assembleDebug
-adb install -r composeApp/build/outputs/apk/debug/composeApp-debug.apk
-adb shell am start -n com.worldwidewaves/.debug.AudioTestActivity
-```
-
-### 📊 Technical Implementation
-
-- **MIDI File Parsing**: Real MIDI file loading with `MidiParser.parseMidiFile()`
-- **Wave Progression**: Time-based progression through musical score
-- **Crowd Modeling**: Mathematical simulation of 50 people with timing variations
-- **Real Audio Output**: Android `AudioTrack` integration for speaker playback
-- **Multiple Waveforms**: Each simulated person uses different waveforms for variety
-
-The simulation proves that when 50 people play the same MIDI file with slight timing variations (every 100ms), the song remains recognizable and creates rich, layered sound - perfect for coordinated crowd events.
-
 ```
 
 ## Contributing
