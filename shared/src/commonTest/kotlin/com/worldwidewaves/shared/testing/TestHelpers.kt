@@ -233,10 +233,8 @@ object TestHelpers {
             approxDuration = duration.inWholeMinutes.toInt()
         )
 
-        // Set up position requester if user position is provided
-        if (userPosition != null) {
-            linearWave.setPositionRequester { userPosition }
-        }
+        // Position is now managed by PositionManager in tests
+        // Tests should set position using: testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
 
         return WWWEvent.WWWWaveDefinition(linear = linearWave)
     }

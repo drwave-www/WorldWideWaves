@@ -535,7 +535,7 @@ class WWWEventObserver(
             }
 
             // Check user position vs area consistency
-            val userPosition = event.wave.getUserPosition()
+            val userPosition = positionManager.getCurrentPosition()
             val observerUserInArea = _userIsInArea.value
 
             if (userPosition != null) {

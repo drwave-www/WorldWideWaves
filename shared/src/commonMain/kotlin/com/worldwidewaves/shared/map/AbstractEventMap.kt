@@ -362,8 +362,6 @@ abstract class AbstractEventMap<T>(
         if (position == null) {
             // Position cleared - reset state
             lastKnownPosition = null
-            event.wave.setPositionRequester { null }
-            event.wave.notifyPositionChanged(null)
             return
         }
 
@@ -380,11 +378,7 @@ abstract class AbstractEventMap<T>(
         }
 
         if (lastKnownPosition == null || lastKnownPosition != position) {
-            // Allow the wave to know the current location of the user for computations
-            event.wave.setPositionRequester { position }
-
-            // Notify reactive position observers for immediate area detection
-            event.wave.notifyPositionChanged(position)
+            // Position is now managed by PositionManager through unified system
 
             // Notify caller
             onLocationUpdate(position)
