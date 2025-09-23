@@ -32,8 +32,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -211,9 +213,7 @@ class CommonComponentsTest {
     }
 
     @Test
-    fun eventOverlays_downloadStatus_displaysCorrectly() {
-        // Test download status indicators
-
+    fun eventOverlays_downloadStatus_downloaded_displaysCorrectly() {
         // Test downloaded state
         composeTestRule.setContent {
             TestEventOverlayMapDownloaded(
@@ -227,7 +227,10 @@ class CommonComponentsTest {
         // Verify downloaded indicator
         composeTestRule.onNodeWithContentDescription("Map downloaded").assertIsDisplayed()
         composeTestRule.onNodeWithTag("download-check").assertIsDisplayed()
+    }
 
+    @Test
+    fun eventOverlays_downloadStatus_downloading_displaysCorrectly() {
         // Test downloading state
         composeTestRule.setContent {
             TestEventOverlayMapDownloaded(
@@ -241,7 +244,10 @@ class CommonComponentsTest {
         // Verify downloading indicator
         composeTestRule.onNodeWithContentDescription("Downloading map").assertIsDisplayed()
         composeTestRule.onNodeWithTag("download-progress").assertIsDisplayed()
+    }
 
+    @Test
+    fun eventOverlays_downloadStatus_error_displaysCorrectly() {
         // Test error state
         composeTestRule.setContent {
             TestEventOverlayMapDownloaded(
@@ -255,7 +261,10 @@ class CommonComponentsTest {
         // Verify error indicator
         composeTestRule.onNodeWithContentDescription("Download failed").assertIsDisplayed()
         composeTestRule.onNodeWithTag("download-error").assertIsDisplayed()
+    }
 
+    @Test
+    fun eventOverlays_downloadStatus_idle_displaysCorrectly() {
         // Test no download state
         composeTestRule.setContent {
             TestEventOverlayMapDownloaded(
@@ -271,9 +280,7 @@ class CommonComponentsTest {
     }
 
     @Test
-    fun eventOverlays_eventStatus_showsCorrectBadge() {
-        // Test mock EventOverlay components
-
+    fun eventOverlays_eventStatus_done_showsCorrectBadge() {
         // Test DONE status
         composeTestRule.setContent {
             TestEventOverlayDone(
@@ -285,7 +292,10 @@ class CommonComponentsTest {
         // Verify done overlay is displayed
         composeTestRule.onNodeWithTag("done-overlay").assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Event completed").assertIsDisplayed()
+    }
 
+    @Test
+    fun eventOverlays_eventStatus_running_showsCorrectBadge() {
         // Test RUNNING status (should not show done overlay)
         composeTestRule.setContent {
             TestEventOverlayDone(
@@ -296,7 +306,10 @@ class CommonComponentsTest {
 
         // Verify done overlay is not displayed for running events
         composeTestRule.onNode(hasContentDescription("Event completed")).assertDoesNotExist()
+    }
 
+    @Test
+    fun eventOverlays_eventStatus_soon_showsCorrectBadge() {
         // Test SOON status overlay
         composeTestRule.setContent {
             TestEventOverlaySoonOrRunning(
@@ -307,7 +320,10 @@ class CommonComponentsTest {
 
         // Verify soon badge is displayed
         composeTestRule.onNodeWithText("SOON").assertIsDisplayed()
+    }
 
+    @Test
+    fun eventOverlays_eventStatus_runningBadge_showsCorrectBadge() {
         // Test RUNNING status overlay
         composeTestRule.setContent {
             TestEventOverlaySoonOrRunning(
