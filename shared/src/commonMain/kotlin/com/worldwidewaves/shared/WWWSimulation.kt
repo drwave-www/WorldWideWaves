@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
 import com.worldwidewaves.shared.events.utils.Position
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -33,8 +34,8 @@ class WWWSimulation(
     private var initialSpeed: Int = 1,
 ) {
     companion object {
-        const val MIN_SPEED = 1
-        const val MAX_SPEED = 500
+        val MIN_SPEED = Wave.MIN_SIMULATION_SPEED
+        val MAX_SPEED = Wave.MAX_SIMULATION_SPEED
     }
 
     private var _speed: Int = validateSpeed(initialSpeed)

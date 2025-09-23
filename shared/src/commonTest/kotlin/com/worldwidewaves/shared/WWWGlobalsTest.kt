@@ -124,7 +124,7 @@ class WWWGlobalsTest {
         assertTrue(backgroundOpacity >= 0.0f, "Opacity should be non-negative")
         assertTrue(backgroundOpacity <= 1.0f, "Opacity should not exceed 100%")
 
-        assertEquals(6, defaultSimulationSpeed, "Default simulation speed should be 6 m/s (realistic for human coordination)")
+        assertEquals(300, defaultSimulationSpeed, "Default simulation speed should be 300 m/s (50x faster for simulations)")
         assertTrue(defaultSimulationSpeed > 0, "Simulation speed should be positive")
         assertTrue(defaultSimulationSpeed < 343, "Simulation speed should be less than speed of sound (343 m/s)")
     }

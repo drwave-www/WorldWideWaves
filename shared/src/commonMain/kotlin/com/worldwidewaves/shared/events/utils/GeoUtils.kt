@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.Companion.Geodetic
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -97,14 +98,14 @@ object GeoUtils {
     // IEEE 754 double precision provides ~15-17 decimal digits
     // At equatorial circumference (40,075,017m), 1e-9 degrees ≈ 0.11mm
     // This provides sub-millimeter precision for geodetic calculations
-    const val EPSILON = 1e-9
+    val EPSILON = Geodetic.COORDINATE_EPSILON
 
-    const val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = 10000.0 // Adjustment variable to manage the nb of wave splits
+    val MIN_PERCEPTIBLE_SPEED_DIFFERENCE = Geodetic.MIN_PERCEPTIBLE_SPEED_DIFFERENCE // Adjustment variable to manage the nb of wave splits
 
     // WGS-84 Ellipsoid constants with scientific justification:
     // Semi-major axis (equatorial radius) as defined by WGS-84 datum
     // Reference: NIMA Technical Report TR8350.2 (2000)
-    const val EARTH_RADIUS = 6378137.0 // meters
+    val EARTH_RADIUS = Geodetic.EARTH_RADIUS // meters
 
     /**
      * Simple LRU cache for expensive trigonometric calculations.

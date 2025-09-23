@@ -98,9 +98,9 @@ class MainActivityTest {
         var dataLoadCompleted = false
 
         coEvery { mockEvents.loadEvents(any()) } answers {
-            delay(100) // Simulate data loading
             dataLoadCompleted = true
             firstArg<() -> Unit>().invoke() // Call onTermination callback
+            mockEvents // Return the WWWEvents instance for chaining
         }
 
         composeTestRule.setContent {
@@ -150,10 +150,8 @@ class MainActivityTest {
         val mockAboutScreen = mockk<AboutScreen>(relaxed = true)
         var selectedTab by mutableStateOf(0)
 
-        every { mockEventsScreen.screenName } returns "Events"
-        every { mockAboutScreen.screenName } returns "About"
-        every { mockEventsScreen.id } returns "events"
-        every { mockAboutScreen.id } returns "about"
+        every { mockEventsScreen.name } returns "Events"
+        every { mockAboutScreen.name } returns "About"
 
         composeTestRule.setContent {
             TestTabNavigation(
@@ -306,7 +304,7 @@ class MainActivityTest {
         val loadingState = MutableStateFlow("loading")
         val mockEvents = mockk<WWWEvents>(relaxed = true)
 
-        every { mockEvents.events } returns flowOf(emptyList())
+        every { mockEvents.flow() } returns flowOf(emptyList())
 
         composeTestRule.setContent {
             TestDataLoadingStates(loadingState.value, mockEvents)
@@ -549,7 +547,7 @@ class MainActivityTest {
 
     @Composable
     private fun TestDataLoadingStates(loadingState: String, events: WWWEvents) {
-        val eventsCount by events.events.collectAsState(initial = emptyList())
+        val eventsCount by events.flow().collectAsState(initial = emptyList())
 
         Text(
             text = "Data Loading",
