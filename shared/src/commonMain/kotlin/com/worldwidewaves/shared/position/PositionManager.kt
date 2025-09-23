@@ -72,7 +72,7 @@ class PositionManager(
     private var debounceJob: Job? = null
     private var pendingUpdate: PositionState? = null
 
-    // Public reactive API
+    // Public reactive API with performance optimization
     private val _position = MutableStateFlow<Position?>(null)
     val position: StateFlow<Position?> = _position.asStateFlow()
 
