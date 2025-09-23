@@ -101,8 +101,24 @@ data class WWWEventArea(
 
     // ---------------------------
 
+    /**
+     * Clears all cached data to force fresh calculations.
+     * Useful when debugging or when polygon data has been updated.
+     */
+    fun clearCache() {
+        Log.i("WWWEventArea", "[AREA_DEBUG] clearCache: clearing all cached data for eventId=${event.id}")
+        cachedAreaPolygons = null
+        cachedBoundingBox = null
+        cachedCenter = null
+        cachedPositionWithinResult = null
+    }
+
+    // ---------------------------
+
     fun setRelatedEvent(event: WWWEvent) {
         this.event = event
+        // Clear cache to ensure fresh calculations for this event
+        clearCache()
     }
 
     // ---------------------------
