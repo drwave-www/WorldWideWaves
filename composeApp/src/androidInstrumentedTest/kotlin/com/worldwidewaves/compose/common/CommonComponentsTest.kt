@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.testing.BaseComponentTest
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before
@@ -74,19 +75,13 @@ import kotlin.time.ExperimentalTime
  * - Common UI patterns and interactions
  */
 @RunWith(AndroidJUnit4::class)
-class CommonComponentsTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
-    private lateinit var mockClock: IClock
+class CommonComponentsTest : BaseComponentTest() {
 
     @OptIn(ExperimentalTime::class)
     @Before
-    fun setUp() {
-        mockClock =
-            mockk<IClock>(relaxed = true) {
-                every { now() } returns kotlin.time.Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
-            }
+    override fun setUp() {
+        super.setUp()
+        // Additional setup specific to CommonComponentsTest if needed
     }
 
     @Test
@@ -94,7 +89,7 @@ class CommonComponentsTest {
         // Test mock ButtonWave component click functionality
         var buttonClicked = false
 
-        composeTestRule.setContent {
+        setThemedContent {
             TestButtonWave(
                 eventId = "test-event",
                 eventState = Status.RUNNING,

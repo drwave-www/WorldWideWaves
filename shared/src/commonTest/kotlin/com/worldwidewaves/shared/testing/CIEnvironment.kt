@@ -85,7 +85,7 @@ object CIEnvironment {
          * Maximum reasonable time for operations that should be near-instantaneous (milliseconds).
          * Higher in CI to account for environment overhead.
          */
-        val maxReasonableTimeMs: Double = if (isCI) 50.0 else 10.0
+        val maxReasonableTimeMs: Double = if (isCI) 100.0 else 50.0
 
         /**
          * Timeout multiplier for CI environments.

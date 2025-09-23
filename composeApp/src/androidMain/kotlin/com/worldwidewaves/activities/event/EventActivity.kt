@@ -141,40 +141,6 @@ class EventActivity : AbstractEventWaveActivity() {
         val isInArea by event.observer.userIsInArea.collectAsState()
         val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
-        // DEBUG: In debug mode, ensure observer uses simulation after map/area data is loaded
-        if (BuildConfig.DEBUG && platform.isOnSimulation()) {
-            LaunchedEffect(Unit) {
-                // Wait for polygon data to load (indicated by progression > 0)
-                var attempts = 0
-                while (attempts < 60 && event.observer.progression.value <= 0.0) { // 30 seconds timeout
-                    kotlinx.coroutines.delay(500)
-                    attempts++
-                }
-
-                android.util.Log.i("EventActivity", "Polygon loading complete, progression=${event.observer.progression.value}")
-
-                // Restart observer to ensure simulation is used with loaded polygon data
-                event.observer.stopObservation()
-                kotlinx.coroutines.delay(500)
-                event.observer.startObservation()
-
-                // Wait a moment for area detection to process
-                kotlinx.coroutines.delay(2000)
-
-                android.util.Log.i("EventActivity", "After observer restart: isInArea=${event.observer.userIsInArea.value}")
-
-                // If still not in area, try one more restart
-                if (!event.observer.userIsInArea.value) {
-                    android.util.Log.i("EventActivity", "Still not in area, attempting second restart")
-                    kotlinx.coroutines.delay(1000)
-                    event.observer.stopObservation()
-                    kotlinx.coroutines.delay(500)
-                    event.observer.startObservation()
-                    kotlinx.coroutines.delay(2000)
-                    android.util.Log.i("EventActivity", "After second restart: isInArea=${event.observer.userIsInArea.value}")
-                }
-            }
-        }
 
         // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
         LaunchedEffect(event.id, progression) {

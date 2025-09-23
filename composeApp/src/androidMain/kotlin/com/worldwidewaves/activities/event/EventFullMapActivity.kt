@@ -92,48 +92,6 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         }
         val isInArea by event.observer.userIsInArea.collectAsState()
 
-        // DEBUG: In debug mode, ensure observer uses simulation after map/area data is loaded
-        if (BuildConfig.DEBUG) {
-            val context = LocalContext.current
-            val platform =
-                remember {
-                    (context as ComponentActivity).get<WWWPlatform>()
-                }
-
-            if (platform.isOnSimulation()) {
-                LaunchedEffect(Unit) {
-                    // Wait for polygon data to load (indicated by progression > 0)
-                    var attempts = 0
-                    while (attempts < 60 && event.observer.progression.value <= 0.0) { // 30 seconds timeout
-                        kotlinx.coroutines.delay(500)
-                        attempts++
-                    }
-
-                    android.util.Log.i("EventFullMapActivity", "Polygon loading complete, progression=${event.observer.progression.value}")
-
-                    // Restart observer to ensure simulation is used with loaded polygon data
-                    event.observer.stopObservation()
-                    kotlinx.coroutines.delay(500)
-                    event.observer.startObservation()
-
-                    // Wait a moment for area detection to process
-                    kotlinx.coroutines.delay(2000)
-
-                    android.util.Log.i("EventFullMapActivity", "After observer restart: isInArea=${event.observer.userIsInArea.value}")
-
-                    // If still not in area, try one more restart
-                    if (!event.observer.userIsInArea.value) {
-                        android.util.Log.i("EventFullMapActivity", "Still not in area, attempting second restart")
-                        kotlinx.coroutines.delay(1000)
-                        event.observer.stopObservation()
-                        kotlinx.coroutines.delay(500)
-                        event.observer.startObservation()
-                        kotlinx.coroutines.delay(2000)
-                        android.util.Log.i("EventFullMapActivity", "After second restart: isInArea=${event.observer.userIsInArea.value}")
-                    }
-                }
-            }
-        }
 
         // Construct the event map
         val eventMap =

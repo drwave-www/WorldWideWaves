@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.events
 
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -40,7 +41,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.component.inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
@@ -241,6 +244,10 @@ class WWWEventObserver(
 
     private var observationJob: Job? = null
 
+    private var positionObservationJob: Job? = null
+
+    private var simulationObservationJob: Job? = null
+
     // ---------------------------
 
     init {
@@ -295,6 +302,12 @@ class WWWEventObserver(
                     } else {
                         Log.v("WWWEventObserver", "Event ${event.id} not ready for continuous observation")
                     }
+
+                    // Start reactive position observation - independent of event state
+                    startPositionObservation()
+
+                    // Start simulation change observation for immediate position updates
+                    startSimulationObservation()
                 } catch (e: Exception) {
                     Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
                 }
@@ -309,12 +322,91 @@ class WWWEventObserver(
             Log.v("stopObservation", "Stopping observation for event $event.id")
             try {
                 observationJob?.cancelAndJoin()
+                positionObservationJob?.cancelAndJoin()
+                simulationObservationJob?.cancelAndJoin()
             } catch (_: CancellationException) {
                 // Expected exception during cancellation
             } catch (e: Exception) {
                 Log.e("stopObservation", "Error stopping observation: $e")
             } finally {
                 observationJob = null
+                positionObservationJob = null
+                simulationObservationJob = null
+            }
+        }
+    }
+
+    /**
+     * Starts reactive position observation that triggers immediate area detection on position changes.
+     * This is separate from the main observation flow to ensure responsive position updates.
+     */
+    private fun startPositionObservation() {
+        positionObservationJob = coroutineScopeProvider.launchDefault {
+            try {
+                Log.v("WWWEventObserver", "Starting position observation for event ${event.id}")
+
+                event.wave.positionUpdates.collect { position ->
+                    Log.v("WWWEventObserver", "Position update received for event ${event.id}: $position")
+
+                    // Only update area detection when polygons are available
+                    try {
+                        val polygons = event.area.getPolygons()
+                        if (polygons.isNotEmpty()) {
+                            updateAreaDetection()
+                            Log.v("WWWEventObserver", "Area detection updated immediately for position change")
+                        } else {
+                            Log.v("WWWEventObserver", "Skipping area detection - polygons not loaded yet")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("WWWEventObserver", "Error in position-triggered area detection: $e")
+                    }
+                }
+            } catch (e: CancellationException) {
+                Log.v("WWWEventObserver", "Position observation cancelled for event ${event.id}")
+                throw e
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error in position observation for event ${event.id}: $e")
+            }
+        }
+    }
+
+    /**
+     * Starts simulation change observation that triggers immediate area detection when simulation changes.
+     * This ensures that when debugging simulation is set/changed, area detection is immediately updated.
+     */
+    private fun startSimulationObservation() {
+        simulationObservationJob = coroutineScopeProvider.launchDefault {
+            try {
+                Log.v("WWWEventObserver", "Starting simulation observation for event ${event.id}")
+
+                val platform = try {
+                    get<WWWPlatform>()
+                } catch (e: Exception) {
+                    Log.w("WWWEventObserver", "Platform not available for simulation observation: $e")
+                    return@launchDefault
+                }
+
+                platform.simulationChanged.collect { _ ->
+                    Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
+
+                    // Trigger immediate area detection when simulation changes
+                    try {
+                        val polygons = event.area.getPolygons()
+                        if (polygons.isNotEmpty()) {
+                            updateAreaDetection()
+                            Log.v("WWWEventObserver", "Area detection updated immediately for simulation change")
+                        } else {
+                            Log.v("WWWEventObserver", "Skipping area detection - polygons not loaded yet")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("WWWEventObserver", "Error in simulation-triggered area detection: $e")
+                    }
+                }
+            } catch (e: CancellationException) {
+                Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
+                throw e
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error in simulation observation for event ${event.id}: $e")
             }
         }
     }
@@ -407,6 +499,24 @@ class WWWEventObserver(
         _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
 
         // User in area - enhanced with validation and error handling
+        updateAreaDetection()
+
+        _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
+        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
+
+        // Log final state for debugging
+        Log.v(
+            "WWWEventObserver",
+            "State updated - userIsInArea=${_userIsInArea.value}, " +
+                "progression=${_progression.value}, status=${_eventStatus.value}",
+        )
+    }
+
+    /**
+     * Updates area detection state (isInArea) based on current user position.
+     * Separated from full state update to allow position-triggered updates.
+     */
+    private suspend fun updateAreaDetection() {
         val userPosition = event.wave.getUserPosition()
         Log.v("WWWEventObserver", "Area detection: userPosition=$userPosition")
 
@@ -431,16 +541,6 @@ class WWWEventObserver(
             Log.v("WWWEventObserver", "No user position available, setting userIsInArea=false")
             _userIsInArea.updateIfChanged(false)
         }
-
-        _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
-        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
-
-        // Log final state for debugging
-        Log.v(
-            "WWWEventObserver",
-            "State updated - userIsInArea=${_userIsInArea.value}, " +
-                "progression=${_progression.value}, status=${_eventStatus.value}",
-        )
     }
 
     /**

@@ -349,6 +349,9 @@ abstract class AbstractEventMap<T>(
                     // Allow the wave to know the current location of the user for computations
                     event.wave.setPositionRequester { mapPosition }
 
+                    // Notify reactive position observers for immediate area detection
+                    event.wave.notifyPositionChanged(mapPosition)
+
                     // Notify caller
                     onLocationUpdate(mapPosition)
 

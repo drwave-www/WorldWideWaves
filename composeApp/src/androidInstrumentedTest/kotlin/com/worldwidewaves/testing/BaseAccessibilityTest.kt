@@ -41,7 +41,7 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
      * Critical for screen reader accessibility.
      */
     protected fun validateInteractiveElementsHaveDescriptions() {
-        val allNodes = composeTestRule.onAllNodes(SemanticsMatcher.matchesAnyOf())
+        val allNodes = composeTestRule.onAllNodes(hasClickAction().or(hasScrollAction()))
             .fetchSemanticsNodes()
 
         val elementsWithoutDescriptions = allNodes.filter { node ->

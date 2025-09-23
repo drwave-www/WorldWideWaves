@@ -23,6 +23,8 @@ package com.worldwidewaves.testing
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,8 +65,8 @@ abstract class BaseIntegrationTest : BaseInstrumentedTest() {
      */
     protected fun createMockEvent(eventId: String): IWWWEvent {
         return mockk<IWWWEvent>(relaxed = true) {
-            io.mockk.every { id } returns eventId
-            io.mockk.every { status } returns IWWWEvent.Status.SOON
+            every { id } returns eventId
+            coEvery { getStatus() } returns IWWWEvent.Status.SOON
         }
     }
 

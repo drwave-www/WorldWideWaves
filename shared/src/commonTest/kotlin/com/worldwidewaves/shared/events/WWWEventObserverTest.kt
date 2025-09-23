@@ -898,4 +898,5 @@ class WWWEventObserverTest : KoinTest {
             testScheduler.advanceUntilIdle()
         }
     }
+
 }
