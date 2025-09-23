@@ -395,13 +395,6 @@ abstract class AbstractEventMap<T>(
     }
 
     /**
-     * Allows external components to update position through PositionManager
-     */
-    fun updatePosition(source: PositionManager.PositionSource, position: Position?) {
-        positionManager.updatePosition(source, position)
-    }
-
-    /**
      * Gets the current unified position from PositionManager
      */
     fun getCurrentPosition(): Position? = positionManager.getCurrentPosition()

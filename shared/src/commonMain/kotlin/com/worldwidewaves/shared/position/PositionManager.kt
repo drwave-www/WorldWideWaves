@@ -55,8 +55,7 @@ class PositionManager(
      */
     enum class PositionSource {
         SIMULATION,     // Highest priority - debug/testing
-        GPS,           // Medium priority - real device location
-        MAP_INTERACTION // Lowest priority - user map interactions
+        GPS            // Standard priority - real device location
     }
 
     /**

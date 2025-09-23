@@ -209,11 +209,9 @@ class PositionManagerTest {
         val positionManager = PositionManager(coroutineScopeProvider, debounceDelay = 0.milliseconds)
         val gpsPosition = Position(lat = 48.8566, lng = 2.3522)
         val simulationPosition = Position(lat = 40.7128, lng = -74.0060)
-        val mapPosition = Position(lat = 51.5074, lng = -0.1278)
 
         // Concurrent updates from different sources
         positionManager.updatePosition(PositionManager.PositionSource.GPS, gpsPosition)
-        positionManager.updatePosition(PositionManager.PositionSource.MAP_INTERACTION, mapPosition)
         positionManager.updatePosition(PositionManager.PositionSource.SIMULATION, simulationPosition)
         testScheduler.runCurrent()
 

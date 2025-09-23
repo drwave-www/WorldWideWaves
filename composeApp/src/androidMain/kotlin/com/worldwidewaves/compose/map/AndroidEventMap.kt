@@ -555,12 +555,7 @@ class AndroidEventMap(
                                     }
                                     onMapLoaded()
                                 },
-                                onMapClick = { latitude, longitude ->
-                                    // Update PositionManager with map interaction position
-                                    this@AndroidEventMap.updatePosition(
-                                        com.worldwidewaves.shared.position.PositionManager.PositionSource.MAP_INTERACTION,
-                                        com.worldwidewaves.shared.events.utils.Position(latitude, longitude)
-                                    )
+                                onMapClick = { _, _ ->
                                     onMapClick?.invoke()
                                 },
                             )
