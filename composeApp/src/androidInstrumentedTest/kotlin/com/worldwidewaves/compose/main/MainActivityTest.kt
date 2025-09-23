@@ -207,7 +207,7 @@ class MainActivityTest {
         val locationPermissionState = MutableStateFlow("not_requested")
 
         composeTestRule.setContent {
-            TestLocationPermissionFlow(locationPermissionState.value) { newState ->
+            TestLocationPermissionFlow(locationPermissionState) { newState ->
                 locationPermissionState.value = newState
             }
         }
@@ -266,7 +266,7 @@ class MainActivityTest {
         val preservedState = MutableStateFlow("initial_data")
 
         composeTestRule.setContent {
-            TestAppLifecycleHandling(lifecycleState.value, preservedState.value)
+            TestAppLifecycleHandling(lifecycleState, preservedState)
         }
 
         // Verify initial created state
@@ -317,7 +317,7 @@ class MainActivityTest {
         every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(mockEventList).asStateFlow()
 
         composeTestRule.setContent {
-            TestDataLoadingStates(loadingState.value, mockEvents)
+            TestDataLoadingStates(loadingState, mockEvents)
         }
 
         // Verify loading indicator is displayed
@@ -361,7 +361,7 @@ class MainActivityTest {
         val retryCount = MutableStateFlow(0)
 
         composeTestRule.setContent {
-            TestErrorRecovery(errorState.value, retryCount.value) {
+            TestErrorRecovery(errorState, retryCount) {
                 retryCount.value = retryCount.value + 1
             }
         }
@@ -506,9 +506,11 @@ class MainActivityTest {
 
     @Composable
     private fun TestLocationPermissionFlow(
-        permissionState: String,
+        permissionStateFlow: StateFlow<String>,
         onPermissionStateChange: (String) -> Unit
     ) {
+        val permissionState by permissionStateFlow.collectAsState()
+
         Column {
             Text(
                 text = "Location Permission",
@@ -542,7 +544,9 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestAppLifecycleHandling(lifecycleState: String, preservedData: String) {
+    private fun TestAppLifecycleHandling(lifecycleStateFlow: StateFlow<String>, preservedDataFlow: StateFlow<String>) {
+        val lifecycleState by lifecycleStateFlow.collectAsState()
+        val preservedData by preservedDataFlow.collectAsState()
 
         Text(
             text = "App Lifecycle",
@@ -560,7 +564,8 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestDataLoadingStates(loadingState: String, events: WWWEvents) {
+    private fun TestDataLoadingStates(loadingStateFlow: StateFlow<String>, events: WWWEvents) {
+        val loadingState by loadingStateFlow.collectAsState()
         val eventsCount by events.flow().collectAsState(initial = emptyList())
 
         Text(
@@ -583,7 +588,10 @@ class MainActivityTest {
     }
 
     @Composable
-    private fun TestErrorRecovery(errorState: String, retryCount: Int, onRetry: () -> Unit) {
+    private fun TestErrorRecovery(errorStateFlow: StateFlow<String>, retryCountFlow: StateFlow<Int>, onRetry: () -> Unit) {
+        val errorState by errorStateFlow.collectAsState()
+        val retryCount by retryCountFlow.collectAsState()
+
         Column {
             Text(
                 text = "Error Recovery",

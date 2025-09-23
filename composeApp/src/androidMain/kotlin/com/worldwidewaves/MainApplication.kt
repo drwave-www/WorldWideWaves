@@ -90,8 +90,8 @@ class MainApplication :
             wwwPlatform.setSimulation(
                 WWWSimulation(
                     now,
-                    // Position(lat = 48.83625, lng = 2.46905),
-                    Position(lat = 48.862725, lng = 2.287592),
+                    // Use test-verified Paris coordinates (known to be inside area)
+                    Position(lat = 48.8566, lng = 2.3522),
                     WWWGlobals.Companion.Wave.DEFAULT_SPEED_SIMULATION,
                 ),
             ) // In Paris, 1h is 2mn
