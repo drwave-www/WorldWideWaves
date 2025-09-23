@@ -312,8 +312,9 @@ class WWWEventObserver(
                     // Add polygon loading observer to trigger area detection when polygon data becomes available
                     polygonLoadingJob = event.area.polygonsLoaded
                         .onEach { isLoaded ->
+                            Log.i("WWWEventObserver", "[DEBUG] Polygon loading state changed: isLoaded=$isLoaded, eventId=${event.id}")
                             if (isLoaded) {
-                                Log.v("WWWEventObserver", "Polygon data loaded, updating area detection for event ${event.id}")
+                                Log.i("WWWEventObserver", "[DEBUG] Polygon data loaded, triggering area detection for event ${event.id}")
                                 updateAreaDetection()
                             }
                         }
@@ -531,43 +532,48 @@ class WWWEventObserver(
      */
     private suspend fun updateAreaDetection() {
         val userPosition = positionManager.getCurrentPosition()
+        Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: userPosition=$userPosition, eventId=${event.id}")
 
         if (userPosition != null) {
             try {
                 // Check if polygon data is available first
                 val polygons = event.area.getPolygons()
+                Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: polygons.size=${polygons.size}, eventId=${event.id}")
 
                 if (polygons.isNotEmpty()) {
-                    // Log polygon details for debugging
-                    polygons.forEachIndexed { index, polygon ->
-                    }
-
                     // Check bounding box first
                     val bbox = event.area.bbox()
+                    Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: bbox=$bbox, eventId=${event.id}")
 
                     val isInBbox = userPosition.lat >= bbox.sw.lat &&
                         userPosition.lat <= bbox.ne.lat &&
                         userPosition.lng >= bbox.sw.lng &&
                         userPosition.lng <= bbox.ne.lng
+                    Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: isInBbox=$isInBbox, eventId=${event.id}")
 
                     // Now call the actual area detection
                     val isInArea = event.area.isPositionWithin(userPosition)
+                    Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: isInArea=$isInArea, eventId=${event.id}")
 
                     // Log state change
                     val previousState = _userIsInArea.value
                     if (previousState != isInArea) {
+                        Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: State change $previousState -> $isInArea, eventId=${event.id}")
                     }
 
                     _userIsInArea.updateIfChanged(isInArea)
                 } else {
+                    Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: Polygon data not yet loaded, eventId=${event.id}")
                     // Polygon data not yet loaded - the polygon loading observer will trigger
                     // updateAreaDetection() when data becomes available
                 }
             } catch (e: Exception) {
+                Log.e("WWWEventObserver", "[DEBUG] updateAreaDetection: Exception $e, eventId=${event.id}")
                 // On error, assume user is not in area for safety
                 _userIsInArea.updateIfChanged(false)
             }
         } else {
+            Log.i("WWWEventObserver", "[DEBUG] updateAreaDetection: No user position, eventId=${event.id}")
             _userIsInArea.updateIfChanged(false)
         }
     }

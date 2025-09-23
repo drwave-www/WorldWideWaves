@@ -82,25 +82,26 @@ class PositionManager(
      * @param newPosition The new position (null to clear)
      */
     fun updatePosition(source: PositionSource, newPosition: Position?) {
-        Log.v("PositionManager", "Position update from $source: $newPosition")
+        Log.i("PositionManager", "[DEBUG] Position update from $source: $newPosition")
 
         val newState = PositionState(newPosition, if (newPosition == null) null else source)
 
         // Check if this update should be applied based on source priority
         val currentState = _currentState.value
         if (!shouldAcceptUpdate(currentState, newState)) {
-            Log.v("PositionManager", "Rejected position update from $source (lower priority than ${currentState.source})")
+            Log.i("PositionManager", "[DEBUG] Rejected position update from $source (lower priority than ${currentState.source})")
             return
         }
 
         // Check for position deduplication
         if (isPositionDuplicate(currentState.position, newPosition)) {
-            Log.v("PositionManager", "Skipped duplicate position update")
+            Log.i("PositionManager", "[DEBUG] Skipped duplicate position update")
             return
         }
 
         // Store pending update and start/restart debounce
         pendingUpdate = newState
+        Log.i("PositionManager", "[DEBUG] Stored pending update: $newState, debounceDelay=$debounceDelay")
 
         debounceJob?.cancel()
         debounceJob = coroutineScopeProvider.launchDefault {
@@ -110,7 +111,7 @@ class PositionManager(
             pendingUpdate?.let { finalState ->
                 _currentState.value = finalState
                 _position.value = finalState.position
-                Log.v("PositionManager", "Applied debounced position: ${finalState.position} from ${finalState.source}")
+                Log.i("PositionManager", "[DEBUG] Applied debounced position: ${finalState.position} from ${finalState.source}")
             }
             pendingUpdate = null
         }
