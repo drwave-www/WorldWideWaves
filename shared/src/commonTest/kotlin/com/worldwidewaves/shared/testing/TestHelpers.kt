@@ -194,12 +194,6 @@ object TestHelpers {
         every { mockArea.validationErrors() } returns null
         every { mockArea.setRelatedEvent(any()) } returns Unit
 
-        // Mock getPolygons() to return non-empty area when polygon data should be available
-        // This is critical for the polygon loading fix logic in WWWEventObserver
-        val mockPolygon = mockk<com.worldwidewaves.shared.events.utils.Polygon>(relaxed = true)
-        val mockAreaList = if (isUserInArea) listOf(mockPolygon) else listOf(mockPolygon) // Always return non-empty to indicate data is loaded
-        coEvery { mockArea.getPolygons() } returns mockAreaList
-
         // Note: isPositionWithin is a suspend function, so we use coEvery
         if (userPosition != null) {
             coEvery { mockArea.isPositionWithin(userPosition) } returns isUserInArea
@@ -233,8 +227,10 @@ object TestHelpers {
             approxDuration = duration.inWholeMinutes.toInt()
         )
 
-        // Position is now managed by PositionManager in tests
-        // Tests should set position using: testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+        // Set up position requester if user position is provided
+        if (userPosition != null) {
+            linearWave.setPositionRequester { userPosition }
+        }
 
         return WWWEvent.WWWWaveDefinition(linear = linearWave)
     }

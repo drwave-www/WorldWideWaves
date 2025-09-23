@@ -137,12 +137,10 @@ class EventsViewModel(
         _events.value = sortedEvents
         _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
 
-        // Start observing all events - multiple events can be active simultaneously
-        // The user has a single position that needs to be checked against all event areas
+        // Start observing all events
         sortedEvents.forEach { event ->
-            Log.d("EventsViewModel", "Starting observation for event ${event.id}")
 
-            // Start event observation for all events
+            // Start event observation
             event.observer.startObservation()
 
             // Setup simulation speed listeners on DEBUG mode

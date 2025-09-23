@@ -184,13 +184,24 @@ class WaveActivity : AbstractEventWaveActivity() {
                 )
                 WaveProgressionBar(event)
 
-                // Always show counter in the proper position with spacing
-                Spacer(modifier = Modifier.weight(1f))
-                WaveHitCounter(event)
-                Spacer(modifier = Modifier.height(30.dp))
+                if (!isChoreographyActive) { // Ensure counter is visible when choreography is not active
+                    Spacer(modifier = Modifier.weight(1f))
+                    WaveHitCounter(event)
+                    Spacer(modifier = Modifier.height(30.dp))
+                }
             }
 
             WaveChoreographies(event, clock, Modifier.zIndex(10f))
+
+            if (isChoreographyActive) { // Ensure counter is visible when choreography is active
+                WaveHitCounter(
+                    event,
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 60.dp)
+                        .zIndex(15f),
+                )
+            }
         }
     }
 }

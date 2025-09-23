@@ -8,6 +8,7 @@ import java.util.Locale
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import android.icu.util.TimeZone as IcuTimeZone
+import java.time.Instant as JavaInstant
 
 @OptIn(ExperimentalTime::class)
 actual object DateTimeFormats {
@@ -21,7 +22,14 @@ actual object DateTimeFormats {
             SimpleDateFormat(pattern, locale).apply {
                 this.timeZone = IcuTimeZone.getTimeZone(timeZone.id)
             }
-        val date = Date(instant.epochSeconds * 1000 + instant.nanosecondsOfSecond / 1000000)
+        val date =
+            Date(
+                JavaInstant
+                    .ofEpochSecond(
+                        instant.epochSeconds,
+                        instant.nanosecondsOfSecond.toLong(),
+                    ).toEpochMilli(),
+            )
         return sdf.format(date)
     }
 
@@ -36,7 +44,14 @@ actual object DateTimeFormats {
             SimpleDateFormat(pattern, locale).apply {
                 this.timeZone = IcuTimeZone.getTimeZone(timeZone.id)
             }
-        val date = Date(instant.epochSeconds * 1000 + instant.nanosecondsOfSecond / 1000000)
+        val date =
+            Date(
+                JavaInstant
+                    .ofEpochSecond(
+                        instant.epochSeconds,
+                        instant.nanosecondsOfSecond.toLong(),
+                    ).toEpochMilli(),
+            )
         return sdf.format(date)
     }
 }

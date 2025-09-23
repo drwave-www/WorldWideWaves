@@ -62,8 +62,6 @@
   <string name="map_error_service_died">አገልግሎቱ በድንገት ተቋርጧል። እባክዎ እንደገና ይሞክሩ።</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">መዳረሻ ተከልክሏል።</string>
-  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
-  <string name="map_error_account_issue">የGoogle Play Store መለያ ችግር። እባክዎ መለያዎን ያረጋግጡ እና እንደገና ይሞክሩ።</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">ያልታወቀ ስህተት ተፈጥሯል፡ %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -178,8 +176,8 @@
   <string name="wave_is_running">በመሞገድ ላይ!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">ይህን ታውቃላችሁ፡ የምድር ታሪክ በ1,000 ገፅ መጽሐፍ ቢተረክም፣ ሰብአዊነት በመጨረሻው ገፅ መጨረሻው ፓራግራፍ ብቻ ታታይ ነበር.</string>
-  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
-  <string name="infos_core_2">ነገር ግን ይህ አጭር ታሪክ ከተጠበቀው ይልቅ በፍጥነት ሊያበቃ ይችላል። በሰፊና ባዶ ጠፈር ውስጥ ተለይተናል። ነገር ሁሉን እናጠፋለን። ራስኣርነት ነን። ጨካኝ ነን። ስግብግብ ነን። ዕውር ነን። እና ለመቆጣጠር እንፈልጋለን። ነገር ግን ርህራሄ ልናሳይ እንችላለን፣ አስደናቂ ነገሮችን እናፈጥራለን፣ ጽናት አለን፣ ሌሎችን ለማገልገል እንችላለን።</string>
+  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <string name="infos_core_2">ነገር ግን ይህ አጭር ታሪክ ከምን እንደምንጠብቀው ይቀደም ሊያበቃ ይችላል። በሰፊ እና ባናቅር ኮስሞስ ውስጥ ተለይተናል። ሁሉንም እናፈርሳለን። ራሳችን ብቻ ነን። ጨካኝ ነን። ረብሻ ነን። ዕውሮች ነን። እና ለመቆጣጠር እንፈልጋለን። ነገር ግን ርህራሄ ማሳየት እንችላለን፣ ድንቆችን እናፈጥራለን፣ ጽናት አለን፣ ለሌሎች መስዋዕት መሆን እንችላለን.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">ነገር ግን ጊዜ ጥቂት ነው። ብዙ እድገት አድርገናል.. ሌላ አማራጭ መገንባት እንችላለን፡ የመብት፣ የኅብረት እና የዲሞክራሲ ማህበር። በእኛ ነው!</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
