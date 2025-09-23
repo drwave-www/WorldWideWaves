@@ -476,73 +476,7 @@ data class WWWEventArea(
                 // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
                 "MultiPolygon" -> {
                     Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing MultiPolygon with ${coordinates?.size} polygons, eventId=${event.id}")
-
-                    if (coordinates == null) {
-                        Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: MultiPolygon coordinates is null, eventId=${event.id}")
-                        return
-                    }
-
-                    if (coordinates.size == 0) {
-                        Log.w("WWWEventArea", "[AREA_DEBUG] processGeometry: MultiPolygon has zero polygons, eventId=${event.id}")
-                        return
-                    }
-
-                    coordinates.forEachIndexed { polygonIndex, polygon ->
-                        try {
-                            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: starting MultiPolygon polygon $polygonIndex processing, eventId=${event.id}")
-
-                            // Verify polygon is a valid JsonArray
-                            val polygonArray = try {
-                                polygon.jsonArray
-                            } catch (e: Exception) {
-                                Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex is not a valid JsonArray for eventId=${event.id}: ${e.message}", e)
-                                return@forEachIndexed
-                            }
-
-                            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex has ${polygonArray.size} rings, eventId=${event.id}")
-
-                            if (polygonArray.isEmpty()) {
-                                Log.w("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex has zero rings, skipping, eventId=${event.id}")
-                                return@forEachIndexed
-                            }
-
-                            // Each polygon in MultiPolygon has rings (exterior + holes)
-                            polygonArray.forEachIndexed { ringIndex, ring ->
-                                try {
-                                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: starting polygon $polygonIndex ring $ringIndex processing, eventId=${event.id}")
-
-                                    // Verify ring is a valid JsonArray
-                                    val ringArray = try {
-                                        ring.jsonArray
-                                    } catch (e: Exception) {
-                                        Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex ring $ringIndex is not a valid JsonArray for eventId=${event.id}: ${e.message}", e)
-                                        return@forEachIndexed
-                                    }
-
-                                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex ring $ringIndex has ${ringArray.size} vertices, eventId=${event.id}")
-
-                                    if (ringArray.isEmpty()) {
-                                        Log.w("WWWEventArea", "[AREA_DEBUG] processGeometry: polygon $polygonIndex ring $ringIndex has zero vertices, skipping, eventId=${event.id}")
-                                        return@forEachIndexed
-                                    }
-
-                                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: calling processRing for polygon $polygonIndex ring $ringIndex, eventId=${event.id}")
-                                    val ringStartPolygonCount = tempPolygons.size
-                                    processRing(ring, tempPolygons)
-                                    val ringEndPolygonCount = tempPolygons.size
-                                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processRing completed for polygon $polygonIndex ring $ringIndex, polygons added: ${ringEndPolygonCount - ringStartPolygonCount}, eventId=${event.id}")
-                                } catch (e: Exception) {
-                                    Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing MultiPolygon polygon $polygonIndex ring $ringIndex for eventId=${event.id}: ${e.message}", e)
-                                }
-                            }
-
-                            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: completed MultiPolygon polygon $polygonIndex processing, eventId=${event.id}")
-                        } catch (e: Exception) {
-                            Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing MultiPolygon polygon $polygonIndex for eventId=${event.id}: ${e.message}", e)
-                        }
-                    }
-
-                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: completed MultiPolygon processing with ${tempPolygons.size} total polygons, eventId=${event.id}")
+                    processMultiPolygon(coordinates, tempPolygons)
                 }
                 else -> {
                     Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: unsupported geometry type: $type for eventId=${event.id}")
@@ -560,6 +494,78 @@ data class WWWEventArea(
         } catch (e: Exception) {
             Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing geometry for eventId=${event.id}: ${e.message}", e)
         }
+    }
+
+    private fun processMultiPolygon(
+        coordinates: kotlinx.serialization.json.JsonArray?,
+        tempPolygons: MutableList<Polygon>,
+    ) {
+        if (coordinates == null) {
+            Log.e("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: MultiPolygon coordinates is null, eventId=${event.id}")
+            return
+        }
+
+        if (coordinates.size == 0) {
+            Log.w("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: MultiPolygon has zero polygons, eventId=${event.id}")
+            return
+        }
+
+        coordinates.forEachIndexed { polygonIndex, polygon ->
+            try {
+                Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: starting MultiPolygon polygon $polygonIndex processing, eventId=${event.id}")
+
+                // Verify polygon is a valid JsonArray
+                val polygonArray = try {
+                    polygon.jsonArray
+                } catch (e: Exception) {
+                    Log.e("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex is not a valid JsonArray for eventId=${event.id}: ${e.message}", e)
+                    return@forEachIndexed
+                }
+
+                Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex has ${polygonArray.size} rings, eventId=${event.id}")
+
+                if (polygonArray.isEmpty()) {
+                    Log.w("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex has zero rings, skipping, eventId=${event.id}")
+                    return@forEachIndexed
+                }
+
+                // Each polygon in MultiPolygon has rings (exterior + holes)
+                polygonArray.forEachIndexed { ringIndex, ring ->
+                    try {
+                        Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: starting polygon $polygonIndex ring $ringIndex processing, eventId=${event.id}")
+
+                        // Verify ring is a valid JsonArray
+                        val ringArray = try {
+                            ring.jsonArray
+                        } catch (e: Exception) {
+                            Log.e("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex ring $ringIndex is not a valid JsonArray for eventId=${event.id}: ${e.message}", e)
+                            return@forEachIndexed
+                        }
+
+                        Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex ring $ringIndex has ${ringArray.size} vertices, eventId=${event.id}")
+
+                        if (ringArray.isEmpty()) {
+                            Log.w("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: polygon $polygonIndex ring $ringIndex has zero vertices, skipping, eventId=${event.id}")
+                            return@forEachIndexed
+                        }
+
+                        Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: calling processRing for polygon $polygonIndex ring $ringIndex, eventId=${event.id}")
+                        val ringStartPolygonCount = tempPolygons.size
+                        processRing(ring, tempPolygons)
+                        val ringEndPolygonCount = tempPolygons.size
+                        Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: processRing completed for polygon $polygonIndex ring $ringIndex, polygons added: ${ringEndPolygonCount - ringStartPolygonCount}, eventId=${event.id}")
+                    } catch (e: Exception) {
+                        Log.e("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: error processing MultiPolygon polygon $polygonIndex ring $ringIndex for eventId=${event.id}: ${e.message}", e)
+                    }
+                }
+
+                Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: completed MultiPolygon polygon $polygonIndex processing, eventId=${event.id}")
+            } catch (e: Exception) {
+                Log.e("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: error processing MultiPolygon polygon $polygonIndex for eventId=${event.id}: ${e.message}", e)
+            }
+        }
+
+        Log.v("WWWEventArea", "[AREA_DEBUG] processMultiPolygon: completed MultiPolygon processing with ${tempPolygons.size} total polygons, eventId=${event.id}")
     }
 
     private fun processRing(
