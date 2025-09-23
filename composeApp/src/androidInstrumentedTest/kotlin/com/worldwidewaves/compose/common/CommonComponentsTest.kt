@@ -114,7 +114,10 @@ class CommonComponentsTest {
         // Click the button
         composeTestRule.onNodeWithTag("button-wave").performClick()
         assert(buttonClicked) { "Button click should be triggered" }
+    }
 
+    @Test
+    fun buttonWave_notInArea_isDisabled() {
         // Test button behavior when user is not in area
         composeTestRule.setContent {
             TestButtonWave(
@@ -127,7 +130,10 @@ class CommonComponentsTest {
 
         // Verify button is disabled when user is not in area
         composeTestRule.onNodeWithTag("button-wave-disabled").assertIsNotEnabled()
+    }
 
+    @Test
+    fun buttonWave_doneStatus_isEnabled() {
         // Test button with DONE status
         composeTestRule.setContent {
             TestButtonWave(
@@ -349,7 +355,10 @@ class CommonComponentsTest {
 
         // Verify divider is displayed
         composeTestRule.onNodeWithTag("test-divider").assertIsDisplayed()
+    }
 
+    @Test
+    fun dividers_horizontal_display_correctly() {
         // Test horizontal divider
         composeTestRule.setContent {
             TestHorizontalDivider(
@@ -358,7 +367,10 @@ class CommonComponentsTest {
         }
 
         composeTestRule.onNodeWithTag("horizontal-divider").assertIsDisplayed()
+    }
 
+    @Test
+    fun dividers_vertical_display_correctly() {
         // Test vertical divider
         composeTestRule.setContent {
             TestVerticalDivider(
@@ -370,9 +382,7 @@ class CommonComponentsTest {
     }
 
     @Test
-    fun commonComponents_accessibility_supportScreenReaders() {
-        // Test accessibility features across common components
-
+    fun commonComponents_accessibility_buttonWave_supportScreenReaders() {
         // Test ButtonWave accessibility
         composeTestRule.setContent {
             TestButtonWave(
@@ -385,7 +395,10 @@ class CommonComponentsTest {
 
         // Verify button has accessible text
         composeTestRule.onNodeWithText("JOIN WAVE").assertIsDisplayed()
+    }
 
+    @Test
+    fun commonComponents_accessibility_eventOverlay_supportScreenReaders() {
         // Test event overlay accessibility
         composeTestRule.setContent {
             TestEventOverlayDone(
@@ -396,7 +409,10 @@ class CommonComponentsTest {
 
         // Verify done overlay has content description
         composeTestRule.onNode(hasContentDescription("Event completed")).assertIsDisplayed()
+    }
 
+    @Test
+    fun commonComponents_accessibility_favorite_supportScreenReaders() {
         // Test favorite overlay accessibility
         composeTestRule.setContent {
             TestEventOverlayFavorite(
@@ -411,9 +427,7 @@ class CommonComponentsTest {
     }
 
     @Test
-    fun commonComponents_theming_adaptsToSystemSettings() {
-        // Test component theming adaptation
-
+    fun commonComponents_theming_buttonWave_adaptsToSystemSettings() {
         // Test with Material Theme
         composeTestRule.setContent {
             MaterialTheme {
@@ -428,7 +442,10 @@ class CommonComponentsTest {
 
         // Verify button renders with theme
         composeTestRule.onNodeWithTag("themed-button").assertIsDisplayed()
+    }
 
+    @Test
+    fun commonComponents_theming_eventStatus_adaptsToSystemSettings() {
         // Test event status overlay theming
         composeTestRule.setContent {
             MaterialTheme {
@@ -441,7 +458,10 @@ class CommonComponentsTest {
 
         // Verify overlay uses theme colors
         composeTestRule.onNodeWithText("SOON").assertIsDisplayed()
+    }
 
+    @Test
+    fun commonComponents_theming_textScaling_adaptsToSystemSettings() {
         // Test text scaling adaptation
         composeTestRule.setContent {
             MaterialTheme {

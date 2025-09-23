@@ -189,46 +189,47 @@ class EdgeCaseTest {
     }
 
     @Test
-    fun edgeCase_adaptiveUI_respondsToFormFactors() {
-        val trace = performanceMonitor.startTrace("adaptiveUI")
-        var tabletLayoutDetected = false
+    fun edgeCase_adaptiveUI_phoneLayout_respondsToFormFactors() {
+        val trace = performanceMonitor.startTrace("adaptiveUI_phone")
         var phoneLayoutDetected = false
 
-        // Test different screen configurations
-        val configurations =
-            listOf(
-                Configuration.SCREENLAYOUT_SIZE_NORMAL, // Phone
-                Configuration.SCREENLAYOUT_SIZE_LARGE, // 7" tablet
-                Configuration.SCREENLAYOUT_SIZE_XLARGE, // 10" tablet
-            )
-
-        configurations.forEach { screenSize ->
-            composeTestRule.setContent {
-                MaterialTheme {
-                    TestAdaptiveUILayout(
-                        screenSize = screenSize,
-                        onTabletLayout = { tabletLayoutDetected = true },
-                        onPhoneLayout = { phoneLayoutDetected = true },
-                    )
-                }
-            }
-
-            when (screenSize) {
-                Configuration.SCREENLAYOUT_SIZE_NORMAL -> {
-                    // Phone layout - single column
-                    composeTestRule.onNodeWithTag("phone-layout").assertIsDisplayed()
-                }
-                Configuration.SCREENLAYOUT_SIZE_LARGE,
-                Configuration.SCREENLAYOUT_SIZE_XLARGE,
-                -> {
-                    // Tablet layout - dual pane
-                    composeTestRule.onNodeWithTag("tablet-layout").assertIsDisplayed()
-                }
+        // Test phone screen configuration
+        composeTestRule.setContent {
+            MaterialTheme {
+                TestAdaptiveUILayout(
+                    screenSize = Configuration.SCREENLAYOUT_SIZE_NORMAL,
+                    onTabletLayout = { },
+                    onPhoneLayout = { phoneLayoutDetected = true },
+                )
             }
         }
 
-        assert(tabletLayoutDetected) { "Tablet layout should be detected for large screens" }
+        // Phone layout - single column
+        composeTestRule.onNodeWithTag("phone-layout").assertIsDisplayed()
         assert(phoneLayoutDetected) { "Phone layout should be detected for normal screens" }
+
+        trace.stop()
+    }
+
+    @Test
+    fun edgeCase_adaptiveUI_tabletLayout_respondsToFormFactors() {
+        val trace = performanceMonitor.startTrace("adaptiveUI_tablet")
+        var tabletLayoutDetected = false
+
+        // Test tablet screen configuration
+        composeTestRule.setContent {
+            MaterialTheme {
+                TestAdaptiveUILayout(
+                    screenSize = Configuration.SCREENLAYOUT_SIZE_LARGE,
+                    onTabletLayout = { tabletLayoutDetected = true },
+                    onPhoneLayout = { },
+                )
+            }
+        }
+
+        // Tablet layout - dual pane
+        composeTestRule.onNodeWithTag("tablet-layout").assertIsDisplayed()
+        assert(tabletLayoutDetected) { "Tablet layout should be detected for large screens" }
 
         trace.stop()
     }
