@@ -127,30 +127,50 @@ data class WWWEventArea(
      * the polygons using the ray-casting algorithm.
      */
     suspend fun isPositionWithin(position: Position): Boolean {
+        Log.v("WWWEventArea", "[AREA_DEBUG] isPositionWithin: checking position=$position, eventId=${event.id}")
+
         // Check if the cached result is within the epsilon
         cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
             if (isPositionWithinEpsilon(position, cachedPosition)) {
+                Log.v("WWWEventArea", "[AREA_DEBUG] Using cached result: $cachedResult for position=$position (cached: $cachedPosition), eventId=${event.id}")
                 return cachedResult
             }
         }
 
         // First, check if the position is within the bounding box (fast check)
         val boundingBox = bbox()
+        Log.v("WWWEventArea", "[AREA_DEBUG] Bounding box check: bbox=$boundingBox, position=$position, eventId=${event.id}")
+
         val isWithinBbox =
             position.lat >= boundingBox.sw.lat &&
                 position.lat <= boundingBox.ne.lat &&
                 position.lng >= boundingBox.sw.lng &&
                 position.lng <= boundingBox.ne.lng
 
+        Log.v("WWWEventArea", "[AREA_DEBUG] Position within bbox: $isWithinBbox, eventId=${event.id}")
+        Log.v("WWWEventArea", "[AREA_DEBUG] Bbox details: lat ${position.lat} in [${boundingBox.sw.lat}, ${boundingBox.ne.lat}] = ${position.lat >= boundingBox.sw.lat && position.lat <= boundingBox.ne.lat}, eventId=${event.id}")
+        Log.v("WWWEventArea", "[AREA_DEBUG] Bbox details: lng ${position.lng} in [${boundingBox.sw.lng}, ${boundingBox.ne.lng}] = ${position.lng >= boundingBox.sw.lng && position.lng <= boundingBox.ne.lng}, eventId=${event.id}")
+
         // If not within the bounding box, return false immediately
         if (!isWithinBbox) {
+            Log.v("WWWEventArea", "[AREA_DEBUG] Position outside bbox, returning false, eventId=${event.id}")
             // Cache the result
             cachedPositionWithinResult = Pair(position, false)
             return false
         }
 
         // If within bounding box, check if within polygon (more expensive check)
-        val result = getPolygons().let { it.isNotEmpty() && isPointInPolygons(position, it) }
+        val polygons = getPolygons()
+        Log.v("WWWEventArea", "[AREA_DEBUG] Position within bbox, checking polygons: count=${polygons.size}, eventId=${event.id}")
+
+        if (polygons.isEmpty()) {
+            Log.w("WWWEventArea", "[AREA_DEBUG] No polygons available, returning false, eventId=${event.id}")
+            cachedPositionWithinResult = Pair(position, false)
+            return false
+        }
+
+        val result = isPointInPolygons(position, polygons)
+        Log.v("WWWEventArea", "[AREA_DEBUG] Polygon containment result: $result for position=$position, eventId=${event.id}")
 
         // Cache the result
         cachedPositionWithinResult = Pair(position, result)
@@ -219,35 +239,52 @@ data class WWWEventArea(
     }
 
     suspend fun bbox(): BoundingBox {
+        Log.v("WWWEventArea", "[AREA_DEBUG] bbox: called for eventId=${event.id}")
+
         // Return cached bounding box if available
         if (cachedBoundingBox != null) {
+            Log.v("WWWEventArea", "[AREA_DEBUG] bbox: returning cached bbox=${cachedBoundingBox}, eventId=${event.id}")
             return cachedBoundingBox!!
         }
 
+        Log.v("WWWEventArea", "[AREA_DEBUG] bbox: cache empty, calculating bbox for eventId=${event.id}")
+
         // If bbox parameter was provided in constructor, use it
         parseBboxString()?.let { bbox ->
+            Log.v("WWWEventArea", "[AREA_DEBUG] bbox: using parsed bbox string=$bbox, eventId=${event.id}")
             cachedBoundingBox = bbox
             return bbox
         }
 
         // Try to extract bbox directly from GeoJSON if available
         parseGeoJsonBbox()?.let { geoBbox ->
+            Log.v("WWWEventArea", "[AREA_DEBUG] bbox: using GeoJSON bbox=$geoBbox, eventId=${event.id}")
             cachedBoundingBox = geoBbox
             return geoBbox
         }
 
         // Fallback: compute extent by scanning every coordinate in the GeoJSON
         computeExtentFromGeoJson()?.let { extentBbox ->
+            Log.v("WWWEventArea", "[AREA_DEBUG] bbox: using computed extent bbox=$extentBbox, eventId=${event.id}")
             cachedBoundingBox = extentBbox
             return extentBbox
         }
 
         // Otherwise calculate from polygons
-        return getPolygons()
+        Log.v("WWWEventArea", "[AREA_DEBUG] bbox: calculating from polygons for eventId=${event.id}")
+        val polygons = getPolygons()
+        return polygons
             .takeIf { it.isNotEmpty() }
             ?.let {
-                polygonsBbox(it).also { bbox -> cachedBoundingBox = bbox }
-            } ?: BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
+                val bbox = polygonsBbox(it)
+                Log.v("WWWEventArea", "[AREA_DEBUG] bbox: calculated from ${it.size} polygons: $bbox, eventId=${event.id}")
+                cachedBoundingBox = bbox
+                bbox
+            } ?: run {
+            val defaultBbox = BoundingBox.fromCorners(Position(0.0, 0.0), Position(0.0, 0.0))
+            Log.w("WWWEventArea", "[AREA_DEBUG] bbox: no polygons available, using default bbox=$defaultBbox, eventId=${event.id}")
+            defaultBbox
+        }
     }
 
     /**
@@ -276,28 +313,43 @@ data class WWWEventArea(
      * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
     suspend fun getPolygons(): Area {
+        Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: called for eventId=${event.id}")
+
         // Fast path: if cache is already populated, return immediately
-        cachedAreaPolygons?.let { return it }
+        cachedAreaPolygons?.let {
+            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: returning cached polygons (count=${it.size}), eventId=${event.id}")
+            return it
+        }
+
+        Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: cache empty, loading polygons for eventId=${event.id}")
 
         // Slow path: populate cache with mutex protection
         polygonsCacheMutex.withLock {
             // Double-check pattern: another coroutine might have populated the cache
-            cachedAreaPolygons?.let { return it }
+            cachedAreaPolygons?.let {
+                Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: cache populated by another coroutine (count=${it.size}), eventId=${event.id}")
+                return it
+            }
+
+            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: acquiring mutex, building polygons for eventId=${event.id}")
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
 
             coroutineScopeProvider.withDefaultContext {
+                Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: getting GeoJSON data for eventId=${event.id}")
                 geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
                     val rootType = geoJsonData["type"]?.jsonPrimitive?.content
 
                     // Now that we know the type, log it for diagnostics
-                    Log.i(::getPolygons.name, "${event.id}: GeoJSON rootType=$rootType")
+                    Log.i("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: GeoJSON rootType=$rootType")
+                    Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: GeoJSON keys: ${geoJsonData.keys}, eventId=${event.id}")
 
                     when (rootType) {
                         "FeatureCollection" -> {
                             // Handle FeatureCollection format
                             val features = geoJsonData["features"]?.jsonArray
+                            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: processing FeatureCollection with ${features?.size} features, eventId=${event.id}")
                             features?.forEach { feature ->
                                 val geometry = feature.jsonObject["geometry"]?.jsonObject
                                 geometry?.let { processGeometry(it, tempPolygons) }
@@ -305,25 +357,36 @@ data class WWWEventArea(
                         }
                         "Polygon", "MultiPolygon" -> {
                             // Handle direct geometry format (your original case)
+                            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: processing direct geometry type=$rootType, eventId=${event.id}")
                             processGeometry(geoJsonData, tempPolygons)
                         }
                         else -> {
-                            Log.e(::getPolygons.name, "${event.id}: Unsupported GeoJSON type: $rootType")
+                            Log.e("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Unsupported GeoJSON type: $rootType")
                         }
                     }
                 } ?: run {
-                    Log.e(::getPolygons.name, "${event.id}: Error loading geojson data for event")
+                    Log.e("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Error loading geojson data for event")
                 }
             }
 
             // Atomically assign the complete immutable list
             cachedAreaPolygons =
                 tempPolygons.toList().also {
-                    Log.i(::getPolygons.name, "${event.id}: Built ${it.size} polygons")
+                    Log.i("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Built ${it.size} polygons")
+                    it.forEachIndexed { index, polygon ->
+                        Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: polygon $index has ${polygon.size} vertices, bbox=${polygon.bbox()}, eventId=${event.id}")
+                        // Log first few vertices for debugging
+                        if (polygon.isNotEmpty()) {
+                            val vertices = polygon.toList()
+                            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: polygon $index first vertices: ${vertices.take(3)}, eventId=${event.id}")
+                        }
+                    }
                 }
         }
 
-        return cachedAreaPolygons ?: emptyList()
+        val result = cachedAreaPolygons ?: emptyList()
+        Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: returning ${result.size} polygons for eventId=${event.id}")
+        return result
     }
 
     private fun processGeometry(

@@ -111,10 +111,17 @@ object PolygonUtils {
     fun Polygon.containsPositionOptimized(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
 
+        Log.v("PolygonUtils", "[AREA_DEBUG] containsPositionOptimized: checking position=$tap in polygon size=${this.size}")
+
         // For small polygons, use standard algorithm
         if (size < 100) {
-            return containsPosition(tap)
+            Log.v("PolygonUtils", "[AREA_DEBUG] Using standard algorithm for small polygon (size=${this.size})")
+            val result = containsPosition(tap)
+            Log.v("PolygonUtils", "[AREA_DEBUG] Standard algorithm result: $result for position=$tap")
+            return result
         }
+
+        Log.v("PolygonUtils", "[AREA_DEBUG] Using spatial index for large polygon (size=${this.size})")
 
         // Use spatial index for large polygons
         val polygonHash = this.hashCode()
@@ -123,9 +130,15 @@ object PolygonUtils {
         }
 
         return if (spatialIndex != null) {
-            containsPositionWithSpatialIndex(tap, spatialIndex)
+            Log.v("PolygonUtils", "[AREA_DEBUG] Using spatial index for containment check")
+            val result = containsPositionWithSpatialIndex(tap, spatialIndex)
+            Log.v("PolygonUtils", "[AREA_DEBUG] Spatial index result: $result for position=$tap")
+            result
         } else {
-            containsPosition(tap) // Fallback
+            Log.v("PolygonUtils", "[AREA_DEBUG] Spatial index not available, falling back to standard algorithm")
+            val result = containsPosition(tap) // Fallback
+            Log.v("PolygonUtils", "[AREA_DEBUG] Fallback algorithm result: $result for position=$tap")
+            result
         }
     }
 
@@ -191,12 +204,21 @@ object PolygonUtils {
     fun Polygon.containsPosition(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
 
+        Log.v("PolygonUtils", "[AREA_DEBUG] containsPosition: checking position=$tap in polygon with ${this.size} vertices")
+
         // Handle simple polygons with less than 3 vertices
-        if (size < 3) return false
+        if (size < 3) {
+            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon has < 3 vertices (${this.size}), returning false")
+            return false
+        }
 
         val points = this.toList()
         var inside = false
         var j = points.size - 1
+        var intersectionCount = 0
+
+        Log.v("PolygonUtils", "[AREA_DEBUG] Polygon vertices: ${points.take(5)}${if (points.size > 5) "..." else ""}")
+        Log.v("PolygonUtils", "[AREA_DEBUG] Starting ray-casting algorithm")
 
         // Use a more robust ray-casting algorithm with better numerical stability
         for (i in points.indices) {
@@ -206,16 +228,27 @@ object PolygonUtils {
             val yj = points[j].lat
 
             // Check if point is exactly on a vertex
-            if (xi == tap.lng && yi == tap.lat) return true
+            if (xi == tap.lng && yi == tap.lat) {
+                Log.v("PolygonUtils", "[AREA_DEBUG] Point is exactly on vertex $i: (${yi}, ${xi}), returning true")
+                return true
+            }
 
             // Improved ray-casting with better edge case handling
-            if (((yi > tap.lat) != (yj > tap.lat)) &&
-                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)) {
-                inside = !inside
+            val yiAbove = yi > tap.lat
+            val yjAbove = yj > tap.lat
+
+            if (yiAbove != yjAbove) {
+                val intersectionX = (xj - xi) * (tap.lat - yi) / (yj - yi) + xi
+                if (tap.lng < intersectionX) {
+                    inside = !inside
+                    intersectionCount++
+                    Log.v("PolygonUtils", "[AREA_DEBUG] Ray intersection $intersectionCount at x=$intersectionX with edge $j->$i")
+                }
             }
             j = i
         }
 
+        Log.v("PolygonUtils", "[AREA_DEBUG] Ray-casting complete: $intersectionCount intersections, inside=$inside")
         return inside
     }
 
@@ -605,7 +638,21 @@ object PolygonUtils {
     fun isPointInPolygons(
         tap: Position,
         polygons: Area,
-    ): Boolean = polygons.any { it.containsPositionOptimized(tap) }
+    ): Boolean {
+        Log.v("PolygonUtils", "[AREA_DEBUG] isPointInPolygons: checking position=$tap against ${polygons.size} polygons")
+
+        polygons.forEachIndexed { index, polygon ->
+            val result = polygon.containsPositionOptimized(tap)
+            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index (size=${polygon.size}): contains position = $result")
+            if (result) {
+                Log.v("PolygonUtils", "[AREA_DEBUG] Position $tap found in polygon $index, returning true")
+                return true
+            }
+        }
+
+        Log.v("PolygonUtils", "[AREA_DEBUG] Position $tap not found in any of ${polygons.size} polygons, returning false")
+        return false
+    }
 
     /**
      * Clears the spatial index cache to free memory.
