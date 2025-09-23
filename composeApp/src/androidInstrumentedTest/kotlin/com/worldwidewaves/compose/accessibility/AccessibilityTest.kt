@@ -53,6 +53,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -84,6 +85,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import kotlinx.coroutines.delay
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -1823,6 +1825,17 @@ private fun TestProgressIndicatorsScreen() {
     val loadingProgress = remember { mutableStateOf(0) }
     val wavePhase = remember { mutableStateOf("") }
 
+    // Auto-progress through loading states
+    LaunchedEffect(loadingProgress.value) {
+        if (loadingProgress.value == 25) {
+            delay(100)
+            loadingProgress.value = 50
+        } else if (loadingProgress.value == 50) {
+            delay(100)
+            loadingProgress.value = 100
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Button(
             onClick = { loadingProgress.value = 25 },
@@ -1838,29 +1851,6 @@ private fun TestProgressIndicatorsScreen() {
                     },
             ) {
                 Text("Loading: ${loadingProgress.value}%")
-            }
-        }
-
-        // Simulate progress updates
-        if (loadingProgress.value == 25) {
-            Box(
-                modifier =
-                    Modifier.semantics {
-                        contentDescription = "Loading events: 50% complete"
-                    },
-            ) {
-                Text("Loading: 50%")
-            }
-        }
-
-        if (loadingProgress.value == 25) {
-            Box(
-                modifier =
-                    Modifier.semantics {
-                        contentDescription = "Loading events: 100% complete"
-                    },
-            ) {
-                Text("Loading: 100%")
             }
         }
 
