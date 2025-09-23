@@ -404,8 +404,11 @@ data class WWWEventArea(
                 }
             // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
             "MultiPolygon" ->
-                coordinates?.forEach { multiPolygon ->
-                    multiPolygon.jsonArray.forEach { ring ->
+                coordinates?.forEachIndexed { polygonIndex, polygon ->
+                    Log.v("WWWEventArea", "[AREA_DEBUG] Processing MultiPolygon polygon $polygonIndex with ${polygon.jsonArray.size} rings, eventId=${event.id}")
+                    // Each polygon in MultiPolygon has rings (exterior + holes)
+                    polygon.jsonArray.forEachIndexed { ringIndex, ring ->
+                        Log.v("WWWEventArea", "[AREA_DEBUG] Processing polygon $polygonIndex ring $ringIndex with ${ring.jsonArray.size} vertices, eventId=${event.id}")
                         processRing(ring, tempPolygons)
                     }
                 }

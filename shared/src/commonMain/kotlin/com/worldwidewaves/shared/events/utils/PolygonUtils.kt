@@ -642,6 +642,10 @@ object PolygonUtils {
         Log.v("PolygonUtils", "[AREA_DEBUG] isPointInPolygons: checking position=$tap against ${polygons.size} polygons")
 
         polygons.forEachIndexed { index, polygon ->
+            val bbox = polygon.bbox()
+            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index: size=${polygon.size}, bbox=$bbox")
+            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index first vertices: ${polygon.toList().take(3)}")
+
             val result = polygon.containsPositionOptimized(tap)
             Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index (size=${polygon.size}): contains position = $result")
             if (result) {
