@@ -17,10 +17,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.WWWGlobals.Companion.Common
 import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.Urls
+import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.instagram_icon
 import com.worldwidewaves.theme.commonBoldStyle
 import com.worldwidewaves.theme.commonTextStyle

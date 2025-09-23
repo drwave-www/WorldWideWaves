@@ -144,7 +144,7 @@ class RealTimeCoordinationTest {
             UITestFactory.createMockWaveEvent(
                 id = "coordination-test-event",
                 isInArea = true,
-            ) as IWWWEvent
+            )
 
         // Mock observer state flows
         val mockObserver = mockk<WWWEventObserver>(relaxed = true)

@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -50,18 +49,16 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.testing.UITestFactory
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 
 /**
@@ -76,7 +73,6 @@ import kotlin.time.ExperimentalTime
  */
 @RunWith(AndroidJUnit4::class)
 class CommonComponentsTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -85,9 +81,10 @@ class CommonComponentsTest {
     @OptIn(ExperimentalTime::class)
     @Before
     fun setUp() {
-        mockClock = mockk<IClock>(relaxed = true) {
-            every { now() } returns kotlin.time.Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
-        }
+        mockClock =
+            mockk<IClock>(relaxed = true) {
+                every { now() } returns kotlin.time.Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
+            }
     }
 
     @Test
@@ -101,7 +98,7 @@ class CommonComponentsTest {
                 eventState = Status.RUNNING,
                 isInArea = true,
                 onButtonClick = { buttonClicked = true },
-                modifier = Modifier.testTag("button-wave")
+                modifier = Modifier.testTag("button-wave"),
             )
         }
 
@@ -122,7 +119,7 @@ class CommonComponentsTest {
                 eventId = "test-event",
                 eventState = Status.RUNNING,
                 isInArea = false, // User not in area
-                modifier = Modifier.testTag("button-wave-disabled")
+                modifier = Modifier.testTag("button-wave-disabled"),
             )
         }
 
@@ -135,7 +132,7 @@ class CommonComponentsTest {
                 eventId = "test-event",
                 eventState = Status.DONE,
                 isInArea = true,
-                modifier = Modifier.testTag("button-wave-done")
+                modifier = Modifier.testTag("button-wave-done"),
             )
         }
 
@@ -152,7 +149,7 @@ class CommonComponentsTest {
                 TestSocialNetworksComponent(
                     instagramUrl = "https://instagram.com/worldwidewaves",
                     hashtag = "#worldwidewaves",
-                    modifier = Modifier.testTag("social-networks")
+                    modifier = Modifier.testTag("social-networks"),
                 )
             }
         }
@@ -186,7 +183,7 @@ class CommonComponentsTest {
                     isFavorite = favoriteState.value
                     toggleCount++
                 },
-                modifier = Modifier.testTag("favorite-overlay")
+                modifier = Modifier.testTag("favorite-overlay"),
             )
         }
 
@@ -205,7 +202,7 @@ class CommonComponentsTest {
             TestEventOverlayFavorite(
                 isFavorite = true,
                 onToggle = { /* no-op for this test */ },
-                modifier = Modifier.testTag("favorite-overlay-filled")
+                modifier = Modifier.testTag("favorite-overlay-filled"),
             )
         }
 
@@ -223,7 +220,7 @@ class CommonComponentsTest {
                 isDownloaded = true,
                 isDownloading = false,
                 hasError = false,
-                modifier = Modifier.testTag("download-overlay-done")
+                modifier = Modifier.testTag("download-overlay-done"),
             )
         }
 
@@ -237,7 +234,7 @@ class CommonComponentsTest {
                 isDownloaded = false,
                 isDownloading = true,
                 hasError = false,
-                modifier = Modifier.testTag("download-overlay-progress")
+                modifier = Modifier.testTag("download-overlay-progress"),
             )
         }
 
@@ -251,7 +248,7 @@ class CommonComponentsTest {
                 isDownloaded = false,
                 isDownloading = false,
                 hasError = true,
-                modifier = Modifier.testTag("download-overlay-error")
+                modifier = Modifier.testTag("download-overlay-error"),
             )
         }
 
@@ -265,7 +262,7 @@ class CommonComponentsTest {
                 isDownloaded = false,
                 isDownloading = false,
                 hasError = false,
-                modifier = Modifier.testTag("download-overlay-none")
+                modifier = Modifier.testTag("download-overlay-none"),
             )
         }
 
@@ -281,7 +278,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             TestEventOverlayDone(
                 eventStatus = Status.DONE,
-                modifier = Modifier.testTag("done-overlay")
+                modifier = Modifier.testTag("done-overlay"),
             )
         }
 
@@ -293,7 +290,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             TestEventOverlayDone(
                 eventStatus = Status.RUNNING,
-                modifier = Modifier.testTag("running-overlay")
+                modifier = Modifier.testTag("running-overlay"),
             )
         }
 
@@ -304,7 +301,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             TestEventOverlaySoonOrRunning(
                 eventStatus = Status.SOON,
-                modifier = Modifier.testTag("soon-overlay")
+                modifier = Modifier.testTag("soon-overlay"),
             )
         }
 
@@ -315,7 +312,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             TestEventOverlaySoonOrRunning(
                 eventStatus = Status.RUNNING,
-                modifier = Modifier.testTag("running-badge")
+                modifier = Modifier.testTag("running-badge"),
             )
         }
 
@@ -329,7 +326,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             Box(modifier = Modifier.fillMaxSize()) {
                 TestDividerComponent(
-                    modifier = Modifier.testTag("test-divider")
+                    modifier = Modifier.testTag("test-divider"),
                 )
             }
         }
@@ -340,7 +337,7 @@ class CommonComponentsTest {
         // Test horizontal divider
         composeTestRule.setContent {
             TestHorizontalDivider(
-                modifier = Modifier.testTag("horizontal-divider")
+                modifier = Modifier.testTag("horizontal-divider"),
             )
         }
 
@@ -349,7 +346,7 @@ class CommonComponentsTest {
         // Test vertical divider
         composeTestRule.setContent {
             TestVerticalDivider(
-                modifier = Modifier.testTag("vertical-divider")
+                modifier = Modifier.testTag("vertical-divider"),
             )
         }
 
@@ -366,7 +363,7 @@ class CommonComponentsTest {
                 eventId = "test-event",
                 eventState = Status.RUNNING,
                 isInArea = true,
-                modifier = Modifier.testTag("accessible-button")
+                modifier = Modifier.testTag("accessible-button"),
             )
         }
 
@@ -377,7 +374,7 @@ class CommonComponentsTest {
         composeTestRule.setContent {
             TestEventOverlayDone(
                 eventStatus = Status.DONE,
-                modifier = Modifier.testTag("accessible-done")
+                modifier = Modifier.testTag("accessible-done"),
             )
         }
 
@@ -389,7 +386,7 @@ class CommonComponentsTest {
             TestEventOverlayFavorite(
                 isFavorite = true,
                 onToggle = { },
-                modifier = Modifier.testTag("accessible-favorite")
+                modifier = Modifier.testTag("accessible-favorite"),
             )
         }
 
@@ -408,7 +405,7 @@ class CommonComponentsTest {
                     eventId = "test-event",
                     eventState = Status.RUNNING,
                     isInArea = true,
-                    modifier = Modifier.testTag("themed-button")
+                    modifier = Modifier.testTag("themed-button"),
                 )
             }
         }
@@ -421,7 +418,7 @@ class CommonComponentsTest {
             MaterialTheme {
                 TestEventOverlaySoonOrRunning(
                     eventStatus = Status.SOON,
-                    modifier = Modifier.testTag("themed-overlay")
+                    modifier = Modifier.testTag("themed-overlay"),
                 )
             }
         }
@@ -434,7 +431,7 @@ class CommonComponentsTest {
             MaterialTheme {
                 TestAutoResizeText(
                     text = "Sample text for scaling",
-                    modifier = Modifier.testTag("scaled-text")
+                    modifier = Modifier.testTag("scaled-text"),
                 )
             }
         }
@@ -450,20 +447,21 @@ class CommonComponentsTest {
 private fun TestSocialNetworksComponent(
     instagramUrl: String,
     hashtag: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         Box(
-            modifier = Modifier.testTag("instagram-link").clickable {
-                // Mock link click action
-            }
+            modifier =
+                Modifier.testTag("instagram-link").clickable {
+                    // Mock link click action
+                },
         ) {
             Text("Instagram")
         }
 
         Text(
             text = hashtag,
-            modifier = Modifier.testTag("hashtag-text")
+            modifier = Modifier.testTag("hashtag-text"),
         )
     }
 }
@@ -472,24 +470,26 @@ private fun TestSocialNetworksComponent(
 private fun TestEventOverlayFavorite(
     isFavorite: Boolean,
     onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.clickable { onToggle() }
+        modifier = modifier.clickable { onToggle() },
     ) {
         if (isFavorite) {
             Text(
                 "★",
-                modifier = Modifier
-                    .testTag("favorite-star-filled")
-                    .semantics { contentDescription = "Remove from favorites" }
+                modifier =
+                    Modifier
+                        .testTag("favorite-star-filled")
+                        .semantics { contentDescription = "Remove from favorites" },
             )
         } else {
             Text(
                 "☆",
-                modifier = Modifier
-                    .testTag("favorite-star-empty")
-                    .semantics { contentDescription = "Add to favorites" }
+                modifier =
+                    Modifier
+                        .testTag("favorite-star-empty")
+                        .semantics { contentDescription = "Add to favorites" },
             )
         }
     }
@@ -500,16 +500,17 @@ private fun TestEventOverlayMapDownloaded(
     isDownloaded: Boolean,
     isDownloading: Boolean,
     hasError: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when {
         isDownloaded -> {
             Box(modifier = modifier) {
                 Text(
                     "✓",
-                    modifier = Modifier
-                        .testTag("download-check")
-                        .semantics { contentDescription = "Map downloaded" }
+                    modifier =
+                        Modifier
+                            .testTag("download-check")
+                            .semantics { contentDescription = "Map downloaded" },
                 )
             }
         }
@@ -517,9 +518,10 @@ private fun TestEventOverlayMapDownloaded(
             Box(modifier = modifier) {
                 Text(
                     "⟳",
-                    modifier = Modifier
-                        .testTag("download-progress")
-                        .semantics { contentDescription = "Downloading map" }
+                    modifier =
+                        Modifier
+                            .testTag("download-progress")
+                            .semantics { contentDescription = "Downloading map" },
                 )
             }
         }
@@ -527,9 +529,10 @@ private fun TestEventOverlayMapDownloaded(
             Box(modifier = modifier) {
                 Text(
                     "✗",
-                    modifier = Modifier
-                        .testTag("download-error")
-                        .semantics { contentDescription = "Download failed" }
+                    modifier =
+                        Modifier
+                            .testTag("download-error")
+                            .semantics { contentDescription = "Download failed" },
                 )
             }
         }
@@ -537,39 +540,36 @@ private fun TestEventOverlayMapDownloaded(
 }
 
 @Composable
-private fun TestDividerComponent(
-    modifier: Modifier = Modifier
-) {
+private fun TestDividerComponent(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(1.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(1.dp),
     ) {
         // Simple divider representation
     }
 }
 
 @Composable
-private fun TestHorizontalDivider(
-    modifier: Modifier = Modifier
-) {
+private fun TestHorizontalDivider(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(1.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(1.dp),
     ) {
         // Horizontal divider representation
     }
 }
 
 @Composable
-private fun TestVerticalDivider(
-    modifier: Modifier = Modifier
-) {
+private fun TestVerticalDivider(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .width(1.dp)
-            .fillMaxHeight()
+        modifier =
+            modifier
+                .width(1.dp)
+                .fillMaxHeight(),
     ) {
         // Vertical divider representation
     }
@@ -578,11 +578,11 @@ private fun TestVerticalDivider(
 @Composable
 private fun TestAutoResizeText(
     text: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Text(
         text = text,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -592,19 +592,20 @@ private fun TestButtonWave(
     eventState: Status,
     isInArea: Boolean,
     onButtonClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isEnabled = isInArea && (eventState == Status.RUNNING || eventState == Status.SOON || eventState == Status.DONE)
 
     Box(
-        modifier = modifier
-            .clickable(enabled = isEnabled) { onButtonClick?.invoke() }
-            .testTag("button-wave"),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .clickable(enabled = isEnabled) { onButtonClick?.invoke() }
+                .testTag("button-wave"),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "JOIN WAVE",
-            color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -612,18 +613,19 @@ private fun TestButtonWave(
 @Composable
 private fun TestEventOverlayDone(
     eventStatus: Status?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (eventStatus == Status.DONE) {
         Box(
             modifier = modifier,
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 "DONE",
-                modifier = Modifier.semantics {
-                    contentDescription = "Event completed"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Event completed"
+                    },
             )
         }
     }
@@ -632,7 +634,7 @@ private fun TestEventOverlayDone(
 @Composable
 private fun TestEventOverlaySoonOrRunning(
     eventStatus: Status?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     when (eventStatus) {
         Status.SOON -> {

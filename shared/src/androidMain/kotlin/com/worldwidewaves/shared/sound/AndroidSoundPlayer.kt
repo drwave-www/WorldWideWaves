@@ -175,7 +175,8 @@ class AndroidSoundPlayer(
     private suspend fun playBuffer(
         buffer: AudioBuffer,
         duration: Duration,
-    ) = withContext(Dispatchers.Default) {  // Audio processing and playback, not I/O
+    ) = withContext(Dispatchers.Default) {
+        // Audio processing and playback, not I/O
         val bufferSizeInBytes = buffer.getRawBuffer().size
 
         val audioTrack =

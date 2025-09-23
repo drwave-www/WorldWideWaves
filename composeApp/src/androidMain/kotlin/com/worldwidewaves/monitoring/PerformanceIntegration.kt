@@ -32,7 +32,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * This singleton ensures consistent monitoring across all activities and screens.
  */
 object PerformanceIntegration {
-
     private var _monitor: AndroidPerformanceMonitor? = null
 
     /**
@@ -49,11 +48,10 @@ object PerformanceIntegration {
      * Get the performance monitor instance
      * Throws exception if not initialized
      */
-    fun getMonitor(): AndroidPerformanceMonitor {
-        return _monitor ?: throw IllegalStateException(
-            "PerformanceIntegration not initialized. Call initialize() first."
+    fun getMonitor(): AndroidPerformanceMonitor =
+        _monitor ?: throw IllegalStateException(
+            "PerformanceIntegration not initialized. Call initialize() first.",
         )
-    }
 
     /**
      * Check if monitoring is initialized
@@ -63,28 +61,40 @@ object PerformanceIntegration {
     /**
      * Record wave timing for performance tracking
      */
-    fun recordWaveTiming(expectedTime: Long, actualTime: Long) {
+    fun recordWaveTiming(
+        expectedTime: Long,
+        actualTime: Long,
+    ) {
         _monitor?.recordWaveTimingAccuracy(expectedTime, actualTime)
     }
 
     /**
      * Record user participation in wave
      */
-    fun recordWaveParticipation(eventId: String, success: Boolean) {
+    fun recordWaveParticipation(
+        eventId: String,
+        success: Boolean,
+    ) {
         _monitor?.recordWaveParticipation(eventId, success)
     }
 
     /**
      * Record screen navigation performance
      */
-    fun recordScreenLoad(screenName: String, loadTime: kotlin.time.Duration) {
+    fun recordScreenLoad(
+        screenName: String,
+        loadTime: kotlin.time.Duration,
+    ) {
         _monitor?.recordScreenLoad(screenName, loadTime)
     }
 
     /**
      * Record user interaction response time
      */
-    fun recordUserInteraction(action: String, responseTime: kotlin.time.Duration) {
+    fun recordUserInteraction(
+        action: String,
+        responseTime: kotlin.time.Duration,
+    ) {
         _monitor?.recordUserInteraction(action, responseTime)
     }
 }
@@ -96,7 +106,10 @@ object PerformanceIntegration {
 /**
  * Measure and record screen load time
  */
-inline fun <T> measureScreenLoad(screenName: String, block: () -> T): T {
+inline fun <T> measureScreenLoad(
+    screenName: String,
+    block: () -> T,
+): T {
     val startTime = System.currentTimeMillis()
     val result = block()
     val duration = (System.currentTimeMillis() - startTime).milliseconds
@@ -107,7 +120,10 @@ inline fun <T> measureScreenLoad(screenName: String, block: () -> T): T {
 /**
  * Measure and record user interaction time
  */
-inline fun <T> measureUserInteraction(action: String, block: () -> T): T {
+inline fun <T> measureUserInteraction(
+    action: String,
+    block: () -> T,
+): T {
     val startTime = System.currentTimeMillis()
     val result = block()
     val duration = (System.currentTimeMillis() - startTime).milliseconds

@@ -23,6 +23,7 @@ package com.worldwidewaves.testing
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
+import com.worldwidewaves.shared.events.IWWWEvent
 import io.mockk.mockk
 import org.junit.Rule
 
@@ -103,8 +104,8 @@ object UITestFactory {
         progression: Double = 50.0,
         userPositionRatio: Double = 0.5,
         timeBeforeHit: kotlin.time.Duration = kotlin.time.Duration.parse("5m")
-    ): Any {
-        return mockk<Any>(relaxed = true)
+    ): IWWWEvent {
+        return mockk<IWWWEvent>(relaxed = true)
     }
 
     /**

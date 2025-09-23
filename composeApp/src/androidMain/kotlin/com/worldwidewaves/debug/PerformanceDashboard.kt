@@ -33,9 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -68,20 +66,20 @@ import kotlin.time.Duration
 @Composable
 fun PerformanceDashboard(
     monitor: AndroidPerformanceMonitor,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val metrics by monitor.performanceMetrics.collectAsState()
     val report = monitor.getPerformanceReport()
 
     LazyColumn(
         modifier = modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Text(
                 text = "Performance Dashboard",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
         }
 
@@ -115,36 +113,36 @@ fun PerformanceDashboard(
 private fun PerformanceOverviewCard(metrics: PerformanceMetrics) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "Performance Overview",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 MetricItem(
                     label = "Events Tracked",
                     value = metrics.totalEvents.toString(),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
                 MetricItem(
                     label = "Memory Usage",
                     value = "${metrics.memoryUsagePercent.toInt()}%",
-                    color = getMemoryUsageColor(metrics.memoryUsagePercent)
+                    color = getMemoryUsageColor(metrics.memoryUsagePercent),
                 )
                 MetricItem(
                     label = "Location Accuracy",
                     value = "${metrics.locationAccuracy.toInt()}m",
-                    color = getLocationAccuracyColor(metrics.locationAccuracy)
+                    color = getLocationAccuracyColor(metrics.locationAccuracy),
                 )
             }
         }
@@ -155,40 +153,41 @@ private fun PerformanceOverviewCard(metrics: PerformanceMetrics) {
 private fun WavePerformanceCard(metrics: PerformanceMetrics) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "Wave Coordination Performance",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 MetricItem(
                     label = "Timing Accuracy",
                     value = "${metrics.averageWaveTimingAccuracy.toInt()}%",
-                    color = getTimingAccuracyColor(metrics.averageWaveTimingAccuracy)
+                    color = getTimingAccuracyColor(metrics.averageWaveTimingAccuracy),
                 )
                 MetricItem(
                     label = "Participation Rate",
                     value = "${(metrics.waveParticipationRate * 100).toInt()}%",
-                    color = getParticipationRateColor(metrics.waveParticipationRate)
+                    color = getParticipationRateColor(metrics.waveParticipationRate),
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Wave timing accuracy measures how precisely users participate in waves. " +
+                text =
+                    "Wave timing accuracy measures how precisely users participate in waves. " +
                         "High accuracy (>95%) indicates excellent synchronization.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -198,31 +197,31 @@ private fun WavePerformanceCard(metrics: PerformanceMetrics) {
 private fun SystemPerformanceCard(metrics: PerformanceMetrics) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "System Performance",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 MetricItem(
                     label = "Screen Load",
                     value = formatDuration(metrics.averageScreenLoadTime),
-                    color = getScreenLoadTimeColor(metrics.averageScreenLoadTime)
+                    color = getScreenLoadTimeColor(metrics.averageScreenLoadTime),
                 )
                 MetricItem(
                     label = "Network Latency",
                     value = formatDuration(metrics.averageNetworkLatency),
-                    color = getNetworkLatencyColor(metrics.averageNetworkLatency)
+                    color = getNetworkLatencyColor(metrics.averageNetworkLatency),
                 )
             }
         }
@@ -233,16 +232,16 @@ private fun SystemPerformanceCard(metrics: PerformanceMetrics) {
 private fun CriticalIssuesCard(issues: List<PerformanceIssue>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "Critical Issues (${issues.size})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onErrorContainer
+                color = MaterialTheme.colorScheme.onErrorContainer,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -258,15 +257,15 @@ private fun CriticalIssuesCard(issues: List<PerformanceIssue>) {
 private fun RecommendationsCard(recommendations: List<String>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "Recommendations",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -274,7 +273,7 @@ private fun RecommendationsCard(recommendations: List<String>) {
                 Text(
                     text = "• $recommendation",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 2.dp)
+                    modifier = Modifier.padding(vertical = 2.dp),
                 )
             }
         }
@@ -285,27 +284,28 @@ private fun RecommendationsCard(recommendations: List<String>) {
 private fun MetricItem(
     label: String,
     value: String,
-    color: Color
+    color: Color,
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
+            modifier =
+                Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(color),
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -313,25 +313,26 @@ private fun MetricItem(
 @Composable
 private fun IssueItem(issue: PerformanceIssue) {
     Row(
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Top,
     ) {
         Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(CircleShape)
-                .background(getSeverityColor(issue.severity))
+            modifier =
+                Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(getSeverityColor(issue.severity)),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
                 text = issue.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer
+                color = MaterialTheme.colorScheme.onErrorContainer,
             )
             Text(
                 text = issue.impact,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f),
             )
         }
     }
@@ -339,54 +340,61 @@ private fun IssueItem(issue: PerformanceIssue) {
 
 // Color helpers for different metrics
 @Composable
-private fun getTimingAccuracyColor(accuracy: Double): Color = when {
-    accuracy >= 95.0 -> Color(0xFF4CAF50) // Green
-    accuracy >= 90.0 -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getTimingAccuracyColor(accuracy: Double): Color =
+    when {
+        accuracy >= 95.0 -> Color(0xFF4CAF50) // Green
+        accuracy >= 90.0 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getParticipationRateColor(rate: Double): Color = when {
-    rate >= 0.8 -> Color(0xFF4CAF50) // Green
-    rate >= 0.6 -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getParticipationRateColor(rate: Double): Color =
+    when {
+        rate >= 0.8 -> Color(0xFF4CAF50) // Green
+        rate >= 0.6 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getMemoryUsageColor(usage: Double): Color = when {
-    usage < 60.0 -> Color(0xFF4CAF50) // Green
-    usage < 80.0 -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getMemoryUsageColor(usage: Double): Color =
+    when {
+        usage < 60.0 -> Color(0xFF4CAF50) // Green
+        usage < 80.0 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getLocationAccuracyColor(accuracy: Float): Color = when {
-    accuracy <= 5.0f -> Color(0xFF4CAF50) // Green
-    accuracy <= 15.0f -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getLocationAccuracyColor(accuracy: Float): Color =
+    when {
+        accuracy <= 5.0f -> Color(0xFF4CAF50) // Green
+        accuracy <= 15.0f -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getScreenLoadTimeColor(duration: Duration): Color = when {
-    duration.inWholeMilliseconds < 1000 -> Color(0xFF4CAF50) // Green
-    duration.inWholeMilliseconds < 2000 -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getScreenLoadTimeColor(duration: Duration): Color =
+    when {
+        duration.inWholeMilliseconds < 1000 -> Color(0xFF4CAF50) // Green
+        duration.inWholeMilliseconds < 2000 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getNetworkLatencyColor(duration: Duration): Color = when {
-    duration.inWholeMilliseconds < 100 -> Color(0xFF4CAF50) // Green
-    duration.inWholeMilliseconds < 300 -> Color(0xFFFF9800) // Orange
-    else -> Color(0xFFF44336) // Red
-}
+private fun getNetworkLatencyColor(duration: Duration): Color =
+    when {
+        duration.inWholeMilliseconds < 100 -> Color(0xFF4CAF50) // Green
+        duration.inWholeMilliseconds < 300 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFFF44336) // Red
+    }
 
 @Composable
-private fun getSeverityColor(severity: PerformanceIssue.Severity): Color = when (severity) {
-    PerformanceIssue.Severity.LOW -> Color(0xFF2196F3) // Blue
-    PerformanceIssue.Severity.MEDIUM -> Color(0xFFFF9800) // Orange
-    PerformanceIssue.Severity.HIGH -> Color(0xFFF44336) // Red
-    PerformanceIssue.Severity.CRITICAL -> Color(0xFF9C27B0) // Purple
-}
+private fun getSeverityColor(severity: PerformanceIssue.Severity): Color =
+    when (severity) {
+        PerformanceIssue.Severity.LOW -> Color(0xFF2196F3) // Blue
+        PerformanceIssue.Severity.MEDIUM -> Color(0xFFFF9800) // Orange
+        PerformanceIssue.Severity.HIGH -> Color(0xFFF44336) // Red
+        PerformanceIssue.Severity.CRITICAL -> Color(0xFF9C27B0) // Purple
+    }
 
 private fun formatDuration(duration: Duration): String {
     val ms = duration.inWholeMilliseconds

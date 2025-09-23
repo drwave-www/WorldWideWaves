@@ -13,14 +13,13 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,10 +55,10 @@ class EventsViewModel(
     private val mapChecker: MapAvailabilityChecker,
     private val platform: WWWPlatform,
 ) : ViewModel() {
-
     companion object {
         private const val MILLIS_PER_SECOND = 1000L
     }
+
     private val originalEventsMutex = Mutex()
     var originalEvents: List<IWWWEvent> = emptyList()
 

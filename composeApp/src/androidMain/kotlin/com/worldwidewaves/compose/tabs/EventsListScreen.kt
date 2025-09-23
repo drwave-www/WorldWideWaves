@@ -197,15 +197,17 @@ class EventsListScreen(
             modifier = modifier,
             events = events,
             mapStates = mapStates,
-            filterState = EventsFilterState(
-                starredSelected = starredSelected,
-                downloadedSelected = downloadedSelected
-            ),
-            filterCallbacks = EventsFilterCallbacks(
-                onAllEventsClicked = { selectTab() },
-                onFavoriteEventsClicked = { selectTab(starred = true) },
-                onDownloadedEventsClicked = { selectTab(downloaded = true) }
-            ),
+            filterState =
+                EventsFilterState(
+                    starredSelected = starredSelected,
+                    downloadedSelected = downloadedSelected,
+                ),
+            filterCallbacks =
+                EventsFilterCallbacks(
+                    onAllEventsClicked = { selectTab() },
+                    onFavoriteEventsClicked = { selectTab(starred = true) },
+                    onDownloadedEventsClicked = { selectTab(downloaded = true) },
+                ),
         )
     }
 
@@ -462,10 +464,11 @@ class EventsListScreen(
         ) {
             event.community?.let {
                 EventFlag(
-                    modifier = Modifier.padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        top = Dimensions.DEFAULT_INT_PADDING.dp
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            top = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = event.getCommunityImage() as DrawableResource,
                     contentDescription = event.community!!,
                 )
@@ -473,10 +476,11 @@ class EventsListScreen(
 
             event.country?.let {
                 EventFlag(
-                    modifier = Modifier.padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        bottom = Dimensions.DEFAULT_INT_PADDING.dp
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = event.getCountryImage() as DrawableResource,
                     contentDescription = event.country!!,
                 )
@@ -690,9 +694,10 @@ class EventsListScreen(
                                     }
                                 }
                             },
-                    painter = painterResource(
-                        if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off
-                    ),
+                    painter =
+                        painterResource(
+                            if (isFavorite) ShRes.drawable.favorite_on else ShRes.drawable.favorite_off,
+                        ),
                     contentDescription =
                         stringResource(
                             if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off,

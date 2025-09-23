@@ -37,7 +37,6 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 
-
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
 
@@ -138,15 +137,16 @@ actual suspend fun getMapFileAbsolutePath(
 
     for (attempt in 1..maxRetries) {
         try {
-            val ctx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                try {
-                    context.createContextForSplit(eventId)
-                } catch (_: Exception) {
+            val ctx =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        context.createContextForSplit(eventId)
+                    } catch (_: Exception) {
+                        context
+                    }
+                } else {
                     context
                 }
-            } else {
-                context
-            }
 
             // Ensure split-compat hooks into this context
             SplitCompat.install(ctx)
@@ -182,9 +182,8 @@ private suspend fun cacheAssetFromContext(
     cachedFile: File,
     metadataFile: File,
     eventId: String,
-    extension: String
+    extension: String,
 ): String {
-
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
         ctx.assets.open(assetPath).use { input ->

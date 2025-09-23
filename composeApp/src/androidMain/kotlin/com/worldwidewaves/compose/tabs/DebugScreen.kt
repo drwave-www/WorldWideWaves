@@ -29,15 +29,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.debug.PerformanceDashboard
-import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 
 /**
  * Debug screen that contains development tools and performance monitoring
  * Only visible in debug builds
  */
 class DebugScreen(
-    private val performanceMonitor: AndroidPerformanceMonitor
+    private val performanceMonitor: AndroidPerformanceMonitor,
 ) : TabScreen {
     override val name = "Debug"
 
@@ -46,7 +46,7 @@ class DebugScreen(
         Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
             PerformanceDashboard(
                 monitor = performanceMonitor,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

@@ -30,7 +30,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -50,9 +49,8 @@ import kotlin.time.Duration.Companion.seconds
  * - System resource monitoring
  */
 class AndroidPerformanceMonitor(
-    private val context: Context
+    private val context: Context,
 ) : PerformanceMonitor() {
-
     companion object {
         internal const val SYSTEM_MONITOR_INTERVAL_SECONDS = 30L
         internal const val MEMORY_MONITOR_INTERVAL_SECONDS = 10L
@@ -97,11 +95,14 @@ class AndroidPerformanceMonitor(
 
             // Record low memory threshold
             if (memoryInfo.lowMemory) {
-                recordEvent("low_memory_warning", mapOf(
-                    "threshold" to memoryInfo.threshold,
-                    "available" to availableMemory,
-                    "total" to totalMemory
-                ))
+                recordEvent(
+                    "low_memory_warning",
+                    mapOf(
+                        "threshold" to memoryInfo.threshold,
+                        "available" to availableMemory,
+                        "total" to totalMemory,
+                    ),
+                )
             }
         } catch (e: Exception) {
             Log.e("AndroidPerformanceMonitor", "Error monitoring memory", e)
@@ -111,61 +112,79 @@ class AndroidPerformanceMonitor(
     /**
      * Get detailed Android device information
      */
-    fun getAndroidDeviceInfo(): String {
-        return buildString {
+    fun getAndroidDeviceInfo(): String =
+        buildString {
             append("Android ${Build.VERSION.RELEASE} ")
             append("(API ${Build.VERSION.SDK_INT}) ")
             append("${Build.MANUFACTURER} ${Build.MODEL} ")
             append("ABI: ${Build.SUPPORTED_ABIS.joinToString(",")}")
         }
-    }
 
     /**
      * Monitor app startup performance
      */
-    fun recordAppStartup(startType: StartupType, duration: kotlin.time.Duration) {
+    fun recordAppStartup(
+        startType: StartupType,
+        duration: kotlin.time.Duration,
+    ) {
         recordMetric("app_startup_${startType.name.lowercase()}", duration.inWholeMilliseconds.toDouble(), "ms")
-        recordEvent("app_startup", mapOf(
-            "type" to startType.name,
-            "duration" to duration.inWholeMilliseconds,
-            "deviceInfo" to getAndroidDeviceInfo()
-        ))
+        recordEvent(
+            "app_startup",
+            mapOf(
+                "type" to startType.name,
+                "duration" to duration.inWholeMilliseconds,
+                "deviceInfo" to getAndroidDeviceInfo(),
+            ),
+        )
     }
 
     /**
      * Monitor Compose recomposition performance
      */
-    fun recordRecomposition(composableName: String, recompositions: Int, skipped: Int) {
+    fun recordRecomposition(
+        composableName: String,
+        recompositions: Int,
+        skipped: Int,
+    ) {
         recordMetric("compose_recompositions_$composableName", recompositions.toDouble())
         recordMetric("compose_skipped_$composableName", skipped.toDouble())
-        recordEvent("compose_performance", mapOf(
-            "composable" to composableName,
-            "recompositions" to recompositions,
-            "skipped" to skipped,
-            "efficiency" to if (recompositions + skipped > 0) skipped.toDouble() / (recompositions + skipped) else 1.0
-        ))
+        recordEvent(
+            "compose_performance",
+            mapOf(
+                "composable" to composableName,
+                "recompositions" to recompositions,
+                "skipped" to skipped,
+                "efficiency" to if (recompositions + skipped > 0) skipped.toDouble() / (recompositions + skipped) else 1.0,
+            ),
+        )
     }
 
     /**
      * Monitor frame rendering performance
      */
-    fun recordFrameMetrics(totalFrames: Long, jankyFrames: Long) {
+    fun recordFrameMetrics(
+        totalFrames: Long,
+        jankyFrames: Long,
+    ) {
         val jankyPercent = if (totalFrames > 0) (jankyFrames.toDouble() / totalFrames) * JANKY_FRAME_THRESHOLD_PERCENT else 0.0
         recordMetric("frame_jank_percent", jankyPercent, "percent")
-        recordEvent("frame_performance", mapOf(
-            "totalFrames" to totalFrames,
-            "jankyFrames" to jankyFrames,
-            "jankyPercent" to jankyPercent
-        ))
+        recordEvent(
+            "frame_performance",
+            mapOf(
+                "totalFrames" to totalFrames,
+                "jankyFrames" to jankyFrames,
+                "jankyPercent" to jankyPercent,
+            ),
+        )
     }
 
     /**
      * App startup types for performance tracking
      */
     enum class StartupType {
-        COLD,    // App process is created
-        WARM,    // App process exists but activity needs to be created
-        HOT      // App and activity exist, just brought to foreground
+        COLD, // App process is created
+        WARM, // App process exists but activity needs to be created
+        HOT, // App and activity exist, just brought to foreground
     }
 }
 
@@ -175,7 +194,7 @@ class AndroidPerformanceMonitor(
 @Composable
 fun PerformanceMonitoringEffect(
     monitor: AndroidPerformanceMonitor,
-    screenName: String
+    screenName: String,
 ) {
     val context = LocalContext.current
     val startTime = remember { System.currentTimeMillis() }
@@ -188,19 +207,20 @@ fun PerformanceMonitoringEffect(
 
     // Monitor memory during screen lifecycle
     DisposableEffect(screenName) {
-        val job = GlobalScope.launch {
-            while (isActive) {
-                try {
-                    val runtime = Runtime.getRuntime()
-                    val usedMemory = runtime.totalMemory() - runtime.freeMemory()
-                    val maxMemory = runtime.maxMemory()
-                    monitor.recordMemoryUsage(usedMemory, maxMemory)
-                    delay(AndroidPerformanceMonitor.MEMORY_MONITOR_INTERVAL_SECONDS.seconds)
-                } catch (e: Exception) {
-                    Log.e("PerformanceMonitoringEffect", "Error monitoring screen memory", e)
+        val job =
+            GlobalScope.launch {
+                while (isActive) {
+                    try {
+                        val runtime = Runtime.getRuntime()
+                        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+                        val maxMemory = runtime.maxMemory()
+                        monitor.recordMemoryUsage(usedMemory, maxMemory)
+                        delay(AndroidPerformanceMonitor.MEMORY_MONITOR_INTERVAL_SECONDS.seconds)
+                    } catch (e: Exception) {
+                        Log.e("PerformanceMonitoringEffect", "Error monitoring screen memory", e)
+                    }
                 }
             }
-        }
 
         onDispose {
             job.cancel()
@@ -226,7 +246,10 @@ class ComposePerformanceTracker {
     private val recompositionCounts = mutableMapOf<String, Int>()
     private val skipCounts = mutableMapOf<String, Int>()
 
-    fun trackRecomposition(composableName: String, skipped: Boolean = false) {
+    fun trackRecomposition(
+        composableName: String,
+        skipped: Boolean = false,
+    ) {
         if (skipped) {
             skipCounts[composableName] = (skipCounts[composableName] ?: 0) + 1
         } else {
@@ -234,9 +257,7 @@ class ComposePerformanceTracker {
         }
     }
 
-    fun getStats(composableName: String): Pair<Int, Int> {
-        return (recompositionCounts[composableName] ?: 0) to (skipCounts[composableName] ?: 0)
-    }
+    fun getStats(composableName: String): Pair<Int, Int> = (recompositionCounts[composableName] ?: 0) to (skipCounts[composableName] ?: 0)
 
     fun reportStats(monitor: AndroidPerformanceMonitor) {
         recompositionCounts.forEach { (name, recompositions) ->

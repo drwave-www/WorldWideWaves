@@ -149,7 +149,7 @@ class MapIntegrationTest {
         mockEvent = UITestFactory.createMockWaveEvent(
             id = "test-map-event",
             isInArea = true
-        ) as IWWWEvent
+        )
 
         every { mockEvent.id } returns "test-map-event"
         every { mockEvent.community } returns "new_york_usa"

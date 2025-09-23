@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
@@ -53,6 +52,8 @@ import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
@@ -63,8 +64,6 @@ import com.worldwidewaves.shared.generated.resources.debug_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
 import com.worldwidewaves.theme.AppTheme
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -110,14 +109,15 @@ open class MainActivity : AppCompatActivity() {
     private var isOfficialSplashDismissed = false
 
     protected val tabManager by lazy {
-        val screens = mutableListOf(
-            eventsListScreen,
-            aboutScreen,
-        )
+        val screens =
+            mutableListOf(
+                eventsListScreen,
+                aboutScreen,
+            )
         debugScreen?.let { screens.add(it) }
 
         TabManager(
-            screens.toList()
+            screens.toList(),
         ) { isSelected, tabIndex, contentDescription ->
             TabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
@@ -227,7 +227,7 @@ open class MainActivity : AppCompatActivity() {
         isSelected: Boolean,
         tabIndex: Int,
         contentDescription: String?,
-        totalTabs: Int
+        totalTabs: Int,
     ) {
         val tabInfo = getTabInfo(totalTabs > 2)
         Image(

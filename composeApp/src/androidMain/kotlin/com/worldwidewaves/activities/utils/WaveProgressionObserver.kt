@@ -27,10 +27,10 @@ import com.worldwidewaves.shared.toMapLibrePolygon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.sample
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Observes a single wave **progression** and mirrors it on the Android map.

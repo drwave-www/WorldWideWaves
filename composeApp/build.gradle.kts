@@ -77,6 +77,7 @@ android {
                 .toInt()
         versionCode = 26
         versionName = "v0.22"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")

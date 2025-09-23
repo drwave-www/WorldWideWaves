@@ -26,7 +26,6 @@ import android.content.Context
 import androidx.work.Configuration
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.di.applicationModule
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.WWWSimulation

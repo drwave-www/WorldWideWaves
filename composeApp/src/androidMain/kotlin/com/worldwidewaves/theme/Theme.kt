@@ -147,8 +147,7 @@ fun commonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
 fun commonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     commonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
 
-fun commonBoldStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun commonBoldStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = commonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun primaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     commonTextStyle(fontSize).copy(color = lightScheme.primary)
@@ -165,11 +164,9 @@ fun quaternaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): Tex
 fun quinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     quinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
-fun extraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
+fun extraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = defaultTextStyle(fontSize).copy(fontFamily = extraFontFamily)
 
-fun extraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
+fun extraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = extraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun extraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     extraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)

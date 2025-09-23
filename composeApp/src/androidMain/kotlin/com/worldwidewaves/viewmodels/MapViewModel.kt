@@ -173,10 +173,11 @@ class MapViewModel(
         _featureState.value = MapFeatureState.Retrying(retryCount, MAX_RETRIES)
         Log.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
 
-        val request = SplitInstallRequest
-            .newBuilder()
-            .addModule(moduleId)
-            .build()
+        val request =
+            SplitInstallRequest
+                .newBuilder()
+                .addModule(moduleId)
+                .build()
 
         Handler(Looper.getMainLooper()).postDelayed({
             startInstallWithRetry(request, moduleId, delay)
@@ -202,11 +203,12 @@ class MapViewModel(
     private fun handleDownloadingStatus(state: SplitInstallSessionState) {
         val totalBytes = state.totalBytesToDownload()
         val downloadedBytes = state.bytesDownloaded()
-        val progressPercent = if (totalBytes > 0) {
-            (downloadedBytes * PROGRESS_MULTIPLIER / totalBytes).toInt()
-        } else {
-            0
-        }
+        val progressPercent =
+            if (totalBytes > 0) {
+                (downloadedBytes * PROGRESS_MULTIPLIER / totalBytes).toInt()
+            } else {
+                0
+            }
         _featureState.value = MapFeatureState.Downloading(progressPercent)
     }
 
@@ -240,15 +242,14 @@ class MapViewModel(
         }
     }
 
-    private fun getModuleIdsFromState(state: SplitInstallSessionState): List<String> {
-        return try {
+    private fun getModuleIdsFromState(state: SplitInstallSessionState): List<String> =
+        try {
             state.moduleNames().toList()
         } catch (_: Exception) {
             emptyList()
         }.ifEmpty {
             currentMapId?.let { listOf(it) }.orEmpty()
         }
-    }
 
     private fun handlePendingStatus() {
         _featureState.value = MapFeatureState.Pending
@@ -256,10 +257,11 @@ class MapViewModel(
 
     private fun handleFailedStatus(state: SplitInstallSessionState) {
         Log.e(TAG, "Status: FAILED code=${state.errorCode()}")
-        _featureState.value = MapFeatureState.Failed(
-            state.errorCode(),
-            getErrorMessage(state.errorCode())
-        )
+        _featureState.value =
+            MapFeatureState.Failed(
+                state.errorCode(),
+                getErrorMessage(state.errorCode()),
+            )
         currentSessionId = 0
     }
 

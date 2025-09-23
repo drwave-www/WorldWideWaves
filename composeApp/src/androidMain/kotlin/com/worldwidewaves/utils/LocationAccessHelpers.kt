@@ -45,7 +45,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
 
 /**
