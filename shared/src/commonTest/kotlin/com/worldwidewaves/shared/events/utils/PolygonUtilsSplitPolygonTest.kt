@@ -51,15 +51,24 @@ class PolygonUtilsSplitPolygonTest {
     @Test
     fun testSplitPolygonByLongitude() =
         runTest {
+            val failedCases = mutableListOf<Pair<Int, String>>()
+
             PolygonUtilsTestCases.testCases.filterIndexed { idx, _ -> idx == 5 }.forEachIndexed { idx, testCase ->
                 try {
                     testSplitPolygonCase(idx, testCase)
                 } catch (e: AssertionError) {
-                    // TODO: Fix polygon splitting algorithm - this is a known issue with complex polygons
-                    Napier.w("Skipping test case $idx due to polygon splitting issue: ${e.message}")
-                    // For now, just pass the test to unblock other work
-                    assertTrue(true)
+                    // Record failed cases for analysis instead of hiding them
+                    val failureMessage = "Test case $idx failed: ${e.message}"
+                    failedCases.add(idx to failureMessage)
+                    Napier.w("Polygon splitting test case $idx failed: ${e.message}")
                 }
+            }
+
+            // Fail the test if any complex polygon cases failed
+            // This forces the algorithm to be fixed rather than hiding failures
+            if (failedCases.isNotEmpty()) {
+                val failureSummary = failedCases.joinToString("\n") { "- ${it.second}" }
+                fail("Polygon splitting algorithm has known issues with complex polygons:\n$failureSummary\n\nThese need to be fixed for reliable event area handling.")
             }
         }
 

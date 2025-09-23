@@ -681,15 +681,23 @@ class ChoreographyManagerTest : KoinTest {
         )
 
         // WHEN: Attempting to get sequences without loaded choreography definitions
-        // THEN: Should handle gracefully without crashing
-        assertDoesNotThrow("ChoreographyManager should handle missing choreography definitions gracefully") {
-            val warmingSequence = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
-            val waitingSequence = realManager.getWaitingSequenceImmediate()
-            val hitSequence = realManager.getHitSequenceImmediate()
+        // THEN: Should handle gracefully with proper fallback behavior
+        var warmingSequence: WarmingSequence? = null
+        var waitingSequence: WaitingSequence? = null
+        var hitSequence: HitSequence? = null
 
-            // These should be null when no choreography is loaded, but shouldn't crash
-            Log.v("ChoreographyManagerTest", "Resource loading test completed: warming=$warmingSequence, waiting=$waitingSequence, hit=$hitSequence")
+        assertDoesNotThrow("ChoreographyManager should handle missing choreography definitions gracefully") {
+            warmingSequence = realManager.getCurrentWarmingSequenceImmediate(TestHelpers.TestTimes.BASE_TIME)
+            waitingSequence = realManager.getWaitingSequenceImmediate()
+            hitSequence = realManager.getHitSequenceImmediate()
         }
+
+        // Validate proper fallback behavior (not just crash prevention)
+        assertNull(warmingSequence, "Should return null warming sequence when no choreography is loaded")
+        assertNull(waitingSequence, "Should return null waiting sequence when no choreography is loaded")
+        assertNull(hitSequence, "Should return null hit sequence when no choreography is loaded")
+
+        Log.v("ChoreographyManagerTest", "Resource loading test completed: warming=$warmingSequence, waiting=$waitingSequence, hit=$hitSequence")
     }
 
     /**

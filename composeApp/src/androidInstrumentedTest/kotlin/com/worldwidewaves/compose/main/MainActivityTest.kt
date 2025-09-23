@@ -58,6 +58,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
@@ -69,6 +70,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
@@ -304,7 +306,7 @@ class MainActivityTest {
         val loadingState = MutableStateFlow("loading")
         val mockEvents = mockk<WWWEvents>(relaxed = true)
 
-        every { mockEvents.flow() } returns flowOf(emptyList())
+        every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(emptyList()).asStateFlow()
 
         composeTestRule.setContent {
             TestDataLoadingStates(loadingState.value, mockEvents)
