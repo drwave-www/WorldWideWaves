@@ -36,7 +36,7 @@ val androidModule =
     module {
         single<WWWPlatform> {
             debugBuild()
-            WWWPlatform("Android ${Build.VERSION.SDK_INT}")
+            WWWPlatform("Android ${Build.VERSION.SDK_INT}", get())
         }
         single<ImageResolver<DrawableResource>> { AndroidImageResolver() }
         single(createdAtStart = true) { ChoreographyManager<DrawableResource>() }
