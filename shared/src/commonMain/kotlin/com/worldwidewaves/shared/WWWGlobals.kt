@@ -68,8 +68,8 @@ class WWWGlobals {
          * Wave Physics & Simulation Constants
          */
         object Wave {
-            /** Default wave simulation speed in meters per second - 50x normal walking pace for faster simulations */
-            const val DEFAULT_SPEED_SIMULATION = 300 // m/s (50 * 6 m/s normal walking pace)
+            /** Default wave simulation speed in meters per second */
+            const val DEFAULT_SPEED_SIMULATION = 50 // m/s
 
             /** Minimum allowed simulation speed */
             const val MIN_SIMULATION_SPEED = 1
