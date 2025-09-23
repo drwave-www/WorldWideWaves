@@ -43,6 +43,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import com.worldwidewaves.shared.position.PositionManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -65,6 +66,7 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
 class WWWEventObserverTest : KoinTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var mockClock: MockClock
+    private lateinit var testPositionManager: PositionManager
     private val activeObservers = mutableListOf<WWWEventObserver>()
 
     companion object {
@@ -77,11 +79,15 @@ class WWWEventObserverTest : KoinTest {
         Dispatchers.setMain(testDispatcher)
         mockClock = MockClock(TestHelpers.TestTimes.BASE_TIME)
 
+        val coroutineScopeProvider = DefaultCoroutineScopeProvider(testDispatcher, testDispatcher)
+        testPositionManager = PositionManager(coroutineScopeProvider)
+
         startKoin {
             modules(
                 module {
                     single<IClock> { mockClock }
-                    single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider(testDispatcher, testDispatcher) }
+                    single<CoroutineScopeProvider> { coroutineScopeProvider }
+                    single<PositionManager> { testPositionManager }
                 }
             )
         }
@@ -100,6 +106,9 @@ class WWWEventObserverTest : KoinTest {
             }
             activeObservers.clear()
         }
+
+        // Clean up PositionManager
+        testPositionManager.cleanup()
 
         // Force garbage collection to help with memory cleanup
         System.gc()
@@ -329,6 +338,10 @@ class WWWEventObserverTest : KoinTest {
         val observer = createTrackedObserver(event)
         testScheduler.advanceUntilIdle()
 
+        // Set position in PositionManager for unified position detection
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.PARIS)
+        testScheduler.advanceUntilIdle()
+
         // Force an observation cycle to ensure state is updated
         observer.startObservation()
         testScheduler.advanceUntilIdle()
@@ -471,6 +484,10 @@ class WWWEventObserverTest : KoinTest {
             type = "city"
         )
         val observer = WWWEventObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // Set position in PositionManager for unified position detection
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
         testScheduler.advanceUntilIdle()
 
         // WHEN: Force state update
@@ -728,6 +745,10 @@ class WWWEventObserverTest : KoinTest {
         val inObserver = WWWEventObserver(inAreaEvent)
         testScheduler.advanceUntilIdle()
 
+        // Set position in PositionManager for unified position detection
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.PARIS)
+        testScheduler.advanceUntilIdle()
+
         try {
             inObserver.startObservation()
             testScheduler.advanceUntilIdle()
@@ -749,6 +770,10 @@ class WWWEventObserverTest : KoinTest {
         )
 
         val outObserver = WWWEventObserver(outAreaEvent)
+        testScheduler.advanceUntilIdle()
+
+        // Set position in PositionManager for unified position detection
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.LONDON)
         testScheduler.advanceUntilIdle()
 
         try {

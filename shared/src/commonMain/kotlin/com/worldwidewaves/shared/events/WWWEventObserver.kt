@@ -490,7 +490,7 @@ class WWWEventObserver(
      * Separated from full state update to allow position-triggered updates.
      */
     private suspend fun updateAreaDetection() {
-        val userPosition = event.wave.getUserPosition()
+        val userPosition = positionManager.getCurrentPosition()
         Log.v("WWWEventObserver", "Area detection: userPosition=$userPosition")
 
         if (userPosition != null) {
