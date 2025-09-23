@@ -111,35 +111,10 @@ object PolygonUtils {
     fun Polygon.containsPositionOptimized(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
 
-        Log.v("PolygonUtils", "[AREA_DEBUG] containsPositionOptimized: checking position=$tap in polygon size=${this.size}")
-
-        // For small polygons, use standard algorithm
-        if (size < 100) {
-            Log.v("PolygonUtils", "[AREA_DEBUG] Using standard algorithm for small polygon (size=${this.size})")
-            val result = containsPosition(tap)
-            Log.v("PolygonUtils", "[AREA_DEBUG] Standard algorithm result: $result for position=$tap")
-            return result
-        }
-
-        Log.v("PolygonUtils", "[AREA_DEBUG] Using spatial index for large polygon (size=${this.size})")
-
-        // Use spatial index for large polygons
-        val polygonHash = this.hashCode()
-        val spatialIndex = spatialIndexCache.getOrPut(polygonHash) {
-            SpatialIndex.build(this)
-        }
-
-        return if (spatialIndex != null) {
-            Log.v("PolygonUtils", "[AREA_DEBUG] Using spatial index for containment check")
-            val result = containsPositionWithSpatialIndex(tap, spatialIndex)
-            Log.v("PolygonUtils", "[AREA_DEBUG] Spatial index result: $result for position=$tap")
-            result
-        } else {
-            Log.v("PolygonUtils", "[AREA_DEBUG] Spatial index not available, falling back to standard algorithm")
-            val result = containsPosition(tap) // Fallback
-            Log.v("PolygonUtils", "[AREA_DEBUG] Fallback algorithm result: $result for position=$tap")
-            result
-        }
+        // TEMPORARY FIX: The spatial index algorithm has a bug, so use standard algorithm for all polygons
+        // This fixes the issue where Paris (48.8566, 2.3522) was incorrectly returning false
+        val result = containsPosition(tap)
+        return result
     }
 
     /**
@@ -638,22 +613,18 @@ object PolygonUtils {
         tap: Position,
         polygons: Area,
     ): Boolean {
-        Log.v("PolygonUtils", "[AREA_DEBUG] isPointInPolygons: checking position=$tap against ${polygons.size} polygons")
+        Log.i("PolygonUtils", "[AREA_DEBUG] isPointInPolygons: checking position=$tap against ${polygons.size} polygons")
 
         polygons.forEachIndexed { index, polygon ->
-            val bbox = polygon.bbox()
-            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index: size=${polygon.size}, bbox=$bbox")
-            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index first vertices: ${polygon.toList().take(3)}")
-
             val result = polygon.containsPositionOptimized(tap)
-            Log.v("PolygonUtils", "[AREA_DEBUG] Polygon $index (size=${polygon.size}): contains position = $result")
+            Log.i("PolygonUtils", "[AREA_DEBUG] Polygon $index (size=${polygon.size}): contains position = $result")
             if (result) {
-                Log.v("PolygonUtils", "[AREA_DEBUG] Position $tap found in polygon $index, returning true")
+                Log.i("PolygonUtils", "[AREA_DEBUG] Position $tap found in polygon $index, returning true")
                 return true
             }
         }
 
-        Log.v("PolygonUtils", "[AREA_DEBUG] Position $tap not found in any of ${polygons.size} polygons, returning false")
+        Log.i("PolygonUtils", "[AREA_DEBUG] Position $tap not found in any of ${polygons.size} polygons, returning false")
         return false
     }
 
