@@ -283,18 +283,21 @@ class WWWEventObserverTest : KoinTest {
     }
 
     @Test
-    fun `observer should create observation flow without errors`() = runTest {
+    fun `observer should start unified observation without errors`() = runTest {
         // GIVEN: A running event
         val event = TestHelpers.createRunningEvent()
 
+        // WHEN: Create observer (which automatically starts observation)
         val observer = WWWEventObserver(event)
         testScheduler.advanceUntilIdle()
 
-        // WHEN: Create observation flow
-        val observationFlow = observer.createObservationFlow()
+        // THEN: Observer should be running and providing state
+        assertNotNull(observer.eventStatus)
+        assertNotNull(observer.progression)
 
-        // THEN: Flow should be created successfully
-        assertNotNull(observationFlow)
+        // Clean up
+        observer.stopObservation()
+        testScheduler.advanceUntilIdle()
     }
 
     @Test
@@ -624,17 +627,16 @@ class WWWEventObserverTest : KoinTest {
     }
 
     @Test
-    fun `test observation flow creation and cancellation`() = runTest {
+    fun `test unified observation lifecycle and cancellation`() = runTest {
         // GIVEN: Running event
         val event = TestHelpers.createRunningEvent()
         val observer = WWWEventObserver(event)
         testScheduler.advanceUntilIdle()
 
-        // WHEN: Create observation flow
-        val flow = observer.createObservationFlow()
-
-        // THEN: Flow should be created successfully
-        assertNotNull(flow)
+        // WHEN: Observer starts automatically and then is stopped
+        // THEN: Observer should handle lifecycle correctly
+        assertNotNull(observer.eventStatus)
+        assertNotNull(observer.progression)
 
         // Clean up
         observer.stopObservation()

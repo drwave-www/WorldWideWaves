@@ -34,11 +34,13 @@ import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.SystemClock
+import com.worldwidewaves.shared.position.PositionManager
 import org.koin.dsl.module
 
 val helpersModule =
     module {
         single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
+        single<PositionManager> { PositionManager(get()) }
         factory { WWWShutdownHandler(get()) }
         single<IClock> { SystemClock() }
         single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }
