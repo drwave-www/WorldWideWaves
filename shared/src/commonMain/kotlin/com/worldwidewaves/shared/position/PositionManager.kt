@@ -63,8 +63,7 @@ class PositionManager(
      */
     private data class PositionState(
         val position: Position?,
-        val source: PositionSource?,
-        val timestamp: Long = System.currentTimeMillis()
+        val source: PositionSource?
     )
 
     // Internal state management
