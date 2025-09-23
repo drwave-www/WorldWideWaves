@@ -99,6 +99,9 @@ data class WWWEventArea(
 
     @Transient private val positionEpsilon = 0.0001 // Roughly 10 meters
 
+    // Debug flag - set to true to disable all area detection caching for debugging
+    private val disableAreaDetectionCache = true
+
     // ---------------------------
 
     /**
@@ -145,12 +148,16 @@ data class WWWEventArea(
     suspend fun isPositionWithin(position: Position): Boolean {
         Log.v("WWWEventArea", "[AREA_DEBUG] isPositionWithin: checking position=$position, eventId=${event.id}")
 
-        // Check if the cached result is within the epsilon
-        cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
-            if (isPositionWithinEpsilon(position, cachedPosition)) {
-                Log.v("WWWEventArea", "[AREA_DEBUG] Using cached result: $cachedResult for position=$position (cached: $cachedPosition), eventId=${event.id}")
-                return cachedResult
+        // Check if the cached result is within the epsilon (skip cache if debug flag is set)
+        if (!disableAreaDetectionCache) {
+            cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
+                if (isPositionWithinEpsilon(position, cachedPosition)) {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] Using cached result: $cachedResult for position=$position (cached: $cachedPosition), eventId=${event.id}")
+                    return cachedResult
+                }
             }
+        } else {
+            Log.i("WWWEventArea", "[AREA_DEBUG] Cache disabled by debug flag, forcing fresh calculation for position=$position, eventId=${event.id}")
         }
 
         // First, check if the position is within the bounding box (fast check)
@@ -170,8 +177,10 @@ data class WWWEventArea(
         // If not within the bounding box, return false immediately
         if (!isWithinBbox) {
             Log.v("WWWEventArea", "[AREA_DEBUG] Position outside bbox, returning false, eventId=${event.id}")
-            // Cache the result
-            cachedPositionWithinResult = Pair(position, false)
+            // Cache the result (only if caching is enabled)
+            if (!disableAreaDetectionCache) {
+                cachedPositionWithinResult = Pair(position, false)
+            }
             return false
         }
 
@@ -181,15 +190,20 @@ data class WWWEventArea(
 
         if (polygons.isEmpty()) {
             Log.w("WWWEventArea", "[AREA_DEBUG] No polygons available, returning false, eventId=${event.id}")
-            cachedPositionWithinResult = Pair(position, false)
+            // Cache the result (only if caching is enabled)
+            if (!disableAreaDetectionCache) {
+                cachedPositionWithinResult = Pair(position, false)
+            }
             return false
         }
 
         val result = isPointInPolygons(position, polygons)
         Log.v("WWWEventArea", "[AREA_DEBUG] Polygon containment result: $result for position=$position, eventId=${event.id}")
 
-        // Cache the result
-        cachedPositionWithinResult = Pair(position, result)
+        // Cache the result (only if caching is enabled)
+        if (!disableAreaDetectionCache) {
+            cachedPositionWithinResult = Pair(position, result)
+        }
         return result
     }
 
