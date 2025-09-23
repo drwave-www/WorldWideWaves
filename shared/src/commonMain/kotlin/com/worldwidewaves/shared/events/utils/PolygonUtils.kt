@@ -186,27 +186,37 @@ object PolygonUtils {
      * It's based on the algorithm available at
      * https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
      *
+     * Enhanced with improved numerical stability and edge case handling.
      */
     fun Polygon.containsPosition(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
-        var (bx, by) = last()!!.let { it.lat - tap.lat to it.lng - tap.lng }
-        var depth = 0
 
-        for (point in this) {
-            val (ax, ay) = bx to by
-            bx = point.lat - tap.lat
-            by = point.lng - tap.lng
+        // Handle simple polygons with less than 3 vertices
+        if (size < 3) return false
 
-            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
-                continue
+        val points = this.toList()
+        var inside = false
+        var j = points.size - 1
+
+        // Use a more robust ray-casting algorithm with better numerical stability
+        for (i in points.indices) {
+            val xi = points[i].lng
+            val yi = points[i].lat
+            val xj = points[j].lng
+            val yj = points[j].lat
+
+            // Check if point is exactly on a vertex
+            if (xi == tap.lng && yi == tap.lat) return true
+
+            // Improved ray-casting with better edge case handling
+            if (((yi > tap.lat) != (yj > tap.lat)) &&
+                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)) {
+                inside = !inside
             }
-
-            val lx = ax - ay * (bx - ax) / (by - ay)
-            if (lx == 0.0) return true
-            if (lx > 0) depth++
+            j = i
         }
 
-        return (depth and 1) == 1
+        return inside
     }
 
     /**
