@@ -336,37 +336,14 @@ data class WWWEventArea(
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
 
-            coroutineScopeProvider.withDefaultContext {
-                Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: getting GeoJSON data for eventId=${event.id}")
-                geoJsonDataProvider.getGeoJsonData(event.id)?.let { geoJsonData ->
-                    val rootType = geoJsonData["type"]?.jsonPrimitive?.content
-
-                    // Now that we know the type, log it for diagnostics
-                    Log.i("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: GeoJSON rootType=$rootType")
-                    Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: GeoJSON keys: ${geoJsonData.keys}, eventId=${event.id}")
-
-                    when (rootType) {
-                        "FeatureCollection" -> {
-                            // Handle FeatureCollection format
-                            val features = geoJsonData["features"]?.jsonArray
-                            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: processing FeatureCollection with ${features?.size} features, eventId=${event.id}")
-                            features?.forEach { feature ->
-                                val geometry = feature.jsonObject["geometry"]?.jsonObject
-                                geometry?.let { processGeometry(it, tempPolygons) }
-                            }
-                        }
-                        "Polygon", "MultiPolygon" -> {
-                            // Handle direct geometry format (your original case)
-                            Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: processing direct geometry type=$rootType, eventId=${event.id}")
-                            processGeometry(geoJsonData, tempPolygons)
-                        }
-                        else -> {
-                            Log.e("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Unsupported GeoJSON type: $rootType")
-                        }
-                    }
-                } ?: run {
-                    Log.e("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Error loading geojson data for event")
+            try {
+                coroutineScopeProvider.withDefaultContext {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: entering coroutine context for eventId=${event.id}")
+                    loadPolygonsFromGeoJson(tempPolygons)
+                    Log.v("WWWEventArea", "[AREA_DEBUG] getPolygons: exiting coroutine context for eventId=${event.id}")
                 }
+            } catch (e: Exception) {
+                Log.e("WWWEventArea", "[AREA_DEBUG] getPolygons: ${event.id}: Exception in withDefaultContext: ${e.message}", e)
             }
 
             // Atomically assign the complete immutable list
@@ -389,59 +366,166 @@ data class WWWEventArea(
         return result
     }
 
+    private suspend fun loadPolygonsFromGeoJson(tempPolygons: MutableArea) {
+        try {
+            Log.v("WWWEventArea", "[AREA_DEBUG] loadPolygonsFromGeoJson: getting GeoJSON data for eventId=${event.id}")
+            val geoJsonData = geoJsonDataProvider.getGeoJsonData(event.id)
+
+            if (geoJsonData != null) {
+                Log.v("WWWEventArea", "[AREA_DEBUG] loadPolygonsFromGeoJson: GeoJSON data loaded successfully for eventId=${event.id}")
+                processGeoJsonData(geoJsonData, tempPolygons)
+            } else {
+                Log.e("WWWEventArea", "[AREA_DEBUG] loadPolygonsFromGeoJson: ${event.id}: GeoJSON data is null - geojson file might not exist or failed to load")
+            }
+        } catch (e: Exception) {
+            Log.e("WWWEventArea", "[AREA_DEBUG] loadPolygonsFromGeoJson: ${event.id}: Exception in coroutine context: ${e.message}", e)
+        }
+    }
+
+    private fun processGeoJsonData(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        val rootType = geoJsonData["type"]?.jsonPrimitive?.content
+        // Now that we know the type, log it for diagnostics
+        Log.i("WWWEventArea", "[AREA_DEBUG] processGeoJsonData: ${event.id}: GeoJSON rootType=$rootType")
+        Log.v("WWWEventArea", "[AREA_DEBUG] processGeoJsonData: GeoJSON keys: ${geoJsonData.keys}, eventId=${event.id}")
+
+        when (rootType) {
+            "FeatureCollection" -> processFeatureCollection(geoJsonData, tempPolygons)
+            "Polygon", "MultiPolygon" -> processDirectGeometry(geoJsonData, tempPolygons)
+            else -> Log.e("WWWEventArea", "[AREA_DEBUG] processGeoJsonData: ${event.id}: Unsupported GeoJSON type: $rootType")
+        }
+    }
+
+    private fun processFeatureCollection(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        val features = geoJsonData["features"]?.jsonArray
+        Log.v("WWWEventArea", "[AREA_DEBUG] processFeatureCollection: processing FeatureCollection with ${features?.size} features, eventId=${event.id}")
+        features?.forEach { feature ->
+            try {
+                val geometry = feature.jsonObject["geometry"]?.jsonObject
+                if (geometry != null) {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] processFeatureCollection: processing feature geometry for eventId=${event.id}")
+                    processGeometry(geometry, tempPolygons)
+                } else {
+                    Log.w("WWWEventArea", "[AREA_DEBUG] processFeatureCollection: feature has null geometry for eventId=${event.id}")
+                }
+            } catch (e: Exception) {
+                Log.e("WWWEventArea", "[AREA_DEBUG] processFeatureCollection: error processing feature for eventId=${event.id}: ${e.message}", e)
+            }
+        }
+    }
+
+    private fun processDirectGeometry(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+        val rootType = geoJsonData["type"]?.jsonPrimitive?.content
+        Log.v("WWWEventArea", "[AREA_DEBUG] processDirectGeometry: processing direct geometry type=$rootType, eventId=${event.id}")
+        try {
+            processGeometry(geoJsonData, tempPolygons)
+            Log.v("WWWEventArea", "[AREA_DEBUG] processDirectGeometry: direct geometry processed successfully for eventId=${event.id}")
+        } catch (e: Exception) {
+            Log.e("WWWEventArea", "[AREA_DEBUG] processDirectGeometry: error processing direct geometry for eventId=${event.id}: ${e.message}", e)
+        }
+    }
+
     private fun processGeometry(
         geometry: JsonObject,
         tempPolygons: MutableList<Polygon>,
     ) {
-        val type = geometry["type"]?.jsonPrimitive?.content
-        val coordinates = geometry["coordinates"]?.jsonArray
+        try {
+            val type = geometry["type"]?.jsonPrimitive?.content
+            val coordinates = geometry["coordinates"]?.jsonArray
 
-        when (type) {
-            // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
-            "Polygon" ->
-                coordinates?.forEach { ring ->
-                    processRing(ring, tempPolygons)
-                }
-            // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
-            "MultiPolygon" ->
-                coordinates?.forEachIndexed { polygonIndex, polygon ->
-                    Log.v("WWWEventArea", "[AREA_DEBUG] Processing MultiPolygon polygon $polygonIndex with ${polygon.jsonArray.size} rings, eventId=${event.id}")
-                    // Each polygon in MultiPolygon has rings (exterior + holes)
-                    polygon.jsonArray.forEachIndexed { ringIndex, ring ->
-                        Log.v("WWWEventArea", "[AREA_DEBUG] Processing polygon $polygonIndex ring $ringIndex with ${ring.jsonArray.size} vertices, eventId=${event.id}")
-                        processRing(ring, tempPolygons)
+            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: type=$type, coordinates size=${coordinates?.size}, eventId=${event.id}")
+
+            when (type) {
+                // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
+                "Polygon" -> {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing Polygon with ${coordinates?.size} rings, eventId=${event.id}")
+                    coordinates?.forEachIndexed { ringIndex, ring ->
+                        try {
+                            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing Polygon ring $ringIndex, eventId=${event.id}")
+                            processRing(ring, tempPolygons)
+                        } catch (e: Exception) {
+                            Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing Polygon ring $ringIndex for eventId=${event.id}: ${e.message}", e)
+                        }
                     }
                 }
-            else -> {
-                Log.e(::getPolygons.name, "Unsupported geometry type: $type")
+                // For a MultiPolygon, keep only the first ring (exterior) of each polygon element
+                "MultiPolygon" -> {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing MultiPolygon with ${coordinates?.size} polygons, eventId=${event.id}")
+                    coordinates?.forEachIndexed { polygonIndex, polygon ->
+                        try {
+                            Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing MultiPolygon polygon $polygonIndex with ${polygon.jsonArray.size} rings, eventId=${event.id}")
+                            // Each polygon in MultiPolygon has rings (exterior + holes)
+                            polygon.jsonArray.forEachIndexed { ringIndex, ring ->
+                                try {
+                                    Log.v("WWWEventArea", "[AREA_DEBUG] processGeometry: processing polygon $polygonIndex ring $ringIndex with ${ring.jsonArray.size} vertices, eventId=${event.id}")
+                                    processRing(ring, tempPolygons)
+                                } catch (e: Exception) {
+                                    Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing MultiPolygon polygon $polygonIndex ring $ringIndex for eventId=${event.id}: ${e.message}", e)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing MultiPolygon polygon $polygonIndex for eventId=${event.id}: ${e.message}", e)
+                        }
+                    }
+                }
+                else -> {
+                    Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: unsupported geometry type: $type for eventId=${event.id}")
+                }
             }
-        }
 
-        // Lightweight diagnostics
-        val ringsCount =
-            when (type) {
-                "Polygon" -> coordinates?.size ?: 0
-                "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
-                else -> 0
-            }
-        Log.d(::processGeometry.name, "${event.id}: processed geometry type=$type rings=$ringsCount")
+            // Lightweight diagnostics
+            val ringsCount =
+                when (type) {
+                    "Polygon" -> coordinates?.size ?: 0
+                    "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
+                    else -> 0
+                }
+            Log.d("WWWEventArea", "[AREA_DEBUG] processGeometry: ${event.id}: processed geometry type=$type rings=$ringsCount")
+        } catch (e: Exception) {
+            Log.e("WWWEventArea", "[AREA_DEBUG] processGeometry: error processing geometry for eventId=${event.id}: ${e.message}", e)
+        }
     }
 
     private fun processRing(
         ring: JsonElement,
         polygons: MutableArea,
     ) {
-        val positions =
-            ring.jsonArray.map { point ->
-                Position(
-                    point.jsonArray[1].jsonPrimitive.double,
-                    point.jsonArray[0].jsonPrimitive.double,
-                ).constrainToBoundingBox()
-            }
+        try {
+            Log.v("WWWEventArea", "[AREA_DEBUG] processRing: processing ring with ${ring.jsonArray.size} points, eventId=${event.id}")
 
-        val polygon = positions.toPolygon
-        if (polygon.size > 1) {
-            polygons.add(polygon)
+            val positions =
+                ring.jsonArray.mapIndexed { pointIndex, point ->
+                    try {
+                        val pointArray = point.jsonArray
+                        if (pointArray.size >= 2) {
+                            val lng = pointArray[0].jsonPrimitive.double
+                            val lat = pointArray[1].jsonPrimitive.double
+                            Log.v("WWWEventArea", "[AREA_DEBUG] processRing: point $pointIndex: [$lng, $lat], eventId=${event.id}")
+                            Position(lat, lng).constrainToBoundingBox()
+                        } else {
+                            Log.e("WWWEventArea", "[AREA_DEBUG] processRing: point $pointIndex has insufficient coordinates (${pointArray.size}), eventId=${event.id}")
+                            null
+                        }
+                    } catch (e: Exception) {
+                        Log.e("WWWEventArea", "[AREA_DEBUG] processRing: error processing point $pointIndex for eventId=${event.id}: ${e.message}", e)
+                        null
+                    }
+                }.filterNotNull()
+
+            Log.v("WWWEventArea", "[AREA_DEBUG] processRing: converted ${positions.size} valid positions from ${ring.jsonArray.size} points, eventId=${event.id}")
+
+            if (positions.isNotEmpty()) {
+                val polygon = positions.toPolygon
+                if (polygon.size > 1) {
+                    Log.v("WWWEventArea", "[AREA_DEBUG] processRing: adding polygon with ${polygon.size} vertices, eventId=${event.id}")
+                    polygons.add(polygon)
+                } else {
+                    Log.w("WWWEventArea", "[AREA_DEBUG] processRing: polygon has too few vertices (${polygon.size}), skipping, eventId=${event.id}")
+                }
+            } else {
+                Log.w("WWWEventArea", "[AREA_DEBUG] processRing: no valid positions found in ring, eventId=${event.id}")
+            }
+        } catch (e: Exception) {
+            Log.e("WWWEventArea", "[AREA_DEBUG] processRing: error processing ring for eventId=${event.id}: ${e.message}", e)
         }
     }
 
