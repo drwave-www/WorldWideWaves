@@ -1,0 +1,50 @@
+# CLAUDE COGNITIVE ENHANCEMENT SETUP
+
+## Project Context
+- **Project Name**: WorldWideWaves
+- **Project Type**: kotlin-multiplatform-mobile
+- **Tech Stack**: Kotlin Multiplatform Mobile + Jetpack Compose + MapLibre + Firebase
+- **Critical Assets**: user data, configuration files
+- **Common Issues**: memory leaks, error handling, testing coverage, configuration management, configuration errors, dependency issues
+
+## Instructions for Claude
+
+Please create a comprehensive CLAUDE.md file for this project that includes:
+
+1. **Project Overview**
+   - Brief description of the project and its purpose
+   - Technology stack and architecture overview
+
+2. **🚨 MANDATORY DEVELOPMENT REQUIREMENTS - NEVER SKIP THESE**
+   - Security patterns specific to: Kotlin Multiplatform Mobile + Jetpack Compose + MapLibre + Firebase
+   - Performance considerations for: kotlin-multiplatform-mobile
+   - Error handling patterns
+   - Input validation requirements
+
+3. **Critical Asset Protection**
+   - Specific protections for: user data, configuration files
+   - Access control patterns
+   - Data encryption requirements
+
+4. **Common Issue Prevention**
+   - Preventive measures for: memory leaks, error handling, testing coverage, configuration management, configuration errors, dependency issues
+   - Monitoring and alerting patterns
+   - Testing requirements
+
+5. **Learning Protocol**
+   - Pattern recognition for continuous improvement
+   - Confidence levels (HIGH/MEDIUM/LOW)
+   - Automatic CLAUDE.md updates
+
+## Output Format
+
+**IMPORTANT**: Your response must be the complete CLAUDE.md file content, starting with "# Project Name" and ending with the learning protocol. Do NOT provide a summary or description of what you would create. Output the actual file content that can be saved directly as CLAUDE.md.
+
+Your response should start with:
+
+# ProjectName
+
+## Project Overview
+(Description of the project and its purpose)
+
+And continue with ALL sections including detailed content, code examples, and specific guidance.
