@@ -75,22 +75,26 @@ struct ContentView: View {
 
                         List {
                             ForEach(events.indices, id: \.self) { index in
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(formatEventName(events[index]))
-                                        .font(.headline)
-                                    Text("Wave event in \(formatLocationName(events[index]))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    HStack {
-                                        Text("Event ID: \(events[index])")
-                                            .font(.caption)
-                                            .padding(4)
-                                            .background(Color.blue.opacity(0.3))
-                                            .cornerRadius(4)
-                                        Spacer()
+                                NavigationLink(destination: EventDetailView(eventId: events[index])) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(formatEventName(events[index]))
+                                            .font(.headline)
+                                        Text("Wave event in \(formatLocationName(events[index]))")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                        HStack {
+                                            Text("Event ID: \(events[index])")
+                                                .font(.caption)
+                                                .padding(4)
+                                                .background(Color.blue.opacity(0.3))
+                                                .cornerRadius(4)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.gray)
+                                        }
                                     }
+                                    .padding(.vertical, 4)
                                 }
-                                .padding(.vertical, 4)
                             }
                         }
                     }
@@ -184,6 +188,95 @@ struct ContentView: View {
                 }
             )
         }
+    }
+
+    private func formatEventName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+
+    private func formatLocationName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ")
+    }
+}
+
+// Event Detail Screen
+struct EventDetailView: View {
+    let eventId: String
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Event header
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(formatEventName(eventId))
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    Text("Wave Event Location")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top)
+
+                Divider()
+
+                // Event information
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Event Information", systemImage: "info.circle")
+                        .font(.headline)
+
+                    Text("This is a WorldWideWaves event where participants create synchronized human waves across \(formatLocationName(eventId)).")
+                        .font(.body)
+
+                    Text("Join thousands of others in this unique experience that transcends physical and cultural boundaries!")
+                        .font(.body)
+                        .italic()
+                }
+
+                Divider()
+
+                // Action section
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Participate", systemImage: "hand.raised")
+                        .font(.headline)
+
+                    Button(action: {
+                        // Wave action - to be implemented
+                        print("Join wave for \(eventId)")
+                    }) {
+                        HStack {
+                            Image(systemName: "waveform")
+                            Text("Join Wave")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+
+                    Button(action: {
+                        // Map action - to be implemented
+                        print("View map for \(eventId)")
+                    }) {
+                        HStack {
+                            Image(systemName: "map")
+                            Text("View on Map")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding()
+        }
+        .navigationTitle("Event Details")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func formatEventName(_ id: String) -> String {
