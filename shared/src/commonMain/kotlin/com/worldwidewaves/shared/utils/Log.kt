@@ -21,11 +21,10 @@ package com.worldwidewaves.shared.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.BuildConfig
 import io.github.aakira.napier.Napier
 
 /**
- * Production-ready logging wrapper that respects BuildConfig flags for performance and security.
+ * Production-ready logging wrapper that respects build configuration flags for performance and security.
  *
  * This utility bridges Napier cross-platform logging with build-specific configuration to ensure:
  * - Verbose/debug logging is disabled in release builds for performance
@@ -43,7 +42,7 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) {
-        if (BuildConfig.ENABLE_VERBOSE_LOGGING) {
+        if (LogConfig.ENABLE_VERBOSE_LOGGING) {
             Napier.v(tag = tag, message = message, throwable = throwable)
         }
     }
@@ -57,7 +56,7 @@ object Log {
         message: String,
         throwable: Throwable? = null,
     ) {
-        if (BuildConfig.ENABLE_DEBUG_LOGGING) {
+        if (LogConfig.ENABLE_DEBUG_LOGGING) {
             Napier.d(tag = tag, message = message, throwable = throwable)
         }
     }
@@ -70,7 +69,7 @@ object Log {
         tag: String,
         message: String,
     ) {
-        if (BuildConfig.ENABLE_PERFORMANCE_LOGGING) {
+        if (LogConfig.ENABLE_PERFORMANCE_LOGGING) {
             Napier.v(tag = tag, message = "[PERF] $message")
         }
     }

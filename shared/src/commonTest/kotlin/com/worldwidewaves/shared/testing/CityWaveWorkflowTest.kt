@@ -28,6 +28,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
@@ -2032,11 +2033,11 @@ class CityWaveWorkflowTest {
         // Rough DST detection for northern hemisphere (March-October)
         return when {
             timezone.contains("America/") || timezone.contains("Europe/") -> {
-                local.monthNumber in 3..10
+                local.month in Month.MARCH..Month.OCTOBER
             }
             timezone.contains("Australia/") -> {
                 // Southern hemisphere DST (October-March)
-                local.monthNumber in 10..12 || local.monthNumber in 1..3
+                local.month in Month.OCTOBER..Month.DECEMBER || local.month in Month.JANUARY..Month.MARCH
             }
             else -> false
         }

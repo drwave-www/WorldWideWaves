@@ -66,7 +66,7 @@ class DefaultObservationScheduler(
         val now = clock.now()
         val eventStartTime = event.getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = event.wave.timeBeforeUserHit() ?: 1.days
+        val timeBeforeHit = event.wave.timeBeforeUserHit()
 
         Log.performance("DefaultObservationScheduler", "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit")
 
@@ -197,11 +197,11 @@ class DefaultObservationScheduler(
         val now = clock.now()
         val eventStartTime = event.getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = event.wave.timeBeforeUserHit() ?: 1.days
+        val timeBeforeHit = event.wave.timeBeforeUserHit()
 
         return when {
             event.isDone() -> ObservationPhase.INACTIVE
-            timeBeforeHit < 5.seconds && timeBeforeHit > ZERO -> ObservationPhase.CRITICAL
+            timeBeforeHit != null && timeBeforeHit < 5.seconds && timeBeforeHit > ZERO -> ObservationPhase.CRITICAL
             timeBeforeEvent <= 35.seconds || event.isRunning() -> ObservationPhase.ACTIVE
             timeBeforeEvent <= 5.minutes + 30.seconds -> ObservationPhase.NEAR
             timeBeforeEvent <= 1.hours + 5.minutes -> ObservationPhase.APPROACHING

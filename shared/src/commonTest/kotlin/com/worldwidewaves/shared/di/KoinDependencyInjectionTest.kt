@@ -87,6 +87,7 @@ class KoinDependencyInjectionTest : KoinTest {
     @Test
     fun `test module validation passes`() {
         // Koin module validation should pass without errors
+        @Suppress("DEPRECATION")
         koin.checkModules()
     }
 
@@ -352,6 +353,7 @@ class KoinDependencyInjectionTest : KoinTest {
     fun `test module validation catches circular dependencies`() {
         // This test ensures our current modules don't have circular dependencies
         // checkModules() would throw an exception if there were circular dependencies
+        @Suppress("DEPRECATION")
         koin.checkModules()
 
         // If we reach here, no circular dependencies exist

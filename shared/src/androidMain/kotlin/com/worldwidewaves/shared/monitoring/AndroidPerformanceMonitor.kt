@@ -30,8 +30,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -59,6 +61,7 @@ class AndroidPerformanceMonitor(
     }
 
     private val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    private val monitoringScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     init {
         startSystemMonitoring()
@@ -68,7 +71,7 @@ class AndroidPerformanceMonitor(
      * Start continuous system monitoring
      */
     private fun startSystemMonitoring() {
-        GlobalScope.launch(Dispatchers.Default) {
+        monitoringScope.launch {
             while (isActive) {
                 try {
                     monitorMemoryUsage()
@@ -187,6 +190,13 @@ class AndroidPerformanceMonitor(
         WARM, // App process exists but activity needs to be created
         HOT, // App and activity exist, just brought to foreground
     }
+
+    /**
+     * Cleanup monitoring resources
+     */
+    fun cleanup() {
+        monitoringScope.cancel()
+    }
 }
 
 /**
@@ -208,8 +218,9 @@ fun PerformanceMonitoringEffect(
 
     // Monitor memory during screen lifecycle
     DisposableEffect(screenName) {
+        val monitoringScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val job =
-            GlobalScope.launch {
+            monitoringScope.launch {
                 while (isActive) {
                     try {
                         val runtime = Runtime.getRuntime()
@@ -224,7 +235,7 @@ fun PerformanceMonitoringEffect(
             }
 
         onDispose {
-            job.cancel()
+            monitoringScope.cancel()
         }
     }
 }
