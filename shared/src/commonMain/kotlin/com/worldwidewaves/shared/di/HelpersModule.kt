@@ -22,6 +22,8 @@ package com.worldwidewaves.shared.di
  */
 
 import com.worldwidewaves.shared.WWWShutdownHandler
+import com.worldwidewaves.shared.domain.observation.DefaultPositionObserver
+import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.DefaultWaveProgressionTracker
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
@@ -44,6 +46,7 @@ val helpersModule =
         single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
         single<PositionManager> { PositionManager(get()) }
         single<WaveProgressionTracker> { DefaultWaveProgressionTracker(get()) }
+        single<PositionObserver> { DefaultPositionObserver(get(), get(), get(), get()) }
         factory { WWWShutdownHandler(get()) }
         single<IClock> { SystemClock() }
         single<EventsConfigurationProvider> { DefaultEventsConfigurationProvider(get()) }

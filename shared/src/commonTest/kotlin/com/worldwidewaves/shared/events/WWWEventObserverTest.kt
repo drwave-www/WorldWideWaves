@@ -44,10 +44,15 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.domain.observation.PositionObserver
+import com.worldwidewaves.shared.domain.observation.DefaultPositionObserver
+import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
+import com.worldwidewaves.shared.domain.progression.DefaultWaveProgressionTracker
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.delay
 import kotlin.test.assertFalse
 import kotlin.test.fail
 import kotlin.test.assertNotEquals
@@ -88,6 +93,8 @@ class WWWEventObserverTest : KoinTest {
                     single<IClock> { mockClock }
                     single<CoroutineScopeProvider> { coroutineScopeProvider }
                     single<PositionManager> { testPositionManager }
+                    single<WaveProgressionTracker> { DefaultWaveProgressionTracker(get()) }
+                    single<PositionObserver> { DefaultPositionObserver(get(), get(), get(), get()) }
                 }
             )
         }
@@ -330,16 +337,20 @@ class WWWEventObserverTest : KoinTest {
         val eventIsDone = event.isDone()
         assertNotNull(eventStatus, "Event should have valid status")
 
-        // WHEN
-        val observer = createTrackedObserver(event)
-        testScheduler.advanceUntilIdle()
-
-        // Set position in PositionManager for unified position detection
+        // Set position in PositionManager BEFORE creating observer so it gets the current position immediately
         testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.PARIS)
         testScheduler.advanceUntilIdle()
 
-        // Force an observation cycle to ensure state is updated
+        // WHEN: Create observer with position already set
+        val observer = createTrackedObserver(event)
+        testScheduler.advanceUntilIdle()
+
+        // Force additional observation cycle to ensure all flows are initialized
         observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // Give flows time to process the position update
+        delay(100)
         testScheduler.advanceUntilIdle()
 
         // THEN: Observer should initialize properly with test data
@@ -479,15 +490,20 @@ class WWWEventObserverTest : KoinTest {
             country = "france",
             type = "city"
         )
-        val observer = WWWEventObserver(event)
+
+        // Set position in PositionManager BEFORE creating observer
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
         testScheduler.advanceUntilIdle()
 
-        // Set position in PositionManager for unified position detection
-        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
+        val observer = WWWEventObserver(event)
         testScheduler.advanceUntilIdle()
 
         // WHEN: Force state update
         observer.startObservation()
+        testScheduler.advanceUntilIdle()
+
+        // Give flows time to process the position update
+        delay(100)
         testScheduler.advanceUntilIdle()
 
         // THEN: Should track user position correctly
@@ -738,16 +754,21 @@ class WWWEventObserverTest : KoinTest {
             area = inAreaMock
         )
 
-        val inObserver = WWWEventObserver(inAreaEvent)
+        // Set position in PositionManager BEFORE creating observer
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.PARIS)
         testScheduler.advanceUntilIdle()
 
-        // Set position in PositionManager for unified position detection
-        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.PARIS)
+        val inObserver = WWWEventObserver(inAreaEvent)
         testScheduler.advanceUntilIdle()
 
         try {
             inObserver.startObservation()
             testScheduler.advanceUntilIdle()
+
+            // Give flows time to process the position update
+            delay(100)
+            testScheduler.advanceUntilIdle()
+
             assertTrue(inObserver.userIsInArea.value)
         } finally {
             inObserver.stopObservation()
@@ -765,16 +786,21 @@ class WWWEventObserverTest : KoinTest {
             area = outAreaMock
         )
 
-        val outObserver = WWWEventObserver(outAreaEvent)
+        // Set position in PositionManager BEFORE creating observer
+        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.LONDON)
         testScheduler.advanceUntilIdle()
 
-        // Set position in PositionManager for unified position detection
-        testPositionManager.updatePosition(PositionManager.PositionSource.GPS, TestHelpers.TestLocations.LONDON)
+        val outObserver = WWWEventObserver(outAreaEvent)
         testScheduler.advanceUntilIdle()
 
         try {
             outObserver.startObservation()
             testScheduler.advanceUntilIdle()
+
+            // Give flows time to process the position update
+            delay(100)
+            testScheduler.advanceUntilIdle()
+
             assertFalse(outObserver.userIsInArea.value)
         } finally {
             outObserver.stopObservation()
