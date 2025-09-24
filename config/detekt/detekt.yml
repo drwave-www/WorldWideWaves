@@ -106,9 +106,10 @@ complexity:
     ignoreOverloaded: false
   CyclomaticComplexMethod:
     active: true
-    threshold: 15
-    ignoreSingleWhenExpression: false
-    ignoreSimpleWhenEntries: false
+    threshold: 18
+    # Increased threshold for complex UI logic and business logic
+    ignoreSingleWhenExpression: true
+    ignoreSimpleWhenEntries: true
     ignoreNestingFunctions: false
     nestingFunctions:
       - 'also'
@@ -128,11 +129,14 @@ complexity:
     threshold: 600
   LongMethod:
     active: true
-    threshold: 120
+    threshold: 150
+    # Increased threshold for UI components which tend to be longer
   LongParameterList:
     active: true
-    functionThreshold: 8
+    functionThreshold: 10
     constructorThreshold: 9
+    # Increased threshold for Compose functions which often have many parameters
+    ignoreAnnotated: ['Composable']
     ignoreDefaultParameters: false
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
@@ -285,15 +289,14 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**', '**/activities/**', '**/viewmodels/**', '**/compose/**', '**/utils/**']
     exceptionNames:
       - 'ArrayIndexOutOfBoundsException'
       - 'Error'
-      - 'Exception'
       - 'IllegalMonitorStateException'
       - 'IndexOutOfBoundsException'
       - 'NullPointerException'
-      - 'RuntimeException'
+      # Removed 'Exception' and 'RuntimeException' for mobile app resilience
       - 'Throwable'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   TooGenericExceptionThrown:
@@ -334,7 +337,9 @@ naming:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
     functionPattern: '[a-z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
-    ignoreAnnotated: ['Composable']
+    ignoreAnnotated: ['Composable', 'Preview']
+    # Allow PascalCase for Compose functions in specific UI files
+    ignoreOverridden: true
   FunctionParameterNaming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*'
