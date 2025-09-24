@@ -22,9 +22,12 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    // Step 2: Add real data connection gradually
+    // Step 3: Add proper loading states and event loading
     @State private var selectedTab = 0
     @State private var eventCount: Int = 0
+    @State private var isLoading: Bool = true
+    @State private var hasError: Bool = false
+    @State private var errorMessage: String = ""
     private let wwwEvents: WWWEvents
 
     // KMM - Koin Call
@@ -42,33 +45,60 @@ struct ContentView: View {
                         .font(.title)
                         .padding()
 
-                    Text("Found \(eventCount) events from shared module")
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
-                        .padding(.bottom)
-
-                    List {
-                        ForEach(0..<max(1, eventCount)) { index in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Event \(index + 1)")
-                                    .font(.headline)
-                                Text("Real event from shared module")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                HStack {
-                                    Text("Status: Loaded from KMM")
-                                        .font(.caption)
-                                        .padding(4)
-                                        .background(Color.green.opacity(0.3))
-                                        .cornerRadius(4)
-                                    Spacer()
-                                }
+                    // Loading and error states
+                    if isLoading {
+                        VStack {
+                            ProgressView("Loading events from KMM...")
+                                .padding()
+                            Text("Connecting to shared business logic...")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                    } else if hasError {
+                        VStack {
+                            Text("❌ Error Loading Events")
+                                .font(.headline)
+                                .foregroundColor(.red)
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            Button("Retry") {
+                                loadEventsWithStates()
                             }
-                            .padding(.vertical, 4)
+                            .padding()
+                        }
+                    } else {
+                        Text("Found \(eventCount) events from shared module")
+                            .font(.subheadline)
+                            .foregroundColor(.blue)
+                            .padding(.bottom)
+
+                        List {
+                            ForEach(0..<max(1, eventCount)) { index in
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Event \(index + 1)")
+                                        .font(.headline)
+                                    Text("Real event from shared module")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    HStack {
+                                        Text("Status: Loaded from KMM")
+                                            .font(.caption)
+                                            .padding(4)
+                                            .background(Color.green.opacity(0.3))
+                                            .cornerRadius(4)
+                                        Spacer()
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
                         }
                     }
                 }
                 .navigationTitle("Events")
+                .refreshable {
+                    loadEventsWithStates()
+                }
             }
             .tabItem {
                 Image(systemName: "water.waves")
@@ -122,13 +152,35 @@ struct ContentView: View {
         }
         .accentColor(.blue)
         .onAppear {
-            loadEventCount()
+            loadEventsWithStates()
         }
     }
 
-    private func loadEventCount() {
-        DispatchQueue.main.async {
-            self.eventCount = self.wwwEvents.list().count
+    private func loadEventsWithStates() {
+        isLoading = true
+        hasError = false
+        errorMessage = ""
+
+        // Simulate loading time and then load events
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // Trigger event loading from shared module with proper callbacks
+            _ = self.wwwEvents.loadEvents(
+                onLoaded: {
+                    DispatchQueue.main.async {
+                        self.eventCount = self.wwwEvents.list().count
+                        self.isLoading = false
+                        print("iOS: Successfully loaded \(self.eventCount) events from shared module")
+                    }
+                },
+                onLoadingError: { error in
+                    DispatchQueue.main.async {
+                        self.hasError = true
+                        self.errorMessage = error.message ?? "Unknown loading error"
+                        self.isLoading = false
+                        print("iOS: Error loading events - \(self.errorMessage)")
+                    }
+                }
+            )
         }
     }
 }
