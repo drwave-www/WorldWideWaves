@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.cancel
-import kotlin.native.concurrent.ThreadLocal
 
 /**
  * iOS implementation of StateFlow to IOSObservable conversion
@@ -82,7 +81,6 @@ private class IOSFlowObservable<T>(
     private val flow: Flow<T>
 ) : IOSObservable<T> {
 
-    @ThreadLocal
     private var _cachedValue: T? = null
 
     override val value: T
