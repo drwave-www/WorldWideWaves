@@ -62,6 +62,8 @@
   <string name="map_error_service_died">서비스가 예기치 않게 중지되었습니다. 다시 시도하세요.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">액세스가 거부되었습니다.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Google Play 스토어 계정 문제입니다. 계정을 확인하고 다시 시도하세요.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">알 수 없는 오류가 발생했습니다: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">웨이브 중!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">알다시피: 지구의 역사를 1,000쪽짜리 책으로 펼치면, 인류는 맨 마지막 쪽의 마지막 문단에야 등장합니다.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">하지만 이 짧은 이야기는 예상보다 일찍 끝날 수도 있습니다. 우리는 광활하고 황량한 우주에서 고립되어 있습니다. 우리는 모든 것을 파괴합니다. 우리는 이기적입니다. 우리는 잔혹합니다. 우리는 탐욕스럽습니다. 우리는 눈이 멀어 있습니다. 그리고 지배하려 합니다. 하지만 우리는 공감할 수 있고, 경이로움을 만들어 내며, 회복력이 있고, 이타적일 수도 있습니다.</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">하지만 이 짧은 이야기는 예상보다 더 빨리 끝날 수 있습니다. 우리는 광활하고 황량한 우주에서 고립되어 있습니다. 우리는 모든 것을 파괴합니다. 우리는 이기적입니다. 우리는 잔인합니다. 우리는 탐욕스럽습니다. 우리는 눈이 멀었습니다. 그리고 지배하려 합니다. 하지만 우리는 공감할 수 있고, 경이로움을 창조하며, 회복력이 있고, 이타적일 수도 있습니다.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">하지만 우리에게 시간은 많지 않습니다. 우리는 큰 진전을 이루어 왔습니다.. 우리는 권리와 연대, 민주주의의 공동체라는 대안을 세울 수 있습니다. 우리에게 달려 있습니다!</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->

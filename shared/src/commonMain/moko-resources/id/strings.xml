@@ -62,6 +62,8 @@
   <string name="map_error_service_died">Layanan berhenti secara tak terduga. Silakan coba lagi.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">Akses ditolak.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Masalah pada akun Google Play Store. Silakan periksa akun Anda dan coba lagi.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Terjadi kesalahan tidak diketahui: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">Bergelombang!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">Anda tahu ini: jika kisah Bumi diceritakan dalam buku setebal 1.000 halaman, umat manusia baru akan muncul di paragraf terakhir pada halaman paling akhir.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">Namun kisah singkat ini bisa berakhir lebih cepat dari yang kita perkirakan. Kita terisolasi di alam semesta yang luas dan tandus. Kita menghancurkan segalanya. Kita egois. Kita kejam. Kita serakah. Kita buta. Dan kita ingin mendominasi. Namun kita juga mampu berempati, menciptakan keajaiban, tangguh, dan bisa bersikap altruistis.</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">Namun kisah singkat ini bisa berakhir lebih cepat dari yang diperkirakan. Kita terisolasi di alam semesta yang luas dan tandus. Kita menghancurkan segalanya. Kita egois. Kita kejam. Kita serakah. Kita buta. Dan kita berusaha mendominasi. Namun kita juga mampu berempati, kita menciptakan keajaiban, kita tangguh, kita bisa bersikap tanpa pamrih.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">Namun waktu kita tidak banyak. Kita telah membuat begitu banyak kemajuan.. Kita bisa membangun alternatif: komunitas berbasis hak, solidaritas, dan demokrasi. Semua ada di tangan kita!</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
