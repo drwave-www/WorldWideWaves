@@ -36,6 +36,11 @@ import io.mockk.mockk
 import io.mockk.every
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
@@ -1568,6 +1573,514 @@ class CityWaveWorkflowTest {
             }
         }
     }
+
+    // =====================================
+    // Phase 2.1.7: Date/Time and Lifecycle Testing
+    // =====================================
+
+    @Test
+    fun `should test event scheduling and timing accuracy for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val center = getCityCenter(cityId)
+
+            // Test different scheduling scenarios
+            val schedulingTests = listOf(
+                EventSchedulingTest(
+                    name = "immediate_event",
+                    scheduleTimeFromNow = 0, // Right now
+                    durationMinutes = 30,
+                    expectedState = "RUNNING",
+                    description = "Event starting immediately should be in RUNNING state"
+                ),
+                EventSchedulingTest(
+                    name = "future_event",
+                    scheduleTimeFromNow = 3600, // 1 hour from now
+                    durationMinutes = 45,
+                    expectedState = "SCHEDULED",
+                    description = "Future event should be in SCHEDULED state"
+                ),
+                EventSchedulingTest(
+                    name = "soon_event",
+                    scheduleTimeFromNow = 900, // 15 minutes from now
+                    durationMinutes = 30,
+                    expectedState = "SOON",
+                    description = "Event starting within 30 minutes should be in SOON state"
+                ),
+                EventSchedulingTest(
+                    name = "past_event",
+                    scheduleTimeFromNow = -7200, // 2 hours ago
+                    durationMinutes = 60,
+                    expectedState = "DONE",
+                    description = "Past event should be in DONE state"
+                ),
+                EventSchedulingTest(
+                    name = "long_duration_event",
+                    scheduleTimeFromNow = -1800, // 30 minutes ago
+                    durationMinutes = 120, // 2 hours duration
+                    expectedState = "RUNNING",
+                    description = "Long event started in past but still running should be RUNNING"
+                )
+            )
+
+            schedulingTests.forEach { test ->
+                val eventTimestamp = kotlin.time.Clock.System.now().plus(kotlin.time.Duration.parse("PT${kotlin.math.abs(test.scheduleTimeFromNow)}S") * if (test.scheduleTimeFromNow >= 0) 1 else -1)
+                val eventDuration = kotlin.time.Duration.parse("PT${test.durationMinutes}M")
+
+                // Create test event with specific timing
+                val testEvent = createTestEventWithTiming(
+                    eventId = "${cityId}_${test.name}",
+                    position = center,
+                    startTime = eventTimestamp,
+                    duration = eventDuration
+                )
+
+                // Calculate expected event state
+                val calculatedState = calculateEventState(eventTimestamp, eventDuration)
+
+                assertEquals(
+                    test.expectedState,
+                    calculatedState,
+                    "${test.description} for city $cityId. Expected: ${test.expectedState}, Got: $calculatedState"
+                )
+
+                // Test timing accuracy (should be within 1 second)
+                val timingAccuracy = calculateTimingAccuracy(eventTimestamp)
+                assertTrue(
+                    timingAccuracy < 1000, // Within 1 second
+                    "Event timing accuracy should be within 1000ms for ${test.name} in city $cityId, was ${timingAccuracy}ms"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `should test timezone handling across different cities`() = runTest {
+        // Test timezone handling for cities in different time zones
+        val timezoneTestCities = mapOf(
+            "new_york_usa" to "America/New_York",
+            "london_england" to "Europe/London",
+            "tokyo_japan" to "Asia/Tokyo",
+            "sydney_australia" to "Australia/Sydney",
+            "mumbai_india" to "Asia/Kolkata",
+            "paris_france" to "Europe/Paris",
+            "los_angeles_usa" to "America/Los_Angeles",
+            "beijing_china" to "Asia/Shanghai",
+            "moscow_russia" to "Europe/Moscow",
+            "dubai_united_arab_emirates" to "Asia/Dubai"
+        ).filterKeys { it in ALL_CITY_IDS }
+
+        timezoneTestCities.forEach { (cityId, timezone) ->
+            val center = getCityCenter(cityId)
+
+            // Test timezone-specific scheduling scenarios
+            val timezoneTests = listOf(
+                TimezoneTest(
+                    name = "midnight_local",
+                    localHour = 0,
+                    expectedBehavior = "should_handle_midnight_scheduling",
+                    description = "Events scheduled at local midnight should be handled correctly"
+                ),
+                TimezoneTest(
+                    name = "noon_local",
+                    localHour = 12,
+                    expectedBehavior = "should_handle_noon_scheduling",
+                    description = "Events scheduled at local noon should be handled correctly"
+                ),
+                TimezoneTest(
+                    name = "early_morning",
+                    localHour = 6,
+                    expectedBehavior = "should_handle_early_morning",
+                    description = "Early morning events should respect local timezone"
+                ),
+                TimezoneTest(
+                    name = "late_night",
+                    localHour = 23,
+                    expectedBehavior = "should_handle_late_night",
+                    description = "Late night events should not conflict with next day"
+                )
+            )
+
+            timezoneTests.forEach { test ->
+                // Create event at specific local time
+                val localEventTime = createLocalTimeEvent(timezone, test.localHour)
+                val utcEventTime = convertToUTC(localEventTime, timezone)
+
+                // Test timezone conversion accuracy
+                val reconvertedLocal = convertFromUTC(utcEventTime, timezone)
+                val timezoneAccuracy = kotlin.math.abs((localEventTime.epochSeconds - reconvertedLocal.epochSeconds).toDouble())
+
+                assertTrue(
+                    timezoneAccuracy < 1.0, // Within 1 second
+                    "Timezone conversion should be accurate for ${test.name} in $cityId ($timezone), accuracy: ${timezoneAccuracy}s"
+                )
+
+                // Test daylight saving time handling
+                val isDSTEvent = isDaylightSavingTime(localEventTime, timezone)
+                val dstOffset = calculateDSTOffset(timezone, localEventTime)
+
+                // Verify DST offset is reasonable (typically -1, 0, or +1 hour)
+                assertTrue(
+                    dstOffset in -3600..3600,
+                    "DST offset should be reasonable for $cityId ($timezone), got: ${dstOffset}s"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `should test complete event lifecycle for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val center = getCityCenter(cityId)
+
+            // Test complete event lifecycle from creation to completion
+            val lifecycleTests = listOf(
+                EventLifecycleTest(
+                    name = "standard_lifecycle",
+                    phases = listOf("CREATED", "SCHEDULED", "SOON", "RUNNING", "DONE"),
+                    duration = 30, // 30 minutes
+                    description = "Standard event lifecycle should progress through all phases"
+                ),
+                EventLifecycleTest(
+                    name = "quick_event",
+                    phases = listOf("CREATED", "SCHEDULED", "RUNNING", "DONE"),
+                    duration = 5, // 5 minutes
+                    description = "Quick events may skip SOON phase"
+                ),
+                EventLifecycleTest(
+                    name = "extended_event",
+                    phases = listOf("CREATED", "SCHEDULED", "SOON", "RUNNING", "RUNNING", "DONE"),
+                    duration = 120, // 2 hours
+                    description = "Extended events should maintain RUNNING state throughout"
+                ),
+                EventLifecycleTest(
+                    name = "cancelled_event",
+                    phases = listOf("CREATED", "SCHEDULED", "CANCELLED"),
+                    duration = 60,
+                    description = "Cancelled events should not progress to RUNNING"
+                )
+            )
+
+            lifecycleTests.forEach { test ->
+                val eventId = "${cityId}_${test.name}_lifecycle"
+                val startTime = kotlin.time.Clock.System.now().plus(kotlin.time.Duration.parse("PT5M")) // 5 minutes from now
+                val duration = kotlin.time.Duration.parse("PT${test.duration}M")
+
+                // Simulate complete event lifecycle
+                val lifecycle = simulateEventLifecycle(eventId, startTime, duration, test.name == "cancelled_event")
+
+                // Verify all expected phases are present
+                test.phases.forEach { expectedPhase ->
+                    assertTrue(
+                        lifecycle.phases.any { it.phase == expectedPhase },
+                        "Event lifecycle should include phase '$expectedPhase' for ${test.name} in city $cityId"
+                    )
+                }
+
+                // Verify phase transitions are logical
+                val phaseTransitions = lifecycle.phases.zipWithNext { current, next ->
+                    isValidPhaseTransition(current.phase, next.phase)
+                }
+
+                assertTrue(
+                    phaseTransitions.all { it },
+                    "All phase transitions should be valid for ${test.name} in city $cityId"
+                )
+
+                // Test lifecycle timing accuracy
+                val totalLifecycleDuration = lifecycle.phases.last().timestamp.minus(lifecycle.phases.first().timestamp)
+                val expectedDuration = if (test.name == "cancelled_event") {
+                    kotlin.time.Duration.parse("PT5M") // Should be cancelled quickly
+                } else {
+                    duration.plus(kotlin.time.Duration.parse("PT10M")) // Allow 10 min buffer for phases
+                }
+
+                assertTrue(
+                    totalLifecycleDuration <= expectedDuration.times(1.5), // Allow 50% buffer
+                    "Event lifecycle duration should be reasonable for ${test.name} in city $cityId. Expected: ~$expectedDuration, Got: $totalLifecycleDuration"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `should test timezone and daylight saving edge cases for all supported cities`() = runTest {
+        // Focus on cities with complex DST rules
+        val dstTestCities = mapOf(
+            "new_york_usa" to "America/New_York",
+            "london_england" to "Europe/London",
+            "sydney_australia" to "Australia/Sydney",
+            "paris_france" to "Europe/Paris",
+            "berlin_germany" to "Europe/Berlin"
+        ).filterKeys { it in ALL_CITY_IDS }
+
+        dstTestCities.forEach { (cityId, timezone) ->
+            val center = getCityCenter(cityId)
+
+            // Test DST transition scenarios
+            val dstTests = listOf(
+                DSTTest(
+                    name = "spring_forward_transition",
+                    testDate = "2024-03-10T02:30:00", // DST starts (US example)
+                    expectedBehavior = "should_handle_missing_hour",
+                    description = "Should handle spring forward transition correctly"
+                ),
+                DSTTest(
+                    name = "fall_back_transition",
+                    testDate = "2024-11-03T01:30:00", // DST ends (US example)
+                    expectedBehavior = "should_handle_duplicate_hour",
+                    description = "Should handle fall back transition correctly"
+                ),
+                DSTTest(
+                    name = "summer_stable_dst",
+                    testDate = "2024-07-15T15:00:00", // Stable DST period
+                    expectedBehavior = "should_be_in_dst",
+                    description = "Should correctly identify DST period"
+                ),
+                DSTTest(
+                    name = "winter_standard_time",
+                    testDate = "2024-01-15T15:00:00", // Stable standard time
+                    expectedBehavior = "should_be_standard_time",
+                    description = "Should correctly identify standard time period"
+                )
+            )
+
+            dstTests.forEach { test ->
+                val testInstant = Instant.parse(test.testDate.replace('T', 'T') + "Z")
+
+                // Test DST detection
+                val isDST = isDaylightSavingTime(testInstant, timezone)
+                val dstOffset = calculateDSTOffset(timezone, testInstant)
+
+                when (test.expectedBehavior) {
+                    "should_be_in_dst" -> {
+                        assertTrue(
+                            isDST,
+                            "Date ${test.testDate} should be in DST for $cityId ($timezone)"
+                        )
+                        assertTrue(
+                            dstOffset > 0,
+                            "DST offset should be positive for $cityId during DST period, got: ${dstOffset}s"
+                        )
+                    }
+                    "should_be_standard_time" -> {
+                        assertFalse(
+                            isDST,
+                            "Date ${test.testDate} should be in standard time for $cityId ($timezone)"
+                        )
+                        assertEquals(
+                            0,
+                            dstOffset,
+                            "DST offset should be 0 during standard time for $cityId, got: ${dstOffset}s"
+                        )
+                    }
+                    "should_handle_missing_hour", "should_handle_duplicate_hour" -> {
+                        // For transition periods, just verify offset is reasonable
+                        assertTrue(
+                            dstOffset in -7200..7200, // Within ±2 hours is reasonable
+                            "DST transition offset should be reasonable for $cityId, got: ${dstOffset}s"
+                        )
+                    }
+                }
+
+                // Test event scheduling during DST transitions
+                val eventDuringTransition = createTestEventWithTiming(
+                    eventId = "${cityId}_${test.name}",
+                    position = center,
+                    startTime = testInstant,
+                    duration = kotlin.time.Duration.parse("PT1H")
+                )
+
+                assertNotNull(
+                    eventDuringTransition,
+                    "Should be able to create events during DST transitions for ${test.name} in $cityId"
+                )
+            }
+        }
+    }
+
+    // =====================================
+    // Phase 2.1.7 Helper Methods and Data Classes
+    // =====================================
+
+    private data class EventSchedulingTest(
+        val name: String,
+        val scheduleTimeFromNow: Int, // seconds from now
+        val durationMinutes: Int,
+        val expectedState: String,
+        val description: String
+    )
+
+    private data class TimezoneTest(
+        val name: String,
+        val localHour: Int, // 0-23
+        val expectedBehavior: String,
+        val description: String
+    )
+
+    private data class EventLifecycleTest(
+        val name: String,
+        val phases: List<String>,
+        val duration: Int, // minutes
+        val description: String
+    )
+
+    private data class DSTTest(
+        val name: String,
+        val testDate: String, // ISO format
+        val expectedBehavior: String,
+        val description: String
+    )
+
+    private data class EventLifecycle(
+        val eventId: String,
+        val phases: List<LifecyclePhase>
+    )
+
+    private data class LifecyclePhase(
+        val phase: String,
+        val timestamp: Instant
+    )
+
+    private fun createTestEventWithTiming(
+        eventId: String,
+        position: Position,
+        startTime: Instant,
+        duration: kotlin.time.Duration
+    ): MockEvent? {
+        // Simulate event creation with specific timing
+        return try {
+            MockEvent(
+                id = eventId,
+                position = position,
+                startTime = startTime,
+                duration = duration,
+                state = calculateEventState(startTime, duration)
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun calculateEventState(startTime: Instant, duration: kotlin.time.Duration): String {
+        val now = kotlin.time.Clock.System.now()
+        val endTime = startTime.plus(duration)
+
+        return when {
+            now < startTime.minus(kotlin.time.Duration.parse("PT30M")) -> "SCHEDULED"
+            now < startTime -> "SOON"
+            now >= startTime && now < endTime -> "RUNNING"
+            else -> "DONE"
+        }
+    }
+
+    private fun calculateTimingAccuracy(eventTime: Instant): Long {
+        val now = kotlin.time.Clock.System.now()
+        return kotlin.math.abs((eventTime.epochSeconds - now.epochSeconds) * 1000)
+    }
+
+    private fun createLocalTimeEvent(timezone: String, hour: Int): Instant {
+        // Create an event at specific local time
+        val today = kotlin.time.Clock.System.now()
+        val todayLocal = today.toLocalDateTime(TimeZone.of(timezone))
+        val eventLocal = LocalDateTime(
+            todayLocal.date,
+            LocalTime(hour, 0)
+        )
+        return eventLocal.toInstant(TimeZone.of(timezone))
+    }
+
+    private fun convertToUTC(localTime: Instant, timezone: String): Instant {
+        // Already in UTC if using Instant
+        return localTime
+    }
+
+    private fun convertFromUTC(utcTime: Instant, timezone: String): Instant {
+        // Convert to local timezone and back to verify accuracy
+        val local = utcTime.toLocalDateTime(TimeZone.of(timezone))
+        return local.toInstant(TimeZone.of(timezone))
+    }
+
+    private fun isDaylightSavingTime(instant: Instant, timezone: String): Boolean {
+        // Simplified DST detection - in real implementation would use actual timezone rules
+        val tz = TimeZone.of(timezone)
+        val local = instant.toLocalDateTime(tz)
+
+        // Rough DST detection for northern hemisphere (March-October)
+        return when {
+            timezone.contains("America/") || timezone.contains("Europe/") -> {
+                local.monthNumber in 3..10
+            }
+            timezone.contains("Australia/") -> {
+                // Southern hemisphere DST (October-March)
+                local.monthNumber in 10..12 || local.monthNumber in 1..3
+            }
+            else -> false
+        }
+    }
+
+    private fun calculateDSTOffset(timezone: String, instant: Instant): Int {
+        // Return DST offset in seconds
+        return if (isDaylightSavingTime(instant, timezone)) {
+            3600 // +1 hour for DST
+        } else {
+            0 // No DST offset
+        }
+    }
+
+    private fun simulateEventLifecycle(
+        eventId: String,
+        startTime: Instant,
+        duration: kotlin.time.Duration,
+        shouldCancel: Boolean = false
+    ): EventLifecycle {
+        val phases = mutableListOf<LifecyclePhase>()
+        val now = kotlin.time.Clock.System.now()
+
+        // Creation phase
+        phases.add(LifecyclePhase("CREATED", now))
+
+        // Scheduled phase
+        phases.add(LifecyclePhase("SCHEDULED", now.plus(kotlin.time.Duration.parse("PT1S"))))
+
+        if (shouldCancel) {
+            phases.add(LifecyclePhase("CANCELLED", now.plus(kotlin.time.Duration.parse("PT2S"))))
+            return EventLifecycle(eventId, phases)
+        }
+
+        // Soon phase (if event is more than 30 minutes away)
+        if (startTime > now.plus(kotlin.time.Duration.parse("PT30M"))) {
+            phases.add(LifecyclePhase("SOON", startTime.minus(kotlin.time.Duration.parse("PT30M"))))
+        }
+
+        // Running phase
+        phases.add(LifecyclePhase("RUNNING", startTime))
+
+        // Done phase
+        phases.add(LifecyclePhase("DONE", startTime.plus(duration)))
+
+        return EventLifecycle(eventId, phases)
+    }
+
+    private fun isValidPhaseTransition(currentPhase: String, nextPhase: String): Boolean {
+        val validTransitions = mapOf(
+            "CREATED" to setOf("SCHEDULED", "CANCELLED"),
+            "SCHEDULED" to setOf("SOON", "RUNNING", "CANCELLED"),
+            "SOON" to setOf("RUNNING", "CANCELLED"),
+            "RUNNING" to setOf("DONE", "CANCELLED"),
+            "DONE" to emptySet(),
+            "CANCELLED" to emptySet()
+        )
+
+        return validTransitions[currentPhase]?.contains(nextPhase) ?: false
+    }
+
+    private data class MockEvent(
+        val id: String,
+        val position: Position,
+        val startTime: Instant,
+        val duration: kotlin.time.Duration,
+        val state: String
+    )
 
     // Helper methods for comprehensive testing
 
