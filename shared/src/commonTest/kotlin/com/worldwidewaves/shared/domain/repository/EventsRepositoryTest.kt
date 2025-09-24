@@ -38,7 +38,6 @@ import kotlin.test.assertTrue
  * and that any implementation must satisfy the expected contract.
  */
 class EventsRepositoryTest {
-
     /**
      * Mock implementation for testing interface contract
      */
@@ -61,11 +60,9 @@ class EventsRepositoryTest {
             lastError?.let { onLoadingError(it) }
         }
 
-        override suspend fun getEvent(eventId: String): Flow<IWWWEvent?> =
-            flowOf(events.find { it.id == eventId })
+        override suspend fun getEvent(eventId: String): Flow<IWWWEvent?> = flowOf(events.find { it.id == eventId })
 
-        override suspend fun refreshEvents(): Result<Unit> =
-            if (lastError != null) Result.failure(lastError!!) else Result.success(Unit)
+        override suspend fun refreshEvents(): Result<Unit> = if (lastError != null) Result.failure(lastError!!) else Result.success(Unit)
 
         override suspend fun getCachedEventsCount(): Int = events.size
 
@@ -99,69 +96,73 @@ class EventsRepositoryTest {
     }
 
     @Test
-    fun `repository implementation should handle empty events list`() = runTest {
-        // Arrange
-        val repository = TestEventsRepository()
-        repository.setMockEvents(emptyList())
+    fun `repository implementation should handle empty events list`() =
+        runTest {
+            // Arrange
+            val repository = TestEventsRepository()
+            repository.setMockEvents(emptyList())
 
-        // Act
-        val events = repository.getEvents()
-        val count = repository.getCachedEventsCount()
+            // Act
+            val events = repository.getEvents()
+            val count = repository.getCachedEventsCount()
 
-        // Assert
-        assertNotNull(events)
-        assertEquals(0, count)
-    }
-
-    @Test
-    fun `repository implementation should handle events list with data`() = runTest {
-        // Arrange
-        val mockEvents = listOf<IWWWEvent>(mockk(), mockk(), mockk())
-        val repository = TestEventsRepository()
-        repository.setMockEvents(mockEvents)
-
-        // Act
-        val count = repository.getCachedEventsCount()
-
-        // Assert
-        assertEquals(3, count)
-    }
-
-    @Test
-    fun `repository should handle error states`() = runTest {
-        // Arrange
-        val testError = RuntimeException("Test error")
-        val repository = TestEventsRepository()
-        repository.setMockError(testError)
-
-        // Act
-        val refreshResult = repository.refreshEvents()
-        var errorReceived: Exception? = null
-        repository.loadEvents { error ->
-            errorReceived = error
+            // Assert
+            assertNotNull(events)
+            assertEquals(0, count)
         }
 
-        // Assert
-        assertTrue(refreshResult.isFailure)
-        assertEquals("Test error", refreshResult.exceptionOrNull()?.message)
-        assertNotNull(errorReceived)
-        assertEquals("Test error", errorReceived?.message)
-    }
+    @Test
+    fun `repository implementation should handle events list with data`() =
+        runTest {
+            // Arrange
+            val mockEvents = listOf<IWWWEvent>(mockk(), mockk(), mockk())
+            val repository = TestEventsRepository()
+            repository.setMockEvents(mockEvents)
+
+            // Act
+            val count = repository.getCachedEventsCount()
+
+            // Assert
+            assertEquals(3, count)
+        }
 
     @Test
-    fun `repository should support cache operations`() = runTest {
-        // Arrange
-        val mockEvents = listOf<IWWWEvent>(mockk())
-        val repository = TestEventsRepository()
-        repository.setMockEvents(mockEvents)
+    fun `repository should handle error states`() =
+        runTest {
+            // Arrange
+            val testError = RuntimeException("Test error")
+            val repository = TestEventsRepository()
+            repository.setMockError(testError)
 
-        // Act
-        val initialCount = repository.getCachedEventsCount()
-        repository.clearCache()
-        val clearedCount = repository.getCachedEventsCount()
+            // Act
+            val refreshResult = repository.refreshEvents()
+            var errorReceived: Exception? = null
+            repository.loadEvents { error ->
+                errorReceived = error
+            }
 
-        // Assert
-        assertEquals(1, initialCount)
-        assertEquals(0, clearedCount)
-    }
+            // Assert
+            assertTrue(refreshResult.isFailure)
+            assertEquals("Test error", refreshResult.exceptionOrNull()?.message)
+            assertNotNull(errorReceived)
+            assertEquals("Test error", errorReceived?.message)
+        }
+
+    @Test
+    fun `repository should support cache operations`() =
+        runTest {
+            // Arrange
+            val mockEvents = listOf<IWWWEvent>(mockk())
+            val repository = TestEventsRepository()
+            repository.setMockEvents(mockEvents)
+
+            // Act
+            val initialCount = repository.getCachedEventsCount()
+            repository.clearCache()
+            val clearedCount = repository.getCachedEventsCount()
+
+            // Assert
+            assertEquals(1, initialCount)
+            assertEquals(0, clearedCount)
+        }
 }

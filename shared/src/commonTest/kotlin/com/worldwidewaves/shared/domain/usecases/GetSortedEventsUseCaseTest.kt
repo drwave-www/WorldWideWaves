@@ -36,174 +36,187 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class GetSortedEventsUseCaseTest {
-
     private val mockRepository = mockk<EventsRepository>()
     private val useCase = GetSortedEventsUseCase(mockRepository)
 
     private fun createMockEvent(
         id: String,
-        startTime: Instant
-    ): IWWWEvent = mockk<IWWWEvent>().apply {
-        coEvery { this@apply.id } returns id
-        coEvery { getStartDateTime() } returns startTime
-    }
+        startTime: Instant,
+    ): IWWWEvent =
+        mockk<IWWWEvent>().apply {
+            coEvery { this@apply.id } returns id
+            coEvery { getStartDateTime() } returns startTime
+        }
 
     @Test
-    fun `invoke returns events sorted by start date ascending`() = runTest {
-        // Given: Events with different start times
-        val laterTime = Instant.fromEpochSeconds(1000)
-        val earlierTime = Instant.fromEpochSeconds(500)
-        val middleTime = Instant.fromEpochSeconds(750)
+    fun `invoke returns events sorted by start date ascending`() =
+        runTest {
+            // Given: Events with different start times
+            val laterTime = Instant.fromEpochSeconds(1000)
+            val earlierTime = Instant.fromEpochSeconds(500)
+            val middleTime = Instant.fromEpochSeconds(750)
 
-        val event1 = createMockEvent("event1", laterTime)
-        val event2 = createMockEvent("event2", earlierTime)
-        val event3 = createMockEvent("event3", middleTime)
+            val event1 = createMockEvent("event1", laterTime)
+            val event2 = createMockEvent("event2", earlierTime)
+            val event3 = createMockEvent("event3", middleTime)
 
-        val unsortedEvents = listOf(event1, event2, event3)
-        coEvery { mockRepository.getEvents() } returns flowOf(unsortedEvents)
+            val unsortedEvents = listOf(event1, event2, event3)
+            coEvery { mockRepository.getEvents() } returns flowOf(unsortedEvents)
 
-        // When: Invoking the use case
-        val result = useCase.invoke().first()
+            // When: Invoking the use case
+            val result = useCase.invoke().first()
 
-        // Then: Events should be sorted by start time (earliest first)
-        assertEquals(3, result.size)
-        assertEquals("event2", result[0].id) // earlierTime
-        assertEquals("event3", result[1].id) // middleTime
-        assertEquals("event1", result[2].id) // laterTime
-    }
-
-    @Test
-    fun `invoke returns empty list when no events available`() = runTest {
-        // Given: Empty events list
-        coEvery { mockRepository.getEvents() } returns flowOf(emptyList())
-
-        // When: Invoking the use case
-        val result = useCase.invoke().first()
-
-        // Then: Should return empty list
-        assertTrue(result.isEmpty())
-    }
+            // Then: Events should be sorted by start time (earliest first)
+            assertEquals(3, result.size)
+            assertEquals("event2", result[0].id) // earlierTime
+            assertEquals("event3", result[1].id) // middleTime
+            assertEquals("event1", result[2].id) // laterTime
+        }
 
     @Test
-    fun `invoke returns single event when only one event available`() = runTest {
-        // Given: Single event
-        val event = createMockEvent("single_event", Instant.fromEpochSeconds(1000))
-        coEvery { mockRepository.getEvents() } returns flowOf(listOf(event))
+    fun `invoke returns empty list when no events available`() =
+        runTest {
+            // Given: Empty events list
+            coEvery { mockRepository.getEvents() } returns flowOf(emptyList())
 
-        // When: Invoking the use case
-        val result = useCase.invoke().first()
+            // When: Invoking the use case
+            val result = useCase.invoke().first()
 
-        // Then: Should return the single event
-        assertEquals(1, result.size)
-        assertEquals("single_event", result[0].id)
-    }
-
-    @Test
-    fun `invoke handles events with same start time`() = runTest {
-        // Given: Events with identical start times
-        val sameTime = Instant.fromEpochSeconds(1000)
-        val event1 = createMockEvent("event1", sameTime)
-        val event2 = createMockEvent("event2", sameTime)
-        val event3 = createMockEvent("event3", sameTime)
-
-        val events = listOf(event1, event2, event3)
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
-
-        // When: Invoking the use case
-        val result = useCase.invoke().first()
-
-        // Then: Should return all events (order may vary for same timestamp)
-        assertEquals(3, result.size)
-        assertTrue(result.all { it.getStartDateTime() == sameTime })
-    }
+            // Then: Should return empty list
+            assertTrue(result.isEmpty())
+        }
 
     @Test
-    fun `invoke with limit returns limited number of events`() = runTest {
-        // Given: Multiple events
-        val events = listOf(
-            createMockEvent("event1", Instant.fromEpochSeconds(100)),
-            createMockEvent("event2", Instant.fromEpochSeconds(200)),
-            createMockEvent("event3", Instant.fromEpochSeconds(300)),
-            createMockEvent("event4", Instant.fromEpochSeconds(400))
-        )
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
+    fun `invoke returns single event when only one event available`() =
+        runTest {
+            // Given: Single event
+            val event = createMockEvent("single_event", Instant.fromEpochSeconds(1000))
+            coEvery { mockRepository.getEvents() } returns flowOf(listOf(event))
 
-        // When: Invoking with limit of 2
-        val result = useCase.invoke(limit = 2).first()
+            // When: Invoking the use case
+            val result = useCase.invoke().first()
 
-        // Then: Should return only first 2 events (sorted)
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event2", result[1].id)
-    }
+            // Then: Should return the single event
+            assertEquals(1, result.size)
+            assertEquals("single_event", result[0].id)
+        }
 
     @Test
-    fun `invoke with null limit returns all events`() = runTest {
-        // Given: Multiple events
-        val events = listOf(
-            createMockEvent("event1", Instant.fromEpochSeconds(100)),
-            createMockEvent("event2", Instant.fromEpochSeconds(200)),
-            createMockEvent("event3", Instant.fromEpochSeconds(300))
-        )
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
+    fun `invoke handles events with same start time`() =
+        runTest {
+            // Given: Events with identical start times
+            val sameTime = Instant.fromEpochSeconds(1000)
+            val event1 = createMockEvent("event1", sameTime)
+            val event2 = createMockEvent("event2", sameTime)
+            val event3 = createMockEvent("event3", sameTime)
 
-        // When: Invoking with null limit
-        val result = useCase.invoke(limit = null).first()
+            val events = listOf(event1, event2, event3)
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
 
-        // Then: Should return all events
-        assertEquals(3, result.size)
-    }
+            // When: Invoking the use case
+            val result = useCase.invoke().first()
 
-    @Test
-    fun `invoke with zero limit returns all events`() = runTest {
-        // Given: Multiple events
-        val events = listOf(
-            createMockEvent("event1", Instant.fromEpochSeconds(100)),
-            createMockEvent("event2", Instant.fromEpochSeconds(200))
-        )
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
-
-        // When: Invoking with limit of 0
-        val result = useCase.invoke(limit = 0).first()
-
-        // Then: Should return all events (0 is treated as no limit)
-        assertEquals(2, result.size)
-    }
+            // Then: Should return all events (order may vary for same timestamp)
+            assertEquals(3, result.size)
+            assertTrue(result.all { it.getStartDateTime() == sameTime })
+        }
 
     @Test
-    fun `invoke with negative limit returns all events`() = runTest {
-        // Given: Multiple events
-        val events = listOf(
-            createMockEvent("event1", Instant.fromEpochSeconds(100)),
-            createMockEvent("event2", Instant.fromEpochSeconds(200))
-        )
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
+    fun `invoke with limit returns limited number of events`() =
+        runTest {
+            // Given: Multiple events
+            val events =
+                listOf(
+                    createMockEvent("event1", Instant.fromEpochSeconds(100)),
+                    createMockEvent("event2", Instant.fromEpochSeconds(200)),
+                    createMockEvent("event3", Instant.fromEpochSeconds(300)),
+                    createMockEvent("event4", Instant.fromEpochSeconds(400)),
+                )
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
 
-        // When: Invoking with negative limit
-        val result = useCase.invoke(limit = -1).first()
+            // When: Invoking with limit of 2
+            val result = useCase.invoke(limit = 2).first()
 
-        // Then: Should return all events (negative limit is treated as no limit)
-        assertEquals(2, result.size)
-    }
+            // Then: Should return only first 2 events (sorted)
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event2", result[1].id)
+        }
 
     @Test
-    fun `invoke maintains chronological order for realistic event times`() = runTest {
-        // Given: Events with realistic timestamps (representing different dates)
-        val event1 = createMockEvent("paris_wave", Instant.parse("2025-10-01T10:00:00Z"))
-        val event2 = createMockEvent("london_wave", Instant.parse("2025-09-15T14:30:00Z"))
-        val event3 = createMockEvent("tokyo_wave", Instant.parse("2025-11-20T09:00:00Z"))
-        val event4 = createMockEvent("sydney_wave", Instant.parse("2025-09-20T16:00:00Z"))
+    fun `invoke with null limit returns all events`() =
+        runTest {
+            // Given: Multiple events
+            val events =
+                listOf(
+                    createMockEvent("event1", Instant.fromEpochSeconds(100)),
+                    createMockEvent("event2", Instant.fromEpochSeconds(200)),
+                    createMockEvent("event3", Instant.fromEpochSeconds(300)),
+                )
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
 
-        val events = listOf(event1, event2, event3, event4)
-        coEvery { mockRepository.getEvents() } returns flowOf(events)
+            // When: Invoking with null limit
+            val result = useCase.invoke(limit = null).first()
 
-        // When: Invoking the use case
-        val result = useCase.invoke().first()
+            // Then: Should return all events
+            assertEquals(3, result.size)
+        }
 
-        // Then: Should be in chronological order
-        assertEquals("london_wave", result[0].id)  // Sep 15
-        assertEquals("sydney_wave", result[1].id)  // Sep 20
-        assertEquals("paris_wave", result[2].id)   // Oct 1
-        assertEquals("tokyo_wave", result[3].id)   // Nov 20
-    }
+    @Test
+    fun `invoke with zero limit returns all events`() =
+        runTest {
+            // Given: Multiple events
+            val events =
+                listOf(
+                    createMockEvent("event1", Instant.fromEpochSeconds(100)),
+                    createMockEvent("event2", Instant.fromEpochSeconds(200)),
+                )
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
+
+            // When: Invoking with limit of 0
+            val result = useCase.invoke(limit = 0).first()
+
+            // Then: Should return all events (0 is treated as no limit)
+            assertEquals(2, result.size)
+        }
+
+    @Test
+    fun `invoke with negative limit returns all events`() =
+        runTest {
+            // Given: Multiple events
+            val events =
+                listOf(
+                    createMockEvent("event1", Instant.fromEpochSeconds(100)),
+                    createMockEvent("event2", Instant.fromEpochSeconds(200)),
+                )
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
+
+            // When: Invoking with negative limit
+            val result = useCase.invoke(limit = -1).first()
+
+            // Then: Should return all events (negative limit is treated as no limit)
+            assertEquals(2, result.size)
+        }
+
+    @Test
+    fun `invoke maintains chronological order for realistic event times`() =
+        runTest {
+            // Given: Events with realistic timestamps (representing different dates)
+            val event1 = createMockEvent("paris_wave", Instant.parse("2025-10-01T10:00:00Z"))
+            val event2 = createMockEvent("london_wave", Instant.parse("2025-09-15T14:30:00Z"))
+            val event3 = createMockEvent("tokyo_wave", Instant.parse("2025-11-20T09:00:00Z"))
+            val event4 = createMockEvent("sydney_wave", Instant.parse("2025-09-20T16:00:00Z"))
+
+            val events = listOf(event1, event2, event3, event4)
+            coEvery { mockRepository.getEvents() } returns flowOf(events)
+
+            // When: Invoking the use case
+            val result = useCase.invoke().first()
+
+            // Then: Should be in chronological order
+            assertEquals("london_wave", result[0].id) // Sep 15
+            assertEquals("sydney_wave", result[1].id) // Sep 20
+            assertEquals("paris_wave", result[2].id) // Oct 1
+            assertEquals("tokyo_wave", result[3].id) // Nov 20
+        }
 }

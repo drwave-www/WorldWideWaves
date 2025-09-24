@@ -27,7 +27,6 @@ import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res
@@ -35,6 +34,7 @@ import com.worldwidewaves.shared.getCacheDir
 import com.worldwidewaves.shared.getMapFileAbsolutePath
 import com.worldwidewaves.shared.isCachedFileStale
 import com.worldwidewaves.shared.updateCacheMetadata
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.core.component.KoinComponent

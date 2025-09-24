@@ -100,7 +100,7 @@ fun WaveChoreographies(
         android.util.Log.v(
             "WaveChoreographies",
             "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, " +
-                "goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit"
+                "goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit",
         )
     }
 
@@ -210,7 +210,10 @@ fun TimedSequenceDisplay(
         return
     }
 
-    android.util.Log.v("TimedSequenceDisplay", "[CHOREO_DEBUG] Displaying sequence: duration=${sequence.duration}, frameCount=${sequence.frameCount}")
+    android.util.Log.v(
+        "TimedSequenceDisplay",
+        "[CHOREO_DEBUG] Displaying sequence: duration=${sequence.duration}, frameCount=${sequence.frameCount}",
+    )
     ChoreographyDisplay(sequence, clock, modifier)
 
     LaunchedEffect(sequence) {

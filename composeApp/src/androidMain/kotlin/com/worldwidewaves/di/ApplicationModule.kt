@@ -28,21 +28,21 @@ import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.monitoring.PerformanceIntegration
+import com.worldwidewaves.shared.domain.repository.EventsRepository
+import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
+import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
+import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CloseableCoroutineScope
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
-import com.worldwidewaves.shared.domain.repository.EventsRepository
-import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
-import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
-import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
-import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 
 val applicationModule =
     module {
@@ -62,7 +62,7 @@ val applicationModule =
                 getSortedEventsUseCase = get(),
                 filterEventsUseCase = get(),
                 checkEventFavoritesUseCase = get(),
-                platform = get()
+                platform = get(),
             )
         }
 

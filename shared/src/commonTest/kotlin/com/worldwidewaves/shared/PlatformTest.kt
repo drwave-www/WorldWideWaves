@@ -40,7 +40,6 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class PlatformTest {
-
     @Test
     fun `should initialize with default simulation state`() {
         // GIVEN: A new platform instance
@@ -189,11 +188,12 @@ class PlatformTest {
         val platform = WWWPlatform("test-platform")
         val startTime = Instant.fromEpochMilliseconds(1000)
         val userPosition = Position(37.7749, -122.4194)
-        val simulations = listOf(
-            WWWSimulation(startTime, userPosition, 5),
-            WWWSimulation(startTime, userPosition, 10),
-            WWWSimulation(startTime, userPosition, 15),
-        )
+        val simulations =
+            listOf(
+                WWWSimulation(startTime, userPosition, 5),
+                WWWSimulation(startTime, userPosition, 10),
+                WWWSimulation(startTime, userPosition, 15),
+            )
 
         val initialChangeValue = platform.simulationChanged.value
 
@@ -303,7 +303,6 @@ class PlatformTest {
  * These tests ensure that shutdown handling correctly cancels all coroutines.
  */
 class ShutdownHandlerTest {
-
     @Test
     fun `should cancel all coroutines on app shutdown`() {
         // GIVEN: A mocked coroutine scope provider

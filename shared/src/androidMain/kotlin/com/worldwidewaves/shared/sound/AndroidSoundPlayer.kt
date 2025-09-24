@@ -73,7 +73,13 @@ class AndroidAudioBuffer(
         var idx = 0
         for (sample in samples) {
             // Convert to 16-bit PCM
-            val value = (sample * WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX).toInt().coerceIn(WWWGlobals.ByteProcessing.AUDIO_16BIT_MIN, WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX).toShort()
+            val value =
+                (sample * WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX)
+                    .toInt()
+                    .coerceIn(
+                        WWWGlobals.ByteProcessing.AUDIO_16BIT_MIN,
+                        WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX,
+                    ).toShort()
             // Write as little-endian
             result[idx++] = (value.toInt() and WWWGlobals.ByteProcessing.BYTE_MASK).toByte()
             result[idx++] = ((value.toInt() shr WWWGlobals.ByteProcessing.BIT_SHIFT_8) and WWWGlobals.ByteProcessing.BYTE_MASK).toByte()
@@ -85,7 +91,11 @@ class AndroidAudioBuffer(
         val result = ByteArray(samples.size)
         for (i in samples.indices) {
             // Convert to 8-bit unsigned PCM (0-255)
-            result[i] = ((samples[i] * WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE + WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE) * WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX).toInt().coerceIn(0, WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX).toByte()
+            result[i] =
+                (
+                    (samples[i] * WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE + WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE) *
+                        WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX
+                ).toInt().coerceIn(0, WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX).toByte()
         }
         return result
     }

@@ -37,19 +37,49 @@ import kotlin.time.Clock
  * - Memory-efficient map storage
  */
 object CityMapRegistry {
-    private val availableCityIds = setOf(
-        "bangalore_india", "bangkok_thailand", "beijing_china", "berlin_germany",
-        "bogota_colombia", "buenos_aires_argentina", "cairo_egypt", "chicago_usa",
-        "delhi_india", "dubai_united_arab_emirates", "hong_kong_china", "istanbul_turkey",
-        "jakarta_indonesia", "johannesburg_south_africa", "karachi_pakistan",
-        "kinshasa_democratic_republic_of_the_congo", "lagos_nigeria", "lima_peru",
-        "london_england", "los_angeles_usa", "madrid_spain", "manila_philippines",
-        "melbourne_australia", "mexico_city_mexico", "moscow_russia", "mumbai_india",
-        "nairobi_kenya", "new_york_usa", "paris_france", "rome_italy",
-        "san_francisco_usa", "santiago_chile", "sao_paulo_brazil", "seoul_south_korea",
-        "shanghai_china", "sydney_australia", "tehran_iran", "tokyo_japan",
-        "toronto_canada", "vancouver_canada"
-    )
+    private val availableCityIds =
+        setOf(
+            "bangalore_india",
+            "bangkok_thailand",
+            "beijing_china",
+            "berlin_germany",
+            "bogota_colombia",
+            "buenos_aires_argentina",
+            "cairo_egypt",
+            "chicago_usa",
+            "delhi_india",
+            "dubai_united_arab_emirates",
+            "hong_kong_china",
+            "istanbul_turkey",
+            "jakarta_indonesia",
+            "johannesburg_south_africa",
+            "karachi_pakistan",
+            "kinshasa_democratic_republic_of_the_congo",
+            "lagos_nigeria",
+            "lima_peru",
+            "london_england",
+            "los_angeles_usa",
+            "madrid_spain",
+            "manila_philippines",
+            "melbourne_australia",
+            "mexico_city_mexico",
+            "moscow_russia",
+            "mumbai_india",
+            "nairobi_kenya",
+            "new_york_usa",
+            "paris_france",
+            "rome_italy",
+            "san_francisco_usa",
+            "santiago_chile",
+            "sao_paulo_brazil",
+            "seoul_south_korea",
+            "shanghai_china",
+            "sydney_australia",
+            "tehran_iran",
+            "tokyo_japan",
+            "toronto_canada",
+            "vancouver_canada",
+        )
 
     private val loadedMaps = mutableMapOf<String, CityMap>()
     private val mutex = Mutex()
@@ -84,9 +114,7 @@ object CityMapRegistry {
     /**
      * Get a loaded map without triggering loading
      */
-    fun getLoadedMap(cityId: String): CityMap? {
-        return loadedMaps[cityId]
-    }
+    fun getLoadedMap(cityId: String): CityMap? = loadedMaps[cityId]
 
     /**
      * Clear all loaded maps to free memory
@@ -100,33 +128,32 @@ object CityMapRegistry {
     /**
      * Get statistics about loaded maps
      */
-    fun getStatistics(): CityMapStatistics {
-        return CityMapStatistics(
+    fun getStatistics(): CityMapStatistics =
+        CityMapStatistics(
             totalAvailableCities = availableCityIds.size,
             loadedCities = loadedMaps.size,
-            memoryFootprintMB = estimateMemoryFootprint()
+            memoryFootprintMB = estimateMemoryFootprint(),
         )
-    }
 
     /**
      * Platform-specific map loading implementation
      */
-    private suspend fun loadCityMap(cityId: String): CityMap? {
-        return try {
+    private suspend fun loadCityMap(cityId: String): CityMap? =
+        try {
             // This will be implemented platform-specifically
             // For now, return a placeholder implementation for testing
             CityMap(
                 id = cityId,
-                name = cityId.replace("_", " ").split(" ").joinToString(" ") {
-                    it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }
-                },
+                name =
+                    cityId.replace("_", " ").split(" ").joinToString(" ") {
+                        it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase() else char.toString() }
+                    },
                 isLoaded = true,
-                hasGeoJson = true
+                hasGeoJson = true,
             )
         } catch (e: Exception) {
             null
         }
-    }
 
     /**
      * Estimate memory footprint of loaded maps
@@ -145,7 +172,7 @@ data class CityMap(
     val name: String,
     val isLoaded: Boolean = false,
     val hasGeoJson: Boolean = false,
-    val loadTimestamp: Long = Clock.System.now().toEpochMilliseconds()
+    val loadTimestamp: Long = Clock.System.now().toEpochMilliseconds(),
 )
 
 /**
@@ -154,5 +181,5 @@ data class CityMap(
 data class CityMapStatistics(
     val totalAvailableCities: Int,
     val loadedCities: Int,
-    val memoryFootprintMB: Double
+    val memoryFootprintMB: Double,
 )

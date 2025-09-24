@@ -26,7 +26,6 @@ import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.MutableArea
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.isPointInPolygons
@@ -34,6 +33,7 @@ import com.worldwidewaves.shared.events.utils.PolygonUtils.polygonsBbox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.getMapFileAbsolutePath
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,7 +93,7 @@ data class WWWEventArea(
 
     @Transient private val polygonsCacheMutex = Mutex()
 
-        // Add mutex for cache protection
+    // Add mutex for cache protection
     @Transient private var cachedBoundingBox: BoundingBox? = null
 
     @Transient private var cachedCenter: Position? = null
@@ -150,7 +150,6 @@ data class WWWEventArea(
      * the polygons using the ray-casting algorithm.
      */
     suspend fun isPositionWithin(position: Position): Boolean {
-
         // Check if the cached result is within the epsilon
         cachedPositionWithinResult?.let { (cachedPosition, cachedResult) ->
             if (isPositionWithinEpsilon(position, cachedPosition)) {
@@ -166,7 +165,6 @@ data class WWWEventArea(
                 position.lat <= boundingBox.ne.lat &&
                 position.lng >= boundingBox.sw.lng &&
                 position.lng <= boundingBox.ne.lng
-
 
         // If not within the bounding box, return false immediately
         if (!isWithinBbox) {
@@ -252,12 +250,10 @@ data class WWWEventArea(
     }
 
     suspend fun bbox(): BoundingBox {
-
         // Return cached bounding box if available
         if (cachedBoundingBox != null) {
             return cachedBoundingBox!!
         }
-
 
         // If bbox parameter was provided in constructor, use it
         parseBboxString()?.let { bbox ->
@@ -317,12 +313,10 @@ data class WWWEventArea(
      * If any polygon points fall outside the bounding box, they are constrained to the bounding box.
      */
     suspend fun getPolygons(): Area {
-
         // Fast path: if cache is already populated, return immediately
         cachedAreaPolygons?.let {
             return it
         }
-
 
         // Slow path: populate cache with mutex protection
         polygonsCacheMutex.withLock {
@@ -330,7 +324,6 @@ data class WWWEventArea(
             cachedAreaPolygons?.let {
                 return it
             }
-
 
             // Build polygons in a temporary mutable list
             val tempPolygons: MutableArea = mutableListOf()
@@ -361,13 +354,15 @@ data class WWWEventArea(
             if (geoJsonData != null) {
                 processGeoJsonData(geoJsonData, tempPolygons)
             }
-
         } catch (ignored: Exception) {
             // GeoJSON data loading errors are handled gracefully
         }
     }
 
-    private fun processGeoJsonData(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+    private fun processGeoJsonData(
+        geoJsonData: JsonObject,
+        tempPolygons: MutableArea,
+    ) {
         val rootType = geoJsonData["type"]?.jsonPrimitive?.content
 
         when (rootType) {
@@ -380,7 +375,10 @@ data class WWWEventArea(
         }
     }
 
-    private fun processFeatureCollection(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+    private fun processFeatureCollection(
+        geoJsonData: JsonObject,
+        tempPolygons: MutableArea,
+    ) {
         val features = geoJsonData["features"]?.jsonArray
         features?.forEach { feature ->
             try {
@@ -394,7 +392,10 @@ data class WWWEventArea(
         }
     }
 
-    private fun processDirectGeometry(geoJsonData: JsonObject, tempPolygons: MutableArea) {
+    private fun processDirectGeometry(
+        geoJsonData: JsonObject,
+        tempPolygons: MutableArea,
+    ) {
         try {
             processGeometry(geoJsonData, tempPolygons)
         } catch (ignored: Exception) {
@@ -409,7 +410,6 @@ data class WWWEventArea(
         try {
             val type = geometry["type"]?.jsonPrimitive?.content
             val coordinates = geometry["coordinates"]?.jsonArray
-
 
             when (type) {
                 // For a Polygon we add every ring (first is exterior, others holes are ignored downstream)
@@ -429,7 +429,6 @@ data class WWWEventArea(
                 else -> {
                 }
             }
-
         } catch (ignored: Exception) {
             // Geometry processing errors are handled gracefully
         }
@@ -449,14 +448,13 @@ data class WWWEventArea(
 
         coordinates.forEachIndexed { polygonIndex, polygon ->
             try {
-
                 // Verify polygon is a valid JsonArray
-                val polygonArray = try {
-                    polygon.jsonArray
-                } catch (e: Exception) {
-                    return@forEachIndexed
-                }
-
+                val polygonArray =
+                    try {
+                        polygon.jsonArray
+                    } catch (e: Exception) {
+                        return@forEachIndexed
+                    }
 
                 if (polygonArray.isEmpty()) {
                     return@forEachIndexed
@@ -465,14 +463,13 @@ data class WWWEventArea(
                 // Each polygon in MultiPolygon has rings (exterior + holes)
                 polygonArray.forEachIndexed { ringIndex, ring ->
                     try {
-
                         // Verify ring is a valid JsonArray
-                        val ringArray = try {
-                            ring.jsonArray
-                        } catch (e: Exception) {
-                            return@forEachIndexed
-                        }
-
+                        val ringArray =
+                            try {
+                                ring.jsonArray
+                            } catch (e: Exception) {
+                                return@forEachIndexed
+                            }
 
                         if (ringArray.isEmpty()) {
                             return@forEachIndexed
@@ -483,12 +480,10 @@ data class WWWEventArea(
                         // Ring processing errors are handled gracefully
                     }
                 }
-
             } catch (ignored: Exception) {
                 // MultiPolygon processing errors are handled gracefully
             }
         }
-
     }
 
     private fun processRing(
@@ -496,71 +491,69 @@ data class WWWEventArea(
         polygons: MutableArea,
     ) {
         try {
-
             // Verify ring is a JsonArray
-            val ringArray = try {
-                ring.jsonArray
-            } catch (e: Exception) {
-                return
-            }
-
+            val ringArray =
+                try {
+                    ring.jsonArray
+                } catch (e: Exception) {
+                    return
+                }
 
             if (ringArray.isEmpty()) {
                 return
             }
 
-
             val positions =
-                ringArray.mapIndexed { pointIndex, point ->
-                    try {
+                ringArray
+                    .mapIndexed { pointIndex, point ->
+                        try {
+                            val pointArray =
+                                try {
+                                    point.jsonArray
+                                } catch (e: Exception) {
+                                    return@mapIndexed null
+                                }
 
-                        val pointArray = try {
-                            point.jsonArray
+                            if (pointArray.size >= 2) {
+                                val lng =
+                                    try {
+                                        pointArray[0].jsonPrimitive.double
+                                    } catch (e: Exception) {
+                                        return@mapIndexed null
+                                    }
+
+                                val lat =
+                                    try {
+                                        pointArray[1].jsonPrimitive.double
+                                    } catch (e: Exception) {
+                                        return@mapIndexed null
+                                    }
+
+                                Position(lat, lng).constrainToBoundingBox()
+                            } else {
+                                null
+                            }
                         } catch (e: Exception) {
-                            return@mapIndexed null
-                        }
-
-                        if (pointArray.size >= 2) {
-                            val lng = try {
-                                pointArray[0].jsonPrimitive.double
-                            } catch (e: Exception) {
-                                return@mapIndexed null
-                            }
-
-                            val lat = try {
-                                pointArray[1].jsonPrimitive.double
-                            } catch (e: Exception) {
-                                return@mapIndexed null
-                            }
-
-                            Position(lat, lng).constrainToBoundingBox()
-                        } else {
                             null
                         }
-                    } catch (e: Exception) {
-                        null
-                    }
-                }.filterNotNull()
-
+                    }.filterNotNull()
 
             if (positions.isEmpty()) {
                 return
             }
 
-
-            val polygon = try {
-                positions.toPolygon
-            } catch (e: Exception) {
-                return
-            }
-
+            val polygon =
+                try {
+                    positions.toPolygon
+                } catch (e: Exception) {
+                    return
+                }
 
             if (polygon.size > 1) {
                 polygons.add(polygon)
             } else {
                 // Polygon with only one point is ignored
             }
-
         } catch (ignored: Exception) {
             // Ring processing errors are handled gracefully
         }

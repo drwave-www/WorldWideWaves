@@ -35,7 +35,7 @@ data class ProgressionSnapshot(
     val timestamp: Instant,
     val progression: Double,
     val userPosition: Position?,
-    val isInWaveArea: Boolean
+    val isInWaveArea: Boolean,
 )
 
 /**
@@ -48,7 +48,6 @@ data class ProgressionSnapshot(
  * - Providing optimized calculations for area containment
  */
 interface WaveProgressionTracker {
-
     /**
      * Calculates the current wave progression as a percentage (0.0 to 100.0).
      *
@@ -67,7 +66,10 @@ interface WaveProgressionTracker {
      * @param waveArea The wave area to check against
      * @return true if user is within the wave area, false otherwise
      */
-    suspend fun isUserInWaveArea(userPosition: Position, waveArea: WWWEventArea): Boolean
+    suspend fun isUserInWaveArea(
+        userPosition: Position,
+        waveArea: WWWEventArea,
+    ): Boolean
 
     /**
      * Gets the history of progression snapshots for analysis.
@@ -83,7 +85,10 @@ interface WaveProgressionTracker {
      * @param event The event being tracked
      * @param userPosition The user's position at time of snapshot
      */
-    suspend fun recordProgressionSnapshot(event: IWWWEvent, userPosition: Position?)
+    suspend fun recordProgressionSnapshot(
+        event: IWWWEvent,
+        userPosition: Position?,
+    )
 
     /**
      * Clears progression history to free memory.

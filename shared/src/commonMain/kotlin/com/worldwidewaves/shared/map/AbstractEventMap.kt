@@ -348,8 +348,7 @@ abstract class AbstractEventMap<T>(
             positionManager.position
                 .onEach { unifiedPosition ->
                     handlePositionUpdate(scope, unifiedPosition)
-                }
-                .launchIn(scope)
+                }.launchIn(scope)
 
             Unit // Explicit return to satisfy callback
         }
@@ -358,7 +357,10 @@ abstract class AbstractEventMap<T>(
     /**
      * Handles unified position updates from PositionManager
      */
-    private fun handlePositionUpdate(scope: CoroutineScope, position: Position?) {
+    private fun handlePositionUpdate(
+        scope: CoroutineScope,
+        position: Position?,
+    ) {
         if (position == null) {
             // Position cleared - reset state
             lastKnownPosition = null

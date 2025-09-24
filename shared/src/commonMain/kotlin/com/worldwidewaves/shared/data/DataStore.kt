@@ -40,7 +40,7 @@ import okio.Path.Companion.toPath
  */
 class DataStoreException(
     message: String,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : Exception(message, cause)
 
 // ----------------------------
@@ -101,7 +101,6 @@ class TestDataStoreFactory : DataStoreFactory {
     }
 }
 
-
 /**
  * Bridge function for backward compatibility during migration to DataStoreFactory.
  * Creates a TestDataStoreFactory for testing purposes.
@@ -109,10 +108,11 @@ class TestDataStoreFactory : DataStoreFactory {
  * @deprecated Tests should use testDatastoreModule with TestDataStoreFactory instead
  */
 @VisibleForTesting
-@Deprecated("Tests should use testDatastoreModule with TestDataStoreFactory instead", ReplaceWith("TestDataStoreFactory().create(producePath)"))
-fun createDataStore(producePath: () -> String): DataStore<Preferences> {
-    return TestDataStoreFactory().create(producePath)
-}
+@Deprecated(
+    "Tests should use testDatastoreModule with TestDataStoreFactory instead",
+    ReplaceWith("TestDataStoreFactory().create(producePath)"),
+)
+fun createDataStore(producePath: () -> String): DataStore<Preferences> = TestDataStoreFactory().create(producePath)
 
 /** Returns the platform-specific absolute path used to store the preferences DataStore file. */
 expect fun keyValueStorePath(): String

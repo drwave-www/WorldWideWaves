@@ -21,7 +21,6 @@
 
 package com.worldwidewaves.testing
 
-import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
@@ -35,25 +34,28 @@ import org.junit.Assert.assertTrue
  * Focuses on inclusive design and assistive technology support.
  */
 abstract class BaseAccessibilityTest : BaseComponentTest() {
-
     /**
      * Validates that all interactive elements have proper content descriptions.
      * Critical for screen reader accessibility.
      */
     protected fun validateInteractiveElementsHaveDescriptions() {
-        val allNodes = composeTestRule.onAllNodes(hasClickAction().or(hasScrollAction()))
-            .fetchSemanticsNodes()
+        val allNodes =
+            composeTestRule
+                .onAllNodes(hasClickAction().or(hasScrollAction()))
+                .fetchSemanticsNodes()
 
-        val elementsWithoutDescriptions = allNodes.filter { node ->
-            val hasAction = node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-                    node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
-            val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
-            hasAction && !hasDescription
-        }
+        val elementsWithoutDescriptions =
+            allNodes.filter { node ->
+                val hasAction =
+                    node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
+                        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus)
+                val hasDescription = node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+                hasAction && !hasDescription
+            }
 
         assertTrue(
             "Found ${elementsWithoutDescriptions.size} interactive elements without content descriptions",
-            elementsWithoutDescriptions.isEmpty()
+            elementsWithoutDescriptions.isEmpty(),
         )
     }
 
@@ -62,8 +64,10 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
      * WCAG 2.1 requires 44dp minimum touch targets.
      */
     protected fun validateTouchTargetSizes(minimumSizeDp: Float = 44f) {
-        val allClickableNodes = composeTestRule.onAllNodes(hasClickAction())
-            .fetchSemanticsNodes()
+        val allClickableNodes =
+            composeTestRule
+                .onAllNodes(hasClickAction())
+                .fetchSemanticsNodes()
 
         allClickableNodes.forEach { node ->
             val bounds = node.boundsInRoot
@@ -72,7 +76,7 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
 
             assertTrue(
                 "Touch target too small: ${widthDp}dp x ${heightDp}dp (minimum: ${minimumSizeDp}dp)",
-                widthDp >= minimumSizeDp && heightDp >= minimumSizeDp
+                widthDp >= minimumSizeDp && heightDp >= minimumSizeDp,
             )
         }
     }
@@ -82,27 +86,31 @@ abstract class BaseAccessibilityTest : BaseComponentTest() {
      * Ensures logical content structure.
      */
     protected fun validateHeadingHierarchy() {
-        val headingNodes = composeTestRule.onAllNodes(isHeading())
-            .fetchSemanticsNodes()
+        val headingNodes =
+            composeTestRule
+                .onAllNodes(isHeading())
+                .fetchSemanticsNodes()
 
         assertTrue(
             "No heading elements found - content structure may be unclear for screen readers",
-            headingNodes.isNotEmpty()
+            headingNodes.isNotEmpty(),
         )
     }
 
     /**
      * Custom semantic matchers for accessibility testing
      */
-    protected fun hasInteractiveAction(): SemanticsMatcher = SemanticsMatcher("has interactive action") { node ->
-        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
-        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) ||
-        node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
-    }
+    protected fun hasInteractiveAction(): SemanticsMatcher =
+        SemanticsMatcher("has interactive action") { node ->
+            node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnClick) ||
+                node.config.contains(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) ||
+                node.config.contains(androidx.compose.ui.semantics.SemanticsActions.OnLongClick)
+        }
 
-    protected fun hasContentDescription(): SemanticsMatcher = SemanticsMatcher("has content description") { node ->
-        node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
-    }
+    protected fun hasContentDescription(): SemanticsMatcher =
+        SemanticsMatcher("has content description") { node ->
+            node.config.contains(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription)
+        }
 
     /**
      * Common accessibility test timeouts - longer for assistive technology compatibility

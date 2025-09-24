@@ -11,7 +11,6 @@ import kotlin.test.assertNotNull
 import kotlin.time.Instant
 
 class WaveProgressionTrackerBasicTest {
-
     @Test
     fun `can create DefaultWaveProgressionTracker`() {
         val mockClock = mockk<IClock>()

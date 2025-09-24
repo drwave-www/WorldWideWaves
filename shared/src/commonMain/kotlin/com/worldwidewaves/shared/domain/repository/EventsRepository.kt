@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.Flow
  * from data access concerns.
  */
 interface EventsRepository {
-
     /**
      * Observes all available events as a reactive stream.
      *

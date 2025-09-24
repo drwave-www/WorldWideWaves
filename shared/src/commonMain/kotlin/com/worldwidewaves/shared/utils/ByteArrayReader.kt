@@ -35,7 +35,7 @@ class ByteArrayReader(
         if (position + bytesToRead > bytes.size) {
             val remaining = bytes.size - position
             throw IndexOutOfBoundsException(
-                "Attempting to read $bytesToRead bytes at position $position, but only $remaining bytes remaining"
+                "Attempting to read $bytesToRead bytes at position $position, but only $remaining bytes remaining",
             )
         }
     }
@@ -56,7 +56,9 @@ class ByteArrayReader(
         val b2 = readUInt8()
         val b3 = readUInt8()
         val b4 = readUInt8()
-        return (b1 shl WWWGlobals.ByteProcessing.BIT_SHIFT_24) or (b2 shl WWWGlobals.ByteProcessing.BIT_SHIFT_16) or (b3 shl WWWGlobals.ByteProcessing.BIT_SHIFT_8) or b4
+        return (b1 shl WWWGlobals.ByteProcessing.BIT_SHIFT_24) or (b2 shl WWWGlobals.ByteProcessing.BIT_SHIFT_16) or
+            (b3 shl WWWGlobals.ByteProcessing.BIT_SHIFT_8) or
+            b4
     }
 
     fun readString(length: Int): String {
@@ -75,7 +77,8 @@ class ByteArrayReader(
 
         do {
             currentByte = readUInt8()
-            result = (result shl WWWGlobals.ByteProcessing.VLQ_BIT_SHIFT) or (currentByte and WWWGlobals.ByteProcessing.VLQ_DATA_MASK).toLong()
+            result =
+                (result shl WWWGlobals.ByteProcessing.VLQ_BIT_SHIFT) or (currentByte and WWWGlobals.ByteProcessing.VLQ_DATA_MASK).toLong()
         } while ((currentByte and WWWGlobals.ByteProcessing.VLQ_CONTINUATION_MASK) != 0)
 
         return result

@@ -24,43 +24,30 @@ package com.worldwidewaves.compose.map
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.map.EventMapConfig
-import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
-import com.worldwidewaves.shared.monitoring.PerformanceTrace
-import com.worldwidewaves.testing.TestCategories
-import kotlin.math.pow
-import kotlin.math.sqrt
-import com.worldwidewaves.testing.UITestConfig
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.math.pow
+import kotlin.math.sqrt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -96,7 +83,6 @@ import kotlin.time.Duration.Companion.seconds
  */
 @RunWith(AndroidJUnit4::class)
 class MapIntegrationTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -146,10 +132,11 @@ class MapIntegrationTest {
     }
 
     private fun setupMockEvent() {
-        mockEvent = UITestFactory.createMockWaveEvent(
-            id = "test-map-event",
-            isInArea = true
-        )
+        mockEvent =
+            UITestFactory.createMockWaveEvent(
+                id = "test-map-event",
+                isInArea = true,
+            )
 
         every { mockEvent.id } returns "test-map-event"
         every { mockEvent.community } returns "new_york_usa"
@@ -171,7 +158,7 @@ class MapIntegrationTest {
                 TestMapDownloadFlow(
                     initialState = MapFeatureState.Installed,
                     onDownloadComplete = { downloadCompleted = true },
-                    onMapLoaded = { mapLoaded = true }
+                    onMapLoaded = { mapLoaded = true },
                 )
             }
         }
@@ -190,12 +177,13 @@ class MapIntegrationTest {
         composeTestRule.setContent {
             MaterialTheme {
                 TestMapDownloadFlow(
-                    initialState = MapFeatureState.Failed(
-                        errorCode = -100,
-                        errorMessage = "Network error"
-                    ),
+                    initialState =
+                        MapFeatureState.Failed(
+                            errorCode = -100,
+                            errorMessage = "Network error",
+                        ),
                     onRetry = { retryTriggered = true },
-                    onErrorDisplayed = { errorDisplayed = true }
+                    onErrorDisplayed = { errorDisplayed = true },
                 )
             }
         }
@@ -212,7 +200,7 @@ class MapIntegrationTest {
             MaterialTheme {
                 TestMapDownloadFlow(
                     initialState = MapFeatureState.Retrying(attempt = 2, maxAttempts = 3),
-                    onRetry = { retryTriggered = true }
+                    onRetry = { retryTriggered = true },
                 )
             }
         }
@@ -229,7 +217,7 @@ class MapIntegrationTest {
             MaterialTheme {
                 TestMapDownloadFlow(
                     initialState = MapFeatureState.Canceling,
-                    onCancel = { cancelTriggered = true }
+                    onCancel = { cancelTriggered = true },
                 )
             }
         }
@@ -258,7 +246,7 @@ class MapIntegrationTest {
                     onLocationUpdate = { position ->
                         locationUpdateReceived = true
                         userInArea = isPositionInWaveArea(position, mockEvent)
-                    }
+                    },
                 )
             }
         }
@@ -285,7 +273,7 @@ class MapIntegrationTest {
                 TestLocationPermissionFlow(
                     hasPermission = true,
                     onPermissionGranted = { permissionGranted = true },
-                    onPermissionDenied = { permissionDenied = true }
+                    onPermissionDenied = { permissionDenied = true },
                 )
             }
         }
@@ -304,7 +292,7 @@ class MapIntegrationTest {
                 TestLocationPermissionFlow(
                     hasPermission = false,
                     onPermissionGranted = { permissionGranted = true },
-                    onPermissionDenied = { permissionDenied = true }
+                    onPermissionDenied = { permissionDenied = true },
                 )
             }
         }
@@ -318,11 +306,12 @@ class MapIntegrationTest {
         val accuracyReadings = mutableListOf<Double>()
 
         // Simulate multiple location readings
-        val testPositions = listOf(
-            Position(40.7128, -74.0060),
-            Position(40.7129, -74.0061),
-            Position(40.7127, -74.0059)
-        )
+        val testPositions =
+            listOf(
+                Position(40.7128, -74.0060),
+                Position(40.7129, -74.0061),
+                Position(40.7127, -74.0059),
+            )
 
         composeTestRule.setContent {
             MaterialTheme {
@@ -330,7 +319,7 @@ class MapIntegrationTest {
                     positions = testPositions,
                     onAccuracyMeasured = { accuracy ->
                         accuracyReadings.add(accuracy)
-                    }
+                    },
                 )
             }
         }
@@ -367,7 +356,7 @@ class MapIntegrationTest {
                     targetPosition = targetPosition,
                     targetZoom = targetZoom,
                     onCameraMovementComplete = { cameraMovementCompleted = true },
-                    onZoomChangeComplete = { zoomChangeCompleted = true }
+                    onZoomChangeComplete = { zoomChangeCompleted = true },
                 )
             }
         }
@@ -386,16 +375,17 @@ class MapIntegrationTest {
     @Test
     fun mapIntegration_cameraBounds_respectsConstraints() {
         var boundsRespected = false
-        val constraintBounds = BoundingBox.fromCorners(
-            Position(40.7000, -74.0200),
-            Position(40.7300, -73.9900)
-        )
+        val constraintBounds =
+            BoundingBox.fromCorners(
+                Position(40.7000, -74.0200),
+                Position(40.7300, -73.9900),
+            )
 
         composeTestRule.setContent {
             MaterialTheme {
                 TestCameraBounds(
                     constraintBounds = constraintBounds,
-                    onBoundsValidated = { boundsRespected = true }
+                    onBoundsValidated = { boundsRespected = true },
                 )
             }
         }
@@ -419,7 +409,7 @@ class MapIntegrationTest {
                     onAnimationFrame = { timestamp ->
                         animationFrames.add(timestamp)
                     },
-                    onAnimationComplete = { animationCompleted = true }
+                    onAnimationComplete = { animationCompleted = true },
                 )
             }
         }
@@ -461,7 +451,7 @@ class MapIntegrationTest {
                     onPolygonsRendered = { polygonsRendered = true },
                     onPerformanceMeasured = { renderTime ->
                         renderingPerformanceAcceptable = renderTime < 100.milliseconds
-                    }
+                    },
                 )
             }
         }
@@ -492,7 +482,7 @@ class MapIntegrationTest {
                         if (updateTime > 50.milliseconds) {
                             performanceAcceptable = false
                         }
-                    }
+                    },
                 )
             }
         }
@@ -521,7 +511,7 @@ class MapIntegrationTest {
                     onRenderingComplete = { renderingCompleted = true },
                     onMemoryUsageChecked = { memoryUsage ->
                         memoryUsageAcceptable = memoryUsage < 100 * 1024 * 1024 // 100MB limit
-                    }
+                    },
                 )
             }
         }
@@ -552,7 +542,7 @@ class MapIntegrationTest {
                     onFrameRendered = { timestamp ->
                         frameTimestamps.add(timestamp)
                     },
-                    onTestComplete = { testCompleted = true }
+                    onTestComplete = { testCompleted = true },
                 )
             }
         }
@@ -583,7 +573,7 @@ class MapIntegrationTest {
                 TestNetworkErrorHandling(
                     simulateNetworkError = true,
                     onErrorHandled = { networkErrorHandled = true },
-                    onRecoveryComplete = { recoverySuccessful = true }
+                    onRecoveryComplete = { recoverySuccessful = true },
                 )
             }
         }
@@ -606,7 +596,7 @@ class MapIntegrationTest {
             MaterialTheme {
                 TestResourceManagement(
                     onResourcesAllocated = { resourcesAllocated = true },
-                    onResourcesCleaned = { resourcesCleaned = true }
+                    onResourcesCleaned = { resourcesCleaned = true },
                 )
             }
         }
@@ -625,7 +615,10 @@ class MapIntegrationTest {
     // HELPER FUNCTIONS & TEST COMPONENTS
     // ========================================================================
 
-    private fun isPositionInWaveArea(position: Position, event: IWWWEvent): Boolean {
+    private fun isPositionInWaveArea(
+        position: Position,
+        event: IWWWEvent,
+    ): Boolean {
         // Simplified area check for New York (Manhattan area)
         return position.latitude in 40.70..40.78 && position.longitude in -74.02..-73.95
     }
@@ -642,20 +635,21 @@ private fun TestMapDownloadFlow(
     onMapLoaded: () -> Unit = {},
     onRetry: () -> Unit = {},
     onCancel: () -> Unit = {},
-    onErrorDisplayed: () -> Unit = {}
+    onErrorDisplayed: () -> Unit = {},
 ) {
     val stateFlow = MutableStateFlow(initialState)
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("map-download-flow")
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .testTag("map-download-flow"),
     ) {
         when (val state = stateFlow.value) {
             is MapFeatureState.NotAvailable -> {
                 androidx.compose.material3.Button(
                     onClick = onDownloadComplete,
-                    modifier = Modifier.testTag("download-button")
+                    modifier = Modifier.testTag("download-button"),
                 ) {
                     androidx.compose.material3.Text("Download Map")
                 }
@@ -663,47 +657,47 @@ private fun TestMapDownloadFlow(
             is MapFeatureState.Downloading -> {
                 androidx.compose.material3.Text(
                     "Downloading... ${state.progress}%",
-                    modifier = Modifier.testTag("download-progress")
+                    modifier = Modifier.testTag("download-progress"),
                 )
             }
             is MapFeatureState.Installing -> {
                 androidx.compose.material3.Text(
                     "Installing...",
-                    modifier = Modifier.testTag("install-status")
+                    modifier = Modifier.testTag("install-status"),
                 )
             }
             is MapFeatureState.Installed -> {
                 androidx.compose.material3.Text(
                     "Map Ready",
-                    modifier = Modifier.testTag("map-ready")
+                    modifier = Modifier.testTag("map-ready"),
                 )
                 onMapLoaded()
             }
             is MapFeatureState.Failed -> {
                 androidx.compose.material3.Text(
                     "Download Failed: ${state.errorMessage}",
-                    modifier = Modifier.testTag("download-error")
+                    modifier = Modifier.testTag("download-error"),
                 )
                 onErrorDisplayed()
             }
             is MapFeatureState.Retrying -> {
                 androidx.compose.material3.Text(
                     "Retrying... ${state.attempt}/${state.maxAttempts}",
-                    modifier = Modifier.testTag("retry-status")
+                    modifier = Modifier.testTag("retry-status"),
                 )
                 onRetry()
             }
             is MapFeatureState.Canceling -> {
                 androidx.compose.material3.Text(
                     "Canceling...",
-                    modifier = Modifier.testTag("cancel-status")
+                    modifier = Modifier.testTag("cancel-status"),
                 )
                 onCancel()
             }
             else -> {
                 androidx.compose.material3.Text(
                     "Unknown State",
-                    modifier = Modifier.testTag("unknown-state")
+                    modifier = Modifier.testTag("unknown-state"),
                 )
             }
         }
@@ -713,20 +707,21 @@ private fun TestMapDownloadFlow(
 @androidx.compose.runtime.Composable
 private fun TestLocationIntegration(
     currentLocation: Position?,
-    onLocationUpdate: (Position) -> Unit
+    onLocationUpdate: (Position) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(currentLocation) {
         currentLocation?.let { onLocationUpdate(it) }
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("location-integration")
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .testTag("location-integration"),
     ) {
         androidx.compose.material3.Text(
             text = currentLocation?.let { "Location: ${it.latitude}, ${it.longitude}" } ?: "No Location",
-            modifier = Modifier.testTag("location-display")
+            modifier = Modifier.testTag("location-display"),
         )
     }
 }
@@ -735,7 +730,7 @@ private fun TestLocationIntegration(
 private fun TestLocationPermissionFlow(
     hasPermission: Boolean,
     onPermissionGranted: () -> Unit,
-    onPermissionDenied: () -> Unit
+    onPermissionDenied: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(hasPermission) {
         if (hasPermission) {
@@ -747,7 +742,7 @@ private fun TestLocationPermissionFlow(
 
     Box(modifier = Modifier.testTag("permission-flow")) {
         androidx.compose.material3.Text(
-            text = if (hasPermission) "Permission Granted" else "Permission Denied"
+            text = if (hasPermission) "Permission Granted" else "Permission Denied",
         )
     }
 }
@@ -755,19 +750,20 @@ private fun TestLocationPermissionFlow(
 @androidx.compose.runtime.Composable
 private fun TestLocationAccuracy(
     positions: List<Position>,
-    onAccuracyMeasured: (Double) -> Unit
+    onAccuracyMeasured: (Double) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(positions) {
         // Calculate accuracy based on position variance
         if (positions.size >= 2) {
             val avgLat = positions.map { it.latitude }.average()
             val avgLng = positions.map { it.longitude }.average()
-            val maxDeviation = positions.maxOf { pos ->
-                sqrt(
-                    (pos.latitude - avgLat).pow(2.0) +
-                    (pos.longitude - avgLng).pow(2.0)
-                ) * 111000 // Convert to meters (approximate)
-            }
+            val maxDeviation =
+                positions.maxOf { pos ->
+                    sqrt(
+                        (pos.latitude - avgLat).pow(2.0) +
+                            (pos.longitude - avgLng).pow(2.0),
+                    ) * 111000 // Convert to meters (approximate)
+                }
             onAccuracyMeasured(maxDeviation)
         }
     }
@@ -782,7 +778,7 @@ private fun TestCameraOperations(
     targetPosition: Position,
     targetZoom: Double,
     onCameraMovementComplete: () -> Unit,
-    onZoomChangeComplete: () -> Unit
+    onZoomChangeComplete: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(500.milliseconds)
@@ -798,7 +794,7 @@ private fun TestCameraOperations(
 @androidx.compose.runtime.Composable
 private fun TestCameraBounds(
     constraintBounds: BoundingBox,
-    onBoundsValidated: () -> Unit
+    onBoundsValidated: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(200.milliseconds)
@@ -813,7 +809,7 @@ private fun TestCameraBounds(
 @androidx.compose.runtime.Composable
 private fun TestCameraAnimations(
     onAnimationFrame: (Long) -> Unit,
-    onAnimationComplete: () -> Unit
+    onAnimationComplete: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) { frame ->
@@ -832,7 +828,7 @@ private fun TestCameraAnimations(
 private fun TestWaveVisualization(
     wavePolygons: List<Any>,
     onPolygonsRendered: () -> Unit,
-    onPerformanceMeasured: (Duration) -> Unit
+    onPerformanceMeasured: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(wavePolygons) {
         val startTime = System.currentTimeMillis()
@@ -851,7 +847,7 @@ private fun TestWaveVisualization(
 @androidx.compose.runtime.Composable
 private fun TestWaveProgressionUpdates(
     progressionUpdates: List<Double>,
-    onUpdateReceived: (Duration) -> Unit
+    onUpdateReceived: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(progressionUpdates) {
         progressionUpdates.forEach { _ ->
@@ -871,7 +867,7 @@ private fun TestWaveProgressionUpdates(
 private fun TestLargeDatasetHandling(
     polygons: List<Any>,
     onRenderingComplete: () -> Unit,
-    onMemoryUsageChecked: (Long) -> Unit
+    onMemoryUsageChecked: (Long) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(polygons) {
         delay(100.milliseconds) // Simulate processing time
@@ -892,7 +888,7 @@ private fun TestLargeDatasetHandling(
 @androidx.compose.runtime.Composable
 private fun TestFrameRatePerformance(
     onFrameRendered: (Long) -> Unit,
-    onTestComplete: () -> Unit
+    onTestComplete: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) {
@@ -911,7 +907,7 @@ private fun TestFrameRatePerformance(
 private fun TestNetworkErrorHandling(
     simulateNetworkError: Boolean,
     onErrorHandled: () -> Unit,
-    onRecoveryComplete: () -> Unit
+    onRecoveryComplete: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(simulateNetworkError) {
         if (simulateNetworkError) {
@@ -930,7 +926,7 @@ private fun TestNetworkErrorHandling(
 @androidx.compose.runtime.Composable
 private fun TestResourceManagement(
     onResourcesAllocated: () -> Unit,
-    onResourcesCleaned: () -> Unit
+    onResourcesCleaned: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         delay(100.milliseconds)

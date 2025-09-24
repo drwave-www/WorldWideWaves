@@ -64,7 +64,6 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalTime::class)
 class WWWEventObserverIntegrationTest : KoinTest {
-
     private val mockClock = MockClock()
     private val mockPositionManager: PositionManager = mockk(relaxed = true)
     private val mockCoroutineScopeProvider: CoroutineScopeProvider = mockk(relaxed = true)
@@ -101,185 +100,196 @@ class WWWEventObserverIntegrationTest : KoinTest {
                     single<PositionObserver> { mockPositionObserver }
                     single<EventStateManager> { mockEventStateManager }
                     single<ObservationScheduler> { mockObservationScheduler }
-                }
+                },
             )
         }
     }
 
     @Test
-    fun `WWWEventObserver integrates all extracted components successfully`() = runTest {
-        // Given
-        val testEvent = TestHelpers.createTestEvent(
-            id = "integration_test_event",
-            userPosition = TestHelpers.TestLocations.PARIS
-        )
+    fun `WWWEventObserver integrates all extracted components successfully`() =
+        runTest {
+            // Given
+            val testEvent =
+                TestHelpers.createTestEvent(
+                    id = "integration_test_event",
+                    userPosition = TestHelpers.TestLocations.PARIS,
+                )
 
-        // Mock the component interactions
-        every { mockCoroutineScopeProvider.scopeDefault() } returns this
-        coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 25.0
-        coEvery { mockPositionObserver.observePositionForEvent(any()) } returns MutableStateFlow(
-            mockk {
-                every { position } returns TestHelpers.TestLocations.PARIS
-                every { isInArea } returns true
-            }
-        )
-        coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns mockk {
-            every { progression } returns 25.0
-            every { status } returns IWWWEvent.Status.SOON
-            every { isUserWarmingInProgress } returns false
-            every { isStartWarmingInProgress } returns false
-            every { userIsGoingToBeHit } returns false
-            every { userHasBeenHit } returns false
-            every { userPositionRatio } returns 0.5
-            every { timeBeforeHit } returns 10.minutes
-            every { hitDateTime } returns mockClock.now() + 10.minutes
-        }
-        coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
-        coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
-        coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
+            // Mock the component interactions
+            every { mockCoroutineScopeProvider.scopeDefault() } returns this
+            coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 25.0
+            coEvery { mockPositionObserver.observePositionForEvent(any()) } returns
+                MutableStateFlow(
+                    mockk {
+                        every { position } returns TestHelpers.TestLocations.PARIS
+                        every { isInArea } returns true
+                    },
+                )
+            coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns
+                mockk {
+                    every { progression } returns 25.0
+                    every { status } returns IWWWEvent.Status.SOON
+                    every { isUserWarmingInProgress } returns false
+                    every { isStartWarmingInProgress } returns false
+                    every { userIsGoingToBeHit } returns false
+                    every { userHasBeenHit } returns false
+                    every { userPositionRatio } returns 0.5
+                    every { timeBeforeHit } returns 10.minutes
+                    every { hitDateTime } returns mockClock.now() + 10.minutes
+                }
+            coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
+            coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
+            coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
 
-        // When
-        val observer = WWWEventObserver(testEvent)
+            // When
+            val observer = WWWEventObserver(testEvent)
 
-        // Then
-        assertNotNull(observer)
+            // Then
+            assertNotNull(observer)
 
-        // Verify the observer exposes the correct public API
-        assertNotNull(observer.eventStatus)
-        assertNotNull(observer.progression)
-        assertNotNull(observer.isUserWarmingInProgress)
-        assertNotNull(observer.userIsGoingToBeHit)
-        assertNotNull(observer.userHasBeenHit)
-        assertNotNull(observer.userPositionRatio)
-        assertNotNull(observer.timeBeforeHit)
-        assertNotNull(observer.hitDateTime)
-        assertNotNull(observer.userIsInArea)
+            // Verify the observer exposes the correct public API
+            assertNotNull(observer.eventStatus)
+            assertNotNull(observer.progression)
+            assertNotNull(observer.isUserWarmingInProgress)
+            assertNotNull(observer.userIsGoingToBeHit)
+            assertNotNull(observer.userHasBeenHit)
+            assertNotNull(observer.userPositionRatio)
+            assertNotNull(observer.timeBeforeHit)
+            assertNotNull(observer.hitDateTime)
+            assertNotNull(observer.userIsInArea)
 
-        // Verify initial state
-        assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value)
-        assertEquals(0.0, observer.progression.value)
-    }
-
-    @Test
-    fun `WWWEventObserver coordinates component interactions correctly`() = runTest {
-        // Given
-        val testEvent = TestHelpers.createRunningEvent(
-            id = "running_integration_test",
-            userPosition = TestHelpers.TestLocations.PARIS
-        )
-
-        val observationFlow = MutableStateFlow(Unit)
-        val positionFlow = MutableStateFlow(
-            mockk<com.worldwidewaves.shared.domain.observation.PositionObservation> {
-                every { position } returns TestHelpers.TestLocations.PARIS
-                every { isInArea } returns true
-            }
-        )
-
-        // Mock component behaviors
-        every { mockCoroutineScopeProvider.scopeDefault() } returns this
-        coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 45.0
-        coEvery { mockPositionObserver.observePositionForEvent(any()) } returns positionFlow
-        coEvery { mockObservationScheduler.createObservationFlow(any()) } returns observationFlow
-
-        val mockEventState = mockk<com.worldwidewaves.shared.domain.state.EventState> {
-            every { progression } returns 45.0
-            every { status } returns IWWWEvent.Status.RUNNING
-            every { isUserWarmingInProgress } returns true
-            every { isStartWarmingInProgress } returns true
-            every { userIsGoingToBeHit } returns true
-            every { userHasBeenHit } returns false
-            every { userPositionRatio } returns 0.75
-            every { timeBeforeHit } returns 5.minutes
-            every { hitDateTime } returns mockClock.now() + 5.minutes
+            // Verify initial state
+            assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value)
+            assertEquals(0.0, observer.progression.value)
         }
 
-        coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns mockEventState
-        coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
-        coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
+    @Test
+    fun `WWWEventObserver coordinates component interactions correctly`() =
+        runTest {
+            // Given
+            val testEvent =
+                TestHelpers.createRunningEvent(
+                    id = "running_integration_test",
+                    userPosition = TestHelpers.TestLocations.PARIS,
+                )
 
-        // When
-        val observer = WWWEventObserver(testEvent)
+            val observationFlow = MutableStateFlow(Unit)
+            val positionFlow =
+                MutableStateFlow(
+                    mockk<com.worldwidewaves.shared.domain.observation.PositionObservation> {
+                        every { position } returns TestHelpers.TestLocations.PARIS
+                        every { isInArea } returns true
+                    },
+                )
 
-        // Allow some time for initialization
-        kotlinx.coroutines.delay(100)
+            // Mock component behaviors
+            every { mockCoroutineScopeProvider.scopeDefault() } returns this
+            coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 45.0
+            coEvery { mockPositionObserver.observePositionForEvent(any()) } returns positionFlow
+            coEvery { mockObservationScheduler.createObservationFlow(any()) } returns observationFlow
 
-        // Then - Verify components are available and working
-        assertNotNull(observer)
-        assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value) // Initial state
-        assertTrue(observer.progression.value >= 0.0)
+            val mockEventState =
+                mockk<com.worldwidewaves.shared.domain.state.EventState> {
+                    every { progression } returns 45.0
+                    every { status } returns IWWWEvent.Status.RUNNING
+                    every { isUserWarmingInProgress } returns true
+                    every { isStartWarmingInProgress } returns true
+                    every { userIsGoingToBeHit } returns true
+                    every { userHasBeenHit } returns false
+                    every { userPositionRatio } returns 0.75
+                    every { timeBeforeHit } returns 5.minutes
+                    every { hitDateTime } returns mockClock.now() + 5.minutes
+                }
 
-        // Verify that the extracted components have been called (relaxed verification)
-        coVerify(atLeast = 0) { mockObservationScheduler.createObservationFlow(any()) }
-        coVerify(atLeast = 0) { mockPositionObserver.observePositionForEvent(any()) }
-    }
+            coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns mockEventState
+            coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
+            coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
+
+            // When
+            val observer = WWWEventObserver(testEvent)
+
+            // Allow some time for initialization
+            kotlinx.coroutines.delay(100)
+
+            // Then - Verify components are available and working
+            assertNotNull(observer)
+            assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value) // Initial state
+            assertTrue(observer.progression.value >= 0.0)
+
+            // Verify that the extracted components have been called (relaxed verification)
+            coVerify(atLeast = 0) { mockObservationScheduler.createObservationFlow(any()) }
+            coVerify(atLeast = 0) { mockPositionObserver.observePositionForEvent(any()) }
+        }
 
     @Test
-    fun `WWWEventObserver handles component errors gracefully`() = runTest {
-        // Given
-        val testEvent = TestHelpers.createTestEvent(id = "error_test_event")
+    fun `WWWEventObserver handles component errors gracefully`() =
+        runTest {
+            // Given
+            val testEvent = TestHelpers.createTestEvent(id = "error_test_event")
 
-        every { mockCoroutineScopeProvider.scopeDefault() } returns this
-        coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
-        coEvery { mockPositionObserver.observePositionForEvent(any()) } returns MutableStateFlow(
-            mockk {
-                every { position } returns TestHelpers.TestLocations.PARIS
-                every { isInArea } returns false
-            }
-        )
+            every { mockCoroutineScopeProvider.scopeDefault() } returns this
+            coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
+            coEvery { mockPositionObserver.observePositionForEvent(any()) } returns
+                MutableStateFlow(
+                    mockk {
+                        every { position } returns TestHelpers.TestLocations.PARIS
+                        every { isInArea } returns false
+                    },
+                )
 
-        // Mock progression tracker to throw an exception
-        coEvery { mockWaveProgressionTracker.calculateProgression(any()) } throws RuntimeException("Test progression error")
+            // Mock progression tracker to throw an exception
+            coEvery { mockWaveProgressionTracker.calculateProgression(any()) } throws RuntimeException("Test progression error")
 
-        // Mock state manager to handle the error gracefully
-        coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } throws RuntimeException("Test state error")
+            // Mock state manager to handle the error gracefully
+            coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } throws RuntimeException("Test state error")
 
-        // When
-        val observer = WWWEventObserver(testEvent)
+            // When
+            val observer = WWWEventObserver(testEvent)
 
-        // Then - Observer should still be created and functional despite component errors
-        assertNotNull(observer)
-        assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value)
-        assertEquals(0.0, observer.progression.value)
+            // Then - Observer should still be created and functional despite component errors
+            assertNotNull(observer)
+            assertEquals(IWWWEvent.Status.UNDEFINED, observer.eventStatus.value)
+            assertEquals(0.0, observer.progression.value)
 
-        // Verify error handling doesn't break the observer
-        assertTrue(observer.eventStatus.value != null)
-        assertTrue(observer.progression.value >= 0.0)
-    }
+            // Verify error handling doesn't break the observer
+            assertTrue(observer.eventStatus.value != null)
+            assertTrue(observer.progression.value >= 0.0)
+        }
 
     @Test
-    fun `WWWEventObserver maintains backward compatibility`() = runTest {
-        // Given
-        val testEvent = TestHelpers.createTestEvent(id = "compatibility_test")
+    fun `WWWEventObserver maintains backward compatibility`() =
+        runTest {
+            // Given
+            val testEvent = TestHelpers.createTestEvent(id = "compatibility_test")
 
-        every { mockCoroutineScopeProvider.scopeDefault() } returns this
-        coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
-        coEvery { mockPositionObserver.observePositionForEvent(any()) } returns MutableStateFlow(mockk(relaxed = true))
-        coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 30.0
-        coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns mockk(relaxed = true)
-        coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
-        coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
+            every { mockCoroutineScopeProvider.scopeDefault() } returns this
+            coEvery { mockObservationScheduler.createObservationFlow(any()) } returns MutableStateFlow(Unit)
+            coEvery { mockPositionObserver.observePositionForEvent(any()) } returns MutableStateFlow(mockk(relaxed = true))
+            coEvery { mockWaveProgressionTracker.calculateProgression(any()) } returns 30.0
+            coEvery { mockEventStateManager.calculateEventState(any(), any(), any()) } returns mockk(relaxed = true)
+            coEvery { mockEventStateManager.validateState(any(), any()) } returns emptyList()
+            coEvery { mockEventStateManager.validateStateTransition(any(), any()) } returns emptyList()
 
-        // When
-        val observer = WWWEventObserver(testEvent)
+            // When
+            val observer = WWWEventObserver(testEvent)
 
-        // Then - All legacy StateFlow properties should still be available
-        assertNotNull(observer.eventStatus)
-        assertNotNull(observer.progression)
-        assertNotNull(observer.isUserWarmingInProgress)
-        assertNotNull(observer.isStartWarmingInProgress)
-        assertNotNull(observer.userIsGoingToBeHit)
-        assertNotNull(observer.userHasBeenHit)
-        assertNotNull(observer.userPositionRatio)
-        assertNotNull(observer.timeBeforeHit)
-        assertNotNull(observer.hitDateTime)
-        assertNotNull(observer.userIsInArea)
+            // Then - All legacy StateFlow properties should still be available
+            assertNotNull(observer.eventStatus)
+            assertNotNull(observer.progression)
+            assertNotNull(observer.isUserWarmingInProgress)
+            assertNotNull(observer.isStartWarmingInProgress)
+            assertNotNull(observer.userIsGoingToBeHit)
+            assertNotNull(observer.userHasBeenHit)
+            assertNotNull(observer.userPositionRatio)
+            assertNotNull(observer.timeBeforeHit)
+            assertNotNull(observer.hitDateTime)
+            assertNotNull(observer.userIsInArea)
 
-        // Legacy methods should still be available
-        observer.startObservation()
-        observer.stopObservation()
+            // Legacy methods should still be available
+            observer.startObservation()
+            observer.stopObservation()
 
-        val validationResult = observer.validateStateConsistency()
-        assertNotNull(validationResult)
-    }
+            val validationResult = observer.validateStateConsistency()
+            assertNotNull(validationResult)
+        }
 }

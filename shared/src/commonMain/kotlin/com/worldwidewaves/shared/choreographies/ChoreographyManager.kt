@@ -23,10 +23,10 @@ package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.getChoreographyText
 import com.worldwidewaves.shared.utils.ImageResolver
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -120,14 +120,15 @@ open class ChoreographyManager<T> : KoinComponent {
     ): ResolvedSequence<T> {
         // Use cached image if available, otherwise resolve and cache
         val imageKey = "${this.frames}_${this.frameWidth}_${this.frameHeight}"
-        val resolvedImage = resolvedImageCache.getOrPut(imageKey) {
-            try {
-                resolveImageResources(imageResolver).firstOrNull()
-            } catch (e: Exception) {
-                Log.w("ChoreographyManager", "Failed to resolve image for $imageKey: ${e.message}")
-                null
+        val resolvedImage =
+            resolvedImageCache.getOrPut(imageKey) {
+                try {
+                    resolveImageResources(imageResolver).firstOrNull()
+                } catch (e: Exception) {
+                    Log.w("ChoreographyManager", "Failed to resolve image for $imageKey: ${e.message}")
+                    null
+                }
             }
-        }
 
         return ResolvedSequence(
             sequence = this,

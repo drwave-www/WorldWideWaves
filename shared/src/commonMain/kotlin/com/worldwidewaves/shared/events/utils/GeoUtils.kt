@@ -112,19 +112,26 @@ object GeoUtils {
      * Simple LRU cache for expensive trigonometric calculations.
      * Optimized for geographic calculations where the same coordinates are often reused.
      */
-    private class TrigCache<T>(private val maxSize: Int = 200) {
+    private class TrigCache<T>(
+        private val maxSize: Int = 200,
+    ) {
         private val cache = mutableMapOf<Double, T>()
         private val accessOrder = mutableListOf<Double>()
 
-        fun get(key: Double, compute: (Double) -> T): T {
-            return cache[key] ?: run {
+        fun get(
+            key: Double,
+            compute: (Double) -> T,
+        ): T =
+            cache[key] ?: run {
                 val value = compute(key)
                 put(key, value)
                 value
             }
-        }
 
-        private fun put(key: Double, value: T) {
+        private fun put(
+            key: Double,
+            value: T,
+        ) {
             if (cache.size >= maxSize) {
                 // Remove least recently used
                 val oldest = accessOrder.removeFirstOrNull()
@@ -160,7 +167,11 @@ object GeoUtils {
     /**
      * Optimized radians conversion with caching for repeated latitude values.
      */
-    private fun cachedToRadians(degrees: Double): Double = radiansCache.get(degrees) { it * (PI / WWWGlobals.MapDisplay.DEGREES_TO_RADIANS_FACTOR) }
+    private fun cachedToRadians(degrees: Double): Double =
+        radiansCache.get(degrees) {
+            it *
+                (PI / WWWGlobals.MapDisplay.DEGREES_TO_RADIANS_FACTOR)
+        }
 
     /**
      * Clears all trigonometric caches to free memory.
@@ -262,7 +273,8 @@ object GeoUtils {
         val deltaLonRad = (lon2 - lon1).toRadians()
 
         val halfDeltaLon = deltaLonRad / 2
-        val a = 0.0 + // deltaLat = 0 for longitude distance, so sin(0)^2 = 0
+        val a =
+            0.0 + // deltaLat = 0 for longitude distance, so sin(0)^2 = 0
                 cachedCos(lat1Rad) * cachedCos(lat2Rad) *
                 cachedSin(halfDeltaLon) * cachedSin(halfDeltaLon)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))

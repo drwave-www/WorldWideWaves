@@ -34,7 +34,6 @@ import org.junit.Rule
  * and ensure consistency across test suites.
  */
 abstract class BaseInstrumentedTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 

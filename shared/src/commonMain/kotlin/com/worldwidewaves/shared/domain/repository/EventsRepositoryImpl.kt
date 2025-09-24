@@ -45,9 +45,8 @@ import kotlinx.coroutines.sync.withLock
  * - Memory-efficient event lookup by ID
  */
 class EventsRepositoryImpl(
-    private val wwwEvents: WWWEvents
+    private val wwwEvents: WWWEvents,
 ) : EventsRepository {
-
     private val cacheMutex = Mutex()
     private var cachedEvents: List<IWWWEvent> = emptyList()
     private var cacheValid = false
@@ -55,8 +54,7 @@ class EventsRepositoryImpl(
     private val _isLoading = MutableStateFlow(false)
     private val _lastError = MutableStateFlow<Exception?>(null)
 
-    override suspend fun getEvents(): Flow<List<IWWWEvent>> =
-        wwwEvents.flow()
+    override suspend fun getEvents(): Flow<List<IWWWEvent>> = wwwEvents.flow()
 
     override suspend fun loadEvents(onLoadingError: (Exception) -> Unit) {
         _isLoading.value = true
@@ -78,7 +76,7 @@ class EventsRepositoryImpl(
                     exception?.let {
                         _lastError.value = it
                     }
-                }
+                },
             )
         } catch (e: Exception) {
             _isLoading.value = false
@@ -118,7 +116,7 @@ class EventsRepositoryImpl(
                         _lastError.value = it
                         loadDeferred.complete(Result.failure(it))
                     } ?: loadDeferred.complete(Result.success(Unit))
-                }
+                },
             )
 
             // Wait for loading to complete

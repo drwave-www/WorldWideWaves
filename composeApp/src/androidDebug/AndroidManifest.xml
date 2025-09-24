@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Debug-only activity - only available in debug builds -->
+        <activity
+            android:name=".debug.AudioTestActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:label="🎵 Audio Test [DEBUG]" />
+
+        <!-- Enable profiling in debug builds -->
+        <profileable android:shell="true" />
+    </application>
+
+</manifest>

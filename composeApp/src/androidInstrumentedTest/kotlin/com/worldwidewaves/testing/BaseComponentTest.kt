@@ -42,7 +42,6 @@ import kotlin.time.Instant
  * with consistent theming and mock setup.
  */
 abstract class BaseComponentTest : BaseInstrumentedTest() {
-
     protected lateinit var mockClock: IClock
 
     @OptIn(ExperimentalTime::class)
@@ -51,9 +50,10 @@ abstract class BaseComponentTest : BaseInstrumentedTest() {
         super.setUp()
 
         // Setup common component test mocks
-        mockClock = mockk<IClock>(relaxed = true) {
-            every { now() } returns Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
-        }
+        mockClock =
+            mockk<IClock>(relaxed = true) {
+                every { now() } returns Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
+            }
     }
 
     /**
@@ -70,11 +70,9 @@ abstract class BaseComponentTest : BaseInstrumentedTest() {
     /**
      * Helper functions for common component interactions
      */
-    protected fun findByText(text: String): SemanticsNodeInteraction =
-        composeTestRule.onNodeWithText(text)
+    protected fun findByText(text: String): SemanticsNodeInteraction = composeTestRule.onNodeWithText(text)
 
-    protected fun findByTag(tag: String): SemanticsNodeInteraction =
-        composeTestRule.onNodeWithTag(tag)
+    protected fun findByTag(tag: String): SemanticsNodeInteraction = composeTestRule.onNodeWithTag(tag)
 
     protected fun findByContentDescription(description: String): SemanticsNodeInteraction =
         composeTestRule.onNodeWithContentDescription(description)

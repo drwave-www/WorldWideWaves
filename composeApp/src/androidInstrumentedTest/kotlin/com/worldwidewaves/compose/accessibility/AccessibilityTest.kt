@@ -67,10 +67,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasScrollAction
-import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -86,12 +82,11 @@ import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.monitoring.PerformanceMonitor
 import kotlinx.coroutines.delay
+import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.assertTrue
 
 /**
  * Comprehensive accessibility testing for WorldWideWaves
@@ -210,7 +205,7 @@ class AccessibilityTest {
 
         assertTrue(
             "Found ${elementsWithoutDescriptions.size} interactive elements without content descriptions",
-            elementsWithoutDescriptions.isEmpty()
+            elementsWithoutDescriptions.isEmpty(),
         )
 
         trace.stop()
@@ -227,32 +222,34 @@ class AccessibilityTest {
         }
 
         // Verify basic heading structure exists (simplified)
-        val hasSemanticStructure = try {
-            composeTestRule.onNodeWithText("WorldWideWaves").assertExists()
-            composeTestRule.onNodeWithText("Available Events").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: check if any structured content exists
+        val hasSemanticStructure =
             try {
-                composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
+                composeTestRule.onNodeWithText("WorldWideWaves").assertExists()
+                composeTestRule.onNodeWithText("Available Events").assertExists()
+                true
+            } catch (e: Exception) {
+                // Fallback: check if any structured content exists
+                try {
+                    composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
+                } catch (e2: Exception) {
+                    false
+                }
             }
-        }
 
         // Check for semantic elements with relaxed matching
-        val hasSemanticElements = try {
-            composeTestRule.onNodeWithTag("navigation-menu").assertExists()
-            composeTestRule.onNodeWithTag("event-list").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: verify basic UI structure exists
+        val hasSemanticElements =
             try {
-                composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
+                composeTestRule.onNodeWithTag("navigation-menu").assertExists()
+                composeTestRule.onNodeWithTag("event-list").assertExists()
+                true
+            } catch (e: Exception) {
+                // Fallback: verify basic UI structure exists
+                try {
+                    composeTestRule.onAllNodesWithText("Event", substring = true).fetchSemanticsNodes().isNotEmpty()
+                } catch (e2: Exception) {
+                    false
+                }
             }
-        }
 
         assertTrue("Semantic structure should be accessible", hasSemanticStructure || hasSemanticElements)
 
@@ -294,7 +291,7 @@ class AccessibilityTest {
 
         assertTrue(
             "Dynamic content changes should be announced",
-            contentChangeAnnounced
+            contentChangeAnnounced,
         )
 
         trace.stop()
@@ -476,18 +473,19 @@ class AccessibilityTest {
         composeTestRule.waitForIdle()
 
         // Verify focus can be maintained on critical elements during coordination
-        val hasAccessibleElements = try {
-            composeTestRule.onNodeWithTag("emergency-exit").assertExists()
-            composeTestRule.onNodeWithTag("wave-status").assertExists()
-            true
-        } catch (e: Exception) {
-            // Fallback: check if any coordination-related UI exists
+        val hasAccessibleElements =
             try {
-                composeTestRule.onAllNodesWithText("Wave", substring = true).fetchSemanticsNodes().isNotEmpty()
-            } catch (e2: Exception) {
-                false
+                composeTestRule.onNodeWithTag("emergency-exit").assertExists()
+                composeTestRule.onNodeWithTag("wave-status").assertExists()
+                true
+            } catch (e: Exception) {
+                // Fallback: check if any coordination-related UI exists
+                try {
+                    composeTestRule.onAllNodesWithText("Wave", substring = true).fetchSemanticsNodes().isNotEmpty()
+                } catch (e2: Exception) {
+                    false
+                }
             }
-        }
 
         assertTrue("Wave coordination should maintain accessibility", hasAccessibleElements)
 
@@ -811,18 +809,19 @@ class AccessibilityTest {
         composeTestRule.waitForIdle()
 
         // Verify progress indicator accessibility without timing dependency
-        val hasAccessibleProgress = try {
-            composeTestRule.onAllNodesWithText("Progress", substring = true).fetchSemanticsNodes().isNotEmpty() ||
-            composeTestRule.onAllNodesWithContentDescription("Loading", substring = true).fetchSemanticsNodes().isNotEmpty()
-        } catch (e: Exception) {
-            // Fallback: just verify the UI components exist
+        val hasAccessibleProgress =
             try {
-                composeTestRule.onNodeWithText("Start Wave Coordination").assertExists()
-                true
-            } catch (e2: Exception) {
-                false
+                composeTestRule.onAllNodesWithText("Progress", substring = true).fetchSemanticsNodes().isNotEmpty() ||
+                    composeTestRule.onAllNodesWithContentDescription("Loading", substring = true).fetchSemanticsNodes().isNotEmpty()
+            } catch (e: Exception) {
+                // Fallback: just verify the UI components exist
+                try {
+                    composeTestRule.onNodeWithText("Start Wave Coordination").assertExists()
+                    true
+                } catch (e2: Exception) {
+                    false
+                }
             }
-        }
 
         assertTrue("Progress indicators should be accessible", hasAccessibleProgress)
 
@@ -931,44 +930,49 @@ private fun TestInteractiveElementsScreen(onElementsCountUpdate: (Int, Int) -> U
                 onClick = { },
                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                 label = { Text("Events") },
-                modifier = Modifier
-                    .testTag("interactive-element")
-                    .semantics { contentDescription = "Navigate to Events" },
+                modifier =
+                    Modifier
+                        .testTag("interactive-element")
+                        .semantics { contentDescription = "Navigate to Events" },
             )
             NavigationBarItem(
                 selected = false,
                 onClick = { },
                 icon = { Icon(Icons.Default.Info, contentDescription = null) },
                 label = { Text("About") },
-                modifier = Modifier
-                    .testTag("interactive-element")
-                    .semantics { contentDescription = "Navigate to About" },
+                modifier =
+                    Modifier
+                        .testTag("interactive-element")
+                        .semantics { contentDescription = "Navigate to About" },
             )
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "Open Settings" },
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Open Settings" },
         ) {
             Icon(Icons.Default.Settings, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "Play Wave Animation" },
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "Play Wave Animation" },
         ) {
             Icon(Icons.Default.PlayArrow, contentDescription = null)
         }
 
         IconButton(
             onClick = { },
-            modifier = Modifier
-                .testTag("interactive-element")
-                .semantics { contentDescription = "User Profile Menu" },
+            modifier =
+                Modifier
+                    .testTag("interactive-element")
+                    .semantics { contentDescription = "User Profile Menu" },
         ) {
             Icon(Icons.Default.Person, contentDescription = null)
         }

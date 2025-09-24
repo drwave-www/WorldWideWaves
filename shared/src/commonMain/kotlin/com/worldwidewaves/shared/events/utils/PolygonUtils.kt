@@ -46,7 +46,7 @@ object PolygonUtils {
     private data class SpatialIndex(
         val bbox: BoundingBox,
         val gridSize: Int = 16, // 16x16 grid for reasonable granularity
-        val edgesByCell: Array<MutableList<Pair<Position, Position>>>
+        val edgesByCell: Array<MutableList<Pair<Position, Position>>>,
     ) {
         companion object {
             fun build(polygon: Polygon): SpatialIndex? {
@@ -117,9 +117,9 @@ object PolygonUtils {
      * Ray-casting algorithm optimized with spatial indexing.
      * Only tests edges in the same grid cell as the query point.
      */
-     private fun Polygon.containsPositionWithSpatialIndex(
+    private fun Polygon.containsPositionWithSpatialIndex(
         tap: Position,
-        spatialIndex: SpatialIndex
+        spatialIndex: SpatialIndex,
     ): Boolean {
         val relevantEdges = spatialIndex.getCellEdges(tap)
         var depth = 0
@@ -199,7 +199,8 @@ object PolygonUtils {
 
             // Ray-casting algorithm
             if (((yi > tap.lat) != (yj > tap.lat)) &&
-                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)) {
+                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)
+            ) {
                 inside = !inside
             }
 
@@ -208,7 +209,6 @@ object PolygonUtils {
 
         return inside
     }
-
 
     /**
      * Splits a polygon by a given longitude.
@@ -557,8 +557,9 @@ object PolygonUtils {
 
                     if (anchor1Pos != -1 && anchor2Pos != -1) {
                         // Check if they are consecutive (considering wrap-around)
-                        val isConsecutive = (anchor2Pos == anchor1Pos + 1) ||
-                                          (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
+                        val isConsecutive =
+                            (anchor2Pos == anchor1Pos + 1) ||
+                                (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
 
                         if (isConsecutive) {
                             // Insert intermediate points after anchor1

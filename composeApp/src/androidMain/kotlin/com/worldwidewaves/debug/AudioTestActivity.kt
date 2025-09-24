@@ -31,13 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -60,7 +59,6 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class AudioTestActivity : ComponentActivity() {
-
     companion object {
         private const val TAG = "AudioTest"
     }
@@ -92,23 +90,25 @@ class AudioTestActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             statusMessage = "Loading MIDI file..."
             midiTrack = loadMidiTrack()
-            statusMessage = if (midiTrack != null) {
-                "MIDI loaded: ${midiTrack!!.notes.size} notes, ${midiTrack!!.totalDuration.inWholeSeconds}s"
-            } else {
-                "Failed to load MIDI, using demo track"
-            }
+            statusMessage =
+                if (midiTrack != null) {
+                    "MIDI loaded: ${midiTrack!!.notes.size} notes, ${midiTrack!!.totalDuration.inWholeSeconds}s"
+                } else {
+                    "Failed to load MIDI, using demo track"
+                }
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = "🎵 Real Audio Crowd Simulation",
-                style = MaterialTheme.typography.headlineMedium
+                style = MaterialTheme.typography.headlineMedium,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -116,7 +116,7 @@ class AudioTestActivity : ComponentActivity() {
             Text(
                 text = statusMessage,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -131,7 +131,7 @@ class AudioTestActivity : ComponentActivity() {
                         isPlaying = false
                     }
                 },
-                enabled = !isLoading && !isPlaying
+                enabled = !isLoading && !isPlaying,
             ) {
                 Text("Play Test Note")
             }
@@ -148,7 +148,7 @@ class AudioTestActivity : ComponentActivity() {
                         isPlaying = false
                     }
                 },
-                enabled = !isLoading && !isPlaying && midiTrack != null
+                enabled = !isLoading && !isPlaying && midiTrack != null,
             ) {
                 Text("Play MIDI Sequence")
             }
@@ -165,7 +165,7 @@ class AudioTestActivity : ComponentActivity() {
                         isPlaying = false
                     }
                 },
-                enabled = !isLoading && !isPlaying && midiTrack != null
+                enabled = !isLoading && !isPlaying && midiTrack != null,
             ) {
                 Text("Play Crowd Simulation")
             }
@@ -182,7 +182,7 @@ class AudioTestActivity : ComponentActivity() {
                         isPlaying = false
                     }
                 },
-                enabled = !isLoading && !isPlaying && midiTrack != null
+                enabled = !isLoading && !isPlaying && midiTrack != null,
             ) {
                 Text("🌊 Play Wave Progression")
             }
@@ -200,7 +200,7 @@ class AudioTestActivity : ComponentActivity() {
             Text(
                 text = "⚠️ Make sure your device volume is turned up!",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
             )
         }
     }
@@ -208,35 +208,35 @@ class AudioTestActivity : ComponentActivity() {
     /**
      * Load MIDI track, fallback to demo if needed
      */
-    private suspend fun loadMidiTrack(): MidiTrack? {
-        return try {
+    private suspend fun loadMidiTrack(): MidiTrack? =
+        try {
             Log.d(TAG, "Loading MIDI file: ${FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE}")
             MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load MIDI file, creating demo track: ${e.message}")
             createDemoMidiTrack()
         }
-    }
 
     /**
      * Create a simple demo MIDI track
      */
     private fun createDemoMidiTrack(): MidiTrack {
         // C major scale: C4, D4, E4, F4, G4, A4, B4, C5
-        val scaleNotes = listOf(60, 62, 64, 65, 67, 69, 71, 72).mapIndexed { index, pitch ->
-            com.worldwidewaves.shared.sound.MidiNote(
-                pitch = pitch,
-                velocity = 100,
-                startTime = (index * 800).milliseconds,
-                duration = 600.milliseconds
-            )
-        }
+        val scaleNotes =
+            listOf(60, 62, 64, 65, 67, 69, 71, 72).mapIndexed { index, pitch ->
+                com.worldwidewaves.shared.sound.MidiNote(
+                    pitch = pitch,
+                    velocity = 100,
+                    startTime = (index * 800).milliseconds,
+                    duration = 600.milliseconds,
+                )
+            }
 
         return MidiTrack(
             name = "Demo C Major Scale",
             notes = scaleNotes,
             totalDuration = 8.seconds,
-            tempo = 120
+            tempo = 120,
         )
     }
 
@@ -250,7 +250,7 @@ class AudioTestActivity : ComponentActivity() {
             frequency = 440.0, // A4
             amplitude = 0.7,
             duration = 2.seconds,
-            waveform = SoundPlayer.Waveform.SINE
+            waveform = SoundPlayer.Waveform.SINE,
         )
 
         // Wait for the tone to finish
@@ -276,7 +276,7 @@ class AudioTestActivity : ComponentActivity() {
                 frequency = frequency,
                 amplitude = amplitude,
                 duration = 800.milliseconds,
-                waveform = SoundPlayer.Waveform.SINE
+                waveform = SoundPlayer.Waveform.SINE,
             )
 
             delay(1000.milliseconds) // Gap between notes
@@ -301,11 +301,12 @@ class AudioTestActivity : ComponentActivity() {
 
         while (currentTime < simulationDuration) {
             // Calculate position in MIDI track
-            val trackPosition = if (track.totalDuration > Duration.ZERO) {
-                (currentTime.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
-            } else {
-                currentTime
-            }
+            val trackPosition =
+                if (track.totalDuration > Duration.ZERO) {
+                    (currentTime.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
+                } else {
+                    currentTime
+                }
 
             // Find active notes at this time
             val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
@@ -320,11 +321,12 @@ class AudioTestActivity : ComponentActivity() {
                     val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.3
 
                     // Each person uses a different waveform
-                    val waveform = when (personIndex % 3) {
-                        0 -> SoundPlayer.Waveform.SINE
-                        1 -> SoundPlayer.Waveform.SQUARE
-                        else -> SoundPlayer.Waveform.SAWTOOTH
-                    }
+                    val waveform =
+                        when (personIndex % 3) {
+                            0 -> SoundPlayer.Waveform.SINE
+                            1 -> SoundPlayer.Waveform.SQUARE
+                            else -> SoundPlayer.Waveform.SAWTOOTH
+                        }
 
                     Log.d(TAG, "  Person ${personIndex + 1}: MIDI ${note.pitch} (${frequency.toInt()}Hz, ${waveform.name})")
 
@@ -333,7 +335,7 @@ class AudioTestActivity : ComponentActivity() {
                         frequency = frequency,
                         amplitude = amplitude,
                         duration = (playbackInterval.inWholeMilliseconds * 0.8).milliseconds,
-                        waveform = waveform
+                        waveform = waveform,
                     )
                 }
             }
@@ -371,7 +373,7 @@ class AudioTestActivity : ComponentActivity() {
             val currentTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             val elapsedTime = currentTime - waveStartTime
 
-            Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits ${peoplePerSlot} people at ${elapsedTime.inWholeSeconds}s")
+            Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits $peoplePerSlot people at ${elapsedTime.inWholeSeconds}s")
 
             // Simulate people getting hit by the wave at this time
             repeat(peoplePerSlot) { personIndex ->
@@ -386,11 +388,12 @@ class AudioTestActivity : ComponentActivity() {
                     val elapsedSinceWaveStart = personHitTime - waveStartTime
 
                     // Calculate position in track with looping
-                    val trackPosition = if (track.totalDuration > Duration.ZERO) {
-                        (elapsedSinceWaveStart.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
-                    } else {
-                        elapsedSinceWaveStart
-                    }
+                    val trackPosition =
+                        if (track.totalDuration > Duration.ZERO) {
+                            (elapsedSinceWaveStart.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
+                        } else {
+                            elapsedSinceWaveStart
+                        }
 
                     // Find active notes at this position (like real SoundChoreographyManager)
                     val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
@@ -405,13 +408,16 @@ class AudioTestActivity : ComponentActivity() {
                         // SQUARE waveform has richer harmonics for better perceived loudness
                         val waveform = SoundPlayer.Waveform.SQUARE
 
-                        Log.v(TAG, "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms")
+                        Log.v(
+                            TAG,
+                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
+                        )
 
                         soundPlayer.playTone(
                             frequency = frequency,
                             amplitude = amplitude,
                             duration = (waveSlotDurationMs * 0.8).milliseconds,
-                            waveform = waveform
+                            waveform = waveform,
                         )
                     }
                 }

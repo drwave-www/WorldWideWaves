@@ -44,7 +44,6 @@ import kotlin.test.assertTrue
  * This test serves as a migration guide for other test files.
  */
 class DataStoreFactoryMigrationTest : KoinTest {
-
     @BeforeTest
     fun setUp() {
         // Clean up any previous Koin context
@@ -81,9 +80,10 @@ class DataStoreFactoryMigrationTest : KoinTest {
     @Test
     fun `demonstration of new pattern with testDatastoreModule`() {
         // NEW PATTERN (preferred): Use testDatastoreModule with proper DI
-        val testModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-        }
+        val testModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+            }
 
         startKoin {
             modules(testDatastoreModule + testModule)
@@ -106,7 +106,6 @@ class DataStoreFactoryMigrationTest : KoinTest {
             val directDataStore1 = factory.create { "/tmp/direct_test_1.pb" }
             val directDataStore2 = factory.create { "/tmp/direct_test_2.pb" }
             assertNotSame(directDataStore1, directDataStore2, "Direct factory calls create separate instances")
-
         } finally {
             stopKoin()
         }
@@ -123,7 +122,6 @@ class DataStoreFactoryMigrationTest : KoinTest {
 
             // DefaultDataStoreFactory should return the same instance for same path
             assertSame(dataStore1, dataStore2, "DefaultDataStoreFactory should maintain singleton behavior")
-
         } catch (e: DataStoreException) {
             // Expected in test environment - just verify behavior
             assertTrue(e.message?.contains("DataStore creation failed") == true)

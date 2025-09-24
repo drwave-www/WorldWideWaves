@@ -45,7 +45,6 @@ import kotlin.time.measureTime
  */
 @OptIn(ExperimentalTime::class)
 class PerformanceTest {
-
     @Test
     fun `should handle large waveform generation efficiently`() {
         // GIVEN: Parameters for large waveform generation
@@ -55,20 +54,22 @@ class PerformanceTest {
         val duration = 10.seconds // Large 10-second waveform
 
         // WHEN: Generating large waveform and measuring time
-        val executionTime = measureTime {
-            val samples = WaveformGenerator.generateWaveform(
-                sampleRate = sampleRate,
-                frequency = frequency,
-                amplitude = amplitude,
-                duration = duration,
-                waveform = SoundPlayer.Waveform.SINE
-            )
+        val executionTime =
+            measureTime {
+                val samples =
+                    WaveformGenerator.generateWaveform(
+                        sampleRate = sampleRate,
+                        frequency = frequency,
+                        amplitude = amplitude,
+                        duration = duration,
+                        waveform = SoundPlayer.Waveform.SINE,
+                    )
 
-            // THEN: Should generate expected number of samples
-            val expectedSamples = sampleRate * duration.inWholeSeconds.toInt()
-            assertTrue(samples.size >= expectedSamples * 0.95, "Should generate approximately expected samples")
-            assertTrue(samples.size <= expectedSamples * 1.05, "Should not significantly exceed expected samples")
-        }
+                // THEN: Should generate expected number of samples
+                val expectedSamples = sampleRate * duration.inWholeSeconds.toInt()
+                assertTrue(samples.size >= expectedSamples * 0.95, "Should generate approximately expected samples")
+                assertTrue(samples.size <= expectedSamples * 1.05, "Should not significantly exceed expected samples")
+            }
 
         // THEN: Should complete in reasonable time (less than 500ms for 10-second audio)
         assertTrue(executionTime < 500.milliseconds, "Large waveform generation should complete in <500ms, took: $executionTime")
@@ -82,27 +83,29 @@ class PerformanceTest {
         val duration = 2.seconds
 
         // WHEN: Generating multiple waveforms concurrently and measuring time
-        val executionTime = measureTime {
-            val results = mutableListOf<DoubleArray>()
+        val executionTime =
+            measureTime {
+                val results = mutableListOf<DoubleArray>()
 
-            repeat(concurrentTasks) { index ->
-                val frequency = 440.0 + (index * 110.0) // Different frequencies
-                val samples = WaveformGenerator.generateWaveform(
-                    sampleRate = sampleRate,
-                    frequency = frequency,
-                    amplitude = 0.5,
-                    duration = duration,
-                    waveform = SoundPlayer.Waveform.SINE
-                )
-                results.add(samples)
-            }
+                repeat(concurrentTasks) { index ->
+                    val frequency = 440.0 + (index * 110.0) // Different frequencies
+                    val samples =
+                        WaveformGenerator.generateWaveform(
+                            sampleRate = sampleRate,
+                            frequency = frequency,
+                            amplitude = 0.5,
+                            duration = duration,
+                            waveform = SoundPlayer.Waveform.SINE,
+                        )
+                    results.add(samples)
+                }
 
-            // THEN: All waveforms should be generated successfully
-            assertTrue(results.size == concurrentTasks, "Should generate all requested waveforms")
-            results.forEach { samples ->
-                assertTrue(samples.isNotEmpty(), "Each waveform should contain samples")
+                // THEN: All waveforms should be generated successfully
+                assertTrue(results.size == concurrentTasks, "Should generate all requested waveforms")
+                results.forEach { samples ->
+                    assertTrue(samples.isNotEmpty(), "Each waveform should contain samples")
+                }
             }
-        }
 
         // THEN: Should complete in reasonable time (less than 1 second for 5x2-second audio)
         assertTrue(executionTime < 1.seconds, "Concurrent waveform generation should complete in <1s, took: $executionTime")
@@ -122,17 +125,18 @@ class PerformanceTest {
             val lng2 = -180.0 + (((i + 50) * 2) % 360)
 
             positions.add(
-                Position(lat = lat1, lng = lng1) to Position(lat = lat2, lng = lng2)
+                Position(lat = lat1, lng = lng1) to Position(lat = lat2, lng = lng2),
             )
         }
 
         // WHEN: Calculating distances for large dataset and measuring time
-        val executionTime = measureTime {
-            positions.forEach { (pos1, pos2) ->
-                val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
-                assertTrue(distance >= 0.0, "Distance should be non-negative")
+        val executionTime =
+            measureTime {
+                positions.forEach { (pos1, pos2) ->
+                    val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
+                    assertTrue(distance >= 0.0, "Distance should be non-negative")
+                }
             }
-        }
 
         // THEN: Should complete in reasonable time (less than 100ms for 1000 calculations)
         assertTrue(executionTime < 100.milliseconds, "Large dataset distance calculations should complete in <100ms, took: $executionTime")
@@ -166,12 +170,13 @@ class PerformanceTest {
         }
 
         // WHEN: Performing complex polygon operations and measuring time
-        val executionTime = measureTime {
-            testPoints.forEach { testPoint ->
-                val isInside = PolygonUtils.run { complexPolygon.toPolygon.containsPosition(testPoint) }
-                // Result can be true or false, we're testing performance not correctness here
+        val executionTime =
+            measureTime {
+                testPoints.forEach { testPoint ->
+                    val isInside = PolygonUtils.run { complexPolygon.toPolygon.containsPosition(testPoint) }
+                    // Result can be true or false, we're testing performance not correctness here
+                }
             }
-        }
 
         // THEN: Should complete in reasonable time (less than 200ms for 200 points x 100-vertex polygon)
         assertTrue(executionTime < 200.milliseconds, "Complex polygon operations should complete in <200ms, took: $executionTime")
@@ -185,24 +190,25 @@ class PerformanceTest {
         val maxLngRange = 360.0 // -180 to +180
 
         // WHEN: Performing stress test with maximum geographic calculations
-        val executionTime = measureTime {
-            repeat(stressTestIterations) { i ->
-                // Generate extreme position pairs
-                val lat1 = -90.0 + (i * maxLatRange) / stressTestIterations
-                val lng1 = -180.0 + (i * maxLngRange) / stressTestIterations
-                val lat2 = 90.0 - (i * maxLatRange) / stressTestIterations
-                val lng2 = 180.0 - (i * maxLngRange) / stressTestIterations
+        val executionTime =
+            measureTime {
+                repeat(stressTestIterations) { i ->
+                    // Generate extreme position pairs
+                    val lat1 = -90.0 + (i * maxLatRange) / stressTestIterations
+                    val lng1 = -180.0 + (i * maxLngRange) / stressTestIterations
+                    val lat2 = 90.0 - (i * maxLatRange) / stressTestIterations
+                    val lng2 = 180.0 - (i * maxLngRange) / stressTestIterations
 
-                val pos1 = Position(lat = lat1, lng = lng1)
-                val pos2 = Position(lat = lat2, lng = lng2)
+                    val pos1 = Position(lat = lat1, lng = lng1)
+                    val pos2 = Position(lat = lat2, lng = lng2)
 
-                // Test geographic distance operation
-                val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
+                    // Test geographic distance operation
+                    val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
 
-                // Validate results are reasonable
-                assertTrue(distance >= 0.0, "Distance should be non-negative")
+                    // Validate results are reasonable
+                    assertTrue(distance >= 0.0, "Distance should be non-negative")
+                }
             }
-        }
 
         // THEN: Should handle stress test in reasonable time (less than 300ms for 500 iterations)
         assertTrue(executionTime < 300.milliseconds, "Geographic stress test should complete in <300ms, took: $executionTime")
@@ -216,28 +222,29 @@ class PerformanceTest {
         val polygons = mutableListOf<List<Position>>()
 
         // WHEN: Creating and processing multiple large polygons
-        val executionTime = measureTime {
-            // Create multiple large polygons
-            repeat(polygonCount) { polygonIndex ->
-                val polygon = mutableListOf<Position>()
-                val baseRadius = 0.01 * (polygonIndex + 1)
+        val executionTime =
+            measureTime {
+                // Create multiple large polygons
+                repeat(polygonCount) { polygonIndex ->
+                    val polygon = mutableListOf<Position>()
+                    val baseRadius = 0.01 * (polygonIndex + 1)
 
-                repeat(largePolygonVertices) { vertexIndex ->
-                    val angle = (vertexIndex * 2 * kotlin.math.PI) / largePolygonVertices
-                    val lat = 40.0 + baseRadius * kotlin.math.cos(angle)
-                    val lng = -74.0 + baseRadius * kotlin.math.sin(angle)
-                    polygon.add(Position(lat = lat, lng = lng))
+                    repeat(largePolygonVertices) { vertexIndex ->
+                        val angle = (vertexIndex * 2 * kotlin.math.PI) / largePolygonVertices
+                        val lat = 40.0 + baseRadius * kotlin.math.cos(angle)
+                        val lng = -74.0 + baseRadius * kotlin.math.sin(angle)
+                        polygon.add(Position(lat = lat, lng = lng))
+                    }
+                    polygons.add(polygon)
                 }
-                polygons.add(polygon)
-            }
 
-            // Process all polygons with test point
-            val testPoint = Position(lat = 40.0, lng = -74.0)
-            polygons.forEach { polygon ->
-                val isInside = PolygonUtils.run { polygon.toPolygon.containsPosition(testPoint) }
-                // Memory allocation and processing test
+                // Process all polygons with test point
+                val testPoint = Position(lat = 40.0, lng = -74.0)
+                polygons.forEach { polygon ->
+                    val isInside = PolygonUtils.run { polygon.toPolygon.containsPosition(testPoint) }
+                    // Memory allocation and processing test
+                }
             }
-        }
 
         // THEN: Should handle memory-intensive operations efficiently (less than 400ms)
         assertTrue(executionTime < 400.milliseconds, "Memory-intensive polygon processing should complete in <400ms, took: $executionTime")
@@ -257,22 +264,23 @@ class PerformanceTest {
 
         inputSizes.forEach { size ->
             // WHEN: Running polygon operations with increasing input sizes
-            val executionTime = measureTime {
-                // Create polygon with 'size' vertices
-                val polygon = mutableListOf<Position>()
-                repeat(size) { i ->
-                    val angle = (i * 2 * kotlin.math.PI) / size
-                    val lat = 40.0 + 0.01 * kotlin.math.cos(angle)
-                    val lng = -74.0 + 0.01 * kotlin.math.sin(angle)
-                    polygon.add(Position(lat = lat, lng = lng))
-                }
+            val executionTime =
+                measureTime {
+                    // Create polygon with 'size' vertices
+                    val polygon = mutableListOf<Position>()
+                    repeat(size) { i ->
+                        val angle = (i * 2 * kotlin.math.PI) / size
+                        val lat = 40.0 + 0.01 * kotlin.math.cos(angle)
+                        val lng = -74.0 + 0.01 * kotlin.math.sin(angle)
+                        polygon.add(Position(lat = lat, lng = lng))
+                    }
 
-                // Test point-in-polygon for multiple points
-                val testPoint = Position(lat = 40.0, lng = -74.0)
-                repeat(50) {
-                    PolygonUtils.run { polygon.toPolygon.containsPosition(testPoint) }
+                    // Test point-in-polygon for multiple points
+                    val testPoint = Position(lat = 40.0, lng = -74.0)
+                    repeat(50) {
+                        PolygonUtils.run { polygon.toPolygon.containsPosition(testPoint) }
+                    }
                 }
-            }
 
             timingResults[size] = executionTime.inWholeMilliseconds
         }
@@ -291,7 +299,7 @@ class PerformanceTest {
 
         for (i in 1 until times.size) {
             val currentTime = times[i].toDouble()
-            val previousTime = times[i-1].toDouble()
+            val previousTime = times[i - 1].toDouble()
 
             // Use effective timing (with minimum threshold) for ratio calculations
             val effectivePreviousTime = maxOf(previousTime, minMeasurableTime)
@@ -300,8 +308,14 @@ class PerformanceTest {
             val ratio = effectiveCurrentTime / effectivePreviousTime
 
             // Both actual and effective times should be reasonable
-            assertTrue(currentTime < maxReasonableTime, "Actual timing should be reasonable for size ${inputSizes[i]}, got: ${currentTime}ms")
-            assertTrue(ratio < maxRatio, "Timing ratio between sizes ${inputSizes[i-1]} and ${inputSizes[i]} should be <${maxRatio}x, got: $ratio (effective: ${effectiveCurrentTime}ms / ${effectivePreviousTime}ms)")
+            assertTrue(
+                currentTime < maxReasonableTime,
+                "Actual timing should be reasonable for size ${inputSizes[i]}, got: ${currentTime}ms",
+            )
+            assertTrue(
+                ratio < maxRatio,
+                "Timing ratio between sizes ${inputSizes[i - 1]} and ${inputSizes[i]} should be <${maxRatio}x, got: $ratio (effective: ${effectiveCurrentTime}ms / ${effectivePreviousTime}ms)",
+            )
         }
 
         // Overall performance should be reasonable
@@ -315,30 +329,31 @@ class PerformanceTest {
         val operationsPerTask = 50
 
         // WHEN: Running multiple geographic operations concurrently
-        val executionTime = measureTime {
-            val results = mutableListOf<Double>()
+        val executionTime =
+            measureTime {
+                val results = mutableListOf<Double>()
 
-            repeat(concurrentOperations) { taskIndex ->
-                repeat(operationsPerTask) { opIndex ->
-                    val lat1 = -90.0 + (taskIndex * 9.0)
-                    val lng1 = -180.0 + (opIndex * 7.2)
-                    val lat2 = lat1 + 1.0
-                    val lng2 = lng1 + 1.0
+                repeat(concurrentOperations) { taskIndex ->
+                    repeat(operationsPerTask) { opIndex ->
+                        val lat1 = -90.0 + (taskIndex * 9.0)
+                        val lng1 = -180.0 + (opIndex * 7.2)
+                        val lat2 = lat1 + 1.0
+                        val lng2 = lng1 + 1.0
 
-                    val pos1 = Position(lat = lat1, lng = lng1)
-                    val pos2 = Position(lat = lat2, lng = lng2)
+                        val pos1 = Position(lat = lat1, lng = lng1)
+                        val pos2 = Position(lat = lat2, lng = lng2)
 
-                    val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
-                    results.add(distance)
+                        val distance = GeoUtils.calculateDistance(pos1.lng, pos2.lng, pos1.lat)
+                        results.add(distance)
+                    }
+                }
+
+                // THEN: All operations should complete successfully
+                assertTrue(results.size == concurrentOperations * operationsPerTask, "Should complete all operations")
+                results.forEach { distance ->
+                    assertTrue(distance >= 0.0, "All distances should be non-negative")
                 }
             }
-
-            // THEN: All operations should complete successfully
-            assertTrue(results.size == concurrentOperations * operationsPerTask, "Should complete all operations")
-            results.forEach { distance ->
-                assertTrue(distance >= 0.0, "All distances should be non-negative")
-            }
-        }
 
         // THEN: Should handle concurrent operations efficiently (less than 200ms)
         assertTrue(executionTime < 200.milliseconds, "Concurrent geographic operations should complete in <200ms, took: $executionTime")
@@ -351,27 +366,28 @@ class PerformanceTest {
         val coordinateArrays = mutableListOf<List<Position>>()
 
         // WHEN: Creating and processing large coordinate arrays
-        val executionTime = measureTime {
-            // Create multiple large coordinate arrays
-            repeat(3) { arrayIndex ->
-                val coordinates = mutableListOf<Position>()
+        val executionTime =
+            measureTime {
+                // Create multiple large coordinate arrays
+                repeat(3) { arrayIndex ->
+                    val coordinates = mutableListOf<Position>()
 
-                repeat(arraySize) { coordIndex ->
-                    val lat = -90.0 + (coordIndex * 180.0) / arraySize
-                    val lng = -180.0 + (coordIndex * 360.0) / arraySize + arrayIndex
-                    coordinates.add(Position(lat = lat, lng = lng))
+                    repeat(arraySize) { coordIndex ->
+                        val lat = -90.0 + (coordIndex * 180.0) / arraySize
+                        val lng = -180.0 + (coordIndex * 360.0) / arraySize + arrayIndex
+                        coordinates.add(Position(lat = lat, lng = lng))
+                    }
+
+                    coordinateArrays.add(coordinates)
                 }
 
-                coordinateArrays.add(coordinates)
-            }
-
-            // Process arrays with distance calculations
-            coordinateArrays.forEach { coords ->
-                for (i in 0 until minOf(100, coords.size - 1)) {
-                    GeoUtils.calculateDistance(coords[i].lng, coords[i + 1].lng, coords[i].lat)
+                // Process arrays with distance calculations
+                coordinateArrays.forEach { coords ->
+                    for (i in 0 until minOf(100, coords.size - 1)) {
+                        GeoUtils.calculateDistance(coords[i].lng, coords[i + 1].lng, coords[i].lat)
+                    }
                 }
             }
-        }
 
         // THEN: Should handle large arrays efficiently (less than 150ms)
         assertTrue(executionTime < 150.milliseconds, "Large coordinate array processing should complete in <150ms, took: $executionTime")

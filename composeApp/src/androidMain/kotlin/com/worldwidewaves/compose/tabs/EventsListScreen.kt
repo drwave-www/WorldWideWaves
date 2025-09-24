@@ -81,11 +81,11 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.primaryColoredBoldTextStyle

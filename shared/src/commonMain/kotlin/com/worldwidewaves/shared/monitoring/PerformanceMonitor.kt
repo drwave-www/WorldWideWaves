@@ -45,29 +45,68 @@ import kotlin.time.TimeSource
  * - Cross-platform performance insights
  */
 interface IPerformanceMonitor {
-
     // Core Metrics
     fun startTrace(name: String): PerformanceTrace
-    fun recordMetric(name: String, value: Double, unit: String = "")
-    fun recordEvent(name: String, parameters: Map<String, Any> = emptyMap())
+
+    fun recordMetric(
+        name: String,
+        value: Double,
+        unit: String = "",
+    )
+
+    fun recordEvent(
+        name: String,
+        parameters: Map<String, Any> = emptyMap(),
+    )
 
     // Wave-Specific Metrics
-    fun recordWaveTimingAccuracy(expectedTime: Long, actualTime: Long)
-    fun recordWaveParticipation(eventId: String, participationSuccess: Boolean)
-    fun recordChoreographyPerformance(sequenceId: String, renderTime: Duration)
+    fun recordWaveTimingAccuracy(
+        expectedTime: Long,
+        actualTime: Long,
+    )
+
+    fun recordWaveParticipation(
+        eventId: String,
+        participationSuccess: Boolean,
+    )
+
+    fun recordChoreographyPerformance(
+        sequenceId: String,
+        renderTime: Duration,
+    )
 
     // UI Performance
-    fun recordScreenLoad(screenName: String, loadTime: Duration)
-    fun recordUserInteraction(action: String, responseTime: Duration)
-    fun recordAnimationPerformance(animationName: String, frameDrops: Int)
+    fun recordScreenLoad(
+        screenName: String,
+        loadTime: Duration,
+    )
+
+    fun recordUserInteraction(
+        action: String,
+        responseTime: Duration,
+    )
+
+    fun recordAnimationPerformance(
+        animationName: String,
+        frameDrops: Int,
+    )
 
     // System Metrics
-    fun recordMemoryUsage(used: Long, available: Long)
-    fun recordNetworkLatency(endpoint: String, latency: Duration)
+    fun recordMemoryUsage(
+        used: Long,
+        available: Long,
+    )
+
+    fun recordNetworkLatency(
+        endpoint: String,
+        latency: Duration,
+    )
+
     fun recordLocationAccuracy(accuracy: Float)
 
     // Performance Health
     val performanceMetrics: StateFlow<PerformanceMetrics>
+
     fun getPerformanceReport(): PerformanceReport
 }
 
@@ -78,13 +117,23 @@ interface PerformanceTrace {
     val name: String
     val startTime: TimeSource.Monotonic.ValueTimeMark
 
-    fun addAttribute(key: String, value: String)
-    fun addMetric(key: String, value: Long)
+    fun addAttribute(
+        key: String,
+        value: String,
+    )
+
+    fun addMetric(
+        key: String,
+        value: Long,
+    )
+
     fun stop()
+
     fun getDurationMs(): Long
 
     // Battery and performance monitoring methods
     fun getBatteryUsage(): BatteryUsage
+
     fun getBackgroundTaskUsage(): BackgroundTaskUsage
 }
 
@@ -99,7 +148,7 @@ data class PerformanceMetrics(
     val memoryUsagePercent: Double = 0.0,
     val locationAccuracy: Float = 0.0f,
     val totalEvents: Long = 0,
-    val lastUpdated: Long = 0
+    val lastUpdated: Long = 0,
 )
 
 /**
@@ -112,7 +161,7 @@ data class PerformanceReport(
     val reportPeriod: Duration,
     val metrics: PerformanceMetrics,
     val criticalIssues: List<PerformanceIssue>,
-    val recommendations: List<String>
+    val recommendations: List<String>,
 )
 
 /**
@@ -123,9 +172,10 @@ data class PerformanceIssue(
     val category: Category,
     val description: String,
     val impact: String,
-    val occurrence: Long
+    val occurrence: Long,
 ) {
     enum class Severity { LOW, MEDIUM, HIGH, CRITICAL }
+
     enum class Category { WAVE_TIMING, UI_RESPONSIVENESS, MEMORY, NETWORK, LOCATION }
 }
 
@@ -135,7 +185,7 @@ data class PerformanceIssue(
 data class BatteryUsage(
     val totalPowerMah: Double,
     val backgroundCpuMs: Long,
-    val averageCpuPercent: Double
+    val averageCpuPercent: Double,
 )
 
 /**
@@ -143,7 +193,7 @@ data class BatteryUsage(
  */
 data class BackgroundTaskUsage(
     val nonEssentialTasksLimited: Boolean,
-    val essentialTasksMaintained: Boolean
+    val essentialTasksMaintained: Boolean,
 )
 
 /**
@@ -151,7 +201,6 @@ data class BackgroundTaskUsage(
  */
 @OptIn(ExperimentalTime::class)
 open class PerformanceMonitor : IPerformanceMonitor {
-
     private val scope = CoroutineScope(Dispatchers.Default)
     private val traces = mutableMapOf<String, PerformanceTraceImpl>()
     private val metrics = mutableMapOf<String, MutableList<Double>>()
@@ -161,127 +210,185 @@ open class PerformanceMonitor : IPerformanceMonitor {
     override val performanceMetrics: StateFlow<PerformanceMetrics> = _performanceMetrics
 
     override fun startTrace(name: String): PerformanceTrace {
-        val trace = PerformanceTraceImpl(name) { finishedTrace ->
-            recordMetric("trace_${name}_duration", finishedTrace.duration.inWholeMilliseconds.toDouble(), "ms")
-            traces.remove(name)
-        }
+        val trace =
+            PerformanceTraceImpl(name) { finishedTrace ->
+                recordMetric("trace_${name}_duration", finishedTrace.duration.inWholeMilliseconds.toDouble(), "ms")
+                traces.remove(name)
+            }
         traces[name] = trace
         return trace
     }
 
-    override fun recordMetric(name: String, value: Double, unit: String) {
+    override fun recordMetric(
+        name: String,
+        value: Double,
+        unit: String,
+    ) {
         metrics.getOrPut(name) { mutableListOf() }.add(value)
         updateMetrics()
     }
 
     @OptIn(ExperimentalTime::class)
-    override fun recordEvent(name: String, parameters: Map<String, Any>) {
+    override fun recordEvent(
+        name: String,
+        parameters: Map<String, Any>,
+    ) {
         events.add(PerformanceEvent(name, parameters, Clock.System.now().toEpochMilliseconds()))
     }
 
-    override fun recordWaveTimingAccuracy(expectedTime: Long, actualTime: Long) {
+    override fun recordWaveTimingAccuracy(
+        expectedTime: Long,
+        actualTime: Long,
+    ) {
         val accuracy = 1.0 - (kotlin.math.abs(expectedTime - actualTime).toDouble() / expectedTime)
         recordMetric("wave_timing_accuracy", accuracy * 100, "percent")
-        recordEvent("wave_timing", mapOf(
-            "expected" to expectedTime,
-            "actual" to actualTime,
-            "accuracy" to accuracy
-        ))
+        recordEvent(
+            "wave_timing",
+            mapOf(
+                "expected" to expectedTime,
+                "actual" to actualTime,
+                "accuracy" to accuracy,
+            ),
+        )
     }
 
-    override fun recordWaveParticipation(eventId: String, participationSuccess: Boolean) {
+    override fun recordWaveParticipation(
+        eventId: String,
+        participationSuccess: Boolean,
+    ) {
         recordMetric("wave_participation", if (participationSuccess) 1.0 else 0.0)
-        recordEvent("wave_participation", mapOf(
-            "eventId" to eventId,
-            "success" to participationSuccess
-        ))
+        recordEvent(
+            "wave_participation",
+            mapOf(
+                "eventId" to eventId,
+                "success" to participationSuccess,
+            ),
+        )
     }
 
-    override fun recordChoreographyPerformance(sequenceId: String, renderTime: Duration) {
+    override fun recordChoreographyPerformance(
+        sequenceId: String,
+        renderTime: Duration,
+    ) {
         recordMetric("choreography_render_time", renderTime.inWholeMilliseconds.toDouble(), "ms")
-        recordEvent("choreography_performance", mapOf(
-            "sequenceId" to sequenceId,
-            "renderTime" to renderTime.inWholeMilliseconds
-        ))
+        recordEvent(
+            "choreography_performance",
+            mapOf(
+                "sequenceId" to sequenceId,
+                "renderTime" to renderTime.inWholeMilliseconds,
+            ),
+        )
     }
 
-    override fun recordScreenLoad(screenName: String, loadTime: Duration) {
-        recordMetric("screen_load_${screenName}", loadTime.inWholeMilliseconds.toDouble(), "ms")
-        recordEvent("screen_load", mapOf(
-            "screen" to screenName,
-            "loadTime" to loadTime.inWholeMilliseconds
-        ))
+    override fun recordScreenLoad(
+        screenName: String,
+        loadTime: Duration,
+    ) {
+        recordMetric("screen_load_$screenName", loadTime.inWholeMilliseconds.toDouble(), "ms")
+        recordEvent(
+            "screen_load",
+            mapOf(
+                "screen" to screenName,
+                "loadTime" to loadTime.inWholeMilliseconds,
+            ),
+        )
     }
 
-    override fun recordUserInteraction(action: String, responseTime: Duration) {
-        recordMetric("user_interaction_${action}", responseTime.inWholeMilliseconds.toDouble(), "ms")
-        recordEvent("user_interaction", mapOf(
-            "action" to action,
-            "responseTime" to responseTime.inWholeMilliseconds
-        ))
+    override fun recordUserInteraction(
+        action: String,
+        responseTime: Duration,
+    ) {
+        recordMetric("user_interaction_$action", responseTime.inWholeMilliseconds.toDouble(), "ms")
+        recordEvent(
+            "user_interaction",
+            mapOf(
+                "action" to action,
+                "responseTime" to responseTime.inWholeMilliseconds,
+            ),
+        )
     }
 
-    override fun recordAnimationPerformance(animationName: String, frameDrops: Int) {
-        recordMetric("animation_frame_drops_${animationName}", frameDrops.toDouble())
-        recordEvent("animation_performance", mapOf(
-            "animation" to animationName,
-            "frameDrops" to frameDrops
-        ))
+    override fun recordAnimationPerformance(
+        animationName: String,
+        frameDrops: Int,
+    ) {
+        recordMetric("animation_frame_drops_$animationName", frameDrops.toDouble())
+        recordEvent(
+            "animation_performance",
+            mapOf(
+                "animation" to animationName,
+                "frameDrops" to frameDrops,
+            ),
+        )
     }
 
-    override fun recordMemoryUsage(used: Long, available: Long) {
+    override fun recordMemoryUsage(
+        used: Long,
+        available: Long,
+    ) {
         val usagePercent = (used.toDouble() / available) * 100
         recordMetric("memory_usage_percent", usagePercent, "percent")
     }
 
-    override fun recordNetworkLatency(endpoint: String, latency: Duration) {
-        recordMetric("network_latency_${endpoint}", latency.inWholeMilliseconds.toDouble(), "ms")
+    override fun recordNetworkLatency(
+        endpoint: String,
+        latency: Duration,
+    ) {
+        recordMetric("network_latency_$endpoint", latency.inWholeMilliseconds.toDouble(), "ms")
     }
 
     override fun recordLocationAccuracy(accuracy: Float) {
         recordMetric("location_accuracy", accuracy.toDouble(), "meters")
     }
 
-    override fun getPerformanceReport(): PerformanceReport {
-        return PerformanceReport(
+    override fun getPerformanceReport(): PerformanceReport =
+        PerformanceReport(
             appVersion = "1.0.0", // This should come from build config
             platform = getPlatformName(),
             deviceInfo = getDeviceInfo(),
             reportPeriod = 24.hours,
             metrics = _performanceMetrics.value,
             criticalIssues = detectCriticalIssues(),
-            recommendations = generateRecommendations()
+            recommendations = generateRecommendations(),
         )
-    }
 
     @OptIn(ExperimentalTime::class)
     private fun updateMetrics() {
         scope.launch {
             val current = _performanceMetrics.value
-            _performanceMetrics.value = current.copy(
-                averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
-                waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
-                averageScreenLoadTime = getAverageScreenLoadTime(),
-                averageNetworkLatency = getAverageNetworkLatency(),
-                memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
-                locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
-                totalEvents = events.size.toLong(),
-                lastUpdated = Clock.System.now().toEpochMilliseconds()
-            )
+            _performanceMetrics.value =
+                current.copy(
+                    averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
+                    waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
+                    averageScreenLoadTime = getAverageScreenLoadTime(),
+                    averageNetworkLatency = getAverageNetworkLatency(),
+                    memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
+                    locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
+                    totalEvents = events.size.toLong(),
+                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                )
         }
     }
 
-    private fun getAverageScreenLoadTime(): Duration {
-        return metrics.filterKeys { it.startsWith("screen_load_") }
-            .values.flatten()
-            .average().takeIf { !it.isNaN() }?.toLong()?.milliseconds ?: Duration.ZERO
-    }
+    private fun getAverageScreenLoadTime(): Duration =
+        metrics
+            .filterKeys { it.startsWith("screen_load_") }
+            .values
+            .flatten()
+            .average()
+            .takeIf { !it.isNaN() }
+            ?.toLong()
+            ?.milliseconds ?: Duration.ZERO
 
-    private fun getAverageNetworkLatency(): Duration {
-        return metrics.filterKeys { it.startsWith("network_latency_") }
-            .values.flatten()
-            .average().takeIf { !it.isNaN() }?.toLong()?.milliseconds ?: Duration.ZERO
-    }
+    private fun getAverageNetworkLatency(): Duration =
+        metrics
+            .filterKeys { it.startsWith("network_latency_") }
+            .values
+            .flatten()
+            .average()
+            .takeIf { !it.isNaN() }
+            ?.toLong()
+            ?.milliseconds ?: Duration.ZERO
 
     private fun detectCriticalIssues(): List<PerformanceIssue> {
         val issues = mutableListOf<PerformanceIssue>()
@@ -289,25 +396,29 @@ open class PerformanceMonitor : IPerformanceMonitor {
         // Check wave timing accuracy
         val timingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 100.0
         if (timingAccuracy < 95.0) {
-            issues.add(PerformanceIssue(
-                severity = PerformanceIssue.Severity.HIGH,
-                category = PerformanceIssue.Category.WAVE_TIMING,
-                description = "Wave timing accuracy below 95%: ${timingAccuracy}%",
-                impact = "Poor user experience and wave coordination",
-                occurrence = metrics["wave_timing_accuracy"]?.size?.toLong() ?: 0
-            ))
+            issues.add(
+                PerformanceIssue(
+                    severity = PerformanceIssue.Severity.HIGH,
+                    category = PerformanceIssue.Category.WAVE_TIMING,
+                    description = "Wave timing accuracy below 95%: $timingAccuracy%",
+                    impact = "Poor user experience and wave coordination",
+                    occurrence = metrics["wave_timing_accuracy"]?.size?.toLong() ?: 0,
+                ),
+            )
         }
 
         // Check memory usage
         val memoryUsage = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0
         if (memoryUsage > 80.0) {
-            issues.add(PerformanceIssue(
-                severity = PerformanceIssue.Severity.MEDIUM,
-                category = PerformanceIssue.Category.MEMORY,
-                description = "High memory usage: ${memoryUsage}%",
-                impact = "Potential app crashes and poor performance",
-                occurrence = 1
-            ))
+            issues.add(
+                PerformanceIssue(
+                    severity = PerformanceIssue.Severity.MEDIUM,
+                    category = PerformanceIssue.Category.MEMORY,
+                    description = "High memory usage: $memoryUsage%",
+                    impact = "Potential app crashes and poor performance",
+                    occurrence = 1,
+                ),
+            )
         }
 
         return issues
@@ -332,6 +443,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
     }
 
     private fun getPlatformName(): String = "Unknown" // Platform-specific implementation needed
+
     private fun getDeviceInfo(): String = "Unknown" // Platform-specific implementation needed
 }
 
@@ -340,9 +452,8 @@ open class PerformanceMonitor : IPerformanceMonitor {
  */
 private class PerformanceTraceImpl(
     override val name: String,
-    private val onComplete: (PerformanceTraceImpl) -> Unit
+    private val onComplete: (PerformanceTraceImpl) -> Unit,
 ) : PerformanceTrace {
-
     override val startTime = TimeSource.Monotonic.markNow()
     private val attributes = mutableMapOf<String, String>()
     private val metrics = mutableMapOf<String, Long>()
@@ -350,21 +461,25 @@ private class PerformanceTraceImpl(
 
     val duration: Duration get() = startTime.elapsedNow()
 
-    override fun addAttribute(key: String, value: String) {
+    override fun addAttribute(
+        key: String,
+        value: String,
+    ) {
         if (!stopped) {
             attributes[key] = value
         }
     }
 
-    override fun addMetric(key: String, value: Long) {
+    override fun addMetric(
+        key: String,
+        value: Long,
+    ) {
         if (!stopped) {
             metrics[key] = value
         }
     }
 
-    override fun getDurationMs(): Long {
-        return duration.inWholeMilliseconds
-    }
+    override fun getDurationMs(): Long = duration.inWholeMilliseconds
 
     override fun getBatteryUsage(): BatteryUsage {
         // In real implementation, would collect actual battery usage metrics
@@ -372,16 +487,15 @@ private class PerformanceTraceImpl(
         return BatteryUsage(
             totalPowerMah = durationMinutes * 2.5, // Estimate: 2.5mAh per minute
             backgroundCpuMs = metrics["background_cpu_time"] ?: (durationMinutes * 100).toLong(),
-            averageCpuPercent = kotlin.math.min(15.0, durationMinutes * 0.5) // Max 15% CPU
+            averageCpuPercent = kotlin.math.min(15.0, durationMinutes * 0.5), // Max 15% CPU
         )
     }
 
-    override fun getBackgroundTaskUsage(): BackgroundTaskUsage {
-        return BackgroundTaskUsage(
+    override fun getBackgroundTaskUsage(): BackgroundTaskUsage =
+        BackgroundTaskUsage(
             nonEssentialTasksLimited = true,
-            essentialTasksMaintained = true
+            essentialTasksMaintained = true,
         )
-    }
 
     override fun stop() {
         if (!stopped) {
@@ -397,6 +511,5 @@ private class PerformanceTraceImpl(
 private data class PerformanceEvent(
     val name: String,
     val parameters: Map<String, Any>,
-    val timestamp: Long
+    val timestamp: Long,
 )
-

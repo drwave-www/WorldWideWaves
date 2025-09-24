@@ -32,7 +32,6 @@ import kotlin.test.assertTrue
  * localization handling, rules hierarchy, FAQ contents, and core info management.
  */
 class InfoStringResourcesTest {
-
     @Test
     fun `test rules_hierarchy contains all expected warning categories`() {
         // Verify all warning categories are present
@@ -54,14 +53,15 @@ class InfoStringResourcesTest {
         assertEquals(6, generalWarnings.size, "Should have 6 general warning items")
 
         // Verify all general warning items are present
-        val expectedGeneralItems = listOf(
-            MokoRes.strings.warn_general_item_1,
-            MokoRes.strings.warn_general_item_2,
-            MokoRes.strings.warn_general_item_3,
-            MokoRes.strings.warn_general_item_4,
-            MokoRes.strings.warn_general_item_5,
-            MokoRes.strings.warn_general_item_6
-        )
+        val expectedGeneralItems =
+            listOf(
+                MokoRes.strings.warn_general_item_1,
+                MokoRes.strings.warn_general_item_2,
+                MokoRes.strings.warn_general_item_3,
+                MokoRes.strings.warn_general_item_4,
+                MokoRes.strings.warn_general_item_5,
+                MokoRes.strings.warn_general_item_6,
+            )
 
         expectedGeneralItems.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem, generalWarnings[index], "General warning item ${index + 1} should match")
@@ -77,13 +77,14 @@ class InfoStringResourcesTest {
         assertEquals(5, safetyWarnings.size, "Should have 5 safety warning items")
 
         // Verify all safety warning items are present
-        val expectedSafetyItems = listOf(
-            MokoRes.strings.warn_safety_item_1,
-            MokoRes.strings.warn_safety_item_2,
-            MokoRes.strings.warn_safety_item_3,
-            MokoRes.strings.warn_safety_item_4,
-            MokoRes.strings.warn_safety_item_5
-        )
+        val expectedSafetyItems =
+            listOf(
+                MokoRes.strings.warn_safety_item_1,
+                MokoRes.strings.warn_safety_item_2,
+                MokoRes.strings.warn_safety_item_3,
+                MokoRes.strings.warn_safety_item_4,
+                MokoRes.strings.warn_safety_item_5,
+            )
 
         expectedSafetyItems.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem, safetyWarnings[index], "Safety warning item ${index + 1} should match")
@@ -99,11 +100,12 @@ class InfoStringResourcesTest {
         assertEquals(3, emergencyWarnings.size, "Should have 3 emergency warning items")
 
         // Verify all emergency warning items are present
-        val expectedEmergencyItems = listOf(
-            MokoRes.strings.warn_emergency_item_1,
-            MokoRes.strings.warn_emergency_item_2,
-            MokoRes.strings.warn_emergency_item_3
-        )
+        val expectedEmergencyItems =
+            listOf(
+                MokoRes.strings.warn_emergency_item_1,
+                MokoRes.strings.warn_emergency_item_2,
+                MokoRes.strings.warn_emergency_item_3,
+            )
 
         expectedEmergencyItems.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem, emergencyWarnings[index], "Emergency warning item ${index + 1} should match")
@@ -119,10 +121,11 @@ class InfoStringResourcesTest {
         assertEquals(2, legalWarnings.size, "Should have 2 legal warning items")
 
         // Verify all legal warning items are present
-        val expectedLegalItems = listOf(
-            MokoRes.strings.warn_legal_item_1,
-            MokoRes.strings.warn_legal_item_2
-        )
+        val expectedLegalItems =
+            listOf(
+                MokoRes.strings.warn_legal_item_1,
+                MokoRes.strings.warn_legal_item_2,
+            )
 
         expectedLegalItems.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem, legalWarnings[index], "Legal warning item ${index + 1} should match")
@@ -142,14 +145,15 @@ class InfoStringResourcesTest {
         }
 
         // Verify specific FAQ items
-        val expectedFaqItems = listOf(
-            Pair(MokoRes.strings.faq_question_1, MokoRes.strings.faq_answer_1),
-            Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
-            Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
-            Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
-            Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5),
-            Pair(MokoRes.strings.faq_question_6, MokoRes.strings.faq_answer_6)
-        )
+        val expectedFaqItems =
+            listOf(
+                Pair(MokoRes.strings.faq_question_1, MokoRes.strings.faq_answer_1),
+                Pair(MokoRes.strings.faq_question_2, MokoRes.strings.faq_answer_2),
+                Pair(MokoRes.strings.faq_question_3, MokoRes.strings.faq_answer_3),
+                Pair(MokoRes.strings.faq_question_4, MokoRes.strings.faq_answer_4),
+                Pair(MokoRes.strings.faq_question_5, MokoRes.strings.faq_answer_5),
+                Pair(MokoRes.strings.faq_question_6, MokoRes.strings.faq_answer_6),
+            )
 
         expectedFaqItems.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem.first, faq_contents[index].first, "FAQ question ${index + 1} should match")
@@ -168,17 +172,18 @@ class InfoStringResourcesTest {
         }
 
         // Verify specific core info items
-        val expectedCoreInfos = listOf(
-            MokoRes.strings.infos_core_1,
-            MokoRes.strings.infos_core_2,
-            MokoRes.strings.infos_core_3,
-            MokoRes.strings.infos_core_4,
-            MokoRes.strings.infos_core_5,
-            MokoRes.strings.infos_core_6,
-            MokoRes.strings.infos_core_7,
-            MokoRes.strings.infos_core_8,
-            MokoRes.strings.infos_core_9
-        )
+        val expectedCoreInfos =
+            listOf(
+                MokoRes.strings.infos_core_1,
+                MokoRes.strings.infos_core_2,
+                MokoRes.strings.infos_core_3,
+                MokoRes.strings.infos_core_4,
+                MokoRes.strings.infos_core_5,
+                MokoRes.strings.infos_core_6,
+                MokoRes.strings.infos_core_7,
+                MokoRes.strings.infos_core_8,
+                MokoRes.strings.infos_core_9,
+            )
 
         expectedCoreInfos.forEachIndexed { index, expectedItem ->
             assertEquals(expectedItem, infos_core[index], "Core info item ${index + 1} should match")
@@ -248,25 +253,27 @@ class InfoStringResourcesTest {
 
         // Test that questions and answers maintain proper ordering
         for (i in 1..6) {
-            val expectedQuestion = when (i) {
-                1 -> MokoRes.strings.faq_question_1
-                2 -> MokoRes.strings.faq_question_2
-                3 -> MokoRes.strings.faq_question_3
-                4 -> MokoRes.strings.faq_question_4
-                5 -> MokoRes.strings.faq_question_5
-                6 -> MokoRes.strings.faq_question_6
-                else -> error("Invalid FAQ index")
-            }
+            val expectedQuestion =
+                when (i) {
+                    1 -> MokoRes.strings.faq_question_1
+                    2 -> MokoRes.strings.faq_question_2
+                    3 -> MokoRes.strings.faq_question_3
+                    4 -> MokoRes.strings.faq_question_4
+                    5 -> MokoRes.strings.faq_question_5
+                    6 -> MokoRes.strings.faq_question_6
+                    else -> error("Invalid FAQ index")
+                }
 
-            val expectedAnswer = when (i) {
-                1 -> MokoRes.strings.faq_answer_1
-                2 -> MokoRes.strings.faq_answer_2
-                3 -> MokoRes.strings.faq_answer_3
-                4 -> MokoRes.strings.faq_answer_4
-                5 -> MokoRes.strings.faq_answer_5
-                6 -> MokoRes.strings.faq_answer_6
-                else -> error("Invalid FAQ index")
-            }
+            val expectedAnswer =
+                when (i) {
+                    1 -> MokoRes.strings.faq_answer_1
+                    2 -> MokoRes.strings.faq_answer_2
+                    3 -> MokoRes.strings.faq_answer_3
+                    4 -> MokoRes.strings.faq_answer_4
+                    5 -> MokoRes.strings.faq_answer_5
+                    6 -> MokoRes.strings.faq_answer_6
+                    else -> error("Invalid FAQ index")
+                }
 
             assertEquals(expectedQuestion, faq_contents[i - 1].first, "FAQ $i question should match")
             assertEquals(expectedAnswer, faq_contents[i - 1].second, "FAQ $i answer should match")
@@ -328,9 +335,9 @@ class InfoStringResourcesTest {
         // Verify expected total count
         val expectedCount =
             4 + // rule titles
-            (6 + 5 + 3 + 2) + // rule items
-            12 + // FAQ questions and answers
-            9 // core infos
+                (6 + 5 + 3 + 2) + // rule items
+                12 + // FAQ questions and answers
+                9 // core infos
 
         assertEquals(expectedCount, allResources.size, "Should have expected number of string resources")
     }
@@ -341,31 +348,32 @@ class InfoStringResourcesTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..5).map { threadId ->
-            Thread {
-                try {
-                    repeat(10) {
-                        // Access rules hierarchy
-                        val rulesCount = rules_hierarchy.size
-                        val totalRuleItems = rules_hierarchy.values.sumOf { it.size }
+        val threads =
+            (1..5).map { threadId ->
+                Thread {
+                    try {
+                        repeat(10) {
+                            // Access rules hierarchy
+                            val rulesCount = rules_hierarchy.size
+                            val totalRuleItems = rules_hierarchy.values.sumOf { it.size }
 
-                        // Access FAQ contents
-                        val faqCount = faq_contents.size
+                            // Access FAQ contents
+                            val faqCount = faq_contents.size
 
-                        // Access core infos
-                        val coreInfoCount = infos_core.size
+                            // Access core infos
+                            val coreInfoCount = infos_core.size
 
-                        synchronized(results) {
-                            results.add("Thread $threadId: rules=$rulesCount/$totalRuleItems, faq=$faqCount, core=$coreInfoCount")
+                            synchronized(results) {
+                                results.add("Thread $threadId: rules=$rulesCount/$totalRuleItems, faq=$faqCount, core=$coreInfoCount")
+                            }
                         }
-                    }
-                } catch (e: Exception) {
-                    synchronized(exceptions) {
-                        exceptions.add(e)
+                    } catch (e: Exception) {
+                        synchronized(exceptions) {
+                            exceptions.add(e)
+                        }
                     }
                 }
             }
-        }
 
         threads.forEach { it.start() }
         threads.forEach { it.join() }

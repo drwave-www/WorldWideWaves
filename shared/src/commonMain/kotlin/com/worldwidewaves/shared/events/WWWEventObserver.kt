@@ -32,8 +32,8 @@ import com.worldwidewaves.shared.domain.state.EventStateManager
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.utils.updateIfChanged
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -246,6 +246,7 @@ class WWWEventObserver(
     private companion object {
         const val PROGRESSION_THRESHOLD = 0.1 // Only update progression if change is > 0.1%
         const val POSITION_RATIO_THRESHOLD = 0.01 // Only update position ratio if change is > 1%
+
         // Normal phase: update time if change is > 1 second (adaptive to 50ms during critical hit phase)
         const val TIME_THRESHOLD_MS = 1000L
     }
@@ -293,61 +294,62 @@ class WWWEventObserver(
                     updateStates(currentProgression, currentStatus)
 
                     // Start unified observation that combines all trigger sources
-                    val mainObservationJob = createUnifiedObservationFlow()
-                        .flowOn(Dispatchers.Default)
-                        .catch { e ->
-                            Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
-                        }
-                        .onEach { observation ->
-                            Log.v(
-                                "WWWEventObserver",
-                                "Unified observation update: progression=${observation.progression}, status=${observation.status}"
-                            )
-                            updateStates(observation.progression, observation.status)
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
+                    val mainObservationJob =
+                        createUnifiedObservationFlow()
+                            .flowOn(Dispatchers.Default)
+                            .catch { e ->
+                                Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
+                            }.onEach { observation ->
+                                Log.v(
+                                    "WWWEventObserver",
+                                    "Unified observation update: progression=${observation.progression}, status=${observation.status}",
+                                )
+                                updateStates(observation.progression, observation.status)
+                            }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Use the dedicated position observer to handle position changes and area detection
-                    val positionObserverJob = positionObserver.observePositionForEvent(event)
-                        .onEach { observation ->
-                            Log.v(
-                                "WWWEventObserver",
-                                "Position observation for event ${event.id}: position=${observation.position}, inArea=${observation.isInArea}"
-                            )
-                            _userIsInArea.updateIfChanged(observation.isInArea)
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
+                    val positionObserverJob =
+                        positionObserver
+                            .observePositionForEvent(event)
+                            .onEach { observation ->
+                                Log.v(
+                                    "WWWEventObserver",
+                                    "Position observation for event ${event.id}: position=${observation.position}, inArea=${observation.isInArea}",
+                                )
+                                _userIsInArea.updateIfChanged(observation.isInArea)
+                            }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Add immediate position change observer for backward compatibility and immediate response
-                    val directPositionObserverJob = positionManager.position
-                        .onEach { _ ->
-                            Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
-                            updateAreaDetection()
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
+                    val directPositionObserverJob =
+                        positionManager.position
+                            .onEach { _ ->
+                                Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
+                                updateAreaDetection()
+                            }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Add polygon loading observer to trigger area detection when polygon data becomes available
-                    val polygonLoadingJob = event.area.polygonsLoaded
-                        .onEach { isLoaded ->
-                            if (isLoaded) {
-                                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
-                                updateAreaDetection()
-                            }
-                        }
-                        .launchIn(coroutineScopeProvider.scopeDefault())
+                    val polygonLoadingJob =
+                        event.area.polygonsLoaded
+                            .onEach { isLoaded ->
+                                if (isLoaded) {
+                                    Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                    updateAreaDetection()
+                                }
+                            }.launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Create a parent job that manages all child jobs
-                    unifiedObservationJob = coroutineScopeProvider.launchDefault {
-                        try {
-                            // Wait for the main observation job to complete
-                            mainObservationJob.join()
-                        } finally {
-                            // Cancel all observer jobs when done
-                            positionObserverJob.cancel()
-                            directPositionObserverJob.cancel()
-                            polygonLoadingJob.cancel()
+                    unifiedObservationJob =
+                        coroutineScopeProvider.launchDefault {
+                            try {
+                                // Wait for the main observation job to complete
+                                mainObservationJob.join()
+                            } finally {
+                                // Cancel all observer jobs when done
+                                positionObserverJob.cancel()
+                                directPositionObserverJob.cancel()
+                                polygonLoadingJob.cancel()
+                            }
                         }
-                    }
                 } catch (e: Exception) {
                     // This is expected when feature map hasn't been downloaded yet - downgrade to info
                     if (e.message?.contains("Flow context cannot contain job") == true) {
@@ -382,83 +384,87 @@ class WWWEventObserver(
      * Position changes are handled by both the PositionObserver and direct observation for reliability.
      * Ensures area detection is triggered on every observation update.
      */
-    private fun createUnifiedObservationFlow() = combine(
-        createPeriodicObservationFlow(),
-        createSimulationFlow()
-    ) { periodicObservation, _ ->
-        // Return the latest periodic observation (progression and status)
-        // Position observation and area detection are handled by multiple observers for reliability
-        periodicObservation
-    }.onEach { _ ->
-        // Ensure area detection is called on every unified observation update for immediate response
-        updateAreaDetection()
-    }
+    private fun createUnifiedObservationFlow() =
+        combine(
+            createPeriodicObservationFlow(),
+            createSimulationFlow(),
+        ) { periodicObservation, _ ->
+            // Return the latest periodic observation (progression and status)
+            // Position observation and area detection are handled by multiple observers for reliability
+            periodicObservation
+        }.onEach { _ ->
+            // Ensure area detection is called on every unified observation update for immediate response
+            updateAreaDetection()
+        }
 
     /**
      * Creates a flow that periodically emits wave observations when the event should be observed.
      * Now uses the extracted ObservationScheduler for timing logic.
      */
-    private fun createPeriodicObservationFlow() = callbackFlow {
-        try {
-            Log.v("WWWEventObserver", "Starting periodic observation flow for event ${event.id}")
+    private fun createPeriodicObservationFlow() =
+        callbackFlow {
+            try {
+                Log.v("WWWEventObserver", "Starting periodic observation flow for event ${event.id}")
 
-            // Use the ObservationScheduler to create the observation flow
-            observationScheduler.createObservationFlow(event).collect { _ ->
-                // Get current state and emit it
-                val progression = try {
-                    waveProgressionTracker.calculateProgression(event)
-                } catch (e: Throwable) {
-                    Log.e("WWWEventObserver", "Error calculating progression for event ${event.id}: $e")
-                    0.0
+                // Use the ObservationScheduler to create the observation flow
+                observationScheduler.createObservationFlow(event).collect { _ ->
+                    // Get current state and emit it
+                    val progression =
+                        try {
+                            waveProgressionTracker.calculateProgression(event)
+                        } catch (e: Throwable) {
+                            Log.e("WWWEventObserver", "Error calculating progression for event ${event.id}: $e")
+                            0.0
+                        }
+
+                    val status = event.getStatus()
+                    val eventObservation = EventObservation(progression, status)
+                    send(eventObservation)
+
+                    Log.v("WWWEventObserver", "Emitted observation for event ${event.id}: progression=$progression, status=$status")
                 }
-
-                val status = event.getStatus()
-                val eventObservation = EventObservation(progression, status)
-                send(eventObservation)
-
-                Log.v("WWWEventObserver", "Emitted observation for event ${event.id}: progression=$progression, status=$status")
+            } catch (e: Exception) {
+                Log.e("periodicObservationFlow", "Error in periodic observation flow: $e")
             }
-        } catch (e: Exception) {
-            Log.e("periodicObservationFlow", "Error in periodic observation flow: $e")
-        }
 
-        awaitClose {
-            Log.v("WWWEventObserver", "Closing periodic observation flow for event ${event.id}")
+            awaitClose {
+                Log.v("WWWEventObserver", "Closing periodic observation flow for event ${event.id}")
+            }
         }
-    }
 
     /**
      * Creates a flow that emits when simulation changes.
      */
-    private fun createSimulationFlow() = callbackFlow {
-        try {
-            val platform = try {
-                get<WWWPlatform>()
-            } catch (e: Exception) {
-                Log.w("WWWEventObserver", "Platform not available for simulation observation: $e")
-                send(Unit) // Emit once to allow combine to work
-                awaitClose()
-                return@callbackFlow
-            }
+    private fun createSimulationFlow() =
+        callbackFlow {
+            try {
+                val platform =
+                    try {
+                        get<WWWPlatform>()
+                    } catch (e: Exception) {
+                        Log.w("WWWEventObserver", "Platform not available for simulation observation: $e")
+                        send(Unit) // Emit once to allow combine to work
+                        awaitClose()
+                        return@callbackFlow
+                    }
 
-            // Emit initial value
-            send(Unit)
-
-            // Then collect simulation changes
-            platform.simulationChanged.collect { _ ->
-                Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
+                // Emit initial value
                 send(Unit)
+
+                // Then collect simulation changes
+                platform.simulationChanged.collect { _ ->
+                    Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
+                    send(Unit)
+                }
+            } catch (e: CancellationException) {
+                Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
+                throw e
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "Error in simulation observation for event ${event.id}: $e")
             }
-        } catch (e: CancellationException) {
-            Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
-            throw e
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Error in simulation observation for event ${event.id}: $e")
+
+            awaitClose()
         }
-
-        awaitClose()
-    }
-
 
     /**
      * Updates all state flows based on the current event state.
@@ -477,20 +483,22 @@ class WWWEventObserver(
         val userIsInArea = _userIsInArea.value
 
         // Create input for state calculation
-        val stateInput = EventStateInput(
-            progression = progression,
-            status = status,
-            userPosition = positionManager.getCurrentPosition(),
-            currentTime = clock.now()
-        )
+        val stateInput =
+            EventStateInput(
+                progression = progression,
+                status = status,
+                userPosition = positionManager.getCurrentPosition(),
+                currentTime = clock.now(),
+            )
 
         try {
             // Calculate event state using EventStateManager
-            val calculatedState = eventStateManager.calculateEventState(
-                event = event,
-                input = stateInput,
-                userIsInArea = userIsInArea
-            )
+            val calculatedState =
+                eventStateManager.calculateEventState(
+                    event = event,
+                    input = stateInput,
+                    userIsInArea = userIsInArea,
+                )
 
             // Validate the calculated state
             val validationIssues = eventStateManager.validateState(stateInput, calculatedState)
@@ -520,10 +528,9 @@ class WWWEventObserver(
             if (calculatedState.userIsGoingToBeHit) {
                 Log.v(
                     "WWWEventObserver",
-                    "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}"
+                    "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}",
                 )
             }
-
         } catch (e: Exception) {
             Log.e("WWWEventObserver", "Error calculating event state: $e")
             // Fall back to basic state updates for safety
@@ -543,8 +550,8 @@ class WWWEventObserver(
      * Gets the current EventState from the StateFlow values.
      * This allows for state transition validation by EventStateManager.
      */
-    private fun getCurrentEventState(): EventState? {
-        return try {
+    private fun getCurrentEventState(): EventState? =
+        try {
             EventState(
                 progression = _progression.value,
                 status = _eventStatus.value,
@@ -556,13 +563,12 @@ class WWWEventObserver(
                 timeBeforeHit = _timeBeforeHit.value,
                 hitDateTime = _hitDateTime.value,
                 userIsInArea = _userIsInArea.value,
-                timestamp = clock.now()
+                timestamp = clock.now(),
             )
         } catch (e: Exception) {
             Log.e("WWWEventObserver", "Error creating current EventState: $e")
             null
         }
-    }
 
     /**
      * Updates area detection state (isInArea) based on current user position.
@@ -613,12 +619,13 @@ class WWWEventObserver(
             val observerUserInArea = _userIsInArea.value
 
             if (userPosition != null) {
-                val actualUserInArea = try {
-                    waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
-                } catch (e: Exception) {
-                    Log.e("WWWEventObserver", "Error validating user in area: $e")
-                    false
-                }
+                val actualUserInArea =
+                    try {
+                        waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                    } catch (e: Exception) {
+                        Log.e("WWWEventObserver", "Error validating user in area: $e")
+                        false
+                    }
                 if (actualUserInArea != observerUserInArea) {
                     issues.add("userIsInArea inconsistency: observer=$observerUserInArea, actual=$actualUserInArea")
                 }
@@ -642,7 +649,6 @@ class WWWEventObserver(
 
         return issues
     }
-
 
     /**
      * Smart throttling functions to reduce unnecessary state updates and improve performance.
@@ -703,5 +709,4 @@ class WWWEventObserver(
             lastEmittedTimeBeforeHit = newTime
         }
     }
-
 }

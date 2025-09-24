@@ -32,7 +32,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FilterEventsUseCaseTest {
-
     private val mockMapChecker = mockk<MapAvailabilityChecker>()
     private val useCase = FilterEventsUseCase(mockMapChecker)
 
@@ -40,233 +39,254 @@ class FilterEventsUseCaseTest {
         id: String,
         favorite: Boolean = false,
         isRunning: Boolean = false,
-        isDone: Boolean = false
-    ): IWWWEvent = mockk<IWWWEvent>().apply {
-        every { this@apply.id } returns id
-        every { this@apply.favorite } returns favorite
-        coEvery { isRunning() } returns isRunning
-        coEvery { isDone() } returns isDone
-    }
+        isDone: Boolean = false,
+    ): IWWWEvent =
+        mockk<IWWWEvent>().apply {
+            every { this@apply.id } returns id
+            every { this@apply.favorite } returns favorite
+            coEvery { isRunning() } returns isRunning
+            coEvery { isDone() } returns isDone
+        }
 
     @Test
-    fun `filter returns all events when no criteria specified`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = false),
-            createMockEvent("event3", favorite = true)
-        )
+    fun `filter returns all events when no criteria specified`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = false),
+                    createMockEvent("event3", favorite = true),
+                )
 
-        // When
-        val result = useCase.invoke(events, EventFilterCriteria())
+            // When
+            val result = useCase.invoke(events, EventFilterCriteria())
 
-        // Then
-        assertEquals(3, result.size)
-        verify { mockMapChecker.refreshAvailability() }
-    }
-
-    @Test
-    fun `filter returns only favorite events when onlyFavorites is true`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = false),
-            createMockEvent("event3", favorite = true)
-        )
-
-        val criteria = EventFilterCriteria(onlyFavorites = true)
-
-        // When
-        val result = useCase.invoke(events, criteria)
-
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event3", result[1].id)
-    }
+            // Then
+            assertEquals(3, result.size)
+            verify { mockMapChecker.refreshAvailability() }
+        }
 
     @Test
-    fun `filter returns only events with downloaded maps when onlyDownloaded is true`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        every { mockMapChecker.isMapDownloaded("event1") } returns true
-        every { mockMapChecker.isMapDownloaded("event2") } returns false
-        every { mockMapChecker.isMapDownloaded("event3") } returns true
+    fun `filter returns only favorite events when onlyFavorites is true`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = false),
+                    createMockEvent("event3", favorite = true),
+                )
 
-        val events = listOf(
-            createMockEvent("event1"),
-            createMockEvent("event2"),
-            createMockEvent("event3")
-        )
+            val criteria = EventFilterCriteria(onlyFavorites = true)
 
-        val criteria = EventFilterCriteria(onlyDownloaded = true)
+            // When
+            val result = useCase.invoke(events, criteria)
 
-        // When
-        val result = useCase.invoke(events, criteria)
-
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event3", result[1].id)
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event3", result[1].id)
+        }
 
     @Test
-    fun `filter returns only running events when onlyRunning is true`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", isRunning = true),
-            createMockEvent("event2", isRunning = false),
-            createMockEvent("event3", isRunning = true)
-        )
+    fun `filter returns only events with downloaded maps when onlyDownloaded is true`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            every { mockMapChecker.isMapDownloaded("event1") } returns true
+            every { mockMapChecker.isMapDownloaded("event2") } returns false
+            every { mockMapChecker.isMapDownloaded("event3") } returns true
 
-        val criteria = EventFilterCriteria(onlyRunning = true)
+            val events =
+                listOf(
+                    createMockEvent("event1"),
+                    createMockEvent("event2"),
+                    createMockEvent("event3"),
+                )
 
-        // When
-        val result = useCase.invoke(events, criteria)
+            val criteria = EventFilterCriteria(onlyDownloaded = true)
 
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event3", result[1].id)
-    }
+            // When
+            val result = useCase.invoke(events, criteria)
 
-    @Test
-    fun `filter returns only upcoming events when onlyUpcoming is true`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", isRunning = false, isDone = false), // upcoming
-            createMockEvent("event2", isRunning = true, isDone = false),  // running
-            createMockEvent("event3", isRunning = false, isDone = true),  // completed
-            createMockEvent("event4", isRunning = false, isDone = false)  // upcoming
-        )
-
-        val criteria = EventFilterCriteria(onlyUpcoming = true)
-
-        // When
-        val result = useCase.invoke(events, criteria)
-
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event4", result[1].id)
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event3", result[1].id)
+        }
 
     @Test
-    fun `filter returns only completed events when onlyCompleted is true`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", isRunning = false, isDone = false), // upcoming
-            createMockEvent("event2", isRunning = true, isDone = false),  // running
-            createMockEvent("event3", isRunning = false, isDone = true),  // completed
-            createMockEvent("event4", isRunning = false, isDone = true)   // completed
-        )
+    fun `filter returns only running events when onlyRunning is true`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", isRunning = true),
+                    createMockEvent("event2", isRunning = false),
+                    createMockEvent("event3", isRunning = true),
+                )
 
-        val criteria = EventFilterCriteria(onlyCompleted = true)
+            val criteria = EventFilterCriteria(onlyRunning = true)
 
-        // When
-        val result = useCase.invoke(events, criteria)
+            // When
+            val result = useCase.invoke(events, criteria)
 
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event3", result[0].id)
-        assertEquals("event4", result[1].id)
-    }
-
-    @Test
-    fun `filter returns empty list when no events match criteria`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = false)
-        )
-
-        val criteria = EventFilterCriteria(onlyFavorites = true)
-
-        // When
-        val result = useCase.invoke(events, criteria)
-
-        // Then
-        assertTrue(result.isEmpty())
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event3", result[1].id)
+        }
 
     @Test
-    fun `filter handles empty event list`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = emptyList<IWWWEvent>()
-        val criteria = EventFilterCriteria(onlyFavorites = true)
+    fun `filter returns only upcoming events when onlyUpcoming is true`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", isRunning = false, isDone = false), // upcoming
+                    createMockEvent("event2", isRunning = true, isDone = false), // running
+                    createMockEvent("event3", isRunning = false, isDone = true), // completed
+                    createMockEvent("event4", isRunning = false, isDone = false), // upcoming
+                )
 
-        // When
-        val result = useCase.invoke(events, criteria)
+            val criteria = EventFilterCriteria(onlyUpcoming = true)
 
-        // Then
-        assertTrue(result.isEmpty())
-    }
+            // When
+            val result = useCase.invoke(events, criteria)
 
-    @Test
-    fun `convenience filter method works with boolean flags`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        every { mockMapChecker.isMapDownloaded("event1") } returns true
-        every { mockMapChecker.isMapDownloaded("event2") } returns false
-
-        val events = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = false)
-        )
-
-        // When
-        val favoriteResult = useCase.filter(events, onlyFavorites = true)
-        val downloadedResult = useCase.filter(events, onlyDownloaded = true)
-        val allResult = useCase.filter(events)
-
-        // Then
-        assertEquals(1, favoriteResult.size)
-        assertEquals("event1", favoriteResult[0].id)
-
-        assertEquals(1, downloadedResult.size)
-        assertEquals("event1", downloadedResult[0].id)
-
-        assertEquals(2, allResult.size)
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event4", result[1].id)
+        }
 
     @Test
-    fun `filter combines multiple criteria correctly`() = runTest {
-        // Given
-        every { mockMapChecker.refreshAvailability() } returns Unit
-        val events = listOf(
-            createMockEvent("event1", favorite = true, isRunning = true),   // favorite + running
-            createMockEvent("event2", favorite = false, isRunning = true),  // running only
-            createMockEvent("event3", favorite = true, isRunning = false)   // favorite only
-        )
+    fun `filter returns only completed events when onlyCompleted is true`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", isRunning = false, isDone = false), // upcoming
+                    createMockEvent("event2", isRunning = true, isDone = false), // running
+                    createMockEvent("event3", isRunning = false, isDone = true), // completed
+                    createMockEvent("event4", isRunning = false, isDone = true), // completed
+                )
 
-        // When: Multiple criteria should be OR-ed (first matching criteria wins)
-        val runningCriteria = EventFilterCriteria(onlyRunning = true)
-        val favoriteCriteria = EventFilterCriteria(onlyFavorites = true)
+            val criteria = EventFilterCriteria(onlyCompleted = true)
 
-        val runningResult = useCase.invoke(events, runningCriteria)
-        val favoriteResult = useCase.invoke(events, favoriteCriteria)
+            // When
+            val result = useCase.invoke(events, criteria)
 
-        // Then
-        assertEquals(2, runningResult.size) // event1 and event2 are running
-        assertEquals(2, favoriteResult.size) // event1 and event3 are favorites
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event3", result[0].id)
+            assertEquals("event4", result[1].id)
+        }
+
+    @Test
+    fun `filter returns empty list when no events match criteria`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = false),
+                )
+
+            val criteria = EventFilterCriteria(onlyFavorites = true)
+
+            // When
+            val result = useCase.invoke(events, criteria)
+
+            // Then
+            assertTrue(result.isEmpty())
+        }
+
+    @Test
+    fun `filter handles empty event list`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events = emptyList<IWWWEvent>()
+            val criteria = EventFilterCriteria(onlyFavorites = true)
+
+            // When
+            val result = useCase.invoke(events, criteria)
+
+            // Then
+            assertTrue(result.isEmpty())
+        }
+
+    @Test
+    fun `convenience filter method works with boolean flags`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            every { mockMapChecker.isMapDownloaded("event1") } returns true
+            every { mockMapChecker.isMapDownloaded("event2") } returns false
+
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = false),
+                )
+
+            // When
+            val favoriteResult = useCase.filter(events, onlyFavorites = true)
+            val downloadedResult = useCase.filter(events, onlyDownloaded = true)
+            val allResult = useCase.filter(events)
+
+            // Then
+            assertEquals(1, favoriteResult.size)
+            assertEquals("event1", favoriteResult[0].id)
+
+            assertEquals(1, downloadedResult.size)
+            assertEquals("event1", downloadedResult[0].id)
+
+            assertEquals(2, allResult.size)
+        }
+
+    @Test
+    fun `filter combines multiple criteria correctly`() =
+        runTest {
+            // Given
+            every { mockMapChecker.refreshAvailability() } returns Unit
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true, isRunning = true), // favorite + running
+                    createMockEvent("event2", favorite = false, isRunning = true), // running only
+                    createMockEvent("event3", favorite = true, isRunning = false), // favorite only
+                )
+
+            // When: Multiple criteria should be OR-ed (first matching criteria wins)
+            val runningCriteria = EventFilterCriteria(onlyRunning = true)
+            val favoriteCriteria = EventFilterCriteria(onlyFavorites = true)
+
+            val runningResult = useCase.invoke(events, runningCriteria)
+            val favoriteResult = useCase.invoke(events, favoriteCriteria)
+
+            // Then
+            assertEquals(2, runningResult.size) // event1 and event2 are running
+            assertEquals(2, favoriteResult.size) // event1 and event3 are favorites
+        }
 
     @Test
     fun `EventFilterCriteria data class works correctly`() {
         // Given & When
         val defaultCriteria = EventFilterCriteria()
-        val customCriteria = EventFilterCriteria(
-            onlyFavorites = true,
-            onlyDownloaded = true,
-            eventIds = listOf("event1", "event2")
-        )
+        val customCriteria =
+            EventFilterCriteria(
+                onlyFavorites = true,
+                onlyDownloaded = true,
+                eventIds = listOf("event1", "event2"),
+            )
 
         // Then
         assertEquals(false, defaultCriteria.onlyFavorites)

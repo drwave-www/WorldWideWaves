@@ -176,11 +176,12 @@ class WWWEventWaveDeepTest {
 
     @BeforeTest
     fun setUp() {
-        waveDeep = WWWEventWaveDeep(
-            speed = 15.0,
-            direction = WWWEventWave.Direction.EAST,
-            approxDuration = 120
-        ).setRelatedEvent(mockEvent)
+        waveDeep =
+            WWWEventWaveDeep(
+                speed = 15.0,
+                direction = WWWEventWave.Direction.EAST,
+                approxDuration = 120,
+            ).setRelatedEvent(mockEvent)
     }
 
     @Test
@@ -274,12 +275,13 @@ class WWWEventWaveLinearSplitTest {
 
     @BeforeTest
     fun setUp() {
-        waveLinearSplit = WWWEventWaveLinearSplit(
-            speed = 18.0,
-            direction = WWWEventWave.Direction.WEST,
-            approxDuration = 90,
-            nbSplits = 5
-        ).setRelatedEvent(mockEvent)
+        waveLinearSplit =
+            WWWEventWaveLinearSplit(
+                speed = 18.0,
+                direction = WWWEventWave.Direction.WEST,
+                approxDuration = 90,
+                nbSplits = 5,
+            ).setRelatedEvent(mockEvent)
     }
 
     @Test
@@ -306,11 +308,12 @@ class WWWEventWaveLinearSplitTest {
     @Test
     fun `test linear split wave copy functionality`() {
         // WHEN: Copy wave with different parameters
-        val copiedWave = waveLinearSplit.copy(
-            speed = 12.0,
-            direction = WWWEventWave.Direction.EAST,
-            nbSplits = 8
-        )
+        val copiedWave =
+            waveLinearSplit.copy(
+                speed = 12.0,
+                direction = WWWEventWave.Direction.EAST,
+                nbSplits = 8,
+            )
 
         // THEN: Should create new instance with updated values
         assertEquals(12.0, copiedWave.speed, "Copied wave should have new speed")
@@ -322,12 +325,13 @@ class WWWEventWaveLinearSplitTest {
     @Test
     fun `test linear split wave validation with valid splits`() {
         // GIVEN: Wave with valid number of splits (> 2)
-        val validWave = WWWEventWaveLinearSplit(
-            speed = 8.0,
-            direction = WWWEventWave.Direction.EAST,
-            approxDuration = 60,
-            nbSplits = 5
-        )
+        val validWave =
+            WWWEventWaveLinearSplit(
+                speed = 8.0,
+                direction = WWWEventWave.Direction.EAST,
+                approxDuration = 60,
+                nbSplits = 5,
+            )
 
         // WHEN: Check validation
         val errors = validWave.validationErrors()
@@ -339,41 +343,46 @@ class WWWEventWaveLinearSplitTest {
     @Test
     fun `test linear split wave validation with invalid splits`() {
         // GIVEN: Wave with invalid number of splits (<= 2)
-        val invalidWave = WWWEventWaveLinearSplit(
-            speed = 14.0,
-            direction = WWWEventWave.Direction.EAST,
-            approxDuration = 60,
-            nbSplits = 2
-        )
+        val invalidWave =
+            WWWEventWaveLinearSplit(
+                speed = 14.0,
+                direction = WWWEventWave.Direction.EAST,
+                approxDuration = 60,
+                nbSplits = 2,
+            )
 
         // WHEN: Check validation
         val errors = invalidWave.validationErrors()
 
         // THEN: Should have validation error
         assertNotNull(errors, "Wave with invalid splits should have validation errors")
-        assertTrue(errors.any { it.contains("Number of splits must be greater than 2") },
-            "Should contain specific validation error message")
+        assertTrue(
+            errors.any { it.contains("Number of splits must be greater than 2") },
+            "Should contain specific validation error message",
+        )
     }
 
     @Test
     fun `test linear split wave validation with edge case splits`() {
         // Test edge cases for split validation
-        val edgeCases = listOf(
-            Pair(1, true),  // Should be invalid
-            Pair(2, true),  // Should be invalid
-            Pair(3, false), // Should be valid
-            Pair(10, false), // Should be valid
-            Pair(100, false) // Should be valid
-        )
+        val edgeCases =
+            listOf(
+                Pair(1, true), // Should be invalid
+                Pair(2, true), // Should be invalid
+                Pair(3, false), // Should be valid
+                Pair(10, false), // Should be valid
+                Pair(100, false), // Should be valid
+            )
 
         edgeCases.forEach { (splits, shouldHaveErrors) ->
             // GIVEN: Wave with specific number of splits
-            val testWave = WWWEventWaveLinearSplit(
-                speed = 16.0,
-                direction = WWWEventWave.Direction.EAST,
-                approxDuration = 60,
-                nbSplits = splits
-            )
+            val testWave =
+                WWWEventWaveLinearSplit(
+                    speed = 16.0,
+                    direction = WWWEventWave.Direction.EAST,
+                    approxDuration = 60,
+                    nbSplits = splits,
+                )
 
             // WHEN: Check validation
             val errors = testWave.validationErrors()

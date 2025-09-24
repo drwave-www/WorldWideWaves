@@ -26,9 +26,9 @@ package com.worldwidewaves.shared.domain.observation
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -55,9 +55,8 @@ import kotlin.math.sqrt
 class DefaultPositionObserver(
     private val positionManager: PositionManager,
     private val waveProgressionTracker: WaveProgressionTracker,
-    private val clock: IClock
+    private val clock: IClock,
 ) : PositionObserver {
-
     private var observationJob: Job? = null
     private var isCurrentlyObserving = false
 
@@ -87,24 +86,25 @@ class DefaultPositionObserver(
             event.area.polygonsLoaded
                 .onEach { loaded ->
                     Log.v("DefaultPositionObserver", "Polygons loaded state: $loaded for event ${event.id}")
-                }
+                },
         ) { position, polygonsLoaded ->
 
-            val isInArea = if (position != null && polygonsLoaded) {
-                try {
-                    waveProgressionTracker.isUserInWaveArea(position, event.area)
-                } catch (e: Exception) {
-                    Log.e("DefaultPositionObserver", "Error checking if user in area: $e")
+            val isInArea =
+                if (position != null && polygonsLoaded) {
+                    try {
+                        waveProgressionTracker.isUserInWaveArea(position, event.area)
+                    } catch (e: Exception) {
+                        Log.e("DefaultPositionObserver", "Error checking if user in area: $e")
+                        false
+                    }
+                } else {
                     false
                 }
-            } else {
-                false
-            }
 
             PositionObservation(
                 position = position,
                 isInArea = isInArea,
-                timestamp = clock.now()
+                timestamp = clock.now(),
             )
         }.distinctUntilChanged { old, new ->
             // Only emit if position changed significantly or area status changed
@@ -118,20 +118,20 @@ class DefaultPositionObserver(
         }.flowOn(Dispatchers.Default)
     }
 
-    override fun getCurrentPosition(): Position? {
-        return positionManager.getCurrentPosition()
-    }
+    override fun getCurrentPosition(): Position? = positionManager.getCurrentPosition()
 
-    override fun isValidPosition(position: Position): Boolean {
-        return position.lat in MIN_LATITUDE..MAX_LATITUDE &&
-               position.lng in MIN_LONGITUDE..MAX_LONGITUDE &&
-               !position.lat.isNaN() &&
-               !position.lng.isNaN() &&
-               position.lat.isFinite() &&
-               position.lng.isFinite()
-    }
+    override fun isValidPosition(position: Position): Boolean =
+        position.lat in MIN_LATITUDE..MAX_LATITUDE &&
+            position.lng in MIN_LONGITUDE..MAX_LONGITUDE &&
+            !position.lat.isNaN() &&
+            !position.lng.isNaN() &&
+            position.lat.isFinite() &&
+            position.lng.isFinite()
 
-    override fun calculateDistance(from: Position, to: Position): Double {
+    override fun calculateDistance(
+        from: Position,
+        to: Position,
+    ): Double {
         if (!isValidPosition(from) || !isValidPosition(to)) {
             Log.w("DefaultPositionObserver", "Invalid positions for distance calculation: $from, $to")
             return Double.POSITIVE_INFINITY
@@ -148,7 +148,8 @@ class DefaultPositionObserver(
         val deltaLatRad = (to.lat - from.lat) * PI / 180.0
         val deltaLngRad = (to.lng - from.lng) * PI / 180.0
 
-        val a = sin(deltaLatRad / 2) * sin(deltaLatRad / 2) +
+        val a =
+            sin(deltaLatRad / 2) * sin(deltaLatRad / 2) +
                 cos(lat1Rad) * cos(lat2Rad) *
                 sin(deltaLngRad / 2) * sin(deltaLngRad / 2)
 
@@ -166,7 +167,5 @@ class DefaultPositionObserver(
         isCurrentlyObserving = false
     }
 
-    override fun isObserving(): Boolean {
-        return isCurrentlyObserving && observationJob?.isActive == true
-    }
+    override fun isObserving(): Boolean = isCurrentlyObserving && observationJob?.isActive == true
 }

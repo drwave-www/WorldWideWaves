@@ -104,10 +104,11 @@ abstract class WWWEventWave :
 
     @Transient protected var positionRequester: (() -> Position?)? = null
 
-    @Transient private val _positionUpdates = MutableSharedFlow<Position?>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
+    @Transient private val _positionUpdates =
+        MutableSharedFlow<Position?>(
+            replay = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
 
     // ---------------------------
 

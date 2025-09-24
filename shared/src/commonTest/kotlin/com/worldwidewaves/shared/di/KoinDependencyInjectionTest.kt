@@ -60,7 +60,6 @@ import kotlin.test.assertTrue
  * module validation, singleton behavior, and factory patterns.
  */
 class KoinDependencyInjectionTest : KoinTest {
-
     private lateinit var koin: Koin
 
     @BeforeTest
@@ -68,15 +67,17 @@ class KoinDependencyInjectionTest : KoinTest {
         // Ensure clean state
         stopKoin()
 
-        val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_${System.currentTimeMillis()}.preferences_pb" } }
-        }
+        val testPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_${System.currentTimeMillis()}.preferences_pb" } }
+            }
 
-        koin = startKoin {
-            modules(sharedModule + testPlatformModule)
-        }.koin
+        koin =
+            startKoin {
+                modules(sharedModule + testPlatformModule)
+            }.koin
     }
 
     @AfterTest
@@ -198,15 +199,17 @@ class KoinDependencyInjectionTest : KoinTest {
         stopKoin()
 
         // Create new configuration with different platform
-        val altPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("alternative") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_alt_${System.currentTimeMillis()}.preferences_pb" } }
-        }
+        val altPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("alternative") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_alt_${System.currentTimeMillis()}.preferences_pb" } }
+            }
 
-        val newKoin = startKoin {
-            modules(sharedModule + altPlatformModule)
-        }.koin
+        val newKoin =
+            startKoin {
+                modules(sharedModule + altPlatformModule)
+            }.koin
 
         val platform = newKoin.get<WWWPlatform>()
         assertEquals("alternative", platform.name)
@@ -215,15 +218,17 @@ class KoinDependencyInjectionTest : KoinTest {
         stopKoin()
 
         // Restore original for tearDown
-        val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_restore_${System.currentTimeMillis()}.preferences_pb" } }
-        }
+        val testPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_restore_${System.currentTimeMillis()}.preferences_pb" } }
+            }
 
-        koin = startKoin {
-            modules(sharedModule + testPlatformModule)
-        }.koin
+        koin =
+            startKoin {
+                modules(sharedModule + testPlatformModule)
+            }.koin
     }
 
     @Test
@@ -231,14 +236,16 @@ class KoinDependencyInjectionTest : KoinTest {
         // Create minimal module without some dependencies
         stopKoin()
 
-        val incompleteModule = module {
-            single<WWWPlatform> { WWWPlatform("incomplete") }
-            // Missing DataStore dependency
-        }
+        val incompleteModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("incomplete") }
+                // Missing DataStore dependency
+            }
 
-        val incompleteKoin = startKoin {
-            modules(listOf(commonModule, incompleteModule))
-        }.koin
+        val incompleteKoin =
+            startKoin {
+                modules(listOf(commonModule, incompleteModule))
+            }.koin
 
         // Should fail when trying to get FavoriteEventsStore without DataStore
         var exceptionThrown = false
@@ -246,24 +253,28 @@ class KoinDependencyInjectionTest : KoinTest {
             incompleteKoin.get<FavoriteEventsStore>()
         } catch (e: Exception) {
             exceptionThrown = true
-            assertTrue(e.message?.contains("No definition found") == true ||
-                      e.message?.contains("NoBeanDefFound") == true ||
-                      e is RuntimeException)
+            assertTrue(
+                e.message?.contains("No definition found") == true ||
+                    e.message?.contains("NoBeanDefFound") == true ||
+                    e is RuntimeException,
+            )
         }
         assertTrue(exceptionThrown, "Expected exception when missing dependency")
 
         stopKoin()
 
         // Restore complete setup
-        val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_restore2_${System.currentTimeMillis()}.preferences_pb" } }
-        }
+        val testPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_restore2_${System.currentTimeMillis()}.preferences_pb" } }
+            }
 
-        koin = startKoin {
-            modules(sharedModule + testPlatformModule)
-        }.koin
+        koin =
+            startKoin {
+                modules(sharedModule + testPlatformModule)
+            }.koin
     }
 
     @Test
@@ -281,11 +292,12 @@ class KoinDependencyInjectionTest : KoinTest {
     fun `test concurrent access to singleton dependencies`() {
         // Test thread safety of singleton access
         val results = mutableSetOf<WWWEvents>()
-        val threads = (1..10).map {
-            Thread {
-                results.add(koin.get<WWWEvents>())
+        val threads =
+            (1..10).map {
+                Thread {
+                    results.add(koin.get<WWWEvents>())
+                }
             }
-        }
 
         threads.forEach { it.start() }
         threads.forEach { it.join() }
@@ -299,18 +311,20 @@ class KoinDependencyInjectionTest : KoinTest {
         // Create module with named dependencies
         stopKoin()
 
-        val namedModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_named_${System.currentTimeMillis()}.preferences_pb" } }
+        val namedModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_named_${System.currentTimeMillis()}.preferences_pb" } }
 
-            single(named("primary")) { "Primary Config" }
-            single(named("secondary")) { "Secondary Config" }
-        }
+                single(named("primary")) { "Primary Config" }
+                single(named("secondary")) { "Secondary Config" }
+            }
 
-        val namedKoin = startKoin {
-            modules(sharedModule + namedModule)
-        }.koin
+        val namedKoin =
+            startKoin {
+                modules(sharedModule + namedModule)
+            }.koin
 
         val primaryConfig = namedKoin.get<String>(named("primary"))
         val secondaryConfig = namedKoin.get<String>(named("secondary"))
@@ -322,15 +336,17 @@ class KoinDependencyInjectionTest : KoinTest {
         stopKoin()
 
         // Restore original setup
-        val testPlatformModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-            single<DataStoreFactory> { TestDataStoreFactory() }
-            single { get<DataStoreFactory>().create { "/tmp/test_koin_restore3_${System.currentTimeMillis()}.preferences_pb" } }
-        }
+        val testPlatformModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+                single<DataStoreFactory> { TestDataStoreFactory() }
+                single { get<DataStoreFactory>().create { "/tmp/test_koin_restore3_${System.currentTimeMillis()}.preferences_pb" } }
+            }
 
-        koin = startKoin {
-            modules(sharedModule + testPlatformModule)
-        }.koin
+        koin =
+            startKoin {
+                modules(sharedModule + testPlatformModule)
+            }.koin
     }
 
     @Test

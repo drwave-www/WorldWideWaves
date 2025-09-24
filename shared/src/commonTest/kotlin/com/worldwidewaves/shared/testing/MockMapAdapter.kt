@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.asStateFlow
  * for comprehensive testing of map-dependent components.
  */
 class MockMapAdapter : MapLibreAdapter<Any> {
-
     // Map properties
     private var mockMap: Any? = null
     private var currentStyle: String? = null
@@ -80,7 +79,10 @@ class MockMapAdapter : MapLibreAdapter<Any> {
         this.mockMap = map
     }
 
-    override fun setStyle(stylePath: String, callback: () -> Unit?) {
+    override fun setStyle(
+        stylePath: String,
+        callback: () -> Unit?,
+    ) {
         currentStyle = stylePath
         styleChanges.add(StyleChange(stylePath, System.currentTimeMillis()))
 
@@ -107,14 +109,15 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     override fun animateCamera(
         position: Position,
         zoom: Double?,
-        callback: MapCameraCallback?
+        callback: MapCameraCallback?,
     ) {
-        val animation = CameraAnimation(
-            type = "animateCamera",
-            targetPosition = position,
-            targetZoom = zoom,
-            timestamp = System.currentTimeMillis()
-        )
+        val animation =
+            CameraAnimation(
+                type = "animateCamera",
+                targetPosition = position,
+                targetZoom = zoom,
+                timestamp = System.currentTimeMillis(),
+            )
         cameraAnimations.add(animation)
 
         if (!shouldFailAnimations) {
@@ -138,14 +141,15 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     override fun animateCameraToBounds(
         bounds: BoundingBox,
         padding: Int,
-        callback: MapCameraCallback?
+        callback: MapCameraCallback?,
     ) {
-        val animation = CameraAnimation(
-            type = "animateCameraToBounds",
-            targetBounds = bounds,
-            padding = padding,
-            timestamp = System.currentTimeMillis()
-        )
+        val animation =
+            CameraAnimation(
+                type = "animateCameraToBounds",
+                targetBounds = bounds,
+                padding = padding,
+                timestamp = System.currentTimeMillis(),
+            )
         cameraAnimations.add(animation)
 
         if (!shouldFailAnimations) {
@@ -167,7 +171,7 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         this.constraintBounds = constraintBounds
         boundsOperations.add(
-            BoundsOperation("setBoundsForCameraTarget", constraintBounds, System.currentTimeMillis())
+            BoundsOperation("setBoundsForCameraTarget", constraintBounds, System.currentTimeMillis()),
         )
     }
 
@@ -181,17 +185,25 @@ class MockMapAdapter : MapLibreAdapter<Any> {
         this.maxZoom = maxZoom
     }
 
-    override fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
+    override fun setAttributionMargins(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
         attributionMargins = AttributionMargins(left, top, right, bottom)
     }
 
-    override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
+    override fun addWavePolygons(
+        polygons: List<Any>,
+        clearExisting: Boolean,
+    ) {
         wavePolygonOperations.add(
             WavePolygonOperation(
                 polygons = polygons,
                 clearExisting = clearExisting,
-                timestamp = System.currentTimeMillis()
-            )
+                timestamp = System.currentTimeMillis(),
+            ),
         )
     }
 
@@ -212,7 +224,10 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     /**
      * Simulates a map click at the specified coordinates.
      */
-    fun simulateMapClick(latitude: Double, longitude: Double) {
+    fun simulateMapClick(
+        latitude: Double,
+        longitude: Double,
+    ) {
         mapClickListener?.invoke(latitude, longitude)
     }
 
@@ -226,7 +241,10 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     /**
      * Sets the map dimensions for testing.
      */
-    fun setMapDimensions(width: Double, height: Double) {
+    fun setMapDimensions(
+        width: Double,
+        height: Double,
+    ) {
         mapWidth = width
         mapHeight = height
     }
@@ -246,7 +264,7 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     fun configureAnimations(
         shouldFail: Boolean = false,
         shouldDelay: Boolean = false,
-        duration: Long = 0
+        duration: Long = 0,
     ) {
         shouldFailAnimations = shouldFail
         shouldDelayCallbacks = shouldDelay
@@ -337,36 +355,52 @@ class MockMapAdapter : MapLibreAdapter<Any> {
     /**
      * Verifies that a specific camera animation was performed.
      */
-    fun verifyCameraAnimationTo(position: Position, zoom: Double? = null) {
-        val matchingAnimation = cameraAnimations.find {
-            it.targetPosition == position && (zoom == null || it.targetZoom == zoom)
-        }
+    fun verifyCameraAnimationTo(
+        position: Position,
+        zoom: Double? = null,
+    ) {
+        val matchingAnimation =
+            cameraAnimations.find {
+                it.targetPosition == position && (zoom == null || it.targetZoom == zoom)
+            }
         if (matchingAnimation == null) {
-            throw AssertionError("Expected camera animation to position $position with zoom $zoom, but none found. Actual animations: $cameraAnimations")
+            throw AssertionError(
+                "Expected camera animation to position $position with zoom $zoom, but none found. Actual animations: $cameraAnimations",
+            )
         }
     }
 
     /**
      * Verifies that a specific bounds animation was performed.
      */
-    fun verifyCameraAnimationToBounds(bounds: BoundingBox, padding: Int = 0) {
-        val matchingAnimation = cameraAnimations.find {
-            it.targetBounds == bounds && it.padding == padding
-        }
+    fun verifyCameraAnimationToBounds(
+        bounds: BoundingBox,
+        padding: Int = 0,
+    ) {
+        val matchingAnimation =
+            cameraAnimations.find {
+                it.targetBounds == bounds && it.padding == padding
+            }
         if (matchingAnimation == null) {
-            throw AssertionError("Expected camera animation to bounds $bounds with padding $padding, but none found. Actual animations: $cameraAnimations")
+            throw AssertionError(
+                "Expected camera animation to bounds $bounds with padding $padding, but none found. Actual animations: $cameraAnimations",
+            )
         }
     }
 
     /**
      * Verifies that wave polygons were added.
      */
-    fun verifyWavePolygonsAdded(expectedCount: Int? = null, clearExisting: Boolean? = null) {
-        val operations = if (clearExisting != null) {
-            wavePolygonOperations.filter { it.clearExisting == clearExisting }
-        } else {
-            wavePolygonOperations
-        }
+    fun verifyWavePolygonsAdded(
+        expectedCount: Int? = null,
+        clearExisting: Boolean? = null,
+    ) {
+        val operations =
+            if (clearExisting != null) {
+                wavePolygonOperations.filter { it.clearExisting == clearExisting }
+            } else {
+                wavePolygonOperations
+            }
 
         if (expectedCount != null) {
             val totalPolygons = operations.sumOf { it.polygons.size }
@@ -392,7 +426,7 @@ class MockMapAdapter : MapLibreAdapter<Any> {
             center.latitude - 0.01,
             center.longitude - 0.01,
             center.latitude + 0.01,
-            center.longitude + 0.01
+            center.longitude + 0.01,
         )
     }
 
@@ -404,36 +438,36 @@ class MockMapAdapter : MapLibreAdapter<Any> {
         val targetBounds: BoundingBox? = null,
         val targetZoom: Double? = null,
         val padding: Int = 0,
-        val timestamp: Long
+        val timestamp: Long,
     )
 
     data class WavePolygonOperation(
         val polygons: List<Any>,
         val clearExisting: Boolean,
-        val timestamp: Long
+        val timestamp: Long,
     )
 
     data class StyleChange(
         val stylePath: String,
-        val timestamp: Long
+        val timestamp: Long,
     )
 
     data class BoundsOperation(
         val operation: String,
         val bounds: BoundingBox,
-        val timestamp: Long
+        val timestamp: Long,
     )
 
     data class AttributionMargins(
         val left: Int,
         val top: Int,
         val right: Int,
-        val bottom: Int
+        val bottom: Int,
     )
 
     data class ZoomConstraints(
         val min: Double,
-        val max: Double
+        val max: Double,
     )
 
     companion object {
@@ -441,53 +475,55 @@ class MockMapAdapter : MapLibreAdapter<Any> {
          * Creates a mock map adapter configured for city testing.
          */
         fun forCity(city: String): MockMapAdapter {
-            val position = when (city.lowercase()) {
-                "paris" -> TestHelpers.TestLocations.PARIS
-                "london" -> TestHelpers.TestLocations.LONDON
-                "newyork", "new_york" -> TestHelpers.TestLocations.NEW_YORK
-                "tokyo" -> TestHelpers.TestLocations.TOKYO
-                "sydney" -> TestHelpers.TestLocations.SYDNEY
-                "saopaulo", "sao_paulo" -> TestHelpers.TestLocations.SAO_PAULO
-                else -> TestHelpers.TestLocations.PARIS
-            }
+            val position =
+                when (city.lowercase()) {
+                    "paris" -> TestHelpers.TestLocations.PARIS
+                    "london" -> TestHelpers.TestLocations.LONDON
+                    "newyork", "new_york" -> TestHelpers.TestLocations.NEW_YORK
+                    "tokyo" -> TestHelpers.TestLocations.TOKYO
+                    "sydney" -> TestHelpers.TestLocations.SYDNEY
+                    "saopaulo", "sao_paulo" -> TestHelpers.TestLocations.SAO_PAULO
+                    else -> TestHelpers.TestLocations.PARIS
+                }
 
             return MockMapAdapter().apply {
                 cameraPosition = position
                 _currentPosition.value = position
-                visibleRegion = BoundingBox(
-                    position.latitude - 0.01,
-                    position.longitude - 0.01,
-                    position.latitude + 0.01,
-                    position.longitude + 0.01
-                )
+                visibleRegion =
+                    BoundingBox(
+                        position.latitude - 0.01,
+                        position.longitude - 0.01,
+                        position.latitude + 0.01,
+                        position.longitude + 0.01,
+                    )
             }
         }
 
         /**
          * Creates a mock map adapter that simulates animation failures.
          */
-        fun withAnimationFailures(): MockMapAdapter {
-            return MockMapAdapter().apply {
+        fun withAnimationFailures(): MockMapAdapter =
+            MockMapAdapter().apply {
                 configureAnimations(shouldFail = true)
             }
-        }
 
         /**
          * Creates a mock map adapter with delayed callbacks for testing async behavior.
          */
-        fun withDelayedCallbacks(): MockMapAdapter {
-            return MockMapAdapter().apply {
+        fun withDelayedCallbacks(): MockMapAdapter =
+            MockMapAdapter().apply {
                 configureAnimations(shouldDelay = true)
             }
-        }
 
         /**
          * Creates a mock map adapter with custom dimensions.
          */
-        fun withDimensions(width: Double, height: Double): MockMapAdapter {
-            return MockMapAdapter().apply {
+        fun withDimensions(
+            width: Double,
+            height: Double,
+        ): MockMapAdapter =
+            MockMapAdapter().apply {
                 setMapDimensions(width, height)
             }
-        }
     }
 }

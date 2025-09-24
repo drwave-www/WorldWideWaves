@@ -21,9 +21,9 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ByteArrayReader
+import com.worldwidewaves.shared.utils.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -326,7 +326,8 @@ object MidiParser {
             val notes =
                 finalNotes.map { internalNote ->
                     val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, globalTempoChanges)
-                    val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, globalTempoChanges)
+                    val endTimeSeconds =
+                        ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, globalTempoChanges)
 
                     MidiNote(
                         pitch = internalNote.pitch,

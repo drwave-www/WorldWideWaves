@@ -33,35 +33,30 @@ import kotlinx.coroutines.flow.onEach
 /**
  * iOS implementation of StateFlow to IOSObservable conversion
  */
-actual fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T> {
-    return IOSStateFlowObservable(this)
-}
+actual fun <T> StateFlow<T>.toIOSObservable(): IOSObservable<T> = IOSStateFlowObservable(this)
 
 /**
  * iOS implementation of Flow to IOSObservable conversion
  */
-actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> {
-    return IOSFlowObservable(this)
-}
+actual fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T> = IOSFlowObservable(this)
 
 /**
  * iOS-specific StateFlow observable implementation
  */
 private class IOSStateFlowObservable<T>(
-    private val stateFlow: StateFlow<T>
+    private val stateFlow: StateFlow<T>,
 ) : IOSObservable<T> {
-
     override val value: T
         get() = stateFlow.value
 
     override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-        val job = stateFlow
-            .onEach { value ->
-                callback(value)
-            }
-            .launchIn(scope)
+        val job =
+            stateFlow
+                .onEach { value ->
+                    callback(value)
+                }.launchIn(scope)
 
         return IOSSubscription(scope, job.isActive)
     }
@@ -77,9 +72,8 @@ private class IOSStateFlowObservable<T>(
  * iOS-specific Flow observable implementation
  */
 private class IOSFlowObservable<T>(
-    private val flow: Flow<T>
+    private val flow: Flow<T>,
 ) : IOSObservable<T> {
-
     private var _cachedValue: T? = null
 
     override val value: T
@@ -88,12 +82,12 @@ private class IOSFlowObservable<T>(
     override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-        val job = flow
-            .onEach { value ->
-                _cachedValue = value
-                callback(value)
-            }
-            .launchIn(scope)
+        val job =
+            flow
+                .onEach { value ->
+                    _cachedValue = value
+                    callback(value)
+                }.launchIn(scope)
 
         return IOSSubscription(scope, job.isActive)
     }
@@ -111,9 +105,8 @@ private class IOSFlowObservable<T>(
  */
 private class IOSSubscription(
     private val scope: CoroutineScope,
-    private var isActiveParameter: Boolean
+    private var isActiveParameter: Boolean,
 ) : IOSObservableSubscription {
-
     override val isActive: Boolean
         get() = isActiveParameter
 
@@ -129,7 +122,6 @@ private class IOSSubscription(
  * iOS-specific reactive subscription manager implementation
  */
 class IOSReactiveSubscriptionManagerImpl : IOSReactiveSubscriptionManager {
-
     private val subscriptions = mutableListOf<IOSObservableSubscription>()
 
     override fun addSubscription(subscription: IOSObservableSubscription) {
@@ -149,9 +141,8 @@ class IOSReactiveSubscriptionManagerImpl : IOSReactiveSubscriptionManager {
  * iOS-specific lifecycle observer implementation
  */
 class IOSLifecycleObserverImpl(
-    private val subscriptionManager: IOSReactiveSubscriptionManager
+    private val subscriptionManager: IOSReactiveSubscriptionManager,
 ) : IOSLifecycleObserver {
-
     override fun onViewDidAppear() {
         // iOS View appeared - subscriptions should already be active
         // This can be used for logging or debugging

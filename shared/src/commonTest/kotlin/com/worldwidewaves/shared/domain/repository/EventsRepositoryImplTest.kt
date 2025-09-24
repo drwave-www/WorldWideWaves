@@ -49,355 +49,377 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class EventsRepositoryImplTest {
-
     private val mockWWWEvents = mockk<WWWEvents>()
     private val repository = EventsRepositoryImpl(mockWWWEvents)
 
-    private fun createMockEvent(id: String): IWWWEvent = mockk<IWWWEvent>().apply {
-        every { this@apply.id } returns id
-    }
-
-    @Test
-    fun `getEvents should return flow from WWWEvents`() = runTest {
-        // Arrange
-        val mockEvents = listOf(
-            createMockEvent("event1"),
-            createMockEvent("event2")
-        )
-        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
-
-        // Act
-        val result = repository.getEvents().first()
-
-        // Assert
-        assertEquals(2, result.size)
-        assertEquals("event1", result[0].id)
-        assertEquals("event2", result[1].id)
-    }
-
-    @Test
-    fun `getEvents should return empty flow when no events`() = runTest {
-        // Arrange
-        every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
-
-        // Act
-        val result = repository.getEvents().first()
-
-        // Assert
-        assertTrue(result.isEmpty())
-    }
-
-    @Test
-    fun `loadEvents should trigger WWWEvents loadEvents with callbacks`() = runTest {
-        // Arrange
-        val testException = RuntimeException("Load error")
-        var onLoadingErrorCalled = false
-        val errorCallback: (Exception) -> Unit = {
-            onLoadingErrorCalled = true
+    private fun createMockEvent(id: String): IWWWEvent =
+        mockk<IWWWEvent>().apply {
+            every { this@apply.id } returns id
         }
 
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoaded = secondArg<(() -> Unit)?>()
-            val onLoadingError = thirdArg<((Exception) -> Unit)?>()
+    @Test
+    fun `getEvents should return flow from WWWEvents`() =
+        runTest {
+            // Arrange
+            val mockEvents =
+                listOf(
+                    createMockEvent("event1"),
+                    createMockEvent("event2"),
+                )
+            every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
-            // Simulate loading error
-            onLoadingError?.invoke(testException)
+            // Act
+            val result = repository.getEvents().first()
 
-            mockWWWEvents
+            // Assert
+            assertEquals(2, result.size)
+            assertEquals("event1", result[0].id)
+            assertEquals("event2", result[1].id)
         }
 
-        // Act
-        repository.loadEvents(errorCallback)
-
-        // Assert
-        assertTrue(onLoadingErrorCalled)
-        verify { mockWWWEvents.loadEvents(any(), any(), any()) }
-    }
-
     @Test
-    fun `loadEvents should manage loading state correctly`() = runTest {
-        // Arrange
-        every { mockWWWEvents.list() } returns emptyList()
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoaded = secondArg<(() -> Unit)?>()
+    fun `getEvents should return empty flow when no events`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
 
-            // Simulate successful loading
-            onLoaded?.invoke()
+            // Act
+            val result = repository.getEvents().first()
 
-            mockWWWEvents
+            // Assert
+            assertTrue(result.isEmpty())
         }
 
-        // Act & Assert
-        // Initially not loading
-        assertFalse(repository.isLoading().first())
-
-        // Start loading
-        repository.loadEvents { }
-
-        // Should not be loading after successful completion
-        assertFalse(repository.isLoading().first())
-    }
-
     @Test
-    fun `loadEvents should set error state on failure`() = runTest {
-        // Arrange
-        val testException = RuntimeException("Load failed")
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoadingError = secondArg<((Exception) -> Unit)?>()
+    fun `loadEvents should trigger WWWEvents loadEvents with callbacks`() =
+        runTest {
+            // Arrange
+            val testException = RuntimeException("Load error")
+            var onLoadingErrorCalled = false
+            val errorCallback: (Exception) -> Unit = {
+                onLoadingErrorCalled = true
+            }
 
-            // Simulate loading error
-            onLoadingError?.invoke(testException)
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoaded = secondArg<(() -> Unit)?>()
+                val onLoadingError = thirdArg<((Exception) -> Unit)?>()
 
-            mockWWWEvents
+                // Simulate loading error
+                onLoadingError?.invoke(testException)
+
+                mockWWWEvents
+            }
+
+            // Act
+            repository.loadEvents(errorCallback)
+
+            // Assert
+            assertTrue(onLoadingErrorCalled)
+            verify { mockWWWEvents.loadEvents(any(), any(), any()) }
         }
 
-        // Initially no error
-        assertNull(repository.getLastError().first())
-
-        // Act
-        repository.loadEvents { }
-
-        // Assert
-        val error = repository.getLastError().first()
-        assertNotNull(error)
-        assertEquals("Load failed", error.message)
-    }
-
     @Test
-    fun `getEvent should return specific event by ID`() = runTest {
-        // Arrange
-        val mockEvents = listOf(
-            createMockEvent("event1"),
-            createMockEvent("event2"),
-            createMockEvent("event3")
-        )
-        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
+    fun `loadEvents should manage loading state correctly`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.list() } returns emptyList()
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoaded = secondArg<(() -> Unit)?>()
 
-        // Act
-        val result = repository.getEvent("event2").first()
+                // Simulate successful loading
+                onLoaded?.invoke()
 
-        // Assert
-        assertNotNull(result)
-        assertEquals("event2", result.id)
-    }
+                mockWWWEvents
+            }
 
-    @Test
-    fun `getEvent should return null for non-existent ID`() = runTest {
-        // Arrange
-        val mockEvents = listOf(
-            createMockEvent("event1"),
-            createMockEvent("event2")
-        )
-        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
+            // Act & Assert
+            // Initially not loading
+            assertFalse(repository.isLoading().first())
 
-        // Act
-        val result = repository.getEvent("non-existent").first()
+            // Start loading
+            repository.loadEvents { }
 
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `getEvent should return null from empty events list`() = runTest {
-        // Arrange
-        every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
-
-        // Act
-        val result = repository.getEvent("any-id").first()
-
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `refreshEvents should reload data successfully`() = runTest {
-        // Arrange
-        every { mockWWWEvents.list() } returns emptyList()
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoaded = firstArg<(() -> Unit)?>()
-
-            // Simulate successful refresh
-            onLoaded?.invoke()
-
-            mockWWWEvents
+            // Should not be loading after successful completion
+            assertFalse(repository.isLoading().first())
         }
 
-        // Act
-        val result = repository.refreshEvents()
-
-        // Assert
-        assertTrue(result.isSuccess)
-        verify { mockWWWEvents.loadEvents(any(), any(), any()) }
-    }
-
     @Test
-    fun `refreshEvents should return failure on error`() = runTest {
-        // Arrange
-        val testException = RuntimeException("Refresh failed")
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoadingError = secondArg<((Exception) -> Unit)?>()
+    fun `loadEvents should set error state on failure`() =
+        runTest {
+            // Arrange
+            val testException = RuntimeException("Load failed")
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoadingError = secondArg<((Exception) -> Unit)?>()
 
-            // Simulate refresh error
-            onLoadingError?.invoke(testException)
+                // Simulate loading error
+                onLoadingError?.invoke(testException)
 
-            mockWWWEvents
+                mockWWWEvents
+            }
+
+            // Initially no error
+            assertNull(repository.getLastError().first())
+
+            // Act
+            repository.loadEvents { }
+
+            // Assert
+            val error = repository.getLastError().first()
+            assertNotNull(error)
+            assertEquals("Load failed", error.message)
         }
 
-        // Act
-        val result = repository.refreshEvents()
-
-        // Assert
-        assertTrue(result.isFailure)
-        assertEquals("Refresh failed", result.exceptionOrNull()?.message)
-    }
-
     @Test
-    fun `getCachedEventsCount should return count from WWWEvents list`() = runTest {
-        // Arrange
-        val mockEvents = listOf(
-            createMockEvent("event1"),
-            createMockEvent("event2"),
-            createMockEvent("event3")
-        )
-        every { mockWWWEvents.list() } returns mockEvents
+    fun `getEvent should return specific event by ID`() =
+        runTest {
+            // Arrange
+            val mockEvents =
+                listOf(
+                    createMockEvent("event1"),
+                    createMockEvent("event2"),
+                    createMockEvent("event3"),
+                )
+            every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
-        // Act
-        val count = repository.getCachedEventsCount()
+            // Act
+            val result = repository.getEvent("event2").first()
 
-        // Assert
-        assertEquals(3, count)
-    }
-
-    @Test
-    fun `getCachedEventsCount should return zero for empty list`() = runTest {
-        // Arrange
-        every { mockWWWEvents.list() } returns emptyList()
-
-        // Act
-        val count = repository.getCachedEventsCount()
-
-        // Assert
-        assertEquals(0, count)
-    }
-
-    @Test
-    fun `clearCache should not affect WWWEvents functionality`() = runTest {
-        // Arrange
-        val mockEvents = listOf(createMockEvent("event1"))
-        every { mockWWWEvents.list() } returns mockEvents
-
-        // Act
-        repository.clearCache()
-
-        // Assert - should still work normally
-        val count = repository.getCachedEventsCount()
-        assertEquals(1, count)
-    }
-
-    @Test
-    fun `isLoading should return false initially`() = runTest {
-        // Act
-        val isLoading = repository.isLoading().first()
-
-        // Assert
-        assertFalse(isLoading)
-    }
-
-    @Test
-    fun `getLastError should return null initially`() = runTest {
-        // Act
-        val error = repository.getLastError().first()
-
-        // Assert
-        assertNull(error)
-    }
-
-    @Test
-    fun `multiple loadEvents calls should handle concurrency`() = runTest {
-        // Arrange
-        every { mockWWWEvents.list() } returns emptyList()
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoaded = secondArg<(() -> Unit)?>()
-            onLoaded?.invoke()
-            mockWWWEvents
+            // Assert
+            assertNotNull(result)
+            assertEquals("event2", result.id)
         }
 
-        // Act - multiple concurrent calls
-        val errorCallback: (Exception) -> Unit = { }
-        repository.loadEvents(errorCallback)
-        repository.loadEvents(errorCallback)
-
-        // Assert - should not crash and complete successfully
-        assertFalse(repository.isLoading().first())
-    }
-
     @Test
-    fun `repository should handle WWWEvents exceptions gracefully`() = runTest {
-        // Arrange
-        val testException = RuntimeException("WWWEvents internal error")
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } throws testException
+    fun `getEvent should return null for non-existent ID`() =
+        runTest {
+            // Arrange
+            val mockEvents =
+                listOf(
+                    createMockEvent("event1"),
+                    createMockEvent("event2"),
+                )
+            every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
-        var errorReceived: Exception? = null
-        val errorCallback: (Exception) -> Unit = { errorReceived = it }
+            // Act
+            val result = repository.getEvent("non-existent").first()
 
-        // Act
-        repository.loadEvents(errorCallback)
-
-        // Assert
-        assertNotNull(errorReceived)
-        assertEquals("WWWEvents internal error", errorReceived?.message)
-
-        val lastError = repository.getLastError().first()
-        assertNotNull(lastError)
-        assertEquals("WWWEvents internal error", lastError.message)
-    }
-
-    @Test
-    fun `refreshEvents should clear previous error state`() = runTest {
-        // Arrange - first set an error
-        val firstException = RuntimeException("First error")
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoadingError = secondArg<((Exception) -> Unit)?>()
-            onLoadingError?.invoke(firstException)
-            mockWWWEvents
+            // Assert
+            assertNull(result)
         }
 
-        repository.loadEvents { }
+    @Test
+    fun `getEvent should return null from empty events list`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
 
-        // Verify error is set
-        val initialError = repository.getLastError().first()
-        assertNotNull(initialError)
+            // Act
+            val result = repository.getEvent("any-id").first()
 
-        // Now set up successful refresh
-        every { mockWWWEvents.list() } returns emptyList()
-        every {
-            mockWWWEvents.loadEvents(any(), any(), any())
-        } answers {
-            val onLoaded = secondArg<(() -> Unit)?>()
-            onLoaded?.invoke()
-            mockWWWEvents
+            // Assert
+            assertNull(result)
         }
 
-        // Act
-        repository.refreshEvents()
+    @Test
+    fun `refreshEvents should reload data successfully`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.list() } returns emptyList()
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoaded = firstArg<(() -> Unit)?>()
 
-        // Assert - error should be cleared
-        assertFalse(repository.isLoading().first())
-    }
+                // Simulate successful refresh
+                onLoaded?.invoke()
+
+                mockWWWEvents
+            }
+
+            // Act
+            val result = repository.refreshEvents()
+
+            // Assert
+            assertTrue(result.isSuccess)
+            verify { mockWWWEvents.loadEvents(any(), any(), any()) }
+        }
+
+    @Test
+    fun `refreshEvents should return failure on error`() =
+        runTest {
+            // Arrange
+            val testException = RuntimeException("Refresh failed")
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoadingError = secondArg<((Exception) -> Unit)?>()
+
+                // Simulate refresh error
+                onLoadingError?.invoke(testException)
+
+                mockWWWEvents
+            }
+
+            // Act
+            val result = repository.refreshEvents()
+
+            // Assert
+            assertTrue(result.isFailure)
+            assertEquals("Refresh failed", result.exceptionOrNull()?.message)
+        }
+
+    @Test
+    fun `getCachedEventsCount should return count from WWWEvents list`() =
+        runTest {
+            // Arrange
+            val mockEvents =
+                listOf(
+                    createMockEvent("event1"),
+                    createMockEvent("event2"),
+                    createMockEvent("event3"),
+                )
+            every { mockWWWEvents.list() } returns mockEvents
+
+            // Act
+            val count = repository.getCachedEventsCount()
+
+            // Assert
+            assertEquals(3, count)
+        }
+
+    @Test
+    fun `getCachedEventsCount should return zero for empty list`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.list() } returns emptyList()
+
+            // Act
+            val count = repository.getCachedEventsCount()
+
+            // Assert
+            assertEquals(0, count)
+        }
+
+    @Test
+    fun `clearCache should not affect WWWEvents functionality`() =
+        runTest {
+            // Arrange
+            val mockEvents = listOf(createMockEvent("event1"))
+            every { mockWWWEvents.list() } returns mockEvents
+
+            // Act
+            repository.clearCache()
+
+            // Assert - should still work normally
+            val count = repository.getCachedEventsCount()
+            assertEquals(1, count)
+        }
+
+    @Test
+    fun `isLoading should return false initially`() =
+        runTest {
+            // Act
+            val isLoading = repository.isLoading().first()
+
+            // Assert
+            assertFalse(isLoading)
+        }
+
+    @Test
+    fun `getLastError should return null initially`() =
+        runTest {
+            // Act
+            val error = repository.getLastError().first()
+
+            // Assert
+            assertNull(error)
+        }
+
+    @Test
+    fun `multiple loadEvents calls should handle concurrency`() =
+        runTest {
+            // Arrange
+            every { mockWWWEvents.list() } returns emptyList()
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoaded = secondArg<(() -> Unit)?>()
+                onLoaded?.invoke()
+                mockWWWEvents
+            }
+
+            // Act - multiple concurrent calls
+            val errorCallback: (Exception) -> Unit = { }
+            repository.loadEvents(errorCallback)
+            repository.loadEvents(errorCallback)
+
+            // Assert - should not crash and complete successfully
+            assertFalse(repository.isLoading().first())
+        }
+
+    @Test
+    fun `repository should handle WWWEvents exceptions gracefully`() =
+        runTest {
+            // Arrange
+            val testException = RuntimeException("WWWEvents internal error")
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } throws testException
+
+            var errorReceived: Exception? = null
+            val errorCallback: (Exception) -> Unit = { errorReceived = it }
+
+            // Act
+            repository.loadEvents(errorCallback)
+
+            // Assert
+            assertNotNull(errorReceived)
+            assertEquals("WWWEvents internal error", errorReceived?.message)
+
+            val lastError = repository.getLastError().first()
+            assertNotNull(lastError)
+            assertEquals("WWWEvents internal error", lastError.message)
+        }
+
+    @Test
+    fun `refreshEvents should clear previous error state`() =
+        runTest {
+            // Arrange - first set an error
+            val firstException = RuntimeException("First error")
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoadingError = secondArg<((Exception) -> Unit)?>()
+                onLoadingError?.invoke(firstException)
+                mockWWWEvents
+            }
+
+            repository.loadEvents { }
+
+            // Verify error is set
+            val initialError = repository.getLastError().first()
+            assertNotNull(initialError)
+
+            // Now set up successful refresh
+            every { mockWWWEvents.list() } returns emptyList()
+            every {
+                mockWWWEvents.loadEvents(any(), any(), any())
+            } answers {
+                val onLoaded = secondArg<(() -> Unit)?>()
+                onLoaded?.invoke()
+                mockWWWEvents
+            }
+
+            // Act
+            repository.refreshEvents()
+
+            // Assert - error should be cleared
+            assertFalse(repository.isLoading().first())
+        }
 }

@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.StateFlow
  * ```
  */
 interface IOSObservable<T> {
-
     /**
      * Current value of the observable state
      * Compatible with iOS @State/@Published patterns
@@ -102,7 +101,6 @@ expect fun <T> Flow<T>.toIOSObservableFlow(): IOSObservable<T>
  * Integrates with iOS ViewController/View lifecycle
  */
 interface IOSLifecycleObserver {
-
     /**
      * Called when iOS View appears
      * Used to start reactive subscriptions
@@ -127,7 +125,6 @@ interface IOSLifecycleObserver {
  * Handles automatic cleanup based on iOS lifecycle
  */
 interface IOSReactiveSubscriptionManager {
-
     /**
      * Register a subscription for automatic lifecycle management
      */

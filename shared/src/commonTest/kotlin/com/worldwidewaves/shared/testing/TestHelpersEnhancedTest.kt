@@ -41,7 +41,6 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class TestHelpersEnhancedTest {
-
     @Test
     fun `test TestLocations constant values`() {
         // Verify all test location constants are properly defined
@@ -102,16 +101,17 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createTestEvent with custom parameters`() {
-        val customEvent = TestHelpers.createTestEvent(
-            id = "custom_id",
-            type = "country",
-            country = "italy",
-            community = "rome",
-            timeZone = "Europe/Rome",
-            date = "2023-07-20",
-            startHour = "20:30",
-            userPosition = TestLocations.LONDON
-        )
+        val customEvent =
+            TestHelpers.createTestEvent(
+                id = "custom_id",
+                type = "country",
+                country = "italy",
+                community = "rome",
+                timeZone = "Europe/Rome",
+                date = "2023-07-20",
+                startHour = "20:30",
+                userPosition = TestLocations.LONDON,
+            )
 
         assertEquals("custom_id", customEvent.id, "Custom ID should be applied")
         assertEquals("country", customEvent.type, "Custom type should be applied")
@@ -124,12 +124,13 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createRunningEvent properties`() {
-        val runningEvent = TestHelpers.createRunningEvent(
-            id = "running_test",
-            startedAgo = 45.minutes,
-            totalDuration = 3.hours,
-            userPosition = TestLocations.TOKYO
-        )
+        val runningEvent =
+            TestHelpers.createRunningEvent(
+                id = "running_test",
+                startedAgo = 45.minutes,
+                totalDuration = 3.hours,
+                userPosition = TestLocations.TOKYO,
+            )
 
         assertEquals("running_test", runningEvent.id, "Running event ID should be set")
         assertNotNull(runningEvent.date, "Running event should have date")
@@ -140,11 +141,12 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createFutureEvent properties`() {
-        val futureEvent = TestHelpers.createFutureEvent(
-            id = "future_test",
-            startsIn = 2.hours,
-            userPosition = TestLocations.SYDNEY
-        )
+        val futureEvent =
+            TestHelpers.createFutureEvent(
+                id = "future_test",
+                startsIn = 2.hours,
+                userPosition = TestLocations.SYDNEY,
+            )
 
         assertEquals("future_test", futureEvent.id, "Future event ID should be set")
         assertNotNull(futureEvent.date, "Future event should have date")
@@ -155,12 +157,13 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createCompletedEvent properties`() {
-        val completedEvent = TestHelpers.createCompletedEvent(
-            id = "completed_test",
-            endedAgo = 30.minutes,
-            totalDuration = 90.minutes,
-            userPosition = TestLocations.SAO_PAULO
-        )
+        val completedEvent =
+            TestHelpers.createCompletedEvent(
+                id = "completed_test",
+                endedAgo = 30.minutes,
+                totalDuration = 90.minutes,
+                userPosition = TestLocations.SAO_PAULO,
+            )
 
         assertEquals("completed_test", completedEvent.id, "Completed event ID should be set")
         assertNotNull(completedEvent.date, "Completed event should have date")
@@ -187,11 +190,12 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createSimpleWaveDefinition`() {
-        val waveDef = TestHelpers.createSimpleWaveDefinition(
-            duration = 90.minutes,
-            speed = 15.0,
-            userPosition = TestLocations.NEW_YORK
-        )
+        val waveDef =
+            TestHelpers.createSimpleWaveDefinition(
+                duration = 90.minutes,
+                speed = 15.0,
+                userPosition = TestLocations.NEW_YORK,
+            )
 
         assertNotNull(waveDef, "Wave definition should be created")
         assertNotNull(waveDef.linear, "Linear wave should be defined")
@@ -207,13 +211,14 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test createMockWave with custom parameters`() {
-        val mockWave = TestHelpers.createMockWave(
-            duration = 4.hours,
-            speed = 25.0,
-            userPosition = TestLocations.LONDON,
-            progression = 0.5,
-            hasBeenHit = true
-        )
+        val mockWave =
+            TestHelpers.createMockWave(
+                duration = 4.hours,
+                speed = 25.0,
+                userPosition = TestLocations.LONDON,
+                progression = 0.5,
+                hasBeenHit = true,
+            )
 
         assertNotNull(mockWave, "Custom mock wave should be created")
     }
@@ -242,11 +247,12 @@ class TestHelpersEnhancedTest {
     @Test
     fun `test GeoHelpers createPolygonPoints`() {
         val center = TestLocations.PARIS
-        val polygonPoints = TestHelpers.GeoHelpers.createPolygonPoints(
-            center = center,
-            radius = 0.01,
-            sides = 6
-        )
+        val polygonPoints =
+            TestHelpers.GeoHelpers.createPolygonPoints(
+                center = center,
+                radius = 0.01,
+                sides = 6,
+            )
 
         assertEquals(6, polygonPoints.size, "Should create 6 polygon points")
 
@@ -261,19 +267,21 @@ class TestHelpersEnhancedTest {
     @Test
     fun `test GeoHelpers createPolygonPoints with different parameters`() {
         val center = TestLocations.LONDON
-        val trianglePoints = TestHelpers.GeoHelpers.createPolygonPoints(
-            center = center,
-            radius = 0.005,
-            sides = 3
-        )
+        val trianglePoints =
+            TestHelpers.GeoHelpers.createPolygonPoints(
+                center = center,
+                radius = 0.005,
+                sides = 3,
+            )
 
         assertEquals(3, trianglePoints.size, "Should create 3 triangle points")
 
-        val octagonPoints = TestHelpers.GeoHelpers.createPolygonPoints(
-            center = center,
-            radius = 0.02,
-            sides = 8
-        )
+        val octagonPoints =
+            TestHelpers.GeoHelpers.createPolygonPoints(
+                center = center,
+                radius = 0.02,
+                sides = 8,
+            )
 
         assertEquals(8, octagonPoints.size, "Should create 8 octagon points")
     }
@@ -296,11 +304,12 @@ class TestHelpersEnhancedTest {
 
     @Test
     fun `test GeoHelpers calculateDistance for various city pairs`() {
-        val distances = mapOf(
-            "Paris-London" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.PARIS, TestLocations.LONDON),
-            "NYC-Tokyo" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.NEW_YORK, TestLocations.TOKYO),
-            "Sydney-SaoPaulo" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.SYDNEY, TestLocations.SAO_PAULO)
-        )
+        val distances =
+            mapOf(
+                "Paris-London" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.PARIS, TestLocations.LONDON),
+                "NYC-Tokyo" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.NEW_YORK, TestLocations.TOKYO),
+                "Sydney-SaoPaulo" to TestHelpers.GeoHelpers.calculateDistance(TestLocations.SYDNEY, TestLocations.SAO_PAULO),
+            )
 
         distances.forEach { (pair, distance) ->
             assertTrue(distance > 0, "$pair distance should be positive")
@@ -407,7 +416,7 @@ class TestHelpersEnhancedTest {
             minLat = 40.0,
             maxLat = 60.0,
             minLng = -10.0,
-            maxLng = 10.0
+            maxLng = 10.0,
         )
 
         // Position should be invalid within restrictive bounds
@@ -417,7 +426,7 @@ class TestHelpersEnhancedTest {
                 minLat = 50.0,
                 maxLat = 51.0,
                 minLng = 0.0,
-                maxLng = 1.0
+                maxLng = 1.0,
             )
         }
     }
@@ -427,34 +436,37 @@ class TestHelpersEnhancedTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..5).map { threadId ->
-            Thread {
-                try {
-                    repeat(10) { iteration ->
-                        // Test various helper functions
-                        val event = TestHelpers.createTestEvent("thread_${threadId}_$iteration")
-                        val runningEvent = TestHelpers.createRunningEvent("running_${threadId}_$iteration")
-                        val polygonPoints = TestHelpers.GeoHelpers.createPolygonPoints(
-                            TestLocations.PARIS,
-                            0.01,
-                            6
-                        )
-                        val distance = TestHelpers.GeoHelpers.calculateDistance(
-                            TestLocations.PARIS,
-                            TestLocations.LONDON
-                        )
+        val threads =
+            (1..5).map { threadId ->
+                Thread {
+                    try {
+                        repeat(10) { iteration ->
+                            // Test various helper functions
+                            val event = TestHelpers.createTestEvent("thread_${threadId}_$iteration")
+                            val runningEvent = TestHelpers.createRunningEvent("running_${threadId}_$iteration")
+                            val polygonPoints =
+                                TestHelpers.GeoHelpers.createPolygonPoints(
+                                    TestLocations.PARIS,
+                                    0.01,
+                                    6,
+                                )
+                            val distance =
+                                TestHelpers.GeoHelpers.calculateDistance(
+                                    TestLocations.PARIS,
+                                    TestLocations.LONDON,
+                                )
 
-                        synchronized(results) {
-                            results.add("Thread $threadId: event=${event.id}, points=${polygonPoints.size}, dist=$distance")
+                            synchronized(results) {
+                                results.add("Thread $threadId: event=${event.id}, points=${polygonPoints.size}, dist=$distance")
+                            }
                         }
-                    }
-                } catch (e: Exception) {
-                    synchronized(exceptions) {
-                        exceptions.add(e)
+                    } catch (e: Exception) {
+                        synchronized(exceptions) {
+                            exceptions.add(e)
+                        }
                     }
                 }
             }
-        }
 
         threads.forEach { it.start() }
         threads.forEach { it.join() }

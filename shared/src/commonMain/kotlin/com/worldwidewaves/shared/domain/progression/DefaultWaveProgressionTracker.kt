@@ -26,8 +26,8 @@ package com.worldwidewaves.shared.domain.progression
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.utils.Log
 
 /**
  * Default implementation of WaveProgressionTracker.
@@ -39,9 +39,8 @@ import com.worldwidewaves.shared.events.utils.Position
  * - Handles edge cases and provides error tolerance
  */
 class DefaultWaveProgressionTracker(
-    private val clock: IClock
+    private val clock: IClock,
 ) : WaveProgressionTracker {
-
     private val progressionHistory = mutableListOf<ProgressionSnapshot>()
     private val maxHistorySize = 100
 
@@ -61,9 +60,10 @@ class DefaultWaveProgressionTracker(
 
                     val progression = (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
 
-                    Log.v("WaveProgressionTracker",
+                    Log.v(
+                        "WaveProgressionTracker",
                         "Calculated progression: $progression% for event ${event.id} " +
-                        "(elapsed: ${elapsedTime}s, total: ${totalTime}s)"
+                            "(elapsed: ${elapsedTime}s, total: ${totalTime}s)",
                     )
 
                     progression
@@ -75,7 +75,10 @@ class DefaultWaveProgressionTracker(
         }
     }
 
-    override suspend fun isUserInWaveArea(userPosition: Position, waveArea: WWWEventArea): Boolean {
+    override suspend fun isUserInWaveArea(
+        userPosition: Position,
+        waveArea: WWWEventArea,
+    ): Boolean {
         return try {
             // Check if polygon data is available first
             val polygons = waveArea.getPolygons()
@@ -88,9 +91,10 @@ class DefaultWaveProgressionTracker(
             // Use the area's optimized position checking
             val isInArea = waveArea.isPositionWithin(userPosition)
 
-            Log.v("WaveProgressionTracker",
+            Log.v(
+                "WaveProgressionTracker",
                 "Position ${userPosition.lat}, ${userPosition.lng} " +
-                "${if (isInArea) "is" else "is not"} within wave area"
+                    "${if (isInArea) "is" else "is not"} within wave area",
             )
 
             isInArea
@@ -105,19 +109,24 @@ class DefaultWaveProgressionTracker(
         return progressionHistory.toList() // Return defensive copy
     }
 
-    override suspend fun recordProgressionSnapshot(event: IWWWEvent, userPosition: Position?) {
+    override suspend fun recordProgressionSnapshot(
+        event: IWWWEvent,
+        userPosition: Position?,
+    ) {
         try {
             val progression = calculateProgression(event)
-            val isInArea = userPosition?.let {
-                isUserInWaveArea(it, event.area)
-            } ?: false
+            val isInArea =
+                userPosition?.let {
+                    isUserInWaveArea(it, event.area)
+                } ?: false
 
-            val snapshot = ProgressionSnapshot(
-                timestamp = clock.now(),
-                progression = progression,
-                userPosition = userPosition,
-                isInWaveArea = isInArea
-            )
+            val snapshot =
+                ProgressionSnapshot(
+                    timestamp = clock.now(),
+                    progression = progression,
+                    userPosition = userPosition,
+                    isInWaveArea = isInArea,
+                )
 
             // Add to history with circular buffer behavior
             progressionHistory.add(snapshot)
@@ -125,8 +134,9 @@ class DefaultWaveProgressionTracker(
                 progressionHistory.removeAt(0)
             }
 
-            Log.v("WaveProgressionTracker",
-                "Recorded progression snapshot: ${progression}% at ${snapshot.timestamp}"
+            Log.v(
+                "WaveProgressionTracker",
+                "Recorded progression snapshot: $progression% at ${snapshot.timestamp}",
             )
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")

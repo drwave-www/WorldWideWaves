@@ -38,7 +38,7 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class GetSortedEventsUseCase(
-    private val eventsRepository: EventsRepository
+    private val eventsRepository: EventsRepository,
 ) {
     /**
      * Retrieves all events sorted by their start date/time in ascending order.

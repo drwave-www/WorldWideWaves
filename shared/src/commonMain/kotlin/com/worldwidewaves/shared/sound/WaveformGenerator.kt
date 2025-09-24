@@ -91,11 +91,12 @@ object WaveformGenerator {
                 val quarterCycle = samplesPerCycle / 4
                 for (i in 0 until numSamples) {
                     val cyclePos = i % samplesPerCycle
-                    samples[i] = when {
-                        cyclePos < quarterCycle -> (cyclePos.toDouble() / quarterCycle) * amplitude
-                        cyclePos < 3 * quarterCycle -> (2.0 - cyclePos.toDouble() / quarterCycle) * amplitude
-                        else -> ((cyclePos.toDouble() / quarterCycle) - 4.0) * amplitude
-                    }
+                    samples[i] =
+                        when {
+                            cyclePos < quarterCycle -> (cyclePos.toDouble() / quarterCycle) * amplitude
+                            cyclePos < 3 * quarterCycle -> (2.0 - cyclePos.toDouble() / quarterCycle) * amplitude
+                            else -> ((cyclePos.toDouble() / quarterCycle) - 4.0) * amplitude
+                        }
                 }
             }
             SoundPlayer.Waveform.SAWTOOTH -> {
@@ -153,7 +154,11 @@ object WaveformGenerator {
             frequency
         } else {
             // Fallback to middle C (MIDI note 60)
-            WWWGlobals.Midi.A4_FREQUENCY * 2.0.pow((WWWGlobals.Midi.MIDDLE_C_MIDI_NOTE - WWWGlobals.Midi.A4_MIDI_NOTE).toDouble() / WWWGlobals.Midi.OCTAVE_DIVISOR.toDouble())
+            WWWGlobals.Midi.A4_FREQUENCY *
+                2.0.pow(
+                    (WWWGlobals.Midi.MIDDLE_C_MIDI_NOTE - WWWGlobals.Midi.A4_MIDI_NOTE).toDouble() /
+                        WWWGlobals.Midi.OCTAVE_DIVISOR.toDouble(),
+                )
         }
     }
 

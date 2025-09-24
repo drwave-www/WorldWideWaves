@@ -35,7 +35,6 @@ import kotlin.test.assertTrue
  * coverage in the test suite quality analysis.
  */
 class GeographicEdgeCasesTest {
-
     companion object {
         private const val EPSILON = 1e-10
         private const val EARTH_CIRCUMFERENCE_DEGREES = 360.0
@@ -52,29 +51,29 @@ class GeographicEdgeCasesTest {
         // Case 1: Range from east to west across antimeridian
         assertTrue(
             GeoUtils.isLongitudeInRange(170.0, 160.0, -160.0),
-            "170° should be in range [160°, -160°] crossing antimeridian"
+            "170° should be in range [160°, -160°] crossing antimeridian",
         )
         assertTrue(
             GeoUtils.isLongitudeInRange(-170.0, 160.0, -160.0),
-            "-170° should be in range [160°, -160°] crossing antimeridian"
+            "-170° should be in range [160°, -160°] crossing antimeridian",
         )
         assertTrue(
             GeoUtils.isLongitudeInRange(180.0, 160.0, -160.0),
-            "180° should be in range [160°, -160°] crossing antimeridian"
+            "180° should be in range [160°, -160°] crossing antimeridian",
         )
         assertTrue(
             GeoUtils.isLongitudeInRange(-180.0, 160.0, -160.0),
-            "-180° should be in range [160°, -160°] crossing antimeridian"
+            "-180° should be in range [160°, -160°] crossing antimeridian",
         )
 
         // Case 2: Values outside the crossing range
         assertFalse(
             GeoUtils.isLongitudeInRange(0.0, 160.0, -160.0),
-            "0° should NOT be in range [160°, -160°] crossing antimeridian"
+            "0° should NOT be in range [160°, -160°] crossing antimeridian",
         )
         assertFalse(
             GeoUtils.isLongitudeInRange(150.0, 160.0, -160.0),
-            "150° should NOT be in range [160°, -160°] crossing antimeridian"
+            "150° should NOT be in range [160°, -160°] crossing antimeridian",
         )
     }
 
@@ -87,21 +86,21 @@ class GeographicEdgeCasesTest {
 
         assertTrue(
             isLongitudeEqual(180.0, -180.0, EPSILON),
-            "180° and -180° should be considered equal at the antimeridian"
+            "180° and -180° should be considered equal at the antimeridian",
         )
         assertTrue(
             isLongitudeEqual(-180.0, 180.0, EPSILON),
-            "-180° and 180° should be considered equal at the antimeridian"
+            "-180° and 180° should be considered equal at the antimeridian",
         )
 
         // Test with slight variations due to floating point precision
         assertTrue(
             isLongitudeEqual(179.99999999, -180.0, 1e-7),
-            "179.99999999° should be approximately equal to -180°"
+            "179.99999999° should be approximately equal to -180°",
         )
         assertTrue(
             isLongitudeEqual(-179.99999999, 180.0, 1e-7),
-            "-179.99999999° should be approximately equal to 180°"
+            "-179.99999999° should be approximately equal to 180°",
         )
     }
 
@@ -115,28 +114,28 @@ class GeographicEdgeCasesTest {
         // North Pole region tests
         assertTrue(
             GeoUtils.isLatitudeInRange(89.9, -90.0, 90.0),
-            "89.9° should be valid latitude near North Pole"
+            "89.9° should be valid latitude near North Pole",
         )
         assertTrue(
             GeoUtils.isLatitudeInRange(90.0, -90.0, 90.0),
-            "90.0° (North Pole) should be valid latitude"
+            "90.0° (North Pole) should be valid latitude",
         )
 
         // South Pole region tests
         assertTrue(
             GeoUtils.isLatitudeInRange(-89.9, -90.0, 90.0),
-            "-89.9° should be valid latitude near South Pole"
+            "-89.9° should be valid latitude near South Pole",
         )
         assertTrue(
             GeoUtils.isLatitudeInRange(-90.0, -90.0, 90.0),
-            "-90.0° (South Pole) should be valid latitude"
+            "-90.0° (South Pole) should be valid latitude",
         )
 
         // At poles, longitude becomes undefined, but we should handle any longitude value
         for (longitude in listOf(-180.0, -90.0, 0.0, 90.0, 180.0)) {
             assertTrue(
                 GeoUtils.isLongitudeInRange(longitude, -180.0, 180.0),
-                "Longitude $longitude should be valid at polar regions"
+                "Longitude $longitude should be valid at polar regions",
             )
         }
     }
@@ -173,7 +172,7 @@ class GeographicEdgeCasesTest {
         // THEN: Should use the shorter great circle path
 
         // Test distance from just west of date line to just east of date line
-        val westOfDateLine = 179.5  // Just west of 180°
+        val westOfDateLine = 179.5 // Just west of 180°
         val eastOfDateLine = -179.5 // Just east of -180°
         val latitude = 0.0 // At equator for simplicity
 
@@ -185,7 +184,7 @@ class GeographicEdgeCasesTest {
         // But currently returns large distance (~40,000 km) due to 359° calculation
         assertTrue(
             distanceAcrossDateLine > 35000000.0, // Current implementation returns ~40,000 km (long path)
-            "Current implementation incorrectly calculates long path: ${distanceAcrossDateLine}m"
+            "Current implementation incorrectly calculates long path: ${distanceAcrossDateLine}m",
         )
 
         // TODO: Once antimeridian handling is fixed, these should be the correct assertions:
@@ -198,7 +197,7 @@ class GeographicEdgeCasesTest {
             distanceAcrossDateLine,
             reverseDistance,
             1000.0, // Allow 1km tolerance for floating point precision (in meters)
-            "Distance calculation should be symmetric across antimeridian"
+            "Distance calculation should be symmetric across antimeridian",
         )
     }
 
@@ -212,14 +211,14 @@ class GeographicEdgeCasesTest {
         // Test degree-radian conversions at boundaries
         assertEquals(PI, GeoUtils.run { 180.0.toRadians() }, EPSILON, "180° should convert to π radians")
         assertEquals(-PI, GeoUtils.run { (-180.0).toRadians() }, EPSILON, "-180° should convert to -π radians")
-        assertEquals(PI/2, GeoUtils.run { 90.0.toRadians() }, EPSILON, "90° should convert to π/2 radians")
-        assertEquals(-PI/2, GeoUtils.run { (-90.0).toRadians() }, EPSILON, "-90° should convert to -π/2 radians")
+        assertEquals(PI / 2, GeoUtils.run { 90.0.toRadians() }, EPSILON, "90° should convert to π/2 radians")
+        assertEquals(-PI / 2, GeoUtils.run { (-90.0).toRadians() }, EPSILON, "-90° should convert to -π/2 radians")
 
         // Test radian-degree conversions at boundaries
         assertEquals(180.0, GeoUtils.run { PI.toDegrees() }, EPSILON, "π radians should convert to 180°")
         assertEquals(-180.0, GeoUtils.run { (-PI).toDegrees() }, EPSILON, "-π radians should convert to -180°")
-        assertEquals(90.0, GeoUtils.run { (PI/2).toDegrees() }, EPSILON, "π/2 radians should convert to 90°")
-        assertEquals(-90.0, GeoUtils.run { (-PI/2).toDegrees() }, EPSILON, "-π/2 radians should convert to -90°")
+        assertEquals(90.0, GeoUtils.run { (PI / 2).toDegrees() }, EPSILON, "π/2 radians should convert to 90°")
+        assertEquals(-90.0, GeoUtils.run { (-PI / 2).toDegrees() }, EPSILON, "-π/2 radians should convert to -90°")
     }
 
     @Test
@@ -240,21 +239,21 @@ class GeographicEdgeCasesTest {
 
             assertTrue(
                 distanceAtNorthPole >= 0.0,
-                "Distance calculation near North Pole should be non-negative"
+                "Distance calculation near North Pole should be non-negative",
             )
             assertTrue(
                 distanceAtSouthPole >= 0.0,
-                "Distance calculation near South Pole should be non-negative"
+                "Distance calculation near South Pole should be non-negative",
             )
 
             // At high latitudes, 1° longitude represents much less distance
             assertTrue(
                 distanceAtNorthPole < 50000.0,
-                "1° longitude near North Pole should be < 50km: ${distanceAtNorthPole}m"
+                "1° longitude near North Pole should be < 50km: ${distanceAtNorthPole}m",
             )
             assertTrue(
                 distanceAtSouthPole < 50000.0,
-                "1° longitude near South Pole should be < 50km: ${distanceAtSouthPole}m"
+                "1° longitude near South Pole should be < 50km: ${distanceAtSouthPole}m",
             )
         }
     }
@@ -267,16 +266,24 @@ class GeographicEdgeCasesTest {
         // THEN: Should handle values outside normal range appropriately
 
         // Test conceptual wraparound scenarios (implementation dependent)
-        val testLongitudes = listOf(
-            0.0, 90.0, 180.0, -180.0, -90.0,
-            179.0, -179.0, 179.9, -179.9
-        )
+        val testLongitudes =
+            listOf(
+                0.0,
+                90.0,
+                180.0,
+                -180.0,
+                -90.0,
+                179.0,
+                -179.0,
+                179.9,
+                -179.9,
+            )
 
         testLongitudes.forEach { longitude ->
             // All valid longitudes should be in the standard range
             assertTrue(
                 GeoUtils.isLongitudeInRange(longitude, -180.0, 180.0),
-                "Longitude $longitude should be in valid range [-180°, 180°]"
+                "Longitude $longitude should be in valid range [-180°, 180°]",
             )
 
             // Conversion round-trip should preserve values
@@ -286,7 +293,7 @@ class GeographicEdgeCasesTest {
                 longitude,
                 backToDegrees,
                 EPSILON,
-                "Round-trip conversion should preserve longitude $longitude"
+                "Round-trip conversion should preserve longitude $longitude",
             )
         }
     }
@@ -303,31 +310,36 @@ class GeographicEdgeCasesTest {
         // Test precision at critical boundaries
         assertTrue(
             isLongitudeEqual(180.0, 180.0, highPrecisionEpsilon),
-            "High-precision equality should work at 180°"
+            "High-precision equality should work at 180°",
         )
         assertTrue(
             isLatitudeEqual(90.0, 90.0, highPrecisionEpsilon),
-            "High-precision equality should work at 90°"
+            "High-precision equality should work at 90°",
         )
 
         // Test that small differences are detected with high precision
         assertFalse(
             isLongitudeEqual(180.0, 180.0 + 1e-11, highPrecisionEpsilon),
-            "High-precision should detect very small longitude differences"
+            "High-precision should detect very small longitude differences",
         )
         assertFalse(
             isLatitudeEqual(90.0, 90.0 + 1e-11, highPrecisionEpsilon),
-            "High-precision should detect very small latitude differences"
+            "High-precision should detect very small latitude differences",
         )
     }
 
     // Helper functions (these should exist in the actual codebase)
-    private fun isLongitudeEqual(lon1: Double, lon2: Double, epsilon: Double = EPSILON): Boolean {
-        return kotlin.math.abs(lon1 - lon2) < epsilon ||
-               kotlin.math.abs(kotlin.math.abs(lon1 - lon2) - EARTH_CIRCUMFERENCE_DEGREES) < epsilon
-    }
+    private fun isLongitudeEqual(
+        lon1: Double,
+        lon2: Double,
+        epsilon: Double = EPSILON,
+    ): Boolean =
+        kotlin.math.abs(lon1 - lon2) < epsilon ||
+            kotlin.math.abs(kotlin.math.abs(lon1 - lon2) - EARTH_CIRCUMFERENCE_DEGREES) < epsilon
 
-    private fun isLatitudeEqual(lat1: Double, lat2: Double, epsilon: Double = EPSILON): Boolean {
-        return kotlin.math.abs(lat1 - lat2) < epsilon
-    }
+    private fun isLatitudeEqual(
+        lat1: Double,
+        lat2: Double,
+        epsilon: Double = EPSILON,
+    ): Boolean = kotlin.math.abs(lat1 - lat2) < epsilon
 }

@@ -33,227 +33,251 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CheckEventFavoritesUseCaseTest {
-
     private val useCase = CheckEventFavoritesUseCase()
 
     private fun createMockEvent(
         id: String,
-        favorite: Boolean = false
-    ): IWWWEvent = mockk<IWWWEvent>().apply {
-        every { this@apply.id } returns id
-        every { this@apply.favorite } returns favorite
-    }
+        favorite: Boolean = false,
+    ): IWWWEvent =
+        mockk<IWWWEvent>().apply {
+            every { this@apply.id } returns id
+            every { this@apply.favorite } returns favorite
+        }
 
     @Test
-    fun `hasFavoriteEvents returns true when at least one event is favorite`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = true),
-            createMockEvent("event3", favorite = false)
-        )
+    fun `hasFavoriteEvents returns true when at least one event is favorite`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = true),
+                    createMockEvent("event3", favorite = false),
+                )
 
-        // When
-        val result = useCase.hasFavoriteEvents(events)
+            // When
+            val result = useCase.hasFavoriteEvents(events)
 
-        // Then
-        assertTrue(result)
-    }
-
-    @Test
-    fun `hasFavoriteEvents returns false when no events are favorite`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = false),
-            createMockEvent("event3", favorite = false)
-        )
-
-        // When
-        val result = useCase.hasFavoriteEvents(events)
-
-        // Then
-        assertFalse(result)
-    }
+            // Then
+            assertTrue(result)
+        }
 
     @Test
-    fun `hasFavoriteEvents returns false for empty list`() = runTest {
-        // Given
-        val events = emptyList<IWWWEvent>()
+    fun `hasFavoriteEvents returns false when no events are favorite`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = false),
+                    createMockEvent("event3", favorite = false),
+                )
 
-        // When
-        val result = useCase.hasFavoriteEvents(events)
+            // When
+            val result = useCase.hasFavoriteEvents(events)
 
-        // Then
-        assertFalse(result)
-    }
-
-    @Test
-    fun `hasFavoriteEvents returns true when all events are favorites`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = true),
-            createMockEvent("event3", favorite = true)
-        )
-
-        // When
-        val result = useCase.hasFavoriteEvents(events)
-
-        // Then
-        assertTrue(result)
-    }
+            // Then
+            assertFalse(result)
+        }
 
     @Test
-    fun `hasFavoriteEventsFlow emits correct values for changing event lists`() = runTest {
-        // Given
-        val eventsWithoutFavorites = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = false)
-        )
+    fun `hasFavoriteEvents returns false for empty list`() =
+        runTest {
+            // Given
+            val events = emptyList<IWWWEvent>()
 
-        val eventsWithFavorites = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = true)
-        )
+            // When
+            val result = useCase.hasFavoriteEvents(events)
 
-        val eventsFlow = flowOf(eventsWithoutFavorites, eventsWithFavorites)
-
-        // When
-        val resultFlow = useCase.hasFavoriteEventsFlow(eventsFlow)
-
-        // Then - we can only get the first emission in this test setup
-        // In a real scenario, this would be collected continuously
-        val firstResult = resultFlow.first()
-        assertFalse(firstResult) // First emission should be false (no favorites)
-    }
+            // Then
+            assertFalse(result)
+        }
 
     @Test
-    fun `getFavoriteEvents returns only favorite events`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = true),
-            createMockEvent("event3", favorite = false),
-            createMockEvent("event4", favorite = true)
-        )
+    fun `hasFavoriteEvents returns true when all events are favorites`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = true),
+                    createMockEvent("event3", favorite = true),
+                )
 
-        // When
-        val result = useCase.getFavoriteEvents(events)
+            // When
+            val result = useCase.hasFavoriteEvents(events)
 
-        // Then
-        assertEquals(2, result.size)
-        assertEquals("event2", result[0].id)
-        assertEquals("event4", result[1].id)
-        assertTrue(result.all { it.favorite })
-    }
+            // Then
+            assertTrue(result)
+        }
 
     @Test
-    fun `getFavoriteEvents returns empty list when no favorites`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = false)
-        )
+    fun `hasFavoriteEventsFlow emits correct values for changing event lists`() =
+        runTest {
+            // Given
+            val eventsWithoutFavorites =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = false),
+                )
 
-        // When
-        val result = useCase.getFavoriteEvents(events)
+            val eventsWithFavorites =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = true),
+                )
 
-        // Then
-        assertTrue(result.isEmpty())
-    }
+            val eventsFlow = flowOf(eventsWithoutFavorites, eventsWithFavorites)
 
-    @Test
-    fun `getFavoriteEvents returns all events when all are favorites`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = true),
-            createMockEvent("event3", favorite = true)
-        )
+            // When
+            val resultFlow = useCase.hasFavoriteEventsFlow(eventsFlow)
 
-        // When
-        val result = useCase.getFavoriteEvents(events)
-
-        // Then
-        assertEquals(3, result.size)
-        assertTrue(result.all { it.favorite })
-    }
+            // Then - we can only get the first emission in this test setup
+            // In a real scenario, this would be collected continuously
+            val firstResult = resultFlow.first()
+            assertFalse(firstResult) // First emission should be false (no favorites)
+        }
 
     @Test
-    fun `getFavoriteEventsCount returns correct count`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = true),
-            createMockEvent("event3", favorite = false),
-            createMockEvent("event4", favorite = true),
-            createMockEvent("event5", favorite = true)
-        )
+    fun `getFavoriteEvents returns only favorite events`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = true),
+                    createMockEvent("event3", favorite = false),
+                    createMockEvent("event4", favorite = true),
+                )
 
-        // When
-        val result = useCase.getFavoriteEventsCount(events)
+            // When
+            val result = useCase.getFavoriteEvents(events)
 
-        // Then
-        assertEquals(3, result)
-    }
-
-    @Test
-    fun `getFavoriteEventsCount returns zero for no favorites`() = runTest {
-        // Given
-        val events = listOf(
-            createMockEvent("event1", favorite = false),
-            createMockEvent("event2", favorite = false)
-        )
-
-        // When
-        val result = useCase.getFavoriteEventsCount(events)
-
-        // Then
-        assertEquals(0, result)
-    }
+            // Then
+            assertEquals(2, result.size)
+            assertEquals("event2", result[0].id)
+            assertEquals("event4", result[1].id)
+            assertTrue(result.all { it.favorite })
+        }
 
     @Test
-    fun `getFavoriteEventsCount returns zero for empty list`() = runTest {
-        // Given
-        val events = emptyList<IWWWEvent>()
+    fun `getFavoriteEvents returns empty list when no favorites`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = false),
+                )
 
-        // When
-        val result = useCase.getFavoriteEventsCount(events)
+            // When
+            val result = useCase.getFavoriteEvents(events)
 
-        // Then
-        assertEquals(0, result)
-    }
-
-    @Test
-    fun `getFavoriteEventsCountFlow emits correct counts`() = runTest {
-        // Given
-        val eventsWithTwoFavorites = listOf(
-            createMockEvent("event1", favorite = true),
-            createMockEvent("event2", favorite = false),
-            createMockEvent("event3", favorite = true)
-        )
-
-        val eventsFlow = flowOf(eventsWithTwoFavorites)
-
-        // When
-        val resultFlow = useCase.getFavoriteEventsCountFlow(eventsFlow)
-
-        // Then
-        val count = resultFlow.first()
-        assertEquals(2, count)
-    }
+            // Then
+            assertTrue(result.isEmpty())
+        }
 
     @Test
-    fun `getFavoriteEventsCountFlow handles empty event list`() = runTest {
-        // Given
-        val eventsFlow = flowOf(emptyList<IWWWEvent>())
+    fun `getFavoriteEvents returns all events when all are favorites`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = true),
+                    createMockEvent("event3", favorite = true),
+                )
 
-        // When
-        val resultFlow = useCase.getFavoriteEventsCountFlow(eventsFlow)
+            // When
+            val result = useCase.getFavoriteEvents(events)
 
-        // Then
-        val count = resultFlow.first()
-        assertEquals(0, count)
-    }
+            // Then
+            assertEquals(3, result.size)
+            assertTrue(result.all { it.favorite })
+        }
+
+    @Test
+    fun `getFavoriteEventsCount returns correct count`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = true),
+                    createMockEvent("event3", favorite = false),
+                    createMockEvent("event4", favorite = true),
+                    createMockEvent("event5", favorite = true),
+                )
+
+            // When
+            val result = useCase.getFavoriteEventsCount(events)
+
+            // Then
+            assertEquals(3, result)
+        }
+
+    @Test
+    fun `getFavoriteEventsCount returns zero for no favorites`() =
+        runTest {
+            // Given
+            val events =
+                listOf(
+                    createMockEvent("event1", favorite = false),
+                    createMockEvent("event2", favorite = false),
+                )
+
+            // When
+            val result = useCase.getFavoriteEventsCount(events)
+
+            // Then
+            assertEquals(0, result)
+        }
+
+    @Test
+    fun `getFavoriteEventsCount returns zero for empty list`() =
+        runTest {
+            // Given
+            val events = emptyList<IWWWEvent>()
+
+            // When
+            val result = useCase.getFavoriteEventsCount(events)
+
+            // Then
+            assertEquals(0, result)
+        }
+
+    @Test
+    fun `getFavoriteEventsCountFlow emits correct counts`() =
+        runTest {
+            // Given
+            val eventsWithTwoFavorites =
+                listOf(
+                    createMockEvent("event1", favorite = true),
+                    createMockEvent("event2", favorite = false),
+                    createMockEvent("event3", favorite = true),
+                )
+
+            val eventsFlow = flowOf(eventsWithTwoFavorites)
+
+            // When
+            val resultFlow = useCase.getFavoriteEventsCountFlow(eventsFlow)
+
+            // Then
+            val count = resultFlow.first()
+            assertEquals(2, count)
+        }
+
+    @Test
+    fun `getFavoriteEventsCountFlow handles empty event list`() =
+        runTest {
+            // Given
+            val eventsFlow = flowOf(emptyList<IWWWEvent>())
+
+            // When
+            val resultFlow = useCase.getFavoriteEventsCountFlow(eventsFlow)
+
+            // Then
+            val count = resultFlow.first()
+            assertEquals(0, count)
+        }
 }

@@ -85,7 +85,7 @@ class WWWSimulationTest {
         val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
         assertTrue(
             timeDifference < 100,
-            "Initial simulation time should be close to start time, got ${timeDifference}ms difference"
+            "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
         )
 
         // AND: Time should advance linearly with speed 1
@@ -93,7 +93,7 @@ class WWWSimulationTest {
         val futureTime = simulation.now()
         assertTrue(
             futureTime >= initialSimTime,
-            "Simulation time should always advance forward"
+            "Simulation time should always advance forward",
         )
     }
 
@@ -109,7 +109,7 @@ class WWWSimulationTest {
         val timeDifference = (initialSimTime - startDateTime).inWholeMilliseconds
         assertTrue(
             timeDifference < 100,
-            "Initial simulation time should be close to start time, got ${timeDifference}ms difference"
+            "Initial simulation time should be close to start time, got ${timeDifference}ms difference",
         )
 
         // AND: Speed should be correctly set
@@ -119,7 +119,7 @@ class WWWSimulationTest {
         val laterTime = simulation.now()
         assertTrue(
             laterTime >= initialSimTime,
-            "Simulation time should advance even with higher speed"
+            "Simulation time should advance even with higher speed",
         )
     }
 
@@ -145,7 +145,7 @@ class WWWSimulationTest {
         val timeAfterSpeedChange = simulation.now()
         assertTrue(
             timeAfterSpeedChange >= initialTime,
-            "Time should continue advancing after speed change"
+            "Time should continue advancing after speed change",
         )
     }
 
@@ -169,7 +169,7 @@ class WWWSimulationTest {
             val currentTime = simulation.now()
             assertTrue(
                 currentTime >= previousTime,
-                "Time should always advance forward with speed $speed"
+                "Time should always advance forward with speed $speed",
             )
             previousTime = currentTime
         }
@@ -191,7 +191,7 @@ class WWWSimulationTest {
         val pausedTime = simulation.now()
         assertTrue(
             (pausedTime - initialTime).inWholeMilliseconds < 50,
-            "Time should not advance significantly while paused"
+            "Time should not advance significantly while paused",
         )
 
         // WHEN: Resuming with speed 5
@@ -204,7 +204,7 @@ class WWWSimulationTest {
         val resumedTime = simulation.now()
         assertTrue(
             resumedTime >= pausedTime,
-            "Time should advance after resume"
+            "Time should advance after resume",
         )
 
         // WHEN: Testing resume without specifying speed (should use last active speed)
@@ -227,7 +227,7 @@ class WWWSimulationTest {
         val initialTimeDifference = (initialTime - startDateTime).inWholeMilliseconds
         assertTrue(
             initialTimeDifference < 100,
-            "Initial time should be close to start time, got ${initialTimeDifference}ms difference"
+            "Initial time should be close to start time, got ${initialTimeDifference}ms difference",
         )
 
         // WHEN: Resetting the simulation
@@ -238,7 +238,7 @@ class WWWSimulationTest {
         val resetTimeDifference = (afterResetTime - startDateTime).inWholeMilliseconds
         assertTrue(
             resetTimeDifference < 100,
-            "Time should be close to start time after reset, got ${resetTimeDifference}ms difference"
+            "Time should be close to start time after reset, got ${resetTimeDifference}ms difference",
         )
 
         // AND: Speed should remain unchanged
@@ -248,7 +248,7 @@ class WWWSimulationTest {
         val laterTime = simulation.now()
         assertTrue(
             laterTime >= afterResetTime,
-            "Time should continue advancing after reset"
+            "Time should continue advancing after reset",
         )
     }
 

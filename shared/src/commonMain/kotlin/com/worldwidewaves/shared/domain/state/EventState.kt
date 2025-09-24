@@ -43,7 +43,7 @@ data class EventState(
     val timeBeforeHit: Duration,
     val hitDateTime: Instant,
     val userIsInArea: Boolean,
-    val timestamp: Instant
+    val timestamp: Instant,
 )
 
 /**
@@ -54,7 +54,7 @@ data class EventStateInput(
     val progression: Double,
     val status: Status,
     val userPosition: Position?,
-    val currentTime: Instant
+    val currentTime: Instant,
 )
 
 /**
@@ -63,9 +63,10 @@ data class EventStateInput(
 data class StateValidationIssue(
     val field: String,
     val issue: String,
-    val severity: Severity = Severity.WARNING
+    val severity: Severity = Severity.WARNING,
 ) {
     enum class Severity {
-        WARNING, ERROR
+        WARNING,
+        ERROR,
     }
 }

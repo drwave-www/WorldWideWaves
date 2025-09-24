@@ -47,7 +47,6 @@ import kotlin.test.assertTrue
  * - Ensures iOS interface patterns work as expected
  */
 class IOSIntegrationTestStubs {
-
     /**
      * Test iOS reactive pattern bridge functionality
      */
@@ -174,9 +173,8 @@ private class TestIOSReactiveSubscriptionManager : IOSReactiveSubscriptionManage
  * Test implementation of iOS lifecycle observer
  */
 private class TestIOSLifecycleObserver(
-    private val subscriptionManager: IOSReactiveSubscriptionManager
+    private val subscriptionManager: IOSReactiveSubscriptionManager,
 ) : IOSLifecycleObserver {
-
     override fun onViewDidAppear() {
         // Mock view appeared
     }

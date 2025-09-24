@@ -36,7 +36,6 @@ import com.worldwidewaves.shared.events.IWWWEvent
  * - Abstracting complex timing and positioning logic
  */
 interface EventStateManager {
-
     /**
      * Calculates the complete event state for a user at the current moment.
      *
@@ -48,7 +47,7 @@ interface EventStateManager {
     suspend fun calculateEventState(
         event: IWWWEvent,
         input: EventStateInput,
-        userIsInArea: Boolean
+        userIsInArea: Boolean,
     ): EventState
 
     /**
@@ -60,7 +59,7 @@ interface EventStateManager {
      */
     fun validateState(
         input: EventStateInput,
-        calculatedState: EventState
+        calculatedState: EventState,
     ): List<StateValidationIssue>
 
     /**
@@ -72,6 +71,6 @@ interface EventStateManager {
      */
     fun validateStateTransition(
         previousState: EventState?,
-        newState: EventState
+        newState: EventState,
     ): List<StateValidationIssue>
 }

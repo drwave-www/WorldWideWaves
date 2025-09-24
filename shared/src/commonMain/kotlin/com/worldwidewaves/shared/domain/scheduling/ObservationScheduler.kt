@@ -41,7 +41,6 @@ import kotlin.time.Instant
  * - Optimizing battery usage through intelligent scheduling
  */
 interface ObservationScheduler {
-
     /**
      * Calculates the appropriate observation interval for an event.
      *
@@ -98,7 +97,7 @@ data class ObservationSchedule(
     val interval: Duration,
     val phase: ObservationPhase,
     val nextObservationTime: Instant?,
-    val reason: String
+    val reason: String,
 )
 
 /**
@@ -121,5 +120,5 @@ enum class ObservationPhase {
     CRITICAL,
 
     /** Event is completed or irrelevant */
-    INACTIVE
+    INACTIVE,
 }

@@ -60,8 +60,10 @@ class DataStoreTest {
         } catch (e: DataStoreException) {
             // DataStore creation failed in test environment - this is acceptable
             pathProviderCalled = true
-            assertTrue(e.message?.contains("DataStore creation failed") == true,
-                "DataStoreException should contain proper error message")
+            assertTrue(
+                e.message?.contains("DataStore creation failed") == true,
+                "DataStoreException should contain proper error message",
+            )
         }
 
         assertTrue(pathProviderCalled, "Path provider should be called regardless of outcome")
@@ -124,8 +126,10 @@ class DataStoreTest {
             // If creation succeeds with empty path, that's acceptable
         } catch (e: DataStoreException) {
             // Expected: DataStore creation failed and was properly wrapped
-            assertTrue(e.message?.contains("DataStore creation failed") == true,
-                "Error message should indicate DataStore creation failure")
+            assertTrue(
+                e.message?.contains("DataStore creation failed") == true,
+                "Error message should indicate DataStore creation failure",
+            )
             assertNotNull(e.cause, "DataStoreException should have underlying cause")
         }
 

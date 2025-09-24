@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -46,7 +47,6 @@ kotlin {
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
         }
-
     }
 }
 
@@ -61,10 +61,9 @@ android {
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
     // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
 
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     defaultConfig {
@@ -205,9 +204,74 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
-
 }
 
+// Firebase Configuration Generation Task
+tasks.register("generateFirebaseConfig") {
+    group = "firebase"
+    description = "Generates google-services.json from local.properties or environment variables"
+
+    val googleServicesFile = file("google-services.json")
+    outputs.file(googleServicesFile)
+
+    doLast {
+        val properties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+
+        // Load from local.properties if it exists
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { properties.load(it) }
+        }
+
+        // Get values from environment variables or properties (both can return null)
+        val projectId = System.getenv("FIREBASE_PROJECT_ID") ?: properties.getProperty("FIREBASE_PROJECT_ID")
+        val projectNumber = System.getenv("FIREBASE_PROJECT_NUMBER") ?: properties.getProperty("FIREBASE_PROJECT_NUMBER")
+        val appId = System.getenv("FIREBASE_MOBILE_SDK_APP_ID") ?: properties.getProperty("FIREBASE_MOBILE_SDK_APP_ID")
+        val apiKey = System.getenv("FIREBASE_API_KEY") ?: properties.getProperty("FIREBASE_API_KEY")
+
+        if (projectId.isNullOrEmpty() || projectNumber.isNullOrEmpty() || appId.isNullOrEmpty() || apiKey.isNullOrEmpty()) {
+            throw GradleException("Firebase configuration missing. Please set FIREBASE_* environment variables or update local.properties")
+        }
+
+        val googleServicesJson = """{
+  "project_info": {
+    "project_number": "$projectNumber",
+    "project_id": "$projectId",
+    "storage_bucket": "$projectId.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "$appId",
+        "android_client_info": {
+          "package_name": "com.worldwidewaves"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "$apiKey"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}"""
+
+        googleServicesFile.writeText(googleServicesJson)
+        println("✅ Generated google-services.json successfully")
+    }
+}
+
+// Ensure Firebase config is generated before processing
+tasks.named("preBuild") {
+    dependsOn("generateFirebaseConfig")
+}
 
 // Custom Gradle Tasks for Real Integration Tests
 tasks.register("runRealIntegrationTests") {

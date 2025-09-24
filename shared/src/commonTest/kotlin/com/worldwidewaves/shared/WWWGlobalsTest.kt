@@ -48,7 +48,6 @@ import kotlin.time.Duration.Companion.seconds
  * and maintain business logic consistency.
  */
 class WWWGlobalsTest {
-
     @Test
     fun `should have valid URL constants`() {
         // GIVEN: URL constants from WWWGlobals

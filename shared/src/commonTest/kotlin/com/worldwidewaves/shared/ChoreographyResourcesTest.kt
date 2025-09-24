@@ -32,7 +32,6 @@ import kotlin.test.assertTrue
  * choreography text loading, sequence management, and error handling.
  */
 class ChoreographyResourcesTest {
-
     @Test
     fun `test getChoreographyText returns correct warming sequences`() {
         // Test all valid warming sequence numbers
@@ -162,9 +161,10 @@ class ChoreographyResourcesTest {
     @Test
     fun `test choreography sequence completeness`() {
         // Verify all warming sequences from 1-6 are available
-        val warmingSequences = (1..6).map { seqNum ->
-            getChoreographyWarmingText(seqNum)
-        }
+        val warmingSequences =
+            (1..6).map { seqNum ->
+                getChoreographyWarmingText(seqNum)
+            }
 
         // All sequences should be unique
         val uniqueSequences = warmingSequences.toSet()
@@ -271,20 +271,22 @@ class ChoreographyResourcesTest {
     @Test
     fun `test choreography error message quality`() {
         // Test that error messages are descriptive
-        val invalidTypeException = assertFailsWith<Exception> {
-            getChoreographyText("invalid_type", 1)
-        }
+        val invalidTypeException =
+            assertFailsWith<Exception> {
+                getChoreographyText("invalid_type", 1)
+            }
         assertTrue(
             invalidTypeException.message?.contains("Invalid choreography type") == true,
-            "Error message should mention invalid choreography type"
+            "Error message should mention invalid choreography type",
         )
 
-        val invalidSeqException = assertFailsWith<Exception> {
-            getChoreographyWarmingText(7)
-        }
+        val invalidSeqException =
+            assertFailsWith<Exception> {
+                getChoreographyWarmingText(7)
+            }
         assertTrue(
             invalidSeqException.message?.contains("Invalid choreography sequence number") == true,
-            "Error message should mention invalid sequence number"
+            "Error message should mention invalid sequence number",
         )
     }
 
@@ -294,26 +296,27 @@ class ChoreographyResourcesTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..5).map { threadId ->
-            Thread {
-                try {
-                    repeat(10) { iteration ->
-                        val seqNum = (iteration % 6) + 1
-                        val warmingText = getChoreographyText("warming", seqNum)
-                        val waitingText = getChoreographyText("waiting")
-                        val hitText = getChoreographyText("hit")
+        val threads =
+            (1..5).map { threadId ->
+                Thread {
+                    try {
+                        repeat(10) { iteration ->
+                            val seqNum = (iteration % 6) + 1
+                            val warmingText = getChoreographyText("warming", seqNum)
+                            val waitingText = getChoreographyText("waiting")
+                            val hitText = getChoreographyText("hit")
 
-                        synchronized(results) {
-                            results.add("Thread $threadId: warming=$warmingText, waiting=$waitingText, hit=$hitText")
+                            synchronized(results) {
+                                results.add("Thread $threadId: warming=$warmingText, waiting=$waitingText, hit=$hitText")
+                            }
                         }
-                    }
-                } catch (e: Exception) {
-                    synchronized(exceptions) {
-                        exceptions.add(e)
+                    } catch (e: Exception) {
+                        synchronized(exceptions) {
+                            exceptions.add(e)
+                        }
                     }
                 }
             }
-        }
 
         threads.forEach { it.start() }
         threads.forEach { it.join() }

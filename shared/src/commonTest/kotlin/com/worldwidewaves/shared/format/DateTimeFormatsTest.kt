@@ -52,8 +52,10 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class DateTimeFormatsTest {
-
-    private fun testDateTimeFormatting(testName: String, block: () -> Unit) {
+    private fun testDateTimeFormatting(
+        testName: String,
+        block: () -> Unit,
+    ) {
         try {
             block()
         } catch (e: Exception) {
@@ -123,7 +125,7 @@ class DateTimeFormatsTest {
             // THEN: Should contain time separators (: or other platform-specific separators)
             assertTrue(
                 result.contains(":") || result.contains(".") || result.contains(" "),
-                "timeShort should contain time separators, got: '$result'"
+                "timeShort should contain time separators, got: '$result'",
             )
         }
     }

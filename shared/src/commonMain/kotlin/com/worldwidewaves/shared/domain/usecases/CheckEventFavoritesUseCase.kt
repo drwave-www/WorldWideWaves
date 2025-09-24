@@ -33,16 +33,13 @@ import kotlinx.coroutines.flow.map
  * to show/hide UI elements related to favorites filtering.
  */
 class CheckEventFavoritesUseCase {
-
     /**
      * Checks if any events in the provided list are marked as favorites.
      *
      * @param events List of events to check
      * @return true if at least one event is marked as favorite, false otherwise
      */
-    suspend fun hasFavoriteEvents(events: List<IWWWEvent>): Boolean {
-        return events.any { it.favorite }
-    }
+    suspend fun hasFavoriteEvents(events: List<IWWWEvent>): Boolean = events.any { it.favorite }
 
     /**
      * Creates a reactive flow that tracks whether any events are favorites.
@@ -50,11 +47,10 @@ class CheckEventFavoritesUseCase {
      * @param eventsFlow Flow of event lists to monitor
      * @return Flow emitting boolean values indicating if favorites exist
      */
-    fun hasFavoriteEventsFlow(eventsFlow: Flow<List<IWWWEvent>>): Flow<Boolean> {
-        return eventsFlow.map { events ->
+    fun hasFavoriteEventsFlow(eventsFlow: Flow<List<IWWWEvent>>): Flow<Boolean> =
+        eventsFlow.map { events ->
             events.any { it.favorite }
         }
-    }
 
     /**
      * Gets all favorite events from the provided list.
@@ -62,9 +58,7 @@ class CheckEventFavoritesUseCase {
      * @param events List of events to filter
      * @return List containing only events marked as favorites
      */
-    suspend fun getFavoriteEvents(events: List<IWWWEvent>): List<IWWWEvent> {
-        return events.filter { it.favorite }
-    }
+    suspend fun getFavoriteEvents(events: List<IWWWEvent>): List<IWWWEvent> = events.filter { it.favorite }
 
     /**
      * Gets the count of favorite events.
@@ -72,9 +66,7 @@ class CheckEventFavoritesUseCase {
      * @param events List of events to count
      * @return Number of events marked as favorites
      */
-    suspend fun getFavoriteEventsCount(events: List<IWWWEvent>): Int {
-        return events.count { it.favorite }
-    }
+    suspend fun getFavoriteEventsCount(events: List<IWWWEvent>): Int = events.count { it.favorite }
 
     /**
      * Creates a reactive flow that tracks the count of favorite events.
@@ -82,9 +74,8 @@ class CheckEventFavoritesUseCase {
      * @param eventsFlow Flow of event lists to monitor
      * @return Flow emitting the count of favorite events
      */
-    fun getFavoriteEventsCountFlow(eventsFlow: Flow<List<IWWWEvent>>): Flow<Int> {
-        return eventsFlow.map { events ->
+    fun getFavoriteEventsCountFlow(eventsFlow: Flow<List<IWWWEvent>>): Flow<Int> =
+        eventsFlow.map { events ->
             events.count { it.favorite }
         }
-    }
 }

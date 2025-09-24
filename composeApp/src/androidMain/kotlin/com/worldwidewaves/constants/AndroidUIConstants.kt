@@ -27,7 +27,6 @@ package com.worldwidewaves.constants
  * For shared constants, see WWWGlobals.
  */
 object AndroidUIConstants {
-
     object Colors {
         /** Success/good performance indicator color (Material Design Green 500) */
         const val GREEN_SUCCESS = 0xFF4CAF50

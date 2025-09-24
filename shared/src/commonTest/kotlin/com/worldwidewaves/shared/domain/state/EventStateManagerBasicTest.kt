@@ -14,47 +14,50 @@ import kotlin.time.Instant
 import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 class EventStateManagerBasicTest {
-
     private val mockWaveProgressionTracker = mockk<WaveProgressionTracker>()
     private val mockClock = mockk<IClock>()
 
-    private val eventStateManager = DefaultEventStateManager(
-        mockWaveProgressionTracker,
-        mockClock
-    )
+    private val eventStateManager =
+        DefaultEventStateManager(
+            mockWaveProgressionTracker,
+            mockClock,
+        )
 
     @Test
     fun `can create DefaultEventStateManager`() {
-        val manager = DefaultEventStateManager(
-            mockWaveProgressionTracker,
-            mockClock
-        )
+        val manager =
+            DefaultEventStateManager(
+                mockWaveProgressionTracker,
+                mockClock,
+            )
 
         assertTrue(manager is EventStateManager)
     }
 
     @Test
     fun `validateState returns no issues for valid progression`() {
-        val input = EventStateInput(
-            progression = 50.0,
-            status = Status.RUNNING,
-            userPosition = Position(40.7128, -74.0060),
-            currentTime = Instant.fromEpochSeconds(1000)
-        )
+        val input =
+            EventStateInput(
+                progression = 50.0,
+                status = Status.RUNNING,
+                userPosition = Position(40.7128, -74.0060),
+                currentTime = Instant.fromEpochSeconds(1000),
+            )
 
-        val state = EventState(
-            progression = 50.0,
-            status = Status.RUNNING,
-            isUserWarmingInProgress = false,
-            isStartWarmingInProgress = false,
-            userIsGoingToBeHit = false,
-            userHasBeenHit = false,
-            userPositionRatio = 0.5,
-            timeBeforeHit = 30.seconds,
-            hitDateTime = DISTANT_FUTURE,
-            userIsInArea = true,
-            timestamp = Instant.fromEpochSeconds(1000)
-        )
+        val state =
+            EventState(
+                progression = 50.0,
+                status = Status.RUNNING,
+                isUserWarmingInProgress = false,
+                isStartWarmingInProgress = false,
+                userIsGoingToBeHit = false,
+                userHasBeenHit = false,
+                userPositionRatio = 0.5,
+                timeBeforeHit = 30.seconds,
+                hitDateTime = DISTANT_FUTURE,
+                userIsInArea = true,
+                timestamp = Instant.fromEpochSeconds(1000),
+            )
 
         val issues = eventStateManager.validateState(input, state)
 
@@ -108,31 +111,36 @@ class EventStateManagerBasicTest {
     fun `validateState detects conflicting user states`() {
         // User cannot be both "going to be hit" and "has been hit"
         val input = createTestInput()
-        val state = createTestState(
-            userIsGoingToBeHit = true,
-            userHasBeenHit = true
-        )
+        val state =
+            createTestState(
+                userIsGoingToBeHit = true,
+                userHasBeenHit = true,
+            )
 
         val issues = eventStateManager.validateState(input, state)
 
-        assertTrue(issues.any {
-            it.field == "userState" &&
-            it.issue.contains("both 'going to be hit' and 'has been hit'") &&
-            it.severity == StateValidationIssue.Severity.ERROR
-        })
+        assertTrue(
+            issues.any {
+                it.field == "userState" &&
+                    it.issue.contains("both 'going to be hit' and 'has been hit'") &&
+                    it.severity == StateValidationIssue.Severity.ERROR
+            },
+        )
     }
 
     @Test
     fun `validateStateTransition returns no issues for valid transitions`() {
-        val previousState = createTestState(
-            progression = 25.0,
-            status = Status.SOON
-        )
+        val previousState =
+            createTestState(
+                progression = 25.0,
+                status = Status.SOON,
+            )
 
-        val newState = createTestState(
-            progression = 50.0,
-            status = Status.RUNNING
-        )
+        val newState =
+            createTestState(
+                progression = 50.0,
+                status = Status.RUNNING,
+            )
 
         val issues = eventStateManager.validateStateTransition(previousState, newState)
 
@@ -141,22 +149,26 @@ class EventStateManagerBasicTest {
 
     @Test
     fun `validateStateTransition detects backward progression`() {
-        val previousState = createTestState(
-            progression = 75.0,
-            status = Status.RUNNING
-        )
+        val previousState =
+            createTestState(
+                progression = 75.0,
+                status = Status.RUNNING,
+            )
 
-        val newState = createTestState(
-            progression = 50.0,
-            status = Status.RUNNING
-        )
+        val newState =
+            createTestState(
+                progression = 50.0,
+                status = Status.RUNNING,
+            )
 
         val issues = eventStateManager.validateStateTransition(previousState, newState)
 
-        assertTrue(issues.any {
-            it.field == "progression" &&
-            it.issue.contains("went backwards")
-        })
+        assertTrue(
+            issues.any {
+                it.field == "progression" &&
+                    it.issue.contains("went backwards")
+            },
+        )
     }
 
     @Test
@@ -183,11 +195,13 @@ class EventStateManagerBasicTest {
 
         val issues = eventStateManager.validateStateTransition(hitState, notHitState)
 
-        assertTrue(issues.any {
-            it.field == "userHasBeenHit" &&
-            it.issue.contains("cannot transition from 'has been hit' to 'not hit'") &&
-            it.severity == StateValidationIssue.Severity.ERROR
-        })
+        assertTrue(
+            issues.any {
+                it.field == "userHasBeenHit" &&
+                    it.issue.contains("cannot transition from 'has been hit' to 'not hit'") &&
+                    it.severity == StateValidationIssue.Severity.ERROR
+            },
+        )
     }
 
     // Helper functions to create test data
@@ -195,7 +209,7 @@ class EventStateManagerBasicTest {
         progression: Double = 50.0,
         status: Status = Status.RUNNING,
         userPosition: Position? = Position(40.7128, -74.0060),
-        currentTime: Instant = Instant.fromEpochSeconds(1000)
+        currentTime: Instant = Instant.fromEpochSeconds(1000),
     ) = EventStateInput(progression, status, userPosition, currentTime)
 
     private fun createTestState(
@@ -209,7 +223,7 @@ class EventStateManagerBasicTest {
         timeBeforeHit: kotlin.time.Duration = 30.seconds,
         hitDateTime: Instant = DISTANT_FUTURE,
         userIsInArea: Boolean = true,
-        timestamp: Instant = Instant.fromEpochSeconds(1000)
+        timestamp: Instant = Instant.fromEpochSeconds(1000),
     ) = EventState(
         progression,
         status,
@@ -221,6 +235,6 @@ class EventStateManagerBasicTest {
         timeBeforeHit,
         hitDateTime,
         userIsInArea,
-        timestamp
+        timestamp,
     )
 }

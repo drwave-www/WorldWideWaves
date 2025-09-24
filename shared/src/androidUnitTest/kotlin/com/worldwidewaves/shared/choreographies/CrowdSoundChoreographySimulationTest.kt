@@ -23,11 +23,11 @@ package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
+import com.worldwidewaves.shared.utils.Log
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.async
@@ -54,7 +54,6 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class CrowdSoundChoreographySimulationTest {
-
     companion object {
         private const val CROWD_SIZE = 50
         private const val SIMULATION_INTERVAL_MS = 100L
@@ -67,7 +66,7 @@ class CrowdSoundChoreographySimulationTest {
     private data class SimulatedPerson(
         val id: Int,
         val soundChoreographyManager: SoundChoreographyManager,
-        val playbackLog: MutableList<PlaybackEvent> = mutableListOf()
+        val playbackLog: MutableList<PlaybackEvent> = mutableListOf(),
     )
 
     /**
@@ -79,7 +78,7 @@ class CrowdSoundChoreographySimulationTest {
         val elapsedTime: Duration,
         val midiPitch: Int?,
         val frequency: Double,
-        val amplitude: Double
+        val amplitude: Double,
     )
 
     /**
@@ -91,41 +90,41 @@ class CrowdSoundChoreographySimulationTest {
         val avgEventsPerPerson: Double,
         val uniquePitchesPlayed: Set<Int>,
         val coveragePercentage: Double,
-        val playbackLog: List<PlaybackEvent>
+        val playbackLog: List<PlaybackEvent>,
     )
 
     @Test
-    fun `simulate crowd sound choreography with 50 people over full MIDI duration`() = runBlocking {
-        Log.d(TAG, "Starting crowd sound choreography simulation")
-        Log.d(TAG, "Parameters: $CROWD_SIZE people, ${SIMULATION_INTERVAL_MS}ms intervals")
+    fun `simulate crowd sound choreography with 50 people over full MIDI duration`() =
+        runBlocking {
+            Log.d(TAG, "Starting crowd sound choreography simulation")
+            Log.d(TAG, "Parameters: $CROWD_SIZE people, ${SIMULATION_INTERVAL_MS}ms intervals")
 
-        // Load and parse the MIDI file
-        val midiTrack = loadMidiTrack()
-        Log.d(TAG, "MIDI track loaded: ${midiTrack.name}")
-        Log.d(TAG, "Duration: ${midiTrack.totalDuration.inWholeSeconds}s, Notes: ${midiTrack.notes.size}")
+            // Load and parse the MIDI file
+            val midiTrack = loadMidiTrack()
+            Log.d(TAG, "MIDI track loaded: ${midiTrack.name}")
+            Log.d(TAG, "Duration: ${midiTrack.totalDuration.inWholeSeconds}s, Notes: ${midiTrack.notes.size}")
 
-        // Create simulated crowd
-        val crowd = createSimulatedCrowd(midiTrack)
-        Log.d(TAG, "Created crowd of ${crowd.size} people")
+            // Create simulated crowd
+            val crowd = createSimulatedCrowd(midiTrack)
+            Log.d(TAG, "Created crowd of ${crowd.size} people")
 
-        // Run the simulation
-        val results = runCrowdSimulation(crowd, midiTrack)
+            // Run the simulation
+            val results = runCrowdSimulation(crowd, midiTrack)
 
-        // Analyze and verify results
-        analyzeSimulationResults(results, midiTrack)
-    }
+            // Analyze and verify results
+            analyzeSimulationResults(results, midiTrack)
+        }
 
     /**
      * Load the MIDI track for simulation
      */
-    private suspend fun loadMidiTrack(): MidiTrack {
-        return try {
+    private suspend fun loadMidiTrack(): MidiTrack =
+        try {
             MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load real MIDI file, using mock data: ${e.message}")
             createMockMidiTrack()
         }
-    }
 
     /**
      * Create a mock MIDI track for testing when real file isn't available
@@ -149,8 +148,8 @@ class CrowdSoundChoreographySimulationTest {
                         pitch = currentPitch,
                         velocity = Random.nextInt(80, 127),
                         startTime = currentTime,
-                        duration = noteDuration
-                    )
+                        duration = noteDuration,
+                    ),
                 )
             }
 
@@ -162,39 +161,40 @@ class CrowdSoundChoreographySimulationTest {
             name = "Mock MIDI Track for Testing",
             notes = mockNotes,
             totalDuration = trackDuration,
-            tempo = 120
+            tempo = 120,
         )
     }
 
     /**
      * Create a simulated crowd of people with individual SoundChoreographyManagers
      */
-    private suspend fun createSimulatedCrowd(midiTrack: MidiTrack): List<SimulatedPerson> {
-        return coroutineScope {
-            (1..CROWD_SIZE).map { personId ->
-                async {
-                    val mockClock = mockk<IClock>()
-                    val mockSoundPlayer = mockk<SoundPlayer>(relaxed = true)
+    private suspend fun createSimulatedCrowd(midiTrack: MidiTrack): List<SimulatedPerson> =
+        coroutineScope {
+            (1..CROWD_SIZE)
+                .map { personId ->
+                    async {
+                        val mockClock = mockk<IClock>()
+                        val mockSoundPlayer = mockk<SoundPlayer>(relaxed = true)
 
-                    // Create manager for this person
-                    val manager = SoundChoreographyManager().apply {
-                        setCurrentTrack(midiTrack)
-                        setLooping(true)
-                        setWaveform(SoundPlayer.Waveform.SQUARE)
+                        // Create manager for this person
+                        val manager =
+                            SoundChoreographyManager().apply {
+                                setCurrentTrack(midiTrack)
+                                setLooping(true)
+                                setWaveform(SoundPlayer.Waveform.SQUARE)
+                            }
+
+                        SimulatedPerson(personId, manager)
                     }
-
-                    SimulatedPerson(personId, manager)
-                }
-            }.map { it.await() }
+                }.map { it.await() }
         }
-    }
 
     /**
      * Run the full crowd simulation
      */
     private suspend fun runCrowdSimulation(
         crowd: List<SimulatedPerson>,
-        midiTrack: MidiTrack
+        midiTrack: MidiTrack,
     ): SimulationResults {
         val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         val allPlaybackEvents = mutableListOf<PlaybackEvent>()
@@ -208,58 +208,62 @@ class CrowdSoundChoreographySimulationTest {
 
         // Simulate wave progression over time
         while (currentTime < simulationDuration) {
-            val currentInstant = Instant.fromEpochMilliseconds(
-                waveStartTime.toEpochMilliseconds() + currentTime.inWholeMilliseconds
-            )
+            val currentInstant =
+                Instant.fromEpochMilliseconds(
+                    waveStartTime.toEpochMilliseconds() + currentTime.inWholeMilliseconds,
+                )
 
             // Have each person in the crowd play their sound simultaneously
             coroutineScope {
-                crowd.map { person ->
-                    async {
-                        try {
-                            // Mock the clock to return current simulation time
-                            val mockClock = mockk<IClock>()
-                            every { mockClock.now() } returns currentInstant
+                crowd
+                    .map { person ->
+                        async {
+                            try {
+                                // Mock the clock to return current simulation time
+                                val mockClock = mockk<IClock>()
+                                every { mockClock.now() } returns currentInstant
 
-                            // Calculate what pitch would be played
-                            val elapsedTime = currentTime
-                            val trackPosition = if (midiTrack.totalDuration > Duration.ZERO) {
-                                (elapsedTime.inWholeMilliseconds % midiTrack.totalDuration.inWholeMilliseconds).milliseconds
-                            } else {
-                                elapsedTime
-                            }
+                                // Calculate what pitch would be played
+                                val elapsedTime = currentTime
+                                val trackPosition =
+                                    if (midiTrack.totalDuration > Duration.ZERO) {
+                                        (elapsedTime.inWholeMilliseconds % midiTrack.totalDuration.inWholeMilliseconds).milliseconds
+                                    } else {
+                                        elapsedTime
+                                    }
 
-                            // Find active notes at this position
-                            val activeNotes = midiTrack.notes.filter { it.isActiveAt(trackPosition) }
+                                // Find active notes at this position
+                                val activeNotes = midiTrack.notes.filter { it.isActiveAt(trackPosition) }
 
-                            if (activeNotes.isNotEmpty()) {
-                                // Select a random note (simulating what the real manager does)
-                                val selectedNote = activeNotes[Random.nextInt(activeNotes.size)]
-                                val frequency = WaveformGenerator.midiPitchToFrequency(selectedNote.pitch)
-                                val amplitude = WaveformGenerator.midiVelocityToAmplitude(selectedNote.velocity)
+                                if (activeNotes.isNotEmpty()) {
+                                    // Select a random note (simulating what the real manager does)
+                                    val selectedNote = activeNotes[Random.nextInt(activeNotes.size)]
+                                    val frequency = WaveformGenerator.midiPitchToFrequency(selectedNote.pitch)
+                                    val amplitude = WaveformGenerator.midiVelocityToAmplitude(selectedNote.velocity)
 
-                                // Record the playback event
-                                val event = PlaybackEvent(
-                                    personId = person.id,
-                                    timestamp = currentInstant,
-                                    elapsedTime = elapsedTime,
-                                    midiPitch = selectedNote.pitch,
-                                    frequency = frequency,
-                                    amplitude = amplitude
-                                )
+                                    // Record the playback event
+                                    val event =
+                                        PlaybackEvent(
+                                            personId = person.id,
+                                            timestamp = currentInstant,
+                                            elapsedTime = elapsedTime,
+                                            midiPitch = selectedNote.pitch,
+                                            frequency = frequency,
+                                            amplitude = amplitude,
+                                        )
 
-                                synchronized(allPlaybackEvents) {
-                                    allPlaybackEvents.add(event)
-                                    person.playbackLog.add(event)
+                                    synchronized(allPlaybackEvents) {
+                                        allPlaybackEvents.add(event)
+                                        person.playbackLog.add(event)
+                                    }
+
+                                    eventCount++
                                 }
-
-                                eventCount++
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Person ${person.id} failed to play sound: ${e.message}")
                             }
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Person ${person.id} failed to play sound: ${e.message}")
                         }
-                    }
-                }.forEach { it.await() }
+                    }.forEach { it.await() }
             }
 
             // Progress simulation time
@@ -281,11 +285,12 @@ class CrowdSoundChoreographySimulationTest {
         val uniquePitchesPlayed = allPlaybackEvents.mapNotNull { it.midiPitch }.toSet()
         val avgEventsPerPerson = if (crowd.isNotEmpty()) eventCount.toDouble() / crowd.size else 0.0
         val uniquePitchesInTrack = midiTrack.notes.map { it.pitch }.toSet()
-        val coveragePercentage = if (uniquePitchesInTrack.isNotEmpty()) {
-            (uniquePitchesPlayed.size.toDouble() / uniquePitchesInTrack.size) * 100.0
-        } else {
-            0.0
-        }
+        val coveragePercentage =
+            if (uniquePitchesInTrack.isNotEmpty()) {
+                (uniquePitchesPlayed.size.toDouble() / uniquePitchesInTrack.size) * 100.0
+            } else {
+                0.0
+            }
 
         return SimulationResults(
             totalDuration = currentTime,
@@ -293,14 +298,17 @@ class CrowdSoundChoreographySimulationTest {
             avgEventsPerPerson = avgEventsPerPerson,
             uniquePitchesPlayed = uniquePitchesPlayed,
             coveragePercentage = coveragePercentage,
-            playbackLog = allPlaybackEvents
+            playbackLog = allPlaybackEvents,
         )
     }
 
     /**
      * Analyze simulation results and verify the crowd behavior
      */
-    private fun analyzeSimulationResults(results: SimulationResults, midiTrack: MidiTrack) {
+    private fun analyzeSimulationResults(
+        results: SimulationResults,
+        midiTrack: MidiTrack,
+    ) {
         Log.d(TAG, "=== CROWD SOUND SIMULATION RESULTS ===")
         Log.d(TAG, "Simulation Duration: ${results.totalDuration.inWholeSeconds} seconds")
         Log.d(TAG, "Total Playback Events: ${results.totalPlaybackEvents}")
@@ -312,13 +320,13 @@ class CrowdSoundChoreographySimulationTest {
         val expectedMinEvents = (results.totalDuration.inWholeMilliseconds / SIMULATION_INTERVAL_MS) * CROWD_SIZE * 0.8
         assertTrue(
             "Expected at least $expectedMinEvents playback events, got ${results.totalPlaybackEvents}",
-            results.totalPlaybackEvents >= expectedMinEvents
+            results.totalPlaybackEvents >= expectedMinEvents,
         )
 
         // Coverage verification - ensure song is recognizable
         assertTrue(
             "Track coverage too low (${results.coveragePercentage}%) - song may not be recognizable",
-            results.coveragePercentage >= 50.0
+            results.coveragePercentage >= 50.0,
         )
 
         // Temporal distribution analysis
@@ -334,7 +342,10 @@ class CrowdSoundChoreographySimulationTest {
     /**
      * Analyze how events are distributed over time
      */
-    private fun analyzeTemporalDistribution(events: List<PlaybackEvent>, midiTrack: MidiTrack) {
+    private fun analyzeTemporalDistribution(
+        events: List<PlaybackEvent>,
+        midiTrack: MidiTrack,
+    ) {
         val timeIntervals = 10 // Divide into 10 time segments
         val intervalDuration = midiTrack.totalDuration.inWholeMilliseconds / timeIntervals
         val eventsByInterval = mutableMapOf<Int, Int>()
@@ -355,12 +366,17 @@ class CrowdSoundChoreographySimulationTest {
     /**
      * Analyze pitch distribution to verify musical content
      */
-    private fun analyzePitchDistribution(events: List<PlaybackEvent>, midiTrack: MidiTrack) {
-        val pitchCounts = events.mapNotNull { it.midiPitch }
-            .groupingBy { it }
-            .eachCount()
-            .toList()
-            .sortedByDescending { it.second }
+    private fun analyzePitchDistribution(
+        events: List<PlaybackEvent>,
+        midiTrack: MidiTrack,
+    ) {
+        val pitchCounts =
+            events
+                .mapNotNull { it.midiPitch }
+                .groupingBy { it }
+                .eachCount()
+                .toList()
+                .sortedByDescending { it.second }
 
         Log.d(TAG, "Pitch Distribution Analysis (Top 10):")
         pitchCounts.take(10).forEach { (pitch, count) ->
@@ -375,7 +391,7 @@ class CrowdSoundChoreographySimulationTest {
 
         assertTrue(
             "Insufficient pitch diversity: $pitchDiversity unique pitches, expected at least $expectedMinDiversity",
-            pitchDiversity >= expectedMinDiversity
+            pitchDiversity >= expectedMinDiversity,
         )
     }
 

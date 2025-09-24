@@ -32,7 +32,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
  * @param mapAvailabilityChecker Service for checking map download status
  */
 class FilterEventsUseCase(
-    private val mapAvailabilityChecker: MapAvailabilityChecker
+    private val mapAvailabilityChecker: MapAvailabilityChecker,
 ) {
     /**
      * Filters a list of events based on the specified criteria.
@@ -43,7 +43,7 @@ class FilterEventsUseCase(
      */
     suspend operator fun invoke(
         events: List<IWWWEvent>,
-        criteria: EventFilterCriteria
+        criteria: EventFilterCriteria,
     ): List<IWWWEvent> {
         // Refresh map availability data before filtering
         mapAvailabilityChecker.refreshAvailability()
@@ -71,16 +71,16 @@ class FilterEventsUseCase(
     suspend fun filter(
         events: List<IWWWEvent>,
         onlyFavorites: Boolean = false,
-        onlyDownloaded: Boolean = false
-    ): List<IWWWEvent> {
-        return invoke(
+        onlyDownloaded: Boolean = false,
+    ): List<IWWWEvent> =
+        invoke(
             events = events,
-            criteria = EventFilterCriteria(
-                onlyFavorites = onlyFavorites,
-                onlyDownloaded = onlyDownloaded
-            )
+            criteria =
+                EventFilterCriteria(
+                    onlyFavorites = onlyFavorites,
+                    onlyDownloaded = onlyDownloaded,
+                ),
         )
-    }
 }
 
 /**
@@ -99,7 +99,7 @@ data class EventFilterCriteria(
     val onlyRunning: Boolean = false,
     val onlyUpcoming: Boolean = false,
     val onlyCompleted: Boolean = false,
-    val eventIds: List<String>? = null
+    val eventIds: List<String>? = null,
 )
 
 /**
@@ -108,6 +108,8 @@ data class EventFilterCriteria(
  */
 interface MapAvailabilityChecker {
     fun refreshAvailability()
+
     fun isMapDownloaded(eventId: String): Boolean
+
     fun getDownloadedMaps(): List<String>
 }

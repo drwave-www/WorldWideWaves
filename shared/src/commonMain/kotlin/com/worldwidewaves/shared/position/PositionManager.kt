@@ -22,8 +22,8 @@ package com.worldwidewaves.shared.position
  */
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,15 +46,14 @@ import kotlin.time.Duration.Companion.milliseconds
 class PositionManager(
     private val coroutineScopeProvider: CoroutineScopeProvider,
     private val debounceDelay: Duration = 100.milliseconds,
-    private val positionEpsilon: Double = 0.0001 // ~10 meters
+    private val positionEpsilon: Double = 0.0001, // ~10 meters
 ) {
-
     /**
      * Position source types with implicit priority ordering (lower ordinal = higher priority)
      */
     enum class PositionSource {
-        SIMULATION,     // Highest priority - debug/testing
-        GPS            // Standard priority - real device location
+        SIMULATION, // Highest priority - debug/testing
+        GPS, // Standard priority - real device location
     }
 
     /**
@@ -62,7 +61,7 @@ class PositionManager(
      */
     private data class PositionState(
         val position: Position?,
-        val source: PositionSource?
+        val source: PositionSource?,
     )
 
     // Internal state management
@@ -80,7 +79,10 @@ class PositionManager(
      * @param source The source of the position update
      * @param newPosition The new position (null to clear)
      */
-    fun updatePosition(source: PositionSource, newPosition: Position?) {
+    fun updatePosition(
+        source: PositionSource,
+        newPosition: Position?,
+    ) {
         Log.i("PositionManager", "[DEBUG] Position update from $source: $newPosition")
 
         val newState = PositionState(newPosition, if (newPosition == null) null else source)
@@ -103,17 +105,18 @@ class PositionManager(
         Log.i("PositionManager", "[DEBUG] Stored pending update: $newState, debounceDelay=$debounceDelay")
 
         debounceJob?.cancel()
-        debounceJob = coroutineScopeProvider.launchDefault {
-            delay(debounceDelay)
+        debounceJob =
+            coroutineScopeProvider.launchDefault {
+                delay(debounceDelay)
 
-            // Apply the debounced update
-            pendingUpdate?.let { finalState ->
-                _currentState.value = finalState
-                _position.value = finalState.position
-                Log.i("PositionManager", "[DEBUG] Applied debounced position: ${finalState.position} from ${finalState.source}")
+                // Apply the debounced update
+                pendingUpdate?.let { finalState ->
+                    _currentState.value = finalState
+                    _position.value = finalState.position
+                    Log.i("PositionManager", "[DEBUG] Applied debounced position: ${finalState.position} from ${finalState.source}")
+                }
+                pendingUpdate = null
             }
-            pendingUpdate = null
-        }
     }
 
     /**
@@ -147,7 +150,10 @@ class PositionManager(
     /**
      * Determines if a new position update should be accepted based on source priority
      */
-    private fun shouldAcceptUpdate(current: PositionState, new: PositionState): Boolean {
+    private fun shouldAcceptUpdate(
+        current: PositionState,
+        new: PositionState,
+    ): Boolean {
         // Always accept if no current position
         if (current.position == null) return true
 
@@ -166,7 +172,10 @@ class PositionManager(
     /**
      * Checks if a position is effectively duplicate using epsilon comparison
      */
-    private fun isPositionDuplicate(current: Position?, new: Position?): Boolean {
+    private fun isPositionDuplicate(
+        current: Position?,
+        new: Position?,
+    ): Boolean {
         if (current == null || new == null) return false
 
         val latDiff = abs(current.lat - new.lat)

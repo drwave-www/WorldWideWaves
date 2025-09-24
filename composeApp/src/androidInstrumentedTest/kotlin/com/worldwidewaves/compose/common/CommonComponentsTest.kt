@@ -46,7 +46,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -54,14 +53,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.testing.BaseComponentTest
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.ExperimentalTime
@@ -78,7 +72,6 @@ import kotlin.time.ExperimentalTime
  */
 @RunWith(AndroidJUnit4::class)
 class CommonComponentsTest : BaseComponentTest() {
-
     @OptIn(ExperimentalTime::class)
     @Before
     override fun setUp() {
@@ -193,12 +186,13 @@ class CommonComponentsTest : BaseComponentTest() {
         }
 
         // Test that the component exists and can be interacted with
-        val favoriteOverlayExists = try {
-            composeTestRule.onNodeWithTag("favorite-overlay").assertExists()
-            true
-        } catch (e: Exception) {
-            false
-        }
+        val favoriteOverlayExists =
+            try {
+                composeTestRule.onNodeWithTag("favorite-overlay").assertExists()
+                true
+            } catch (e: Exception) {
+                false
+            }
 
         assertTrue("Favorite overlay component should exist and be accessible", favoriteOverlayExists)
 

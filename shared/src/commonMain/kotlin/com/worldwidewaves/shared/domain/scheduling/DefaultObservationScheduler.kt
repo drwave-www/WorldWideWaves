@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.ZERO
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -59,16 +58,18 @@ import kotlin.time.Duration.Companion.seconds
  * - Critical timing accuracy for sound synchronization
  */
 class DefaultObservationScheduler(
-    private val clock: IClock
+    private val clock: IClock,
 ) : ObservationScheduler {
-
     override suspend fun calculateObservationInterval(event: IWWWEvent): Duration {
         val now = clock.now()
         val eventStartTime = event.getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
         val timeBeforeHit = event.wave.timeBeforeUserHit()
 
-        Log.performance("DefaultObservationScheduler", "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit")
+        Log.performance(
+            "DefaultObservationScheduler",
+            "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit",
+        )
 
         return when {
             // Event is far in the future - minimal battery usage
@@ -123,61 +124,66 @@ class DefaultObservationScheduler(
 
     override suspend fun shouldObserveContinuously(event: IWWWEvent): Boolean {
         val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
-        Log.v("DefaultObservationScheduler", "Should observe continuously: $shouldObserve (running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})")
+        Log.v(
+            "DefaultObservationScheduler",
+            "Should observe continuously: $shouldObserve (running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})",
+        )
         return shouldObserve
     }
 
-    override fun createObservationFlow(event: IWWWEvent): Flow<Unit> = callbackFlow {
-        Log.v("DefaultObservationScheduler", "Creating observation flow for event ${event.id}")
+    override fun createObservationFlow(event: IWWWEvent): Flow<Unit> =
+        callbackFlow {
+            Log.v("DefaultObservationScheduler", "Creating observation flow for event ${event.id}")
 
-        try {
-            if (shouldObserveContinuously(event)) {
-                Log.v("DefaultObservationScheduler", "Starting continuous observation for event ${event.id}")
+            try {
+                if (shouldObserveContinuously(event)) {
+                    Log.v("DefaultObservationScheduler", "Starting continuous observation for event ${event.id}")
 
-                while (!event.isDone()) {
-                    // Emit observation trigger
-                    send(Unit)
+                    while (!event.isDone()) {
+                        // Emit observation trigger
+                        send(Unit)
 
-                    // Calculate next observation interval
-                    val observationDelay = calculateObservationInterval(event)
+                        // Calculate next observation interval
+                        val observationDelay = calculateObservationInterval(event)
 
-                    if (!observationDelay.isFinite()) {
-                        Log.v("DefaultObservationScheduler", "Stopping observation flow due to infinite interval")
-                        break
+                        if (!observationDelay.isFinite()) {
+                            Log.v("DefaultObservationScheduler", "Stopping observation flow due to infinite interval")
+                            break
+                        }
+
+                        // Wait for next observation
+                        Log.v("DefaultObservationScheduler", "Waiting $observationDelay for next observation")
+                        clock.delay(observationDelay)
                     }
 
-                    // Wait for next observation
-                    Log.v("DefaultObservationScheduler", "Waiting ${observationDelay} for next observation")
-                    clock.delay(observationDelay)
+                    // Final emission when event is done
+                    Log.v("DefaultObservationScheduler", "Event ${event.id} done, final observation emission")
+                    send(Unit)
+                } else {
+                    // For events not ready for continuous observation, emit once
+                    Log.v("DefaultObservationScheduler", "Event ${event.id} not ready for continuous observation, emitting once")
+                    send(Unit)
                 }
-
-                // Final emission when event is done
-                Log.v("DefaultObservationScheduler", "Event ${event.id} done, final observation emission")
-                send(Unit)
-            } else {
-                // For events not ready for continuous observation, emit once
-                Log.v("DefaultObservationScheduler", "Event ${event.id} not ready for continuous observation, emitting once")
-                send(Unit)
+            } catch (e: Exception) {
+                Log.e("DefaultObservationScheduler", "Error in observation flow for event ${event.id}: $e")
             }
-        } catch (e: Exception) {
-            Log.e("DefaultObservationScheduler", "Error in observation flow for event ${event.id}: $e")
-        }
 
-        awaitClose {
-            Log.v("DefaultObservationScheduler", "Closing observation flow for event ${event.id}")
+            awaitClose {
+                Log.v("DefaultObservationScheduler", "Closing observation flow for event ${event.id}")
+            }
         }
-    }
 
     override suspend fun getObservationSchedule(event: IWWWEvent): ObservationSchedule {
         val shouldObserve = shouldObserveContinuously(event)
         val interval = calculateObservationInterval(event)
         val phase = determineObservationPhase(event)
 
-        val nextObservationTime = if (shouldObserve && interval.isFinite()) {
-            clock.now() + interval
-        } else {
-            null
-        }
+        val nextObservationTime =
+            if (shouldObserve && interval.isFinite()) {
+                clock.now() + interval
+            } else {
+                null
+            }
 
         val reason = buildReasonString(event, phase, interval)
 
@@ -186,7 +192,7 @@ class DefaultObservationScheduler(
             interval = interval,
             phase = phase,
             nextObservationTime = nextObservationTime,
-            reason = reason
+            reason = reason,
         )
     }
 
@@ -212,18 +218,22 @@ class DefaultObservationScheduler(
     /**
      * Builds a human-readable reason string for the observation schedule.
      */
-    private suspend fun buildReasonString(event: IWWWEvent, phase: ObservationPhase, interval: Duration): String {
+    private suspend fun buildReasonString(
+        event: IWWWEvent,
+        phase: ObservationPhase,
+        interval: Duration,
+    ): String {
         val now = clock.now()
         val eventStartTime = event.getStartDateTime()
         val timeBeforeEvent = eventStartTime - now
         val timeBeforeHit = event.wave.timeBeforeUserHit()
 
         return when (phase) {
-            ObservationPhase.DISTANT -> "Event is ${timeBeforeEvent} away, minimal monitoring"
-            ObservationPhase.APPROACHING -> "Event approaching in ${timeBeforeEvent}, moderate monitoring"
-            ObservationPhase.NEAR -> "Event near (${timeBeforeEvent}), active monitoring"
+            ObservationPhase.DISTANT -> "Event is $timeBeforeEvent away, minimal monitoring"
+            ObservationPhase.APPROACHING -> "Event approaching in $timeBeforeEvent, moderate monitoring"
+            ObservationPhase.NEAR -> "Event near ($timeBeforeEvent), active monitoring"
             ObservationPhase.ACTIVE -> "Event active or starting, real-time monitoring"
-            ObservationPhase.CRITICAL -> "Critical hit timing (${timeBeforeHit}), maximum accuracy"
+            ObservationPhase.CRITICAL -> "Critical hit timing ($timeBeforeHit), maximum accuracy"
             ObservationPhase.INACTIVE -> "Event done or irrelevant, no observation needed"
         }
     }

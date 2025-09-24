@@ -29,7 +29,6 @@ import kotlin.test.assertTrue
  * Tests for CI environment detection and configuration.
  */
 class CIEnvironmentTest {
-
     @Test
     fun `should provide valid CI detection`() {
         // WHEN: Checking CI environment status
@@ -99,17 +98,18 @@ class CIEnvironmentTest {
         val systemName = CIEnvironment.ciSystemName
 
         // THEN: Should be one of the known systems or local
-        val knownSystems = setOf(
-            "GitHub Actions",
-            "Travis CI",
-            "CircleCI",
-            "Jenkins",
-            "Generic CI",
-            "local"
-        )
+        val knownSystems =
+            setOf(
+                "GitHub Actions",
+                "Travis CI",
+                "CircleCI",
+                "Jenkins",
+                "Generic CI",
+                "local",
+            )
         assertTrue(
             systemName in knownSystems,
-            "CI system name '$systemName' should be one of the known systems: $knownSystems"
+            "CI system name '$systemName' should be one of the known systems: $knownSystems",
         )
     }
 
@@ -123,12 +123,12 @@ class CIEnvironmentTest {
         if (isCI) {
             assertTrue(
                 systemName != "local",
-                "If isCI is true, system name should not be 'local'"
+                "If isCI is true, system name should not be 'local'",
             )
         } else {
             assertTrue(
                 systemName == "local",
-                "If isCI is false, system name should be 'local'"
+                "If isCI is false, system name should be 'local'",
             )
         }
     }
@@ -141,7 +141,7 @@ class CIEnvironmentTest {
         // THEN: Should be within reasonable bounds
         assertTrue(
             multiplier >= 1.0 && multiplier <= 10.0,
-            "Timeout multiplier should be between 1.0 and 10.0, got: $multiplier"
+            "Timeout multiplier should be between 1.0 and 10.0, got: $multiplier",
         )
     }
 }

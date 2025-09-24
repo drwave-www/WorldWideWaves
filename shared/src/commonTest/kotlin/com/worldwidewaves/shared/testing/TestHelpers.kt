@@ -47,7 +47,6 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 object TestHelpers {
-
     // Standard test locations using the existing Position class
     object TestLocations {
         val PARIS = Position(48.8566, 2.3522)
@@ -83,15 +82,16 @@ object TestHelpers {
         waveDuration: Duration = 2.hours,
         waveSpeed: Double = 10.0, // m/s
         area: WWWEventArea? = null,
-        map: WWWEventMap? = null
+        map: WWWEventMap? = null,
     ): WWWEvent {
         val mockArea = area ?: createMockArea(userPosition = userPosition)
         val mockMap = map ?: createMockMap()
-        val waveDefinition = createSimpleWaveDefinition(
-            duration = waveDuration,
-            speed = waveSpeed,
-            userPosition = userPosition
-        )
+        val waveDefinition =
+            createSimpleWaveDefinition(
+                duration = waveDuration,
+                speed = waveSpeed,
+                userPosition = userPosition,
+            )
 
         return WWWEvent(
             id = id,
@@ -116,13 +116,17 @@ object TestHelpers {
         id: String = "running_event",
         startedAgo: Duration = 30.minutes,
         totalDuration: Duration = 2.hours,
-        userPosition: Position? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS,
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val startTime = now - startedAgo
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+
         @Suppress("DEPRECATION")
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(
+            2,
+            '0',
+        )}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
@@ -130,7 +134,7 @@ object TestHelpers {
             date = startDateTime,
             startHour = startHour,
             userPosition = userPosition,
-            waveDuration = totalDuration
+            waveDuration = totalDuration,
         )
     }
 
@@ -140,20 +144,24 @@ object TestHelpers {
     fun createFutureEvent(
         id: String = "future_event",
         startsIn: Duration = 5.hours,
-        userPosition: Position? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS,
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val startTime = now + startsIn
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+
         @Suppress("DEPRECATION")
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(
+            2,
+            '0',
+        )}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
             id = id,
             date = startDateTime,
             startHour = startHour,
-            userPosition = userPosition
+            userPosition = userPosition,
         )
     }
 
@@ -164,14 +172,18 @@ object TestHelpers {
         id: String = "completed_event",
         endedAgo: Duration = 1.hours,
         totalDuration: Duration = 30.minutes,
-        userPosition: Position? = TestLocations.PARIS
+        userPosition: Position? = TestLocations.PARIS,
     ): WWWEvent {
         val now = TestTimes.BASE_TIME
         val endTime = now - endedAgo
         val startTime = endTime - totalDuration
         val localDateTime = startTime.toLocalDateTime(TimeZone.UTC)
+
         @Suppress("DEPRECATION")
-        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(2, '0')}-${localDateTime.day.toString().padStart(2, '0')}"
+        val startDateTime = "${localDateTime.year}-${localDateTime.monthNumber.toString().padStart(
+            2,
+            '0',
+        )}-${localDateTime.day.toString().padStart(2, '0')}"
         val startHour = "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 
         return createTestEvent(
@@ -179,7 +191,7 @@ object TestHelpers {
             date = startDateTime,
             startHour = startHour,
             userPosition = userPosition,
-            waveDuration = totalDuration
+            waveDuration = totalDuration,
         )
     }
 
@@ -188,7 +200,7 @@ object TestHelpers {
      */
     fun createMockArea(
         userPosition: Position? = null,
-        isUserInArea: Boolean = true
+        isUserInArea: Boolean = true,
     ): WWWEventArea {
         val mockArea = mockk<WWWEventArea>(relaxed = true)
         every { mockArea.validationErrors() } returns null
@@ -225,13 +237,14 @@ object TestHelpers {
     fun createSimpleWaveDefinition(
         duration: Duration = 2.hours,
         speed: Double = 10.0,
-        userPosition: Position? = null
+        userPosition: Position? = null,
     ): WWWEvent.WWWWaveDefinition {
-        val linearWave = WWWEventWaveLinear(
-            speed = speed,
-            direction = WWWEventWave.Direction.EAST,
-            approxDuration = duration.inWholeMinutes.toInt()
-        )
+        val linearWave =
+            WWWEventWaveLinear(
+                speed = speed,
+                direction = WWWEventWave.Direction.EAST,
+                approxDuration = duration.inWholeMinutes.toInt(),
+            )
 
         // Position is now managed by PositionManager in tests
         // Tests should set position using: testPositionManager.updatePosition(PositionManager.PositionSource.GPS, userPosition)
@@ -250,7 +263,7 @@ object TestHelpers {
         timeBeforeHit: Duration? = null,
         hasBeenHit: Boolean = false,
         userPositionRatio: Double? = null,
-        hitDateTime: Instant? = null
+        hitDateTime: Instant? = null,
     ): WWWEventWave {
         val mockWave = mockk<WWWEventWave>(relaxed = true)
 
@@ -271,12 +284,13 @@ object TestHelpers {
     /**
      * Creates a collection of test events with different statuses for comprehensive testing.
      */
-    fun createTestEventSuite(): List<WWWEvent> = listOf(
-        createRunningEvent("running_city", userPosition = TestLocations.PARIS),
-        createFutureEvent("future_country", startsIn = 5.hours, userPosition = TestLocations.LONDON),
-        createCompletedEvent("completed_world", endedAgo = 1.hours, userPosition = TestLocations.NEW_YORK),
-        createTestEvent("soon_event", date = "2022-01-02", userPosition = TestLocations.TOKYO), // Soon event
-    )
+    fun createTestEventSuite(): List<WWWEvent> =
+        listOf(
+            createRunningEvent("running_city", userPosition = TestLocations.PARIS),
+            createFutureEvent("future_country", startsIn = 5.hours, userPosition = TestLocations.LONDON),
+            createCompletedEvent("completed_world", endedAgo = 1.hours, userPosition = TestLocations.NEW_YORK),
+            createTestEvent("soon_event", date = "2022-01-02", userPosition = TestLocations.TOKYO), // Soon event
+        )
 
     /**
      * Geographic calculation testing utilities.
@@ -285,7 +299,7 @@ object TestHelpers {
         fun createPolygonPoints(
             center: Position,
             radius: Double = 0.01, // Degrees
-            sides: Int = 6
+            sides: Int = 6,
         ): List<Position> {
             val points = mutableListOf<Position>()
             val angleStep = 360.0 / sides
@@ -300,11 +314,15 @@ object TestHelpers {
             return points
         }
 
-        fun calculateDistance(pos1: Position, pos2: Position): Double {
+        fun calculateDistance(
+            pos1: Position,
+            pos2: Position,
+        ): Double {
             // Simplified Haversine formula for testing
             val dLat = Math.toRadians(pos2.latitude - pos1.latitude)
             val dLng = Math.toRadians(pos2.longitude - pos1.longitude)
-            val a = kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
+            val a =
+                kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
                     kotlin.math.cos(Math.toRadians(pos1.latitude)) *
                     kotlin.math.cos(Math.toRadians(pos2.latitude)) *
                     kotlin.math.sin(dLng / 2) * kotlin.math.sin(dLng / 2)
@@ -327,14 +345,15 @@ object TestHelpers {
         fun assertStatusTransition(
             from: IWWWEvent.Status,
             to: IWWWEvent.Status,
-            message: String = "Invalid status transition"
+            message: String = "Invalid status transition",
         ) {
-            val validTransitions = mapOf(
-                IWWWEvent.Status.NEXT to setOf(IWWWEvent.Status.SOON, IWWWEvent.Status.RUNNING),
-                IWWWEvent.Status.SOON to setOf(IWWWEvent.Status.RUNNING, IWWWEvent.Status.NEXT),
-                IWWWEvent.Status.RUNNING to setOf(IWWWEvent.Status.DONE),
-                IWWWEvent.Status.DONE to emptySet()
-            )
+            val validTransitions =
+                mapOf(
+                    IWWWEvent.Status.NEXT to setOf(IWWWEvent.Status.SOON, IWWWEvent.Status.RUNNING),
+                    IWWWEvent.Status.SOON to setOf(IWWWEvent.Status.RUNNING, IWWWEvent.Status.NEXT),
+                    IWWWEvent.Status.RUNNING to setOf(IWWWEvent.Status.DONE),
+                    IWWWEvent.Status.DONE to emptySet(),
+                )
 
             val allowedTransitions = validTransitions[from] ?: emptySet()
             if (to !in allowedTransitions && from != to) {
@@ -342,7 +361,10 @@ object TestHelpers {
             }
         }
 
-        fun assertTimeOrderCorrect(start: Instant, end: Instant) {
+        fun assertTimeOrderCorrect(
+            start: Instant,
+            end: Instant,
+        ) {
             if (start >= end) {
                 throw AssertionError("Start time ($start) must be before end time ($end)")
             }
@@ -353,7 +375,7 @@ object TestHelpers {
             minLat: Double = -90.0,
             maxLat: Double = 90.0,
             minLng: Double = -180.0,
-            maxLng: Double = 180.0
+            maxLng: Double = 180.0,
         ) {
             if (position.latitude < minLat || position.latitude > maxLat) {
                 throw AssertionError("Latitude ${position.latitude} is out of bounds [$minLat, $maxLat]")

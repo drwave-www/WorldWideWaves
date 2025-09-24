@@ -27,7 +27,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.junit.Before
 
 /**
@@ -37,7 +36,6 @@ import org.junit.Before
  * Firebase integration, network scenarios, and end-to-end flows.
  */
 abstract class BaseIntegrationTest : BaseInstrumentedTest() {
-
     protected lateinit var mockWWWEvents: WWWEvents
 
     @Before
@@ -54,26 +52,29 @@ abstract class BaseIntegrationTest : BaseInstrumentedTest() {
      * Creates a test event flow with specified number of events
      */
     protected fun createTestEventFlow(eventCount: Int): MutableStateFlow<List<IWWWEvent>> {
-        val testEvents = (1..eventCount).map { index ->
-            createMockEvent("test-event-$index")
-        }
+        val testEvents =
+            (1..eventCount).map { index ->
+                createMockEvent("test-event-$index")
+            }
         return MutableStateFlow(testEvents)
     }
 
     /**
      * Creates a mock event with basic properties
      */
-    protected fun createMockEvent(eventId: String): IWWWEvent {
-        return mockk<IWWWEvent>(relaxed = true) {
+    protected fun createMockEvent(eventId: String): IWWWEvent =
+        mockk<IWWWEvent>(relaxed = true) {
             every { id } returns eventId
             coEvery { getStatus() } returns IWWWEvent.Status.SOON
         }
-    }
 
     /**
      * Simulates network connectivity states
      */
-    protected fun simulateNetworkState(isConnected: Boolean, isSlowConnection: Boolean = false) {
+    protected fun simulateNetworkState(
+        isConnected: Boolean,
+        isSlowConnection: Boolean = false,
+    ) {
         // This would integrate with actual network state management
         // For now, providing structure for future implementation
     }
@@ -89,7 +90,10 @@ abstract class BaseIntegrationTest : BaseInstrumentedTest() {
     /**
      * Simulates Firebase authentication states
      */
-    protected fun simulateFirebaseAuth(isAuthenticated: Boolean, userId: String? = null) {
+    protected fun simulateFirebaseAuth(
+        isAuthenticated: Boolean,
+        userId: String? = null,
+    ) {
         // This would integrate with actual Firebase auth
         // For now, providing structure for future implementation
     }

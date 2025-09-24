@@ -78,7 +78,6 @@ import kotlin.test.assertTrue
  * @see Segment
  */
 class GeoUtilsEnhancedTest {
-
     @Test
     fun `test EPSILON constant value`() {
         assertEquals(1e-9, EPSILON, "EPSILON should be 1e-9 for double precision")
@@ -325,28 +324,29 @@ class GeoUtilsEnhancedTest {
         val results = mutableListOf<String>()
         val exceptions = mutableListOf<Exception>()
 
-        val threads = (1..5).map { threadId ->
-            Thread {
-                try {
-                    repeat(10) { iteration ->
-                        // Test various calculations
-                        val radians = (iteration * 30.0).toRadians()
-                        val degrees = radians.toDegrees()
-                        val distance = calculateDistance(0.0, 1.0, iteration * 10.0)
-                        val segment = Segment(Position(0.0, 0.0), Position(iteration.toDouble(), iteration.toDouble()))
-                        val pointOnSegment = isPointOnSegment(Position(iteration / 2.0, iteration / 2.0), segment)
+        val threads =
+            (1..5).map { threadId ->
+                Thread {
+                    try {
+                        repeat(10) { iteration ->
+                            // Test various calculations
+                            val radians = (iteration * 30.0).toRadians()
+                            val degrees = radians.toDegrees()
+                            val distance = calculateDistance(0.0, 1.0, iteration * 10.0)
+                            val segment = Segment(Position(0.0, 0.0), Position(iteration.toDouble(), iteration.toDouble()))
+                            val pointOnSegment = isPointOnSegment(Position(iteration / 2.0, iteration / 2.0), segment)
 
-                        synchronized(results) {
-                            results.add("Thread $threadId: deg=$degrees, dist=$distance, onSeg=$pointOnSegment")
+                            synchronized(results) {
+                                results.add("Thread $threadId: deg=$degrees, dist=$distance, onSeg=$pointOnSegment")
+                            }
                         }
-                    }
-                } catch (e: Exception) {
-                    synchronized(exceptions) {
-                        exceptions.add(e)
+                    } catch (e: Exception) {
+                        synchronized(exceptions) {
+                            exceptions.add(e)
+                        }
                     }
                 }
             }
-        }
 
         threads.forEach { it.start() }
         threads.forEach { it.join() }

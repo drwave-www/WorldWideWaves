@@ -15,12 +15,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.domain.repository.EventsRepository
-import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
-import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.EventFilterCriteria
+import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.events.IWWWEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -105,26 +105,27 @@ class EventsViewModel(
                 }
 
                 // Observe loading state from repository
-                eventsRepository.isLoading()
+                eventsRepository
+                    .isLoading()
                     .onEach { isLoading -> _isLoading.value = isLoading }
                     .launchIn(viewModelScope)
 
                 // Observe errors from repository
-                eventsRepository.getLastError()
+                eventsRepository
+                    .getLastError()
                     .onEach { error ->
                         _loadingError.value = error != null
                         error?.let {
                             Log.e(::EventsViewModel.name, "Repository error: ${it.message}", it)
                         }
-                    }
-                    .launchIn(viewModelScope)
+                    }.launchIn(viewModelScope)
 
                 // Get sorted events through use case and process them
-                getSortedEventsUseCase.invoke()
+                getSortedEventsUseCase
+                    .invoke()
                     .onEach { sortedEvents: List<IWWWEvent> ->
                         processEventsList(sortedEvents)
-                    }
-                    .flowOn(Dispatchers.Default)
+                    }.flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
             } catch (e: Exception) {
                 Log.e(::EventsViewModel.name, "Error in loadEvents", e)
@@ -199,21 +200,22 @@ class EventsViewModel(
         viewModelScope.launch {
             try {
                 // Get all events from the use case first
-                getSortedEventsUseCase.invoke()
+                getSortedEventsUseCase
+                    .invoke()
                     .onEach { allEvents: List<IWWWEvent> ->
                         // Use FilterEventsUseCase for business logic
-                        val filterCriteria = EventFilterCriteria(
-                            onlyFavorites = onlyFavorites,
-                            onlyDownloaded = onlyDownloaded,
-                            onlyRunning = false, // Not used in this UI context
-                            onlyUpcoming = false, // Not used in this UI context
-                            onlyCompleted = false // Not used in this UI context
-                        )
+                        val filterCriteria =
+                            EventFilterCriteria(
+                                onlyFavorites = onlyFavorites,
+                                onlyDownloaded = onlyDownloaded,
+                                onlyRunning = false, // Not used in this UI context
+                                onlyUpcoming = false, // Not used in this UI context
+                                onlyCompleted = false, // Not used in this UI context
+                            )
 
                         val filteredEvents = filterEventsUseCase.invoke(allEvents, filterCriteria)
                         _events.value = filteredEvents
-                    }
-                    .launchIn(viewModelScope)
+                    }.launchIn(viewModelScope)
             } catch (e: Exception) {
                 Log.e(::EventsViewModel.name, "Error filtering events", e)
                 _loadingError.value = true

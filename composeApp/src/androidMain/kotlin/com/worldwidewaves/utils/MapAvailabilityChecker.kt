@@ -28,12 +28,12 @@ import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.clearEventCache
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 
 /**
  * A utility class for checking and monitoring the availability of map feature modules.
@@ -164,7 +164,11 @@ class MapAvailabilityChecker(
     }
 
     override fun getDownloadedMaps(): List<String> {
-        val downloaded = mapStates.value.filterValues { it == true }.keys.toList()
+        val downloaded =
+            mapStates.value
+                .filterValues { it == true }
+                .keys
+                .toList()
         Log.d(TAG, "getDownloadedMaps -> $downloaded")
         return downloaded
     }

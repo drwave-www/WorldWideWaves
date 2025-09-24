@@ -146,12 +146,14 @@ android {
      * directly from Android Studio (Run/Debug-gutter icon or context menu).
      */
     lint {
-        disable.addAll(listOf(
-            "MissingTranslation",
-            "TypographyEllipsis",
-            "LogNotTimber",
-            "Typos"
-        ))
+        disable.addAll(
+            listOf(
+                "MissingTranslation",
+                "TypographyEllipsis",
+                "LogNotTimber",
+                "Typos",
+            ),
+        )
     }
 
     testOptions {

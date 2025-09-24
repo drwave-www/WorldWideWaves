@@ -14,24 +14,25 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PositionObserverBasicTest {
-
     private val mockPositionManager = mockk<PositionManager>()
     private val mockWaveProgressionTracker = mockk<WaveProgressionTracker>()
     private val mockClock = mockk<IClock>()
 
-    private val observer = DefaultPositionObserver(
-        mockPositionManager,
-        mockWaveProgressionTracker,
-        mockClock
-    )
+    private val observer =
+        DefaultPositionObserver(
+            mockPositionManager,
+            mockWaveProgressionTracker,
+            mockClock,
+        )
 
     @Test
     fun `can create DefaultPositionObserver`() {
-        val observer = DefaultPositionObserver(
-            mockPositionManager,
-            mockWaveProgressionTracker,
-            mockClock
-        )
+        val observer =
+            DefaultPositionObserver(
+                mockPositionManager,
+                mockWaveProgressionTracker,
+                mockClock,
+            )
 
         assertTrue(observer is PositionObserver)
         assertFalse(observer.isObserving())
@@ -49,13 +50,14 @@ class PositionObserverBasicTest {
 
     @Test
     fun `isValidPosition returns true for valid coordinates`() {
-        val validPositions = listOf(
-            Position(0.0, 0.0),           // Equator/Prime Meridian
-            Position(40.7128, -74.0060), // New York
-            Position(-33.8688, 151.2093), // Sydney
-            Position(89.9, 179.9),        // Near North Pole
-            Position(-89.9, -179.9),      // Near South Pole
-        )
+        val validPositions =
+            listOf(
+                Position(0.0, 0.0), // Equator/Prime Meridian
+                Position(40.7128, -74.0060), // New York
+                Position(-33.8688, 151.2093), // Sydney
+                Position(89.9, 179.9), // Near North Pole
+                Position(-89.9, -179.9), // Near South Pole
+            )
 
         validPositions.forEach { position ->
             assertTrue(observer.isValidPosition(position), "Position $position should be valid")
@@ -64,16 +66,17 @@ class PositionObserverBasicTest {
 
     @Test
     fun `isValidPosition returns false for invalid coordinates`() {
-        val invalidPositions = listOf(
-            Position(91.0, 0.0),          // Latitude too high
-            Position(-91.0, 0.0),         // Latitude too low
-            Position(0.0, 181.0),         // Longitude too high
-            Position(0.0, -181.0),        // Longitude too low
-            Position(Double.NaN, 0.0),    // NaN latitude
-            Position(0.0, Double.NaN),    // NaN longitude
-            Position(Double.POSITIVE_INFINITY, 0.0), // Infinite latitude
-            Position(0.0, Double.NEGATIVE_INFINITY), // Infinite longitude
-        )
+        val invalidPositions =
+            listOf(
+                Position(91.0, 0.0), // Latitude too high
+                Position(-91.0, 0.0), // Latitude too low
+                Position(0.0, 181.0), // Longitude too high
+                Position(0.0, -181.0), // Longitude too low
+                Position(Double.NaN, 0.0), // NaN latitude
+                Position(0.0, Double.NaN), // NaN longitude
+                Position(Double.POSITIVE_INFINITY, 0.0), // Infinite latitude
+                Position(0.0, Double.NEGATIVE_INFINITY), // Infinite longitude
+            )
 
         invalidPositions.forEach { position ->
             assertFalse(observer.isValidPosition(position), "Position $position should be invalid")
@@ -110,8 +113,10 @@ class PositionObserverBasicTest {
         val distance = observer.calculateDistance(pos1, pos2)
 
         // Just check it's not negative, not zero, not infinity, and is finite
-        assertTrue(distance > 0.0 && distance.isFinite() && !distance.isNaN(),
-                  "Distance $distance should be positive and finite")
+        assertTrue(
+            distance > 0.0 && distance.isFinite() && !distance.isNaN(),
+            "Distance $distance should be positive and finite",
+        )
     }
 
     @Test

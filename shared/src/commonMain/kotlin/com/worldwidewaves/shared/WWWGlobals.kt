@@ -40,7 +40,6 @@ fun debugBuild() {
  * Constants are grouped logically to improve maintainability and discoverability.
  */
 object WWWGlobals {
-
     // ============================================================================================
     // GEODETIC & WAVE PHYSICS CONSTANTS
     // ============================================================================================
@@ -208,6 +207,7 @@ object WWWGlobals {
         const val CONSTRAINT_LARGE_THRESHOLD = 0.4
         const val CONSTRAINT_PADDING_MULTIPLIER = 0.5
         const val CONSTRAINT_EXTRA_MARGIN = 1.5
+
         /** Threshold for significant padding/constraint changes (10%) */
         const val CHANGE_THRESHOLD = 0.1
 

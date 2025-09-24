@@ -35,7 +35,6 @@ import kotlin.test.assertTrue
  * and provides consistent logging behavior across all log levels.
  */
 class LogTest {
-
     private class TestAntilog : Antilog() {
         val logs = mutableListOf<LogEntry>()
 
@@ -43,16 +42,23 @@ class LogTest {
             val level: String,
             val tag: String,
             val message: String,
-            val throwable: Throwable?
+            val throwable: Throwable?,
         )
 
-        override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-            logs.add(LogEntry(
-                level = priority.name,
-                tag = tag ?: "",
-                message = message ?: "",
-                throwable = throwable
-            ))
+        override fun performLog(
+            priority: LogLevel,
+            tag: String?,
+            throwable: Throwable?,
+            message: String?,
+        ) {
+            logs.add(
+                LogEntry(
+                    level = priority.name,
+                    tag = tag ?: "",
+                    message = message ?: "",
+                    throwable = throwable,
+                ),
+            )
         }
     }
 
@@ -63,11 +69,18 @@ class LogTest {
             test(testLogger)
         } finally {
             // Reset to default debug logger for other tests
-            Napier.base(object : Antilog() {
-                override fun performLog(priority: LogLevel, tag: String?, throwable: Throwable?, message: String?) {
-                    println("[$priority] $tag: $message")
-                }
-            })
+            Napier.base(
+                object : Antilog() {
+                    override fun performLog(
+                        priority: LogLevel,
+                        tag: String?,
+                        throwable: Throwable?,
+                        message: String?,
+                    ) {
+                        println("[$priority] $tag: $message")
+                    }
+                },
+            )
         }
     }
 
@@ -249,14 +262,15 @@ class LogTest {
     fun `should handle empty and special characters in messages`() {
         withTestLogger { testLogger ->
             // GIVEN: Various special message content
-            val testCases = listOf(
-                "" to "empty string",
-                "Unicode: 🌊🌍✨" to "unicode characters",
-                "Line\nBreaks\nHere" to "line breaks",
-                "Tabs\tAnd\tSpaces" to "tabs and spaces",
-                "Special chars: !@#$%^&*()" to "special characters",
-                "Very long message ".repeat(100) to "very long message"
-            )
+            val testCases =
+                listOf(
+                    "" to "empty string",
+                    "Unicode: 🌊🌍✨" to "unicode characters",
+                    "Line\nBreaks\nHere" to "line breaks",
+                    "Tabs\tAnd\tSpaces" to "tabs and spaces",
+                    "Special chars: !@#$%^&*()" to "special characters",
+                    "Very long message ".repeat(100) to "very long message",
+                )
 
             // WHEN: Logging various message types
             testCases.forEachIndexed { index, (message, description) ->
@@ -276,14 +290,15 @@ class LogTest {
     fun `should handle empty and special characters in tags`() {
         withTestLogger { testLogger ->
             // GIVEN: Various tag formats
-            val testCases = listOf(
-                "SimpleTag" to "simple tag",
-                "Tag.With.Dots" to "dotted tag",
-                "Tag_With_Underscores" to "underscored tag",
-                "Tag-With-Dashes" to "dashed tag",
-                "TagWith123Numbers" to "alphanumeric tag",
-                "CamelCaseTag" to "camel case tag"
-            )
+            val testCases =
+                listOf(
+                    "SimpleTag" to "simple tag",
+                    "Tag.With.Dots" to "dotted tag",
+                    "Tag_With_Underscores" to "underscored tag",
+                    "Tag-With-Dashes" to "dashed tag",
+                    "TagWith123Numbers" to "alphanumeric tag",
+                    "CamelCaseTag" to "camel case tag",
+                )
 
             // WHEN: Logging with various tag formats
             testCases.forEach { (tag, _) ->
@@ -326,15 +341,16 @@ class LogTest {
                 assertEquals("Message $i", log.message, "Message should match index")
                 assertEquals(null, log.throwable, "No throwable should be present")
 
-                val expectedLevel = when (i % 6) {
-                    0 -> "VERBOSE"
-                    1 -> "DEBUG"
-                    2 -> "INFO"
-                    3 -> "WARNING"
-                    4 -> "ERROR"
-                    5 -> "ASSERT"
-                    else -> error("Unexpected index")
-                }
+                val expectedLevel =
+                    when (i % 6) {
+                        0 -> "VERBOSE"
+                        1 -> "DEBUG"
+                        2 -> "INFO"
+                        3 -> "WARNING"
+                        4 -> "ERROR"
+                        5 -> "ASSERT"
+                        else -> error("Unexpected index")
+                    }
                 assertEquals(expectedLevel, log.level, "Level should match expected for index $i")
             }
         }
@@ -349,13 +365,14 @@ class LogTest {
             val expectedTotalLogs = threadCount * logsPerThread
 
             // WHEN: Multiple threads log concurrently
-            val threads = (0 until threadCount).map { threadId ->
-                Thread {
-                    repeat(logsPerThread) { logId ->
-                        Log.i("Thread$threadId", "Log $logId from thread $threadId")
+            val threads =
+                (0 until threadCount).map { threadId ->
+                    Thread {
+                        repeat(logsPerThread) { logId ->
+                            Log.i("Thread$threadId", "Log $logId from thread $threadId")
+                        }
                     }
                 }
-            }
 
             threads.forEach { it.start() }
             threads.forEach { it.join() }

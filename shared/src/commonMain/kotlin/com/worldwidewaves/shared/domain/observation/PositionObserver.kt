@@ -34,7 +34,7 @@ import kotlin.time.Instant
 data class PositionObservation(
     val position: Position?,
     val isInArea: Boolean,
-    val timestamp: Instant
+    val timestamp: Instant,
 )
 
 /**
@@ -48,7 +48,6 @@ data class PositionObservation(
  * - Validating position data integrity
  */
 interface PositionObserver {
-
     /**
      * Starts observing position changes for a specific event.
      *
@@ -79,7 +78,10 @@ interface PositionObserver {
      * @param to Ending position
      * @return Distance in meters
      */
-    fun calculateDistance(from: Position, to: Position): Double
+    fun calculateDistance(
+        from: Position,
+        to: Position,
+    ): Double
 
     /**
      * Stops position observation and cleans up resources.

@@ -37,16 +37,17 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class IClockTest {
-
-    private fun safeInstantToLiteral(instant: Instant, timeZone: TimeZone): String? {
-        return try {
+    private fun safeInstantToLiteral(
+        instant: Instant,
+        timeZone: TimeZone,
+    ): String? =
+        try {
             IClock.instantToLiteral(instant, timeZone)
         } catch (e: Exception) {
             // Platform formatting may fail in test environments, especially with certain date ranges
             // This is acceptable as we're testing the contract, not the exact implementation
             null
         }
-    }
 
     @Test
     fun `should handle time formatting API contract`() {
@@ -70,17 +71,19 @@ class IClockTest {
     @Test
     fun `should handle different modern timestamps consistently`() {
         // GIVEN: Various modern timestamps that should work reliably
-        val modernInstants = listOf(
-            Instant.fromEpochSeconds(1577836800), // 2020-01-01 00:00:00 UTC
-            Instant.fromEpochSeconds(1609459200), // 2021-01-01 00:00:00 UTC
-            Instant.fromEpochSeconds(1640995200), // 2022-01-01 00:00:00 UTC
-        )
+        val modernInstants =
+            listOf(
+                Instant.fromEpochSeconds(1577836800), // 2020-01-01 00:00:00 UTC
+                Instant.fromEpochSeconds(1609459200), // 2021-01-01 00:00:00 UTC
+                Instant.fromEpochSeconds(1640995200), // 2022-01-01 00:00:00 UTC
+            )
         val timeZone = TimeZone.UTC
 
         // WHEN: Formatting each instant
-        val results = modernInstants.mapNotNull { instant ->
-            safeInstantToLiteral(instant, timeZone)
-        }
+        val results =
+            modernInstants.mapNotNull { instant ->
+                safeInstantToLiteral(instant, timeZone)
+            }
 
         // THEN: If any succeed, they should all be valid
         if (results.isNotEmpty()) {
@@ -96,15 +99,17 @@ class IClockTest {
     fun `should handle timezone variations gracefully`() {
         // GIVEN: A modern instant with common timezones
         val instant = Instant.fromEpochSeconds(1609459200) // 2021-01-01 00:00:00 UTC
-        val commonTimezones = listOf(
-            TimeZone.UTC,
-            TimeZone.currentSystemDefault()
-        )
+        val commonTimezones =
+            listOf(
+                TimeZone.UTC,
+                TimeZone.currentSystemDefault(),
+            )
 
         // WHEN: Formatting with different timezones
-        val results = commonTimezones.mapNotNull { tz ->
-            safeInstantToLiteral(instant, tz)
-        }
+        val results =
+            commonTimezones.mapNotNull { tz ->
+                safeInstantToLiteral(instant, tz)
+            }
 
         // THEN: Each successful result should be valid
         results.forEach { result ->

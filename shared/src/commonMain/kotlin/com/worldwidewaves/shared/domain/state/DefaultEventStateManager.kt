@@ -47,15 +47,17 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  */
 class DefaultEventStateManager(
     private val waveProgressionTracker: WaveProgressionTracker,
-    private val clock: IClock
+    private val clock: IClock,
 ) : EventStateManager {
-
     override suspend fun calculateEventState(
         event: IWWWEvent,
         input: EventStateInput,
-        userIsInArea: Boolean
+        userIsInArea: Boolean,
     ): EventState {
-        Log.v("DefaultEventStateManager", "Calculating state for event ${event.id}: progression=${input.progression}, status=${input.status}")
+        Log.v(
+            "DefaultEventStateManager",
+            "Calculating state for event ${event.id}: progression=${input.progression}, status=${input.status}",
+        )
 
         // Calculate warming phases
         val warmingInProgress = calculateWarmingPhase(event)
@@ -88,43 +90,49 @@ class DefaultEventStateManager(
             timeBeforeHit = timeBeforeHit,
             hitDateTime = hitDateTime,
             userIsInArea = userIsInArea,
-            timestamp = input.currentTime
+            timestamp = input.currentTime,
         )
     }
 
     override fun validateState(
         input: EventStateInput,
-        calculatedState: EventState
+        calculatedState: EventState,
     ): List<StateValidationIssue> {
         val issues = mutableListOf<StateValidationIssue>()
 
         // Validate progression bounds
         if (input.progression < 0.0 || input.progression > 100.0 || input.progression.isNaN() || input.progression.isInfinite()) {
-            issues.add(StateValidationIssue(
-                field = "progression",
-                issue = "Progression ${input.progression} is out of bounds (should be 0-100)",
-                severity = StateValidationIssue.Severity.WARNING
-            ))
+            issues.add(
+                StateValidationIssue(
+                    field = "progression",
+                    issue = "Progression ${input.progression} is out of bounds (should be 0-100)",
+                    severity = StateValidationIssue.Severity.WARNING,
+                ),
+            )
         }
 
         // Validate status consistency with progression
         when (input.status) {
             Status.DONE -> {
                 if (input.progression < 100.0) {
-                    issues.add(StateValidationIssue(
-                        field = "status",
-                        issue = "Status is DONE but progression is ${input.progression} (should be 100.0)",
-                        severity = StateValidationIssue.Severity.WARNING
-                    ))
+                    issues.add(
+                        StateValidationIssue(
+                            field = "status",
+                            issue = "Status is DONE but progression is ${input.progression} (should be 100.0)",
+                            severity = StateValidationIssue.Severity.WARNING,
+                        ),
+                    )
                 }
             }
             Status.RUNNING -> {
                 if (input.progression <= 0.0) {
-                    issues.add(StateValidationIssue(
-                        field = "status",
-                        issue = "Status is RUNNING but progression is ${input.progression} (should be > 0)",
-                        severity = StateValidationIssue.Severity.WARNING
-                    ))
+                    issues.add(
+                        StateValidationIssue(
+                            field = "status",
+                            issue = "Status is RUNNING but progression is ${input.progression} (should be > 0)",
+                            severity = StateValidationIssue.Severity.WARNING,
+                        ),
+                    )
                 }
             }
             else -> {
@@ -134,19 +142,23 @@ class DefaultEventStateManager(
 
         // Validate state consistency
         if (calculatedState.userIsGoingToBeHit && calculatedState.userHasBeenHit) {
-            issues.add(StateValidationIssue(
-                field = "userState",
-                issue = "User cannot be both 'going to be hit' and 'has been hit' simultaneously",
-                severity = StateValidationIssue.Severity.ERROR
-            ))
+            issues.add(
+                StateValidationIssue(
+                    field = "userState",
+                    issue = "User cannot be both 'going to be hit' and 'has been hit' simultaneously",
+                    severity = StateValidationIssue.Severity.ERROR,
+                ),
+            )
         }
 
         if (calculatedState.userIsGoingToBeHit && !calculatedState.userIsInArea) {
-            issues.add(StateValidationIssue(
-                field = "userState",
-                issue = "User is 'going to be hit' but not in area",
-                severity = StateValidationIssue.Severity.WARNING
-            ))
+            issues.add(
+                StateValidationIssue(
+                    field = "userState",
+                    issue = "User is 'going to be hit' but not in area",
+                    severity = StateValidationIssue.Severity.WARNING,
+                ),
+            )
         }
 
         return issues
@@ -154,7 +166,7 @@ class DefaultEventStateManager(
 
     override fun validateStateTransition(
         previousState: EventState?,
-        newState: EventState
+        newState: EventState,
     ): List<StateValidationIssue> {
         val issues = mutableListOf<StateValidationIssue>()
 
@@ -164,40 +176,48 @@ class DefaultEventStateManager(
 
         // Validate progression transitions
         if (newState.progression < previousState.progression && newState.status != Status.DONE) {
-            issues.add(StateValidationIssue(
-                field = "progression",
-                issue = "Progression went backwards: ${previousState.progression} -> ${newState.progression} (status: ${newState.status})",
-                severity = StateValidationIssue.Severity.WARNING
-            ))
+            issues.add(
+                StateValidationIssue(
+                    field = "progression",
+                    issue = "Progression went backwards: ${previousState.progression} -> ${newState.progression} (status: ${newState.status})",
+                    severity = StateValidationIssue.Severity.WARNING,
+                ),
+            )
         }
 
         // Validate status transitions follow logical order
         when (previousState.status) {
             Status.DONE -> {
                 if (newState.status != Status.DONE) {
-                    issues.add(StateValidationIssue(
-                        field = "status",
-                        issue = "Invalid transition from DONE to ${newState.status}",
-                        severity = StateValidationIssue.Severity.WARNING
-                    ))
+                    issues.add(
+                        StateValidationIssue(
+                            field = "status",
+                            issue = "Invalid transition from DONE to ${newState.status}",
+                            severity = StateValidationIssue.Severity.WARNING,
+                        ),
+                    )
                 }
             }
             Status.RUNNING -> {
                 if (newState.status == Status.NEXT || newState.status == Status.SOON) {
-                    issues.add(StateValidationIssue(
-                        field = "status",
-                        issue = "Invalid backward transition from RUNNING to ${newState.status}",
-                        severity = StateValidationIssue.Severity.WARNING
-                    ))
+                    issues.add(
+                        StateValidationIssue(
+                            field = "status",
+                            issue = "Invalid backward transition from RUNNING to ${newState.status}",
+                            severity = StateValidationIssue.Severity.WARNING,
+                        ),
+                    )
                 }
             }
             Status.SOON -> {
                 if (newState.status == Status.NEXT) {
-                    issues.add(StateValidationIssue(
-                        field = "status",
-                        issue = "Invalid backward transition from SOON to ${newState.status}",
-                        severity = StateValidationIssue.Severity.WARNING
-                    ))
+                    issues.add(
+                        StateValidationIssue(
+                            field = "status",
+                            issue = "Invalid backward transition from SOON to ${newState.status}",
+                            severity = StateValidationIssue.Severity.WARNING,
+                        ),
+                    )
                 }
             }
             else -> {
@@ -207,11 +227,13 @@ class DefaultEventStateManager(
 
         // Validate that hit states don't reverse
         if (previousState.userHasBeenHit && !newState.userHasBeenHit) {
-            issues.add(StateValidationIssue(
-                field = "userHasBeenHit",
-                issue = "User cannot transition from 'has been hit' to 'not hit'",
-                severity = StateValidationIssue.Severity.ERROR
-            ))
+            issues.add(
+                StateValidationIssue(
+                    field = "userHasBeenHit",
+                    issue = "User cannot transition from 'has been hit' to 'not hit'",
+                    severity = StateValidationIssue.Severity.ERROR,
+                ),
+            )
         }
 
         return issues
@@ -220,31 +242,35 @@ class DefaultEventStateManager(
     /**
      * Calculates if the user warming phase is in progress.
      */
-    private suspend fun calculateWarmingPhase(event: IWWWEvent): Boolean {
-        return try {
+    private suspend fun calculateWarmingPhase(event: IWWWEvent): Boolean =
+        try {
             event.warming.isUserWarmingStarted()
         } catch (e: Exception) {
             Log.e("DefaultEventStateManager", "Error checking warming phase: $e")
             false
         }
-    }
 
     /**
      * Calculates if the start warming phase is in progress (between event start and wave start).
      */
-    private fun calculateStartWarmingPhase(event: IWWWEvent, currentTime: Instant): Boolean {
-        return try {
+    private fun calculateStartWarmingPhase(
+        event: IWWWEvent,
+        currentTime: Instant,
+    ): Boolean =
+        try {
             currentTime > event.getStartDateTime() && currentTime < event.getWaveStartDateTime()
         } catch (e: Exception) {
             Log.e("DefaultEventStateManager", "Error checking start warming phase: $e")
             false
         }
-    }
 
     /**
      * Calculates if the user is about to be hit by the wave.
      */
-    private fun calculateUserGoingToBeHit(timeBeforeHit: Duration, userIsInArea: Boolean): Boolean {
+    private fun calculateUserGoingToBeHit(
+        timeBeforeHit: Duration,
+        userIsInArea: Boolean,
+    ): Boolean {
         if (!userIsInArea) {
             return false
         }
@@ -252,7 +278,10 @@ class DefaultEventStateManager(
         val isAboutToBeHit = timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
 
         if (isAboutToBeHit) {
-            Log.v("DefaultEventStateManager", "[CHOREO_DEBUG] User is going to be hit - timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}")
+            Log.v(
+                "DefaultEventStateManager",
+                "[CHOREO_DEBUG] User is going to be hit - timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}",
+            )
         }
 
         return isAboutToBeHit

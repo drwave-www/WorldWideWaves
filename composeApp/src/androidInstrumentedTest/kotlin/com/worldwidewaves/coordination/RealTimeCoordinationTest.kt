@@ -30,7 +30,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.testing.BaseIntegrationTest
 import io.mockk.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -48,107 +47,111 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class RealTimeCoordinationTest : BaseIntegrationTest() {
-
     @Test
-    fun testRealTimeStateUpdates_eventStatusChanges_propagatesToAllClients() = runTest {
-        val stateManager = createMockStateManager()
+    fun testRealTimeStateUpdates_eventStatusChanges_propagatesToAllClients() =
+        runTest {
+            val stateManager = createMockStateManager()
 
-        var client1State: IWWWEvent.Status? = null
-        var client2State: IWWWEvent.Status? = null
-        var client3State: IWWWEvent.Status? = null
+            var client1State: IWWWEvent.Status? = null
+            var client2State: IWWWEvent.Status? = null
+            var client3State: IWWWEvent.Status? = null
 
-        val client1Observer = { status: IWWWEvent.Status -> client1State = status }
-        val client2Observer = { status: IWWWEvent.Status -> client2State = status }
-        val client3Observer = { status: IWWWEvent.Status -> client3State = status }
+            val client1Observer = { status: IWWWEvent.Status -> client1State = status }
+            val client2Observer = { status: IWWWEvent.Status -> client2State = status }
+            val client3Observer = { status: IWWWEvent.Status -> client3State = status }
 
-        stateManager.subscribeToEventUpdates("event-123", client1Observer)
-        stateManager.subscribeToEventUpdates("event-123", client2Observer)
-        stateManager.subscribeToEventUpdates("event-123", client3Observer)
+            stateManager.subscribeToEventUpdates("event-123", client1Observer)
+            stateManager.subscribeToEventUpdates("event-123", client2Observer)
+            stateManager.subscribeToEventUpdates("event-123", client3Observer)
 
-        stateManager.updateEventStatus("event-123", IWWWEvent.Status.RUNNING)
+            stateManager.updateEventStatus("event-123", IWWWEvent.Status.RUNNING)
 
-        delay(100)
+            delay(100)
 
-        assertEquals("Client 1 should receive status update", IWWWEvent.Status.RUNNING, client1State)
-        assertEquals("Client 2 should receive status update", IWWWEvent.Status.RUNNING, client2State)
-        assertEquals("Client 3 should receive status update", IWWWEvent.Status.RUNNING, client3State)
-    }
-
-    @Test
-    fun testMultiUserWaveCoordination_simultaneousParticipation_synchronizesCorrectly() = runTest {
-        val coordinationManager = createMockCoordinationManager()
-        val participant1 = createMockParticipant("user-1", 40.7128, -74.0060)
-        val participant2 = createMockParticipant("user-2", 40.7829, -73.9654)
-        val participant3 = createMockParticipant("user-3", 40.7505, -73.9934)
-
-        val waveEvent = createMockWaveEvent("wave-001", IWWWEvent.Status.RUNNING)
-        coordinationManager.addParticipant(participant1)
-        coordinationManager.addParticipant(participant2)
-        coordinationManager.addParticipant(participant3)
-
-        val syncResults = coordinationManager.synchronizeWave(waveEvent)
-
-        assertTrue("All participants should be synchronized", syncResults.allSynchronized)
-        assertEquals("Should have 3 synchronized participants", 3, syncResults.participantCount)
-        assertTrue("Synchronization should complete within time limit", syncResults.syncTimeMs < 2000)
-
-        verify { coordinationManager.broadcastWaveState(waveEvent, any()) }
-    }
-
-    @Test
-    fun testTimeSignificantEventCoordination_preciseTimingRequired_achievesAccuracy() = runTest {
-        val timingCoordinator = createMockTimingCoordinator()
-        val targetTime = System.currentTimeMillis() + 1000 // 1 second from now
-        val tolerance = 5000L // 5 second tolerance (very lenient for test environment)
-
-        val participants = (1..5).map { index ->
-            createMockParticipant("timing-user-$index", 40.7128 + (index * 0.001), -74.0060)
+            assertEquals("Client 1 should receive status update", IWWWEvent.Status.RUNNING, client1State)
+            assertEquals("Client 2 should receive status update", IWWWEvent.Status.RUNNING, client2State)
+            assertEquals("Client 3 should receive status update", IWWWEvent.Status.RUNNING, client3State)
         }
 
-        participants.forEach { timingCoordinator.registerForTimedEvent(it, targetTime) }
-
-        val startTime = System.currentTimeMillis()
-        timingCoordinator.executeTimedCoordination(targetTime)
-        val executionTime = System.currentTimeMillis()
-
-        // In a mock test, we just verify the method calls happened and execution was reasonably fast
-        val timingAccuracy = executionTime - startTime
-        assertTrue("Coordination should execute quickly in mock environment", timingAccuracy <= tolerance)
-
-        // Manually trigger notification to test the flow (since mocks don't automatically call methods)
-        timingCoordinator.notifyParticipants(participants, "coordination-message")
-
-        // Verify method was called (since we just called it manually in the test)
-        verify { timingCoordinator.notifyParticipants(participants, any()) }
-        verify { timingCoordinator.executeTimedCoordination(targetTime) }
-    }
-
     @Test
-    fun testConcurrentWaveManagement_multipleSimultaneousWaves_handlesCorrectly() = runTest {
-        val waveManager = createMockWaveManager()
+    fun testMultiUserWaveCoordination_simultaneousParticipation_synchronizesCorrectly() =
+        runTest {
+            val coordinationManager = createMockCoordinationManager()
+            val participant1 = createMockParticipant("user-1", 40.7128, -74.0060)
+            val participant2 = createMockParticipant("user-2", 40.7829, -73.9654)
+            val participant3 = createMockParticipant("user-3", 40.7505, -73.9934)
 
-        val wave1 = createMockWaveEvent("wave-concurrent-1", IWWWEvent.Status.RUNNING)
-        val wave2 = createMockWaveEvent("wave-concurrent-2", IWWWEvent.Status.RUNNING)
-        val wave3 = createMockWaveEvent("wave-concurrent-3", IWWWEvent.Status.RUNNING)
+            val waveEvent = createMockWaveEvent("wave-001", IWWWEvent.Status.RUNNING)
+            coordinationManager.addParticipant(participant1)
+            coordinationManager.addParticipant(participant2)
+            coordinationManager.addParticipant(participant3)
 
-        val wave1Participants = (1..10).map { createMockParticipant("w1-user-$it", 40.7128, -74.0060) }
-        val wave2Participants = (1..15).map { createMockParticipant("w2-user-$it", 40.7829, -73.9654) }
-        val wave3Participants = (1..8).map { createMockParticipant("w3-user-$it", 40.7505, -73.9934) }
+            val syncResults = coordinationManager.synchronizeWave(waveEvent)
 
-        kotlinx.coroutines.coroutineScope {
-            launch { waveManager.coordinateWave(wave1, wave1Participants) }
-            launch { waveManager.coordinateWave(wave2, wave2Participants) }
-            launch { waveManager.coordinateWave(wave3, wave3Participants) }
+            assertTrue("All participants should be synchronized", syncResults.allSynchronized)
+            assertEquals("Should have 3 synchronized participants", 3, syncResults.participantCount)
+            assertTrue("Synchronization should complete within time limit", syncResults.syncTimeMs < 2000)
+
+            verify { coordinationManager.broadcastWaveState(waveEvent, any()) }
         }
 
-        delay(1000)
+    @Test
+    fun testTimeSignificantEventCoordination_preciseTimingRequired_achievesAccuracy() =
+        runTest {
+            val timingCoordinator = createMockTimingCoordinator()
+            val targetTime = System.currentTimeMillis() + 1000 // 1 second from now
+            val tolerance = 5000L // 5 second tolerance (very lenient for test environment)
 
-        val activeWaves = waveManager.getActiveWaves()
-        assertEquals("Should manage 3 concurrent waves", 3, activeWaves.size)
-        // Note: In a real implementation, we would need to check getStatus() for each wave
-        // For this test, we assume all waves are running based on the mock setup
-        assertTrue("All waves should be running", activeWaves.size == 3)
-    }
+            val participants =
+                (1..5).map { index ->
+                    createMockParticipant("timing-user-$index", 40.7128 + (index * 0.001), -74.0060)
+                }
+
+            participants.forEach { timingCoordinator.registerForTimedEvent(it, targetTime) }
+
+            val startTime = System.currentTimeMillis()
+            timingCoordinator.executeTimedCoordination(targetTime)
+            val executionTime = System.currentTimeMillis()
+
+            // In a mock test, we just verify the method calls happened and execution was reasonably fast
+            val timingAccuracy = executionTime - startTime
+            assertTrue("Coordination should execute quickly in mock environment", timingAccuracy <= tolerance)
+
+            // Manually trigger notification to test the flow (since mocks don't automatically call methods)
+            timingCoordinator.notifyParticipants(participants, "coordination-message")
+
+            // Verify method was called (since we just called it manually in the test)
+            verify { timingCoordinator.notifyParticipants(participants, any()) }
+            verify { timingCoordinator.executeTimedCoordination(targetTime) }
+        }
+
+    @Test
+    fun testConcurrentWaveManagement_multipleSimultaneousWaves_handlesCorrectly() =
+        runTest {
+            val waveManager = createMockWaveManager()
+
+            val wave1 = createMockWaveEvent("wave-concurrent-1", IWWWEvent.Status.RUNNING)
+            val wave2 = createMockWaveEvent("wave-concurrent-2", IWWWEvent.Status.RUNNING)
+            val wave3 = createMockWaveEvent("wave-concurrent-3", IWWWEvent.Status.RUNNING)
+
+            val wave1Participants = (1..10).map { createMockParticipant("w1-user-$it", 40.7128, -74.0060) }
+            val wave2Participants = (1..15).map { createMockParticipant("w2-user-$it", 40.7829, -73.9654) }
+            val wave3Participants = (1..8).map { createMockParticipant("w3-user-$it", 40.7505, -73.9934) }
+
+            kotlinx.coroutines.coroutineScope {
+                launch { waveManager.coordinateWave(wave1, wave1Participants) }
+                launch { waveManager.coordinateWave(wave2, wave2Participants) }
+                launch { waveManager.coordinateWave(wave3, wave3Participants) }
+            }
+
+            delay(1000)
+
+            val activeWaves = waveManager.getActiveWaves()
+            assertEquals("Should manage 3 concurrent waves", 3, activeWaves.size)
+            // Note: In a real implementation, we would need to check getStatus() for each wave
+            // For this test, we assume all waves are running based on the mock setup
+            assertTrue("All waves should be running", activeWaves.size == 3)
+        }
 
     @Test
     fun testUI_realTimeCoordinationDisplay_updatesCorrectly() {
@@ -161,7 +164,7 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
                 status = coordinationStatus,
                 participantCount = participantCount,
                 syncProgress = syncProgress,
-                onStartCoordination = { coordinationStatus = CoordinationStatus.COORDINATING }
+                onStartCoordination = { coordinationStatus = CoordinationStatus.COORDINATING },
             )
         }
 
@@ -184,25 +187,27 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
         status: CoordinationStatus,
         participantCount: Int,
         syncProgress: Float,
-        onStartCoordination: () -> Unit
+        onStartCoordination: () -> Unit,
     ) {
         androidx.compose.foundation.layout.Column {
             androidx.compose.material3.Text(
-                text = when (status) {
-                    CoordinationStatus.WAITING -> "Waiting for coordination"
-                    CoordinationStatus.COORDINATING -> "Coordinating wave..."
-                    CoordinationStatus.SYNCHRONIZED -> "Wave synchronized!"
-                }
+                text =
+                    when (status) {
+                        CoordinationStatus.WAITING -> "Waiting for coordination"
+                        CoordinationStatus.COORDINATING -> "Coordinating wave..."
+                        CoordinationStatus.SYNCHRONIZED -> "Wave synchronized!"
+                    },
             )
             androidx.compose.material3.Text("Participants: $participantCount")
             androidx.compose.material3.LinearProgressIndicator(
                 progress = { syncProgress },
-                modifier = Modifier
-                    .semantics { contentDescription = "Sync progress: ${(syncProgress * 100).toInt()}%" }
+                modifier =
+                    Modifier
+                        .semantics { contentDescription = "Sync progress: ${(syncProgress * 100).toInt()}%" },
             )
             if (status == CoordinationStatus.WAITING) {
                 androidx.compose.material3.Button(
-                    onClick = onStartCoordination
+                    onClick = onStartCoordination,
                 ) {
                     androidx.compose.material3.Text("Start Coordination")
                 }
@@ -210,8 +215,8 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
         }
     }
 
-    private fun createMockStateManager(): StateManager {
-        return mockk<StateManager>(relaxed = true) {
+    private fun createMockStateManager(): StateManager =
+        mockk<StateManager>(relaxed = true) {
             val observers = mutableMapOf<String, MutableList<(IWWWEvent.Status) -> Unit>>()
 
             every { subscribeToEventUpdates(any(), any()) } answers {
@@ -226,10 +231,9 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
                 observers[eventId]?.forEach { it(status) }
             }
         }
-    }
 
-    private fun createMockCoordinationManager(): CoordinationManager {
-        return mockk<CoordinationManager>(relaxed = true) {
+    private fun createMockCoordinationManager(): CoordinationManager =
+        mockk<CoordinationManager>(relaxed = true) {
             every { addParticipant(any()) } just runs
             every { synchronizeWave(any()) } answers {
                 // Also call broadcastWaveState when synchronizeWave is called
@@ -238,71 +242,100 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
             }
             every { broadcastWaveState(any(), any()) } just runs
         }
-    }
 
-    private fun createMockTimingCoordinator(): TimingCoordinator {
-        return mockk<TimingCoordinator>(relaxed = true) {
+    private fun createMockTimingCoordinator(): TimingCoordinator =
+        mockk<TimingCoordinator>(relaxed = true) {
             every { registerForTimedEvent(any(), any()) } just runs
             every { executeTimedCoordination(any()) } just runs
             every { notifyParticipants(any(), any()) } just runs
         }
-    }
 
-    private fun createMockWaveManager(): WaveManager {
-        return mockk<WaveManager>(relaxed = true) {
+    private fun createMockWaveManager(): WaveManager =
+        mockk<WaveManager>(relaxed = true) {
             every { coordinateWave(any(), any()) } just runs
-            every { getActiveWaves() } returns listOf(
-                createMockWaveEvent("wave-concurrent-1", IWWWEvent.Status.RUNNING),
-                createMockWaveEvent("wave-concurrent-2", IWWWEvent.Status.RUNNING),
-                createMockWaveEvent("wave-concurrent-3", IWWWEvent.Status.RUNNING)
-            )
+            every { getActiveWaves() } returns
+                listOf(
+                    createMockWaveEvent("wave-concurrent-1", IWWWEvent.Status.RUNNING),
+                    createMockWaveEvent("wave-concurrent-2", IWWWEvent.Status.RUNNING),
+                    createMockWaveEvent("wave-concurrent-3", IWWWEvent.Status.RUNNING),
+                )
         }
-    }
 
-    private fun createMockParticipant(id: String, lat: Double, lng: Double): Participant {
-        return mockk<Participant> {
+    private fun createMockParticipant(
+        id: String,
+        lat: Double,
+        lng: Double,
+    ): Participant =
+        mockk<Participant> {
             every { this@mockk.id } returns id
             every { latitude } returns lat
             every { longitude } returns lng
         }
-    }
 
-    private fun createMockWaveEvent(id: String, eventStatus: IWWWEvent.Status): IWWWEvent {
-        return mockk<IWWWEvent>(relaxed = true) {
+    private fun createMockWaveEvent(
+        id: String,
+        eventStatus: IWWWEvent.Status,
+    ): IWWWEvent =
+        mockk<IWWWEvent>(relaxed = true) {
             every { this@mockk.id } returns id
             coEvery { this@mockk.getStatus() } returns eventStatus
         }
-    }
 
     enum class CoordinationStatus {
-        WAITING, COORDINATING, SYNCHRONIZED
+        WAITING,
+        COORDINATING,
+        SYNCHRONIZED,
     }
 
     data class SyncResult(
         val allSynchronized: Boolean,
         val participantCount: Int,
-        val syncTimeMs: Long
+        val syncTimeMs: Long,
     )
 
     interface StateManager {
-        fun subscribeToEventUpdates(eventId: String, observer: (IWWWEvent.Status) -> Unit)
-        fun updateEventStatus(eventId: String, status: IWWWEvent.Status)
+        fun subscribeToEventUpdates(
+            eventId: String,
+            observer: (IWWWEvent.Status) -> Unit,
+        )
+
+        fun updateEventStatus(
+            eventId: String,
+            status: IWWWEvent.Status,
+        )
     }
 
     interface CoordinationManager {
         fun addParticipant(participant: Participant)
+
         fun synchronizeWave(event: IWWWEvent): SyncResult
-        fun broadcastWaveState(event: IWWWEvent, state: Any)
+
+        fun broadcastWaveState(
+            event: IWWWEvent,
+            state: Any,
+        )
     }
 
     interface TimingCoordinator {
-        fun registerForTimedEvent(participant: Participant, targetTime: Long)
+        fun registerForTimedEvent(
+            participant: Participant,
+            targetTime: Long,
+        )
+
         fun executeTimedCoordination(targetTime: Long)
-        fun notifyParticipants(participants: List<Participant>, message: Any)
+
+        fun notifyParticipants(
+            participants: List<Participant>,
+            message: Any,
+        )
     }
 
     interface WaveManager {
-        fun coordinateWave(wave: IWWWEvent, participants: List<Participant>)
+        fun coordinateWave(
+            wave: IWWWEvent,
+            participants: List<Participant>,
+        )
+
         fun getActiveWaves(): List<IWWWEvent>
     }
 
