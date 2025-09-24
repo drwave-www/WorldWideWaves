@@ -23,7 +23,7 @@ package com.worldwidewaves.shared.domain.state
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status

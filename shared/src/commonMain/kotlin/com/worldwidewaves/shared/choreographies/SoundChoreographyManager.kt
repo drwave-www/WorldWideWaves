@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.choreographies
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock

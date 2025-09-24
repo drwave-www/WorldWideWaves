@@ -77,8 +77,8 @@ import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.compose.common.EventOverlayDone
 import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Log

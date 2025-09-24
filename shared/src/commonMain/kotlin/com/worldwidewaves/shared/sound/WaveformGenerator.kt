@@ -26,6 +26,7 @@ import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.time.Duration
+import com.worldwidewaves.shared.WWWGlobals
 
 /**
  * Shared waveform generation algorithms for all platforms
@@ -153,12 +154,12 @@ object WaveformGenerator {
             frequency
         } else {
             // Fallback to middle C (MIDI note 60)
-            440.0 * 2.0.pow((60 - 69).toDouble() / 12.0)
+            WWWGlobals.Midi.A4_FREQUENCY * 2.0.pow((WWWGlobals.Midi.MIDDLE_C_MIDI_NOTE - WWWGlobals.Midi.A4_MIDI_NOTE).toDouble() / WWWGlobals.Midi.OCTAVE_DIVISOR.toDouble())
         }
     }
 
     /**
      * Convert MIDI velocity (0-127) to amplitude (0.0-1.0)
      */
-    fun midiVelocityToAmplitude(velocity: Int): Double = (velocity / 127.0).coerceIn(0.0, 1.0)
+    fun midiVelocityToAmplitude(velocity: Int): Double = (velocity / WWWGlobals.Midi.MAX_VELOCITY.toDouble()).coerceIn(0.0, 1.0)
 }

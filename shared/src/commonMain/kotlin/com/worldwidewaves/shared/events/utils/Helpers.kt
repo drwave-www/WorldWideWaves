@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvent

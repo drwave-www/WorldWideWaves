@@ -417,7 +417,8 @@ data class WWWEventArea(
                     coordinates?.forEachIndexed { ringIndex, ring ->
                         try {
                             processRing(ring, tempPolygons)
-                        } catch (e: Exception) {
+                        } catch (ignored: Exception) {
+                            // Ignore invalid ring geometry and continue processing
                         }
                     }
                 }
@@ -429,14 +430,8 @@ data class WWWEventArea(
                 }
             }
 
-            // Lightweight diagnostics
-            val ringsCount =
-                when (type) {
-                    "Polygon" -> coordinates?.size ?: 0
-                    "MultiPolygon" -> coordinates?.sumOf { it.jsonArray.size } ?: 0
-                    else -> 0
-                }
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
+            // Geometry processing errors are handled gracefully
         }
     }
 
@@ -483,14 +478,14 @@ data class WWWEventArea(
                             return@forEachIndexed
                         }
 
-                        val ringStartPolygonCount = tempPolygons.size
                         processRing(ring, tempPolygons)
-                        val ringEndPolygonCount = tempPolygons.size
-                    } catch (e: Exception) {
+                    } catch (ignored: Exception) {
+                        // Ring processing errors are handled gracefully
                     }
                 }
 
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
+                // MultiPolygon processing errors are handled gracefully
             }
         }
 
@@ -563,9 +558,11 @@ data class WWWEventArea(
             if (polygon.size > 1) {
                 polygons.add(polygon)
             } else {
+                // Polygon with only one point is ignored
             }
 
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
+            // Ring processing errors are handled gracefully
         }
     }
 

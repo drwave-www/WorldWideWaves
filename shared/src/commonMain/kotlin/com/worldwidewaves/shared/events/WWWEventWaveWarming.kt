@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager

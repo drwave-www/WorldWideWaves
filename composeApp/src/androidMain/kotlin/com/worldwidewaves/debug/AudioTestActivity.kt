@@ -30,7 +30,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
@@ -266,7 +266,7 @@ class AudioTestActivity : ComponentActivity() {
         Log.d(TAG, "Playing MIDI sequence: ${track.notes.size} notes")
 
         // Play first DEFAULT_OCTAVE notes to keep demo reasonable
-        track.notes.take(com.worldwidewaves.shared.WWWGlobals.Companion.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
+        track.notes.take(com.worldwidewaves.shared.WWWGlobals.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
             val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
             val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.6
 

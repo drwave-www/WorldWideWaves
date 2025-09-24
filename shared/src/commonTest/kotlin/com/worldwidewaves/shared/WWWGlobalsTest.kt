@@ -29,18 +29,18 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Duration.Companion.milliseconds
-import com.worldwidewaves.shared.WWWGlobals.Companion.Urls
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
-import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
-import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
-import com.worldwidewaves.shared.WWWGlobals.Companion.BackNav
-import com.worldwidewaves.shared.WWWGlobals.Companion.Event
-import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
-import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
+import com.worldwidewaves.shared.WWWGlobals.Urls
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.Wave
+import com.worldwidewaves.shared.WWWGlobals.Timing
+import com.worldwidewaves.shared.WWWGlobals.MapDisplay
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.TabBar
+import com.worldwidewaves.shared.WWWGlobals.BackNav
+import com.worldwidewaves.shared.WWWGlobals.Event
+import com.worldwidewaves.shared.WWWGlobals.EventsList
+import com.worldwidewaves.shared.WWWGlobals.DisplayText
 
 /**
  * Tests for WWWGlobals constants and configuration values.

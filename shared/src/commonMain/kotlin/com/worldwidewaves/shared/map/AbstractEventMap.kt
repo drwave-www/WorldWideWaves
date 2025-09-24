@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
+import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad

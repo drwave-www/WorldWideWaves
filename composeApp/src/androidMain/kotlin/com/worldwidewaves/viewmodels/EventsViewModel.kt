@@ -13,7 +13,7 @@ package com.worldwidewaves.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.domain.repository.EventsRepository

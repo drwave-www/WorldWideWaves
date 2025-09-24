@@ -36,6 +36,7 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import com.worldwidewaves.shared.WWWGlobals
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -187,10 +188,10 @@ private suspend fun cacheAssetFromContext(
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
         ctx.assets.open(assetPath).use { input ->
-            BufferedInputStream(input, 8192).use { bufferedInput ->
+            BufferedInputStream(input, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedInput ->
                 cachedFile.outputStream().use { fileOutput ->
-                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                        val buffer = ByteArray(8192)
+                    BufferedOutputStream(fileOutput, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedOutput ->
+                        val buffer = ByteArray(WWWGlobals.ByteProcessing.BUFFER_SIZE)
                         var bytesRead: Int
 
                         while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {

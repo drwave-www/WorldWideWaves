@@ -29,6 +29,7 @@ import android.media.AudioTrack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import com.worldwidewaves.shared.WWWGlobals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -68,14 +69,14 @@ class AndroidAudioBuffer(
     }
 
     private fun convert16Bit(samples: DoubleArray): ByteArray {
-        val result = ByteArray(samples.size * 2)
+        val result = ByteArray(samples.size * WWWGlobals.ByteProcessing.BYTES_PER_16BIT_SAMPLE)
         var idx = 0
         for (sample in samples) {
             // Convert to 16-bit PCM
-            val value = (sample * 32767).toInt().coerceIn(-32768, 32767).toShort()
+            val value = (sample * WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX).toInt().coerceIn(WWWGlobals.ByteProcessing.AUDIO_16BIT_MIN, WWWGlobals.ByteProcessing.AUDIO_16BIT_MAX).toShort()
             // Write as little-endian
-            result[idx++] = (value.toInt() and 0xFF).toByte()
-            result[idx++] = ((value.toInt() shr 8) and 0xFF).toByte()
+            result[idx++] = (value.toInt() and WWWGlobals.ByteProcessing.BYTE_MASK).toByte()
+            result[idx++] = ((value.toInt() shr WWWGlobals.ByteProcessing.BIT_SHIFT_8) and WWWGlobals.ByteProcessing.BYTE_MASK).toByte()
         }
         return result
     }
@@ -84,7 +85,7 @@ class AndroidAudioBuffer(
         val result = ByteArray(samples.size)
         for (i in samples.indices) {
             // Convert to 8-bit unsigned PCM (0-255)
-            result[i] = ((samples[i] * 0.5 + 0.5) * 255).toInt().coerceIn(0, 255).toByte()
+            result[i] = ((samples[i] * WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE + WWWGlobals.ByteProcessing.AUDIO_8BIT_SCALE) * WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX).toInt().coerceIn(0, WWWGlobals.ByteProcessing.AUDIO_8BIT_MAX).toByte()
         }
         return result
     }

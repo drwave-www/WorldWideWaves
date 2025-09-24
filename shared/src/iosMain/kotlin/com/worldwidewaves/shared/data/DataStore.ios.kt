@@ -38,5 +38,5 @@ actual fun keyValueStorePath(): String {
             error = null,
         )
 
-    return requireNotNull(documentDirectory).path + "/$dataStoreFileName"
+    return requireNotNull(documentDirectory).path + "/$DATA_STORE_FILE_NAME"
 }

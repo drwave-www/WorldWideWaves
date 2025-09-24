@@ -78,7 +78,7 @@ import com.worldwidewaves.compose.common.DownloadProgressIndicator
 import com.worldwidewaves.compose.common.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
+import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap

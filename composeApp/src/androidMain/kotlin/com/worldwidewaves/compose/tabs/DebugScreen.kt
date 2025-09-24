@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.activities.utils.TabScreen
 import com.worldwidewaves.debug.PerformanceDashboard
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 
 /**

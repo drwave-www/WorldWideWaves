@@ -71,10 +71,10 @@ import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
-import com.worldwidewaves.shared.WWWGlobals.Companion.Event
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveDisplay
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.DisplayText
+import com.worldwidewaves.shared.WWWGlobals.Event
+import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock

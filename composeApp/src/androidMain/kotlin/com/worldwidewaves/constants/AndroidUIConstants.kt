@@ -40,8 +40,14 @@ object AndroidUIConstants {
     }
 
     object Audio {
-        /** Default audio volume for sound tests */
+        /** Default audio volume for sound tests (Android-specific default) */
         const val DEFAULT_VOLUME = 0.8f
+
+        /** 8-bit audio bit depth (Android audio format) */
+        const val AUDIO_8_BIT = 8
+
+        /** 16-bit audio bit depth (Android audio format) */
+        const val AUDIO_16_BIT = 16
     }
 
     object Timing {

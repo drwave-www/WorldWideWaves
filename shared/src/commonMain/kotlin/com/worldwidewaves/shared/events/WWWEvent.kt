@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator

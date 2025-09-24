@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
 
 @Immutable
 data class ExtendedColorScheme(

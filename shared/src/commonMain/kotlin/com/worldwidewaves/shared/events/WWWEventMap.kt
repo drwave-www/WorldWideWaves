@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.cacheDeepFile
 import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists

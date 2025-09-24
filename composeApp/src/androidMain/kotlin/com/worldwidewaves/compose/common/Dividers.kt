@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
 
 /** Horizontal white divider reused across screens. */
 @Composable

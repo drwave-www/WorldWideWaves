@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import kotlin.math.abs
 import kotlin.math.cos

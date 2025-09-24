@@ -56,7 +56,7 @@ import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.BackNav
+import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents

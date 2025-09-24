@@ -57,8 +57,8 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.FAQ
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.FAQ
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy

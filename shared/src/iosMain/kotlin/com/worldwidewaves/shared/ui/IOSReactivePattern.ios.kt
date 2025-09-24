@@ -112,16 +112,16 @@ private class IOSFlowObservable<T>(
  */
 private class IOSSubscription(
     private val scope: CoroutineScope,
-    private var _isActive: Boolean
+    private var isActiveParameter: Boolean
 ) : IOSObservableSubscription {
 
     override val isActive: Boolean
-        get() = _isActive
+        get() = isActiveParameter
 
     override fun dispose() {
-        if (_isActive) {
+        if (isActiveParameter) {
             scope.cancel()
-            _isActive = false
+            isActiveParameter = false
         }
     }
 }

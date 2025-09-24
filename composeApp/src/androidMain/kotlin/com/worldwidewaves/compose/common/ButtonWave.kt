@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.theme.onQuaternaryLight

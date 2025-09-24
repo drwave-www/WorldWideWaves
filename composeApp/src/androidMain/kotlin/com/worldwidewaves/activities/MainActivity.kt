@@ -52,8 +52,8 @@ import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon

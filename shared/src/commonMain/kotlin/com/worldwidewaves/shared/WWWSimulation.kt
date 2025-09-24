@@ -21,7 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.Position
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime

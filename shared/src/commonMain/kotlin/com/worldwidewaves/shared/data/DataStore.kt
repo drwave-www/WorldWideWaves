@@ -45,7 +45,7 @@ class DataStoreException(
 
 // ----------------------------
 
-internal const val dataStoreFileName = "wwwaves.preferences_pb"
+internal const val DATA_STORE_FILE_NAME = "wwwaves.preferences_pb"
 
 /**
  * DataStore factory interface that provides testable DataStore creation.

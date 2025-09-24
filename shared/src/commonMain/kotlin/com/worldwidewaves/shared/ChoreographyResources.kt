@@ -22,6 +22,7 @@ package com.worldwidewaves.shared
  */
 
 import dev.icerock.moko.resources.StringResource
+import com.worldwidewaves.shared.WWWGlobals
 
 fun getChoreographyText(
     sequenceType: String,

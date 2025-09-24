@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Common
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Common
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done

@@ -253,7 +253,8 @@ class WWWEventObserver(
     private companion object {
         const val PROGRESSION_THRESHOLD = 0.1 // Only update progression if change is > 0.1%
         const val POSITION_RATIO_THRESHOLD = 0.01 // Only update position ratio if change is > 1%
-        const val TIME_THRESHOLD_MS = 1000L // Normal phase: update time if change is > 1 second (adaptive to 50ms during critical hit phase)
+        // Normal phase: update time if change is > 1 second (adaptive to 50ms during critical hit phase)
+        const val TIME_THRESHOLD_MS = 1000L
     }
 
     // Cache last emitted values for throttling
@@ -305,7 +306,10 @@ class WWWEventObserver(
                             Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
                         }
                         .onEach { observation ->
-                            Log.v("WWWEventObserver", "Unified observation update: progression=${observation.progression}, status=${observation.status}")
+                            Log.v(
+                                "WWWEventObserver",
+                                "Unified observation update: progression=${observation.progression}, status=${observation.status}"
+                            )
                             updateStates(observation.progression, observation.status)
                         }
                         .launchIn(coroutineScopeProvider.scopeDefault())
@@ -313,7 +317,10 @@ class WWWEventObserver(
                     // Use the dedicated position observer to handle position changes and area detection
                     val positionObserverJob = positionObserver.observePositionForEvent(event)
                         .onEach { observation ->
-                            Log.v("WWWEventObserver", "Position observation for event ${event.id}: position=${observation.position}, inArea=${observation.isInArea}")
+                            Log.v(
+                                "WWWEventObserver",
+                                "Position observation for event ${event.id}: position=${observation.position}, inArea=${observation.isInArea}"
+                            )
                             _userIsInArea.updateIfChanged(observation.isInArea)
                         }
                         .launchIn(coroutineScopeProvider.scopeDefault())
@@ -518,7 +525,10 @@ class WWWEventObserver(
 
             // Log debug information for choreo debugging
             if (calculatedState.userIsGoingToBeHit) {
-                Log.v("WWWEventObserver", "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}")
+                Log.v(
+                    "WWWEventObserver",
+                    "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}"
+                )
             }
 
         } catch (e: Exception) {

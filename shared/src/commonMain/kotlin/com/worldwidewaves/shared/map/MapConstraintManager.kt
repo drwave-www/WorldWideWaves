@@ -28,6 +28,7 @@ import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import com.worldwidewaves.shared.WWWGlobals
 
 /**
  * Platform-independent map constraint management that handles the logic
@@ -283,7 +284,7 @@ class MapConstraintManager(
             abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
-        return latChange > 0.1 || lngChange > 0.1 // 10% change threshold
+        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD || lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
     }
 
     fun getNearestValidPoint(

@@ -38,11 +38,11 @@ class DataStoreTest {
     }
 
     @Test
-    fun `test dataStoreFileName constant has correct value`() {
+    fun `test DATA_STORE_FILE_NAME constant has correct value`() {
         assertEquals(
             "wwwaves.preferences_pb",
-            dataStoreFileName,
-            "dataStoreFileName should have the expected value",
+            DATA_STORE_FILE_NAME,
+            "DATA_STORE_FILE_NAME should have the expected value",
         )
     }
 

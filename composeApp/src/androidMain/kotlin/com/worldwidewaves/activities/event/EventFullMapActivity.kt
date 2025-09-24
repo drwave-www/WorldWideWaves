@@ -46,8 +46,8 @@ import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.common.ButtonWave
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.Event
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status

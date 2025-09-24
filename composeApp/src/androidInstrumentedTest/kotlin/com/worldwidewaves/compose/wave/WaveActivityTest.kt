@@ -104,8 +104,8 @@ class WaveActivityTest {
             TestWaveCountdownTimer(mockEvent) { timeBeforeHitFlow.value }
         }
 
-        // Verify initial countdown display (MM:SS format)
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        // Verify initial countdown display (MM:SS format) - increased timeout for emulator
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Countdown: 01:05")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -151,7 +151,7 @@ class WaveActivityTest {
         // Test warming phase animation
         isWarmingFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Warming phase active")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -164,7 +164,7 @@ class WaveActivityTest {
         isWarmingFlow.value = false
         isGoingToBeHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Hit phase active")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -177,7 +177,7 @@ class WaveActivityTest {
         isGoingToBeHitFlow.value = false
         hasBeenHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Hit complete")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -214,7 +214,7 @@ class WaveActivityTest {
         isInAreaFlow.value = true
         userPositionRatioFlow.value = 0.25
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location status: In wave area, position 25%")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -226,7 +226,7 @@ class WaveActivityTest {
         // Test GPS accuracy during wave coordination
         userPositionRatioFlow.value = 0.75
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location status: In wave area, position 75%")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -258,7 +258,7 @@ class WaveActivityTest {
         // Test sound trigger on hit
         hasBeenHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Sound status: Hit sound triggered")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -299,7 +299,7 @@ class WaveActivityTest {
         statusFlow.value = IWWWEvent.Status.RUNNING
         isWarmingFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Warming")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -308,7 +308,7 @@ class WaveActivityTest {
         // Waiting phase (warming stops, not yet hit)
         isWarmingFlow.value = false
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Waiting")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -317,7 +317,7 @@ class WaveActivityTest {
         // Hit phase
         isGoingToBeHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Hit")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -328,7 +328,7 @@ class WaveActivityTest {
         hasBeenHitFlow.value = true
         statusFlow.value = IWWWEvent.Status.DONE
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Done")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -358,7 +358,7 @@ class WaveActivityTest {
         // Test network connectivity issues
         networkError = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: Network connection lost")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -371,7 +371,7 @@ class WaveActivityTest {
         networkError = false
         gpsError = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: GPS signal lost")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -383,7 +383,7 @@ class WaveActivityTest {
         // Test graceful error recovery
         gpsError = false
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: Recovered")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -416,7 +416,7 @@ class WaveActivityTest {
         progressionFlow.value = 25.0
         participantsFlow.value = 5
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Coordination status: Wave 25% complete, 5 participants")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -426,7 +426,7 @@ class WaveActivityTest {
         progressionFlow.value = 75.0
         participantsFlow.value = 12
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Coordination status: Wave 75% complete, 12 participants")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -453,7 +453,7 @@ class WaveActivityTest {
         // Test perfect hit timing (within 50ms)
         hitAccuracy.value = 25.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Perfect timing (25ms difference)")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -462,7 +462,7 @@ class WaveActivityTest {
         // Test good hit timing (within 100ms)
         hitAccuracy.value = 75.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Good timing (75ms difference)")
                 .fetchSemanticsNodes().isNotEmpty()
@@ -471,7 +471,7 @@ class WaveActivityTest {
         // Test missed hit (over 200ms)
         hitAccuracy.value = 250.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Missed timing (250ms difference)")
                 .fetchSemanticsNodes().isNotEmpty()

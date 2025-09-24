@@ -42,8 +42,8 @@ import com.worldwidewaves.compose.tabs.AboutDividerLine
 import com.worldwidewaves.compose.tabs.AboutWWWLogo
 import com.worldwidewaves.compose.tabs.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.Info
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Info
 import com.worldwidewaves.shared.infos_core
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle

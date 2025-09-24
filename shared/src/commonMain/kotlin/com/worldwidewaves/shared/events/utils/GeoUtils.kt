@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.Geodetic
+import com.worldwidewaves.shared.WWWGlobals.Geodetic
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -30,6 +30,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.atan2
 import kotlin.math.sqrt
+import com.worldwidewaves.shared.WWWGlobals
 
 object GeoUtils {
     /**
@@ -159,7 +160,7 @@ object GeoUtils {
     /**
      * Optimized radians conversion with caching for repeated latitude values.
      */
-    private fun cachedToRadians(degrees: Double): Double = radiansCache.get(degrees) { it * (PI / 180) }
+    private fun cachedToRadians(degrees: Double): Double = radiansCache.get(degrees) { it * (PI / WWWGlobals.MapDisplay.DEGREES_TO_RADIANS_FACTOR) }
 
     /**
      * Clears all trigonometric caches to free memory.
@@ -174,7 +175,7 @@ object GeoUtils {
     // Extension function to convert degrees to radians (optimized with caching)
     fun Double.toRadians(): Double = cachedToRadians(this)
 
-    fun Double.toDegrees(): Double = this * 180.0 / PI
+    fun Double.toDegrees(): Double = this * WWWGlobals.MapDisplay.DEGREES_TO_RADIANS_FACTOR / PI
 
     data class Vector2D(
         val x: Double,
