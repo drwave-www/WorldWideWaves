@@ -362,7 +362,7 @@ class AudioTestActivity : ComponentActivity() {
         // Create a SoundChoreographyManager-like simulation
         val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         val waveSlotDurationMs = 100L // 100ms time slots
-        val peoplePerSlot = 10 // 10 people per slot
+        val peoplePerSlot = 5 // Increased to 5 simultaneous people for better crowd effect
         val totalDurationMs = track.totalDuration.inWholeMilliseconds
 
         var currentSlotIndex = 0
@@ -373,7 +373,7 @@ class AudioTestActivity : ComponentActivity() {
 
             Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits ${peoplePerSlot} people at ${elapsedTime.inWholeSeconds}s")
 
-            // Simulate 10 people getting hit by the wave at this time
+            // Simulate people getting hit by the wave at this time
             repeat(peoplePerSlot) { personIndex ->
                 // Each person has random micro-timing within the 100ms slot
                 val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())

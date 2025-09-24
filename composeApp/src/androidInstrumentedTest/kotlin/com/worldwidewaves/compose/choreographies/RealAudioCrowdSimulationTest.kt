@@ -67,7 +67,7 @@ class RealAudioCrowdSimulationTest {
         private const val PLAYBACK_INTERVAL_MS = 500L // Slower for audibility
 
         // Wave progression constants for realistic simulation
-        private const val WAVE_PEOPLE_PER_SLOT = 10 // 10 people per 100ms slot
+        private const val WAVE_PEOPLE_PER_SLOT = 5 // Increased to 5 people for better crowd effect
         private const val WAVE_SLOT_DURATION_MS = 100L // 100ms time slots
     }
 
