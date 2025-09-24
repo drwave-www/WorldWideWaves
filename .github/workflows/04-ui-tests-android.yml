@@ -1,15 +1,21 @@
-name: 05 • UI Tests (Android)
+name: 04 • UI Tests (Android)
 
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'composeApp/src/**'
+      - 'shared/src/**'
+      - '**/build.gradle.kts'
+      - 'gradle/**'
+      - '.github/workflows/04-ui-tests-android.yml'
   schedule:
     # Run daily at 2 AM UTC only if there are changes
     - cron: '0 2 * * *'
   workflow_dispatch:
 
 concurrency:
-  group: instrumented-tests-${{ github.ref }}
+  group: ui-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,7 +41,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
 
       - name: Setup Gradle

@@ -40,10 +40,10 @@ jobs:
             });
 
             const relevantWorkflows = [
-              '03 • Code Quality & Standards',
+              '03 • Quality & Security Gates',
               '01 • Build Android',
               '02 • Build iOS',
-              '05 • UI Tests (Android)'
+              '04 • UI Tests (Android)'
             ];
 
             const workflowResults = {};

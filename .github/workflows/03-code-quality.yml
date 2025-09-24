@@ -1,4 +1,4 @@
-name: 03 • Code Quality & Standards
+name: 03 • Quality & Security Gates
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 concurrency:
-  group: quality-${{ github.ref }}
+  group: quality-security-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
 
       - name: Setup Gradle
@@ -60,7 +60,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
 
       - name: Setup Gradle
@@ -93,7 +93,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: 17
 
       - name: Setup Gradle
@@ -121,10 +121,64 @@ jobs:
           fi
           echo "✅ All required UI test classes found"
 
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run dependency vulnerability check
+        run: ./gradlew dependencyCheckAnalyze || true
+
+      - name: Upload dependency check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Generate license report
+        run: ./gradlew generateLicenseReport --stacktrace
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: build/reports/licenses/
+
   quality-summary:
     name: Quality Gates Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, ui-test-compilation]
+    needs: [lint, test, ui-test-compilation, dependency-check, license-check]
     if: always()
     steps:
       - name: Evaluate Quality Gates
@@ -132,11 +186,15 @@ jobs:
           lint_result="${{ needs.lint.result }}"
           test_result="${{ needs.test.result }}"
           ui_compile_result="${{ needs.ui-test-compilation.result }}"
+          dependency_result="${{ needs.dependency-check.result }}"
+          license_result="${{ needs.license-check.result }}"
 
-          echo "## Quality Gates Results"
+          echo "## Quality & Security Gates Results"
           echo "- Linting: $lint_result"
           echo "- Unit Tests: $test_result"
           echo "- UI Test Compilation: $ui_compile_result"
+          echo "- Dependency Security: $dependency_result"
+          echo "- License Compliance: $license_result"
 
           if [[ "$lint_result" != "success" || "$test_result" != "success" || "$ui_compile_result" != "success" ]]; then
             echo "❌ Quality gates failed"

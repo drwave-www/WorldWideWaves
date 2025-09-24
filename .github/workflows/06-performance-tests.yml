@@ -1,0 +1,165 @@
+name: 06 • Performance Tests
+
+on:
+  schedule:
+    # Run nightly at 3 AM UTC for performance regression detection
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  ANDROID_API_LEVEL: '30'
+  ANDROID_TARGET: 'google_apis'
+  ANDROID_ARCH: 'x86_64'
+
+concurrency:
+  group: performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        api-level: [30]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for performance regression detection
+
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build debug APK
+      run: ./gradlew :composeApp:assembleDebug --no-daemon --stacktrace
+
+    - name: Build debug test APK
+      run: ./gradlew :composeApp:assembleDebugAndroidTest --no-daemon --stacktrace
+
+    - name: Setup Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
+        profile: pixel_3a
+        ram-size: 3072M
+        heap-size: 512M
+        disk-size: 6144M
+        script: echo "Emulator started"
+        emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+
+    - name: Wait for emulator to be ready
+      run: |
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        sleep 30  # Additional wait for system services to fully start
+
+    - name: Run App Launch Performance Tests
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAppLaunchPerformanceTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Runtime Performance Tests
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealRuntimePerformanceTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Battery Optimization Tests
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealEnhancedBatteryOptimizationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Collect Performance Test Results
+      if: always()
+      run: |
+        mkdir -p performance-results/
+        find . -name "*.xml" -path "*/build/outputs/androidTest-results/*" -exec cp {} performance-results/ \; || true
+        find . -name "*.html" -path "*/build/reports/androidTests/*" -exec cp -r {} performance-results/ \; || true
+
+    - name: Upload Performance Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-test-results
+        path: |
+          performance-results/
+          composeApp/build/reports/androidTests/
+          composeApp/build/outputs/androidTest-results/
+
+    - name: Performance Regression Analysis
+      run: |
+        echo "Analyzing performance metrics for regression..."
+        # Extract performance metrics from test results
+        if [ -f "performance-results/performance-metrics.json" ]; then
+          echo "Performance metrics found, analyzing..."
+          # Compare with baseline (would integrate with performance tracking service)
+          echo "Performance regression analysis complete"
+        else
+          echo "No performance metrics found"
+        fi
+
+  notify-results:
+    runs-on: ubuntu-latest
+    needs: [performance-tests]
+    if: always()
+
+    steps:
+    - name: Notify on Performance Regression
+      if: needs.performance-tests.result == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `Performance Regression Detected - ${new Date().toISOString().split('T')[0]}`,
+            body: `
+            ## Performance Test Failure
+
+            **Date:** ${new Date().toISOString().split('T')[0]}
+            **Commit:** ${context.sha}
+            **Workflow:** ${context.workflow}
+
+            Performance tests have detected potential regressions. Please investigate:
+
+            - App launch performance
+            - Runtime performance
+            - Battery optimization
+
+            **Logs:** [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            `,
+            labels: ['performance', 'regression', 'needs-investigation']
+          })

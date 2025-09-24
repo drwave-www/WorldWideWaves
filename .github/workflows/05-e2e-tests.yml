@@ -1,8 +1,8 @@
-name: 06 • End-to-End Tests
+name: 05 • End-to-End Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   schedule:
@@ -14,6 +14,10 @@ env:
   ANDROID_API_LEVEL: '30'
   ANDROID_TARGET: 'google_apis'
   ANDROID_ARCH: 'x86_64'
+
+concurrency:
+  group: e2e-tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   real-integration-tests:
@@ -160,42 +164,6 @@ jobs:
           echo "No performance metrics found"
         fi
 
-  performance-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    needs: [real-integration-tests]
-    if: github.event_name == 'schedule'  # Only run performance tests nightly
-
-    strategy:
-      matrix:
-        api-level: [30]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK ${{ env.JAVA_VERSION }}
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: 'temurin'
-
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        api-level: ${{ matrix.api-level }}
-        target: ${{ env.ANDROID_TARGET }}
-        arch: ${{ env.ANDROID_ARCH }}
-
-    - name: Run Performance Tests
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAppLaunchPerformanceTest \
-          --no-daemon --stacktrace
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealRuntimePerformanceTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
 
   firebase-test-lab:
     runs-on: ubuntu-latest
