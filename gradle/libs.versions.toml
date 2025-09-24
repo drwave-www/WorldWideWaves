@@ -1,5 +1,5 @@
 [versions]
-firebaseBom = "34.4.0"
+firebaseBom = "34.2.0"
 j2objcAnnotations = "2.8"
 agp = "8.13.0"
 android-compileSdk = "36"

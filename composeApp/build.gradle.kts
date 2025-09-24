@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
+import org.gradle.api.Task
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -268,9 +269,15 @@ tasks.register("generateFirebaseConfig") {
     }
 }
 
-// Ensure Firebase config is generated before processing
+// Ensure Firebase config is generated before Google Services processing
 tasks.named("preBuild") {
     dependsOn("generateFirebaseConfig")
+}
+
+// Fix Gradle task dependency issue
+afterEvaluate {
+    tasks.findByName("processDebugGoogleServices")?.dependsOn("generateFirebaseConfig")
+    tasks.findByName("processReleaseGoogleServices")?.dependsOn("generateFirebaseConfig")
 }
 
 // Custom Gradle Tasks for Real Integration Tests
