@@ -51,6 +51,11 @@
             android:name=".activities.event.WaveActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".debug.AudioTestActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:label="🎵 Audio Test" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"
