@@ -23,8 +23,21 @@ package com.worldwidewaves.shared.map
 
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.WWWLogger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import platform.CoreLocation.CLLocation
+import platform.CoreLocation.CLLocationManager
+import platform.CoreLocation.CLLocationManagerDelegateProtocol
+import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
+import platform.CoreLocation.kCLAuthorizationStatusDenied
+import platform.CoreLocation.kCLAuthorizationStatusNotDetermined
+import platform.CoreLocation.kCLAuthorizationStatusRestricted
+import platform.Foundation.NSError
+import platform.darwin.NSObject
 
 /**
  * iOS-specific location provider using Core Location framework.
@@ -47,7 +60,7 @@ import kotlinx.coroutines.flow.StateFlow
  * • Event area detection
  * • Wave progression tracking
  */
-class IOSWWWLocationProvider : WWWLocationProvider {
+class IOSWWWLocationProvider : WWWLocationProvider, NSObject(), CLLocationManagerDelegateProtocol {
 
     private val _currentLocation = MutableStateFlow<Position?>(null)
     override val currentLocation: StateFlow<Position?> = _currentLocation
@@ -55,46 +68,119 @@ class IOSWWWLocationProvider : WWWLocationProvider {
     private var isUpdating = false
     private var onLocationUpdate: ((Position) -> Unit)? = null
 
+    private val locationManager = CLLocationManager()
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    init {
+        locationManager.delegate = this
+        locationManager.desiredAccuracy = platform.CoreLocation.kCLLocationAccuracyBest
+    }
+
     override fun startLocationUpdates(onLocationUpdate: (Position) -> Unit) {
         if (isUpdating) {
             WWWLogger.d("IOSWWWLocationProvider", "Location updates already started")
-            return // Already started
+            return
         }
 
         this.onLocationUpdate = onLocationUpdate
         isUpdating = true
 
-        // For now, provide a default location (can be updated by iOS native code)
-        // This ensures the location provider works while full Core Location integration
-        // is completed in native iOS code
-        val defaultLocation = Position(
-            lat = 37.7749, // San Francisco coordinates as default
-            lng = -122.4194
-        )
+        WWWLogger.d("IOSWWWLocationProvider", "Starting iOS Core Location updates")
 
-        _currentLocation.value = defaultLocation
-        onLocationUpdate(defaultLocation)
-
-        WWWLogger.d("IOSWWWLocationProvider", "Started location updates with default location")
-        WWWLogger.i("IOSWWWLocationProvider", "Using default coordinates - integrate with iOS Core Location for real GPS")
+        // Check current authorization status
+        when (locationManager.authorizationStatus) {
+            kCLAuthorizationStatusNotDetermined -> {
+                WWWLogger.i("IOSWWWLocationProvider", "Requesting location permission")
+                locationManager.requestWhenInUseAuthorization()
+            }
+            kCLAuthorizationStatusAuthorizedWhenInUse -> {
+                WWWLogger.d("IOSWWWLocationProvider", "Permission granted, starting location updates")
+                locationManager.startUpdatingLocation()
+            }
+            kCLAuthorizationStatusDenied, kCLAuthorizationStatusRestricted -> {
+                WWWLogger.w("IOSWWWLocationProvider", "Location permission denied, using default location")
+                useDefaultLocation()
+            }
+            else -> {
+                WWWLogger.w("IOSWWWLocationProvider", "Unknown location permission status, using default location")
+                useDefaultLocation()
+            }
+        }
     }
 
     override fun stopLocationUpdates() {
         isUpdating = false
         onLocationUpdate = null
+        locationManager.stopUpdatingLocation()
         WWWLogger.d("IOSWWWLocationProvider", "Stopped location updates")
     }
 
     /**
-     * Update location from iOS native code.
-     * This method can be called from Swift/Objective-C to provide real GPS coordinates.
+     * CLLocationManagerDelegate method - called when authorization status changes
      */
-    fun updateLocation(latitude: Double, longitude: Double) {
-        if (isUpdating) {
-            val position = Position(lat = latitude, lng = longitude)
-            _currentLocation.value = position
-            onLocationUpdate?.invoke(position)
-            WWWLogger.v("IOSWWWLocationProvider", "Location update: $latitude, $longitude")
+    override fun locationManagerDidChangeAuthorization(manager: CLLocationManager) {
+        WWWLogger.d("IOSWWWLocationProvider", "Authorization status changed to: ${manager.authorizationStatus}")
+
+        when (manager.authorizationStatus) {
+            kCLAuthorizationStatusAuthorizedWhenInUse -> {
+                if (isUpdating) {
+                    WWWLogger.d("IOSWWWLocationProvider", "Permission granted, starting location updates")
+                    manager.startUpdatingLocation()
+                }
+            }
+            kCLAuthorizationStatusDenied, kCLAuthorizationStatusRestricted -> {
+                WWWLogger.w("IOSWWWLocationProvider", "Location permission denied")
+                useDefaultLocation()
+            }
+            else -> {
+                // Handle other states if needed
+            }
         }
+    }
+
+    /**
+     * CLLocationManagerDelegate method - called when new location is received
+     */
+    override fun locationManager(manager: CLLocationManager, didUpdateLocations: List<*>) {
+        val locations = didUpdateLocations.filterIsInstance<CLLocation>()
+        val location = locations.lastOrNull()
+
+        location?.let { loc ->
+            val position = Position(
+                lat = loc.coordinate.latitude,
+                lng = loc.coordinate.longitude
+            )
+
+            coroutineScope.launch {
+                _currentLocation.value = position
+                onLocationUpdate?.invoke(position)
+                WWWLogger.v("IOSWWWLocationProvider", "Location update: ${position.lat}, ${position.lng}")
+            }
+        }
+    }
+
+    /**
+     * CLLocationManagerDelegate method - called when location update fails
+     */
+    override fun locationManager(manager: CLLocationManager, didFailWithError: NSError) {
+        WWWLogger.e("IOSWWWLocationProvider", "Location update failed: ${didFailWithError.localizedDescription}")
+        useDefaultLocation()
+    }
+
+    /**
+     * Fallback to default location when GPS is unavailable
+     */
+    private fun useDefaultLocation() {
+        val defaultLocation = Position(
+            lat = 37.7749, // San Francisco coordinates as default
+            lng = -122.4194
+        )
+
+        coroutineScope.launch {
+            _currentLocation.value = defaultLocation
+            onLocationUpdate?.invoke(defaultLocation)
+        }
+
+        WWWLogger.i("IOSWWWLocationProvider", "Using default location: San Francisco")
     }
 }
