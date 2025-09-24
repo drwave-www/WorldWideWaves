@@ -41,11 +41,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Get all workflow runs for this commit (not just completed)
             const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               head_sha: context.sha,
-              status: 'completed',
               per_page: 100
             });
 
@@ -53,7 +53,7 @@ jobs:
               '03 • Quality & Security Gates',
               '01 • Build Android',
               '02 • Build iOS',
-              '04 • UI Tests (Android)'
+              '05 • End-to-End Tests'
             ];
 
             const workflowResults = {};
@@ -62,15 +62,23 @@ jobs:
             for (const workflow of relevantWorkflows) {
               const run = runs.workflow_runs.find(r => r.name === workflow);
               if (run) {
-                workflowResults[workflow] = run.conclusion;
-                if (run.conclusion !== 'success') {
-                  allPassed = false;
+                if (run.status === 'completed') {
+                  workflowResults[workflow] = run.conclusion;
+                  if (run.conclusion !== 'success') {
+                    allPassed = false;
+                  }
+                } else {
+                  workflowResults[workflow] = run.status; // 'in_progress', 'queued', etc.
+                  allPassed = false; // Not completed yet
                 }
               } else {
                 workflowResults[workflow] = 'not_found';
                 allPassed = false;
               }
             }
+
+            console.log('Workflow Results:', workflowResults);
+            console.log('All Passed:', allPassed);
 
             core.setOutput('all_passed', allPassed);
             core.setOutput('results', JSON.stringify(workflowResults));
@@ -80,8 +88,8 @@ jobs:
         run: |
           echo "Checking for still-running workflows..."
 
-          # Wait up to 15 minutes for workflows to complete
-          timeout=900
+          # Wait up to 45 minutes for workflows to complete (E2E tests can take long)
+          timeout=2700
           interval=30
           elapsed=0
 
