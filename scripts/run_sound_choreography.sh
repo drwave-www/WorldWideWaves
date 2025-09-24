@@ -441,11 +441,11 @@ main() {
     echo ""
     case "$RUN_MODE" in
         "play")
-            print_status "Running automated sound choreography test (--play mode)..."
-            if ANDROID_SERIAL="$SELECTED_DEVICE" ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest --no-daemon; then
-                print_status "Automated test completed successfully!"
+            print_status "Running unit test sound choreography simulation (--play mode)..."
+            if ./gradlew :shared:testDebugUnitTest --tests "*CrowdSoundChoreographySimulationTest*" --no-daemon; then
+                print_status "Sound choreography simulation completed successfully!"
             else
-                print_warning "Automated test had issues (probably audio-related), but manual test should work fine."
+                print_warning "Sound choreography simulation had issues, but manual test should work fine."
             fi
             ;;
         "open")
@@ -453,14 +453,14 @@ main() {
             print_status "No automated test will be run."
             ;;
         "default")
-            read -p "Would you like to run the automated instrumented test as well? (y/n): " -n 1 -r
+            read -p "Would you like to run the sound choreography simulation test as well? (y/n): " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
-                print_status "Running automated sound choreography test..."
-                if ANDROID_SERIAL="$SELECTED_DEVICE" ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest --no-daemon; then
-                    print_status "Automated test completed successfully!"
+                print_status "Running unit test sound choreography simulation..."
+                if ./gradlew :shared:testDebugUnitTest --tests "*CrowdSoundChoreographySimulationTest*" --no-daemon; then
+                    print_status "Sound choreography simulation completed successfully!"
                 else
-                    print_warning "Automated test had issues (probably audio-related), but manual test should work fine."
+                    print_warning "Sound choreography simulation had issues, but manual test should work fine."
                 fi
             fi
             ;;

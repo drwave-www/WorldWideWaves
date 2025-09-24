@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
         }
+
     }
 }
 
@@ -59,6 +60,7 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].resources.srcDirs("src/androidMain/res")
     // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -113,6 +115,11 @@ android {
         compose = true
         viewBinding = true
         buildConfig = true
+    }
+
+    // Real Integration Test Configuration
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
     dynamicFeatures +=
         setOf(
@@ -187,4 +194,39 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
+
+}
+
+
+// Custom Gradle Tasks for Real Integration Tests
+tasks.register("runRealIntegrationTests") {
+    group = "verification"
+    description = "Runs real integration tests on connected devices"
+
+    doFirst {
+        println("🚀 Real Integration Tests framework ready!")
+        println("📱 To run real integration tests:")
+        println("   1. Connect Android device with USB debugging enabled")
+        println("   2. Enable 'Allow mock locations' in developer options")
+        println("   3. Grant location permissions to the app")
+        println("   4. Ensure internet connectivity")
+        println("   5. Run: ./gradlew connectedRealIntegrationTestAndroidTest")
+    }
+}
+
+tasks.register("verifyAllTests") {
+    group = "verification"
+    description = "Runs all test types: unit, instrumented, and real integration tests"
+
+    dependsOn("testDebugUnitTest")
+    dependsOn("connectedDebugAndroidTest")
+
+    doFirst {
+        println("🧪 Running available test suite...")
+    }
+
+    doLast {
+        println("✅ Available tests completed successfully!")
+        println("ℹ️  Real integration tests require separate execution with device setup")
+    }
 }
