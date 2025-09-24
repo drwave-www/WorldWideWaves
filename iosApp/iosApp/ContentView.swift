@@ -76,38 +76,52 @@ struct ContentView: View {
                         List {
                             ForEach(events.indices, id: \.self) { index in
                                 NavigationLink(destination: EventDetailView(eventId: events[index])) {
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        // Top row: Location (left) and Date (right) - matching Android
-                                        HStack {
-                                            Text(formatEventName(events[index]))
-                                                .font(.title3)
-                                                .fontWeight(.medium)
-                                            Spacer()
-                                            Text("Dec 24")
-                                                .font(.headline)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.blue)
-                                        }
+                                    ZStack {
+                                        VStack(alignment: .leading, spacing: 12) {
+                                            // Top row: Location (left) and Date (right) - exact Android match
+                                            HStack {
+                                                Text(formatEventName(events[index]))
+                                                    .font(.title3)
+                                                    .fontWeight(.medium)
+                                                Spacer()
+                                                Text("Dec 24")
+                                                    .font(.headline)
+                                                    .fontWeight(.bold)
+                                                    .foregroundColor(.blue)
+                                            }
 
-                                        // Bottom row: Country / Community - matching Android
-                                        HStack {
-                                            Text(getCountryName(events[index]))
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                            Text(" / ")
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                            Text(getCommunityName(events[index]))
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
-                                            Spacer()
+                                            // Bottom row: Country / Community - exact Android match
+                                            HStack {
+                                                Text(getCountryName(events[index]))
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                Text(" / ")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                Text(getCommunityName(events[index]))
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                Spacer()
+                                            }
+                                            .padding(.top, -8)
                                         }
-                                        .padding(.top, -8)
+                                        .padding(.vertical, 12)
+
+                                        // Event status overlay (matching Android EventOverlays)
+                                        HStack {
+                                            Spacer()
+                                            VStack {
+                                                EventStatusOverlay(eventId: events[index])
+                                                Spacer()
+                                            }
+                                        }
                                     }
-                                    .padding(.vertical, 12)
                                 }
                                 .listRowBackground(Color.clear)
                             }
+                        }
+                        .refreshable {
+                            loadEventsWithStates()
                         }
                     }
                 }
@@ -266,18 +280,23 @@ struct EventDetailView: View {
                     .frame(height: 1)
                     .padding(.horizontal)
 
-                // Wave button section with navigation (matching Android ButtonWave)
+                // Wave button section with exact Android ButtonWave styling
                 NavigationLink(destination: WaveView(eventId: eventId)) {
-                    HStack {
-                        Image(systemName: "waveform.path.ecg")
-                        Text("Wave Now")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                    Text("Wave Now")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .frame(width: 120, height: 44)
+                        .background(Color.blue)
+                        .cornerRadius(6)
+                        .overlay(
+                            // Blinking animation matching Android
+                            Rectangle()
+                                .fill(Color.blue)
+                                .opacity(0.3)
+                                .cornerRadius(6)
+                                .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: UUID())
+                        )
                 }
                 .padding()
 
@@ -529,6 +548,56 @@ struct WaveView: View {
                 timer.invalidate()
                 isWaveActive = false
             }
+        }
+    }
+}
+
+// Event Status Overlay - Matching Android EventOverlaySoonOrRunning
+struct EventStatusOverlay: View {
+    let eventId: String
+
+    var body: some View {
+        // Simulate event status based on city (matching Android logic)
+        let status = getEventStatus(eventId)
+
+        if status != "none" {
+            Text(status.uppercased())
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(getStatusColor(status))
+                .cornerRadius(4)
+                .padding(.top, 8)
+                .padding(.trailing, 8)
+        }
+    }
+
+    private func getEventStatus(_ eventId: String) -> String {
+        // Simulate status based on event (matching Android behavior)
+        switch eventId {
+        case let id where id.contains("new_york"):
+            return "soon"
+        case let id where id.contains("paris"):
+            return "running"
+        case let id where id.contains("tokyo"):
+            return "done"
+        default:
+            return "none"
+        }
+    }
+
+    private func getStatusColor(_ status: String) -> Color {
+        switch status {
+        case "soon":
+            return Color.orange
+        case "running":
+            return Color.green
+        case "done":
+            return Color.gray
+        default:
+            return Color.blue
         }
     }
 }
