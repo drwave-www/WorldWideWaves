@@ -14,6 +14,7 @@ jobs:
   build-framework:
     name: Build iOS Framework
     runs-on: macos-14
+    timeout-minutes: 30
     needs: []  # Removed dependency to run in parallel
 
     steps:
@@ -43,6 +44,7 @@ jobs:
   build-app:
     name: Build iOS App
     runs-on: macos-14
+    timeout-minutes: 30
     needs: build-framework
 
     steps:

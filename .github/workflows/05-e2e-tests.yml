@@ -3,11 +3,10 @@ name: 05 • End-to-End Tests
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   schedule:
     # Run daily at 2 AM UTC to catch environmental issues
     - cron: '0 2 * * *'
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: '17'
@@ -92,9 +91,9 @@ jobs:
         target: ${{ env.ANDROID_TARGET }}
         arch: ${{ env.ANDROID_ARCH }}
         profile: pixel_3a
-        ram-size: 4096M
-        heap-size: 1024M
-        disk-size: 8G
+        ram-size: 3072M
+        heap-size: 512M
+        disk-size: 6144M
         script: echo "Emulator started"
         emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 

@@ -14,6 +14,7 @@ jobs:
   lint:
     name: Code Linting
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,10 +34,10 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run ktlint
-        run: ./gradlew ktlintCheck --stacktrace
+        run: ./gradlew ktlintCheck --no-daemon --stacktrace
 
       - name: Run detekt
-        run: ./gradlew detekt --stacktrace
+        run: ./gradlew detekt --no-daemon --stacktrace
 
       - name: Upload lint reports
         if: failure()
@@ -50,6 +51,7 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,7 +71,7 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run unit tests
-        run: ./gradlew testDebugUnitTest --stacktrace
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
 
       - name: Upload test reports
         if: always()
@@ -83,6 +85,7 @@ jobs:
   ui-test-compilation:
     name: UI Test Compilation Check
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,7 +105,7 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Compile instrumented tests
-        run: ./gradlew compileDebugAndroidTestKotlin --stacktrace
+        run: ./gradlew compileDebugAndroidTestKotlin --no-daemon --stacktrace
 
       - name: Verify UI test classes exist
         run: |
@@ -124,6 +127,7 @@ jobs:
   dependency-check:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
@@ -140,7 +144,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run dependency vulnerability check
-        run: ./gradlew dependencyCheckAnalyze || true
+        run: ./gradlew dependencyCheckAnalyze --no-daemon || true
 
       - name: Upload dependency check report
         if: always()
@@ -152,6 +156,7 @@ jobs:
   license-check:
     name: License Compliance Check
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -167,7 +172,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Generate license report
-        run: ./gradlew generateLicenseReport --stacktrace
+        run: ./gradlew generateLicenseReport --no-daemon --stacktrace
 
       - name: Upload license report
         uses: actions/upload-artifact@v4
@@ -178,6 +183,7 @@ jobs:
   quality-summary:
     name: Quality Gates Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [lint, test, ui-test-compilation, dependency-check, license-check]
     if: always()
     steps:
