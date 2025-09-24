@@ -89,28 +89,28 @@ class DefaultObservationScheduler(
                 1.seconds
             }
 
-            // Event is active or about to start - real-time updates
-            timeBeforeEvent > 0.seconds || event.isRunning() -> {
-                Log.v("DefaultObservationScheduler", "Event is active/starting, using 500ms interval")
-                500.milliseconds
-            }
-
-            // After event start, check hit timing
-            timeBeforeHit < ZERO -> {
+            // For events that have started or are about to start, check hit timing first
+            timeBeforeHit != null && timeBeforeHit < ZERO -> {
                 Log.v("DefaultObservationScheduler", "User already hit or event done, stopping observation")
                 INFINITE
             }
 
             // Critical hit timing - maximum accuracy for sound synchronization
-            timeBeforeHit < 1.seconds -> {
+            timeBeforeHit != null && timeBeforeHit < 1.seconds -> {
                 Log.v("DefaultObservationScheduler", "Critical hit timing (<1s), using 50ms interval")
                 50.milliseconds
             }
 
             // Near hit timing - high accuracy with battery consideration
-            timeBeforeHit < 5.seconds -> {
+            timeBeforeHit != null && timeBeforeHit < 5.seconds -> {
                 Log.v("DefaultObservationScheduler", "Near hit timing (<5s), using 200ms interval")
                 200.milliseconds
+            }
+
+            // Event is active or about to start - real-time updates
+            timeBeforeEvent > 0.seconds || event.isRunning() -> {
+                Log.v("DefaultObservationScheduler", "Event is active/starting, using 500ms interval")
+                500.milliseconds
             }
 
             // Default post-event monitoring - battery friendly

@@ -543,13 +543,12 @@ class WWWEventObserverTest : KoinTest {
         every { mockEvent.area } returns mockArea
         every { mockEvent.warming } returns mockWarming
         every { mockEvent.getStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
-        every { mockEvent.getWaveStartDateTime() } returns TestHelpers.TestTimes.BASE_TIME
+        every { mockEvent.getWaveStartDateTime() } throws RuntimeException("Test error") // This will trigger error in progression calculation
         coEvery { mockEvent.getStatus() } returns Status.RUNNING
-        coEvery { mockEvent.isRunning() } returns false // Not running to avoid observation flow
+        coEvery { mockEvent.isRunning() } returns true // Need to be running to trigger progression calculation
         every { mockEvent.isSoon() } returns false
         every { mockEvent.isNearTime() } returns false // Not near time to avoid observation flow
-        coEvery { mockEvent.isDone() } returns true // Mark as done to prevent infinite loops
-        coEvery { mockWave.getProgression() } throws RuntimeException("Test error")
+        coEvery { mockEvent.isDone() } returns false // Must not be done to trigger progression calculation
         every { mockWave.getUserPosition() } returns null
         coEvery { mockWave.timeBeforeUserHit() } returns null
         coEvery { mockWave.userPositionToWaveRatio() } returns null
