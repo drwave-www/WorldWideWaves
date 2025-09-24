@@ -1,11 +1,10 @@
 package com.worldwidewaves.shared.data
 
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,9 +12,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
-import kotlin.test.fail
+import kotlin.test.assertTrue
 
 /**
  * Tests for DataStore functionality in a KMP-compatible way.

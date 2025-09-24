@@ -25,7 +25,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import okio.Path.Companion.toPath

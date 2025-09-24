@@ -22,13 +22,13 @@ package com.worldwidewaves.shared.map
  */
 
 import androidx.annotation.UiThread
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Napier
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import com.worldwidewaves.shared.WWWGlobals
 
 /**
  * Platform-independent map constraint management that handles the logic

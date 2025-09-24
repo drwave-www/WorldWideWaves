@@ -96,7 +96,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.theme.commonTextStyle
 import com.worldwidewaves.theme.extraBoldTextStyle
@@ -123,6 +123,10 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
 class EventActivity : AbstractEventWaveActivity() {
     private val clock: IClock by inject()
     private val platform: WWWPlatform by inject()
+
+    companion object {
+        private const val TAG = "EventActivity"
+    }
 
     // ------------------------------------------------------------------------
 
@@ -270,8 +274,8 @@ class EventActivity : AbstractEventWaveActivity() {
                                         )
 
                                     // Set the simulation
-                                    Log.i("Simulation", "Setting simulation starting time to $simulationTime from event ${event.id}")
-                                    Log.i("Simulation", "Setting simulation user position to $position from event ${event.id}")
+                                    Log.i(TAG, "Setting simulation starting time to $simulationTime from event ${event.id}")
+                                    Log.i(TAG, "Setting simulation user position to $position from event ${event.id}")
                                     platform.setSimulation(simulation)
 
                                     // Restart event observation to apply simulation (observation delay changes)
@@ -289,13 +293,13 @@ class EventActivity : AbstractEventWaveActivity() {
                                     simulationButtonState = "active"
                                 } catch (ise: IllegalStateException) {
                                     simulationButtonState = "idle"
-                                    Log.e("Simulation", "Invalid state for simulation setup", ise)
+                                    Log.e(TAG, "Invalid state for simulation setup", ise)
                                 } catch (iae: IllegalArgumentException) {
                                     simulationButtonState = "idle"
-                                    Log.e("Simulation", "Invalid simulation parameters", iae)
+                                    Log.e(TAG, "Invalid simulation parameters", iae)
                                 } catch (uoe: UnsupportedOperationException) {
                                     simulationButtonState = "idle"
-                                    Log.e("Simulation", "Unsupported simulation operation", uoe)
+                                    Log.e(TAG, "Unsupported simulation operation", uoe)
                                 }
                             }
                         } else if (simulationButtonState == "active") {

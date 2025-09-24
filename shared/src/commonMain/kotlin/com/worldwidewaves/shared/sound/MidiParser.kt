@@ -21,8 +21,7 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ByteArrayReader
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -76,6 +75,9 @@ data class MidiTrack(
  * Handles parsing of Standard MIDI File (SMF) format
  */
 object MidiParser {
+    // Logging tag
+    private const val TAG = "MidiParser"
+
     // Constants for MIDI file parsing
     private const val HEADER_CHUNK_ID = "MThd"
     private const val TRACK_CHUNK_ID = "MTrk"
@@ -363,8 +365,7 @@ object MidiParser {
                 tempo = finalTempo.toInt(),
             )
         } catch (e: Exception) {
-            Log.e("MidiParser", "Error parsing MIDI bytes: ${e.message}")
-            e.printStackTrace()
+            Log.e(TAG, "Error parsing MIDI bytes: ${e.message}", throwable = e)
             throw e
         }
     }

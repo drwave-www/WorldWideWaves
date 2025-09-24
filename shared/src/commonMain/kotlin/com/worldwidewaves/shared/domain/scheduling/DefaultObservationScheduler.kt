@@ -25,7 +25,7 @@ package com.worldwidewaves.shared.domain.scheduling
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

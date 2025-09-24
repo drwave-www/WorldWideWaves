@@ -25,7 +25,6 @@ package com.worldwidewaves.shared.domain.scheduling
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventWave
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.testing.MockClock
 import io.mockk.coEvery
 import io.mockk.every
@@ -36,7 +35,6 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
-import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -45,10 +43,10 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Comprehensive tests for ObservationScheduler implementation.

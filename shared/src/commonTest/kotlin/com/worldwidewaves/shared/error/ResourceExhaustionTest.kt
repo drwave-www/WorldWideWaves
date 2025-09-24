@@ -22,24 +22,24 @@ package com.worldwidewaves.shared.error
  */
 
 import com.worldwidewaves.shared.events.WWWEventObserver
-import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
-import com.worldwidewaves.shared.sound.WaveformGenerator
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.WaveformGenerator
 import com.worldwidewaves.shared.testing.TestHelpers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.TimeoutCancellationException
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -48,10 +48,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

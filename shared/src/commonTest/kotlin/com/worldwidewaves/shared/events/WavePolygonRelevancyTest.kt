@@ -26,17 +26,13 @@ package com.worldwidewaves.shared.events
 import com.worldwidewaves.shared.events.utils.ComposedLongitude
 import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils
-import com.worldwidewaves.shared.events.utils.PolygonUtils.SplitResult
 import com.worldwidewaves.shared.events.utils.PolygonUtils.containsPosition
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.testing.CIEnvironment
 import kotlinx.coroutines.test.runTest
 import kotlin.math.abs
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Comprehensive test suite for wave polygon relevancy and geometric calculations.

@@ -27,7 +27,7 @@ import com.worldwidewaves.shared.cacheStringToFile
 import com.worldwidewaves.shared.cachedFileExists
 import com.worldwidewaves.shared.cachedFilePath
 import com.worldwidewaves.shared.events.utils.DataValidator
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.generated.resources.Res

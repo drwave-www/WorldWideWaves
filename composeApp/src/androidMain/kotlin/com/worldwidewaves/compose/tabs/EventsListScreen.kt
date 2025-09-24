@@ -81,7 +81,7 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.favorite_off

@@ -52,6 +52,7 @@ class AndroidPerformanceMonitor(
     private val context: Context,
 ) : PerformanceMonitor() {
     companion object {
+        private const val TAG = "AndroidPerformanceMonitor"
         internal const val SYSTEM_MONITOR_INTERVAL_SECONDS = 30L
         internal const val MEMORY_MONITOR_INTERVAL_SECONDS = 10L
         internal const val JANKY_FRAME_THRESHOLD_PERCENT = 100.0
@@ -73,7 +74,7 @@ class AndroidPerformanceMonitor(
                     monitorMemoryUsage()
                     delay(SYSTEM_MONITOR_INTERVAL_SECONDS.seconds)
                 } catch (e: Exception) {
-                    Log.e("AndroidPerformanceMonitor", "Error in system monitoring", e)
+                    Log.e(TAG, "Error in system monitoring", e)
                 }
             }
         }
@@ -105,7 +106,7 @@ class AndroidPerformanceMonitor(
                 )
             }
         } catch (e: Exception) {
-            Log.e("AndroidPerformanceMonitor", "Error monitoring memory", e)
+            Log.e(TAG, "Error monitoring memory", e)
         }
     }
 

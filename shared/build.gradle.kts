@@ -87,16 +87,30 @@ android {
         libs.versions.android.compileSdk
             .get()
             .toInt()
+
+    defaultConfig {
+        // Logging configuration for shared module
+        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     buildTypes {
         release {
             isMinifyEnabled = false
+
+            // Production logging configuration - disable verbose/debug logging for performance and security
+            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     packaging {

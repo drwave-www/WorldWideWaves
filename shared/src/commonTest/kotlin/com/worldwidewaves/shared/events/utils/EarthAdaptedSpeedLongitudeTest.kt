@@ -54,7 +54,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit

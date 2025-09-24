@@ -25,8 +25,6 @@ import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Position
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import kotlin.test.AfterTest

@@ -21,19 +21,23 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.domain.observation.DefaultPositionObserver
+import com.worldwidewaves.shared.domain.observation.PositionObserver
+import com.worldwidewaves.shared.domain.progression.DefaultWaveProgressionTracker
+import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.position.PositionManager
 import com.worldwidewaves.shared.testing.MockClock
 import com.worldwidewaves.shared.testing.TestHelpers
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.WWWSimulation
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -43,25 +47,18 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import com.worldwidewaves.shared.position.PositionManager
-import com.worldwidewaves.shared.domain.observation.PositionObserver
-import com.worldwidewaves.shared.domain.observation.DefaultPositionObserver
-import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
-import com.worldwidewaves.shared.domain.progression.DefaultWaveProgressionTracker
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.delay
 import kotlin.test.assertFalse
-import kotlin.test.fail
-import kotlin.test.assertNotEquals
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.fail
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime

@@ -26,7 +26,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -39,7 +39,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.koin.test.KoinTest
-import org.koin.test.get
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

@@ -23,10 +23,8 @@
 
 package com.worldwidewaves.shared.choreographies
 
-import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.domain.observation.PositionObservation
 import com.worldwidewaves.shared.domain.observation.PositionObserver
-import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.testing.CIEnvironment
@@ -39,7 +37,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -53,7 +50,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Comprehensive test suite for user positioning and choreography integration.

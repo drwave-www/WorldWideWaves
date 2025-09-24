@@ -21,9 +21,9 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
-import kotlin.math.PI
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

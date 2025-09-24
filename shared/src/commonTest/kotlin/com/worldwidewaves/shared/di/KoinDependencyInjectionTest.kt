@@ -26,14 +26,12 @@ import androidx.datastore.preferences.core.Preferences
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWShutdownHandler
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
+import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.FavoriteEventsStore
 import com.worldwidewaves.shared.data.HiddenMapsStore
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.data.SetEventFavorite
-import com.worldwidewaves.shared.data.DataStoreFactory
 import com.worldwidewaves.shared.data.TestDataStoreFactory
-import com.worldwidewaves.shared.data.createDataStore
-import com.worldwidewaves.shared.di.testDatastoreModule
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
@@ -42,8 +40,8 @@ import com.worldwidewaves.shared.events.utils.GeoJsonDataProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import org.koin.core.Koin
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.context.GlobalContext.stopKoin
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.test.KoinTest
@@ -52,7 +50,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame

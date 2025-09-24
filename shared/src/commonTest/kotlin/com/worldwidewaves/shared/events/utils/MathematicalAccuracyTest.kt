@@ -21,9 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Wave
-import com.worldwidewaves.shared.events.WWWEventWaveLinear
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -31,7 +29,6 @@ import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 
 /**
  * Comprehensive tests for mathematical calculation accuracy addressing TODO items:

@@ -23,14 +23,13 @@ package com.worldwidewaves.shared.events.utils
 
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.math.atan2
 import kotlin.math.sqrt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Comprehensive tests for mathematical calculations in GeoUtils.

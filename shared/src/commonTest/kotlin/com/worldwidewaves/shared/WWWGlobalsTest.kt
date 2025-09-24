@@ -21,26 +21,26 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.BackNav
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.DisplayText
+import com.worldwidewaves.shared.WWWGlobals.Event
+import com.worldwidewaves.shared.WWWGlobals.EventsList
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.MapDisplay
+import com.worldwidewaves.shared.WWWGlobals.TabBar
+import com.worldwidewaves.shared.WWWGlobals.Timing
+import com.worldwidewaves.shared.WWWGlobals.Urls
+import com.worldwidewaves.shared.WWWGlobals.Wave
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Duration.Companion.milliseconds
-import com.worldwidewaves.shared.WWWGlobals.Urls
-import com.worldwidewaves.shared.WWWGlobals.FileSystem
-import com.worldwidewaves.shared.WWWGlobals.WaveTiming
-import com.worldwidewaves.shared.WWWGlobals.Wave
-import com.worldwidewaves.shared.WWWGlobals.Timing
-import com.worldwidewaves.shared.WWWGlobals.MapDisplay
-import com.worldwidewaves.shared.WWWGlobals.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.TabBar
-import com.worldwidewaves.shared.WWWGlobals.BackNav
-import com.worldwidewaves.shared.WWWGlobals.Event
-import com.worldwidewaves.shared.WWWGlobals.EventsList
-import com.worldwidewaves.shared.WWWGlobals.DisplayText
 
 /**
  * Tests for WWWGlobals constants and configuration values.

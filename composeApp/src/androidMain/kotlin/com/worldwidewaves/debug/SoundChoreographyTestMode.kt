@@ -78,7 +78,7 @@ import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.R
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import com.worldwidewaves.theme.onPrimaryLight
@@ -103,6 +103,8 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 class SoundChoreographyTestMode {
     companion object {
+        internal const val TAG = "SoundChoreographyTestMode"
+
         // Global test mode state
         private var _isEnabled = mutableStateOf(false)
 
@@ -116,7 +118,7 @@ class SoundChoreographyTestMode {
          */
         fun setEnabled(enabled: Boolean) {
             _isEnabled.value = enabled
-            Log.d("SoundChoreographyTestMode", "Test mode ${if (enabled) "enabled" else "disabled"}")
+            Log.d(TAG, "Test mode ${if (enabled) "enabled" else "disabled"}")
         }
 
         /**
@@ -136,7 +138,7 @@ class SoundChoreographyTestMode {
         fun noteWasPlayed(midiNote: Int) {
             _lastPlayedNote.intValue = midiNote
             _notePlayingTime.longValue = System.currentTimeMillis()
-            Log.d("SoundChoreographyTestMode", "Note played: $midiNote")
+            Log.d(TAG, "Note played: $midiNote")
         }
 
         /**
@@ -600,7 +602,7 @@ private suspend fun runWaveSimulation(
     durationSeconds: Int,
     waveform: SoundPlayer.Waveform,
 ) {
-    Log.d("SoundChoreographyTestMode", "Starting simulation with $userCount users over $durationSeconds seconds")
+    Log.d(SoundChoreographyTestMode.TAG, "Starting simulation with $userCount users over $durationSeconds seconds")
 
     // Calculate delay between users
     val totalDurationMs = durationSeconds * 1000
@@ -626,14 +628,14 @@ private suspend fun runWaveSimulation(
             }
         }
     } catch (ise: IllegalStateException) {
-        Log.e("SoundChoreographyTestMode", "Invalid state during simulation: ${ise.message}", ise)
+        Log.e(SoundChoreographyTestMode.TAG, "Invalid state during simulation: ${ise.message}", ise)
     } catch (iae: IllegalArgumentException) {
-        Log.e("SoundChoreographyTestMode", "Invalid simulation parameters: ${iae.message}", iae)
+        Log.e(SoundChoreographyTestMode.TAG, "Invalid simulation parameters: ${iae.message}", iae)
     } catch (uoe: UnsupportedOperationException) {
-        Log.e("SoundChoreographyTestMode", "Unsupported operation during simulation: ${uoe.message}", uoe)
+        Log.e(SoundChoreographyTestMode.TAG, "Unsupported operation during simulation: ${uoe.message}", uoe)
     }
 
-    Log.d("SoundChoreographyTestMode", "Simulation completed")
+    Log.d(SoundChoreographyTestMode.TAG, "Simulation completed")
 }
 
 /**

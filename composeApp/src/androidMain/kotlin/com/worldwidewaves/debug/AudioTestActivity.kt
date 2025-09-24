@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.sound.AndroidSoundPlayer
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack

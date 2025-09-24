@@ -21,20 +21,18 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.events.utils.GeoUtils
+import com.worldwidewaves.shared.events.utils.PolygonUtils
+import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.sound.WaveformGenerator
+import com.worldwidewaves.shared.testing.CIEnvironment
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
-
-import com.worldwidewaves.shared.events.utils.GeoUtils
-import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.events.utils.PolygonUtils
-import com.worldwidewaves.shared.events.utils.PolygonUtils.toPolygon
-import com.worldwidewaves.shared.sound.WaveformGenerator
-import com.worldwidewaves.shared.sound.SoundPlayer
-import com.worldwidewaves.shared.testing.CIEnvironment
 
 /**
  * Comprehensive performance tests addressing TODO_PHASE2.md Item 10:

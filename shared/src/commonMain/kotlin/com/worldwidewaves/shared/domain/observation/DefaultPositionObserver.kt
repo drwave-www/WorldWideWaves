@@ -26,7 +26,7 @@ package com.worldwidewaves.shared.domain.observation
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import kotlinx.coroutines.Dispatchers

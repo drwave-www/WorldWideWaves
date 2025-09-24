@@ -25,7 +25,6 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals

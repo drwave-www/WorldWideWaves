@@ -73,6 +73,7 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Critical Phase 1 UI tests for Wave Activity - Core wave participation workflow

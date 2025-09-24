@@ -28,7 +28,6 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Focused tests for SoundPlayer interface contract and basic functionality.

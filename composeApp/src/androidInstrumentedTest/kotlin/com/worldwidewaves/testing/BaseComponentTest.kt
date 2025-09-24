@@ -33,6 +33,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.Before
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Base class for component-level tests.

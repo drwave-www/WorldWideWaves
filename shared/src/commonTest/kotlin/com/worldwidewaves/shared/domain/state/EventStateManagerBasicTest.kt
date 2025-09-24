@@ -6,15 +6,11 @@ import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
-import io.mockk.every
 import io.mockk.mockk
-import kotlin.time.Instant
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.INFINITE
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 import kotlin.time.Instant.Companion.DISTANT_FUTURE
 
 class EventStateManagerBasicTest {

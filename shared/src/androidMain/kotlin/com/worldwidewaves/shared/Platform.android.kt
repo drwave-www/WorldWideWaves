@@ -36,7 +36,6 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import com.worldwidewaves.shared.WWWGlobals
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -167,8 +166,7 @@ actual suspend fun getMapFileAbsolutePath(
     if (lastException is java.io.FileNotFoundException) {
         Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
     } else {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}")
-        lastException?.printStackTrace()
+        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
     }
     return null
 }

@@ -22,27 +22,27 @@ package com.worldwidewaves.shared.error
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.WWWEventObserver
-import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.testing.TestHelpers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -51,11 +51,8 @@ import org.koin.test.KoinTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
-import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -76,7 +73,7 @@ class ErrorHandlingTest : KoinTest {
                     message: String?,
                 ) {
                     println("[$priority] $tag: $message")
-                    throwable?.printStackTrace()
+                    throwable?.let { println("Exception: ${it.javaClass.simpleName}: ${it.message}") }
                 }
             },
         )

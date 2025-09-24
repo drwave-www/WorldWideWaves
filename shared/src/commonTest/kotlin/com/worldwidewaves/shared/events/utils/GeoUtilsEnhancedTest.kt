@@ -33,7 +33,6 @@ import com.worldwidewaves.shared.events.utils.GeoUtils.isPointOnSegment
 import com.worldwidewaves.shared.events.utils.GeoUtils.toDegrees
 import com.worldwidewaves.shared.events.utils.GeoUtils.toRadians
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

@@ -22,12 +22,10 @@ package com.worldwidewaves.shared.testing
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEvent
-import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.utils.Position
+import com.worldwidewaves.shared.testing.TestHelpers.AssertionHelpers
 import com.worldwidewaves.shared.testing.TestHelpers.TestLocations
 import com.worldwidewaves.shared.testing.TestHelpers.TestTimes
-import com.worldwidewaves.shared.testing.TestHelpers.AssertionHelpers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

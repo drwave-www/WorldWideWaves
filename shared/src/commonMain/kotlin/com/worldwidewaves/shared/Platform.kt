@@ -22,7 +22,7 @@ package com.worldwidewaves.shared
  */
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.position.PositionManager
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow

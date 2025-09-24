@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.events
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

@@ -25,8 +25,8 @@ package com.worldwidewaves.shared.domain.observation
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 /**
  * Data class representing a position observation event.

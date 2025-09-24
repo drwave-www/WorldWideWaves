@@ -4,7 +4,7 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.testing.TestHelpers
 import com.worldwidewaves.shared.utils.ImageResolver
 import io.mockk.MockKAnnotations
@@ -80,11 +80,10 @@ class ChoreographyManagerTest : KoinTest {
     // Test-specific subclass that allows setting test data
     @OptIn(ExperimentalTime::class)
     private class TestChoreographyManager<T>(
-        coroutineScopeProvider: CoroutineScopeProvider,
         private val warmingSequences: List<ChoreographySequence> = emptyList(),
         private val waitingSequence: ChoreographySequence? = null,
         private val hitSequence: ChoreographySequence? = null,
-    ) : ChoreographyManager<T>(coroutineScopeProvider) {
+    ) : ChoreographyManager<T>() {
         // This method allows us to test without relying on resource loading
         fun initializeWithTestData() {
             // Build an in-memory resolved choreography we can use in overridden getters
@@ -207,7 +206,7 @@ class ChoreographyManagerTest : KoinTest {
         every { imageResolver.resolve(any()) } returns TestImage()
 
         // Create manager with mocked dependencies
-        manager = ChoreographyManager(coroutineScopeProvider)
+        manager = ChoreographyManager()
     }
 
     @AfterTest
@@ -249,7 +248,6 @@ class ChoreographyManagerTest : KoinTest {
 
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence1, warmingSequence2),
                 )
             testManager.initializeWithTestData()
@@ -306,7 +304,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence1, warmingSequence2),
                 )
             testManager.initializeWithTestData()
@@ -345,7 +342,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequence
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence),
                 )
             testManager.initializeWithTestData()
@@ -385,7 +381,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequence
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     waitingSequence = waitingSequence,
                 )
             testManager.initializeWithTestData()
@@ -418,7 +413,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequence
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     hitSequence = hitSequence,
                 )
             testManager.initializeWithTestData()
@@ -439,7 +433,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with no sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = emptyList(),
                 )
             testManager.initializeWithTestData()
@@ -478,7 +471,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with zero duration sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(zeroSequence1, zeroSequence2),
                 )
             testManager.initializeWithTestData()
@@ -519,7 +511,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence1, warmingSequence2),
                 )
             testManager.initializeWithTestData()
@@ -555,7 +546,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequence
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence),
                 )
             testManager.initializeWithTestData()
@@ -601,7 +591,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence1, warmingSequence2),
                 )
             testManager.initializeWithTestData()
@@ -650,7 +639,6 @@ class ChoreographyManagerTest : KoinTest {
             // Create test manager with our test sequences
             val testManager =
                 TestChoreographyManager<TestImage>(
-                    coroutineScopeProvider = coroutineScopeProvider,
                     warmingSequences = listOf(warmingSequence1, warmingSequence2),
                 )
             testManager.initializeWithTestData()
@@ -678,7 +666,6 @@ class ChoreographyManagerTest : KoinTest {
     fun `integration test - real choreography manager handles missing choreography definitions gracefully`() = runTest {
         // GIVEN: A real ChoreographyManager (not test subclass) without pre-loaded choreography data
         val realManager = ChoreographyManager<TestImage>(
-            coroutineScopeProvider = coroutineScopeProvider
         )
 
         // WHEN: Attempting to get sequences without loaded choreography definitions
@@ -709,7 +696,6 @@ class ChoreographyManagerTest : KoinTest {
     fun `integration test - validates resource loading lifecycle`() = runTest {
         // GIVEN: A real ChoreographyManager that will attempt actual resource loading
         val realManager = ChoreographyManager<TestImage>(
-            coroutineScopeProvider = coroutineScopeProvider
         )
 
         // WHEN: Exercising real resource loading paths
@@ -752,7 +738,6 @@ class ChoreographyManagerTest : KoinTest {
     fun `integration test - validates state consistency across multiple calls`() = runTest {
         // GIVEN: A real ChoreographyManager
         val realManager = ChoreographyManager<TestImage>(
-            coroutineScopeProvider = coroutineScopeProvider
         )
 
         // WHEN: Making multiple calls to the same methods
@@ -783,7 +768,6 @@ class ChoreographyManagerTest : KoinTest {
     fun `integration test - validates error handling in resource loading scenarios`() = runTest {
         // GIVEN: A real ChoreographyManager
         val realManager = ChoreographyManager<TestImage>(
-            coroutineScopeProvider = coroutineScopeProvider
         )
 
         // WHEN: Testing various error scenarios that may occur during resource loading

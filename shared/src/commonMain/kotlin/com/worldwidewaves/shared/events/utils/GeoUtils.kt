@@ -21,16 +21,16 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Geodetic
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.atan2
+import kotlin.math.sin
 import kotlin.math.sqrt
-import com.worldwidewaves.shared.WWWGlobals
 
 object GeoUtils {
     /**

@@ -74,6 +74,10 @@ class AndroidMapLibreAdapter(
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
 
+    companion object {
+        private const val TAG = "AndroidMapLibreAdapter"
+    }
+
     override fun getWidth(): Double {
         require(mapLibreMap != null)
         return mapLibreMap!!.width.toDouble()
@@ -130,11 +134,11 @@ class AndroidMapLibreAdapter(
     ) {
         require(mapLibreMap != null)
         // Log style application start – helps diagnose early style failures
-        Log.d("MapStyle", "Applying style from URI: $stylePath")
+        Log.d(TAG, "Applying style from URI: $stylePath")
 
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
-            Log.i("MapStyle", "Style loaded successfully")
+            Log.i(TAG, "Style loaded successfully")
             callback()
         }
     }

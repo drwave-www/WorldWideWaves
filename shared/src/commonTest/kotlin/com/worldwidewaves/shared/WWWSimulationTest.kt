@@ -3,7 +3,6 @@ package com.worldwidewaves.shared
 import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

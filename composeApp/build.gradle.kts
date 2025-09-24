@@ -80,6 +80,12 @@ android {
         versionCode = 26
         versionName = "v0.22"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Logging configuration
+        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
+
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
@@ -105,6 +111,11 @@ android {
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
+
+            // Production logging configuration - disable verbose/debug logging for performance and security
+            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     compileOptions {

@@ -22,9 +22,7 @@
 package com.worldwidewaves.shared.ui
 
 import com.worldwidewaves.shared.events.IWWWEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlin.test.Test

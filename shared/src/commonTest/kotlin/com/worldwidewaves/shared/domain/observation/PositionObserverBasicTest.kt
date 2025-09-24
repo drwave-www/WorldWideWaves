@@ -8,8 +8,6 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.time.Instant
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

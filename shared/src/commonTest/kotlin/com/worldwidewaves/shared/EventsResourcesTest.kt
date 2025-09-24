@@ -23,7 +23,6 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.not_found
-import dev.icerock.moko.resources.StringResource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -37,12 +37,10 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.slot
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Instant
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import kotlin.math.abs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -52,6 +50,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Comprehensive test suite for sound system integration with wave events.

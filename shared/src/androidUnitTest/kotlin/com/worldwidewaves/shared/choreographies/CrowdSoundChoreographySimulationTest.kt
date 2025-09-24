@@ -23,27 +23,25 @@ package com.worldwidewaves.shared.choreographies
 
 import com.worldwidewaves.shared.WWWGlobals.FileSystem
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Test
-import org.junit.Assert.assertTrue
-import org.junit.Before
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.random.Random
 
 /**
  * Comprehensive simulation test for sound choreography in a crowd of 50 simultaneous people.

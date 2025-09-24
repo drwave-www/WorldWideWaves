@@ -25,8 +25,8 @@ package com.worldwidewaves.shared.domain.state
 
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.Position
-import kotlin.time.Instant
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 /**
  * Represents the complete state of an event for a user at a specific moment in time.

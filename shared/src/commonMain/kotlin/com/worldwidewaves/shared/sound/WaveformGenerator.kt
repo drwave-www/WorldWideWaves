@@ -21,12 +21,11 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals
 import kotlin.math.PI
-import kotlin.math.floor
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.time.Duration
-import com.worldwidewaves.shared.WWWGlobals
 
 /**
  * Shared waveform generation algorithms for all platforms

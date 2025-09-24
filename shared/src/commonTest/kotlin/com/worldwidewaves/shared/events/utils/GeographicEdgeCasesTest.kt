@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

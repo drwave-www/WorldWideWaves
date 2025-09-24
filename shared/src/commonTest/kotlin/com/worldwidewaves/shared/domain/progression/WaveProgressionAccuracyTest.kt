@@ -30,14 +30,12 @@ import com.worldwidewaves.shared.testing.TestHelpers
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Instant
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.math.abs
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Comprehensive test suite for wave progression calculation accuracy.

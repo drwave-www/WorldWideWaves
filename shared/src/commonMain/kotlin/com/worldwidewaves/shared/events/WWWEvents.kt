@@ -26,7 +26,7 @@ import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

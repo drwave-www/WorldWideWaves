@@ -21,21 +21,21 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.di.testDatastoreModule
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.context.GlobalContext.stopKoin
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.di.testDatastoreModule
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 /**
  * Demonstration test showing how to migrate from the old createDataStore pattern
