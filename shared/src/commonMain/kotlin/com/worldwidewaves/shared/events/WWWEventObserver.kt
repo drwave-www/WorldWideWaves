@@ -311,8 +311,23 @@ class WWWEventObserver(
                         }
                         .launchIn(coroutineScopeProvider.scopeDefault())
 
-                    // Position observation and area detection are now handled by the PositionObserver
-                    // No need for separate polygon loading observation
+                    // Add immediate position change observer for backward compatibility and immediate response
+                    val directPositionObserverJob = positionManager.position
+                        .onEach { _ ->
+                            Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
+                            updateAreaDetection()
+                        }
+                        .launchIn(coroutineScopeProvider.scopeDefault())
+
+                    // Add polygon loading observer to trigger area detection when polygon data becomes available
+                    val polygonLoadingJob = event.area.polygonsLoaded
+                        .onEach { isLoaded ->
+                            if (isLoaded) {
+                                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                updateAreaDetection()
+                            }
+                        }
+                        .launchIn(coroutineScopeProvider.scopeDefault())
 
                     // Create a parent job that manages all child jobs
                     unifiedObservationJob = coroutineScopeProvider.launchDefault {
@@ -320,8 +335,10 @@ class WWWEventObserver(
                             // Wait for the main observation job to complete
                             mainObservationJob.join()
                         } finally {
-                            // Cancel the observer jobs when done
+                            // Cancel all observer jobs when done
                             positionObserverJob.cancel()
+                            directPositionObserverJob.cancel()
+                            polygonLoadingJob.cancel()
                         }
                     }
                 } catch (e: Exception) {
@@ -350,16 +367,19 @@ class WWWEventObserver(
 
     /**
      * Creates a unified observation flow that combines periodic ticks and simulation changes.
-     * Position changes are now handled by the dedicated PositionObserver.
-     * This simplifies the flow by removing redundant position handling.
+     * Position changes are handled by both the PositionObserver and direct observation for reliability.
+     * Ensures area detection is triggered on every observation update.
      */
     private fun createUnifiedObservationFlow() = combine(
         createPeriodicObservationFlow(),
         createSimulationFlow()
     ) { periodicObservation, _ ->
         // Return the latest periodic observation (progression and status)
-        // Position observation and area detection are handled by the PositionObserver
+        // Position observation and area detection are handled by multiple observers for reliability
         periodicObservation
+    }.onEach { _ ->
+        // Ensure area detection is called on every unified observation update for immediate response
+        updateAreaDetection()
     }
 
     /**
@@ -508,7 +528,8 @@ class WWWEventObserver(
         val now = clock.now()
         _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
 
-        // User in area state is now handled by the PositionObserver
+        // User in area - ensure immediate detection alongside PositionObserver
+        updateAreaDetection()
 
         _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
         _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
@@ -521,6 +542,34 @@ class WWWEventObserver(
         )
     }
 
+    /**
+     * Updates area detection state (isInArea) based on current user position.
+     * This provides immediate area detection alongside the PositionObserver Flow.
+     * Ensures backward compatibility and immediate area detection response.
+     */
+    private suspend fun updateAreaDetection() {
+        val userPosition = positionManager.getCurrentPosition()
+
+        if (userPosition != null) {
+            try {
+                // Check if polygon data is available first
+                val polygons = event.area.getPolygons()
+
+                if (polygons.isNotEmpty()) {
+                    // Now call the actual area detection
+                    val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                    _userIsInArea.updateIfChanged(isInArea)
+                }
+                // If polygon data not yet loaded, the PositionObserver will handle it when available
+            } catch (e: Exception) {
+                Log.e("WWWEventObserver", "updateAreaDetection: Exception $e, eventId=${event.id}")
+                // On error, assume user is not in area for safety
+                _userIsInArea.updateIfChanged(false)
+            }
+        } else {
+            _userIsInArea.updateIfChanged(false)
+        }
+    }
 
     /**
      * Validates the current state consistency for debugging purposes.
