@@ -12,7 +12,6 @@ import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.utils.IOSImageResolver
 import com.worldwidewaves.shared.utils.ImageResolver
 import org.koin.dsl.module
-import platform.MapLibre.MLNMapView
 import platform.UIKit.UIImage
 
 val IOSModule =
@@ -23,6 +22,6 @@ val IOSModule =
 
         // Map services
         single<PlatformMapManager> { IOSPlatformMapManager() }
-        single<MapLibreAdapter<MLNMapView>> { IOSMapLibreAdapter() }
+        single<MapLibreAdapter<Any>> { IOSMapLibreAdapter() }
         single { MapStateManager(get()) }
     }
