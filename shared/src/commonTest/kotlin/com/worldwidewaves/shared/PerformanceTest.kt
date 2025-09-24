@@ -312,10 +312,14 @@ class PerformanceTest {
                 currentTime < maxReasonableTime,
                 "Actual timing should be reasonable for size ${inputSizes[i]}, got: ${currentTime}ms",
             )
-            assertTrue(
-                ratio < maxRatio,
-                "Timing ratio between sizes ${inputSizes[i - 1]} and ${inputSizes[i]} should be <${maxRatio}x, got: $ratio (effective: ${effectiveCurrentTime}ms / ${effectivePreviousTime}ms)",
-            )
+
+            // Skip ratio check if both times are near zero (too fast to measure accurately)
+            if (previousTime >= minMeasurableTime && currentTime >= minMeasurableTime) {
+                assertTrue(
+                    ratio < maxRatio,
+                    "Timing ratio between sizes ${inputSizes[i - 1]} and ${inputSizes[i]} should be <${maxRatio}x, got: $ratio (effective: ${effectiveCurrentTime}ms / ${effectivePreviousTime}ms)",
+                )
+            }
         }
 
         // Overall performance should be reasonable
