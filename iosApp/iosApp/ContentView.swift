@@ -287,24 +287,18 @@ struct EventDetailView: View {
                 }
                 .padding()
 
-                // Map button section
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        // Navigate to EventFullMapActivity equivalent
-                        print("Navigate to map for \(eventId)")
-                    }) {
-                        HStack {
-                            Image(systemName: "map")
-                            Text("View Map")
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+                // Map button section with navigation
+                NavigationLink(destination: EventMapView(eventId: eventId)) {
+                    HStack {
+                        Image(systemName: "map")
+                        Text("View Map")
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
                 }
                 .padding(.horizontal)
 
@@ -322,6 +316,86 @@ struct EventDetailView: View {
 
     private func formatLocationName(_ id: String) -> String {
         return id.replacingOccurrences(of: "_", with: " ")
+    }
+}
+
+// Event Map Screen - Matching Android EventFullMapActivity
+struct EventMapView: View {
+    let eventId: String
+
+    var body: some View {
+        ZStack {
+            // Map placeholder (iOS MapKit integration)
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.green.opacity(0.3)]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .ignoresSafeArea()
+
+            VStack {
+                // Map overlay with event info (matching Android)
+                VStack(spacing: 8) {
+                    Text("🗺️ Event Map")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Text(formatEventName(eventId))
+                        .font(.headline)
+                        .foregroundColor(.white)
+
+                    Text("Event location will be displayed here")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding()
+                .background(Color.black.opacity(0.7))
+                .cornerRadius(12)
+                .padding(.top, 50)
+
+                Spacer()
+
+                // Bottom action buttons (matching Android map actions)
+                HStack(spacing: 16) {
+                    Button(action: {
+                        print("Center on event location for \(eventId)")
+                    }) {
+                        HStack {
+                            Image(systemName: "location")
+                            Text("Center")
+                        }
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                    }
+
+                    Button(action: {
+                        print("Start wave for \(eventId)")
+                    }) {
+                        HStack {
+                            Image(systemName: "waveform.path.ecg")
+                            Text("Join Wave")
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                }
+                .padding(.bottom, 40)
+            }
+        }
+        .navigationTitle("Map")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func formatEventName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ").capitalized
     }
 }
 
