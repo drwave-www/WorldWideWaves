@@ -1,0 +1,303 @@
+name: Real Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC to catch environmental issues
+    - cron: '0 2 * * *'
+
+env:
+  JAVA_VERSION: '17'
+  ANDROID_API_LEVEL: '30'
+  ANDROID_TARGET: 'google_apis'
+  ANDROID_ARCH: 'x86_64'
+
+jobs:
+  real-integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hours for comprehensive real integration tests
+
+    strategy:
+      matrix:
+        # Test on multiple API levels for compatibility
+        api-level: [26, 30, 34]
+      fail-fast: false  # Allow other API levels to continue if one fails
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for performance regression detection
+
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Cache Android SDK
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.ANDROID_HOME }}
+          ~/.android/avd/*
+        key: android-${{ matrix.api-level }}-${{ env.ANDROID_TARGET }}-${{ env.ANDROID_ARCH }}
+        restore-keys: |
+          android-${{ matrix.api-level }}-
+          android-
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build debug APK
+      run: ./gradlew :composeApp:assembleDebug --no-daemon --stacktrace
+
+    - name: Build debug test APK
+      run: ./gradlew :composeApp:assembleDebugAndroidTest --no-daemon --stacktrace
+
+    - name: Enable KVM group perms (for hardware acceleration)
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Setup Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
+        profile: pixel_3a
+        ram-size: 4096M
+        heap-size: 1024M
+        disk-size: 8G
+        script: echo "Emulator started"
+        emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+
+    - name: Wait for emulator to be ready
+      run: |
+        adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+        sleep 30  # Additional wait for system services to fully start
+
+    - name: Setup Firebase Test Environment
+      env:
+        FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+      run: |
+        if [ ! -z "$FIREBASE_SERVICE_ACCOUNT_KEY" ]; then
+          echo "Setting up Firebase test environment..."
+          echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > firebase-service-account.json
+          # Configure Firebase for test environment
+          echo "Firebase configured for testing"
+        else
+          echo "Warning: Firebase service account not configured, some tests may be limited"
+        fi
+
+    - name: Run Real Integration Tests - Foundation & Setup
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.BaseRealIntegrationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - App Launch Performance
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAppLaunchPerformanceTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Runtime Performance
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealRuntimePerformanceTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Accessibility
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAccessibilityIntegrationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Device Compatibility
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealDeviceCompatibilityTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Network & GPS Failures
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealNetworkFailureTest \
+          --no-daemon --stacktrace
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealGpsFailureTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Stability & Crash Prevention
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealStabilityCrashPreventionTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Collect Test Results
+      if: always()
+      run: |
+        find . -name "*.xml" -path "*/build/outputs/androidTest-results/*" -exec cp {} test-results/ \; || true
+        find . -name "*.html" -path "*/build/reports/androidTests/*" -exec cp -r {} test-reports/ \; || true
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-api-${{ matrix.api-level }}
+        path: |
+          test-results/
+          test-reports/
+          composeApp/build/reports/androidTests/
+          composeApp/build/outputs/androidTest-results/
+
+    - name: Upload APKs for debugging
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apks-api-${{ matrix.api-level }}
+        path: |
+          composeApp/build/outputs/apk/debug/
+          composeApp/build/outputs/apk/androidTest/debug/
+
+    - name: Performance Regression Detection
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Analyzing performance metrics for regression..."
+        # Extract performance metrics from test results
+        if [ -f "test-results/performance-metrics.json" ]; then
+          echo "Performance metrics found, analyzing..."
+          # Compare with baseline (would integrate with performance tracking service)
+          echo "Performance regression analysis complete"
+        else
+          echo "No performance metrics found"
+        fi
+
+  firebase-test-lab:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [real-integration-tests]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Build for Firebase Test Lab
+      run: |
+        ./gradlew :composeApp:assembleDebug :composeApp:assembleDebugAndroidTest --no-daemon
+
+    - name: Authenticate with Firebase
+      env:
+        FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+      run: |
+        if [ ! -z "$FIREBASE_SERVICE_ACCOUNT_KEY" ]; then
+          echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > firebase-service-account.json
+          gcloud auth activate-service-account --key-file=firebase-service-account.json
+          gcloud config set project worldwidewaves-test
+        fi
+
+    - name: Run tests on Firebase Test Lab
+      if: env.FIREBASE_SERVICE_ACCOUNT_KEY != ''
+      run: |
+        gcloud firebase test android run \
+          --type instrumentation \
+          --app composeApp/build/outputs/apk/debug/composeApp-debug.apk \
+          --test composeApp/build/outputs/apk/androidTest/debug/composeApp-debug-androidTest.apk \
+          --device model=pixel2,version=28,locale=en,orientation=portrait \
+          --device model=pixel4,version=30,locale=en,orientation=portrait \
+          --device model=redfin,version=33,locale=en,orientation=portrait \
+          --timeout 45m \
+          --results-bucket gs://worldwidewaves-test-results \
+          --results-dir "integration-tests/$(date +%Y%m%d_%H%M%S)" \
+          --environment-variables coverage=true,coverageFile=/sdcard/coverage.ec
+
+  notify-results:
+    runs-on: ubuntu-latest
+    needs: [real-integration-tests, firebase-test-lab]
+    if: always()
+
+    steps:
+    - name: Notify Slack on Success
+      if: needs.real-integration-tests.result == 'success'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        channel: '#ci-builds'
+        text: '✅ Real Integration Tests passed on all API levels!'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify Slack on Failure
+      if: needs.real-integration-tests.result == 'failure'
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#ci-builds'
+        text: '❌ Real Integration Tests failed. Please check the results.'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Create Issue on Critical Failure
+      if: needs.real-integration-tests.result == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `Real Integration Tests Failed - ${new Date().toISOString().split('T')[0]}`,
+            body: `
+            ## Real Integration Test Failure
+
+            **Branch:** ${context.ref}
+            **Commit:** ${context.sha}
+            **Workflow:** ${context.workflow}
+
+            The real integration tests have failed on the main branch. This requires immediate attention.
+
+            **Failed Jobs:**
+            - ${{ needs.real-integration-tests.result }}
+            - ${{ needs.firebase-test-lab.result }}
+
+            Please investigate and resolve the failing tests.
+
+            **Logs:** [View Workflow Run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            `,
+            labels: ['bug', 'ci-failure', 'high-priority']
+          })

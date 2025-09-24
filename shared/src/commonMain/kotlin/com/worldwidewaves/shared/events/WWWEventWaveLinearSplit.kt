@@ -46,7 +46,9 @@ data class WWWEventWaveLinearSplit(
     // ---------------------------
 
     override suspend fun getWaveDuration(): Duration {
-        return 2.hours // TODO
+        // For split waves, fall back to approximate duration
+        // TODO: Implement proper split-based duration calculation when area calculation is available
+        return event.wave.getApproxDuration()
     }
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
@@ -78,7 +80,8 @@ data class WWWEventWaveLinearSplit(
                         nbSplits <= 2 ->
                             add("Number of splits must be greater than 2")
 
-                        // TODO
+                        nbSplits > 50 ->
+                            add("Number of splits must be 50 or fewer for performance reasons")
 
                         else -> { }
                     }
