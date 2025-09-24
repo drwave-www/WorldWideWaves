@@ -21,6 +21,17 @@ kotlin {
         }
     }
 
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
     sourceSets {
         androidMain.dependencies {
             implementation(libs.j2objc.annotations)
@@ -47,6 +58,9 @@ kotlin {
             implementation(libs.androidx.espresso.core)
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
+        }
+        iosMain.dependencies {
+            // iOS-specific dependencies can be added here
         }
     }
 }

@@ -42,7 +42,7 @@ actual abstract class BaseViewModel actual constructor() {
     /**
      * iOS lifecycle cleanup
      */
-    actual open fun onCleared() {
+    actual protected open fun onCleared() {
         viewModelScope.cancel()
     }
 
