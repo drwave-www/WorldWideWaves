@@ -198,8 +198,8 @@ class WWWEventWaveDeepTest {
             // WHEN: Get wave duration
             val duration = waveDeep.getWaveDuration()
 
-            // THEN: Should return expected duration (currently hardcoded to 2 hours)
-            assertEquals(2.hours, duration, "Deep wave duration should be 2 hours")
+            // THEN: Should return approximate duration (120 minutes as configured)
+            assertEquals(2.hours, duration, "Deep wave duration should match approxDuration (120 minutes)")
         }
     }
 
@@ -298,8 +298,8 @@ class WWWEventWaveLinearSplitTest {
             // WHEN: Get wave duration
             val duration = waveLinearSplit.getWaveDuration()
 
-            // THEN: Should return expected duration (currently hardcoded to 2 hours)
-            assertEquals(2.hours, duration, "Linear split wave duration should be 2 hours")
+            // THEN: Should return approximate duration (90 minutes as configured)
+            assertEquals(1.5.hours, duration, "Linear split wave duration should match approxDuration (90 minutes)")
         }
     }
 

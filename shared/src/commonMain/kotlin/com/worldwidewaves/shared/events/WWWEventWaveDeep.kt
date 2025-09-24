@@ -45,7 +45,7 @@ data class WWWEventWaveDeep(
     override suspend fun getWaveDuration(): Duration {
         // For deep waves, fall back to approximate duration
         // TODO: Implement proper depth-based duration calculation when depth parameter is available
-        return event.wave.getApproxDuration()
+        return getApproxDuration()
     }
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
