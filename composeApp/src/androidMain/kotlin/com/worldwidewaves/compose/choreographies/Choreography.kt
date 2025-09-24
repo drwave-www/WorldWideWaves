@@ -142,13 +142,14 @@ fun WaveChoreographies(
     when {
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
-            // Get the current sequence
-            val warmingSequence =
-                remember(warmingKey) {
-                    val sequence = event.warming.getCurrentChoregraphySequence()
-                    android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence for ${event.id}: $sequence")
-                    sequence
-                }
+            // Get the current sequence using suspend function
+            var warmingSequence by remember { mutableStateOf<DisplayableSequence<DrawableResource>?>(null) }
+
+            androidx.compose.runtime.LaunchedEffect(warmingKey) {
+                val sequence = event.warming.getCurrentChoregraphySequence()
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence for ${event.id}: $sequence")
+                warmingSequence = sequence
+            }
 
             // When this sequence ends, request a new one
             if (warmingSequence != null) {

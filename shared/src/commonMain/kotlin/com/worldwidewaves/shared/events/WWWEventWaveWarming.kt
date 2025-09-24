@@ -51,8 +51,8 @@ class WWWEventWaveWarming(
 
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
-    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
-        choreographyManager.getCurrentWarmingSequenceImmediate(event.getStartDateTime())
+    suspend fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
+        choreographyManager.getCurrentWarmingSequence(event.getStartDateTime())
 
     /**
      * Play a tone from the choreography that is active **now** and return the MIDI pitch

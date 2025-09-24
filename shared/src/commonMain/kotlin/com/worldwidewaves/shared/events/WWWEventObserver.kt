@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.events
 import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -199,6 +200,8 @@ class WWWEventObserver(
 
     private val positionManager: PositionManager by inject()
 
+    private val waveProgressionTracker: WaveProgressionTracker by inject()
+
     private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
     val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
 
@@ -277,7 +280,7 @@ class WWWEventObserver(
                     val currentStatus = event.getStatus()
                     val currentProgression =
                         try {
-                            event.wave.getProgression()
+                            waveProgressionTracker.calculateProgression(event)
                         } catch (e: Throwable) {
                             Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
                             0.0
@@ -387,7 +390,7 @@ class WWWEventObserver(
 
                 while (!event.isDone()) {
                     // Get current state and emit it
-                    val progression = event.wave.getProgression()
+                    val progression = waveProgressionTracker.calculateProgression(event)
                     val status = event.getStatus()
                     val eventObservation = EventObservation(progression, status)
                     send(eventObservation)
@@ -409,7 +412,7 @@ class WWWEventObserver(
                 // For events not ready for continuous observation, emit current state once
                 Log.v("WWWEventObserver", "Event ${event.id} not ready for continuous observation, emitting current state")
                 val progression = try {
-                    event.wave.getProgression()
+                    waveProgressionTracker.calculateProgression(event)
                 } catch (e: Throwable) {
                     Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
                     0.0
@@ -508,6 +511,14 @@ class WWWEventObserver(
         updatePositionRatioIfSignificant(event.wave.userPositionToWaveRatio() ?: 0.0)
         _hitDateTime.updateIfChanged(event.wave.userHitDateTime() ?: DISTANT_FUTURE)
 
+        // Record progression snapshot for tracking and analysis
+        val currentPosition = positionManager.getCurrentPosition()
+        try {
+            waveProgressionTracker.recordProgressionSnapshot(event, currentPosition)
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Error recording progression snapshot: $e")
+        }
+
         // Warming start (between event start and wave start)
         val now = clock.now()
         _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
@@ -540,7 +551,7 @@ class WWWEventObserver(
 
                 if (polygons.isNotEmpty()) {
                     // Now call the actual area detection
-                    val isInArea = event.area.isPositionWithin(userPosition)
+                    val isInArea = waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
                     _userIsInArea.updateIfChanged(isInArea)
                 }
                 // If polygon data not yet loaded, the polygon loading observer will trigger
