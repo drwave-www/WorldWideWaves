@@ -22,9 +22,9 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    // Step 3: Add proper loading states and event loading
+    // Step 4: Show actual event data, not just count
     @State private var selectedTab = 0
-    @State private var eventCount: Int = 0
+    @State private var events: [String] = [] // Start with event IDs as strings
     @State private var isLoading: Bool = true
     @State private var hasError: Bool = false
     @State private var errorMessage: String = ""
@@ -68,24 +68,24 @@ struct ContentView: View {
                             .padding()
                         }
                     } else {
-                        Text("Found \(eventCount) events from shared module")
+                        Text("Found \(events.count) real events from shared module")
                             .font(.subheadline)
                             .foregroundColor(.blue)
                             .padding(.bottom)
 
                         List {
-                            ForEach(0..<max(1, eventCount)) { index in
+                            ForEach(events.indices, id: \.self) { index in
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text("Event \(index + 1)")
+                                    Text(formatEventName(events[index]))
                                         .font(.headline)
-                                    Text("Real event from shared module")
+                                    Text("Wave event in \(formatLocationName(events[index]))")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                     HStack {
-                                        Text("Status: Loaded from KMM")
+                                        Text("Event ID: \(events[index])")
                                             .font(.caption)
                                             .padding(4)
-                                            .background(Color.green.opacity(0.3))
+                                            .background(Color.blue.opacity(0.3))
                                             .cornerRadius(4)
                                         Spacer()
                                     }
@@ -167,9 +167,11 @@ struct ContentView: View {
             _ = self.wwwEvents.loadEvents(
                 onLoaded: {
                     DispatchQueue.main.async {
-                        self.eventCount = self.wwwEvents.list().count
+                        // Extract actual event IDs from shared module
+                        let eventList = self.wwwEvents.list()
+                        self.events = eventList.map { $0.id }
                         self.isLoading = false
-                        print("iOS: Successfully loaded \(self.eventCount) events from shared module")
+                        print("iOS: Successfully loaded \(self.events.count) real events: \(self.events.prefix(3).joined(separator: ", "))...")
                     }
                 },
                 onLoadingError: { error in
@@ -182,6 +184,14 @@ struct ContentView: View {
                 }
             )
         }
+    }
+
+    private func formatEventName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+
+    private func formatLocationName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ")
     }
 }
 
