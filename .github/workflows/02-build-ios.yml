@@ -1,4 +1,4 @@
-name: Build iOS
+name: 02 • Build iOS
 
 on:
   push:

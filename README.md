@@ -1,5 +1,11 @@
 # WorldWideWaves
 
+[![Code Quality & Standards](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/03-code-quality.yml)
+[![Android Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/01-build-android.yml)
+[![iOS Build](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/02-build-ios.yml)
+[![Android UI Tests](https://github.com/mglcel/WorldWideWaves/actions/workflows/05-ui-tests-android.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/05-ui-tests-android.yml)
+[![End-to-End Tests](https://github.com/mglcel/WorldWideWaves/actions/workflows/06-e2e-tests.yml/badge.svg)](https://github.com/mglcel/WorldWideWaves/actions/workflows/06-e2e-tests.yml)
+
 A Kotlin Multiplatform app for synchronized global wave events. Join people worldwide in coordinated "waves" through real-time mapping, location services, and choreographed animations.
 
 ## What is WorldWideWaves?

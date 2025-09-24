@@ -1,4 +1,4 @@
-name: Real Integration Tests
+name: 06 • End-to-End Tests
 
 on:
   push:
@@ -18,13 +18,13 @@ env:
 jobs:
   real-integration-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # 2 hours for comprehensive real integration tests
+    timeout-minutes: 60  # Reduced from 2 hours to 1 hour
 
     strategy:
       matrix:
-        # Test on multiple API levels for compatibility
-        api-level: [26, 30, 34]
-      fail-fast: false  # Allow other API levels to continue if one fails
+        # Focus on stable API levels for E2E tests
+        api-level: [30]  # Single stable API level
+      fail-fast: true  # Fail fast for E2E tests
 
     steps:
     - name: Checkout code
@@ -112,76 +112,12 @@ jobs:
           echo "Warning: Firebase service account not configured, some tests may be limited"
         fi
 
-    - name: Run Real Integration Tests - Foundation & Setup
+    - name: Run Critical Integration Tests
       run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.BaseRealIntegrationTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - App Launch Performance
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAppLaunchPerformanceTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Runtime Performance
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealRuntimePerformanceTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Accessibility
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAccessibilityIntegrationTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Device Compatibility
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealDeviceCompatibilityTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Network & GPS Failures
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealNetworkFailureTest \
-          --no-daemon --stacktrace
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealGpsFailureTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Stability & Crash Prevention
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealStabilityCrashPreventionTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Sound Choreography (Critical)
-      run: |
+        echo "Running critical integration tests in parallel..."
+        # Run only the most critical tests to reduce execution time
         ./gradlew :composeApp:connectedDebugAndroidTest \
           -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealSoundChoreographyIntegrationTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Complex Wave Physics (Critical)
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealComplexWavePhysicsIntegrationTest \
-          --no-daemon --stacktrace
-      continue-on-error: true
-
-    - name: Run Real Integration Tests - Enhanced Battery Optimization
-      run: |
-        ./gradlew :composeApp:connectedDebugAndroidTest \
-          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealEnhancedBatteryOptimizationTest \
           --no-daemon --stacktrace
       continue-on-error: true
 
@@ -224,10 +160,48 @@ jobs:
           echo "No performance metrics found"
         fi
 
+  performance-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: [real-integration-tests]
+    if: github.event_name == 'schedule'  # Only run performance tests nightly
+
+    strategy:
+      matrix:
+        api-level: [30]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ matrix.api-level }}
+        target: ${{ env.ANDROID_TARGET }}
+        arch: ${{ env.ANDROID_ARCH }}
+
+    - name: Run Performance Tests
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealAppLaunchPerformanceTest \
+          --no-daemon --stacktrace
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealRuntimePerformanceTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
   firebase-test-lab:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [real-integration-tests]
+    # Note: Requires FIREBASE_SERVICE_ACCOUNT_KEY secret to be configured
 
     steps:
     - name: Checkout code

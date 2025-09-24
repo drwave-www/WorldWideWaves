@@ -1,4 +1,4 @@
-name: Status Check
+name: 99 • Pipeline Status
 
 on:
   push:
@@ -40,10 +40,10 @@ jobs:
             });
 
             const relevantWorkflows = [
-              'Quality Gates',
-              'Build Android',
-              'Build iOS',
-              'Android Instrumented Tests'
+              '03 • Code Quality & Standards',
+              '01 • Build Android',
+              '02 • Build iOS',
+              '05 • UI Tests (Android)'
             ];
 
             const workflowResults = {};

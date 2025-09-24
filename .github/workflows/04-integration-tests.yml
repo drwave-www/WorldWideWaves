@@ -1,4 +1,4 @@
-name: Integration Tests
+name: 04 • Integration Tests
 
 on:
   push:
