@@ -586,7 +586,12 @@ class WWWEventObserver(
             val observerUserInArea = _userIsInArea.value
 
             if (userPosition != null) {
-                val actualUserInArea = event.area.isPositionWithin(userPosition)
+                val actualUserInArea = try {
+                    waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                } catch (e: Exception) {
+                    Log.e("WWWEventObserver", "Error validating user in area: $e")
+                    false
+                }
                 if (actualUserInArea != observerUserInArea) {
                     issues.add("userIsInArea inconsistency: observer=$observerUserInArea, actual=$actualUserInArea")
                 }
