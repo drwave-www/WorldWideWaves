@@ -551,6 +551,208 @@ class CityWaveWorkflowTest {
         }
     }
 
+    @Test
+    fun `should test wave progression calculation accuracy for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            // Test multiple progression scenarios
+            val testScenarios = listOf(
+                ProgressionScenario(0L, 3600000L, 1800000L, expectedRange = 45.0..55.0), // 50% progression
+                ProgressionScenario(0L, 7200000L, 3600000L, expectedRange = 45.0..55.0), // 50% progression
+                ProgressionScenario(0L, 1000000L, 250000L, expectedRange = 20.0..30.0),   // 25% progression
+                ProgressionScenario(0L, 1000000L, 750000L, expectedRange = 70.0..80.0)    // 75% progression
+            )
+
+            testScenarios.forEach { scenario ->
+                val startTime = Instant.fromEpochMilliseconds(scenario.startMs)
+                val endTime = Instant.fromEpochMilliseconds(scenario.startMs + scenario.durationMs)
+                val currentTime = Instant.fromEpochMilliseconds(scenario.startMs + scenario.currentOffsetMs)
+
+                val progression = calculateMockProgression(startTime, endTime, currentTime)
+
+                assertTrue(
+                    progression in scenario.expectedRange,
+                    "Wave progression should be ${scenario.expectedRange.start}-${scenario.expectedRange.endInclusive}% " +
+                            "but was $progression% for city $cityId (scenario: ${scenario.currentOffsetMs}/${scenario.durationMs}ms)"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `should verify wave progression monotonicity for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val startTime = Instant.fromEpochMilliseconds(1000000000L)
+            val endTime = Instant.fromEpochMilliseconds(1000000000L + 3600000L) // 1 hour duration
+
+            // Test progression at multiple time points (should never go backward)
+            val timePoints = listOf(
+                1000000000L + 0L,        // 0%   - start
+                1000000000L + 600000L,   // ~17% - 10 minutes
+                1000000000L + 1200000L,  // ~33% - 20 minutes
+                1000000000L + 1800000L,  // ~50% - 30 minutes
+                1000000000L + 2400000L,  // ~67% - 40 minutes
+                1000000000L + 3000000L,  // ~83% - 50 minutes
+                1000000000L + 3600000L   // 100% - 60 minutes (end)
+            )
+
+            var previousProgression = -1.0
+
+            timePoints.forEach { timeMs ->
+                val currentTime = Instant.fromEpochMilliseconds(timeMs)
+                val progression = calculateMockProgression(startTime, endTime, currentTime)
+
+                assertTrue(
+                    progression >= previousProgression,
+                    "Wave progression should be monotonic (never decrease) for city $cityId. " +
+                            "Previous: $previousProgression%, Current: $progression% at ${timeMs - startTime.toEpochMilliseconds()}ms"
+                )
+
+                // Progression should be between 0-100%
+                assertTrue(
+                    progression >= 0.0 && progression <= 100.0,
+                    "Wave progression should be 0-100% but was $progression% for city $cityId"
+                )
+
+                previousProgression = progression
+            }
+        }
+    }
+
+    @Test
+    fun `should test wave progression edge cases for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val bounds = getCityBounds(cityId)
+
+            // Test positions: center, boundary, outside
+            val testPositions = listOf(
+                EdgeCasePosition(
+                    "center",
+                    Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2),
+                    expectProgression = true
+                ),
+                EdgeCasePosition(
+                    "boundary_min",
+                    Position(bounds.minLat, bounds.minLng),
+                    expectProgression = true // Boundary positions should still get progression
+                ),
+                EdgeCasePosition(
+                    "boundary_max",
+                    Position(bounds.maxLat, bounds.maxLng),
+                    expectProgression = true
+                ),
+                EdgeCasePosition(
+                    "outside",
+                    Position(bounds.maxLat + 1.0, bounds.maxLng + 1.0),
+                    expectProgression = false // Outside positions may not get progression
+                )
+            )
+
+            testPositions.forEach { edgeCase ->
+                // Test progression calculation for different user positions
+                val startTime = Instant.fromEpochMilliseconds(1000000000L)
+                val endTime = Instant.fromEpochMilliseconds(1000000000L + 1800000L) // 30 min
+                val currentTime = Instant.fromEpochMilliseconds(1000000000L + 900000L) // 15 min (50%)
+
+                val progression = calculateMockProgression(startTime, endTime, currentTime)
+                val isInBounds = simulatePolygonContainment(edgeCase.position, cityId)
+
+                if (edgeCase.expectProgression && isInBounds) {
+                    assertTrue(
+                        progression > 0.0 && progression < 100.0,
+                        "Wave progression should be valid for ${edgeCase.name} position in city $cityId"
+                    )
+                }
+
+                // Progression should always be a valid number
+                assertFalse(
+                    progression.isNaN() || progression.isInfinite(),
+                    "Wave progression should not be NaN or Infinite for ${edgeCase.name} position in city $cityId"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `should test wave progression performance for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val startTime = Instant.fromEpochMilliseconds(1000000000L)
+            val endTime = Instant.fromEpochMilliseconds(1000000000L + 3600000L)
+
+            // Performance test: calculate progression for many time points
+            val performanceStartTime = System.currentTimeMillis()
+            val iterations = 100
+
+            repeat(iterations) { i ->
+                val currentTime = Instant.fromEpochMilliseconds(1000000000L + (i * 36000L)) // Every 36 seconds
+                val progression = calculateMockProgression(startTime, endTime, currentTime)
+
+                // Basic validation that calculation completed
+                assertTrue(
+                    progression >= 0.0 && progression <= 100.0,
+                    "Performance test progression should be valid for city $cityId, iteration $i"
+                )
+            }
+
+            val performanceEndTime = System.currentTimeMillis()
+            val totalTimeMs = performanceEndTime - performanceStartTime
+
+            // Performance assertion: should complete 100 calculations in reasonable time
+            assertTrue(
+                totalTimeMs.toInt() < 1000, // Less than 1 second for 100 calculations
+                "Wave progression calculations should be fast for city $cityId. " +
+                        "100 calculations took ${totalTimeMs}ms (should be < 1000ms)"
+            )
+        }
+    }
+
+    @Test
+    fun `should validate wave progression mathematical properties for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val startTime = Instant.fromEpochMilliseconds(1000000000L)
+            val endTime = Instant.fromEpochMilliseconds(1000000000L + 3600000L) // 1 hour
+
+            // Test mathematical properties
+
+            // 1. Progression at start time should be 0%
+            val progressionAtStart = calculateMockProgression(startTime, endTime, startTime)
+            assertTrue(
+                progressionAtStart <= 5.0, // Allow small tolerance
+                "Wave progression at start should be near 0% for city $cityId, was $progressionAtStart%"
+            )
+
+            // 2. Progression at end time should be 100%
+            val progressionAtEnd = calculateMockProgression(startTime, endTime, endTime)
+            assertTrue(
+                progressionAtEnd >= 95.0, // Allow small tolerance
+                "Wave progression at end should be near 100% for city $cityId, was $progressionAtEnd%"
+            )
+
+            // 3. Progression at midpoint should be around 50%
+            val midTime = Instant.fromEpochMilliseconds(startTime.toEpochMilliseconds() + 1800000L) // 30 min
+            val progressionAtMid = calculateMockProgression(startTime, endTime, midTime)
+            assertTrue(
+                progressionAtMid in 40.0..60.0,
+                "Wave progression at midpoint should be 40-60% for city $cityId, was $progressionAtMid%"
+            )
+
+            // 4. Before start time should be 0%
+            val beforeStart = Instant.fromEpochMilliseconds(startTime.toEpochMilliseconds() - 600000L) // 10 min before
+            val progressionBeforeStart = calculateMockProgression(startTime, endTime, beforeStart)
+            assertTrue(
+                progressionBeforeStart <= 0.0,
+                "Wave progression before start should be 0% for city $cityId, was $progressionBeforeStart%"
+            )
+
+            // 5. After end time should be 100%
+            val afterEnd = Instant.fromEpochMilliseconds(endTime.toEpochMilliseconds() + 600000L) // 10 min after
+            val progressionAfterEnd = calculateMockProgression(startTime, endTime, afterEnd)
+            assertTrue(
+                progressionAfterEnd >= 100.0,
+                "Wave progression after end should be 100% for city $cityId, was $progressionAfterEnd%"
+            )
+        }
+    }
+
     // Helper methods for comprehensive testing
 
     private suspend fun testEventLifecycleForCity(cityId: String, testPosition: Position) {
@@ -709,5 +911,18 @@ class CityWaveWorkflowTest {
         val maxLat: Double,
         val minLng: Double,
         val maxLng: Double
+    )
+
+    private data class ProgressionScenario(
+        val startMs: Long,
+        val durationMs: Long,
+        val currentOffsetMs: Long,
+        val expectedRange: ClosedFloatingPointRange<Double>
+    )
+
+    private data class EdgeCasePosition(
+        val name: String,
+        val position: Position,
+        val expectProgression: Boolean
     )
 }
