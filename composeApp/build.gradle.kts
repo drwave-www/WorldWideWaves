@@ -216,6 +216,12 @@ tasks.register("generateFirebaseConfig") {
     outputs.file(googleServicesFile)
 
     doLast {
+        // Skip if google-services.json already exists and is valid (for CI builds)
+        if (googleServicesFile.exists() && googleServicesFile.length() > 0) {
+            println("Firebase config file already exists, skipping generation")
+            return@doLast
+        }
+
         val properties = Properties()
         val localPropertiesFile = rootProject.file("local.properties")
 
