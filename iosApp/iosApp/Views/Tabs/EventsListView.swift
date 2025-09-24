@@ -40,15 +40,17 @@ class EventsListViewModel: ObservableObject {
         isLoading = true
         hasLoadingError = false
 
-        // Use the existing WWWEvents for now to avoid integration complexity
-        events = wwwEvents.events()
-        isLoading = false
+        // Get events from shared WWWEvents
+        DispatchQueue.main.async {
+            self.events = self.wwwEvents.list().compactMap { $0 as? WWWEvent }
+            self.isLoading = false
+        }
     }
 
     func refreshEvents() {
         wwwEvents.loadEvents {
             DispatchQueue.main.async {
-                self.events = self.wwwEvents.events()
+                self.events = self.wwwEvents.list().compactMap { $0 as? WWWEvent }
                 self.isLoading = false
             }
         }
