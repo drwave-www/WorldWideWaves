@@ -25,7 +25,7 @@ import Shared
 struct SplashView: View {
     @Binding var isActive: Bool
     @State private var startTime = Date()
-
+    
     var body: some View {
         ZStack {
             // Background image - equivalent to Android's background drawable
@@ -33,7 +33,7 @@ struct SplashView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
-
+            
             // Logo image - equivalent to Android's www_logo_transparent drawable
             VStack {
                 Spacer()
@@ -48,21 +48,21 @@ struct SplashView: View {
         .onAppear {
             // Initialize Koin
             HelperKt.doInitKoin()
-
+            
             // Load events
             let events = WWWEvents()
-            events.loadEvents {
+            events.loadEvents(onTermination: {
                 // Calculate elapsed time
                 let elapsedTime = Date().timeIntervalSince(startTime) * 1000 // Convert to milliseconds
                 let minDuration = WWWGlobalsCompanion().CONST_SPLASH_MIN_DURATION.inWholeMilliseconds
                 let remainingTime = max(0, Double(minDuration) - elapsedTime)
-
+                
                 // Delay navigation if needed to ensure minimum splash duration
                 DispatchQueue.main.asyncAfter(deadline: .now() + remainingTime / 1000.0) {
                     // Navigate to main view
                     self.isActive = true
                 }
-            }
+            })
         }
     }
 }

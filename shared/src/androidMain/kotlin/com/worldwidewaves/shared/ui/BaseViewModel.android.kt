@@ -22,8 +22,8 @@ package com.worldwidewaves.shared.ui
  */
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
 import androidx.lifecycle.viewModelScope as androidViewModelScope
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Android implementation of BaseViewModel.

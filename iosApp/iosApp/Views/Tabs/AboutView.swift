@@ -26,7 +26,7 @@ import Shared
 class AboutViewModel: ObservableObject {
     @Published var appVersion: String = "1.0.0"
     @Published var appDescription: String = "WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and countries."
-
+    
     // Placeholder for future implementation
     func loadAboutInformation() {
         // Will be implemented to load information from shared code or resources
@@ -35,7 +35,7 @@ class AboutViewModel: ObservableObject {
 
 struct AboutView: View {
     @ObservedObject var viewModel: AboutViewModel
-
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -47,23 +47,23 @@ struct AboutView: View {
                         .frame(maxWidth: 200)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 20)
-
+                    
                     // App description
                     Text(viewModel.appDescription)
                         .font(.body)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                         .frame(maxWidth: .infinity, alignment: .center)
-
+                    
                     // Placeholder sections for future content
                     AboutSection(title: "About WorldWideWaves", content: "Placeholder for app description and mission statement.")
-
+                    
                     AboutSection(title: "How It Works", content: "Placeholder for explanation of wave mechanics and participation.")
-
+                    
                     AboutSection(title: "Our Team", content: "Placeholder for team information.")
-
+                    
                     AboutSection(title: "Privacy & Data", content: "Placeholder for privacy information.")
-
+                    
                     // Version information
                     Text("Version \(viewModel.appVersion)")
                         .font(.caption)
@@ -83,17 +83,17 @@ struct AboutView: View {
 struct AboutSection: View {
     let title: String
     let content: String
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
                 .padding(.bottom, 4)
-
+            
             Text(content)
                 .font(.body)
                 .foregroundColor(.secondary)
-
+            
             Divider()
                 .padding(.top, 8)
         }

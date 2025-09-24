@@ -25,11 +25,11 @@ import Shared
 struct MainView: View {
     // Tab selection state
     @State private var selectedTab = 0
-
+    
     private let eventsListView: EventsListView
     private let aboutView: AboutView
     private let settingsView: SettingsView
-
+    
     init() {
         // Initialize Koin DI if not already done
         if KoinKt.getKoin() == nil {
@@ -46,7 +46,7 @@ struct MainView: View {
         self.aboutView      = AboutView(viewModel: aboutViewModel)
         self.settingsView   = SettingsView(viewModel: settingsViewModel)
     }
-
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             // Events Tab
@@ -60,7 +60,7 @@ struct MainView: View {
                     Text("Events")
                 }
                 .tag(0)
-
+            
             // About Tab
             aboutView
                 .tabItem {
@@ -72,7 +72,7 @@ struct MainView: View {
                     Text("About")
                 }
                 .tag(1)
-
+            
             // Settings Tab
             settingsView
                 .tabItem {
@@ -101,7 +101,7 @@ struct TabBarIcon: View {
     let isSelected: Bool
     let normalIcon: String
     let selectedIcon: String
-
+    
     var body: some View {
         // Use the appropriate icon based on selection state
         Image(isSelected ? selectedIcon : normalIcon)

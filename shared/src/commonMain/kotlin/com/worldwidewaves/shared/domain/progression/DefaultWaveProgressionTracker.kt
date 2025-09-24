@@ -58,7 +58,15 @@ class DefaultWaveProgressionTracker(
                         return 0.0
                     }
 
-                    (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
+                    val progression = (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
+
+                    Log.v(
+                        "WaveProgressionTracker",
+                        "Calculated progression: $progression% for event ${event.id} " +
+                            "(elapsed: ${elapsedTime}s, total: ${totalTime}s)",
+                    )
+
+                    progression
                 }
             }
         } catch (e: Exception) {
@@ -81,7 +89,15 @@ class DefaultWaveProgressionTracker(
             }
 
             // Use the area's optimized position checking
-            waveArea.isPositionWithin(userPosition)
+            val isInArea = waveArea.isPositionWithin(userPosition)
+
+            Log.v(
+                "WaveProgressionTracker",
+                "Position ${userPosition.lat}, ${userPosition.lng} " +
+                    "${if (isInArea) "is" else "is not"} within wave area",
+            )
+
+            isInArea
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error checking position in wave area: $e")
             // On error, assume user is not in area for safety
@@ -118,6 +134,10 @@ class DefaultWaveProgressionTracker(
                 progressionHistory.removeAt(0)
             }
 
+            Log.v(
+                "WaveProgressionTracker",
+                "Recorded progression snapshot: $progression% at ${snapshot.timestamp}",
+            )
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")
         }

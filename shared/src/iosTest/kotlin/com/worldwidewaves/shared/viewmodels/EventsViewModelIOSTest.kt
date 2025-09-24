@@ -17,6 +17,7 @@ import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.events.IWWWEvent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest

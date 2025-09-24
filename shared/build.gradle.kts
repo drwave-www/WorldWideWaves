@@ -25,7 +25,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = false // Change to dynamic framework for better bundle loading
+            isStatic = true
         }
     }
 
@@ -59,7 +59,6 @@ kotlin {
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
-            implementation(compose.ui)
             implementation(libs.napier)
         }
         commonTest.dependencies {
@@ -190,15 +189,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = false  // Disable until commonTest JVM dependencies are resolved
+    enabled = false
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = false  // Disable until commonTest JVM dependencies are resolved
+    enabled = false
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = false  // Disable until commonTest JVM dependencies are resolved
+    enabled = false
 }
 
 // Custom Gradle task for crowd sound choreography simulation

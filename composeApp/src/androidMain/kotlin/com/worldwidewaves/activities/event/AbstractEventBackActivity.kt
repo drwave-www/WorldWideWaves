@@ -54,15 +54,15 @@ import com.worldwidewaves.R
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
-import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.theme.AppTheme
+import com.worldwidewaves.theme.primaryColoredTextStyle
+import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -99,7 +99,7 @@ abstract class AbstractEventBackActivity(
         }
 
         setContent {
-            WorldWideWavesTheme {
+            AppTheme {
                 Surface(
                     modifier =
                         Modifier
@@ -169,7 +169,7 @@ abstract class AbstractEventBackActivity(
                         )
                         Text(
                             text = stringResource(MokoRes.strings.back),
-                            style = sharedPrimaryColoredTextStyle(BackNav.FONTSIZE),
+                            style = primaryColoredTextStyle(BackNav.FONTSIZE),
                         )
                     }
                     if (selectedEvent != null) {
@@ -177,7 +177,7 @@ abstract class AbstractEventBackActivity(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = stringResource(selectedEvent!!.getLocation()),
                             style =
-                                sharedQuinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
+                                quinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
                                     textAlign = TextAlign.Center,
                                 ),
                         )
@@ -200,7 +200,7 @@ abstract class AbstractEventBackActivity(
             } else {
                 Text(
                     text = stringResource(MokoRes.strings.events_not_found_loading),
-                    style = sharedPrimaryColoredTextStyle(),
+                    style = primaryColoredTextStyle(),
                 )
             }
         }

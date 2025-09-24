@@ -143,7 +143,7 @@ class AndroidMapLibreAdapter(
         }
     }
 
-    override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
+    fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
         if (mapLibreMap != null) {
             // Map is already set, execute callback immediately
             callback(this)

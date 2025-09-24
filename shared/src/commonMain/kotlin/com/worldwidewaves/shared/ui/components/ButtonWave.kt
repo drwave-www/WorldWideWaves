@@ -39,6 +39,7 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.utils.WWWLogger
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
@@ -74,6 +75,12 @@ fun ButtonWave(
             it > (now - 1.hours) && it <= now
         } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
+
+    // Debug logging for button state changes
+    WWWLogger.d(
+        "ButtonWave",
+        "Wave button state: eventId=$eventId, eventState=$eventState, isInArea=$isInArea, isRunning=$isRunning, isSoon=$isSoon, isEndDateTimeRecent=$isEndDateTimeRecent, isEnabled=$isEnabled",
+    )
 
     // Blinking animation
     val infiniteTransition = rememberInfiniteTransition(label = "blinking")

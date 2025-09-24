@@ -54,6 +54,10 @@ class DefaultEventStateManager(
         input: EventStateInput,
         userIsInArea: Boolean,
     ): EventState {
+        Log.v(
+            "DefaultEventStateManager",
+            "Calculating state for event ${event.id}: progression=${input.progression}, status=${input.status}",
+        )
 
         // Calculate warming phases
         val warmingInProgress = calculateWarmingPhase(event)
@@ -266,6 +270,20 @@ class DefaultEventStateManager(
     private fun calculateUserGoingToBeHit(
         timeBeforeHit: Duration,
         userIsInArea: Boolean,
-    ): Boolean = userIsInArea && timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
+    ): Boolean {
+        if (!userIsInArea) {
+            return false
+        }
 
+        val isAboutToBeHit = timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
+
+        if (isAboutToBeHit) {
+            Log.v(
+                "DefaultEventStateManager",
+                "[CHOREO_DEBUG] User is going to be hit - timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}",
+            )
+        }
+
+        return isAboutToBeHit
+    }
 }
