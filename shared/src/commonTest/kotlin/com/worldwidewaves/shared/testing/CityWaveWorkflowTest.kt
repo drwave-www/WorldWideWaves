@@ -380,12 +380,12 @@ class CityWaveWorkflowTest {
             // 4. Test position generation works
             val testPosition = generateTestPositionForCity(cityId)
             assertTrue(
-                testPosition.latitude >= -90.0 && testPosition.latitude <= 90.0,
-                "Generated test position latitude ${testPosition.latitude} invalid for city $cityId"
+                testPosition.lat >= -90.0 && testPosition.lat <= 90.0,
+                "Generated test position latitude ${testPosition.lat} invalid for city $cityId"
             )
             assertTrue(
-                testPosition.longitude >= -180.0 && testPosition.longitude <= 180.0,
-                "Generated test position longitude ${testPosition.longitude} invalid for city $cityId"
+                testPosition.lng >= -180.0 && testPosition.lng <= 180.0,
+                "Generated test position longitude ${testPosition.lng} invalid for city $cityId"
             )
 
             // 5. Test city bounds can be calculated
@@ -685,10 +685,10 @@ class CityWaveWorkflowTest {
         val bounds = getCityBounds(cityId)
 
         // Simple bounding box containment for simulation
-        return position.latitude >= bounds.minLat &&
-                position.latitude <= bounds.maxLat &&
-                position.longitude >= bounds.minLng &&
-                position.longitude <= bounds.maxLng
+        return position.lat >= bounds.minLat &&
+                position.lat <= bounds.maxLat &&
+                position.lng >= bounds.minLng &&
+                position.lng <= bounds.maxLng
     }
 
     // Data classes for testing
