@@ -133,19 +133,37 @@ class CrowdSoundChoreographySimulationTest {
      * Create a mock MIDI track for testing when real file isn't available
      */
     private fun createMockMidiTrack(): MidiTrack {
-        val mockNotes = (0..127).map { pitch ->
-            com.worldwidewaves.shared.sound.MidiNote(
-                pitch = pitch,
-                velocity = Random.nextInt(64, 127),
-                startTime = (pitch * 100).milliseconds,
-                duration = 500.milliseconds
-            )
+        val mockNotes = mutableListOf<com.worldwidewaves.shared.sound.MidiNote>()
+        val trackDuration = 15.seconds
+        val noteInterval = 200.milliseconds // Notes every 200ms
+        val noteDuration = 400.milliseconds // Each note lasts 400ms, ensuring overlap
+
+        // Create overlapping notes throughout the entire track duration
+        var currentTime = Duration.ZERO
+        var pitch = 60 // Start from middle C
+
+        while (currentTime < trackDuration) {
+            // Create multiple notes at each time step for richness
+            for (pitchOffset in 0..2) {
+                val currentPitch = (pitch + pitchOffset) % 128
+                mockNotes.add(
+                    com.worldwidewaves.shared.sound.MidiNote(
+                        pitch = currentPitch,
+                        velocity = Random.nextInt(80, 127),
+                        startTime = currentTime,
+                        duration = noteDuration
+                    )
+                )
+            }
+
+            currentTime += noteInterval
+            pitch = ((pitch + 1) % 48) + 60 // Cycle through a reasonable range
         }
 
         return MidiTrack(
             name = "Mock MIDI Track for Testing",
             notes = mockNotes,
-            totalDuration = 15.seconds,
+            totalDuration = trackDuration,
             tempo = 120
         )
     }
@@ -208,7 +226,7 @@ class CrowdSoundChoreographySimulationTest {
                             // Calculate what pitch would be played
                             val elapsedTime = currentTime
                             val trackPosition = if (midiTrack.totalDuration > Duration.ZERO) {
-                                (elapsedTime.inWholeNanoseconds % midiTrack.totalDuration.inWholeNanoseconds).milliseconds
+                                (elapsedTime.inWholeMilliseconds % midiTrack.totalDuration.inWholeMilliseconds).milliseconds
                             } else {
                                 elapsedTime
                             }
@@ -262,11 +280,11 @@ class CrowdSoundChoreographySimulationTest {
         Log.d(TAG, "Simulation completed. Total events: $eventCount")
 
         // Analyze results
-        val uniquePitches = allPlaybackEvents.mapNotNull { it.midiPitch }.toSet()
+        val uniquePitchesPlayed = allPlaybackEvents.mapNotNull { it.midiPitch }.toSet()
         val avgEventsPerPerson = if (crowd.isNotEmpty()) eventCount.toDouble() / crowd.size else 0.0
-        val totalNotesInTrack = midiTrack.notes.size
-        val coveragePercentage = if (totalNotesInTrack > 0) {
-            (uniquePitches.size.toDouble() / totalNotesInTrack) * 100.0
+        val uniquePitchesInTrack = midiTrack.notes.map { it.pitch }.toSet()
+        val coveragePercentage = if (uniquePitchesInTrack.isNotEmpty()) {
+            (uniquePitchesPlayed.size.toDouble() / uniquePitchesInTrack.size) * 100.0
         } else {
             0.0
         }
@@ -275,7 +293,7 @@ class CrowdSoundChoreographySimulationTest {
             totalDuration = currentTime,
             totalPlaybackEvents = eventCount,
             avgEventsPerPerson = avgEventsPerPerson,
-            uniquePitchesPlayed = uniquePitches,
+            uniquePitchesPlayed = uniquePitchesPlayed,
             coveragePercentage = coveragePercentage,
             playbackLog = allPlaybackEvents
         )
