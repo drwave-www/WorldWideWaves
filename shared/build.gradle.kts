@@ -52,6 +52,8 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
             implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(libs.androidx.annotation)
             implementation(libs.datastore.preferences)

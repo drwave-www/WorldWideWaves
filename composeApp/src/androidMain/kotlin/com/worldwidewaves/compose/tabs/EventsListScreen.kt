@@ -73,7 +73,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.activities.event.EventActivity
-import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.compose.common.EventOverlayDone
 import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes

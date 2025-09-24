@@ -27,7 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.debug.PerformanceDashboard
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor

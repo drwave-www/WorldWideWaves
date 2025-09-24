@@ -40,8 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.utils.TabManager
-import com.worldwidewaves.activities.utils.TabScreen
+import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
