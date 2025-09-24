@@ -76,25 +76,37 @@ struct ContentView: View {
                         List {
                             ForEach(events.indices, id: \.self) { index in
                                 NavigationLink(destination: EventDetailView(eventId: events[index])) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text(formatEventName(events[index]))
-                                            .font(.headline)
-                                        Text("Wave event in \(formatLocationName(events[index]))")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        // Top row: Location (left) and Date (right) - matching Android
                                         HStack {
-                                            Text("Event ID: \(events[index])")
-                                                .font(.caption)
-                                                .padding(4)
-                                                .background(Color.blue.opacity(0.3))
-                                                .cornerRadius(4)
+                                            Text(formatEventName(events[index]))
+                                                .font(.title3)
+                                                .fontWeight(.medium)
                                             Spacer()
-                                            Image(systemName: "chevron.right")
-                                                .foregroundColor(.gray)
+                                            Text("Dec 24")
+                                                .font(.headline)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.blue)
                                         }
+
+                                        // Bottom row: Country / Community - matching Android
+                                        HStack {
+                                            Text(getCountryName(events[index]))
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Text(" / ")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Text(getCommunityName(events[index]))
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                        }
+                                        .padding(.top, -8)
                                     }
-                                    .padding(.vertical, 4)
+                                    .padding(.vertical, 12)
                                 }
+                                .listRowBackground(Color.clear)
                             }
                         }
                     }
@@ -197,85 +209,110 @@ struct ContentView: View {
     private func formatLocationName(_ id: String) -> String {
         return id.replacingOccurrences(of: "_", with: " ")
     }
+
+    private func getCountryName(_ eventId: String) -> String {
+        // Extract country from event ID (e.g., "new_york_usa" -> "USA")
+        let components = eventId.components(separatedBy: "_")
+        return components.last?.uppercased() ?? "Unknown"
+    }
+
+    private func getCommunityName(_ eventId: String) -> String {
+        // Extract community name from event ID
+        let components = eventId.components(separatedBy: "_")
+        if components.count >= 2 {
+            return components.dropLast().joined(separator: " ").capitalized
+        }
+        return "Community"
+    }
 }
 
-// Event Detail Screen
+// Event Detail Screen - Matching Android EventActivity design
 struct EventDetailView: View {
     let eventId: String
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Event header
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(formatEventName(eventId))
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
+        VStack(spacing: 0) {
+            // Event overlays section (matching Android)
+            ZStack {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(height: 200)
 
-                    Text("Wave Event Location")
-                        .font(.title2)
+                VStack {
+                    Text(formatEventName(eventId))
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+
+                    Text("Wave Event")
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                .padding(.top)
+            }
 
-                Divider()
+            // Event description section (matching Android)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Event Description")
+                    .font(.headline)
+                    .padding(.horizontal)
 
-                // Event information
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("Event Information", systemImage: "info.circle")
-                        .font(.headline)
+                Text("Experience the wave in \(formatLocationName(eventId)). Join thousands of participants in this synchronized human wave event that transcends physical and cultural boundaries.")
+                    .font(.body)
+                    .padding(.horizontal)
 
-                    Text("This is a WorldWideWaves event where participants create synchronized human waves across \(formatLocationName(eventId)).")
-                        .font(.body)
+                // Divider line (matching Android DividerLine)
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 1)
+                    .padding(.horizontal)
 
-                    Text("Join thousands of others in this unique experience that transcends physical and cultural boundaries!")
-                        .font(.body)
-                        .italic()
-                }
-
-                Divider()
-
-                // Action section
-                VStack(alignment: .leading, spacing: 12) {
-                    Label("Participate", systemImage: "hand.raised")
-                        .font(.headline)
-
+                // Wave button section (matching Android ButtonWave)
+                HStack {
+                    Spacer()
                     Button(action: {
-                        // Wave action - to be implemented
-                        print("Join wave for \(eventId)")
+                        // Navigate to WaveActivity equivalent
+                        print("Navigate to wave for \(eventId)")
                     }) {
                         HStack {
-                            Image(systemName: "waveform")
-                            Text("Join Wave")
+                            Image(systemName: "waveform.path.ecg")
+                            Text("Wave Now")
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
                         .background(Color.blue)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(8)
                     }
+                    Spacer()
+                }
+                .padding()
 
+                // Map button section
+                HStack {
+                    Spacer()
                     Button(action: {
-                        // Map action - to be implemented
-                        print("View map for \(eventId)")
+                        // Navigate to EventFullMapActivity equivalent
+                        print("Navigate to map for \(eventId)")
                     }) {
                         HStack {
                             Image(systemName: "map")
-                            Text("View on Map")
+                            Text("View Map")
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
                         .background(Color.green)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(8)
                     }
+                    Spacer()
                 }
+                .padding(.horizontal)
 
                 Spacer()
             }
-            .padding()
+            .padding(.top)
         }
-        .navigationTitle("Event Details")
+        .navigationTitle("Event")
         .navigationBarTitleDisplayMode(.inline)
     }
 
