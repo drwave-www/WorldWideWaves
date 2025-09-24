@@ -796,7 +796,7 @@ class IOSShortcutsManager {
 **Priority**: Quick wins to complete common module migration
 
 **Week 1 Tasks**:
-1. **Day 1-2**: Move TabManager, CoroutineHelpers, EventOverlays to common
+1. **Day 1-2**: ✅ **COMPLETED** - Move TabManager, CoroutineHelpers to common + Create WWWLogger (EventOverlays deferred due to theme dependencies)
 2. **Day 3-4**: Create ViewModel platform abstraction layer
 3. **Day 5**: Add iOS app entry point and build configuration
 
@@ -804,9 +804,10 @@ class IOSShortcutsManager {
 - [x] Domain Layer (ALREADY COMPLETE)
 - [x] iOS Platform Services (ALREADY COMPLETE)
 - [x] iOS Reactive Framework (ALREADY COMPLETE)
-- [ ] TabManager in common module
-- [ ] CoroutineHelpers in common module
-- [ ] EventOverlays in common module
+- [x] TabManager in common module ✅ **COMPLETED**
+- [x] CoroutineHelpers in common module ✅ **COMPLETED**
+- [x] Platform logging abstraction (WWWLogger) ✅ **COMPLETED**
+- [ ] EventOverlays in common module ⚠️ **DEFERRED** (requires theme abstraction)
 - [ ] ViewModel abstraction layer
 - [ ] iOS composeApp module setup
 
