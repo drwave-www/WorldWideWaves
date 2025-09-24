@@ -22,12 +22,15 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    // Step 1: Simple tab structure - start basic, build up incrementally
+    // Step 2: Add real data connection gradually
     @State private var selectedTab = 0
+    @State private var eventCount: Int = 0
+    private let wwwEvents: WWWEvents
 
     // KMM - Koin Call
     init() {
         HelperKt.doInitKoin()
+        self.wwwEvents = WWWEvents()
     }
 
     var body: some View {
@@ -39,16 +42,21 @@ struct ContentView: View {
                         .font(.title)
                         .padding()
 
+                    Text("Found \(eventCount) events from shared module")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                        .padding(.bottom)
+
                     List {
-                        ForEach(0..<5) { index in
+                        ForEach(0..<max(1, eventCount)) { index in
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Event \(index + 1)")
                                     .font(.headline)
-                                Text("Sample event location")
+                                Text("Real event from shared module")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 HStack {
-                                    Text("Status: Active")
+                                    Text("Status: Loaded from KMM")
                                         .font(.caption)
                                         .padding(4)
                                         .background(Color.green.opacity(0.3))
@@ -113,6 +121,15 @@ struct ContentView: View {
             .tag(2)
         }
         .accentColor(.blue)
+        .onAppear {
+            loadEventCount()
+        }
+    }
+
+    private func loadEventCount() {
+        DispatchQueue.main.async {
+            self.eventCount = self.wwwEvents.list().count
+        }
     }
 }
 
