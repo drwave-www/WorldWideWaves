@@ -797,8 +797,8 @@ class IOSShortcutsManager {
 
 **Week 1 Tasks**:
 1. **Day 1-2**: ✅ **COMPLETED** - Move TabManager, CoroutineHelpers to common + Create WWWLogger (EventOverlays deferred due to theme dependencies)
-2. **Day 3-4**: Create ViewModel platform abstraction layer
-3. **Day 5**: Add iOS app entry point and build configuration
+2. **Day 3-4**: ✅ **COMPLETED** - Create ViewModel platform abstraction layer (BaseViewModel with expect/actual pattern)
+3. **Day 5**: ✅ **COMPLETED** - Add iOS app entry point and build configuration
 
 **Deliverables**:
 - [x] Domain Layer (ALREADY COMPLETE)
@@ -807,9 +807,9 @@ class IOSShortcutsManager {
 - [x] TabManager in common module ✅ **COMPLETED**
 - [x] CoroutineHelpers in common module ✅ **COMPLETED**
 - [x] Platform logging abstraction (WWWLogger) ✅ **COMPLETED**
+- [x] ViewModel abstraction layer (BaseViewModel) ✅ **COMPLETED**
+- [x] iOS composeApp module setup ✅ **COMPLETED**
 - [ ] EventOverlays in common module ⚠️ **DEFERRED** (requires theme abstraction)
-- [ ] ViewModel abstraction layer
-- [ ] iOS composeApp module setup
 
 ### Phase 2: iOS Core Implementation (Weeks 2-4) ⚡ ACCELERATED
 **Priority**: Leverage existing iOS infrastructure
