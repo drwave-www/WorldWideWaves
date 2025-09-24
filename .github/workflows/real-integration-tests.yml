@@ -164,6 +164,27 @@ jobs:
           --no-daemon --stacktrace
       continue-on-error: true
 
+    - name: Run Real Integration Tests - Sound Choreography (Critical)
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealSoundChoreographyIntegrationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Complex Wave Physics (Critical)
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealComplexWavePhysicsIntegrationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
+    - name: Run Real Integration Tests - Enhanced Battery Optimization
+      run: |
+        ./gradlew :composeApp:connectedDebugAndroidTest \
+          -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.testing.real.RealEnhancedBatteryOptimizationTest \
+          --no-daemon --stacktrace
+      continue-on-error: true
+
     - name: Collect Test Results
       if: always()
       run: |
