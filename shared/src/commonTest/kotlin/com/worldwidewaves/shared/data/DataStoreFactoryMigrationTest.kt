@@ -21,21 +21,21 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.di.testDatastoreModule
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import org.koin.core.context.GlobalContext.startKoin
-import org.koin.core.context.GlobalContext.stopKoin
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.di.testDatastoreModule
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 /**
  * Demonstration test showing how to migrate from the old createDataStore pattern
@@ -44,7 +44,6 @@ import kotlin.test.assertSame
  * This test serves as a migration guide for other test files.
  */
 class DataStoreFactoryMigrationTest : KoinTest {
-
     @BeforeTest
     fun setUp() {
         // Clean up any previous Koin context
@@ -81,9 +80,10 @@ class DataStoreFactoryMigrationTest : KoinTest {
     @Test
     fun `demonstration of new pattern with testDatastoreModule`() {
         // NEW PATTERN (preferred): Use testDatastoreModule with proper DI
-        val testModule = module {
-            single<WWWPlatform> { WWWPlatform("test") }
-        }
+        val testModule =
+            module {
+                single<WWWPlatform> { WWWPlatform("test") }
+            }
 
         startKoin {
             modules(testDatastoreModule + testModule)
@@ -106,7 +106,6 @@ class DataStoreFactoryMigrationTest : KoinTest {
             val directDataStore1 = factory.create { "/tmp/direct_test_1.pb" }
             val directDataStore2 = factory.create { "/tmp/direct_test_2.pb" }
             assertNotSame(directDataStore1, directDataStore2, "Direct factory calls create separate instances")
-
         } finally {
             stopKoin()
         }
@@ -123,7 +122,6 @@ class DataStoreFactoryMigrationTest : KoinTest {
 
             // DefaultDataStoreFactory should return the same instance for same path
             assertSame(dataStore1, dataStore2, "DefaultDataStoreFactory should maintain singleton behavior")
-
         } catch (e: DataStoreException) {
             // Expected in test environment - just verify behavior
             assertTrue(e.message?.contains("DataStore creation failed") == true)

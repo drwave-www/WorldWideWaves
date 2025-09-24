@@ -21,58 +21,35 @@
 
 package com.worldwidewaves.compose.wave
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.activities.event.UserWaveStatusText
-import com.worldwidewaves.activities.event.WaveHitCounter
-import com.worldwidewaves.activities.event.WaveProgressionBar
-import com.worldwidewaves.compose.choreographies.WaveChoreographies
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.math.abs
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Critical Phase 1 UI tests for Wave Activity - Core wave participation workflow
@@ -83,7 +60,6 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(kotlin.time.ExperimentalTime::class)
 @RunWith(AndroidJUnit4::class)
 class WaveActivityTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -104,11 +80,12 @@ class WaveActivityTest {
             TestWaveCountdownTimer(mockEvent) { timeBeforeHitFlow.value }
         }
 
-        // Verify initial countdown display (MM:SS format)
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        // Verify initial countdown display (MM:SS format) - increased timeout for emulator
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Countdown: 01:05")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Countdown: 01:05")
@@ -120,7 +97,8 @@ class WaveActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 500) {
             composeTestRule
                 .onAllNodesWithContentDescription("Countdown: 00:30")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Countdown: 00:30")
@@ -151,10 +129,11 @@ class WaveActivityTest {
         // Test warming phase animation
         isWarmingFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Warming phase active")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Wave choreography: Warming phase active")
@@ -164,10 +143,11 @@ class WaveActivityTest {
         isWarmingFlow.value = false
         isGoingToBeHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Hit phase active")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Wave choreography: Hit phase active")
@@ -177,10 +157,11 @@ class WaveActivityTest {
         isGoingToBeHitFlow.value = false
         hasBeenHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave choreography: Hit complete")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Wave choreography: Hit complete")
@@ -214,10 +195,11 @@ class WaveActivityTest {
         isInAreaFlow.value = true
         userPositionRatioFlow.value = 0.25
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location status: In wave area, position 25%")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Location status: In wave area, position 25%")
@@ -226,10 +208,11 @@ class WaveActivityTest {
         // Test GPS accuracy during wave coordination
         userPositionRatioFlow.value = 0.75
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location status: In wave area, position 75%")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         trace.stop()
@@ -258,10 +241,11 @@ class WaveActivityTest {
         // Test sound trigger on hit
         hasBeenHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Sound status: Hit sound triggered")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Verify sound choreography was called
@@ -299,28 +283,31 @@ class WaveActivityTest {
         statusFlow.value = IWWWEvent.Status.RUNNING
         isWarmingFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Warming")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Waiting phase (warming stops, not yet hit)
         isWarmingFlow.value = false
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Waiting")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Hit phase
         isGoingToBeHitFlow.value = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Hit")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Done phase
@@ -328,10 +315,11 @@ class WaveActivityTest {
         hasBeenHitFlow.value = true
         statusFlow.value = IWWWEvent.Status.DONE
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Wave phase: Done")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         trace.stop()
@@ -358,10 +346,11 @@ class WaveActivityTest {
         // Test network connectivity issues
         networkError = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: Network connection lost")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Error status: Network connection lost")
@@ -371,10 +360,11 @@ class WaveActivityTest {
         networkError = false
         gpsError = true
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: GPS signal lost")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Error status: GPS signal lost")
@@ -383,10 +373,11 @@ class WaveActivityTest {
         // Test graceful error recovery
         gpsError = false
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error status: Recovered")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         trace.stop()
@@ -416,20 +407,22 @@ class WaveActivityTest {
         progressionFlow.value = 25.0
         participantsFlow.value = 5
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Coordination status: Wave 25% complete, 5 participants")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Test real-time status updates accuracy
         progressionFlow.value = 75.0
         participantsFlow.value = 12
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Coordination status: Wave 75% complete, 12 participants")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         trace.stop()
@@ -444,7 +437,7 @@ class WaveActivityTest {
         val mockClock = mockk<IClock>(relaxed = true)
         val hitAccuracy = MutableStateFlow(0.0) // Milliseconds difference
 
-        every { mockClock.now() } returns kotlinx.datetime.Instant.fromEpochMilliseconds(1000000)
+        every { mockClock.now() } returns Instant.fromEpochMilliseconds(1000000)
 
         composeTestRule.setContent {
             TestWaveHitAccuracy(mockEvent, mockClock, hitAccuracy.value)
@@ -453,28 +446,31 @@ class WaveActivityTest {
         // Test perfect hit timing (within 50ms)
         hitAccuracy.value = 25.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Perfect timing (25ms difference)")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Test good hit timing (within 100ms)
         hitAccuracy.value = 75.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Good timing (75ms difference)")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Test missed hit (over 200ms)
         hitAccuracy.value = 250.0
 
-        composeTestRule.waitUntil(timeoutMillis = 1000) {
+        composeTestRule.waitUntil(timeoutMillis = 5000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Hit accuracy: Missed timing (250ms difference)")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         trace.stop()
@@ -485,37 +481,43 @@ class WaveActivityTest {
     @Composable
     private fun TestWaveCountdownTimer(
         event: IWWWEvent,
-        getTimeBeforeHit: () -> kotlin.time.Duration
+        getTimeBeforeHit: () -> kotlin.time.Duration,
     ) {
         val timeBeforeHit = getTimeBeforeHit()
         val text = formatTestDuration(timeBeforeHit)
 
         Text(
             text = "Countdown",
-            modifier = Modifier.semantics {
-                contentDescription = "Countdown: $text"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Countdown: $text"
+                },
         )
     }
 
     @Composable
-    private fun TestWaveChoreographyDisplay(event: IWWWEvent, clock: IClock) {
+    private fun TestWaveChoreographyDisplay(
+        event: IWWWEvent,
+        clock: IClock,
+    ) {
         val isWarming by event.observer.isUserWarmingInProgress.collectAsState(false)
         val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
-        val phase = when {
-            isWarming -> "Warming phase active"
-            isGoingToBeHit -> "Hit phase active"
-            hasBeenHit -> "Hit complete"
-            else -> "Observer phase"
-        }
+        val phase =
+            when {
+                isWarming -> "Warming phase active"
+                isGoingToBeHit -> "Hit phase active"
+                hasBeenHit -> "Hit complete"
+                else -> "Observer phase"
+            }
 
         Text(
             text = "Wave choreography",
-            modifier = Modifier.semantics {
-                contentDescription = "Wave choreography: $phase"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave choreography: $phase"
+                },
         )
     }
 
@@ -524,17 +526,19 @@ class WaveActivityTest {
         val isInArea by event.observer.userIsInArea.collectAsState(false)
         val userPositionRatio by event.observer.userPositionRatio.collectAsState(0.0)
 
-        val status = if (isInArea) {
-            "In wave area, position ${(userPositionRatio * 100).toInt()}%"
-        } else {
-            "Outside wave area"
-        }
+        val status =
+            if (isInArea) {
+                "In wave area, position ${(userPositionRatio * 100).toInt()}%"
+            } else {
+                "Outside wave area"
+            }
 
         Text(
             text = "Location tracking",
-            modifier = Modifier.semantics {
-                contentDescription = "Location status: $status"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Location status: $status"
+                },
         )
     }
 
@@ -554,9 +558,10 @@ class WaveActivityTest {
 
         Text(
             text = "Sound coordination",
-            modifier = Modifier.semantics {
-                contentDescription = "Sound status: $status"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Sound status: $status"
+                },
         )
     }
 
@@ -567,71 +572,90 @@ class WaveActivityTest {
         val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
-        val phase = when {
-            status == IWWWEvent.Status.DONE -> "Done"
-            hasBeenHit -> "Done"
-            isGoingToBeHit -> "Hit"
-            isWarming -> "Warming"
-            status == IWWWEvent.Status.RUNNING -> "Waiting"
-            else -> "Observer"
-        }
+        val phase =
+            when {
+                status == IWWWEvent.Status.DONE -> "Done"
+                hasBeenHit -> "Done"
+                isGoingToBeHit -> "Hit"
+                isWarming -> "Warming"
+                status == IWWWEvent.Status.RUNNING -> "Waiting"
+                else -> "Observer"
+            }
 
         Text(
             text = "Wave phase",
-            modifier = Modifier.semantics {
-                contentDescription = "Wave phase: $phase"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Wave phase: $phase"
+                },
         )
     }
 
     @Composable
-    private fun TestWaveErrorHandling(event: IWWWEvent, networkError: Boolean, gpsError: Boolean) {
-        val status = when {
-            networkError -> "Network connection lost"
-            gpsError -> "GPS signal lost"
-            !networkError && !gpsError -> "Recovered"
-            else -> "No errors"
-        }
+    private fun TestWaveErrorHandling(
+        event: IWWWEvent,
+        networkError: Boolean,
+        gpsError: Boolean,
+    ) {
+        val status =
+            when {
+                networkError -> "Network connection lost"
+                gpsError -> "GPS signal lost"
+                !networkError && !gpsError -> "Recovered"
+                else -> "No errors"
+            }
 
         Text(
             text = "Error handling",
-            modifier = Modifier.semantics {
-                contentDescription = "Error status: $status"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Error status: $status"
+                },
         )
     }
 
     @Composable
-    private fun TestRealTimeCoordination(event: IWWWEvent, participants: Int) {
+    private fun TestRealTimeCoordination(
+        event: IWWWEvent,
+        participants: Int,
+    ) {
         val progression by event.observer.progression.collectAsState(0.0)
 
-        val status = if (progression == 0.0) {
-            "Wave starting, $participants participants"
-        } else {
-            "Wave ${progression.toInt()}% complete, $participants participants"
-        }
+        val status =
+            if (progression == 0.0) {
+                "Wave starting, $participants participants"
+            } else {
+                "Wave ${progression.toInt()}% complete, $participants participants"
+            }
 
         Text(
             text = "Real-time coordination",
-            modifier = Modifier.semantics {
-                contentDescription = "Coordination status: $status"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Coordination status: $status"
+                },
         )
     }
 
     @Composable
-    private fun TestWaveHitAccuracy(event: IWWWEvent, clock: IClock, accuracy: Double) {
-        val description = when {
-            accuracy <= 50.0 -> "Perfect timing (${accuracy.toInt()}ms difference)"
-            accuracy <= 100.0 -> "Good timing (${accuracy.toInt()}ms difference)"
-            else -> "Missed timing (${accuracy.toInt()}ms difference)"
-        }
+    private fun TestWaveHitAccuracy(
+        event: IWWWEvent,
+        clock: IClock,
+        accuracy: Double,
+    ) {
+        val description =
+            when {
+                accuracy <= 50.0 -> "Perfect timing (${accuracy.toInt()}ms difference)"
+                accuracy <= 100.0 -> "Good timing (${accuracy.toInt()}ms difference)"
+                else -> "Missed timing (${accuracy.toInt()}ms difference)"
+            }
 
         Text(
             text = "Hit accuracy",
-            modifier = Modifier.semantics {
-                contentDescription = "Hit accuracy: $description"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Hit accuracy: $description"
+                },
         )
     }
 

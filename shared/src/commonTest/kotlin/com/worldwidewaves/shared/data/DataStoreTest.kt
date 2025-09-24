@@ -1,11 +1,10 @@
 package com.worldwidewaves.shared.data
 
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkObject
-import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,9 +12,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
-import kotlin.test.fail
+import kotlin.test.assertTrue
 
 /**
  * Tests for DataStore functionality in a KMP-compatible way.
@@ -38,11 +36,11 @@ class DataStoreTest {
     }
 
     @Test
-    fun `test dataStoreFileName constant has correct value`() {
+    fun `test DATA_STORE_FILE_NAME constant has correct value`() {
         assertEquals(
             "wwwaves.preferences_pb",
-            dataStoreFileName,
-            "dataStoreFileName should have the expected value",
+            DATA_STORE_FILE_NAME,
+            "DATA_STORE_FILE_NAME should have the expected value",
         )
     }
 
@@ -62,8 +60,10 @@ class DataStoreTest {
         } catch (e: DataStoreException) {
             // DataStore creation failed in test environment - this is acceptable
             pathProviderCalled = true
-            assertTrue(e.message?.contains("DataStore creation failed") == true,
-                "DataStoreException should contain proper error message")
+            assertTrue(
+                e.message?.contains("DataStore creation failed") == true,
+                "DataStoreException should contain proper error message",
+            )
         }
 
         assertTrue(pathProviderCalled, "Path provider should be called regardless of outcome")
@@ -126,8 +126,10 @@ class DataStoreTest {
             // If creation succeeds with empty path, that's acceptable
         } catch (e: DataStoreException) {
             // Expected: DataStore creation failed and was properly wrapped
-            assertTrue(e.message?.contains("DataStore creation failed") == true,
-                "Error message should indicate DataStore creation failure")
+            assertTrue(
+                e.message?.contains("DataStore creation failed") == true,
+                "Error message should indicate DataStore creation failure",
+            )
             assertNotNull(e.cause, "DataStoreException should have underlying cause")
         }
 

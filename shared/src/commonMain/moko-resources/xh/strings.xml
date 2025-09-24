@@ -62,6 +62,8 @@
   <string name="map_error_service_died">Inkonzo iphele ngequbuliso. Nceda zama kwakhona.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">Ufikelelo aluvumelekanga.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Ingxaki yeakhawunti yeGoogle Play Store. Nceda ujonge iakhawunti yakho uze uzame kwakhona.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Kwenzeke imposiso engaziwayo: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">Kwenziwa igagasi!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">Uyakwazi oku: ukuba ibali loMhlaba libaliswa kwincwadi enamaphepha ayi-1,000, uluntu luya kuvela kuphela kwisivakalisi sokugqibela sephepha lokugqibela.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">Kodwa eli bali lifutshane lingaphela ngaphambi kokulindelweyo. Sikhona sodwa kwindalo iphela enkulu nengentlanga. Siyatshabalalisa yonke into. Sizicingela thina. Sinenkohlakalo. Sinobukrelemnqa. Siyimfama. Kwaye sifuna ukongama. Kodwa sikwakwazi nenceba, sivelisa imimangaliso, siyanyamezela, sikwakwazi ukuzinikela.</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">Kodwa eli bali lifutshane linokuphela ngaphambi kokulindelekileyo. Sikodwa kwindalo iphela ebanzi nengenabomi. Sitshabalalisa yonke into. Sizicingela thina kuphela. Asinanceba. Sinobugovu. Simpumputhe. Kwaye sifuna ukongamela. Kodwa nathi sikwakwazi ukuvelana, sidala iimangaliso, siyomelela, sinokuzicingela abanye.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">Kodwa asinaxesha lide. Senze inkqubela eninzi.. Singakha enye indlela: uluntu lwamalungelo, lobumbano, nwentando yesininzi. Kuxhomekeke kuthi!</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->

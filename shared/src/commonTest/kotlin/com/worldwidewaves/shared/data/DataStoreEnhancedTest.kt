@@ -26,7 +26,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -39,7 +39,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.koin.test.KoinTest
-import org.koin.test.get
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -55,7 +54,6 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DataStoreEnhancedTest : KoinTest {
-
     private lateinit var testDataStore: DataStore<Preferences>
     private var tempDir: String = ""
 
@@ -82,193 +80,206 @@ class DataStoreEnhancedTest : KoinTest {
     }
 
     @Test
-    fun `test concurrent write operations do not corrupt data`() = runTest {
-        val key1 = stringPreferencesKey("concurrent_key_1")
-        val key2 = stringPreferencesKey("concurrent_key_2")
-        val key3 = booleanPreferencesKey("concurrent_bool_key")
+    fun `test concurrent write operations do not corrupt data`() =
+        runTest {
+            val key1 = stringPreferencesKey("concurrent_key_1")
+            val key2 = stringPreferencesKey("concurrent_key_2")
+            val key3 = booleanPreferencesKey("concurrent_bool_key")
 
-        // Launch multiple concurrent write operations
-        val operations = listOf(
-            async { testDataStore.edit { it[key1] = "value1" } },
-            async { testDataStore.edit { it[key2] = "value2" } },
-            async { testDataStore.edit { it[key3] = true } },
-            async { testDataStore.edit { it[key1] = "updated_value1" } },
-            async { testDataStore.edit { it[key2] = "updated_value2" } },
-        )
+            // Launch multiple concurrent write operations
+            val operations =
+                listOf(
+                    async { testDataStore.edit { it[key1] = "value1" } },
+                    async { testDataStore.edit { it[key2] = "value2" } },
+                    async { testDataStore.edit { it[key3] = true } },
+                    async { testDataStore.edit { it[key1] = "updated_value1" } },
+                    async { testDataStore.edit { it[key2] = "updated_value2" } },
+                )
 
-        // Wait for all operations to complete
-        operations.awaitAll()
+            // Wait for all operations to complete
+            operations.awaitAll()
 
-        // Verify final state is consistent
-        val preferences = testDataStore.data.first()
-        assertEquals("updated_value1", preferences[key1])
-        assertEquals("updated_value2", preferences[key2])
-        assertTrue(preferences[key3] ?: false)
-    }
+            // Verify final state is consistent
+            val preferences = testDataStore.data.first()
+            assertEquals("updated_value1", preferences[key1])
+            assertEquals("updated_value2", preferences[key2])
+            assertTrue(preferences[key3] ?: false)
+        }
 
     @Test
-    fun `test concurrent read operations are thread-safe`() = runTest {
-        val testKey = stringPreferencesKey("read_test_key")
+    fun `test concurrent read operations are thread-safe`() =
+        runTest {
+            val testKey = stringPreferencesKey("read_test_key")
 
-        // Set initial value
-        testDataStore.edit { it[testKey] = "initial_value" }
+            // Set initial value
+            testDataStore.edit { it[testKey] = "initial_value" }
 
-        // Launch multiple concurrent read operations
-        val readOperations = (1..10).map {
-            async {
-                testDataStore.data.first()[testKey]
+            // Launch multiple concurrent read operations
+            val readOperations =
+                (1..10).map {
+                    async {
+                        testDataStore.data.first()[testKey]
+                    }
+                }
+
+            val results = readOperations.awaitAll()
+
+            // All reads should return the same value
+            results.forEach { result ->
+                assertEquals("initial_value", result)
             }
         }
 
-        val results = readOperations.awaitAll()
+    @Test
+    fun `test mixed concurrent read and write operations`() =
+        runTest {
+            val testKey = stringPreferencesKey("mixed_operations_key")
 
-        // All reads should return the same value
-        results.forEach { result ->
-            assertEquals("initial_value", result)
+            // Set initial value
+            testDataStore.edit { it[testKey] = "initial" }
+
+            val operations =
+                listOf(
+                    // Reads
+                    async { testDataStore.data.first()[testKey] },
+                    async { testDataStore.data.first()[testKey] },
+                    // Writes
+                    async { testDataStore.edit { it[testKey] = "updated1" } },
+                    async { testDataStore.data.first()[testKey] },
+                    async { testDataStore.edit { it[testKey] = "updated2" } },
+                    async { testDataStore.data.first()[testKey] },
+                )
+
+            operations.awaitAll()
+
+            // Final value should be one of the updated values
+            val finalValue = testDataStore.data.first()[testKey]
+            assertTrue(finalValue in setOf("updated1", "updated2"))
         }
-    }
 
     @Test
-    fun `test mixed concurrent read and write operations`() = runTest {
-        val testKey = stringPreferencesKey("mixed_operations_key")
+    fun `test large data set operations performance`() =
+        runTest {
+            val keys = (1..100).map { stringPreferencesKey("large_key_$it") }
+            val values = (1..100).map { "large_value_$it" }
 
-        // Set initial value
-        testDataStore.edit { it[testKey] = "initial" }
+            // Write large amount of data
+            testDataStore.edit { preferences ->
+                keys.zip(values).forEach { (key, value) ->
+                    preferences[key] = value
+                }
+            }
 
-        val operations = listOf(
-            // Reads
-            async { testDataStore.data.first()[testKey] },
-            async { testDataStore.data.first()[testKey] },
-            // Writes
-            async { testDataStore.edit { it[testKey] = "updated1" } },
-            async { testDataStore.data.first()[testKey] },
-            async { testDataStore.edit { it[testKey] = "updated2" } },
-            async { testDataStore.data.first()[testKey] },
-        )
-
-        operations.awaitAll()
-
-        // Final value should be one of the updated values
-        val finalValue = testDataStore.data.first()[testKey]
-        assertTrue(finalValue in setOf("updated1", "updated2"))
-    }
-
-    @Test
-    fun `test large data set operations performance`() = runTest {
-        val keys = (1..100).map { stringPreferencesKey("large_key_$it") }
-        val values = (1..100).map { "large_value_$it" }
-
-        // Write large amount of data
-        testDataStore.edit { preferences ->
-            keys.zip(values).forEach { (key, value) ->
-                preferences[key] = value
+            // Read back and verify
+            val preferences = testDataStore.data.first()
+            keys.zip(values).forEach { (key, expectedValue) ->
+                assertEquals(expectedValue, preferences[key])
             }
         }
 
-        // Read back and verify
-        val preferences = testDataStore.data.first()
-        keys.zip(values).forEach { (key, expectedValue) ->
-            assertEquals(expectedValue, preferences[key])
-        }
-    }
-
     @Test
-    fun `test data persistence within same datastore instance`() = runTest {
-        val persistenceKey = stringPreferencesKey("persistence_test")
-        val testValue = "persistent_value"
+    fun `test data persistence within same datastore instance`() =
+        runTest {
+            val persistenceKey = stringPreferencesKey("persistence_test")
+            val testValue = "persistent_value"
 
-        // Write data
-        testDataStore.edit { it[persistenceKey] = testValue }
+            // Write data
+            testDataStore.edit { it[persistenceKey] = testValue }
 
-        // Read back multiple times to verify persistence
-        repeat(3) {
-            val retrievedValue = testDataStore.data.first()[persistenceKey]
-            assertEquals(testValue, retrievedValue)
-        }
-    }
-
-    @Test
-    fun `test empty preferences handling`() = runTest {
-        val nonExistentKey = stringPreferencesKey("non_existent_key")
-        val boolNonExistentKey = booleanPreferencesKey("bool_non_existent")
-
-        val preferences = testDataStore.data.first()
-
-        assertNull(preferences[nonExistentKey])
-        assertNull(preferences[boolNonExistentKey])
-
-        // Verify default value behavior
-        assertEquals("default", preferences[nonExistentKey] ?: "default")
-        assertFalse(preferences[boolNonExistentKey] ?: false)
-    }
-
-    @Test
-    fun `test preference key collision handling`() = runTest {
-        val key1 = stringPreferencesKey("collision_test")
-        val key2 = stringPreferencesKey("collision_test") // Same key name
-
-        testDataStore.edit { preferences ->
-            preferences[key1] = "value1"
-            preferences[key2] = "value2" // Should overwrite value1
+            // Read back multiple times to verify persistence
+            repeat(3) {
+                val retrievedValue = testDataStore.data.first()[persistenceKey]
+                assertEquals(testValue, retrievedValue)
+            }
         }
 
-        val preferences = testDataStore.data.first()
-        assertEquals("value2", preferences[key1])
-        assertEquals("value2", preferences[key2])
-    }
-
     @Test
-    fun `test boolean preference operations`() = runTest {
-        val boolKey1 = booleanPreferencesKey("bool_test_1")
-        val boolKey2 = booleanPreferencesKey("bool_test_2")
+    fun `test empty preferences handling`() =
+        runTest {
+            val nonExistentKey = stringPreferencesKey("non_existent_key")
+            val boolNonExistentKey = booleanPreferencesKey("bool_non_existent")
 
-        testDataStore.edit { preferences ->
-            preferences[boolKey1] = true
-            preferences[boolKey2] = false
+            val preferences = testDataStore.data.first()
+
+            assertNull(preferences[nonExistentKey])
+            assertNull(preferences[boolNonExistentKey])
+
+            // Verify default value behavior
+            assertEquals("default", preferences[nonExistentKey] ?: "default")
+            assertFalse(preferences[boolNonExistentKey] ?: false)
         }
 
-        val preferences = testDataStore.data.first()
-        assertTrue(preferences[boolKey1] ?: false)
-        assertFalse(preferences[boolKey2] ?: true)
-    }
-
     @Test
-    fun `test preference removal operations`() = runTest {
-        val removalKey = stringPreferencesKey("removal_test")
+    fun `test preference key collision handling`() =
+        runTest {
+            val key1 = stringPreferencesKey("collision_test")
+            val key2 = stringPreferencesKey("collision_test") // Same key name
 
-        // Add value
-        testDataStore.edit { it[removalKey] = "to_be_removed" }
-        assertNotNull(testDataStore.data.first()[removalKey])
+            testDataStore.edit { preferences ->
+                preferences[key1] = "value1"
+                preferences[key2] = "value2" // Should overwrite value1
+            }
 
-        // Remove value
-        testDataStore.edit { it.remove(removalKey) }
-        assertNull(testDataStore.data.first()[removalKey])
-    }
-
-    @Test
-    fun `test clear all preferences operation`() = runTest {
-        val key1 = stringPreferencesKey("clear_test_1")
-        val key2 = booleanPreferencesKey("clear_test_2")
-
-        // Add multiple values
-        testDataStore.edit { preferences ->
-            preferences[key1] = "value1"
-            preferences[key2] = true
+            val preferences = testDataStore.data.first()
+            assertEquals("value2", preferences[key1])
+            assertEquals("value2", preferences[key2])
         }
 
-        // Verify values exist
-        var preferences = testDataStore.data.first()
-        assertNotNull(preferences[key1])
-        assertNotNull(preferences[key2])
+    @Test
+    fun `test boolean preference operations`() =
+        runTest {
+            val boolKey1 = booleanPreferencesKey("bool_test_1")
+            val boolKey2 = booleanPreferencesKey("bool_test_2")
 
-        // Clear all preferences
-        testDataStore.edit { it.clear() }
+            testDataStore.edit { preferences ->
+                preferences[boolKey1] = true
+                preferences[boolKey2] = false
+            }
 
-        // Verify all values are gone
-        preferences = testDataStore.data.first()
-        assertNull(preferences[key1])
-        assertNull(preferences[key2])
-    }
+            val preferences = testDataStore.data.first()
+            assertTrue(preferences[boolKey1] ?: false)
+            assertFalse(preferences[boolKey2] ?: true)
+        }
+
+    @Test
+    fun `test preference removal operations`() =
+        runTest {
+            val removalKey = stringPreferencesKey("removal_test")
+
+            // Add value
+            testDataStore.edit { it[removalKey] = "to_be_removed" }
+            assertNotNull(testDataStore.data.first()[removalKey])
+
+            // Remove value
+            testDataStore.edit { it.remove(removalKey) }
+            assertNull(testDataStore.data.first()[removalKey])
+        }
+
+    @Test
+    fun `test clear all preferences operation`() =
+        runTest {
+            val key1 = stringPreferencesKey("clear_test_1")
+            val key2 = booleanPreferencesKey("clear_test_2")
+
+            // Add multiple values
+            testDataStore.edit { preferences ->
+                preferences[key1] = "value1"
+                preferences[key2] = true
+            }
+
+            // Verify values exist
+            var preferences = testDataStore.data.first()
+            assertNotNull(preferences[key1])
+            assertNotNull(preferences[key2])
+
+            // Clear all preferences
+            testDataStore.edit { it.clear() }
+
+            // Verify all values are gone
+            preferences = testDataStore.data.first()
+            assertNull(preferences[key1])
+            assertNull(preferences[key2])
+        }
 
     @Test
     fun `test datastore factory behavior with new pattern`() {
@@ -302,7 +313,6 @@ class DataStoreEnhancedTest : KoinTest {
             val deprecatedDataStore = createDataStore(provider)
             verify { provider() }
             assertNotNull(deprecatedDataStore)
-
         } catch (e: Exception) {
             // Expected since we're testing with mock paths
             // We're verifying the migration compatibility exists

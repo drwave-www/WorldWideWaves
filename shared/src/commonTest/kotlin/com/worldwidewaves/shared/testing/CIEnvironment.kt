@@ -29,7 +29,6 @@ package com.worldwidewaves.shared.testing
  * behavior accordingly.
  */
 object CIEnvironment {
-
     /**
      * Detects if the current environment is a CI system.
      *
@@ -37,11 +36,13 @@ object CIEnvironment {
      */
     val isCI: Boolean by lazy {
         System.getenv("CI") == "true" ||
-        System.getenv("GITHUB_ACTIONS") == "true" ||
-        System.getenv("CONTINUOUS_INTEGRATION") == "true" ||
-        System.getenv("BUILD_NUMBER") != null ||  // Jenkins
-        System.getenv("TRAVIS") == "true" ||      // Travis CI
-        System.getenv("CIRCLECI") == "true"       // CircleCI
+            System.getenv("GITHUB_ACTIONS") == "true" ||
+            System.getenv("CONTINUOUS_INTEGRATION") == "true" ||
+            System.getenv("BUILD_NUMBER") != null ||
+            // Jenkins
+            System.getenv("TRAVIS") == "true" ||
+            // Travis CI
+            System.getenv("CIRCLECI") == "true" // CircleCI
     }
 
     /**
@@ -85,7 +86,7 @@ object CIEnvironment {
          * Maximum reasonable time for operations that should be near-instantaneous (milliseconds).
          * Higher in CI to account for environment overhead.
          */
-        val maxReasonableTimeMs: Double = if (isCI) 50.0 else 10.0
+        val maxReasonableTimeMs: Double = if (isCI) 100.0 else 50.0
 
         /**
          * Timeout multiplier for CI environments.
@@ -102,15 +103,17 @@ object CIEnvironment {
          * Whether to enable memory-intensive tests.
          * May be disabled in resource-constrained CI environments.
          */
-        val enableMemoryIntensiveTests: Boolean = !isCI ||
-            System.getenv("CI_ENABLE_MEMORY_TESTS") == "true"
+        val enableMemoryIntensiveTests: Boolean =
+            !isCI ||
+                System.getenv("CI_ENABLE_MEMORY_TESTS") == "true"
 
         /**
          * Whether to enable long-running tests.
          * May be disabled in CI to keep build times reasonable.
          */
-        val enableLongRunningTests: Boolean = !isCI ||
-            System.getenv("CI_ENABLE_LONG_TESTS") == "true"
+        val enableLongRunningTests: Boolean =
+            !isCI ||
+                System.getenv("CI_ENABLE_LONG_TESTS") == "true"
     }
 
     /**

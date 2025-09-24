@@ -21,26 +21,26 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.WWWGlobals.BackNav
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.DisplayText
+import com.worldwidewaves.shared.WWWGlobals.Event
+import com.worldwidewaves.shared.WWWGlobals.EventsList
+import com.worldwidewaves.shared.WWWGlobals.FileSystem
+import com.worldwidewaves.shared.WWWGlobals.MapDisplay
+import com.worldwidewaves.shared.WWWGlobals.TabBar
+import com.worldwidewaves.shared.WWWGlobals.Timing
+import com.worldwidewaves.shared.WWWGlobals.Urls
+import com.worldwidewaves.shared.WWWGlobals.Wave
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Duration.Companion.milliseconds
-import com.worldwidewaves.shared.WWWGlobals.Companion.Urls
-import com.worldwidewaves.shared.WWWGlobals.Companion.FileSystem
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
-import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
-import com.worldwidewaves.shared.WWWGlobals.Companion.MapDisplay
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Companion.TabBar
-import com.worldwidewaves.shared.WWWGlobals.Companion.BackNav
-import com.worldwidewaves.shared.WWWGlobals.Companion.Event
-import com.worldwidewaves.shared.WWWGlobals.Companion.EventsList
-import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
 
 /**
  * Tests for WWWGlobals constants and configuration values.
@@ -48,7 +48,6 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.DisplayText
  * and maintain business logic consistency.
  */
 class WWWGlobalsTest {
-
     @Test
     fun `should have valid URL constants`() {
         // GIVEN: URL constants from WWWGlobals
@@ -124,9 +123,9 @@ class WWWGlobalsTest {
         assertTrue(backgroundOpacity >= 0.0f, "Opacity should be non-negative")
         assertTrue(backgroundOpacity <= 1.0f, "Opacity should not exceed 100%")
 
-        assertEquals(300, defaultSimulationSpeed, "Default simulation speed should be 300 m/s (50x faster for simulations)")
+        assertEquals(50, defaultSimulationSpeed, "Default simulation speed should be 50 m/s for balanced simulation speed")
         assertTrue(defaultSimulationSpeed > 0, "Simulation speed should be positive")
-        assertTrue(defaultSimulationSpeed <= 600, "Simulation speed should be reasonable for fast simulations (≤600 m/s)")
+        assertTrue(defaultSimulationSpeed <= 300, "Simulation speed should be reasonable for fast simulations (≤300 m/s)")
     }
 
     @Test

@@ -22,16 +22,16 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.events.utils.DataValidator
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.getCommunityText
 import com.worldwidewaves.shared.getCountryText
 import com.worldwidewaves.shared.getEventImage
 import com.worldwidewaves.shared.getEventText
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime

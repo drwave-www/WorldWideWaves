@@ -44,7 +44,6 @@ import kotlin.test.assertTrue
  * sound systems, and file handles to prevent resource leaks and ensure proper shutdown.
  */
 class ResourceManagementTest {
-
     private lateinit var coroutineScopeProvider: CoroutineScopeProvider
 
     @BeforeTest
@@ -58,139 +57,149 @@ class ResourceManagementTest {
     }
 
     @Test
-    fun `should properly cleanup coroutine scope provider resources`() = runTest {
-        // GIVEN: CoroutineScopeProvider with active jobs
-        val jobs = mutableListOf<Job>()
+    fun `should properly cleanup coroutine scope provider resources`() =
+        runTest {
+            // GIVEN: CoroutineScopeProvider with active jobs
+            val jobs = mutableListOf<Job>()
 
-        // WHEN: Launching several coroutines
-        repeat(5) { index ->
-            val job = coroutineScopeProvider.launchIO {
-                delay(1000) // Long-running operation
+            // WHEN: Launching several coroutines
+            repeat(5) { index ->
+                val job =
+                    coroutineScopeProvider.launchIO {
+                        delay(1000) // Long-running operation
+                    }
+                jobs.add(job)
             }
-            jobs.add(job)
-        }
 
-        // THEN: Jobs should be active initially
-        jobs.forEach { job ->
-            assertTrue(job.isActive, "Job should be active after launch")
-        }
-
-        // WHEN: Cancelling all coroutines
-        coroutineScopeProvider.cancelAllCoroutines()
-
-        // Wait a bit for cancellation to propagate
-        delay(100)
-
-        // THEN: Jobs should be cancelled
-        jobs.forEach { job ->
-            assertFalse(job.isActive, "Job should be cancelled after cancelAllCoroutines")
-            assertTrue(job.isCancelled, "Job should be marked as cancelled")
-        }
-    }
-
-    @Test
-    fun `should handle multiple cancellation calls safely`() = runTest {
-        // GIVEN: CoroutineScopeProvider with some jobs
-        val job1 = coroutineScopeProvider.launchDefault {
-            delay(1000)
-        }
-        val job2 = coroutineScopeProvider.launchIO {
-            delay(1000)
-        }
-
-        // WHEN: Cancelling multiple times
-        coroutineScopeProvider.cancelAllCoroutines()
-        coroutineScopeProvider.cancelAllCoroutines() // Second call should be safe
-        coroutineScopeProvider.cancelAllCoroutines() // Third call should be safe
-
-        // THEN: Should not throw exceptions and jobs should be cancelled
-        assertFalse(job1.isActive, "Job1 should be cancelled")
-        assertFalse(job2.isActive, "Job2 should be cancelled")
-    }
-
-    @Test
-    fun `should provide separate IO and Default scopes correctly`() = runTest {
-        // GIVEN: CoroutineScopeProvider
-
-        // WHEN: Getting different scope types
-        val ioScope = coroutineScopeProvider.scopeIO()
-        val defaultScope = coroutineScopeProvider.scopeDefault()
-
-        // THEN: Scopes should be different and valid
-        assertNotNull(ioScope, "IO scope should not be null")
-        assertNotNull(defaultScope, "Default scope should not be null")
-        // Note: Scopes may share context but have different dispatchers
-    }
-
-    @Test
-    fun `should handle sound choreography manager resource cleanup`() = runTest {
-        // GIVEN: SoundChoreographyManager
-        val soundManager = SoundChoreographyManager(coroutineScopeProvider)
-
-        // WHEN: Using the sound manager
-        // Note: We test that creation and basic usage doesn't leak resources
-        assertNotNull(soundManager, "Sound manager should be created successfully")
-
-        // WHEN: Cleaning up resources
-        coroutineScopeProvider.cancelAllCoroutines()
-
-        // THEN: Should complete without hanging or throwing exceptions
-        assertTrue(true, "Sound manager cleanup should complete successfully")
-    }
-
-    @Test
-    fun `should handle file resource cleanup in sound preloading`() = runTest {
-        // GIVEN: SoundChoreographyManager for file operations
-        val soundManager = SoundChoreographyManager(coroutineScopeProvider)
-
-        // WHEN: Attempting to preload files (which may open file handles)
-        val result1 = soundManager.preloadMidiFile("nonexistent1.mid")
-        val result2 = soundManager.preloadMidiFile("nonexistent2.mid")
-        val result3 = soundManager.preloadMidiFile("nonexistent3.mid")
-
-        // THEN: Should handle gracefully without resource leaks
-        assertFalse(result1, "Should return false for nonexistent file")
-        assertFalse(result2, "Should return false for nonexistent file")
-        assertFalse(result3, "Should return false for nonexistent file")
-
-        // WHEN: Cleaning up
-        coroutineScopeProvider.cancelAllCoroutines()
-
-        // THEN: Should not have hanging file handles
-        assertTrue(true, "File handle cleanup should complete successfully")
-    }
-
-    @Test
-    fun `should handle concurrent resource access safely`() = runTest {
-        // GIVEN: Multiple concurrent operations
-        val jobs = mutableListOf<Job>()
-
-        // WHEN: Starting multiple concurrent operations with longer delays
-        repeat(10) { index ->
-            val job = coroutineScopeProvider.launchIO {
-                // Simulate resource access with longer delays to ensure they're running
-                delay(500 + (index * 100).toLong())
+            // THEN: Jobs should be active initially
+            jobs.forEach { job ->
+                assertTrue(job.isActive, "Job should be active after launch")
             }
-            jobs.add(job)
+
+            // WHEN: Cancelling all coroutines
+            coroutineScopeProvider.cancelAllCoroutines()
+
+            // Wait a bit for cancellation to propagate
+            delay(100)
+
+            // THEN: Jobs should be cancelled
+            jobs.forEach { job ->
+                assertFalse(job.isActive, "Job should be cancelled after cancelAllCoroutines")
+                assertTrue(job.isCancelled, "Job should be marked as cancelled")
+            }
         }
 
-        // Small delay to ensure jobs have started
-        delay(50)
+    @Test
+    fun `should handle multiple cancellation calls safely`() =
+        runTest {
+            // GIVEN: CoroutineScopeProvider with some jobs
+            val job1 =
+                coroutineScopeProvider.launchDefault {
+                    delay(1000)
+                }
+            val job2 =
+                coroutineScopeProvider.launchIO {
+                    delay(1000)
+                }
 
-        // THEN: All jobs should start successfully
-        val activeJobs = jobs.count { it.isActive }
-        assertTrue(activeJobs > 0, "At least some concurrent jobs should be active (found $activeJobs active)")
+            // WHEN: Cancelling multiple times
+            coroutineScopeProvider.cancelAllCoroutines()
+            coroutineScopeProvider.cancelAllCoroutines() // Second call should be safe
+            coroutineScopeProvider.cancelAllCoroutines() // Third call should be safe
 
-        // WHEN: Cancelling during concurrent execution
-        coroutineScopeProvider.cancelAllCoroutines()
-
-        // THEN: All should be cancelled without resource conflicts
-        delay(100) // Allow cancellation to propagate
-        jobs.forEach { job ->
-            assertFalse(job.isActive, "Concurrent job should be cancelled")
-            assertTrue(job.isCancelled, "Concurrent job should be marked as cancelled")
+            // THEN: Should not throw exceptions and jobs should be cancelled
+            assertFalse(job1.isActive, "Job1 should be cancelled")
+            assertFalse(job2.isActive, "Job2 should be cancelled")
         }
-    }
+
+    @Test
+    fun `should provide separate IO and Default scopes correctly`() =
+        runTest {
+            // GIVEN: CoroutineScopeProvider
+
+            // WHEN: Getting different scope types
+            val ioScope = coroutineScopeProvider.scopeIO()
+            val defaultScope = coroutineScopeProvider.scopeDefault()
+
+            // THEN: Scopes should be different and valid
+            assertNotNull(ioScope, "IO scope should not be null")
+            assertNotNull(defaultScope, "Default scope should not be null")
+            // Note: Scopes may share context but have different dispatchers
+        }
+
+    @Test
+    fun `should handle sound choreography manager resource cleanup`() =
+        runTest {
+            // GIVEN: SoundChoreographyManager
+            val soundManager = SoundChoreographyManager(coroutineScopeProvider)
+
+            // WHEN: Using the sound manager
+            // Note: We test that creation and basic usage doesn't leak resources
+            assertNotNull(soundManager, "Sound manager should be created successfully")
+
+            // WHEN: Cleaning up resources
+            coroutineScopeProvider.cancelAllCoroutines()
+
+            // THEN: Should complete without hanging or throwing exceptions
+            assertTrue(true, "Sound manager cleanup should complete successfully")
+        }
+
+    @Test
+    fun `should handle file resource cleanup in sound preloading`() =
+        runTest {
+            // GIVEN: SoundChoreographyManager for file operations
+            val soundManager = SoundChoreographyManager(coroutineScopeProvider)
+
+            // WHEN: Attempting to preload files (which may open file handles)
+            val result1 = soundManager.preloadMidiFile("nonexistent1.mid")
+            val result2 = soundManager.preloadMidiFile("nonexistent2.mid")
+            val result3 = soundManager.preloadMidiFile("nonexistent3.mid")
+
+            // THEN: Should handle gracefully without resource leaks
+            assertFalse(result1, "Should return false for nonexistent file")
+            assertFalse(result2, "Should return false for nonexistent file")
+            assertFalse(result3, "Should return false for nonexistent file")
+
+            // WHEN: Cleaning up
+            coroutineScopeProvider.cancelAllCoroutines()
+
+            // THEN: Should not have hanging file handles
+            assertTrue(true, "File handle cleanup should complete successfully")
+        }
+
+    @Test
+    fun `should handle concurrent resource access safely`() =
+        runTest {
+            // GIVEN: Multiple concurrent operations
+            val jobs = mutableListOf<Job>()
+
+            // WHEN: Starting multiple concurrent operations with longer delays
+            repeat(10) { index ->
+                val job =
+                    coroutineScopeProvider.launchIO {
+                        // Simulate resource access with longer delays to ensure they're running
+                        delay(500 + (index * 100).toLong())
+                    }
+                jobs.add(job)
+            }
+
+            // Small delay to ensure jobs have started
+            delay(50)
+
+            // THEN: All jobs should start successfully
+            val activeJobs = jobs.count { it.isActive }
+            assertTrue(activeJobs > 0, "At least some concurrent jobs should be active (found $activeJobs active)")
+
+            // WHEN: Cancelling during concurrent execution
+            coroutineScopeProvider.cancelAllCoroutines()
+
+            // THEN: All should be cancelled without resource conflicts
+            delay(100) // Allow cancellation to propagate
+            jobs.forEach { job ->
+                assertFalse(job.isActive, "Concurrent job should be cancelled")
+                assertTrue(job.isCancelled, "Concurrent job should be marked as cancelled")
+            }
+        }
 
     @Test
     fun `should handle shutdown handler resource cleanup`() {
@@ -210,84 +219,89 @@ class ResourceManagementTest {
     }
 
     @Test
-    fun `should validate resource scope isolation`() = runTest {
-        // GIVEN: Different resource scopes
-        val provider1 = DefaultCoroutineScopeProvider()
-        val provider2 = DefaultCoroutineScopeProvider()
+    fun `should validate resource scope isolation`() =
+        runTest {
+            // GIVEN: Different resource scopes
+            val provider1 = DefaultCoroutineScopeProvider()
+            val provider2 = DefaultCoroutineScopeProvider()
 
-        // WHEN: Creating jobs in different providers
-        val job1 = provider1.launchIO { delay(1000) }
-        val job2 = provider2.launchIO { delay(1000) }
+            // WHEN: Creating jobs in different providers
+            val job1 = provider1.launchIO { delay(1000) }
+            val job2 = provider2.launchIO { delay(1000) }
 
-        // THEN: Jobs should be independent
-        assertTrue(job1.isActive, "Job1 should be active")
-        assertTrue(job2.isActive, "Job2 should be active")
+            // THEN: Jobs should be independent
+            assertTrue(job1.isActive, "Job1 should be active")
+            assertTrue(job2.isActive, "Job2 should be active")
 
-        // WHEN: Cancelling only provider1
-        provider1.cancelAllCoroutines()
-        delay(50) // Allow cancellation to propagate
+            // WHEN: Cancelling only provider1
+            provider1.cancelAllCoroutines()
+            delay(50) // Allow cancellation to propagate
 
-        // THEN: Only job1 should be cancelled
-        assertFalse(job1.isActive, "Job1 should be cancelled")
-        assertTrue(job2.isActive, "Job2 should still be active")
+            // THEN: Only job1 should be cancelled
+            assertFalse(job1.isActive, "Job1 should be cancelled")
+            assertTrue(job2.isActive, "Job2 should still be active")
 
-        // Cleanup for test
-        provider2.cancelAllCoroutines()
-    }
+            // Cleanup for test
+            provider2.cancelAllCoroutines()
+        }
 
     @Test
-    fun `should handle exception during resource cleanup`() = runTest {
-        // GIVEN: CoroutineScopeProvider with jobs that might throw
-        val jobs = mutableListOf<Job>()
+    fun `should handle exception during resource cleanup`() =
+        runTest {
+            // GIVEN: CoroutineScopeProvider with jobs that might throw
+            val jobs = mutableListOf<Job>()
 
-        // WHEN: Launching jobs with potential exceptions
-        repeat(3) { index ->
-            val job = coroutineScopeProvider.launchDefault {
-                if (index == 1) {
-                    throw RuntimeException("Test exception in coroutine $index")
-                }
-                delay(1000)
+            // WHEN: Launching jobs with potential exceptions
+            repeat(3) { index ->
+                val job =
+                    coroutineScopeProvider.launchDefault {
+                        if (index == 1) {
+                            throw RuntimeException("Test exception in coroutine $index")
+                        }
+                        delay(1000)
+                    }
+                jobs.add(job)
             }
-            jobs.add(job)
+
+            // THEN: Jobs should start normally
+            delay(50) // Allow exception to occur
+
+            // WHEN: Cancelling all (should handle exceptions gracefully)
+            coroutineScopeProvider.cancelAllCoroutines()
+
+            // THEN: Should complete cleanup despite exceptions
+            delay(50)
+            jobs.forEach { job ->
+                assertFalse(job.isActive, "Job should be cancelled even with exceptions")
+            }
         }
-
-        // THEN: Jobs should start normally
-        delay(50) // Allow exception to occur
-
-        // WHEN: Cancelling all (should handle exceptions gracefully)
-        coroutineScopeProvider.cancelAllCoroutines()
-
-        // THEN: Should complete cleanup despite exceptions
-        delay(50)
-        jobs.forEach { job ->
-            assertFalse(job.isActive, "Job should be cancelled even with exceptions")
-        }
-    }
 
     @Test
-    fun `should validate memory cleanup in long-running operations`() = runTest {
-        // GIVEN: Multiple resource-intensive operations
-        val provider = DefaultCoroutineScopeProvider()
-        val operations = mutableListOf<Job>()
+    fun `should validate memory cleanup in long-running operations`() =
+        runTest {
+            // GIVEN: Multiple resource-intensive operations
+            val provider = DefaultCoroutineScopeProvider()
+            val operations = mutableListOf<Job>()
 
-        // WHEN: Creating many operations
-        repeat(20) { index ->
-            val job = provider.launchIO {
-                // Simulate memory usage
-                val data = ByteArray(1000) { it.toByte() }
-                delay(100)
-                // data should be collected when coroutine ends
+            // WHEN: Creating many operations
+            repeat(20) { index ->
+                val job =
+                    provider.launchIO {
+                        // Simulate memory usage
+                        val data = ByteArray(1000) { it.toByte() }
+                        delay(100)
+                        // data should be collected when coroutine ends
+                    }
+                operations.add(job)
             }
-            operations.add(job)
-        }
 
-        // WHEN: Cancelling operations
-        provider.cancelAllCoroutines()
-        delay(100) // Allow cleanup
+            // WHEN: Cancelling operations
+            provider.cancelAllCoroutines()
+            delay(100) // Allow cleanup
 
-        // THEN: All operations should be cleaned up
-        operations.forEach { operation ->
-            assertTrue(operation.isCancelled, "Operation should be cancelled and cleaned up")
+            // THEN: All operations should be cleaned up
+            operations.forEach { operation ->
+                assertTrue(operation.isCancelled, "Operation should be cancelled and cleaned up")
+            }
         }
-    }
 }

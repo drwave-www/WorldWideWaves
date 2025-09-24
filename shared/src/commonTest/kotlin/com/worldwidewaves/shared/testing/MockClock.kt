@@ -37,9 +37,8 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 class MockClock(
-    private var currentTime: Instant = TestHelpers.TestTimes.BASE_TIME
+    private var currentTime: Instant = TestHelpers.TestTimes.BASE_TIME,
 ) : IClock {
-
     private val _delayCalls = mutableListOf<Duration>()
     val delayCalls: List<Duration> get() = _delayCalls.toList()
 
@@ -83,7 +82,7 @@ class MockClock(
      */
     fun simulateEventProgress(
         eventDuration: Duration,
-        steps: Int = 10
+        steps: Int = 10,
     ): List<Instant> {
         val timePoints = mutableListOf<Instant>()
         val stepDuration = eventDuration / steps
@@ -103,7 +102,7 @@ class MockClock(
     fun verifyDelaysCalled(expectedDelays: List<Duration>) {
         if (delayCalls != expectedDelays) {
             throw AssertionError(
-                "Expected delays: $expectedDelays, but got: $delayCalls"
+                "Expected delays: $expectedDelays, but got: $delayCalls",
             )
         }
     }
@@ -142,7 +141,7 @@ class MockClock(
          */
         fun forEventStartTime(
             date: String = "2022-01-01",
-            time: String = "18:00"
+            time: String = "18:00",
         ): MockClock {
             // Parse the date and time to create an Instant
             // This is a simplified implementation for testing

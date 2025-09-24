@@ -1,5 +1,10 @@
 package com.worldwidewaves.shared.choreographies
 
+import com.worldwidewaves.shared.utils.ImageResolver
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -8,11 +13,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.serialization.json.Json
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import com.worldwidewaves.shared.utils.ImageResolver
 
 class ChoreographySequenceTest {
     // Test fixture for image resolver

@@ -74,22 +74,24 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.common.DownloadProgressIndicator
-import com.worldwidewaves.compose.common.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
+import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.map.WWWLocationProvider
+import com.worldwidewaves.shared.toMapLibrePolygon
+import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.viewmodels.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
@@ -112,7 +114,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.geojson.Polygon
 import java.io.File
 import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
@@ -154,6 +155,8 @@ class AndroidEventMap(
         private const val BUTTON_WIDTH_DP = 200f
         private const val BUTTON_HEIGHT_DP = 60f
     }
+
+    val context: Context by inject(Context::class.java)
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
@@ -607,13 +610,22 @@ class AndroidEventMap(
     ) {
         Log.i(TAG, "Setting up map location component")
         map.style?.let { style ->
-            // Activate location component
-            map.locationComponent.activateLocationComponent(
-                buildLocationComponentActivationOptions(context, style),
-            )
-            map.locationComponent.isLocationComponentEnabled = true
-            map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
-            Log.i(TAG, "Location component setup complete")
+            try {
+                // Check if already activated to avoid double activation
+                if (!map.locationComponent.isLocationComponentActivated) {
+                    // Activate location component
+                    map.locationComponent.activateLocationComponent(
+                        buildLocationComponentActivationOptions(context, style),
+                    )
+                }
+                map.locationComponent.isLocationComponentEnabled = true
+                map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+                Log.i(TAG, "Location component setup complete")
+            } catch (e: IllegalStateException) {
+                Log.e(TAG, "Failed to setup location component - invalid state", e)
+            } catch (e: UnsupportedOperationException) {
+                Log.e(TAG, "Failed to setup location component - operation not supported", e)
+            }
         } ?: run {
             Log.e(TAG, "Cannot setup location component - map style is null")
         }
@@ -690,8 +702,11 @@ class AndroidEventMap(
 
         map.style?.let {
             try {
-                // Always disable first to avoid stale state
-                map.locationComponent.isLocationComponentEnabled = false
+                // Check if location component is activated before trying to disable it
+                if (map.locationComponent.isLocationComponentActivated) {
+                    // Always disable first to avoid stale state
+                    map.locationComponent.isLocationComponentEnabled = false
+                }
 
                 if (hasPermission) {
                     setupMapLocationComponent(map, context)
@@ -705,6 +720,16 @@ class AndroidEventMap(
             } catch (uoe: UnsupportedOperationException) {
                 // Map operation not supported
                 Log.e(TAG, "Unsupported map operation", uoe)
+            } catch (e: IllegalStateException) {
+                // Location component not initialized - this is expected on first run
+                if (e.message?.contains("LocationComponent has to be activated") == true) {
+                    Log.d(TAG, "Location component not yet initialized, will activate it")
+                    if (hasPermission) {
+                        setupMapLocationComponent(map, context)
+                    }
+                } else {
+                    Log.e(TAG, "Unexpected illegal state with location component", e)
+                }
             }
         } ?: run {
             Log.w(TAG, "Cannot update location component - map style is null")
@@ -777,16 +802,16 @@ class AndroidEventMap(
     /**
      * Update wave polygons on the map
      */
-    fun updateWavePolygons(
-        context: Context,
+    override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
-        clearPolygons: Boolean,
+        clearPolygons: Boolean
     ) {
-        Log.v(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
         (context as? AppCompatActivity)?.runOnUiThread {
-            mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
+            val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
+            mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
+
 }
 
 // ----------------------------------------------------------------------------

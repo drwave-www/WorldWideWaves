@@ -21,74 +21,25 @@
 import SwiftUI
 import Shared
 
-struct ContentView: View {
-    private let wwwEvents: WWWEvents
+struct ContentView: UIViewControllerRepresentable {
+    // iOS Compose Multiplatform integration - Uses same UI as Android
 
-    // KMM - Koin Call
-    init() {
+    func makeUIViewController(context: Context) -> UIViewController {
+        NSLog("📱 ContentView: makeUIViewController called")
+
+        // Initialize Koin DI (now includes Napier logging initialization)
         HelperKt.doInitKoin()
-        self.wwwEvents = WWWEvents()
-    }
-    
-    var body: some View {
-        VStack {
-            if isLoading {
-                ProgressView("Loading events…")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let error = errorMessage {
-                VStack(spacing: 8) {
-                    Text("Failed to load events")
-                        .font(.headline)
-                    Text(error)
-                        .font(.caption)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
-            } else {
-                List(events, id: \.id) { event in
-                    Text(Platform_iosKt.localizeString(resource: event.getLocation()))
-                }
-            }
-        }
-        .onAppear {
-            // Trigger loading only if we have no events yet and we're not already loading.
-            if events.isEmpty && !isLoading {
-                loadEvents()
-            }
-        }
-    }
-    
-    // MARK: - Private state & helpers
+        NSLog("📱 ContentView: doInitKoin completed")
 
-    @State
-    private var events: [any IWWWEvent] = []
-    
-    @State
-    private var isLoading: Bool = false
-    
-    @State
-    private var errorMessage: String? = nil
-    
-    /// Loads events using the shared `WWWEvents` instance.
-    private func loadEvents() {
-        // Set initial loading state
-        isLoading = true
-        errorMessage = nil
-        
-        _ = wwwEvents.loadEvents(
-            onLoaded: {
-                DispatchQueue.main.async {
-                    self.events = self.wwwEvents.list()
-                    self.isLoading = false
-                }
-            },
-            onLoadingError: { error in
-                DispatchQueue.main.async {
-                    self.errorMessage = error.message ?? "Unknown error"
-                    self.isLoading = false
-                }
-            }
-        )
+        // Return Compose UI - Same as Android for perfect UI parity
+        NSLog("📱 ContentView: About to call MainViewController")
+        let controller = MainViewControllerKt.MainViewController()
+        NSLog("📱 ContentView: MainViewController created successfully")
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No updates needed - Compose handles state internally
     }
 }
 

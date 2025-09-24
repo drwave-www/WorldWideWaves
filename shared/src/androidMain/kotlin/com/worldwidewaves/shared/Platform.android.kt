@@ -166,8 +166,7 @@ actual suspend fun getMapFileAbsolutePath(
     if (lastException is java.io.FileNotFoundException) {
         Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
     } else {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}")
-        lastException?.printStackTrace()
+        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
     }
     return null
 }
@@ -187,10 +186,10 @@ private suspend fun cacheAssetFromContext(
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
         ctx.assets.open(assetPath).use { input ->
-            BufferedInputStream(input, 8192).use { bufferedInput ->
+            BufferedInputStream(input, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedInput ->
                 cachedFile.outputStream().use { fileOutput ->
-                    BufferedOutputStream(fileOutput, 8192).use { bufferedOutput ->
-                        val buffer = ByteArray(8192)
+                    BufferedOutputStream(fileOutput, WWWGlobals.ByteProcessing.BUFFER_SIZE).use { bufferedOutput ->
+                        val buffer = ByteArray(WWWGlobals.ByteProcessing.BUFFER_SIZE)
                         var bytesRead: Int
 
                         while (bufferedInput.read(buffer).also { bytesRead = it } != -1) {

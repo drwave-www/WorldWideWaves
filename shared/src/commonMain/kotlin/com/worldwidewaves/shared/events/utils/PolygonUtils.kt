@@ -46,7 +46,7 @@ object PolygonUtils {
     private data class SpatialIndex(
         val bbox: BoundingBox,
         val gridSize: Int = 16, // 16x16 grid for reasonable granularity
-        val edgesByCell: Array<MutableList<Pair<Position, Position>>>
+        val edgesByCell: Array<MutableList<Pair<Position, Position>>>,
     ) {
         companion object {
             fun build(polygon: Polygon): SpatialIndex? {
@@ -105,37 +105,21 @@ object PolygonUtils {
     private val spatialIndexCache = mutableMapOf<Int, SpatialIndex?>()
 
     /**
-     * Optimized point-in-polygon test using spatial indexing for large polygons.
-     * Falls back to standard ray-casting for small polygons.
+     * Point-in-polygon test using the standard ray-casting algorithm.
+     * This implementation prioritizes correctness over performance optimization.
      */
     fun Polygon.containsPositionOptimized(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
-
-        // For small polygons, use standard algorithm
-        if (size < 100) {
-            return containsPosition(tap)
-        }
-
-        // Use spatial index for large polygons
-        val polygonHash = this.hashCode()
-        val spatialIndex = spatialIndexCache.getOrPut(polygonHash) {
-            SpatialIndex.build(this)
-        }
-
-        return if (spatialIndex != null) {
-            containsPositionWithSpatialIndex(tap, spatialIndex)
-        } else {
-            containsPosition(tap) // Fallback
-        }
+        return containsPosition(tap)
     }
 
     /**
      * Ray-casting algorithm optimized with spatial indexing.
      * Only tests edges in the same grid cell as the query point.
      */
-     private fun Polygon.containsPositionWithSpatialIndex(
+    private fun Polygon.containsPositionWithSpatialIndex(
         tap: Position,
-        spatialIndex: SpatialIndex
+        spatialIndex: SpatialIndex,
     ): Boolean {
         val relevantEdges = spatialIndex.getCellEdges(tap)
         var depth = 0
@@ -186,27 +170,44 @@ object PolygonUtils {
      * It's based on the algorithm available at
      * https://github.com/KohlsAdrian/google_maps_utils/blob/master/lib/poly_utils.dart
      *
+     * Enhanced with improved numerical stability and edge case handling.
      */
     fun Polygon.containsPosition(tap: Position): Boolean {
         require(isNotEmpty()) { return false }
-        var (bx, by) = last()!!.let { it.lat - tap.lat to it.lng - tap.lng }
-        var depth = 0
 
-        for (point in this) {
-            val (ax, ay) = bx to by
-            bx = point.lat - tap.lat
-            by = point.lng - tap.lng
-
-            if ((ay < 0 && by < 0) || (ay > 0 && by > 0) || (ax < 0 && bx < 0)) {
-                continue
-            }
-
-            val lx = ax - ay * (bx - ax) / (by - ay)
-            if (lx == 0.0) return true
-            if (lx > 0) depth++
+        // Handle simple polygons with less than 3 vertices
+        if (size < 3) {
+            return false
         }
 
-        return (depth and 1) == 1
+        val points = this.toList()
+        var inside = false
+        var j = points.size - 1
+        val epsilon = 1e-12
+
+        // Use the robust ray-casting algorithm
+        for (i in points.indices) {
+            val xi = points[i].lng
+            val yi = points[i].lat
+            val xj = points[j].lng
+            val yj = points[j].lat
+
+            // Check if point is exactly on a vertex
+            if (kotlin.math.abs(xi - tap.lng) < epsilon && kotlin.math.abs(yi - tap.lat) < epsilon) {
+                return true
+            }
+
+            // Ray-casting algorithm
+            if (((yi > tap.lat) != (yj > tap.lat)) &&
+                (tap.lng < (xj - xi) * (tap.lat - yi) / (yj - yi) + xi)
+            ) {
+                inside = !inside
+            }
+
+            j = i
+        }
+
+        return inside
     }
 
     /**
@@ -529,13 +530,16 @@ object PolygonUtils {
 
                 if (onLine.size < 2) return@map polygon
 
-                // Process consecutive anchors in traversal order (no sorting)
-                for (idx in 0 until onLine.size - 1) {
-                    var current = onLine[idx]
-                    val next = onLine[idx + 1]
+                // Remove duplicate anchors and sort by latitude to get proper order along composed longitude
+                val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
+
+                // Process consecutive anchors in latitude order (along composed longitude)
+                for (idx in 0 until uniqueAnchors.size - 1) {
+                    val anchor1 = uniqueAnchors[idx]
+                    val anchor2 = uniqueAnchors[idx + 1]
 
                     // Calculate midpoint latitude
-                    val midLat = (current.lat + next.lat) / 2
+                    val midLat = (anchor1.lat + anchor2.lat) / 2
                     val midLng = lngToCut.lngAt(midLat) ?: continue
 
                     // Include intermediate points only when the composed-longitude
@@ -543,19 +547,38 @@ object PolygonUtils {
                     val insideMid = source.containsPosition(Position(midLat, midLng))
                     if (!insideMid) continue
 
-                    // Get intermediate points between anchors, preserving direction
-                    val between =
-                        if (current.lat <= next.lat) {
-                            lngToCut.positionsBetween(current.lat, next.lat)
-                        } else {
-                            lngToCut.positionsBetween(next.lat, current.lat).asReversed()
-                        }
+                    // Get intermediate points between anchors
+                    val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
 
-                    // Insert each intermediate point right after the running anchor
-                    for (p in between) {
-                        // Avoid duplicates with last inserted / anchor and check if point already exists in polygon
-                        if (p != current && !polygon.any { it.lat == p.lat && it.lng == p.lng }) {
-                            current = polygon.insertAfter(p, current.id)
+                    // Find the correct position in the polygon to insert intermediate points
+                    // We need to find where anchor1 and anchor2 appear consecutively in the polygon
+                    val anchor1Pos = polygon.indexOfFirst { it.lat == anchor1.lat && it.lng == anchor1.lng }
+                    val anchor2Pos = polygon.indexOfFirst { it.lat == anchor2.lat && it.lng == anchor2.lng }
+
+                    if (anchor1Pos != -1 && anchor2Pos != -1) {
+                        // Check if they are consecutive (considering wrap-around)
+                        val isConsecutive =
+                            (anchor2Pos == anchor1Pos + 1) ||
+                                (anchor1Pos == polygon.size - 1 && anchor2Pos == 0)
+
+                        if (isConsecutive) {
+                            // Insert intermediate points after anchor1
+                            var current = polygon.elementAt(anchor1Pos)
+                            for (p in between) {
+                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
+                                    current = polygon.insertAfter(p, current.id)
+                                }
+                            }
+                        } else {
+                            // For non-consecutive anchors, we need a more sophisticated approach
+                            // to determine the correct insertion point based on the polygon's traversal order
+                            // For now, use a simple heuristic: insert after the first anchor found
+                            var current = polygon.elementAt(anchor1Pos)
+                            for (p in between) {
+                                if (!polygon.any { it.lat == p.lat && it.lng == p.lng }) {
+                                    current = polygon.insertAfter(p, current.id)
+                                }
+                            }
                         }
                     }
                 }
@@ -574,7 +597,15 @@ object PolygonUtils {
     fun isPointInPolygons(
         tap: Position,
         polygons: Area,
-    ): Boolean = polygons.any { it.containsPositionOptimized(tap) }
+    ): Boolean {
+        polygons.forEachIndexed { index, polygon ->
+            val result = polygon.containsPositionOptimized(tap)
+            if (result) {
+                return true
+            }
+        }
+        return false
+    }
 
     /**
      * Clears the spatial index cache to free memory.

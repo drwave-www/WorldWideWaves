@@ -1,0 +1,213 @@
+name: 03 • Quality & Security Gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: quality-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck --no-daemon --stacktrace
+
+      - name: Run detekt
+        run: ./gradlew detekt --no-daemon --stacktrace
+
+      - name: Upload lint reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports
+          path: |
+            **/build/reports/ktlint/
+            **/build/reports/detekt/
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+
+  ui-test-compilation:
+    name: UI Test Compilation Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Compile instrumented tests
+        run: ./gradlew compileDebugAndroidTestKotlin --no-daemon --stacktrace
+
+      - name: Verify UI test classes exist
+        run: |
+          echo "Checking for required UI test classes..."
+          if [ ! -f "composeApp/src/androidInstrumentedTest/kotlin/com/worldwidewaves/compose/edgecases/EdgeCaseTest.kt" ]; then
+            echo "❌ EdgeCaseTest.kt not found"
+            exit 1
+          fi
+          if [ ! -f "composeApp/src/androidInstrumentedTest/kotlin/com/worldwidewaves/compose/accessibility/AccessibilityTest.kt" ]; then
+            echo "❌ AccessibilityTest.kt not found"
+            exit 1
+          fi
+          if [ ! -f "composeApp/src/androidInstrumentedTest/kotlin/com/worldwidewaves/testing/ScreenshotTestUtils.kt" ]; then
+            echo "❌ ScreenshotTestUtils.kt not found"
+            exit 1
+          fi
+          echo "✅ All required UI test classes found"
+
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run dependency vulnerability check
+        run: ./gradlew dependencyCheckAnalyze --no-daemon || true
+
+      - name: Upload dependency check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Generate license report
+        run: ./gradlew generateLicenseReport --no-daemon --stacktrace
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: build/reports/licenses/
+
+  quality-summary:
+    name: Quality Gates Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, test, ui-test-compilation, dependency-check, license-check]
+    if: always()
+    steps:
+      - name: Evaluate Quality Gates
+        run: |
+          lint_result="${{ needs.lint.result }}"
+          test_result="${{ needs.test.result }}"
+          ui_compile_result="${{ needs.ui-test-compilation.result }}"
+          dependency_result="${{ needs.dependency-check.result }}"
+          license_result="${{ needs.license-check.result }}"
+
+          echo "## Quality & Security Gates Results"
+          echo "- Linting: $lint_result"
+          echo "- Unit Tests: $test_result"
+          echo "- UI Test Compilation: $ui_compile_result"
+          echo "- Dependency Security: $dependency_result"
+          echo "- License Compliance: $license_result"
+
+          if [[ "$lint_result" != "success" || "$test_result" != "success" || "$ui_compile_result" != "success" ]]; then
+            echo "❌ Quality gates failed"
+            echo "QUALITY_GATES_PASSED=false" >> $GITHUB_ENV
+            exit 1
+          else
+            echo "✅ All quality gates passed"
+            echo "QUALITY_GATES_PASSED=true" >> $GITHUB_ENV
+          fi
+

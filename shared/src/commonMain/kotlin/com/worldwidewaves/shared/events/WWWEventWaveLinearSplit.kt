@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.events
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -46,7 +45,9 @@ data class WWWEventWaveLinearSplit(
     // ---------------------------
 
     override suspend fun getWaveDuration(): Duration {
-        return 2.hours // TODO
+        // For split waves, fall back to approximate duration
+        // TODO: Implement proper split-based duration calculation when area calculation is available
+        return getApproxDuration()
     }
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
@@ -78,7 +79,7 @@ data class WWWEventWaveLinearSplit(
                         nbSplits <= 2 ->
                             add("Number of splits must be greater than 2")
 
-                        // TODO
+                        // TODO: Add upper limit validation when performance requirements are determined
 
                         else -> { }
                     }

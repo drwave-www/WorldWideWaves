@@ -24,7 +24,6 @@ package com.worldwidewaves.shared.events
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -43,7 +42,9 @@ data class WWWEventWaveDeep(
     }
 
     override suspend fun getWaveDuration(): Duration {
-        return 2.hours // TODO
+        // For deep waves, fall back to approximate duration
+        // TODO: Implement proper depth-based duration calculation when depth parameter is available
+        return getApproxDuration()
     }
 
     override suspend fun hasUserBeenHitInCurrentPosition(): Boolean {
@@ -68,7 +69,7 @@ data class WWWEventWaveDeep(
         val superValid = super.validationErrors()
         val errors = superValid?.toMutableList() ?: mutableListOf()
 
-        // TODO
+        // TODO: Add depth parameter validation when depth property is available
 
         return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveDeep::class.simpleName}: $it" }
     }

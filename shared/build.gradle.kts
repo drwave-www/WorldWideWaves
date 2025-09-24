@@ -25,7 +25,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = true
+            isStatic = false // Change to dynamic framework for better bundle loading
         }
     }
 
@@ -52,11 +52,14 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
             implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(libs.androidx.annotation)
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
+            implementation(compose.ui)
             implementation(libs.napier)
         }
         commonTest.dependencies {
@@ -87,16 +90,30 @@ android {
         libs.versions.android.compileSdk
             .get()
             .toInt()
+
+    defaultConfig {
+        // Logging configuration for shared module
+        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     buildTypes {
         release {
             isMinifyEnabled = false
+
+            // Production logging configuration - disable verbose/debug logging for performance and security
+            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     packaging {
@@ -123,6 +140,7 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
+        implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
         implementation(libs.maplibre.android)
     }
@@ -131,6 +149,17 @@ android {
      * Configure the Android test runner so that common JVM tests can be executed
      * directly from Android Studio (Run/Debug-gutter icon or context menu).
      */
+    lint {
+        disable.addAll(
+            listOf(
+                "MissingTranslation",
+                "TypographyEllipsis",
+                "LogNotTimber",
+                "Typos",
+            ),
+        )
+    }
+
     testOptions {
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
@@ -161,13 +190,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = false
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = false
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = false
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
+
+// Custom Gradle task for crowd sound choreography simulation

@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.utils
 
+import com.worldwidewaves.shared.WWWGlobals
+
 /*
  * Copyright 2025 DrWave
  *
@@ -31,19 +33,22 @@ class ByteArrayReader(
 
     private fun checkBounds(bytesToRead: Int) {
         if (position + bytesToRead > bytes.size) {
-            throw IndexOutOfBoundsException("Attempting to read $bytesToRead bytes at position $position, but only ${bytes.size - position} bytes remaining")
+            val remaining = bytes.size - position
+            throw IndexOutOfBoundsException(
+                "Attempting to read $bytesToRead bytes at position $position, but only $remaining bytes remaining",
+            )
         }
     }
 
     fun readUInt8(): Int {
         checkBounds(1)
-        return bytes[position++].toInt() and 0xFF
+        return bytes[position++].toInt() and WWWGlobals.ByteProcessing.BYTE_MASK
     }
 
     fun readInt16(): Int {
         val msb = readUInt8()
         val lsb = readUInt8()
-        return (msb shl 8) or lsb
+        return (msb shl WWWGlobals.ByteProcessing.BIT_SHIFT_8) or lsb
     }
 
     fun readInt32(): Int {
@@ -51,7 +56,9 @@ class ByteArrayReader(
         val b2 = readUInt8()
         val b3 = readUInt8()
         val b4 = readUInt8()
-        return (b1 shl 24) or (b2 shl 16) or (b3 shl 8) or b4
+        return (b1 shl WWWGlobals.ByteProcessing.BIT_SHIFT_24) or (b2 shl WWWGlobals.ByteProcessing.BIT_SHIFT_16) or
+            (b3 shl WWWGlobals.ByteProcessing.BIT_SHIFT_8) or
+            b4
     }
 
     fun readString(length: Int): String {
@@ -70,8 +77,9 @@ class ByteArrayReader(
 
         do {
             currentByte = readUInt8()
-            result = (result shl 7) or (currentByte and 0x7F).toLong()
-        } while ((currentByte and 0x80) != 0)
+            result =
+                (result shl WWWGlobals.ByteProcessing.VLQ_BIT_SHIFT) or (currentByte and WWWGlobals.ByteProcessing.VLQ_DATA_MASK).toLong()
+        } while ((currentByte and WWWGlobals.ByteProcessing.VLQ_CONTINUATION_MASK) != 0)
 
         return result
     }

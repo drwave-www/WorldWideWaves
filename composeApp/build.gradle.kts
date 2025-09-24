@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+import org.gradle.api.Task
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -16,6 +18,17 @@ kotlin {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
         }
     }
 
@@ -45,6 +58,10 @@ kotlin {
             implementation(libs.androidx.espresso.core)
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
+            implementation(projects.shared)
+        }
+        iosMain.dependencies {
+            // iOS-specific dependencies can be added here
         }
     }
 }
@@ -61,8 +78,8 @@ android {
     // sourceSets["main"].assets.srcDirs("src/androidMain/assets")
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     defaultConfig {
@@ -78,6 +95,12 @@ android {
         versionCode = 26
         versionName = "v0.22"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Logging configuration
+        buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "true")
+        buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "true")
+
         ndk {
             // Ship only the arm64-v8a ABI to minimise download size
             abiFilters += listOf("arm64-v8a")
@@ -103,6 +126,11 @@ android {
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
+
+            // Production logging configuration - disable verbose/debug logging for performance and security
+            buildConfigField("boolean", "ENABLE_VERBOSE_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_DEBUG_LOGGING", "false")
+            buildConfigField("boolean", "ENABLE_PERFORMANCE_LOGGING", "false")
         }
     }
     compileOptions {
@@ -113,6 +141,11 @@ android {
         compose = true
         viewBinding = true
         buildConfig = true
+    }
+
+    // Real Integration Test Configuration
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
     dynamicFeatures +=
         setOf(
@@ -187,4 +220,116 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics.ndk)
     implementation(libs.firebase.analytics)
+}
+
+// Firebase Configuration Generation Task
+tasks.register("generateFirebaseConfig") {
+    group = "firebase"
+    description = "Generates google-services.json from local.properties or environment variables"
+
+    val googleServicesFile = file("google-services.json")
+    outputs.file(googleServicesFile)
+
+    doLast {
+        // Skip if google-services.json already exists and is valid (for CI builds)
+        if (googleServicesFile.exists() && googleServicesFile.length() > 0) {
+            println("Firebase config file already exists, skipping generation")
+            return@doLast
+        }
+
+        val properties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+
+        // Load from local.properties if it exists
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { properties.load(it) }
+        }
+
+        // Get values from environment variables or properties (both can return null)
+        val projectId = System.getenv("FIREBASE_PROJECT_ID") ?: properties.getProperty("FIREBASE_PROJECT_ID")
+        val projectNumber = System.getenv("FIREBASE_PROJECT_NUMBER") ?: properties.getProperty("FIREBASE_PROJECT_NUMBER")
+        val appId = System.getenv("FIREBASE_MOBILE_SDK_APP_ID") ?: properties.getProperty("FIREBASE_MOBILE_SDK_APP_ID")
+        val apiKey = System.getenv("FIREBASE_API_KEY") ?: properties.getProperty("FIREBASE_API_KEY")
+
+        if (projectId.isNullOrEmpty() || projectNumber.isNullOrEmpty() || appId.isNullOrEmpty() || apiKey.isNullOrEmpty()) {
+            throw GradleException("Firebase configuration missing. Please set FIREBASE_* environment variables or update local.properties")
+        }
+
+        val googleServicesJson = """{
+  "project_info": {
+    "project_number": "$projectNumber",
+    "project_id": "$projectId",
+    "storage_bucket": "$projectId.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "$appId",
+        "android_client_info": {
+          "package_name": "com.worldwidewaves"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "$apiKey"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}"""
+
+        googleServicesFile.writeText(googleServicesJson)
+        println("✅ Generated google-services.json successfully")
+    }
+}
+
+// Ensure Firebase config is generated before Google Services processing
+tasks.named("preBuild") {
+    dependsOn("generateFirebaseConfig")
+}
+
+// Fix Gradle task dependency issue
+afterEvaluate {
+    tasks.findByName("processDebugGoogleServices")?.dependsOn("generateFirebaseConfig")
+    tasks.findByName("processReleaseGoogleServices")?.dependsOn("generateFirebaseConfig")
+}
+
+// Custom Gradle Tasks for Real Integration Tests
+tasks.register("runRealIntegrationTests") {
+    group = "verification"
+    description = "Runs real integration tests on connected devices"
+
+    doFirst {
+        println("🚀 Real Integration Tests framework ready!")
+        println("📱 To run real integration tests:")
+        println("   1. Connect Android device with USB debugging enabled")
+        println("   2. Enable 'Allow mock locations' in developer options")
+        println("   3. Grant location permissions to the app")
+        println("   4. Ensure internet connectivity")
+        println("   5. Run: ./gradlew connectedRealIntegrationTestAndroidTest")
+    }
+}
+
+tasks.register("verifyAllTests") {
+    group = "verification"
+    description = "Runs all test types: unit, instrumented, and real integration tests"
+
+    dependsOn("testDebugUnitTest")
+    dependsOn("connectedDebugAndroidTest")
+
+    doFirst {
+        println("🧪 Running available test suite...")
+    }
+
+    doLast {
+        println("✅ Available tests completed successfully!")
+        println("ℹ️  Real integration tests require separate execution with device setup")
+    }
 }

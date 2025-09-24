@@ -21,10 +21,9 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.utils.ByteArrayReader
+import com.worldwidewaves.shared.utils.Log
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -76,6 +75,9 @@ data class MidiTrack(
  * Handles parsing of Standard MIDI File (SMF) format
  */
 object MidiParser {
+    // Logging tag
+    private const val TAG = "MidiParser"
+
     // Constants for MIDI file parsing
     private const val HEADER_CHUNK_ID = "MThd"
     private const val TRACK_CHUNK_ID = "MTrk"
@@ -324,7 +326,8 @@ object MidiParser {
             val notes =
                 finalNotes.map { internalNote ->
                     val startTimeSeconds = ticksToRealTime(internalNote.startTick, ticksPerBeat, globalTempoChanges)
-                    val endTimeSeconds = ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, globalTempoChanges)
+                    val endTimeSeconds =
+                        ticksToRealTime(internalNote.startTick + internalNote.durationTicks, ticksPerBeat, globalTempoChanges)
 
                     MidiNote(
                         pitch = internalNote.pitch,
@@ -363,8 +366,7 @@ object MidiParser {
                 tempo = finalTempo.toInt(),
             )
         } catch (e: Exception) {
-            Log.e("MidiParser", "Error parsing MIDI bytes: ${e.message}")
-            e.printStackTrace()
+            Log.e(TAG, "Error parsing MIDI bytes: ${e.message}", throwable = e)
             throw e
         }
     }

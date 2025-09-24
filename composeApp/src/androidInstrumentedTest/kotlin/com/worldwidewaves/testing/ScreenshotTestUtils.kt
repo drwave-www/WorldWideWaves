@@ -22,7 +22,6 @@
 package com.worldwidewaves.testing
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Build
 import android.os.Environment
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -34,7 +33,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 /**
  * Screenshot testing utilities for WorldWideWaves UI testing
@@ -73,7 +73,6 @@ import java.util.*
  * ```
  */
 object ScreenshotTestUtils {
-
     private const val SCREENSHOT_DIR = "screenshots"
     private const val BASELINE_DIR = "baseline"
     private const val ACTUAL_DIR = "actual"
@@ -85,14 +84,13 @@ object ScreenshotTestUtils {
     fun captureScreenshot(
         composeTestRule: ComposeTestRule,
         testName: String,
-        category: String = "general"
-    ): File {
-        return captureScreenshotInternal(
+        category: String = "general",
+    ): File =
+        captureScreenshotInternal(
             bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap(),
             testName = testName,
-            category = category
+            category = category,
         )
-    }
 
     /**
      * Captures a screenshot of a specific UI node
@@ -100,14 +98,13 @@ object ScreenshotTestUtils {
     fun captureNodeScreenshot(
         node: SemanticsNodeInteraction,
         testName: String,
-        category: String = "components"
-    ): File {
-        return captureScreenshotInternal(
+        category: String = "components",
+    ): File =
+        captureScreenshotInternal(
             bitmap = node.captureToImage().asAndroidBitmap(),
             testName = testName,
-            category = category
+            category = category,
         )
-    }
 
     /**
      * Captures a series of screenshots for animation testing
@@ -117,7 +114,7 @@ object ScreenshotTestUtils {
         testName: String,
         frameCount: Int = 10,
         delayMs: Long = 100,
-        category: String = "animations"
+        category: String = "animations",
     ): List<File> {
         val frames = mutableListOf<File>()
 
@@ -125,11 +122,12 @@ object ScreenshotTestUtils {
             Thread.sleep(delayMs)
             composeTestRule.waitForIdle()
 
-            val frameFile = captureScreenshotInternal(
-                bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap(),
-                testName = "${testName}_frame_${frameIndex}",
-                category = category
-            )
+            val frameFile =
+                captureScreenshotInternal(
+                    bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap(),
+                    testName = "${testName}_frame_$frameIndex",
+                    category = category,
+                )
             frames.add(frameFile)
         }
 
@@ -142,16 +140,17 @@ object ScreenshotTestUtils {
     fun captureOrientationScreenshots(
         composeTestRule: ComposeTestRule,
         testName: String,
-        category: String = "orientation"
+        category: String = "orientation",
     ): Map<String, File> {
         val screenshots = mutableMapOf<String, File>()
 
         // Capture portrait
-        screenshots["portrait"] = captureScreenshotInternal(
-            bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap(),
-            testName = "${testName}_portrait",
-            category = category
-        )
+        screenshots["portrait"] =
+            captureScreenshotInternal(
+                bitmap = composeTestRule.onRoot().captureToImage().asAndroidBitmap(),
+                testName = "${testName}_portrait",
+                category = category,
+            )
 
         // Note: Actual orientation change would require more complex setup
         // This is a simplified version for demonstration
@@ -164,13 +163,13 @@ object ScreenshotTestUtils {
     fun compareScreenshots(
         baseline: File,
         actual: File,
-        tolerance: Double = 0.02
+        tolerance: Double = 0.02,
     ): ScreenshotComparisonResult {
         if (!baseline.exists()) {
             return ScreenshotComparisonResult(
                 isMatch = false,
                 difference = 1.0,
-                error = "Baseline screenshot not found: ${baseline.absolutePath}"
+                error = "Baseline screenshot not found: ${baseline.absolutePath}",
             )
         }
 
@@ -178,7 +177,7 @@ object ScreenshotTestUtils {
             return ScreenshotComparisonResult(
                 isMatch = false,
                 difference = 1.0,
-                error = "Actual screenshot not found: ${actual.absolutePath}"
+                error = "Actual screenshot not found: ${actual.absolutePath}",
             )
         }
 
@@ -186,7 +185,7 @@ object ScreenshotTestUtils {
         return ScreenshotComparisonResult(
             isMatch = true,
             difference = 0.0,
-            diffImage = null
+            diffImage = null,
         )
     }
 
@@ -217,29 +216,34 @@ object ScreenshotTestUtils {
     /**
      * Captures test environment information for screenshot metadata
      */
-    fun captureTestEnvironment(): TestEnvironmentInfo {
-        return TestEnvironmentInfo(
+    fun captureTestEnvironment(): TestEnvironmentInfo =
+        TestEnvironmentInfo(
             deviceModel = Build.MODEL,
             androidVersion = Build.VERSION.RELEASE,
-            screenDensity = InstrumentationRegistry.getInstrumentation()
-                .targetContext.resources.displayMetrics.density,
-            screenWidth = InstrumentationRegistry.getInstrumentation()
-                .targetContext.resources.displayMetrics.widthPixels,
-            screenHeight = InstrumentationRegistry.getInstrumentation()
-                .targetContext.resources.displayMetrics.heightPixels,
-            timestamp = System.currentTimeMillis()
+            screenDensity =
+                InstrumentationRegistry
+                    .getInstrumentation()
+                    .targetContext.resources.displayMetrics.density,
+            screenWidth =
+                InstrumentationRegistry
+                    .getInstrumentation()
+                    .targetContext.resources.displayMetrics.widthPixels,
+            screenHeight =
+                InstrumentationRegistry
+                    .getInstrumentation()
+                    .targetContext.resources.displayMetrics.heightPixels,
+            timestamp = System.currentTimeMillis(),
         )
-    }
 
     private fun captureScreenshotInternal(
         bitmap: Bitmap,
         testName: String,
-        category: String
+        category: String,
     ): File {
         val environment = captureTestEnvironment()
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
-        val fileName = "${testName}_${environment.deviceModel.replace(" ", "_")}_${timestamp}.png"
+        val fileName = "${testName}_${environment.deviceModel.replace(" ", "_")}_$timestamp.png"
         val categoryDir = File(getActualDirectory(), category)
 
         if (!categoryDir.exists()) {
@@ -266,21 +270,18 @@ object ScreenshotTestUtils {
     }
 
     private fun getBaselineDirectory(testClass: String = ""): File {
-        val baseDir = if (testClass.isNotEmpty()) {
-            File(getScreenshotRoot(), "$BASELINE_DIR/$testClass")
-        } else {
-            File(getScreenshotRoot(), BASELINE_DIR)
-        }
+        val baseDir =
+            if (testClass.isNotEmpty()) {
+                File(getScreenshotRoot(), "$BASELINE_DIR/$testClass")
+            } else {
+                File(getScreenshotRoot(), BASELINE_DIR)
+            }
         return baseDir
     }
 
-    private fun getActualDirectory(): File {
-        return File(getScreenshotRoot(), ACTUAL_DIR)
-    }
+    private fun getActualDirectory(): File = File(getScreenshotRoot(), ACTUAL_DIR)
 
-    private fun getDiffDirectory(): File {
-        return File(getScreenshotRoot(), DIFF_DIR)
-    }
+    private fun getDiffDirectory(): File = File(getScreenshotRoot(), DIFF_DIR)
 }
 
 /**
@@ -290,7 +291,7 @@ data class ScreenshotComparisonResult(
     val isMatch: Boolean,
     val difference: Double,
     val diffImage: File? = null,
-    val error: String? = null
+    val error: String? = null,
 )
 
 /**
@@ -302,7 +303,7 @@ data class TestEnvironmentInfo(
     val screenDensity: Float,
     val screenWidth: Int,
     val screenHeight: Int,
-    val timestamp: Long
+    val timestamp: Long,
 )
 
 /**
@@ -324,14 +325,10 @@ object ScreenshotCategories {
  */
 fun ComposeTestRule.captureScreenshot(
     testName: String,
-    category: String = ScreenshotCategories.COMPONENTS
-): File {
-    return ScreenshotTestUtils.captureScreenshot(this, testName, category)
-}
+    category: String = ScreenshotCategories.COMPONENTS,
+): File = ScreenshotTestUtils.captureScreenshot(this, testName, category)
 
 fun SemanticsNodeInteraction.captureScreenshot(
     testName: String,
-    category: String = ScreenshotCategories.COMPONENTS
-): File {
-    return ScreenshotTestUtils.captureNodeScreenshot(this, testName, category)
-}
+    category: String = ScreenshotCategories.COMPONENTS,
+): File = ScreenshotTestUtils.captureNodeScreenshot(this, testName, category)

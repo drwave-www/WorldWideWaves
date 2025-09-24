@@ -42,7 +42,6 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class MockInfrastructureTest {
-
     @Test
     fun `test MockClock basic time operations`() {
         val mockClock = MockClock()
@@ -119,15 +118,19 @@ class MockInfrastructureTest {
         val mockProvider = MockLocationProvider()
         val locationUpdates = mutableListOf<Position>()
 
-        val listener = object : MockLocationProvider.LocationListener {
-            override fun onLocationUpdate(position: Position, accuracy: Float) {
-                locationUpdates.add(position)
-            }
+        val listener =
+            object : MockLocationProvider.LocationListener {
+                override fun onLocationUpdate(
+                    position: Position,
+                    accuracy: Float,
+                ) {
+                    locationUpdates.add(position)
+                }
 
-            override fun onLocationError(error: String) {
-                // Not testing errors in this test
+                override fun onLocationError(error: String) {
+                    // Not testing errors in this test
+                }
             }
-        }
 
         mockProvider.addLocationListener(listener)
 
@@ -154,15 +157,19 @@ class MockInfrastructureTest {
         val mockProvider = MockLocationProvider()
         var errorReceived: String? = null
 
-        val listener = object : MockLocationProvider.LocationListener {
-            override fun onLocationUpdate(position: Position, accuracy: Float) {
-                // Not testing successful updates here
-            }
+        val listener =
+            object : MockLocationProvider.LocationListener {
+                override fun onLocationUpdate(
+                    position: Position,
+                    accuracy: Float,
+                ) {
+                    // Not testing successful updates here
+                }
 
-            override fun onLocationError(error: String) {
-                errorReceived = error
+                override fun onLocationError(error: String) {
+                    errorReceived = error
+                }
             }
-        }
 
         mockProvider.addLocationListener(listener)
 
@@ -229,15 +236,16 @@ class MockInfrastructureTest {
         val targetZoom = 15.0
 
         var animationFinished = false
-        val callback = object : MapCameraCallback {
-            override fun onFinish() {
-                animationFinished = true
-            }
+        val callback =
+            object : MapCameraCallback {
+                override fun onFinish() {
+                    animationFinished = true
+                }
 
-            override fun onCancel() {
-                // Not testing cancellation here
+                override fun onCancel() {
+                    // Not testing cancellation here
+                }
             }
-        }
 
         // Test camera animation
         mockAdapter.animateCamera(targetPosition, targetZoom, callback)
@@ -257,15 +265,16 @@ class MockInfrastructureTest {
         val padding = 50
 
         var animationFinished = false
-        val callback = object : MapCameraCallback {
-            override fun onFinish() {
-                animationFinished = true
-            }
+        val callback =
+            object : MapCameraCallback {
+                override fun onFinish() {
+                    animationFinished = true
+                }
 
-            override fun onCancel() {
-                // Not testing cancellation here
+                override fun onCancel() {
+                    // Not testing cancellation here
+                }
             }
-        }
 
         // Test bounds animation
         mockAdapter.animateCameraToBounds(testBounds, padding, callback)
@@ -326,15 +335,16 @@ class MockInfrastructureTest {
         val targetPosition = TestHelpers.TestLocations.LONDON
         var animationCancelled = false
 
-        val callback = object : MapCameraCallback {
-            override fun onFinish() {
-                // Should not be called
-            }
+        val callback =
+            object : MapCameraCallback {
+                override fun onFinish() {
+                    // Should not be called
+                }
 
-            override fun onCancel() {
-                animationCancelled = true
+                override fun onCancel() {
+                    animationCancelled = true
+                }
             }
-        }
 
         mockAdapter.animateCamera(targetPosition, callback = callback)
 
@@ -354,10 +364,14 @@ class MockInfrastructureTest {
         var animationCancelled = false
         failingAdapter.animateCamera(
             TestHelpers.TestLocations.PARIS,
-            callback = object : MapCameraCallback {
-                override fun onFinish() {}
-                override fun onCancel() { animationCancelled = true }
-            }
+            callback =
+                object : MapCameraCallback {
+                    override fun onFinish() {}
+
+                    override fun onCancel() {
+                        animationCancelled = true
+                    }
+                },
         )
         assertTrue(animationCancelled)
 

@@ -23,14 +23,13 @@ package com.worldwidewaves.shared.events.utils
 
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.math.atan2
 import kotlin.math.sqrt
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Comprehensive tests for mathematical calculations in GeoUtils.
@@ -50,7 +49,6 @@ import kotlin.test.assertFalse
  * @see GeoUtils
  */
 class GeoMathematicalValidationTest {
-
     companion object {
         // Scientifically justified tolerances based on WGS-84 precision requirements
         private const val COORDINATE_PRECISION_EPSILON = 1e-9 // ~1mm precision at equator
@@ -63,13 +61,19 @@ class GeoMathematicalValidationTest {
      * Reference implementation of Haversine formula for great circle distance.
      * Used to validate the accuracy of GeoUtils.calculateDistance.
      */
-    private fun haversineDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    private fun haversineDistance(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double,
+    ): Double {
         val lat1Rad = lat1 * (PI / 180)
         val lat2Rad = lat2 * (PI / 180)
         val deltaLatRad = (lat2 - lat1) * (PI / 180)
         val deltaLonRad = (lon2 - lon1) * (PI / 180)
 
-        val a = sin(deltaLatRad / 2) * sin(deltaLatRad / 2) +
+        val a =
+            sin(deltaLatRad / 2) * sin(deltaLatRad / 2) +
                 cos(lat1Rad) * cos(lat2Rad) *
                 sin(deltaLonRad / 2) * sin(deltaLonRad / 2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
@@ -85,8 +89,11 @@ class GeoMathematicalValidationTest {
 
         // WHEN: Comparing with scientifically justified value
         // THEN: Should use precision appropriate for geodetic calculations (~1mm at equator)
-        assertEquals(expectedEpsilon, currentEpsilon,
-            "EPSILON should be $expectedEpsilon for ~1mm precision at equator, but was $currentEpsilon")
+        assertEquals(
+            expectedEpsilon,
+            currentEpsilon,
+            "EPSILON should be $expectedEpsilon for ~1mm precision at equator, but was $currentEpsilon",
+        )
     }
 
     @Test
@@ -97,8 +104,11 @@ class GeoMathematicalValidationTest {
 
         // WHEN: Comparing with WGS-84 standard
         // THEN: Should match WGS-84 semi-major axis
-        assertEquals(wgs84SemiMajorAxis, currentRadius,
-            "EARTH_RADIUS should match WGS-84 semi-major axis ($wgs84SemiMajorAxis m)")
+        assertEquals(
+            wgs84SemiMajorAxis,
+            currentRadius,
+            "EARTH_RADIUS should match WGS-84 semi-major axis ($wgs84SemiMajorAxis m)",
+        )
     }
 
     @Test
@@ -114,16 +124,18 @@ class GeoMathematicalValidationTest {
 
         // THEN: Should be within acceptable tolerance for short distances
         val errorPercentage = abs(geoUtilsDistance - haversineDistance) / haversineDistance * 100
-        assertTrue(errorPercentage < 1.0,
-            "Short distance error should be <1%, got ${errorPercentage}% " +
-            "(GeoUtils: ${geoUtilsDistance}m, Haversine: ${haversineDistance}m)")
+        assertTrue(
+            errorPercentage < 1.0,
+            "Short distance error should be <1%, got $errorPercentage% " +
+                "(GeoUtils: ${geoUtilsDistance}m, Haversine: ${haversineDistance}m)",
+        )
     }
 
     @Test
     fun `test calculateDistanceFast vs accurate for longitude distances`() {
         // GIVEN: Long distance coordinates (transcontinental scale)
         val lat = 45.0
-        val lon1 = 0.0  // Greenwich
+        val lon1 = 0.0 // Greenwich
         val lon2 = 90.0 // Quarter way around the globe
 
         // WHEN: Calculating with both fast approximation and accurate methods
@@ -132,29 +144,38 @@ class GeoMathematicalValidationTest {
 
         // THEN: Both methods should produce reasonable results for longitude distances
         // Note: For longitude-only distances at the same latitude, the difference is minimal
-        assertTrue(accurateDistance > 0,
-            "Accurate distance should be positive, got: ${accurateDistance}m")
-        assertTrue(fastDistance > 0,
-            "Fast distance should be positive, got: ${fastDistance}m")
+        assertTrue(
+            accurateDistance > 0,
+            "Accurate distance should be positive, got: ${accurateDistance}m",
+        )
+        assertTrue(
+            fastDistance > 0,
+            "Fast distance should be positive, got: ${fastDistance}m",
+        )
 
         // Verify the distances are in reasonable range (quarter globe at 45° lat)
         val expectedApprox = 10_000_000.0 // ~10,000 km
-        assertTrue(accurateDistance > expectedApprox * 0.5,
-            "Distance should be at least half expected (~5,000km), got: ${accurateDistance}m")
-        assertTrue(accurateDistance < expectedApprox * 1.5,
-            "Distance should be at most 1.5x expected (~15,000km), got: ${accurateDistance}m")
+        assertTrue(
+            accurateDistance > expectedApprox * 0.5,
+            "Distance should be at least half expected (~5,000km), got: ${accurateDistance}m",
+        )
+        assertTrue(
+            accurateDistance < expectedApprox * 1.5,
+            "Distance should be at most 1.5x expected (~15,000km), got: ${accurateDistance}m",
+        )
     }
 
     @Test
     fun `test calculateDistanceAccurate matches Haversine formula`() {
         // GIVEN: Various distance coordinates
-        val testCases = listOf(
-            Triple(45.0, 0.0, 1.0),   // Short distance
-            Triple(45.0, 0.0, 10.0),  // Medium distance
-            Triple(45.0, 0.0, 90.0),  // Long distance
-            Triple(0.0, 0.0, 45.0),   // Equatorial distance
-            Triple(80.0, 0.0, 10.0),  // Near-polar distance
-        )
+        val testCases =
+            listOf(
+                Triple(45.0, 0.0, 1.0), // Short distance
+                Triple(45.0, 0.0, 10.0), // Medium distance
+                Triple(45.0, 0.0, 90.0), // Long distance
+                Triple(0.0, 0.0, 45.0), // Equatorial distance
+                Triple(80.0, 0.0, 10.0), // Near-polar distance
+            )
 
         testCases.forEach { (lat, lon1, lon2) ->
             // WHEN: Calculating with accurate method vs reference Haversine
@@ -163,9 +184,11 @@ class GeoMathematicalValidationTest {
 
             // THEN: Should match within acceptable tolerance
             val errorPercentage = abs(geoUtilsAccurate - haversineReference) / haversineReference * 100
-            assertTrue(errorPercentage < 0.1,
-                "Accurate method should match Haversine within 0.1%, got ${errorPercentage}% " +
-                "for coordinates ($lat°, $lon1°, $lon2°)")
+            assertTrue(
+                errorPercentage < 0.1,
+                "Accurate method should match Haversine within 0.1%, got $errorPercentage% " +
+                    "for coordinates ($lat°, $lon1°, $lon2°)",
+            )
         }
     }
 
@@ -181,9 +204,11 @@ class GeoMathematicalValidationTest {
         val equatorDistance = GeoUtils.calculateDistance(lon1, lon2, 0.0)
 
         // THEN: Distance should be much smaller near poles due to convergence
-        assertTrue(polarDistance < equatorDistance * 0.1,
+        assertTrue(
+            polarDistance < equatorDistance * 0.1,
             "Distance near pole should be much smaller due to meridian convergence. " +
-            "Polar: ${polarDistance}m, Equator: ${equatorDistance}m")
+                "Polar: ${polarDistance}m, Equator: ${equatorDistance}m",
+        )
     }
 
     @Test
@@ -198,9 +223,11 @@ class GeoMathematicalValidationTest {
         val equatorDistance = GeoUtils.calculateDistance(lon1, lon2, 0.0)
 
         // THEN: Distance should be much smaller near poles
-        assertTrue(polarDistance < equatorDistance * 0.1,
+        assertTrue(
+            polarDistance < equatorDistance * 0.1,
             "Distance near South Pole should be much smaller due to meridian convergence. " +
-            "Polar: ${polarDistance}m, Equator: ${equatorDistance}m")
+                "Polar: ${polarDistance}m, Equator: ${equatorDistance}m",
+        )
     }
 
     @Test
@@ -234,13 +261,14 @@ class GeoMathematicalValidationTest {
     @Test
     fun `test latitude range validation is mathematically sound`() {
         // GIVEN: Various latitude ranges
-        val testCases = listOf(
-            Triple(45.0, 40.0, 50.0) to true,  // Normal range
-            Triple(0.0, -10.0, 10.0) to true,  // Crossing equator
-            Triple(-85.0, -90.0, -80.0) to true, // Antarctic region
-            Triple(45.0, 50.0, 40.0) to true,  // Reversed range (should still work)
-            Triple(60.0, 40.0, 50.0) to false, // Outside range
-        )
+        val testCases =
+            listOf(
+                Triple(45.0, 40.0, 50.0) to true, // Normal range
+                Triple(0.0, -10.0, 10.0) to true, // Crossing equator
+                Triple(-85.0, -90.0, -80.0) to true, // Antarctic region
+                Triple(45.0, 50.0, 40.0) to true, // Reversed range (should still work)
+                Triple(60.0, 40.0, 50.0) to false, // Outside range
+            )
 
         testCases.forEach { (data, expected) ->
             val (lat, start, end) = data
@@ -249,8 +277,11 @@ class GeoMathematicalValidationTest {
             val result = GeoUtils.isLatitudeInRange(lat, start, end)
 
             // THEN: Should match expected result
-            assertEquals(expected, result,
-                "Latitude $lat should ${if (expected) "be" else "not be"} in range [$start, $end]")
+            assertEquals(
+                expected,
+                result,
+                "Latitude $lat should ${if (expected) "be" else "not be"} in range [$start, $end]",
+            )
         }
     }
 
@@ -266,8 +297,10 @@ class GeoMathematicalValidationTest {
         val isOnSegment = GeoUtils.isPointOnSegment(point, segment)
 
         // THEN: Should handle precision correctly
-        assertTrue(isOnSegment,
-            "Point at precision limits should be correctly identified as on segment")
+        assertTrue(
+            isOnSegment,
+            "Point at precision limits should be correctly identified as on segment",
+        )
     }
 
     @Test
@@ -280,49 +313,63 @@ class GeoMathematicalValidationTest {
         val crossProduct = vector1.cross(vector2)
 
         // THEN: Should match mathematical expectation (3*2 - 4*1 = 2)
-        assertEquals(2.0, crossProduct, 1e-10,
-            "Cross product should be mathematically correct")
+        assertEquals(
+            2.0,
+            crossProduct,
+            1e-10,
+            "Cross product should be mathematically correct",
+        )
     }
 
     @Test
     fun `test radians to degrees conversion accuracy`() {
         // GIVEN: Known angle conversions
-        val testCases = listOf(
-            0.0 to 0.0,
-            PI / 2 to 90.0,
-            PI to 180.0,
-            2 * PI to 360.0,
-            -PI / 2 to -90.0
-        )
+        val testCases =
+            listOf(
+                0.0 to 0.0,
+                PI / 2 to 90.0,
+                PI to 180.0,
+                2 * PI to 360.0,
+                -PI / 2 to -90.0,
+            )
 
         testCases.forEach { (radians, expectedDegrees) ->
             // WHEN: Converting radians to degrees
             val degrees = GeoUtils.run { radians.toDegrees() }
 
             // THEN: Should be mathematically accurate
-            assertEquals(expectedDegrees, degrees, 1e-10,
-                "Conversion of $radians radians should equal $expectedDegrees degrees")
+            assertEquals(
+                expectedDegrees,
+                degrees,
+                1e-10,
+                "Conversion of $radians radians should equal $expectedDegrees degrees",
+            )
         }
     }
 
     @Test
     fun `test degrees to radians conversion accuracy`() {
         // GIVEN: Known angle conversions
-        val testCases = listOf(
-            0.0 to 0.0,
-            90.0 to PI / 2,
-            180.0 to PI,
-            360.0 to 2 * PI,
-            -90.0 to -PI / 2
-        )
+        val testCases =
+            listOf(
+                0.0 to 0.0,
+                90.0 to PI / 2,
+                180.0 to PI,
+                360.0 to 2 * PI,
+                -90.0 to -PI / 2,
+            )
 
         testCases.forEach { (degrees, expectedRadians) ->
             // WHEN: Converting degrees to radians
             val radians = GeoUtils.run { degrees.toRadians() }
 
             // THEN: Should be mathematically accurate
-            assertEquals(expectedRadians, radians, 1e-10,
-                "Conversion of $degrees degrees should equal $expectedRadians radians")
+            assertEquals(
+                expectedRadians,
+                radians,
+                1e-10,
+                "Conversion of $degrees degrees should equal $expectedRadians radians",
+            )
         }
     }
 
@@ -336,28 +383,35 @@ class GeoMathematicalValidationTest {
         val distance = GeoUtils.calculateDistance(lon, lon, lat)
 
         // THEN: Should return zero
-        assertEquals(0.0, distance, GeoUtils.EPSILON,
-            "Distance between identical coordinates should be zero")
+        assertEquals(
+            0.0,
+            distance,
+            GeoUtils.EPSILON,
+            "Distance between identical coordinates should be zero",
+        )
     }
 
     @Test
     fun `test distance calculation is always non-negative`() {
         // GIVEN: Various coordinate pairs (including negative coordinates)
-        val testCases = listOf(
-            Triple(0.0, 10.0, 45.0),
-            Triple(10.0, 0.0, 45.0),
-            Triple(-10.0, 10.0, 45.0),
-            Triple(10.0, -10.0, 45.0),
-            Triple(-170.0, 170.0, 0.0), // Crosses date line
-        )
+        val testCases =
+            listOf(
+                Triple(0.0, 10.0, 45.0),
+                Triple(10.0, 0.0, 45.0),
+                Triple(-10.0, 10.0, 45.0),
+                Triple(10.0, -10.0, 45.0),
+                Triple(-170.0, 170.0, 0.0), // Crosses date line
+            )
 
         testCases.forEach { (lon1, lon2, lat) ->
             // WHEN: Calculating distance
             val distance = GeoUtils.calculateDistance(lon1, lon2, lat)
 
             // THEN: Should always be non-negative
-            assertTrue(distance >= 0.0,
-                "Distance should always be non-negative, got $distance for coordinates ($lon1, $lon2) at $lat°")
+            assertTrue(
+                distance >= 0.0,
+                "Distance should always be non-negative, got $distance for coordinates ($lon1, $lon2) at $lat°",
+            )
         }
     }
 }

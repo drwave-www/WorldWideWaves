@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
@@ -51,8 +51,8 @@ class WWWEventWaveWarming(
 
     suspend fun isUserWarmingStarted(): Boolean = userWarmingStartDateTime()?.let { clock.now() >= it } ?: false
 
-    fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
-        choreographyManager.getCurrentWarmingSequenceImmediate(event.getStartDateTime())
+    suspend fun getCurrentChoregraphySequence(): DisplayableSequence<DrawableResource>? =
+        choreographyManager.getCurrentWarmingSequence(event.getStartDateTime())
 
     /**
      * Play a tone from the choreography that is active **now** and return the MIDI pitch

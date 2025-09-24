@@ -33,7 +33,8 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.initNapier
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -70,6 +71,9 @@ class MainApplication :
     override fun onCreate() {
         super.onCreate()
 
+        // Initialize Napier logging for Android
+        initNapier()
+
         // Ensure split compat is installed
         SplitCompat.install(this)
 
@@ -90,9 +94,9 @@ class MainApplication :
             wwwPlatform.setSimulation(
                 WWWSimulation(
                     now,
-                    // Position(lat = 48.83625, lng = 2.46905),
-                    Position(lat = 48.862725, lng = 2.287592),
-                    WWWGlobals.Companion.Wave.DEFAULT_SPEED_SIMULATION,
+                    // Use test-verified Paris coordinates (known to be inside area)
+                    Position(lat = 48.8566, lng = 2.3522),
+                    WWWGlobals.Wave.DEFAULT_SPEED_SIMULATION,
                 ),
             ) // In Paris, 1h is 2mn
         }
