@@ -95,6 +95,11 @@ fun WaveChoreographies(
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
+    // Debug logging for choreography states
+    androidx.compose.runtime.LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit) {
+        android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit")
+    }
+
     // State to track if we should show the hit sequence
     var showHitSequence by remember { mutableStateOf(false) }
 

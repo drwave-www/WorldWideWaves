@@ -489,9 +489,11 @@ class WWWEventObserver(
         // Check if user is about to be hit
         var userIsGoingToBeHit = false
         val timeBeforeHit = event.wave.timeBeforeUserHit() ?: INFINITE
+        Log.v("WWWEventObserver", "[CHOREO_DEBUG] timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}, userIsInArea=${_userIsInArea.value}")
         if (timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT) {
             warmingInProgress = false
             userIsGoingToBeHit = true
+            Log.v("WWWEventObserver", "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}")
         }
 
         // Check if user has been hit

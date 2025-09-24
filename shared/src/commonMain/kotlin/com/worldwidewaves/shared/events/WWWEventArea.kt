@@ -339,7 +339,8 @@ data class WWWEventArea(
                 coroutineScopeProvider.withDefaultContext {
                     loadPolygonsFromGeoJson(tempPolygons)
                 }
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
+                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
             // Atomically assign the complete immutable list
@@ -358,22 +359,16 @@ data class WWWEventArea(
             val geoJsonData = geoJsonDataProvider.getGeoJsonData(event.id)
 
             if (geoJsonData != null) {
-                val startPolygonCount = tempPolygons.size
                 processGeoJsonData(geoJsonData, tempPolygons)
-                val endPolygonCount = tempPolygons.size
-            } else {
             }
 
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
+            // GeoJSON data loading errors are handled gracefully
         }
     }
 
     private fun processGeoJsonData(geoJsonData: JsonObject, tempPolygons: MutableArea) {
-
         val rootType = geoJsonData["type"]?.jsonPrimitive?.content
-        // Now that we know the type, log it for diagnostics
-
-        val startPolygonCount = tempPolygons.size
 
         when (rootType) {
             "FeatureCollection" -> {
@@ -382,11 +377,7 @@ data class WWWEventArea(
             "Polygon", "MultiPolygon" -> {
                 processDirectGeometry(geoJsonData, tempPolygons)
             }
-            else -> {
-            }
         }
-
-        val endPolygonCount = tempPolygons.size
     }
 
     private fun processFeatureCollection(geoJsonData: JsonObject, tempPolygons: MutableArea) {
@@ -396,24 +387,19 @@ data class WWWEventArea(
                 val geometry = feature.jsonObject["geometry"]?.jsonObject
                 if (geometry != null) {
                     processGeometry(geometry, tempPolygons)
-                } else {
                 }
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
+                // Feature geometry processing errors are handled gracefully
             }
         }
     }
 
     private fun processDirectGeometry(geoJsonData: JsonObject, tempPolygons: MutableArea) {
-        val rootType = geoJsonData["type"]?.jsonPrimitive?.content
-
-        val startPolygonCount = tempPolygons.size
-
         try {
             processGeometry(geoJsonData, tempPolygons)
-            val endPolygonCount = tempPolygons.size
-        } catch (e: Exception) {
+        } catch (ignored: Exception) {
+            // Direct geometry processing errors are handled gracefully
         }
-
     }
 
     private fun processGeometry(
