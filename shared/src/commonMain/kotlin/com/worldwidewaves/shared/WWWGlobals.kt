@@ -161,6 +161,12 @@ class WWWGlobals {
 
             /** Default ticks per beat for MIDI timing */
             const val DEFAULT_TICKS_PER_BEAT = 24
+
+            /** MIDI octave divisor for note calculations */
+            const val OCTAVE_DIVISOR = 12
+
+            /** Default octave for MIDI operations */
+            const val DEFAULT_OCTAVE = 8
         }
 
         // ============================================================================================
@@ -216,6 +222,12 @@ class WWWGlobals {
         object Timing {
             /** Minimum duration for splash screen display */
             val SPLASH_MIN_DURATION = 2000.milliseconds
+
+            /** Maximum duration for splash screen display */
+            val SPLASH_MAX_DURATION = 2000.milliseconds
+
+            /** Camera animation duration for map transitions (milliseconds) */
+            const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
 
             /** GPS update timer interval */
             val GPS_UPDATE_INTERVAL = 3000.milliseconds
@@ -434,6 +446,48 @@ class WWWGlobals {
             /** Empty counter placeholder text */
             const val EMPTY_COUNTER = "--:--"
         }
+
+        // ============================================================================================
+        // PERFORMANCE & LOCATION CONSTANTS (SHARED)
+        // ============================================================================================
+
+        /**
+         * Performance Thresholds (Business Logic)
+         */
+        object PerformanceThresholds {
+            /** Excellent timing accuracy threshold (percentage) */
+            const val TIMING_ACCURACY_EXCELLENT = 95.0
+
+            /** Good timing accuracy threshold (percentage) */
+            const val TIMING_ACCURACY_GOOD = 90.0
+
+            /** High participation rate threshold */
+            const val PARTICIPATION_RATE_HIGH = 0.8
+
+            /** Medium participation rate threshold */
+            const val PARTICIPATION_RATE_MEDIUM = 0.6
+
+            /** Low memory usage threshold (percentage) */
+            const val MEMORY_USAGE_LOW = 60.0
+
+            /** Medium memory usage threshold (percentage) */
+            const val MEMORY_USAGE_MEDIUM = 80.0
+        }
+
+        /**
+         * Location Accuracy Constants (GPS-agnostic)
+         */
+        object LocationAccuracy {
+            /** High GPS accuracy threshold in meters */
+            const val GPS_HIGH_ACCURACY_THRESHOLD = 5.0f
+
+            /** Medium GPS accuracy threshold in meters */
+            const val GPS_MEDIUM_ACCURACY_THRESHOLD = 15.0f
+
+            /** Low GPS accuracy threshold in meters */
+            const val GPS_LOW_ACCURACY_THRESHOLD = 50.0f
+        }
+
 
     }
 }

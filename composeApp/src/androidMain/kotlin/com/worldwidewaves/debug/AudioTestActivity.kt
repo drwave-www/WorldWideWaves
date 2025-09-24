@@ -265,8 +265,8 @@ class AudioTestActivity : ComponentActivity() {
         val track = midiTrack ?: return
         Log.d(TAG, "Playing MIDI sequence: ${track.notes.size} notes")
 
-        // Play first 8 notes to keep demo reasonable
-        track.notes.take(8).forEachIndexed { index, note ->
+        // Play first DEFAULT_OCTAVE notes to keep demo reasonable
+        track.notes.take(com.worldwidewaves.shared.WWWGlobals.Companion.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
             val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
             val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.6
 

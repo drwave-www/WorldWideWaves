@@ -271,7 +271,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newCameraPosition(builder.build()),
-            500, // Animation duration
+            com.worldwidewaves.shared.WWWGlobals.Companion.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
@@ -311,7 +311,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(latLngBounds, padding),
-            500, // Animation duration
+            com.worldwidewaves.shared.WWWGlobals.Companion.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom

@@ -147,7 +147,7 @@ open class MainActivity : AppCompatActivity() {
         splashScreen.setKeepOnScreenCondition {
             if (!isOfficialSplashDismissed) {
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(500L) // 500 ms
+                    kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MIN_DURATION_MS)
                     isOfficialSplashDismissed = true
                 }
                 true // keep the official splash right now
@@ -207,7 +207,7 @@ open class MainActivity : AppCompatActivity() {
 
         // Also enforce minimum duration
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(2000) // Timing.SPLASH_MIN_DURATION
+            kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS) // Timing.SPLASH_MIN_DURATION
             checkSplashFinished(startTime)
         }
     }
@@ -215,7 +215,7 @@ open class MainActivity : AppCompatActivity() {
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded && elapsed >= 2000) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+        if (isDataLoaded && elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
             isSplashFinished.update { true }
         }
     }

@@ -452,7 +452,7 @@ private fun NoteVisualization(
                 Text(
                     text = "MIDI: $lastPlayedNote • ${WaveformGenerator.midiPitchToFrequency(lastPlayedNote).roundToInt()} Hz",
                     fontSize = 12.sp,
-                    modifier = Modifier.alpha(noteAlpha * 0.8f),
+                    modifier = Modifier.alpha(noteAlpha * com.worldwidewaves.constants.AndroidUIConstants.Audio.DEFAULT_VOLUME),
                 )
             } else {
                 Text(
@@ -470,7 +470,7 @@ private fun NoteVisualization(
  */
 private fun getNoteName(midiNote: Int): String {
     val noteNames = arrayOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-    return noteNames[midiNote % 12]
+    return noteNames[midiNote % com.worldwidewaves.shared.WWWGlobals.Companion.Midi.OCTAVE_DIVISOR]
 }
 
 /**

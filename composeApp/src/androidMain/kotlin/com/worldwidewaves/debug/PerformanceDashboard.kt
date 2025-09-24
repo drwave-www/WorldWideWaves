@@ -342,33 +342,33 @@ private fun IssueItem(issue: PerformanceIssue) {
 @Composable
 private fun getTimingAccuracyColor(accuracy: Double): Color =
     when {
-        accuracy >= 95.0 -> Color(0xFF4CAF50) // Green
-        accuracy >= 90.0 -> Color(0xFFFF9800) // Orange
-        else -> Color(0xFFF44336) // Red
+        accuracy >= com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.TIMING_ACCURACY_EXCELLENT -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.GREEN_SUCCESS) // Green
+        accuracy >= com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.TIMING_ACCURACY_GOOD -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.ORANGE_WARNING) // Orange
+        else -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.RED_ERROR) // Red
     }
 
 @Composable
 private fun getParticipationRateColor(rate: Double): Color =
     when {
-        rate >= 0.8 -> Color(0xFF4CAF50) // Green
-        rate >= 0.6 -> Color(0xFFFF9800) // Orange
-        else -> Color(0xFFF44336) // Red
+        rate >= com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.PARTICIPATION_RATE_HIGH -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.GREEN_SUCCESS) // Green
+        rate >= com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.PARTICIPATION_RATE_MEDIUM -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.ORANGE_WARNING) // Orange
+        else -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.RED_ERROR) // Red
     }
 
 @Composable
 private fun getMemoryUsageColor(usage: Double): Color =
     when {
-        usage < 60.0 -> Color(0xFF4CAF50) // Green
-        usage < 80.0 -> Color(0xFFFF9800) // Orange
-        else -> Color(0xFFF44336) // Red
+        usage < com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.MEMORY_USAGE_LOW -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.GREEN_SUCCESS) // Green
+        usage < com.worldwidewaves.shared.WWWGlobals.Companion.PerformanceThresholds.MEMORY_USAGE_MEDIUM -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.ORANGE_WARNING) // Orange
+        else -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.RED_ERROR) // Red
     }
 
 @Composable
 private fun getLocationAccuracyColor(accuracy: Float): Color =
     when {
-        accuracy <= 5.0f -> Color(0xFF4CAF50) // Green
-        accuracy <= 15.0f -> Color(0xFFFF9800) // Orange
-        else -> Color(0xFFF44336) // Red
+        accuracy <= com.worldwidewaves.shared.WWWGlobals.Companion.LocationAccuracy.GPS_HIGH_ACCURACY_THRESHOLD -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.GREEN_SUCCESS) // Green
+        accuracy <= com.worldwidewaves.shared.WWWGlobals.Companion.LocationAccuracy.GPS_MEDIUM_ACCURACY_THRESHOLD -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.ORANGE_WARNING) // Orange
+        else -> Color(com.worldwidewaves.constants.AndroidUIConstants.Colors.RED_ERROR) // Red
     }
 
 @Composable
