@@ -140,7 +140,7 @@ class WaveEventSoundIntegrationTest : KoinTest {
         // Mock current time to be during the wave event
         every { clock.now() } returns waveStartTime.plus(2000.milliseconds)
 
-        // Create test MIDI track
+        // Create test MIDI track and set it in the manager
         val testTrack = MidiTrack(
             name = "Test Wave Track",
             notes = listOf(
@@ -159,6 +159,9 @@ class WaveEventSoundIntegrationTest : KoinTest {
             ),
             totalDuration = 2.seconds
         )
+
+        // Set the track in the manager
+        soundChoreographyManager.setCurrentTrack(testTrack)
 
         // Capture sound parameters
         val frequencySlot = slot<Double>()
@@ -345,6 +348,16 @@ class WaveEventSoundIntegrationTest : KoinTest {
         val waveStartTime = Instant.fromEpochMilliseconds(1000)
         every { clock.now() } returns waveStartTime.plus(1000.milliseconds)
 
+        // Set up a test track so playCurrentSoundTone has something to work with
+        val testTrack = MidiTrack(
+            name = "Error Test Track",
+            notes = listOf(
+                MidiNote(pitch = 60, velocity = 80, startTime = 0.seconds, duration = 1.seconds)
+            ),
+            totalDuration = 1.seconds
+        )
+        soundChoreographyManager.setCurrentTrack(testTrack)
+
         // Test various error scenarios
         val errorScenarios = listOf(
             "Audio hardware unavailable" to RuntimeException("Audio hardware unavailable"),
@@ -488,6 +501,16 @@ class WaveEventSoundIntegrationTest : KoinTest {
     @Test
     fun `should manage sound system resources correctly`() = runTest {
         val waveStartTime = Instant.fromEpochMilliseconds(1000)
+
+        // Set up a test track for the resource management test
+        val testTrack = MidiTrack(
+            name = "Resource Test Track",
+            notes = listOf(
+                MidiNote(pitch = 60, velocity = 80, startTime = 0.seconds, duration = 1.seconds)
+            ),
+            totalDuration = 1.seconds
+        )
+        soundChoreographyManager.setCurrentTrack(testTrack)
 
         // Test multiple sound playback calls
         repeat(5) { iteration ->
