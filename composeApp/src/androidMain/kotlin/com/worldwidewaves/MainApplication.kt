@@ -33,7 +33,7 @@ import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant

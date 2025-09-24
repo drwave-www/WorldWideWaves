@@ -1,4 +1,4 @@
-package com.worldwidewaves.utils
+package com.worldwidewaves.shared.utils
 
 /*
  * Copyright 2025 DrWave

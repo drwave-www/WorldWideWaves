@@ -35,7 +35,7 @@ import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import com.worldwidewaves.viewmodels.EventsViewModel

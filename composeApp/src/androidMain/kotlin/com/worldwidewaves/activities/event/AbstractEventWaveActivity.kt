@@ -31,7 +31,7 @@ import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import org.koin.android.ext.android.inject
 
 /**
