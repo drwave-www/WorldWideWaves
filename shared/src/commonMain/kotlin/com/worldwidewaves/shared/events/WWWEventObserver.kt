@@ -26,6 +26,9 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
+import com.worldwidewaves.shared.domain.state.EventState
+import com.worldwidewaves.shared.domain.state.EventStateInput
+import com.worldwidewaves.shared.domain.state.EventStateManager
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -204,6 +207,8 @@ class WWWEventObserver(
     private val waveProgressionTracker: WaveProgressionTracker by inject()
 
     private val positionObserver: PositionObserver by inject()
+
+    private val eventStateManager: EventStateManager by inject()
 
     private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
     val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
@@ -477,62 +482,61 @@ class WWWEventObserver(
     ) {
         Log.v("WWWEventObserver", "updateStates called: progression=$progression, status=$status, eventId=${event.id}")
 
-        // Validate input parameters and state transitions
-        if (progression < 0.0 || progression > 100.0) {
-            Log.w("WWWEventObserver", "Invalid progression value: $progression (should be 0-100)")
-        }
-
-        // Validate state transitions for consistency
-        validateStateTransition(progression, status)
-        // Update the main state flows with smart throttling
-        updateProgressionIfSignificant(progression)
-        _eventStatus.updateIfChanged(status)
-
-        // Check for warming started
-        var warmingInProgress = false
-        if (event.warming.isUserWarmingStarted()) {
-            warmingInProgress = true
-        }
-
-        // Check if user is about to be hit
-        var userIsGoingToBeHit = false
-        val timeBeforeHit = event.wave.timeBeforeUserHit() ?: INFINITE
-        Log.v("WWWEventObserver", "[CHOREO_DEBUG] timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}, userIsInArea=${_userIsInArea.value}")
-        if (timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT) {
-            warmingInProgress = false
-            userIsGoingToBeHit = true
-            Log.v("WWWEventObserver", "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}")
-        }
-
-        // Check if user has been hit
-        if (event.wave.hasUserBeenHitInCurrentPosition()) {
-            warmingInProgress = false
-            userIsGoingToBeHit = false
-            _userHasBeenHit.updateIfChanged(true)
-        }
-
-        // Update additional state flows with smart throttling
-        updateTimeBeforeHitIfSignificant(timeBeforeHit)
-        updatePositionRatioIfSignificant(event.wave.userPositionToWaveRatio() ?: 0.0)
-        _hitDateTime.updateIfChanged(event.wave.userHitDateTime() ?: DISTANT_FUTURE)
-
-        // Record progression snapshot for tracking and analysis
-        val currentPosition = positionManager.getCurrentPosition()
-        try {
-            waveProgressionTracker.recordProgressionSnapshot(event, currentPosition)
-        } catch (e: Exception) {
-            Log.e("WWWEventObserver", "Error recording progression snapshot: $e")
-        }
-
-        // Warming start (between event start and wave start)
-        val now = clock.now()
-        _isStartWarmingInProgress.updateIfChanged(now > event.getStartDateTime() && now < event.getWaveStartDateTime())
-
         // User in area - ensure immediate detection alongside PositionObserver
         updateAreaDetection()
+        val userIsInArea = _userIsInArea.value
 
-        _isUserWarmingInProgress.updateIfChanged(warmingInProgress)
-        _userIsGoingToBeHit.updateIfChanged(userIsGoingToBeHit)
+        // Create input for state calculation
+        val stateInput = EventStateInput(
+            progression = progression,
+            status = status,
+            userPosition = positionManager.getCurrentPosition(),
+            currentTime = clock.now()
+        )
+
+        try {
+            // Calculate event state using EventStateManager
+            val calculatedState = eventStateManager.calculateEventState(
+                event = event,
+                input = stateInput,
+                userIsInArea = userIsInArea
+            )
+
+            // Validate the calculated state
+            val validationIssues = eventStateManager.validateState(stateInput, calculatedState)
+            if (validationIssues.isNotEmpty()) {
+                Log.w("WWWEventObserver", "State validation issues found: ${validationIssues.joinToString(", ")}")
+            }
+
+            // Validate state transitions
+            val currentState = getCurrentEventState()
+            val transitionIssues = eventStateManager.validateStateTransition(currentState, calculatedState)
+            if (transitionIssues.isNotEmpty()) {
+                Log.w("WWWEventObserver", "State transition issues found: ${transitionIssues.joinToString(", ")}")
+            }
+
+            // Update state flows with calculated values using smart throttling
+            updateProgressionIfSignificant(calculatedState.progression)
+            _eventStatus.updateIfChanged(calculatedState.status)
+            _isUserWarmingInProgress.updateIfChanged(calculatedState.isUserWarmingInProgress)
+            _isStartWarmingInProgress.updateIfChanged(calculatedState.isStartWarmingInProgress)
+            _userIsGoingToBeHit.updateIfChanged(calculatedState.userIsGoingToBeHit)
+            _userHasBeenHit.updateIfChanged(calculatedState.userHasBeenHit)
+            updatePositionRatioIfSignificant(calculatedState.userPositionRatio)
+            updateTimeBeforeHitIfSignificant(calculatedState.timeBeforeHit)
+            _hitDateTime.updateIfChanged(calculatedState.hitDateTime)
+
+            // Log debug information for choreo debugging
+            if (calculatedState.userIsGoingToBeHit) {
+                Log.v("WWWEventObserver", "[CHOREO_DEBUG] Setting userIsGoingToBeHit=true for event ${event.id}, timeBeforeHit=${calculatedState.timeBeforeHit}")
+            }
+
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Error calculating event state: $e")
+            // Fall back to basic state updates for safety
+            updateProgressionIfSignificant(progression)
+            _eventStatus.updateIfChanged(status)
+        }
 
         // Log final state for debugging
         Log.v(
@@ -540,6 +544,31 @@ class WWWEventObserver(
             "State updated - userIsInArea=${_userIsInArea.value}, " +
                 "progression=${_progression.value}, status=${_eventStatus.value}",
         )
+    }
+
+    /**
+     * Gets the current EventState from the StateFlow values.
+     * This allows for state transition validation by EventStateManager.
+     */
+    private fun getCurrentEventState(): EventState? {
+        return try {
+            EventState(
+                progression = _progression.value,
+                status = _eventStatus.value,
+                isUserWarmingInProgress = _isUserWarmingInProgress.value,
+                isStartWarmingInProgress = _isStartWarmingInProgress.value,
+                userIsGoingToBeHit = _userIsGoingToBeHit.value,
+                userHasBeenHit = _userHasBeenHit.value,
+                userPositionRatio = _userPositionRatio.value,
+                timeBeforeHit = _timeBeforeHit.value,
+                hitDateTime = _hitDateTime.value,
+                userIsInArea = _userIsInArea.value,
+                timestamp = clock.now()
+            )
+        } catch (e: Exception) {
+            Log.e("WWWEventObserver", "Error creating current EventState: $e")
+            null
+        }
     }
 
     /**
@@ -621,62 +650,6 @@ class WWWEventObserver(
         return issues
     }
 
-    /**
-     * Validates state transitions to ensure they follow logical progression.
-     * This helps catch state management bugs early and ensures consistent behavior.
-     */
-    private fun validateStateTransition(
-        newProgression: Double,
-        newStatus: Status,
-    ) {
-        val previousProgression = _progression.value
-        val previousStatus = _eventStatus.value
-
-        // Validate progression transitions
-        if (newProgression < previousProgression && newStatus != Status.DONE) {
-            // Progression should generally not go backwards unless the event is done
-            Log.w("WWWEventObserver", "Progression went backwards: $previousProgression -> $newProgression (status: $newStatus)")
-        }
-
-        // Validate status transitions follow logical order
-        when (previousStatus) {
-            Status.DONE -> {
-                if (newStatus != Status.DONE) {
-                    Log.w("WWWEventObserver", "Invalid transition from DONE to $newStatus")
-                }
-            }
-            Status.RUNNING -> {
-                if (newStatus == Status.NEXT || newStatus == Status.SOON) {
-                    Log.w("WWWEventObserver", "Invalid backward transition from RUNNING to $newStatus")
-                }
-            }
-            Status.SOON -> {
-                if (newStatus == Status.NEXT) {
-                    Log.w("WWWEventObserver", "Invalid backward transition from SOON to $newStatus")
-                }
-            }
-            else -> {
-                // NEXT, SOON, and UNDEFINED can transition to any state
-            }
-        }
-
-        // Validate progression consistency with status
-        when (newStatus) {
-            Status.DONE -> {
-                if (newProgression < 100.0) {
-                    Log.w("WWWEventObserver", "Status is DONE but progression is $newProgression (should be 100.0)")
-                }
-            }
-            Status.RUNNING -> {
-                if (newProgression <= 0.0) {
-                    Log.w("WWWEventObserver", "Status is RUNNING but progression is $newProgression (should be > 0)")
-                }
-            }
-            else -> {
-                // Other statuses can have any progression value
-            }
-        }
-    }
 
     /**
      * Smart throttling functions to reduce unnecessary state updates and improve performance.
