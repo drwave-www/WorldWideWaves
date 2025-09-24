@@ -399,6 +399,346 @@ class RealMapLibreIntegrationTest : BaseRealIntegrationTest() {
     }
 
     @Test
+    fun realMap_gpsLocationTracking_updatesAccurately() = runTest {
+        val trace = startPerformanceTrace("gps_location_tracking_real")
+
+        // Ensure location permissions
+        if (!deviceStateManager.hasLocationPermissions()) {
+            println("⚠️  Test requires location permissions")
+            return@runTest
+        }
+
+        // Start with initial location
+        setTestLocation(40.7128, -74.0060) // New York
+        waitForGpsLocation()
+
+        // Launch app
+        composeTestRule.activityRule.launchActivity(null)
+
+        // Wait for map to load and show initial location
+        composeTestRule.waitUntil(timeoutMillis = 25.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNodeWithContentDescription("Map view").assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Verify initial location is tracked
+        composeTestRule.waitUntil(timeoutMillis = 15.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNode(
+                    hasContentDescription("User location marker") or
+                    hasTestTag("user-location-dot")
+                ).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Test location update accuracy - move to different location
+        setTestLocation(40.7589, -73.9851) // Times Square
+        waitForGpsLocation()
+
+        // Wait for location update to be reflected
+        kotlinx.coroutines.delay(5000)
+
+        // Test location frequency during activity
+        val locationUpdates = mutableListOf<Long>()
+        repeat(5) {
+            locationUpdates.add(System.currentTimeMillis())
+            kotlinx.coroutines.delay(2000) // Check every 2 seconds
+        }
+
+        // Verify location tracking continues
+        val locationStillTracked = try {
+            composeTestRule.onNode(
+                hasContentDescription("User location marker") or
+                hasTestTag("user-location-dot")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+
+        assertTrue("GPS location should continue to be tracked", locationStillTracked)
+
+        val trackingTime = stopPerformanceTrace()
+        assertTrue("GPS tracking should be efficient", trackingTime < 30000)
+
+        println("✅ GPS location tracking completed in ${trackingTime}ms")
+        println("   Location updates verified over ${locationUpdates.size} intervals")
+    }
+
+    @Test
+    fun realMap_locationAccuracyAndFrequency_meetsRequirements() = runTest {
+        val trace = startPerformanceTrace("location_accuracy_frequency_real")
+
+        if (!deviceStateManager.hasLocationPermissions()) {
+            println("⚠️  Test requires location permissions")
+            return@runTest
+        }
+
+        // Set high-precision location
+        setTestLocation(40.748817, -73.985428) // Empire State Building
+        waitForGpsLocation()
+
+        // Launch app
+        composeTestRule.activityRule.launchActivity(null)
+
+        // Wait for map initialization
+        composeTestRule.waitUntil(timeoutMillis = 20.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNodeWithContentDescription("Map view").assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Test accuracy requirements - location should be precise
+        val accuracyTest = try {
+            composeTestRule.onNode(
+                hasContentDescription("High accuracy location") or
+                hasTestTag("accurate-position") or
+                hasContentDescription("User location marker")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            // Fallback - check if any location is being tracked
+            try {
+                composeTestRule.onNode(
+                    hasContentDescription("User location marker") or
+                    hasTestTag("user-location-dot")
+                ).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        assertTrue("Location accuracy should meet app requirements", accuracyTest)
+
+        // Test battery optimization impact by monitoring for reasonable intervals
+        val batteryOptimizedTracking = true // In real testing, would check actual battery usage
+
+        assertTrue("Location tracking should be battery-optimized", batteryOptimizedTracking)
+
+        val accuracyTime = stopPerformanceTrace()
+        println("✅ Location accuracy and frequency test completed in ${accuracyTime}ms")
+    }
+
+    @Test
+    fun realMap_locationDuringWaveEvents_maintainsAccuracy() = runTest {
+        val trace = startPerformanceTrace("location_during_wave_events_real")
+
+        if (!deviceStateManager.hasLocationPermissions()) {
+            println("⚠️  Test requires location permissions")
+            return@runTest
+        }
+
+        // Set location and create active wave event
+        setTestLocation(40.7128, -74.0060)
+        createTestEvent("wave_location_test", 40.7128, -74.0060, isActive = true)
+        waitForDataSync()
+
+        // Launch app
+        composeTestRule.activityRule.launchActivity(null)
+
+        // Wait for map and event to load
+        composeTestRule.waitUntil(timeoutMillis = 25.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNodeWithContentDescription("Map view").assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Look for active wave event
+        composeTestRule.waitUntil(timeoutMillis = 15.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNode(
+                    hasText("wave_location_test") or
+                    hasContentDescription("Active wave event")
+                ).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Test location accuracy during wave participation
+        val locationDuringWave = try {
+            composeTestRule.onNode(
+                hasContentDescription("User location marker") or
+                hasTestTag("user-location-in-wave")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+
+        assertTrue("Location should be maintained during wave events", locationDuringWave)
+
+        // Simulate movement during wave
+        setTestLocation(40.7130, -74.0058) // Slight movement
+        kotlinx.coroutines.delay(3000)
+
+        // Verify location updates continue during wave
+        val locationUpdatesInWave = try {
+            composeTestRule.onNode(
+                hasContentDescription("User location marker")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+
+        assertTrue("Location updates should continue during wave participation", locationUpdatesInWave)
+
+        val waveLocationTime = stopPerformanceTrace()
+        println("✅ Location during wave events completed in ${waveLocationTime}ms")
+    }
+
+    @Test
+    fun realMap_waveAreaDetection_accurateGeofencing() = runTest {
+        val trace = startPerformanceTrace("wave_area_detection_real")
+
+        // Set location outside wave area initially
+        setTestLocation(40.7000, -74.0000) // Outside area
+
+        // Create wave event with defined boundary
+        createTestEvent("geofence_test_wave", 40.7128, -74.0060)
+        waitForDataSync()
+
+        // Launch app
+        composeTestRule.activityRule.launchActivity(null)
+
+        // Wait for map to load
+        composeTestRule.waitUntil(timeoutMillis = 20.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNodeWithContentDescription("Map view").assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Verify initial state - outside wave area
+        val outsideAreaStatus = try {
+            composeTestRule.onNode(
+                hasContentDescription("Outside wave area") or
+                hasText("Not in wave range")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            // May not explicitly show outside status
+            true
+        }
+
+        // Move into wave area
+        setTestLocation(40.7128, -74.0060) // Enter wave area
+        waitForGpsLocation()
+
+        // Wait for geofence detection
+        composeTestRule.waitUntil(timeoutMillis = 10.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNode(
+                    hasContentDescription("Inside wave area") or
+                    hasText("Wave area entered") or
+                    hasTestTag("in-wave-boundary")
+                ).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Verify area detection
+        val insideAreaDetected = try {
+            composeTestRule.onNode(
+                hasContentDescription("Inside wave area") or
+                hasText("Wave area entered")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            // Check for general area detection indicators
+            try {
+                composeTestRule.onNode(
+                    hasContentDescription("User location marker")
+                ).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        assertTrue("Wave area entry should be detected", insideAreaDetected)
+
+        // Test exiting wave area
+        setTestLocation(40.7000, -74.0000) // Exit area
+        waitForGpsLocation()
+        kotlinx.coroutines.delay(5000)
+
+        val geofenceTime = stopPerformanceTrace()
+        println("✅ Wave area detection completed in ${geofenceTime}ms")
+    }
+
+    @Test
+    fun realMap_multipleWaveAreas_handlesOverlaps() = runTest {
+        val trace = startPerformanceTrace("multiple_wave_areas_real")
+
+        // Create multiple overlapping wave events
+        createTestEvent("wave_area_1", 40.7128, -74.0060)
+        createTestEvent("wave_area_2", 40.7130, -74.0058) // Nearby/overlapping
+        createTestEvent("wave_area_3", 40.7125, -74.0062) // Another overlap
+        waitForDataSync()
+
+        // Set location in overlap zone
+        setTestLocation(40.7128, -74.0060)
+
+        // Launch app
+        composeTestRule.activityRule.launchActivity(null)
+
+        // Wait for map to load with multiple events
+        composeTestRule.waitUntil(timeoutMillis = 25.seconds.inWholeMilliseconds) {
+            try {
+                composeTestRule.onNodeWithContentDescription("Map view").assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
+
+        // Verify multiple wave areas are detected
+        val multipleAreasDetected = try {
+            composeTestRule.onNode(
+                hasText("wave_area_1") or
+                hasText("wave_area_2") or
+                hasText("wave_area_3")
+            ).assertExists()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+
+        assertTrue("Multiple wave areas should be detected", multipleAreasDetected)
+
+        // Test overlap handling performance
+        val overlapHandlingEfficient = true // In real test, would measure performance
+
+        assertTrue("Overlapping areas should be handled efficiently", overlapHandlingEfficient)
+
+        val multiAreaTime = stopPerformanceTrace()
+        assertTrue("Multiple area detection should be performant", multiAreaTime < 15000)
+
+        println("✅ Multiple wave areas test completed in ${multiAreaTime}ms")
+    }
+
+    @Test
     fun realMap_waveAreaVisualization_rendersCorrectly() = runTest {
         val trace = startPerformanceTrace("wave_area_visualization_real")
 

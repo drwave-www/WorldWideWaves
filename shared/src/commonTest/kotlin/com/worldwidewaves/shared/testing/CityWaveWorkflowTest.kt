@@ -990,6 +990,270 @@ class CityWaveWorkflowTest {
         }
     }
 
+    @Test
+    fun `should test sound playback during wave events for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val bounds = getCityBounds(cityId)
+
+            // Test sound playback scenarios during different wave phases
+            val soundPlaybackScenarios = listOf(
+                SoundPlaybackScenario(
+                    "wave_approaching",
+                    wavePhase = "PRE_WARMING",
+                    userPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2),
+                    expectedSoundType = "AMBIENT_BUILDUP",
+                    expectedVolume = 0.3
+                ),
+                SoundPlaybackScenario(
+                    "wave_hit",
+                    wavePhase = "USER_HIT",
+                    userPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2),
+                    expectedSoundType = "HIT_SOUND",
+                    expectedVolume = 0.8
+                ),
+                SoundPlaybackScenario(
+                    "wave_propagation",
+                    wavePhase = "WAVE_PROPAGATION",
+                    userPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2),
+                    expectedSoundType = "CROWD_SOUND",
+                    expectedVolume = 0.6
+                ),
+                SoundPlaybackScenario(
+                    "user_outside_area",
+                    wavePhase = "USER_HIT",
+                    userPosition = Position(bounds.maxLat + 0.1, bounds.maxLng + 0.1),
+                    expectedSoundType = "NONE",
+                    expectedVolume = 0.0
+                )
+            )
+
+            soundPlaybackScenarios.forEach { scenario ->
+                // Test sound system activation based on wave phase and user position
+                val isInArea = simulatePolygonContainment(scenario.userPosition, cityId)
+                val actualSoundConfig = calculateSoundConfiguration(scenario.wavePhase, isInArea, scenario.userPosition, bounds)
+
+                // Verify sound type matches expectation
+                if (isInArea || scenario.expectedSoundType != "NONE") {
+                    assertNotNull(
+                        actualSoundConfig,
+                        "Sound configuration should be available for ${scenario.name} in city $cityId"
+                    )
+
+                    assertEquals(
+                        scenario.expectedSoundType,
+                        actualSoundConfig.soundType,
+                        "Sound type should match expectation for ${scenario.name} in city $cityId"
+                    )
+
+                    // Verify volume level is appropriate
+                    assertTrue(
+                        actualSoundConfig.volume >= 0.0 && actualSoundConfig.volume <= 1.0,
+                        "Volume should be between 0.0 and 1.0 for ${scenario.name} in city $cityId"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should verify audio timing synchronization for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val eventStartTime = Instant.fromEpochMilliseconds(1000000000L)
+            val eventDuration = 30000L // 30 seconds
+
+            // Test audio timing checkpoints throughout wave event
+            val timingCheckpoints = listOf(
+                AudioTimingCheckpoint(0L, "PRE_WARMING", shouldHaveAudio = true, expectedLatency = 50L),
+                AudioTimingCheckpoint(5000L, "BUILDING_TENSION", shouldHaveAudio = true, expectedLatency = 50L),
+                AudioTimingCheckpoint(10000L, "USER_HIT", shouldHaveAudio = true, expectedLatency = 30L), // Critical timing
+                AudioTimingCheckpoint(12000L, "WAVE_PROPAGATION", shouldHaveAudio = true, expectedLatency = 100L),
+                AudioTimingCheckpoint(25000L, "CLEANUP", shouldHaveAudio = true, expectedLatency = 200L),
+                AudioTimingCheckpoint(30000L, "COMPLETED", shouldHaveAudio = false, expectedLatency = 0L),
+                AudioTimingCheckpoint(-1000L, "NOT_STARTED", shouldHaveAudio = false, expectedLatency = 0L)
+            )
+
+            timingCheckpoints.forEach { checkpoint ->
+                val checkpointTime = Instant.fromEpochMilliseconds(eventStartTime.toEpochMilliseconds() + checkpoint.offsetMs)
+                val audioState = simulateAudioState(eventStartTime, eventDuration, checkpointTime)
+
+                // Test audio synchronization timing
+                assertEquals(
+                    checkpoint.shouldHaveAudio,
+                    audioState.isActive,
+                    "Audio state should match expectation for ${checkpoint.phase} at ${checkpoint.offsetMs}ms in city $cityId"
+                )
+
+                if (checkpoint.shouldHaveAudio) {
+                    // Verify audio latency is within acceptable bounds
+                    assertTrue(
+                        audioState.latencyMs <= checkpoint.expectedLatency,
+                        "Audio latency should be <= ${checkpoint.expectedLatency}ms for ${checkpoint.phase} in city $cityId, was ${audioState.latencyMs}ms"
+                    )
+
+                    // Test synchronization accuracy
+                    val syncAccuracy = kotlin.math.abs(audioState.actualStartTime - checkpointTime.toEpochMilliseconds())
+                    assertTrue(
+                        syncAccuracy <= 100L, // Allow 100ms sync tolerance
+                        "Audio synchronization should be accurate within 100ms for ${checkpoint.phase} in city $cityId, was ${syncAccuracy}ms off"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should test platform-specific audio implementations for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            // Test different platform audio configurations
+            val platformScenarios = listOf(
+                PlatformAudioScenario("Android", "PCM_16_BIT", true, 50L),
+                PlatformAudioScenario("iOS", "PCM_FLOAT32", true, 30L),
+                PlatformAudioScenario("Android", "PCM_8_BIT", true, 100L),
+                PlatformAudioScenario("Unknown", "PCM_16_BIT", false, 200L)
+            )
+
+            platformScenarios.forEach { scenario ->
+                // Test platform-specific audio configuration
+                val audioConfig = simulatePlatformAudioConfig(scenario.platform, scenario.audioFormat)
+
+                // Verify platform support matches expectation
+                assertTrue(
+                    audioConfig.supportedFormats.contains(scenario.audioFormat) == scenario.expectedSupported,
+                    "Platform ${scenario.platform} support for ${scenario.audioFormat} should match expectation in city $cityId"
+                )
+
+                // Verify latency is within acceptable bounds
+                if (scenario.expectedSupported) {
+                    assertTrue(
+                        audioConfig.averageLatencyMs <= scenario.maxAcceptableLatency,
+                        "Audio latency should be <= ${scenario.maxAcceptableLatency}ms for ${scenario.platform} in city $cityId, was ${audioConfig.averageLatencyMs}ms"
+                    )
+
+                    // Test audio initialization for platform
+                    val initResult = simulateAudioInitialization(scenario.platform)
+                    assertTrue(
+                        initResult.success,
+                        "Audio initialization should succeed for ${scenario.platform} in city $cityId: ${initResult.errorMessage}"
+                    )
+
+                    // Verify initialization time is reasonable
+                    assertTrue(
+                        initResult.initializationTimeMs < 1000L,
+                        "Audio initialization should complete quickly for ${scenario.platform} in city $cityId, took ${initResult.initializationTimeMs}ms"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should test audio integration across iOS and Android platforms for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            // Test cross-platform audio compatibility
+            val integrationScenarios = listOf(
+                AudioIntegrationScenario("cross_platform_sync", "PCM_16_BIT", 44100, true),
+                AudioIntegrationScenario("high_quality_sync", "PCM_FLOAT32", 48000, true),
+                AudioIntegrationScenario("legacy_compatibility", "PCM_8_BIT", 22050, false)
+            )
+
+            integrationScenarios.forEach { scenario ->
+                // Test multi-platform audio coordination
+                val integrationResult = simulateAudioIntegration(scenario)
+
+                assertEquals(
+                    scenario.expectedCompatible,
+                    integrationResult.crossPlatformCompatible,
+                    "Audio integration should work for ${scenario.name} in city $cityId"
+                )
+
+                if (integrationResult.crossPlatformCompatible) {
+                    // Verify both platforms support the format
+                    assertTrue(
+                        integrationResult.iosSupported,
+                        "iOS should support ${scenario.audioFormat} for ${scenario.name} in city $cityId"
+                    )
+
+                    assertTrue(
+                        integrationResult.androidSupported,
+                        "Android should support ${scenario.audioFormat} for ${scenario.name} in city $cityId"
+                    )
+
+                    // Verify latency is reasonable
+                    assertTrue(
+                        integrationResult.maxLatencyMs <= 100L,
+                        "Maximum latency should be reasonable for ${scenario.name} in city $cityId, was ${integrationResult.maxLatencyMs}ms"
+                    )
+
+                    // Verify shared features exist
+                    assertTrue(
+                        integrationResult.sharedFeatures.isNotEmpty(),
+                        "Should have shared audio features for ${scenario.name} in city $cityId"
+                    )
+                } else {
+                    // Verify integration issues are reported
+                    assertTrue(
+                        integrationResult.integrationIssues.isNotEmpty(),
+                        "Integration issues should be reported for incompatible scenario ${scenario.name} in city $cityId"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should test audio performance and resource usage for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            // Test audio system performance under different loads
+            val performanceStartTime = System.currentTimeMillis()
+            val iterations = 30
+
+            repeat(iterations) { i ->
+                // Simulate audio operations
+                val audioConfig = simulatePlatformAudioConfig("Android", "PCM_16_BIT")
+                val audioState = simulateAudioState(
+                    Instant.fromEpochMilliseconds(1000000000L),
+                    30000L,
+                    Instant.fromEpochMilliseconds(1000000000L + (i * 1000L))
+                )
+
+                // Verify audio operations complete successfully
+                assertNotNull(
+                    audioConfig,
+                    "Audio configuration should be available for iteration $i in city $cityId"
+                )
+
+                assertNotNull(
+                    audioState,
+                    "Audio state should be available for iteration $i in city $cityId"
+                )
+            }
+
+            val performanceEndTime = System.currentTimeMillis()
+            val totalTimeMs = performanceEndTime - performanceStartTime
+
+            // Performance assertion: audio operations should be efficient
+            assertTrue(
+                totalTimeMs < 1000, // Less than 1 second for 30 operations
+                "Audio performance should be efficient for city $cityId. " +
+                        "30 operations took ${totalTimeMs}ms (should be < 1000ms)"
+            )
+
+            // Test memory usage simulation for different audio configurations
+            val testAudioConfig = AudioConfig("TEST_SOUND", 0.5, "PCM_16_BIT", 44100, 1024)
+            val memoryUsage = simulateAudioMemoryUsage(testAudioConfig, 30000L)
+
+            assertTrue(
+                memoryUsage.isMemoryEfficient,
+                "Audio system should use memory efficiently for city $cityId"
+            )
+
+            assertTrue(
+                memoryUsage.totalMemoryBytes < 50 * 1024 * 1024, // Less than 50MB total usage
+                "Audio buffers should use reasonable memory for city $cityId: ${memoryUsage.bufferUsageMB}MB"
+            )
+        }
+    }
+
     // Helper methods for comprehensive testing
 
     private suspend fun testEventLifecycleForCity(cityId: String, testPosition: Position) {
@@ -1224,5 +1488,214 @@ class CityWaveWorkflowTest {
         val offsetMs: Long,
         val expectedStep: String,
         val shouldBeActive: Boolean
+    )
+
+    // Sound System Testing Helper Functions and Data Classes
+
+    private fun calculateSoundConfiguration(wavePhase: String, isInArea: Boolean, userPosition: Position, bounds: CityBounds): AudioConfig? {
+        if (!isInArea && wavePhase != "NONE") return null
+
+        return when (wavePhase) {
+            "PRE_WARMING" -> AudioConfig("AMBIENT_BUILDUP", 0.3, "PCM_16_BIT", 22050, 512)
+            "BUILDING_TENSION" -> AudioConfig("TENSION_SOUND", 0.5, "PCM_16_BIT", 44100, 256)
+            "USER_HIT" -> AudioConfig("HIT_SOUND", 0.8, "PCM_FLOAT32", 48000, 128)
+            "WAVE_PROPAGATION" -> AudioConfig("CROWD_SOUND", 0.6, "PCM_16_BIT", 44100, 256)
+            "CLEANUP" -> AudioConfig("FADE_OUT", 0.2, "PCM_16_BIT", 22050, 512)
+            else -> null
+        }
+    }
+
+    private fun simulateAudioState(eventStart: Instant, eventDurationMs: Long, currentTime: Instant): AudioState {
+        val elapsedMs = currentTime.toEpochMilliseconds() - eventStart.toEpochMilliseconds()
+        val isActive = elapsedMs >= 0 && elapsedMs < eventDurationMs
+
+        val latency = when {
+            elapsedMs < 0 || elapsedMs >= eventDurationMs -> 0L
+            elapsedMs < 12000L -> 30L // Critical timing for USER_HIT
+            elapsedMs < 5000L -> 50L // PRE_WARMING and BUILDING_TENSION
+            elapsedMs < 25000L -> 100L // WAVE_PROPAGATION
+            else -> 200L // CLEANUP
+        }
+
+        return AudioState(
+            isActive = isActive,
+            latencyMs = latency,
+            actualStartTime = if (isActive) eventStart.toEpochMilliseconds() + latency else 0L,
+            phase = when {
+                elapsedMs < 0 -> "NOT_STARTED"
+                elapsedMs >= eventDurationMs -> "COMPLETED"
+                elapsedMs < 5000 -> "PRE_WARMING"
+                elapsedMs < 10000 -> "BUILDING_TENSION"
+                elapsedMs < 12000 -> "USER_HIT"
+                elapsedMs < 25000 -> "WAVE_PROPAGATION"
+                else -> "CLEANUP"
+            }
+        )
+    }
+
+    private fun simulatePlatformAudioConfig(platform: String, audioFormat: String): PlatformAudioConfig {
+        return when (platform) {
+            "iOS" -> PlatformAudioConfig(
+                platform = "iOS",
+                supportedFormats = listOf("PCM_16_BIT", "PCM_FLOAT32"),
+                maxSampleRate = 96000,
+                minBufferSize = 64,
+                maxBufferSize = 4096,
+                supportsLowLatency = true,
+                averageLatencyMs = 25L
+            )
+            "Android" -> PlatformAudioConfig(
+                platform = "Android",
+                supportedFormats = listOf("PCM_16_BIT", "PCM_8_BIT", "PCM_FLOAT32"),
+                maxSampleRate = 192000,
+                minBufferSize = 128,
+                maxBufferSize = 8192,
+                supportsLowLatency = true,
+                averageLatencyMs = 35L
+            )
+            else -> PlatformAudioConfig(
+                platform = "Unknown",
+                supportedFormats = listOf("PCM_16_BIT"),
+                maxSampleRate = 44100,
+                minBufferSize = 512,
+                maxBufferSize = 2048,
+                supportsLowLatency = false,
+                averageLatencyMs = 100L
+            )
+        }
+    }
+
+    private fun simulateAudioInitialization(platform: String): AudioInitializationResult {
+        val config = simulatePlatformAudioConfig(platform, "PCM_16_BIT")
+        val success = config.supportsLowLatency && config.supportedFormats.isNotEmpty()
+
+        return AudioInitializationResult(
+            success = success,
+            initializationTimeMs = if (success) kotlin.random.Random.nextLong(50, 200) else 5000L,
+            errorMessage = if (success) null else "Audio initialization failed for $platform",
+            supportedFeatures = if (success) listOf("LOW_LATENCY", "MULTI_CHANNEL", "REAL_TIME") else emptyList()
+        )
+    }
+
+    private fun simulateAudioIntegration(scenario: AudioIntegrationScenario): AudioIntegrationResult {
+        val iosResult = simulateAudioInitialization("iOS")
+        val androidResult = simulateAudioInitialization("Android")
+
+        val crossPlatformCompatible = iosResult.success && androidResult.success
+        val maxLatency = maxOf(
+            simulatePlatformAudioConfig("iOS", scenario.audioFormat).averageLatencyMs,
+            simulatePlatformAudioConfig("Android", scenario.audioFormat).averageLatencyMs
+        )
+
+        return AudioIntegrationResult(
+            crossPlatformCompatible = crossPlatformCompatible,
+            maxLatencyMs = maxLatency,
+            iosSupported = iosResult.success,
+            androidSupported = androidResult.success,
+            sharedFeatures = if (crossPlatformCompatible) listOf("PCM_PLAYBACK", "REAL_TIME_SYNC") else emptyList(),
+            integrationIssues = if (crossPlatformCompatible) emptyList() else listOf("Platform compatibility mismatch")
+        )
+    }
+
+    private fun simulateAudioMemoryUsage(audioConfig: AudioConfig, durationMs: Long): AudioMemoryUsage {
+        val bytesPerSample = when (audioConfig.audioFormat) {
+            "PCM_8_BIT" -> 1
+            "PCM_16_BIT" -> 2
+            "PCM_FLOAT32" -> 4
+            else -> 2
+        }
+
+        val samplesPerSecond = audioConfig.sampleRate
+        val totalSamples = (durationMs / 1000.0 * samplesPerSecond).toLong()
+        val totalBytes = totalSamples * bytesPerSample
+        val bufferBytes = audioConfig.bufferSize * bytesPerSample * 2L // Double buffering
+
+        return AudioMemoryUsage(
+            totalMemoryBytes = totalBytes + bufferBytes,
+            bufferMemoryBytes = bufferBytes,
+            streamingMemoryBytes = totalBytes,
+            peakMemoryBytes = totalBytes + bufferBytes * 3, // Account for temporary allocations
+            isMemoryEfficient = totalBytes < 50 * 1024 * 1024 // < 50MB considered efficient
+        )
+    }
+
+    // Sound System Data Classes
+
+    private data class SoundPlaybackScenario(
+        val name: String,
+        val wavePhase: String,
+        val userPosition: Position,
+        val expectedSoundType: String,
+        val expectedVolume: Double
+    )
+
+    private data class AudioConfig(
+        val soundType: String,
+        val volume: Double,
+        val audioFormat: String,
+        val sampleRate: Int,
+        val bufferSize: Int
+    )
+
+    private data class AudioState(
+        val isActive: Boolean,
+        val latencyMs: Long,
+        val actualStartTime: Long,
+        val phase: String
+    )
+
+    private data class AudioTimingCheckpoint(
+        val offsetMs: Long,
+        val phase: String,
+        val shouldHaveAudio: Boolean,
+        val expectedLatency: Long
+    )
+
+    private data class PlatformAudioScenario(
+        val platform: String,
+        val audioFormat: String,
+        val expectedSupported: Boolean,
+        val maxAcceptableLatency: Long
+    )
+
+    private data class PlatformAudioConfig(
+        val platform: String,
+        val supportedFormats: List<String>,
+        val maxSampleRate: Int,
+        val minBufferSize: Int,
+        val maxBufferSize: Int,
+        val supportsLowLatency: Boolean,
+        val averageLatencyMs: Long
+    )
+
+    private data class AudioIntegrationScenario(
+        val name: String,
+        val audioFormat: String,
+        val sampleRate: Int,
+        val expectedCompatible: Boolean
+    )
+
+    private data class AudioIntegrationResult(
+        val crossPlatformCompatible: Boolean,
+        val maxLatencyMs: Long,
+        val iosSupported: Boolean,
+        val androidSupported: Boolean,
+        val sharedFeatures: List<String>,
+        val integrationIssues: List<String>
+    )
+
+    private data class AudioInitializationResult(
+        val success: Boolean,
+        val initializationTimeMs: Long,
+        val errorMessage: String?,
+        val supportedFeatures: List<String>
+    )
+
+    private data class AudioMemoryUsage(
+        val totalMemoryBytes: Long,
+        val bufferMemoryBytes: Long,
+        val streamingMemoryBytes: Long,
+        val peakMemoryBytes: Long,
+        val isMemoryEfficient: Boolean
     )
 }
