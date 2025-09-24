@@ -68,7 +68,7 @@ class DefaultObservationScheduler(
         val timeBeforeEvent = eventStartTime - now
         val timeBeforeHit = event.wave.timeBeforeUserHit() ?: 1.days
 
-        Log.v("DefaultObservationScheduler", "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit")
+        Log.performance("DefaultObservationScheduler", "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit")
 
         return when {
             // Event is far in the future - minimal battery usage
@@ -97,19 +97,19 @@ class DefaultObservationScheduler(
 
             // Critical hit timing - maximum accuracy for sound synchronization
             timeBeforeHit != null && timeBeforeHit < 1.seconds -> {
-                Log.v("DefaultObservationScheduler", "Critical hit timing (<1s), using 50ms interval")
+                Log.performance("DefaultObservationScheduler", "Critical hit timing (<1s), using 50ms interval")
                 50.milliseconds
             }
 
             // Near hit timing - high accuracy with battery consideration
             timeBeforeHit != null && timeBeforeHit < 5.seconds -> {
-                Log.v("DefaultObservationScheduler", "Near hit timing (<5s), using 200ms interval")
+                Log.performance("DefaultObservationScheduler", "Near hit timing (<5s), using 200ms interval")
                 200.milliseconds
             }
 
             // Event is active or about to start - real-time updates
             timeBeforeEvent > 0.seconds || event.isRunning() -> {
-                Log.v("DefaultObservationScheduler", "Event is active/starting, using 500ms interval")
+                Log.performance("DefaultObservationScheduler", "Event is active/starting, using 500ms interval")
                 500.milliseconds
             }
 

@@ -82,7 +82,7 @@ class DefaultPositionObserver(
         return combine(
             positionManager.position
                 .onEach { position ->
-                    Log.v("DefaultPositionObserver", "Position update: $position for event ${event.id}")
+                    Log.performance("DefaultPositionObserver", "Position update: $position for event ${event.id}")
                 },
             event.area.polygonsLoaded
                 .onEach { loaded ->

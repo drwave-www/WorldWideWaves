@@ -28,6 +28,7 @@ import com.worldwidewaves.shared.events.WWWEvent
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.readGeoJson
+import com.worldwidewaves.shared.utils.Log
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
