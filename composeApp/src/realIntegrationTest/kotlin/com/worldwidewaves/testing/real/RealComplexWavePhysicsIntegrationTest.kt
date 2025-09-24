@@ -558,7 +558,7 @@ class RealComplexWavePhysicsIntegrationTest : BaseRealIntegrationTest() {
         val positionIndex: Int,
         val position: Position,
         val userHit: Boolean,
-        val hitDateTime: kotlin.time.Instant?,
+        val hitDateTime: Instant?,
         val waveRatio: Double?
     )
 
@@ -566,7 +566,7 @@ class RealComplexWavePhysicsIntegrationTest : BaseRealIntegrationTest() {
         val distance: Double,
         val position: Position,
         val userHit: Boolean,
-        val hitDateTime: kotlin.time.Instant?,
+        val hitDateTime: Instant?,
         val waveRatio: Double?,
         val closestLongitude: Double
     )

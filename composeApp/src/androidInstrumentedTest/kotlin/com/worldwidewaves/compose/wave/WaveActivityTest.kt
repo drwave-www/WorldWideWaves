@@ -444,7 +444,7 @@ class WaveActivityTest {
         val mockClock = mockk<IClock>(relaxed = true)
         val hitAccuracy = MutableStateFlow(0.0) // Milliseconds difference
 
-        every { mockClock.now() } returns kotlinx.datetime.Instant.fromEpochMilliseconds(1000000)
+        every { mockClock.now() } returns Instant.fromEpochMilliseconds(1000000)
 
         composeTestRule.setContent {
             TestWaveHitAccuracy(mockEvent, mockClock, hitAccuracy.value)

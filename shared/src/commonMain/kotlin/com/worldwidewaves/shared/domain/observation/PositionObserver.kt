@@ -25,6 +25,7 @@ package com.worldwidewaves.shared.domain.observation
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.Position
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -33,7 +34,7 @@ import kotlinx.coroutines.flow.Flow
 data class PositionObservation(
     val position: Position?,
     val isInArea: Boolean,
-    val timestamp: kotlinx.datetime.Instant
+    val timestamp: Instant
 )
 
 /**

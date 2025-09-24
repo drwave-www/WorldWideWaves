@@ -26,7 +26,7 @@ package com.worldwidewaves.shared.domain.progression
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.utils.Position
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Data class representing a snapshot of wave progression at a specific time.

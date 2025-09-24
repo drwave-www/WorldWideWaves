@@ -51,7 +51,7 @@ abstract class BaseComponentTest : BaseInstrumentedTest() {
 
         // Setup common component test mocks
         mockClock = mockk<IClock>(relaxed = true) {
-            every { now() } returns kotlin.time.Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
+            every { now() } returns Instant.fromEpochSeconds(1640995200) // 2022-01-01T00:00:00Z
         }
     }
 

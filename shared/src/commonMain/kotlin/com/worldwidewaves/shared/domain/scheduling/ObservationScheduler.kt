@@ -26,6 +26,7 @@ package com.worldwidewaves.shared.domain.scheduling
 import com.worldwidewaves.shared.events.IWWWEvent
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 /**
  * Manages the observation scheduling for WWWEvent instances.
@@ -96,7 +97,7 @@ data class ObservationSchedule(
     val shouldObserve: Boolean,
     val interval: Duration,
     val phase: ObservationPhase,
-    val nextObservationTime: kotlin.time.Instant?,
+    val nextObservationTime: Instant?,
     val reason: String
 )
 

@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.format
  * limitations under the License.
  */
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertNotNull

@@ -30,7 +30,7 @@ import com.worldwidewaves.shared.testing.TestHelpers
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals

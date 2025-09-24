@@ -5,7 +5,7 @@ package com.worldwidewaves.shared.domain.progression
 import com.worldwidewaves.shared.events.utils.IClock
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
