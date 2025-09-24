@@ -180,8 +180,8 @@ class EventsListScreen(
         }
 
         // Pre-track all event IDs
-        LaunchedEffect(viewModel.originalEvents) {
-            mapChecker.trackMaps(viewModel.originalEvents.map { it.id })
+        LaunchedEffect(events) {
+            mapChecker.trackMaps(events.map { it.id })
             mapChecker.refreshAvailability()
         }
 

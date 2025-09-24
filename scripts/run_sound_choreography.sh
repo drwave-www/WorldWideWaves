@@ -149,15 +149,21 @@ start_emulator_with_audio() {
     local android_sdk="$1"
     local emulator_path="$android_sdk/emulator/emulator"
     local avd_name="$2"
+    local show_window="$3"  # "true" for visible window, "false" for headless
 
     if [[ ! -x "$emulator_path" ]]; then
         return 1
     fi
 
-    print_status "Starting emulator '$avd_name' with audio support..."
-
-    # Start emulator in background with audio
-    "$emulator_path" -avd "$avd_name" -audio default -no-snapshot-load &
+    if [[ "$show_window" == "true" ]]; then
+        print_status "Starting emulator '$avd_name' with visible window and audio support..."
+        # Start emulator with visible window and audio
+        "$emulator_path" -avd "$avd_name" -audio default -no-snapshot-load -gpu swiftshader_indirect &
+    else
+        print_status "Starting emulator '$avd_name' in headless mode with audio support..."
+        # Start emulator headless with audio
+        "$emulator_path" -avd "$avd_name" -audio default -no-snapshot-load -no-window &
+    fi
     local emulator_pid=$!
 
     print_status "Emulator started (PID: $emulator_pid). Waiting for it to boot..."
@@ -342,8 +348,8 @@ main() {
 
         print_status "Using device: $SELECTED_DEVICE"
 
-        # Ensure audio is properly configured
-        enable_emulator_audio "$ADB_PATH" "$SELECTED_DEVICE"
+        # Ensure audio is properly configured (but don't fail if uncertain)
+        enable_emulator_audio "$ADB_PATH" "$SELECTED_DEVICE" || print_warning "Audio configuration uncertain, but continuing..."
     else
         print_warning "No connected devices found. Checking for available emulators..."
 
@@ -375,14 +381,20 @@ main() {
 
         if [[ -n "$PREFERRED_AVD" ]]; then
             print_status "Starting emulator: $PREFERRED_AVD"
-            if start_emulator_with_audio "$ANDROID_SDK" "$PREFERRED_AVD"; then
+            # Determine if we should show window based on run mode
+            local show_window="false"
+            if [[ "$RUN_MODE" == "open" ]]; then
+                show_window="true"
+            fi
+
+            if start_emulator_with_audio "$ANDROID_SDK" "$PREFERRED_AVD" "$show_window"; then
                 # Find the new emulator device serial
                 sleep 2
                 SELECTED_DEVICE=$("$ADB_PATH" devices | grep "emulator" | head -n1 | cut -f1)
                 print_status "Emulator ready: $SELECTED_DEVICE"
 
-                # Ensure audio is properly configured on new emulator
-                enable_emulator_audio "$ADB_PATH" "$SELECTED_DEVICE"
+                # Ensure audio is properly configured on new emulator (but don't fail if uncertain)
+                enable_emulator_audio "$ADB_PATH" "$SELECTED_DEVICE" || print_warning "Audio configuration uncertain, but continuing..."
             else
                 print_error "Failed to start emulator"
                 exit 1

@@ -607,13 +607,20 @@ class AndroidEventMap(
     ) {
         Log.i(TAG, "Setting up map location component")
         map.style?.let { style ->
-            // Activate location component
-            map.locationComponent.activateLocationComponent(
-                buildLocationComponentActivationOptions(context, style),
-            )
-            map.locationComponent.isLocationComponentEnabled = true
-            map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
-            Log.i(TAG, "Location component setup complete")
+            try {
+                // Check if already activated to avoid double activation
+                if (!map.locationComponent.isLocationComponentActivated) {
+                    // Activate location component
+                    map.locationComponent.activateLocationComponent(
+                        buildLocationComponentActivationOptions(context, style),
+                    )
+                }
+                map.locationComponent.isLocationComponentEnabled = true
+                map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
+                Log.i(TAG, "Location component setup complete")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to setup location component", e)
+            }
         } ?: run {
             Log.e(TAG, "Cannot setup location component - map style is null")
         }
@@ -690,8 +697,11 @@ class AndroidEventMap(
 
         map.style?.let {
             try {
-                // Always disable first to avoid stale state
-                map.locationComponent.isLocationComponentEnabled = false
+                // Check if location component is activated before trying to disable it
+                if (map.locationComponent.isLocationComponentActivated) {
+                    // Always disable first to avoid stale state
+                    map.locationComponent.isLocationComponentEnabled = false
+                }
 
                 if (hasPermission) {
                     setupMapLocationComponent(map, context)
@@ -705,6 +715,16 @@ class AndroidEventMap(
             } catch (uoe: UnsupportedOperationException) {
                 // Map operation not supported
                 Log.e(TAG, "Unsupported map operation", uoe)
+            } catch (e: RuntimeException) {
+                // Location component not initialized - this is expected on first run
+                if (e.message?.contains("LocationComponent has to be activated") == true) {
+                    Log.d(TAG, "Location component not yet initialized, will activate it")
+                    if (hasPermission) {
+                        setupMapLocationComponent(map, context)
+                    }
+                } else {
+                    Log.e(TAG, "Unexpected runtime error with location component", e)
+                }
             }
         } ?: run {
             Log.w(TAG, "Cannot update location component - map style is null")

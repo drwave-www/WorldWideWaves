@@ -23,14 +23,13 @@ package com.worldwidewaves.shared.domain.repository
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.testing.TestHelpers.createMockWWWEventLinear
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -56,14 +55,18 @@ class EventsRepositoryImplTest {
     private val mockWWWEvents = mockk<WWWEvents>()
     private val repository = EventsRepositoryImpl(mockWWWEvents)
 
+    private fun createMockEvent(id: String): IWWWEvent = mockk<IWWWEvent>().apply {
+        every { this@apply.id } returns id
+    }
+
     @Test
     fun `getEvents should return flow from WWWEvents`() = runTest {
         // Arrange
         val mockEvents = listOf(
-            createMockWWWEventLinear("event1"),
-            createMockWWWEventLinear("event2")
+            createMockEvent("event1"),
+            createMockEvent("event2")
         )
-        every { mockWWWEvents.flow() } returns flowOf(mockEvents)
+        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
         // Act
         val result = repository.getEvents().first()
@@ -77,7 +80,7 @@ class EventsRepositoryImplTest {
     @Test
     fun `getEvents should return empty flow when no events`() = runTest {
         // Arrange
-        every { mockWWWEvents.flow() } returns flowOf(emptyList())
+        every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
 
         // Act
         val result = repository.getEvents().first()
@@ -172,11 +175,11 @@ class EventsRepositoryImplTest {
     fun `getEvent should return specific event by ID`() = runTest {
         // Arrange
         val mockEvents = listOf(
-            createMockWWWEventLinear("event1"),
-            createMockWWWEventLinear("event2"),
-            createMockWWWEventLinear("event3")
+            createMockEvent("event1"),
+            createMockEvent("event2"),
+            createMockEvent("event3")
         )
-        every { mockWWWEvents.flow() } returns flowOf(mockEvents)
+        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
         // Act
         val result = repository.getEvent("event2").first()
@@ -190,10 +193,10 @@ class EventsRepositoryImplTest {
     fun `getEvent should return null for non-existent ID`() = runTest {
         // Arrange
         val mockEvents = listOf(
-            createMockWWWEventLinear("event1"),
-            createMockWWWEventLinear("event2")
+            createMockEvent("event1"),
+            createMockEvent("event2")
         )
-        every { mockWWWEvents.flow() } returns flowOf(mockEvents)
+        every { mockWWWEvents.flow() } returns MutableStateFlow(mockEvents)
 
         // Act
         val result = repository.getEvent("non-existent").first()
@@ -205,7 +208,7 @@ class EventsRepositoryImplTest {
     @Test
     fun `getEvent should return null from empty events list`() = runTest {
         // Arrange
-        every { mockWWWEvents.flow() } returns flowOf(emptyList())
+        every { mockWWWEvents.flow() } returns MutableStateFlow(emptyList())
 
         // Act
         val result = repository.getEvent("any-id").first()
@@ -221,7 +224,7 @@ class EventsRepositoryImplTest {
         every {
             mockWWWEvents.loadEvents(any(), any(), any())
         } answers {
-            val onLoaded = secondArg<(() -> Unit)?>()
+            val onLoaded = firstArg<(() -> Unit)?>()
 
             // Simulate successful refresh
             onLoaded?.invoke()
@@ -264,9 +267,9 @@ class EventsRepositoryImplTest {
     fun `getCachedEventsCount should return count from WWWEvents list`() = runTest {
         // Arrange
         val mockEvents = listOf(
-            createMockWWWEventLinear("event1"),
-            createMockWWWEventLinear("event2"),
-            createMockWWWEventLinear("event3")
+            createMockEvent("event1"),
+            createMockEvent("event2"),
+            createMockEvent("event3")
         )
         every { mockWWWEvents.list() } returns mockEvents
 
@@ -292,7 +295,7 @@ class EventsRepositoryImplTest {
     @Test
     fun `clearCache should not affect WWWEvents functionality`() = runTest {
         // Arrange
-        val mockEvents = listOf(createMockWWWEventLinear("event1"))
+        val mockEvents = listOf(createMockEvent("event1"))
         every { mockWWWEvents.list() } returns mockEvents
 
         // Act

@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.domain.usecases
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.domain.repository.EventsRepository
 import com.worldwidewaves.shared.events.IWWWEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -64,13 +65,4 @@ class GetSortedEventsUseCase(
                 sorted
             }
         }
-}
-
-/**
- * Repository interface for events data access.
- * This interface will be implemented in the repository layer.
- */
-interface EventsRepository {
-    suspend fun getEvents(): Flow<List<IWWWEvent>>
-    suspend fun loadEvents(onLoadingError: (Exception) -> Unit)
 }

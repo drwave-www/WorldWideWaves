@@ -16,7 +16,11 @@ import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.domain.repository.EventsRepository
+import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
+import com.worldwidewaves.shared.domain.usecases.EventFilterCriteria
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -29,29 +33,30 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 /**
  * Central ViewModel that drives the **Events** tab.
  *
+ * Following Clean Architecture principles, this ViewModel focuses solely on UI state
+ * management and delegates business logic to use cases.
+ *
  * Responsibilities:
- * • Load the catalogue from the shared [WWWEvents] repository, sort by start date
- * • Expose reactive `StateFlow`s for the full list, loading/error flags and
- *   “has-favorites” helper used by the UI
- * • Spin up each event’s [IWWWEvent.observer] so real-time status (soon / running
- *   / done, user-hit, etc.) keeps updating in the background and, in debug
- *   builds, throttle the simulation speed around the hit sequence
- * • Maintain in-memory copy (`originalEvents`) protected by a mutex and provide
- *   cheap filtering by favorites or “map downloaded” using
- *   [MapAvailabilityChecker]
- * • Catch uncaught coroutine exceptions through a dedicated
- *   [CoroutineExceptionHandler] and surface them via `_loadingError`
+ * • Manage UI state through reactive `StateFlow`s for events list, loading/error flags
+ * • Delegate data loading to [EventsRepository]
+ * • Use [GetSortedEventsUseCase] for event sorting business logic
+ * • Use [FilterEventsUseCase] for event filtering logic
+ * • Use [CheckEventFavoritesUseCase] for favorites checking logic
+ * • Handle UI-specific simulation speed adjustments in debug builds
+ * • Provide event observation coordination for UI updates
+ * • Catch uncaught coroutine exceptions and surface them to UI
  */
 @OptIn(ExperimentalTime::class)
 class EventsViewModel(
-    private val wwwEvents: WWWEvents,
+    private val eventsRepository: EventsRepository,
+    private val getSortedEventsUseCase: GetSortedEventsUseCase,
+    private val filterEventsUseCase: FilterEventsUseCase,
+    private val checkEventFavoritesUseCase: CheckEventFavoritesUseCase,
     private val mapChecker: MapAvailabilityChecker,
     private val platform: WWWPlatform,
 ) : ViewModel() {
@@ -59,10 +64,7 @@ class EventsViewModel(
         private const val MILLIS_PER_SECOND = 1000L
     }
 
-    private val originalEventsMutex = Mutex()
-    var originalEvents: List<IWWWEvent> = emptyList()
-
-    // State flows
+    // UI State flows
     private val _hasFavorites = MutableStateFlow(false)
     val hasFavorites: StateFlow<Boolean> = _hasFavorites.asStateFlow()
 
@@ -71,6 +73,9 @@ class EventsViewModel(
 
     private val _loadingError = MutableStateFlow(false)
     val hasLoadingError: StateFlow<Boolean> = _loadingError.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     // Exception handler for coroutines
     private val exceptionHandler =
@@ -90,52 +95,55 @@ class EventsViewModel(
     // ---------------------------
 
     /**
-     * Load events from the data source
+     * Load events from the data source through repository and use cases
      */
     private fun loadEvents() {
         viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
             try {
-                wwwEvents.loadEvents(
-                    onLoadingError = { exception ->
-                        Log.e(::EventsViewModel.name, "Error loading events", exception)
-                        _loadingError.value = true
-                    },
-                )
+                // Start loading events through repository
+                eventsRepository.loadEvents { exception ->
+                    Log.e(::EventsViewModel.name, "Error loading events", exception)
+                    _loadingError.value = true
+                }
 
-                // Collect the events flow and process events list
-                wwwEvents
-                    .flow()
-                    .onEach { eventsList ->
-                        processEventsList(eventsList)
-                    }.flowOn(Dispatchers.Default)
+                // Observe loading state from repository
+                eventsRepository.isLoading()
+                    .onEach { isLoading -> _isLoading.value = isLoading }
                     .launchIn(viewModelScope)
-            } catch (e: IllegalStateException) {
-                Log.e(::EventsViewModel.name, "Invalid state while loading events", e)
-                _loadingError.value = true
-            } catch (e: SecurityException) {
-                Log.e(::EventsViewModel.name, "Security error while loading events", e)
-                _loadingError.value = true
-            } catch (e: UnsupportedOperationException) {
-                Log.e(::EventsViewModel.name, "Unsupported operation while loading events", e)
+
+                // Observe errors from repository
+                eventsRepository.getLastError()
+                    .onEach { error ->
+                        _loadingError.value = error != null
+                        error?.let {
+                            Log.e(::EventsViewModel.name, "Repository error: ${it.message}", it)
+                        }
+                    }
+                    .launchIn(viewModelScope)
+
+                // Get sorted events through use case and process them
+                getSortedEventsUseCase.invoke()
+                    .onEach { sortedEvents: List<IWWWEvent> ->
+                        processEventsList(sortedEvents)
+                    }
+                    .flowOn(Dispatchers.Default)
+                    .launchIn(viewModelScope)
+            } catch (e: Exception) {
+                Log.e(::EventsViewModel.name, "Error in loadEvents", e)
                 _loadingError.value = true
             }
         }
     }
 
     /**
-     * Process a new list of events
+     * Process a new list of sorted events for UI updates
      */
-    private suspend fun processEventsList(eventsList: List<IWWWEvent>) {
-        val sortedEvents = eventsList.sortedBy { it.getStartDateTime() }
-
-        // Update original events with mutex protection
-        originalEventsMutex.withLock {
-            originalEvents = sortedEvents
-        }
-
-        // Update UI state
+    private suspend fun processEventsList(sortedEvents: List<IWWWEvent>) {
+        // Update UI state - events are already sorted by use case
         _events.value = sortedEvents
-        _hasFavorites.value = sortedEvents.any(IWWWEvent::favorite)
+
+        // Check for favorites using use case
+        _hasFavorites.value = checkEventFavoritesUseCase.hasFavoriteEvents(sortedEvents)
 
         // Start observing all events - multiple events can be active simultaneously
         // The user has a single position that needs to be checked against all event areas
@@ -184,22 +192,34 @@ class EventsViewModel(
     // ---------------------------
 
     /**
-     * Filter events by favorite status
+     * Filter events using business logic from FilterEventsUseCase
      */
     fun filterEvents(
         onlyFavorites: Boolean = false,
         onlyDownloaded: Boolean = false,
     ) {
-        mapChecker.refreshAvailability()
         viewModelScope.launch {
-            _events.value =
-                originalEvents.filter { event ->
-                    when {
-                        onlyFavorites -> event.favorite
-                        onlyDownloaded -> mapChecker.isMapDownloaded(event.id)
-                        else -> true // All events
+            try {
+                // Get all events from the use case first
+                getSortedEventsUseCase.invoke()
+                    .onEach { allEvents: List<IWWWEvent> ->
+                        // Use FilterEventsUseCase for business logic
+                        val filterCriteria = EventFilterCriteria(
+                            onlyFavorites = onlyFavorites,
+                            onlyDownloaded = onlyDownloaded,
+                            onlyRunning = false, // Not used in this UI context
+                            onlyUpcoming = false, // Not used in this UI context
+                            onlyCompleted = false // Not used in this UI context
+                        )
+
+                        val filteredEvents = filterEventsUseCase.invoke(allEvents, filterCriteria)
+                        _events.value = filteredEvents
                     }
-                }
+                    .launchIn(viewModelScope)
+            } catch (e: Exception) {
+                Log.e(::EventsViewModel.name, "Error filtering events", e)
+                _loadingError.value = true
+            }
         }
     }
 }

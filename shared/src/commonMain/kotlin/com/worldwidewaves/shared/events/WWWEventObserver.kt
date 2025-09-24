@@ -349,7 +349,12 @@ class WWWEventObserver(
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
+                    // This is expected when feature map hasn't been downloaded yet - downgrade to info
+                    if (e.message?.contains("Flow context cannot contain job") == true) {
+                        Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
+                    } else {
+                        Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
+                    }
                 }
             }
         } else {

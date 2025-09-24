@@ -23,6 +23,7 @@ package com.worldwidewaves.shared.domain.repository
 
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -98,29 +99,31 @@ class EventsRepositoryImpl(
             _lastError.value = null
             invalidateCache()
 
-            // Reload events
-            var loadResult: Result<Unit> = Result.success(Unit)
+            // Use CompletableDeferred to wait for async loading completion
+            val loadDeferred = CompletableDeferred<Result<Unit>>()
 
             wwwEvents.loadEvents(
                 onLoadingError = { exception ->
-                    loadResult = Result.failure(exception)
                     _lastError.value = exception
                     _isLoading.value = false
+                    loadDeferred.complete(Result.failure(exception))
                 },
                 onLoaded = {
                     _isLoading.value = false
                     updateCache()
+                    loadDeferred.complete(Result.success(Unit))
                 },
                 onTermination = { exception ->
                     _isLoading.value = false
                     exception?.let {
-                        loadResult = Result.failure(it)
                         _lastError.value = it
-                    }
+                        loadDeferred.complete(Result.failure(it))
+                    } ?: loadDeferred.complete(Result.success(Unit))
                 }
             )
 
-            loadResult
+            // Wait for loading to complete
+            loadDeferred.await()
         } catch (e: Exception) {
             _isLoading.value = false
             _lastError.value = e
@@ -147,19 +150,26 @@ class EventsRepositoryImpl(
      * Updates the internal cache with the latest events from WWWEvents.
      * This method is thread-safe and should be called when events are loaded.
      */
-    private suspend fun updateCache() {
-        cacheMutex.withLock {
-            cachedEvents = wwwEvents.list()
-            cacheValid = true
+    private fun updateCache() {
+        // Cache update doesn't require suspending since we're just copying data
+        // that's already loaded in memory from WWWEvents
+        val currentEvents = wwwEvents.list()
+        kotlinx.coroutines.runBlocking {
+            cacheMutex.withLock {
+                cachedEvents = currentEvents
+                cacheValid = true
+            }
         }
     }
 
     /**
      * Invalidates the internal cache, forcing a reload on next access.
      */
-    private suspend fun invalidateCache() {
-        cacheMutex.withLock {
-            cacheValid = false
+    private fun invalidateCache() {
+        kotlinx.coroutines.runBlocking {
+            cacheMutex.withLock {
+                cacheValid = false
+            }
         }
     }
 }

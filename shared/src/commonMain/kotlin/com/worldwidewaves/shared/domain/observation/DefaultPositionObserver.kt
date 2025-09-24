@@ -30,6 +30,7 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -115,7 +116,7 @@ class DefaultPositionObserver(
             } else {
                 calculateDistance(old.position!!, new.position!!) < MIN_POSITION_CHANGE_METERS
             }
-        }.flowOn(coroutineScopeProvider.scopeDefault().coroutineContext)
+        }.flowOn(Dispatchers.Default)
     }
 
     override fun getCurrentPosition(): Position? {

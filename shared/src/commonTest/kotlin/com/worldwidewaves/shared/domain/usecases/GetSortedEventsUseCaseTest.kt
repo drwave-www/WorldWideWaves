@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.domain.usecases
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.domain.repository.EventsRepository
 import com.worldwidewaves.shared.events.IWWWEvent
 import io.mockk.coEvery
 import io.mockk.mockk
