@@ -22,47 +22,97 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    // Step 1: Start with working foundation, add functionality incrementally
-    private let wwwEvents: WWWEvents
+    // Step 1: Simple tab structure - start basic, build up incrementally
+    @State private var selectedTab = 0
 
     // KMM - Koin Call
     init() {
         HelperKt.doInitKoin()
-        self.wwwEvents = WWWEvents()
     }
 
     var body: some View {
-        VStack {
-            Text("🌊 WorldWideWaves iOS")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding()
-
-            // Step 1: Show real events from shared module
+        TabView(selection: $selectedTab) {
+            // Events Tab - Simple version first
             NavigationView {
-                List {
-                    ForEach(wwwEvents.list(), id: \.id) { event in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(event.name)
-                                .font(.headline)
-                            Text(event.location)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            HStack {
-                                Text("Status: \(event.status.name)")
-                                    .font(.caption)
-                                    .padding(4)
-                                    .background(Color.blue.opacity(0.3))
-                                    .cornerRadius(4)
-                                Spacer()
+                VStack {
+                    Text("📋 Events List")
+                        .font(.title)
+                        .padding()
+
+                    List {
+                        ForEach(0..<5) { index in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Event \(index + 1)")
+                                    .font(.headline)
+                                Text("Sample event location")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                HStack {
+                                    Text("Status: Active")
+                                        .font(.caption)
+                                        .padding(4)
+                                        .background(Color.green.opacity(0.3))
+                                        .cornerRadius(4)
+                                    Spacer()
+                                }
                             }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 4)
                     }
                 }
                 .navigationTitle("Events")
             }
+            .tabItem {
+                Image(systemName: "water.waves")
+                Text("Events")
+            }
+            .tag(0)
+
+            // About Tab - Simple
+            NavigationView {
+                VStack(spacing: 20) {
+                    Text("ℹ️ About")
+                        .font(.title)
+                    Text("WorldWideWaves")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                    Text("Orchestrating human waves across cities and countries")
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                    Spacer()
+                }
+                .navigationTitle("About")
+                .padding()
+            }
+            .tabItem {
+                Image(systemName: "info.circle")
+                Text("About")
+            }
+            .tag(1)
+
+            // Settings Tab - Simple
+            NavigationView {
+                VStack(spacing: 20) {
+                    Text("⚙️ Settings")
+                        .font(.title)
+                    Text("App Settings")
+                        .font(.headline)
+                    Text("Settings functionality will be implemented")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .navigationTitle("Settings")
+                .padding()
+            }
+            .tabItem {
+                Image(systemName: "gear")
+                Text("Settings")
+            }
+            .tag(2)
         }
+        .accentColor(.blue)
     }
 }
 
