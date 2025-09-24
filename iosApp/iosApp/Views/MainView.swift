@@ -31,11 +31,13 @@ struct MainView: View {
     private let settingsView: SettingsView
     
     init() {
-        // Shared data source for events (can be reused by multiple view-models)
-        let sharedEvents = WWWEvents()
+        // Initialize Koin DI if not already done
+        if KoinKt.getKoin() == nil {
+            HelperKt.doInitKoin()
+        }
 
-        // Create view-models directly, avoiding complex DI for iOS layer
-        let eventsListViewModel = EventsListViewModel(wwwEvents: sharedEvents)
+        // Create view-models using enhanced architecture
+        let eventsListViewModel = EventsListViewModel()  // Now uses shared EventsViewModel
         let aboutViewModel      = AboutViewModel()
         let settingsViewModel   = SettingsViewModel()
 

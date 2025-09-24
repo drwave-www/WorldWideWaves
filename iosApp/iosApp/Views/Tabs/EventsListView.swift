@@ -34,6 +34,11 @@ class EventsListViewModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     init() {
+        // Initialize Koin DI if not already done
+        if KoinKt.getKoin() == nil {
+            HelperKt.doInitKoin()
+        }
+
         // Initialize shared EventsViewModel with DI
         self.sharedViewModel = DIContainer.shared.eventsViewModel
         setupStateObservers()
@@ -77,77 +82,124 @@ class EventsListViewModel: ObservableObject {
 
 struct EventsListView: View {
     @ObservedObject var viewModel: EventsListViewModel
-    @State private var selectedEvent: WWWEvent? = nil
+    @State private var selectedEvent: (any IWWWEvent)? = nil
     @State private var navigateToEventDetail = false
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(viewModel.events, id: \.id) { event in
-                    EventRow(event: event)
-                        .onTapGesture {
-                            selectedEvent = event
-                            navigateToEventDetail = true
-                        }
+            if viewModel.isLoading && viewModel.events.isEmpty {
+                // Loading state
+                VStack {
+                    ProgressView("Loading events...")
+                        .padding()
+                    Spacer()
                 }
-            }
-            .navigationTitle("Events")
-            .refreshable {
-                viewModel.refreshEvents()
-            }
-            .background(
-                NavigationLink(
-                    destination: EventDetailView(event: selectedEvent),
-                    isActive: $navigateToEventDetail,
-                    label: { EmptyView() }
+            } else if viewModel.hasLoadingError && viewModel.events.isEmpty {
+                // Error state
+                VStack {
+                    Text("Failed to load events")
+                        .font(.headline)
+                        .foregroundColor(.red)
+                    Text("Please try again")
+                        .font(.caption)
+                    Button("Retry") {
+                        // Trigger reload - will be implemented
+                    }
+                    .padding()
+                    Spacer()
+                }
+            } else {
+                // Events list
+                List {
+                    ForEach(viewModel.events, id: \.id) { event in
+                        EventRow(event: event)
+                            .onTapGesture {
+                                selectedEvent = event
+                                navigateToEventDetail = true
+                            }
+                    }
+                }
+                .refreshable {
+                    // Pull to refresh - will be implemented
+                }
+                .background(
+                    NavigationLink(
+                        destination: EventDetailView(event: selectedEvent),
+                        isActive: $navigateToEventDetail,
+                        label: { EmptyView() }
+                    )
+                    .hidden()
                 )
-                .hidden()
-            )
+            }
         }
+        .navigationTitle("Events")
         .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
 // Row item for each event in the list
 struct EventRow: View {
-    let event: WWWEvent
-    
+    let event: any IWWWEvent
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(event.name)
+            // Event title (using ID for now, will be enhanced)
+            Text(event.id.replacingOccurrences(of: "_", with: " ").capitalized)
                 .font(.headline)
-            
-            Text(event.location)
+
+            // Event location/description placeholder
+            Text("Wave event in \(event.id.replacingOccurrences(of: "_", with: " "))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
+
             HStack {
-                Text("Date: \(formattedDate(event.date))")
-                    .font(.caption)
-                Spacer()
-                Text("Status: \(event.status.name)")
+                // Status indicator
+                Text("Status: \(statusText(event.status))")
                     .font(.caption)
                     .padding(4)
                     .background(statusColor(event.status))
                     .cornerRadius(4)
+                Spacer()
+
+                // Event type indicator
+                Text("Wave Event")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 8)
     }
-    
-    // Helper function to format the date
-    private func formattedDate(_ date: Kotlinx_datetimeLocalDateTime) -> String {
-        return "\(date.dayOfMonth)/\(date.monthNumber)/\(date.year) \(date.hour):\(String(format: "%02d", date.minute))"
-    }
-    
-    // Helper function to determine status color
-    private func statusColor(_ status: WWWEventStatus) -> Color {
+
+    // Helper function to get status text
+    private func statusText(_ status: IWWWEventStatus?) -> String {
+        guard let status = status else { return "Unknown" }
+
         switch status {
-        case .upcoming:
+        case .upcomingValue:
+            return "Upcoming"
+        case .soonValue:
+            return "Soon"
+        case .runningValue:
+            return "Running"
+        case .doneValue:
+            return "Done"
+        default:
+            return "Unknown"
+        }
+    }
+
+    // Helper function to determine status color
+    private func statusColor(_ status: IWWWEventStatus?) -> Color {
+        guard let status = status else { return Color.gray.opacity(0.3) }
+
+        switch status {
+        case .upcomingValue:
             return Color.blue.opacity(0.3)
-        case .active:
+        case .soonValue:
+            return Color.orange.opacity(0.3)
+        case .runningValue:
             return Color.green.opacity(0.3)
-        case .completed:
+        case .doneValue:
             return Color.gray.opacity(0.3)
         default:
             return Color.gray.opacity(0.3)
@@ -157,30 +209,73 @@ struct EventRow: View {
 
 // Placeholder for the event detail view
 struct EventDetailView: View {
-    let event: WWWEvent?
-    
+    let event: (any IWWWEvent)?
+
     var body: some View {
         if let event = event {
-            VStack {
-                Text(event.name)
-                    .font(.title)
-                Text(event.location)
-                    .font(.headline)
-                
-                // Placeholder for future implementation
-                Text("Event details will be implemented")
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(8)
-                    .padding()
-                
+            VStack(alignment: .leading, spacing: 16) {
+                // Event header
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(event.id.replacingOccurrences(of: "_", with: " ").capitalized)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                    Text("Wave Event Location")
+                        .font(.title2)
+                        .foregroundColor(.secondary)
+                }
+
+                Divider()
+
+                // Event details section
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Event Information", systemImage: "info.circle")
+                        .font(.headline)
+
+                    Text("This is a WorldWideWaves event where participants create synchronized human waves across the city.")
+                        .font(.body)
+
+                    Text("Join thousands of others in this unique experience that transcends physical and cultural boundaries!")
+                        .font(.body)
+                        .italic()
+                }
+
+                Divider()
+
+                // Action section placeholder
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Actions", systemImage: "hand.raised")
+                        .font(.headline)
+
+                    Button(action: {
+                        // Wave action - to be implemented
+                    }) {
+                        HStack {
+                            Image(systemName: "waveform")
+                            Text("Join Wave")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                    }
+                }
+
                 Spacer()
             }
             .padding()
             .navigationTitle("Event Details")
+            .navigationBarTitleDisplayMode(.inline)
         } else {
-            Text("No event selected")
+            VStack {
+                Image(systemName: "exclamationmark.circle")
+                    .font(.system(size: 50))
+                    .foregroundColor(.gray)
+                Text("No event selected")
+                    .font(.title2)
+                    .foregroundColor(.gray)
+            }
         }
     }
 }
