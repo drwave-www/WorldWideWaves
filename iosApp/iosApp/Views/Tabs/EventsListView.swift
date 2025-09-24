@@ -21,29 +21,57 @@
 
 import SwiftUI
 import Shared
+import Combine
 
-// View Model for EventsListView
+// iOS ViewModel wrapper for shared EventsViewModel
 class EventsListViewModel: ObservableObject {
-    @Published var events: [WWWEvent] = []
-    private let wwwEvents: WWWEvents
-    
-    init(wwwEvents: WWWEvents = WWWEvents()) {
-        self.wwwEvents = wwwEvents
-        loadEvents()
+    @Published var events: [any IWWWEvent] = []
+    @Published var isLoading: Bool = false
+    @Published var hasLoadingError: Bool = false
+    @Published var hasFavorites: Bool = false
+
+    private let sharedViewModel: EventsViewModel
+    private var cancellables: Set<AnyCancellable> = []
+
+    init() {
+        // Initialize shared EventsViewModel with DI
+        self.sharedViewModel = DIContainer.shared.eventsViewModel
+        setupStateObservers()
     }
-    
-    func loadEvents() {
-        // Load events from shared code
-        events = wwwEvents.events()
-    }
-    
-    func refreshEvents() {
-        // Refresh events (will be implemented with proper loading logic)
-        wwwEvents.loadEvents(onTermination: {
+
+    private func setupStateObservers() {
+        // Observe shared ViewModel StateFlows using iOS reactive bridge
+        sharedViewModel.events.toIOSObservable().sink { [weak self] events in
             DispatchQueue.main.async {
-                self.events = self.wwwEvents.events()
+                self?.events = events
             }
-        })
+        }.store(in: &cancellables)
+
+        sharedViewModel.isLoading.toIOSObservable().sink { [weak self] loading in
+            DispatchQueue.main.async {
+                self?.isLoading = loading
+            }
+        }.store(in: &cancellables)
+
+        sharedViewModel.hasLoadingError.toIOSObservable().sink { [weak self] error in
+            DispatchQueue.main.async {
+                self?.hasLoadingError = error
+            }
+        }.store(in: &cancellables)
+
+        sharedViewModel.hasFavorites.toIOSObservable().sink { [weak self] favorites in
+            DispatchQueue.main.async {
+                self?.hasFavorites = favorites
+            }
+        }.store(in: &cancellables)
+    }
+
+    func filterEvents(onlyFavorites: Bool = false, onlyDownloaded: Bool = false) {
+        sharedViewModel.filterEvents(onlyFavorites: onlyFavorites, onlyDownloaded: onlyDownloaded)
+    }
+
+    deinit {
+        cancellables.removeAll()
     }
 }
 

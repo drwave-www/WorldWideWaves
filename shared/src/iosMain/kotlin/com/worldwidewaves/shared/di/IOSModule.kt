@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.di
 
+import com.worldwidewaves.shared.map.IOSWWWLocationProvider
+import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.sound.IOSSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.utils.IOSImageResolver
@@ -11,4 +13,5 @@ val IOSModule =
     module {
         single<SoundPlayer> { IOSSoundPlayer() }
         single<ImageResolver<UIImage>> { IOSImageResolver() }
+        single<WWWLocationProvider> { IOSWWWLocationProvider() }
     }

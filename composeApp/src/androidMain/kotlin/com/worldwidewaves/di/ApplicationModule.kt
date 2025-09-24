@@ -38,7 +38,7 @@ import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
-import com.worldwidewaves.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module

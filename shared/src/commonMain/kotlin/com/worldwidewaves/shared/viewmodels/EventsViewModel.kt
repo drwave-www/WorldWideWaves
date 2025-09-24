@@ -1,4 +1,4 @@
-package com.worldwidewaves.viewmodels
+package com.worldwidewaves.shared.viewmodels
 
 /*
  * Copyright 2025 DrWave

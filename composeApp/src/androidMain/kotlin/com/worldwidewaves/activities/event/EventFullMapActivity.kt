@@ -39,7 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.compose.common.ButtonWave
+import com.worldwidewaves.shared.ui.components.ButtonWave
+import com.worldwidewaves.shared.ui.components.WaveNavigator
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
@@ -105,7 +106,17 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         // Screen composition
         Box(modifier = modifier.fillMaxSize()) {
             eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
-            ButtonWave(event.id, eventStatus, endDateTime, clock, isInArea, Modifier.align(Alignment.TopCenter).padding(top = 40.dp))
+            ButtonWave(
+                event.id,
+                eventStatus,
+                endDateTime,
+                clock,
+                isInArea,
+                onNavigateToWave = WaveNavigator { eventId ->
+                    // This is already in an event activity, so we stay here
+                },
+                Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
+            )
             MapActions(event, eventMap, clock)
         }
     }

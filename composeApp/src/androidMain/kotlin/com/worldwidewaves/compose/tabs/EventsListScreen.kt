@@ -74,8 +74,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.compose.common.EventOverlayDone
-import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.EventOverlayDone
+import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
@@ -93,7 +93,7 @@ import com.worldwidewaves.theme.quaternaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredTextStyle
 import com.worldwidewaves.theme.scrimLight
 import com.worldwidewaves.utils.MapAvailabilityChecker
-import com.worldwidewaves.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource

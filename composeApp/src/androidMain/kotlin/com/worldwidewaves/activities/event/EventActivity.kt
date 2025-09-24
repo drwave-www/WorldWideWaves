@@ -79,10 +79,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
 import com.worldwidewaves.compose.common.AutoResizeSingleLineText
-import com.worldwidewaves.compose.common.ButtonWave
 import com.worldwidewaves.compose.common.DividerLine
-import com.worldwidewaves.compose.common.EventOverlayDone
-import com.worldwidewaves.compose.common.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.ButtonWave
+import com.worldwidewaves.shared.ui.components.EventOverlayDone
+import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.WaveNavigator
 import com.worldwidewaves.compose.common.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
@@ -190,6 +191,13 @@ class EventActivity : AbstractEventWaveActivity() {
                         endDateTime.value,
                         clock,
                         isInArea,
+                        onNavigateToWave = WaveNavigator { eventId ->
+                            context.startActivity(
+                                Intent(context, WaveActivity::class.java).apply {
+                                    putExtra("eventId", eventId)
+                                }
+                            )
+                        },
                         modifier = Modifier.align(Alignment.Center),
                     )
 

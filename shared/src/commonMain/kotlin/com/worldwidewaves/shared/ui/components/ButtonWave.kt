@@ -1,6 +1,15 @@
-package com.worldwidewaves.compose.common
+package com.worldwidewaves.shared.ui.components
 
-import android.content.Intent
+/*
+ * Copyright 2025 DrWave
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -20,23 +29,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.BuildConfig
-import com.worldwidewaves.activities.event.WaveActivity
+import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.theme.onQuaternaryLight
-import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.utils.WWWLogger
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-/** Primary button that navigates to [WaveActivity] when the wave is active or imminent. */
+/**
+ * Interface for platform-specific navigation to wave screen.
+ */
+fun interface WaveNavigator {
+    fun navigateToWave(eventId: String)
+}
+
+/**
+ * Shared cross-platform wave button component.
+ * Primary button that navigates to wave screen when the wave is active or imminent.
+ */
 @OptIn(ExperimentalTime::class)
 @Composable
 fun ButtonWave(
@@ -45,10 +64,9 @@ fun ButtonWave(
     endDateTime: Instant?,
     clock: IClock,
     isInArea: Boolean,
+    onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON
     val isEndDateTimeRecent =
@@ -58,13 +76,11 @@ fun ButtonWave(
         } ?: false
     val isEnabled = isInArea && (isRunning || isSoon || isEndDateTimeRecent)
 
-    // DEBUG: Temporary debug logging to monitor button state changes
-    if (BuildConfig.DEBUG && eventId == "paris_france") {
-        android.util.Log.i(
-            "ButtonWave",
-            "Paris Wave Now button state: eventId=$eventId, eventState=$eventState, isInArea=$isInArea, isRunning=$isRunning, isSoon=$isSoon, isEndDateTimeRecent=$isEndDateTimeRecent, isEnabled=$isEnabled",
-        )
-    }
+    // Debug logging for button state changes
+    WWWLogger.d(
+        "ButtonWave",
+        "Wave button state: eventId=$eventId, eventState=$eventState, isInArea=$isInArea, isRunning=$isRunning, isSoon=$isSoon, isEndDateTimeRecent=$isEndDateTimeRecent, isEnabled=$isEnabled",
+    )
 
     // Blinking animation
     val infiniteTransition = rememberInfiniteTransition(label = "blinking")
@@ -80,18 +96,14 @@ fun ButtonWave(
     )
 
     Surface(
-        color = if (isEnabled) MaterialTheme.colorScheme.primary else onQuaternaryLight,
+        color = if (isEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
         modifier =
             modifier
                 .width(Event.WAVEBUTTON_WIDTH.dp)
                 .height(Event.WAVEBUTTON_HEIGHT.dp)
                 .alpha(if (isEnabled) alpha else 1f) // Apply blinking only when enabled
                 .clickable(enabled = isEnabled, onClick = {
-                    context.startActivity(
-                        Intent(context, WaveActivity::class.java).apply {
-                            putExtra("eventId", eventId)
-                        },
-                    )
+                    onNavigateToWave.navigateToWave(eventId)
                 }),
     ) {
         Text(
@@ -101,7 +113,10 @@ fun ButtonWave(
                     .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
             style =
-                quinaryColoredBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
+                TextStyle(
+                    fontSize = Event.WAVEBUTTON_FONTSIZE.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 ),
         )

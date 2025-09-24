@@ -1,4 +1,14 @@
-package com.worldwidewaves.compose.common
+package com.worldwidewaves.shared.ui.components
+
+/*
+ * Copyright 2025 DrWave
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,19 +26,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Common
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
-import com.worldwidewaves.theme.commonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 
-/** Top-right banner indicating SOON / RUNNING event states. */
+/**
+ * Shared cross-platform event overlay components.
+ * These components provide visual indicators for event states.
+ */
+
+/**
+ * Top-right banner indicating SOON / RUNNING event states.
+ */
 @Composable
 fun EventOverlaySoonOrRunning(
     eventStatus: Status?,
@@ -53,20 +72,25 @@ fun EventOverlaySoonOrRunning(
                         .height(Common.SOONRUNNING_HEIGHT.dp)
                         .background(backgroundColor)
                         .padding(horizontal = Dimensions.DEFAULT_INT_PADDING.dp),
-                // Changed to horizontal padding
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = stringResource(textId),
-                    style = commonTextStyle(Common.SOONRUNNING_FONTSIZE),
-                    textAlign = TextAlign.Center, // Added text alignment
+                    style = TextStyle(
+                        fontSize = Common.SOONRUNNING_FONTSIZE.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    textAlign = TextAlign.Center,
                 )
             }
         }
     }
 }
 
-/** Semi-transparent overlay with "done" image when the event is finished. */
+/**
+ * Semi-transparent overlay with "done" image when the event is finished.
+ */
 @Composable
 fun EventOverlayDone(
     eventStatus: Status?,
@@ -75,7 +99,7 @@ fun EventOverlayDone(
     if (eventStatus == Status.DONE) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
             Surface(
-                color = Color.run { White.copy(alpha = 0.5f) },
+                color = Color.White.copy(alpha = 0.5f),
                 modifier = Modifier.fillMaxSize(),
             ) { }
             Image(
