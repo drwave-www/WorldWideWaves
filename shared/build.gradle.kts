@@ -139,6 +139,7 @@ android {
         implementation(libs.kotlinx.datetime)
         implementation(libs.maplibre.android)
         implementation(libs.androidx.datastore.preferences)
+        implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
         implementation(libs.maplibre.android)
     }

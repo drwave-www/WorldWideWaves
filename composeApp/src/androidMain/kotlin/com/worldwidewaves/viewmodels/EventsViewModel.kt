@@ -11,8 +11,7 @@ package com.worldwidewaves.viewmodels
  */
 
 import com.worldwidewaves.shared.utils.WWWLogger
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.repository.EventsRepository
@@ -57,7 +56,7 @@ class EventsViewModel(
     private val filterEventsUseCase: FilterEventsUseCase,
     private val checkEventFavoritesUseCase: CheckEventFavoritesUseCase,
     private val platform: WWWPlatform,
-) : ViewModel() {
+) : BaseViewModel() {
     companion object {
         private const val MILLIS_PER_SECOND = 1000L
     }
