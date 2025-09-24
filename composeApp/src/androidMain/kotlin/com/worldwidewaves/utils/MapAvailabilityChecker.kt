@@ -28,6 +28,7 @@ import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -41,7 +42,7 @@ import kotlin.coroutines.resume
  */
 class MapAvailabilityChecker(
     val context: Context,
-) {
+) : IMapAvailabilityChecker {
     /** Log tag used throughout this helper for easy filtering. */
     private companion object {
         private const val TAG = "MapAvail"
@@ -127,7 +128,7 @@ class MapAvailabilityChecker(
      * Refreshes the availability state of all tracked maps.
      * Call this when returning to a list to ensure fresh data.
      */
-    fun refreshAvailability() {
+    override fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
         Log.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
         Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
@@ -156,9 +157,15 @@ class MapAvailabilityChecker(
         Log.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
     }
 
-    fun isMapDownloaded(eventId: String): Boolean {
+    override fun isMapDownloaded(eventId: String): Boolean {
         val downloaded = mapStates.value[eventId] == true
         Log.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
+        return downloaded
+    }
+
+    override fun getDownloadedMaps(): List<String> {
+        val downloaded = mapStates.value.filterValues { it == true }.keys.toList()
+        Log.d(TAG, "getDownloadedMaps -> $downloaded")
         return downloaded
     }
 

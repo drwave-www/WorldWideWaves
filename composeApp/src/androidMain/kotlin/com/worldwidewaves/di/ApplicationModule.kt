@@ -33,6 +33,12 @@ import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CloseableCoroutineScope
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
+import com.worldwidewaves.shared.domain.repository.EventsRepository
+import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
+import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
+import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapAvailabilityChecker
 import com.worldwidewaves.viewmodels.EventsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
@@ -42,7 +48,24 @@ val applicationModule =
     module {
         single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
 
-        viewModel { EventsViewModel(wwwEvents = get(), mapChecker = get(), platform = get()) }
+        // Repository layer
+        single<EventsRepository> { EventsRepositoryImpl(get()) }
+
+        // Use cases layer
+        single { GetSortedEventsUseCase(get()) }
+        single { FilterEventsUseCase(get()) }
+        single { CheckEventFavoritesUseCase() }
+
+        viewModel {
+            EventsViewModel(
+                eventsRepository = get(),
+                getSortedEventsUseCase = get(),
+                filterEventsUseCase = get(),
+                checkEventFavoritesUseCase = get(),
+                mapChecker = get(),
+                platform = get()
+            )
+        }
 
         single { AboutScreen(get(), get()) }
         single { AboutInfoScreen() }
@@ -58,6 +81,9 @@ val applicationModule =
                 }
             }
         }
+
+        // Bind the interface to the implementation
+        single<IMapAvailabilityChecker> { get<MapAvailabilityChecker>() }
 
         // A closeable coroutine scope for cleanup
         single { CloseableCoroutineScope() }
