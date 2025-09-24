@@ -35,10 +35,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Instant
-import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.sin

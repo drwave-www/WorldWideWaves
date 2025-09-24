@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.events
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker

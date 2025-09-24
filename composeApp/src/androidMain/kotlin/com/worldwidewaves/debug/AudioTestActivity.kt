@@ -170,6 +170,23 @@ class AudioTestActivity : ComponentActivity() {
                 Text("Play Crowd Simulation")
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    scope.launch {
+                        isPlaying = true
+                        statusMessage = "🌊 Wave passing through crowd (10 per 100ms)..."
+                        playWaveProgression()
+                        statusMessage = "✅ Wave progression completed"
+                        isPlaying = false
+                    }
+                },
+                enabled = !isLoading && !isPlaying && midiTrack != null
+            ) {
+                Text("🌊 Play Wave Progression")
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             if (isPlaying) {
@@ -327,6 +344,71 @@ class AudioTestActivity : ComponentActivity() {
         }
 
         Log.d(TAG, "Crowd simulation completed")
+    }
+
+    /**
+     * Simulate a wave passing through a crowd - full MIDI with realistic timing
+     */
+    private suspend fun playWaveProgression() {
+        val track = midiTrack ?: return
+        Log.d(TAG, "🌊 Starting wave progression through crowd")
+
+        val waveSlotDurationMs = 100L // 100ms time slots
+        val peoplePerSlot = 10 // 10 people per slot
+        val totalDurationSeconds = 30L // Play for 30 seconds
+        val totalDurationMs = totalDurationSeconds * 1000
+
+        var currentSlotIndex = 0
+
+        while (currentSlotIndex * waveSlotDurationMs < totalDurationMs) {
+            val slotStartTime = currentSlotIndex * waveSlotDurationMs
+            val midiPositionMs = slotStartTime % track.totalDuration.inWholeMilliseconds
+
+            // Find all active notes at this MIDI position
+            val midiPosition = midiPositionMs.milliseconds
+            val activeNotes = track.notes.filter { it.isActiveAt(midiPosition) }
+
+            if (activeNotes.isNotEmpty()) {
+                Log.d(TAG, "🎵 Slot $currentSlotIndex: ${activeNotes.size} active notes")
+
+                // Create 10 people for this time slot with random micro-timing
+                repeat(peoplePerSlot) { personIndex ->
+                    // Random offset within the 100ms slot (0-99ms)
+                    val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())
+
+                    // Each person gets a different note if available
+                    val note = activeNotes[personIndex % activeNotes.size]
+                    val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
+                    val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.12 // Quieter for crowd
+
+                    // Vary waveforms for realistic human sound variation
+                    val waveform = when (personIndex % 4) {
+                        0 -> SoundPlayer.Waveform.SINE
+                        1 -> SoundPlayer.Waveform.SQUARE
+                        2 -> SoundPlayer.Waveform.SAWTOOTH
+                        else -> SoundPlayer.Waveform.SINE
+                    }
+
+                    // Launch each person's note with their random timing offset
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        delay(randomOffsetMs.milliseconds)
+
+                        soundPlayer.playTone(
+                            frequency = frequency,
+                            amplitude = amplitude,
+                            duration = (waveSlotDurationMs * 0.9).milliseconds, // Slight overlap
+                            waveform = waveform
+                        )
+                    }
+                }
+            }
+
+            // Move to next 100ms slot
+            delay(waveSlotDurationMs.milliseconds)
+            currentSlotIndex++
+        }
+
+        Log.d(TAG, "🌊 Wave progression completed - $currentSlotIndex time slots processed")
     }
 
     override fun onDestroy() {

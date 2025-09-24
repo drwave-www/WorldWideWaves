@@ -28,7 +28,6 @@ import com.worldwidewaves.shared.events.WWWEventArea
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
-import kotlin.math.roundToInt
 
 /**
  * Default implementation of WaveProgressionTracker.

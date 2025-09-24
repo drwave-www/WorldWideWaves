@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,6 +65,11 @@ class RealAudioCrowdSimulationTest {
         private const val DEMO_PEOPLE_COUNT = 5 // Reduced for demo
         private const val DEMO_DURATION_SECONDS = 10L // Shorter demo
         private const val PLAYBACK_INTERVAL_MS = 500L // Slower for audibility
+
+        // Wave progression constants for realistic simulation
+        private const val WAVE_PEOPLE_PER_SLOT = 10 // 10 people per 100ms slot
+        private const val WAVE_SLOT_DURATION_MS = 100L // 100ms time slots
+        private const val WAVE_TOTAL_DURATION_SECONDS = 60L // Play full MIDI for 60 seconds
     }
 
     @Test
@@ -138,6 +144,36 @@ class RealAudioCrowdSimulationTest {
         }
 
         Log.d(TAG, "✅ MIDI demo completed!")
+    }
+
+    @Test
+    fun playWaveProgressionThroughCrowd() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        Log.d(TAG, "🌊 Starting WAVE PROGRESSION through crowd simulation")
+        Log.d(TAG, "👥 Configuration: $WAVE_PEOPLE_PER_SLOT people per ${WAVE_SLOT_DURATION_MS}ms slot")
+
+        try {
+            val midiTrack = loadMidiTrack()
+            val soundPlayer = AndroidSoundPlayer(context)
+
+            Log.d(TAG, "🎼 MIDI loaded: ${midiTrack.name}")
+            Log.d(TAG, "   Duration: ${midiTrack.totalDuration.inWholeSeconds}s")
+            Log.d(TAG, "   Notes: ${midiTrack.notes.size}")
+
+            Log.d(TAG, "🔊 AUDIO WARNING: Full MIDI wave simulation starting in 3 seconds...")
+            delay(3.seconds)
+
+            // Run the wave progression simulation
+            simulateWaveProgressionThroughCrowd(soundPlayer, midiTrack)
+
+            soundPlayer.release()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Wave progression demo failed: ${e.message}")
+            throw e
+        }
+
+        Log.d(TAG, "✅ Wave progression demo completed!")
     }
 
     /**
@@ -253,5 +289,78 @@ class RealAudioCrowdSimulationTest {
 
         Log.d(TAG, "👥 Crowd simulation completed")
         soundPlayer.release()
+    }
+
+    /**
+     * Simulate a wave passing through a crowd with realistic timing:
+     * - 10 people per 100ms time slot
+     * - Each group plays as the wave reaches them
+     * - Full MIDI file duration
+     * - Random spacing within each time slot
+     */
+    private suspend fun simulateWaveProgressionThroughCrowd(
+        soundPlayer: AndroidSoundPlayer,
+        midiTrack: MidiTrack
+    ) {
+        Log.d(TAG, "🌊 Wave passing through crowd - playing full MIDI track")
+        Log.d(TAG, "⏰ Each ${WAVE_SLOT_DURATION_MS}ms: $WAVE_PEOPLE_PER_SLOT people play together")
+
+        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        val totalDurationMs = WAVE_TOTAL_DURATION_SECONDS * 1000
+        var currentSlotIndex = 0
+
+        while (currentSlotIndex * WAVE_SLOT_DURATION_MS < totalDurationMs) {
+            val slotStartTime = currentSlotIndex * WAVE_SLOT_DURATION_MS
+            val midiPositionMs = slotStartTime % midiTrack.totalDuration.inWholeMilliseconds
+
+            // Find all active notes at this MIDI position
+            val midiPosition = midiPositionMs.milliseconds
+            val activeNotes = midiTrack.notes.filter { it.isActiveAt(midiPosition) }
+
+            if (activeNotes.isNotEmpty()) {
+                Log.d(TAG, "🎵 Slot ${currentSlotIndex}: ${activeNotes.size} active notes at ${midiPositionMs}ms")
+
+                // Create 10 people for this time slot with random micro-timing
+                repeat(WAVE_PEOPLE_PER_SLOT) { personIndex ->
+                    // Random offset within the 100ms slot (0-99ms)
+                    val randomOffsetMs = Random.nextInt(0, WAVE_SLOT_DURATION_MS.toInt())
+
+                    // Each person gets a different note if available
+                    val note = activeNotes[personIndex % activeNotes.size]
+                    val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
+                    val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.15 // Quieter for crowd
+
+                    // Vary waveforms for realistic human sound variation
+                    val waveform = when (personIndex % 4) {
+                        0 -> SoundPlayer.Waveform.SINE
+                        1 -> SoundPlayer.Waveform.SQUARE
+                        2 -> SoundPlayer.Waveform.SAWTOOTH
+                        else -> SoundPlayer.Waveform.SINE
+                    }
+
+                    // Launch each person's note with their random timing offset
+                    launch {
+                        delay(randomOffsetMs.milliseconds)
+
+                        Log.v(TAG, "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} (${frequency.toInt()}Hz)")
+
+                        soundPlayer.playTone(
+                            frequency = frequency,
+                            amplitude = amplitude,
+                            duration = (WAVE_SLOT_DURATION_MS * 0.9).milliseconds, // Slight overlap
+                            waveform = waveform
+                        )
+                    }
+                }
+            } else {
+                Log.d(TAG, "🔇 Slot ${currentSlotIndex}: No active notes at ${midiPositionMs}ms")
+            }
+
+            // Move to next 100ms slot
+            delay(WAVE_SLOT_DURATION_MS.milliseconds)
+            currentSlotIndex++
+        }
+
+        Log.d(TAG, "🌊 Wave progression completed - ${currentSlotIndex} time slots processed")
     }
 }
