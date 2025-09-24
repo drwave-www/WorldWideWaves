@@ -26,6 +26,7 @@ import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
+import com.worldwidewaves.shared.domain.scheduling.ObservationScheduler
 import com.worldwidewaves.shared.domain.state.EventState
 import com.worldwidewaves.shared.domain.state.EventStateInput
 import com.worldwidewaves.shared.domain.state.EventStateManager
@@ -153,11 +154,11 @@ import kotlin.time.Instant.Companion.DISTANT_FUTURE
  *
  * ### Performance Characteristics:
  *
- * **Observation Intervals (Adaptive):**
- * - **> 1 hour**: 1 hour intervals
- * - **5-60 minutes**: 5 minute intervals
- * - **35-300 seconds**: 1 second intervals
- * - **0-35 seconds**: 500ms intervals (active monitoring)
+ * **Observation Intervals (Adaptive - via ObservationScheduler):**
+ * - **> 1 hour**: 1 hour intervals (minimal battery usage)
+ * - **5-60 minutes**: 5 minute intervals (moderate monitoring)
+ * - **35-300 seconds**: 1 second intervals (active monitoring)
+ * - **0-35 seconds**: 500ms intervals (real-time updates)
  * - **Hit critical (< 1s)**: 50ms intervals (sound accuracy)
  *
  * **State Update Throttling (Adaptive):**
@@ -209,6 +210,8 @@ class WWWEventObserver(
     private val positionObserver: PositionObserver by inject()
 
     private val eventStateManager: EventStateManager by inject()
+
+    private val observationScheduler: ObservationScheduler by inject()
 
     private val _eventStatus = MutableStateFlow(Status.UNDEFINED)
     val eventStatus: StateFlow<Status> = _eventStatus.asStateFlow()
@@ -389,52 +392,35 @@ class WWWEventObserver(
 
     /**
      * Creates a flow that periodically emits wave observations when the event should be observed.
+     * Now uses the extracted ObservationScheduler for timing logic.
      */
     private fun createPeriodicObservationFlow() = callbackFlow {
         try {
-            // Check if we should start continuous observation
-            val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
+            Log.v("WWWEventObserver", "Starting periodic observation flow for event ${event.id}")
 
-            if (shouldObserve) {
-                Log.v("WWWEventObserver", "Starting periodic observation for event ${event.id}")
-
-                while (!event.isDone()) {
-                    // Get current state and emit it
-                    val progression = waveProgressionTracker.calculateProgression(event)
-                    val status = event.getStatus()
-                    val eventObservation = EventObservation(progression, status)
-                    send(eventObservation)
-
-                    // Wait for the next observation interval
-                    val observationDelay = getObservationInterval()
-
-                    if (!observationDelay.isFinite()) {
-                        Log.w("periodicObservationFlow", "Stopping flow due to infinite observation delay")
-                        break
-                    }
-
-                    clock.delay(observationDelay)
-                }
-
-                // Final emission when event is done
-                send(EventObservation(100.0, Status.DONE))
-            } else {
-                // For events not ready for continuous observation, emit current state once
-                Log.v("WWWEventObserver", "Event ${event.id} not ready for continuous observation, emitting current state")
+            // Use the ObservationScheduler to create the observation flow
+            observationScheduler.createObservationFlow(event).collect { _ ->
+                // Get current state and emit it
                 val progression = try {
                     waveProgressionTracker.calculateProgression(event)
                 } catch (e: Throwable) {
-                    Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
+                    Log.e("WWWEventObserver", "Error calculating progression for event ${event.id}: $e")
                     0.0
                 }
+
                 val status = event.getStatus()
-                send(EventObservation(progression, status))
+                val eventObservation = EventObservation(progression, status)
+                send(eventObservation)
+
+                Log.v("WWWEventObserver", "Emitted observation for event ${event.id}: progression=$progression, status=$status")
             }
         } catch (e: Exception) {
             Log.e("periodicObservationFlow", "Error in periodic observation flow: $e")
         }
 
-        awaitClose()
+        awaitClose {
+            Log.v("WWWEventObserver", "Closing periodic observation flow for event ${event.id}")
+        }
     }
 
     /**
@@ -711,28 +697,4 @@ class WWWEventObserver(
         }
     }
 
-    /**
-     * Calculates the observation interval for the wave event.
-     *
-     * This function determines the appropriate interval for observing the wave event based on the
-     * current time, the event start time, and the time before the user is hit by the wave.
-     *
-     */
-    private suspend fun getObservationInterval(): Duration {
-        val now = clock.now()
-        val eventStartTime = event.getStartDateTime()
-        val timeBeforeEvent = eventStartTime - now
-        val timeBeforeHit = event.wave.timeBeforeUserHit() ?: 1.days
-
-        return when {
-            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
-            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
-            timeBeforeEvent > 35.seconds -> 1.seconds
-            timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
-            timeBeforeHit < ZERO -> INFINITE
-            timeBeforeHit < 1.seconds -> 50.milliseconds // For sound accuracy
-            timeBeforeHit < 5.seconds -> 200.milliseconds // Additional tier for better battery
-            else -> 30.seconds // More battery-friendly default
-        }
-    }
 }
