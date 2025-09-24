@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package com.worldwidewaves.shared.map
 
 /*
@@ -23,6 +25,7 @@ package com.worldwidewaves.shared.map
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Clock
 
 /**
  * Registry for managing city maps and their availability.
@@ -142,7 +145,7 @@ data class CityMap(
     val name: String,
     val isLoaded: Boolean = false,
     val hasGeoJson: Boolean = false,
-    val loadTimestamp: Long = System.currentTimeMillis()
+    val loadTimestamp: Long = Clock.System.now().toEpochMilliseconds()
 )
 
 /**

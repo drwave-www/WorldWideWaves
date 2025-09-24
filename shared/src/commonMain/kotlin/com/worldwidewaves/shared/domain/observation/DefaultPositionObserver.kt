@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
+import kotlin.math.PI
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.sin
@@ -142,10 +143,10 @@ class DefaultPositionObserver(
         }
 
         // Haversine formula for calculating great-circle distance
-        val lat1Rad = Math.toRadians(from.lat)
-        val lat2Rad = Math.toRadians(to.lat)
-        val deltaLatRad = Math.toRadians(to.lat - from.lat)
-        val deltaLngRad = Math.toRadians(to.lng - from.lng)
+        val lat1Rad = from.lat * PI / 180.0
+        val lat2Rad = to.lat * PI / 180.0
+        val deltaLatRad = (to.lat - from.lat) * PI / 180.0
+        val deltaLngRad = (to.lng - from.lng) * PI / 180.0
 
         val a = sin(deltaLatRad / 2) * sin(deltaLatRad / 2) +
                 cos(lat1Rad) * cos(lat2Rad) *
