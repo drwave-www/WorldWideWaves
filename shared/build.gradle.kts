@@ -180,3 +180,17 @@ tasks.named("compileTestKotlinIosSimulatorArm64").configure {
 tasks.named("compileTestKotlinIosX64").configure {
     enabled = false
 }
+
+// Custom Gradle task for crowd sound choreography simulation
+tasks.register("crowdSoundSimulation") {
+    description = "Simulates sound choreography for a crowd of 50 people playing MIDI file every 100ms"
+    group = "verification"
+
+    doLast {
+        println("🎵 Crowd Sound Choreography Simulation")
+        println("   • To run the simulation test, execute:")
+        println("   ./gradlew :shared:cleanTest :shared:testDebugUnitTest --tests \"*CrowdSoundChoreographySimulationTest*\"")
+        println("   • Parameters: 50 people, 100ms intervals, full MIDI duration")
+        println("   • Goal: Verify song recognizability in large crowd")
+    }
+}
