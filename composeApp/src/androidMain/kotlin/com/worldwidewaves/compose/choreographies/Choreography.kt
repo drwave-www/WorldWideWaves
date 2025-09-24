@@ -97,7 +97,11 @@ fun WaveChoreographies(
 
     // Debug logging for choreography states
     androidx.compose.runtime.LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit) {
-        android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit")
+        android.util.Log.v(
+            "WaveChoreographies",
+            "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, " +
+                "goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit"
+        )
     }
 
     // State to track if we should show the hit sequence
@@ -141,11 +145,14 @@ fun WaveChoreographies(
             // Get the current sequence
             val warmingSequence =
                 remember(warmingKey) {
-                    event.warming.getCurrentChoregraphySequence()
+                    val sequence = event.warming.getCurrentChoregraphySequence()
+                    android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence for ${event.id}: $sequence")
+                    sequence
                 }
 
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing warming sequence for ${event.id}")
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
                     clock = clock,
@@ -156,6 +163,8 @@ fun WaveChoreographies(
                     // Leave space for counter
                     onSequenceComplete = { warmingKey++ },
                 )
+            } else {
+                android.util.Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence is NULL for ${event.id}")
             }
         }
 
@@ -195,8 +204,12 @@ fun TimedSequenceDisplay(
     modifier: Modifier = Modifier,
     onSequenceComplete: () -> Unit,
 ) {
-    if (sequence == null) return
+    if (sequence == null) {
+        android.util.Log.v("TimedSequenceDisplay", "[CHOREO_DEBUG] Sequence is NULL")
+        return
+    }
 
+    android.util.Log.v("TimedSequenceDisplay", "[CHOREO_DEBUG] Displaying sequence: duration=${sequence.duration}, frameCount=${sequence.frameCount}")
     ChoreographyDisplay(sequence, clock, modifier)
 
     LaunchedEffect(sequence) {
