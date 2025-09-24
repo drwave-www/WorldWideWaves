@@ -21,14 +21,11 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
-import com.worldwidewaves.shared.WWWGlobals.Companion.WaveTiming
+import com.worldwidewaves.shared.WWWGlobals.Wave
+import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.format.DateTimeFormats
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.test.Test
@@ -53,7 +50,6 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class TimePhysicsValidationTest {
-
     companion object {
         // Physical constants for validation
         private const val SPEED_OF_SOUND_AIR = 343.0 // m/s at 20°C
@@ -81,17 +77,17 @@ class TimePhysicsValidationTest {
         // Wave speed should be much less than speed of sound
         assertTrue(
             defaultSimulationSpeed < SPEED_OF_SOUND_AIR,
-            "Default wave speed ($defaultSimulationSpeed m/s) should be less than speed of sound ($SPEED_OF_SOUND_AIR m/s)"
+            "Default wave speed ($defaultSimulationSpeed m/s) should be less than speed of sound ($SPEED_OF_SOUND_AIR m/s)",
         )
 
         // Wave speed should be realistic for human movement
         assertTrue(
             defaultSimulationSpeed > 0.1,
-            "Wave speed should be greater than 0.1 m/s (slow human movement)"
+            "Wave speed should be greater than 0.1 m/s (slow human movement)",
         )
         assertTrue(
-            defaultSimulationSpeed <= 600.0,
-            "Wave speed should be 600 m/s or less (maximum simulation speed for testing)"
+            defaultSimulationSpeed <= 300.0,
+            "Wave speed should be 300 m/s or less (maximum simulation speed for testing)",
         )
 
         // Wave should be able to circle Earth in reasonable time
@@ -100,11 +96,11 @@ class TimePhysicsValidationTest {
 
         assertTrue(
             hoursToCircleEarth > 1.0,
-            "Wave should take more than 1 hour to circle Earth (current: ${hoursToCircleEarth} hours)"
+            "Wave should take more than 1 hour to circle Earth (current: $hoursToCircleEarth hours)",
         )
         assertTrue(
             hoursToCircleEarth < 24.0 * 365.0,
-            "Wave should take less than 1 year to circle Earth (current: ${hoursToCircleEarth} hours)"
+            "Wave should take less than 1 year to circle Earth (current: $hoursToCircleEarth hours)",
         )
     }
 
@@ -125,11 +121,12 @@ class TimePhysicsValidationTest {
         assertNotNull(beforeInstant, "Time before DST transition should be valid")
 
         // Time during the "lost hour" should either throw or be adjusted
-        val duringInstant = try {
-            duringTransition.toInstant(timezone)
-        } catch (e: Exception) {
-            null // This is acceptable - the time doesn't exist
-        }
+        val duringInstant =
+            try {
+                duringTransition.toInstant(timezone)
+            } catch (e: Exception) {
+                null // This is acceptable - the time doesn't exist
+            }
 
         // After transition should convert normally
         val afterInstant = afterTransition.toInstant(timezone)
@@ -140,7 +137,7 @@ class TimePhysicsValidationTest {
             val timeDiff = afterInstant - beforeInstant
             assertTrue(
                 timeDiff >= 1.hours && timeDiff <= 2.hours,
-                "Time difference across DST should be between 1-2 hours, was $timeDiff"
+                "Time difference across DST should be between 1-2 hours, was $timeDiff",
             )
         }
     }
@@ -170,7 +167,7 @@ class TimePhysicsValidationTest {
         val totalTimeDiff = afterInstant - beforeInstant
         assertTrue(
             totalTimeDiff >= 2.hours && totalTimeDiff <= 4.hours,
-            "Total time difference should be between 2-4 hours across DST fall back, was $totalTimeDiff"
+            "Total time difference should be between 2-4 hours across DST fall back, was $totalTimeDiff",
         )
     }
 
@@ -182,12 +179,13 @@ class TimePhysicsValidationTest {
         // WHEN: Formatting times around DST transitions
         // THEN: Should not crash and should produce reasonable output
 
-        val testTimes = listOf(
-            LocalDateTime(2024, 3, 10, 1, 0, 0), // Before spring forward
-            LocalDateTime(2024, 3, 10, 3, 0, 0), // After spring forward
-            LocalDateTime(2024, 11, 3, 1, 0, 0), // Before fall back
-            LocalDateTime(2024, 11, 3, 3, 0, 0)  // After fall back
-        )
+        val testTimes =
+            listOf(
+                LocalDateTime(2024, 3, 10, 1, 0, 0), // Before spring forward
+                LocalDateTime(2024, 3, 10, 3, 0, 0), // After spring forward
+                LocalDateTime(2024, 11, 3, 1, 0, 0), // Before fall back
+                LocalDateTime(2024, 11, 3, 3, 0, 0), // After fall back
+            )
 
         testTimes.forEach { localTime ->
             try {
@@ -196,7 +194,7 @@ class TimePhysicsValidationTest {
                 assertNotNull(formatted, "Formatted time should not be null for $localTime")
                 assertTrue(
                     formatted.isNotBlank(),
-                    "Formatted time should not be blank for $localTime"
+                    "Formatted time should not be blank for $localTime",
                 )
             } catch (e: Exception) {
                 // Some DST times may not exist (e.g., 2:30 AM during spring forward)
@@ -224,7 +222,7 @@ class TimePhysicsValidationTest {
         assertEquals(
             2.seconds,
             timeDiff,
-            "Time difference across year boundary should be exactly 2 seconds"
+            "Time difference across year boundary should be exactly 2 seconds",
         )
 
         // Year should increment correctly
@@ -283,11 +281,12 @@ class TimePhysicsValidationTest {
         val timezone = TimeZone.UTC
 
         // Test some historical leap second dates (June 30 and December 31)
-        val potentialLeapSecondDates = listOf(
-            LocalDateTime(2016, 12, 31, 23, 59, 59), // Last leap second was 2016-12-31
-            LocalDateTime(2015, 6, 30, 23, 59, 59),  // Previous leap second
-            LocalDateTime(2024, 12, 31, 23, 59, 59)  // Future potential leap second
-        )
+        val potentialLeapSecondDates =
+            listOf(
+                LocalDateTime(2016, 12, 31, 23, 59, 59), // Last leap second was 2016-12-31
+                LocalDateTime(2015, 6, 30, 23, 59, 59), // Previous leap second
+                LocalDateTime(2024, 12, 31, 23, 59, 59), // Future potential leap second
+            )
 
         potentialLeapSecondDates.forEach { dateTime ->
             try {
@@ -305,7 +304,7 @@ class TimePhysicsValidationTest {
                     if (formatted != null) {
                         assertTrue(
                             formatted.isNotBlank(),
-                            "Formatted time should not be blank if not null"
+                            "Formatted time should not be blank if not null",
                         )
                     }
                 } catch (formatException: Exception) {
@@ -317,10 +316,10 @@ class TimePhysicsValidationTest {
                 // As long as it doesn't crash the application
                 assertTrue(
                     e.message?.contains("leap") == true ||
-                    e.message?.contains("second") == true ||
-                    e.message?.contains("Invalid") == true ||
-                    e.message?.contains("format") == true,
-                    "Exception should be related to time/date handling, got: ${e.message}"
+                        e.message?.contains("second") == true ||
+                        e.message?.contains("Invalid") == true ||
+                        e.message?.contains("format") == true,
+                    "Exception should be related to time/date handling, got: ${e.message}",
                 )
             }
         }
@@ -342,65 +341,65 @@ class TimePhysicsValidationTest {
         // SOON delay should be reasonable for advance planning
         assertTrue(
             waveSoonDelay.inWholeDays >= 1,
-            "SOON delay should be at least 1 day for advance planning"
+            "SOON delay should be at least 1 day for advance planning",
         )
         assertTrue(
             waveSoonDelay.inWholeDays <= 365,
-            "SOON delay should be less than 1 year"
+            "SOON delay should be less than 1 year",
         )
 
         // OBSERVE delay should be reasonable for user preparation
         assertTrue(
             waveObserveDelay.inWholeHours >= 1,
-            "OBSERVE delay should be at least 1 hour for user preparation"
+            "OBSERVE delay should be at least 1 hour for user preparation",
         )
         assertTrue(
             waveObserveDelay.inWholeHours <= 24,
-            "OBSERVE delay should be less than 1 day"
+            "OBSERVE delay should be less than 1 day",
         )
 
         // WARMING duration should be reasonable for user readiness
         assertTrue(
             waveWarmingDuration.inWholeMinutes >= 1,
-            "WARMING duration should be at least 1 minute"
+            "WARMING duration should be at least 1 minute",
         )
         assertTrue(
             waveWarmingDuration.inWholeMinutes <= 10,
-            "WARMING duration should be less than 10 minutes"
+            "WARMING duration should be less than 10 minutes",
         )
 
         // WARNING should give users enough time to react
         assertTrue(
             waveWarnBeforeHit.inWholeSeconds >= 5,
-            "Warning should be at least 5 seconds for user reaction"
+            "Warning should be at least 5 seconds for user reaction",
         )
         assertTrue(
             waveWarnBeforeHit.inWholeSeconds <= 60,
-            "Warning should be less than 60 seconds to maintain urgency"
+            "Warning should be less than 60 seconds to maintain urgency",
         )
 
         // Hit sequence should be long enough to be visible
         assertTrue(
             waveShowHitSequence.inWholeSeconds >= 3,
-            "Hit sequence should be at least 3 seconds for visibility"
+            "Hit sequence should be at least 3 seconds for visibility",
         )
         assertTrue(
             waveShowHitSequence.inWholeSeconds <= 30,
-            "Hit sequence should be less than 30 seconds to avoid monotony"
+            "Hit sequence should be less than 30 seconds to avoid monotony",
         )
 
         // Logical ordering of delays
         assertTrue(
             waveSoonDelay > waveObserveDelay,
-            "SOON delay should be longer than OBSERVE delay"
+            "SOON delay should be longer than OBSERVE delay",
         )
         assertTrue(
             waveObserveDelay > waveWarmingDuration,
-            "OBSERVE delay should be longer than WARMING duration"
+            "OBSERVE delay should be longer than WARMING duration",
         )
         assertTrue(
             waveWarmingDuration > waveWarnBeforeHit,
-            "WARMING duration should be longer than WARNING time"
+            "WARMING duration should be longer than WARNING time",
         )
     }
 
@@ -427,7 +426,7 @@ class TimePhysicsValidationTest {
         val timeDifference = futureInstant - pastInstant
         assertTrue(
             timeDifference.isPositive(),
-            "Time difference should be positive"
+            "Time difference should be positive",
         )
 
         // Try to format extreme dates - this may fail for very old/future dates

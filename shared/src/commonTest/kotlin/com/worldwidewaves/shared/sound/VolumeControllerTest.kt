@@ -32,7 +32,6 @@ import kotlin.test.assertTrue
  * Tests for VolumeController interface functionality
  */
 class VolumeControllerTest {
-
     @Test
     fun `test VolumeController interface contract`() {
         // GIVEN: Mock VolumeController implementation

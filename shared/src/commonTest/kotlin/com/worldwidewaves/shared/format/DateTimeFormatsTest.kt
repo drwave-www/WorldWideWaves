@@ -21,13 +21,13 @@ package com.worldwidewaves.shared.format
  * limitations under the License.
  */
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Comprehensive tests for DateTimeFormats platform-specific formatting functionality.
@@ -52,8 +52,10 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class DateTimeFormatsTest {
-
-    private fun testDateTimeFormatting(testName: String, block: () -> Unit) {
+    private fun testDateTimeFormatting(
+        testName: String,
+        block: () -> Unit,
+    ) {
         try {
             block()
         } catch (e: Exception) {
@@ -123,7 +125,7 @@ class DateTimeFormatsTest {
             // THEN: Should contain time separators (: or other platform-specific separators)
             assertTrue(
                 result.contains(":") || result.contains(".") || result.contains(" "),
-                "timeShort should contain time separators, got: '$result'"
+                "timeShort should contain time separators, got: '$result'",
             )
         }
     }

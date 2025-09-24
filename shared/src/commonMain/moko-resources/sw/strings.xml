@@ -62,6 +62,8 @@
   <string name="map_error_service_died">Huduma imekoma ghafla. Tafadhali jaribu tena.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">Ufikiaji umekataliwa.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Tatizo la akaunti ya Google Play Store. Tafadhali kagua akaunti yako na ujaribu tena.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Hitilafu isiyojulikana imetokea: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">Wimbi linaendelea!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">Unalijua hili: kama hadithi ya Dunia ingeandikwa katika kitabu chenye kurasa 1,000, ubinadamu ungeonekana tu kwenye aya ya mwisho ya ukurasa wa mwisho kabisa.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">Lakini hadithi hii fupi inaweza kumalizika mapema kuliko tunavyotarajia. Tuko pweke katika ulimwengu mpana na wenye ukiwa. Tunaharibu kila kitu. Sisi ni wabinafsi. Sisi ni wakatili. Tuna tamaa. Sisi ni vipofu. Na tunatafuta kutawala. Lakini pia tuna uwezo wa huruma, tunaumba maajabu, tuna ustahimilivu, tunaweza kuwa wasio na ubinafsi.</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">Lakini simulizi hii fupi inaweza kuisha mapema kuliko tunavyotarajia. Tuko pweke katika ulimwengu mpana na wa ukiwa. Tunaharibu kila kitu. Sisi ni wabinafsi. Sisi ni wakatili. Sisi ni walafi. Sisi ni vipofu. Na tunataka kutawala. Lakini pia tuna uwezo wa kuoneana huruma, tunaunda maajabu, tuna ustahimilivu, tunaweza kuwa wa kujitolea bila ubinafsi.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">Lakini tuna muda mchache. Tumepiga hatua kubwa sana.. Tunaweza kujenga mbadala: jumuiya ya haki, ya mshikamano, ya demokrasia. Ni juu yetu!</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->

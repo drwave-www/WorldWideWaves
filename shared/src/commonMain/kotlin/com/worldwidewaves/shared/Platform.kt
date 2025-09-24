@@ -22,7 +22,8 @@ package com.worldwidewaves.shared
  */
 
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.position.PositionManager
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class WWWPlatform(
     val name: String,
+    private val positionManager: PositionManager? = null,
 ) {
     private var _simulation: WWWSimulation? = null
 
@@ -72,6 +74,8 @@ class WWWPlatform(
 
     fun disableSimulation() {
         _simulation = null
+        // Clear simulation position from PositionManager
+        positionManager?.clearPosition(PositionManager.PositionSource.SIMULATION)
         // Notify observers that the simulation context has changed
         _simulationChanged.value = _simulationChanged.value + 1
     }
@@ -79,6 +83,8 @@ class WWWPlatform(
     fun setSimulation(simulation: WWWSimulation) {
         Log.i(::setSimulation.name, "Set simulation to ${simulation.now()} and ${simulation.getUserPosition()}")
         _simulation = simulation
+        // Update PositionManager with simulation position
+        positionManager?.updatePosition(PositionManager.PositionSource.SIMULATION, simulation.getUserPosition())
         // Notify observers that the simulation context has changed
         _simulationChanged.value = _simulationChanged.value + 1
     }

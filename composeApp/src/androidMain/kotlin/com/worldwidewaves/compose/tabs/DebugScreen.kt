@@ -1,53 +1,34 @@
 /*
  * Copyright 2025 DrWave
  *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package com.worldwidewaves.compose.tabs
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.worldwidewaves.activities.utils.TabScreen
-import com.worldwidewaves.debug.PerformanceDashboard
-import com.worldwidewaves.shared.WWWGlobals.Companion.Dimensions
-import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
+import com.worldwidewaves.shared.ui.TabScreen
+import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
 
 /**
- * Debug screen that contains development tools and performance monitoring
- * Only visible in debug builds
+ * Android wrapper for SharedDebugScreen.
+ * Delegates to shared implementation for perfect cross-platform parity.
  */
-class DebugScreen(
-    private val performanceMonitor: AndroidPerformanceMonitor,
-) : TabScreen {
+class DebugScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
-            PerformanceDashboard(
-                monitor = performanceMonitor,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
+        SharedDebugScreen(
+            modifier = modifier,
+            onPerformanceClick = {
+                // Debug functionality handled by shared debug screen
+            }
+        )
     }
 }

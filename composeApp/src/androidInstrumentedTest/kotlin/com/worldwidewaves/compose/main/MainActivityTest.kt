@@ -21,23 +21,20 @@
 
 package com.worldwidewaves.compose.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,8 +43,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -55,23 +50,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.activities.utils.TabManager
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
-import dev.icerock.moko.resources.compose.stringResource
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -84,7 +73,6 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -109,7 +97,7 @@ class MainActivityTest {
             TestSplashScreenApp(
                 events = mockEvents,
                 isSplashFinished = isSplashFinished,
-                onDataLoad = { dataLoadCompleted }
+                onDataLoad = { dataLoadCompleted },
             )
         }
 
@@ -134,7 +122,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Main content is displayed")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Main content is displayed")
@@ -160,7 +149,7 @@ class MainActivityTest {
                 eventsScreen = mockEventsScreen,
                 aboutScreen = mockAboutScreen,
                 selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+                onTabSelected = { selectedTab = it },
             )
         }
 
@@ -206,7 +195,7 @@ class MainActivityTest {
         val locationPermissionState = MutableStateFlow("not_requested")
 
         composeTestRule.setContent {
-            TestLocationPermissionFlow(locationPermissionState.value) { newState ->
+            TestLocationPermissionFlow(locationPermissionState) { newState ->
                 locationPermissionState.value = newState
             }
         }
@@ -235,7 +224,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location permission: Granted")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Location permission: Granted")
@@ -247,7 +237,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Location permission: Denied")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Location permission: Denied")
@@ -265,7 +256,7 @@ class MainActivityTest {
         val preservedState = MutableStateFlow("initial_data")
 
         composeTestRule.setContent {
-            TestAppLifecycleHandling(lifecycleState.value, preservedState.value)
+            TestAppLifecycleHandling(lifecycleState, preservedState)
         }
 
         // Verify initial created state
@@ -279,7 +270,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Lifecycle state: Paused, Data: initial_data")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Test return to foreground (resumed state) with state preservation
@@ -289,7 +281,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Lifecycle state: Resumed, Data: preserved_data")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Lifecycle state: Resumed, Data: preserved_data")
@@ -307,16 +300,17 @@ class MainActivityTest {
         val mockEvents = mockk<WWWEvents>(relaxed = true)
 
         // Create mock events for the test
-        val mockEventList = listOf(
-            mockk<IWWWEvent>(relaxed = true),
-            mockk<IWWWEvent>(relaxed = true),
-            mockk<IWWWEvent>(relaxed = true)
-        )
+        val mockEventList =
+            listOf(
+                mockk<IWWWEvent>(relaxed = true),
+                mockk<IWWWEvent>(relaxed = true),
+                mockk<IWWWEvent>(relaxed = true),
+            )
 
         every { mockEvents.flow() } returns MutableStateFlow<List<IWWWEvent>>(mockEventList).asStateFlow()
 
         composeTestRule.setContent {
-            TestDataLoadingStates(loadingState.value, mockEvents)
+            TestDataLoadingStates(loadingState, mockEvents)
         }
 
         // Verify loading indicator is displayed
@@ -330,7 +324,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Data loading: Success, Events loaded: 3")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Data loading: Success, Events loaded: 3")
@@ -342,7 +337,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Data loading: Network error")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Data loading: Network error")
@@ -360,7 +356,7 @@ class MainActivityTest {
         val retryCount = MutableStateFlow(0)
 
         composeTestRule.setContent {
-            TestErrorRecovery(errorState.value, retryCount.value) {
+            TestErrorRecovery(errorState, retryCount) {
                 retryCount.value = retryCount.value + 1
             }
         }
@@ -376,7 +372,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error state: Network failure, Retries: 0")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         // Test retry mechanism
@@ -398,7 +395,8 @@ class MainActivityTest {
         composeTestRule.waitUntil(timeoutMillis = 1000) {
             composeTestRule
                 .onAllNodesWithContentDescription("Error state: Recovered, Retries: 1")
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
         composeTestRule
             .onNodeWithContentDescription("Error state: Recovered, Retries: 1")
@@ -413,7 +411,7 @@ class MainActivityTest {
     private fun TestSplashScreenApp(
         events: WWWEvents,
         isSplashFinished: MutableStateFlow<Boolean>,
-        onDataLoad: () -> Boolean
+        onDataLoad: () -> Boolean,
     ) {
         val ready by isSplashFinished.collectAsState()
         val isDataLoaded = onDataLoad()
@@ -428,21 +426,23 @@ class MainActivityTest {
             if (ready) {
                 Text(
                     text = "Main Content",
-                    modifier = Modifier.semantics {
-                        contentDescription = "Main content is displayed"
-                    }
+                    modifier =
+                        Modifier.semantics {
+                            contentDescription = "Main content is displayed"
+                        },
                 )
             } else {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     CircularProgressIndicator()
                     Text(
                         text = "Loading...",
-                        modifier = Modifier.semantics {
-                            contentDescription = "Splash screen is displayed"
-                        }
+                        modifier =
+                            Modifier.semantics {
+                                contentDescription = "Splash screen is displayed"
+                            },
                     )
                 }
             }
@@ -454,44 +454,44 @@ class MainActivityTest {
         eventsScreen: EventsListScreen,
         aboutScreen: AboutScreen,
         selectedTab: Int,
-        onTabSelected: (Int) -> Unit
+        onTabSelected: (Int) -> Unit,
     ) {
         Column {
             // Tab buttons
             androidx.compose.foundation.layout.Row {
                 Text(
                     text = "Events",
-                    modifier = Modifier
-                        .testTag("tab-events")
-                        .semantics {
-                            contentDescription = if (selectedTab == 0) "Events tab selected" else "Events tab"
-                        }
-                        .padding(16.dp)
-                        .then(
-                            if (selectedTab == 0) {
-                                Modifier.background(Color.Blue)
-                            } else {
-                                Modifier
-                            }
-                        ),
-                    color = if (selectedTab == 0) Color.White else Color.Black
+                    modifier =
+                        Modifier
+                            .testTag("tab-events")
+                            .semantics {
+                                contentDescription = if (selectedTab == 0) "Events tab selected" else "Events tab"
+                            }.padding(16.dp)
+                            .then(
+                                if (selectedTab == 0) {
+                                    Modifier.background(Color.Blue)
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                    color = if (selectedTab == 0) Color.White else Color.Black,
                 )
                 Text(
                     text = "About",
-                    modifier = Modifier
-                        .testTag("tab-about")
-                        .semantics {
-                            contentDescription = if (selectedTab == 1) "About tab selected" else "About tab"
-                        }
-                        .padding(16.dp)
-                        .then(
-                            if (selectedTab == 1) {
-                                Modifier.background(Color.Blue)
-                            } else {
-                                Modifier
-                            }
-                        ),
-                    color = if (selectedTab == 1) Color.White else Color.Black
+                    modifier =
+                        Modifier
+                            .testTag("tab-about")
+                            .semantics {
+                                contentDescription = if (selectedTab == 1) "About tab selected" else "About tab"
+                            }.padding(16.dp)
+                            .then(
+                                if (selectedTab == 1) {
+                                    Modifier.background(Color.Blue)
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                    color = if (selectedTab == 1) Color.White else Color.Black,
                 )
             }
 
@@ -505,104 +505,136 @@ class MainActivityTest {
 
     @Composable
     private fun TestLocationPermissionFlow(
-        permissionState: String,
-        onPermissionStateChange: (String) -> Unit
+        permissionStateFlow: StateFlow<String>,
+        onPermissionStateChange: (String) -> Unit,
     ) {
+        val permissionState by permissionStateFlow.collectAsState()
+
         Column {
             Text(
                 text = "Location Permission",
-                modifier = Modifier.semantics {
-                    contentDescription = "Location permission: ${
-                        when (permissionState) {
-                            "not_requested" -> "Not requested"
-                            "requesting" -> "Requesting"
-                            "granted" -> "Granted"
-                            "denied" -> "Denied"
-                            else -> "Unknown"
-                        }
-                    }"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Location permission: ${
+                            when (permissionState) {
+                                "not_requested" -> "Not requested"
+                                "requesting" -> "Requesting"
+                                "granted" -> "Granted"
+                                "denied" -> "Denied"
+                                else -> "Unknown"
+                            }
+                        }"
+                    },
             )
 
             if (permissionState == "not_requested") {
                 Text(
                     text = "Request Permission",
-                    modifier = Modifier
-                        .testTag("request-permission")
-                        .padding(8.dp)
-                        .background(Color.Gray)
-                        .padding(16.dp)
+                    modifier =
+                        Modifier
+                            .testTag("request-permission")
+                            .padding(8.dp)
+                            .background(Color.Gray)
+                            .padding(16.dp)
+                            .clickable {
+                                onPermissionStateChange("requesting")
+                            },
                 )
             }
         }
     }
 
     @Composable
-    private fun TestAppLifecycleHandling(lifecycleState: String, preservedData: String) {
+    private fun TestAppLifecycleHandling(
+        lifecycleStateFlow: StateFlow<String>,
+        preservedDataFlow: StateFlow<String>,
+    ) {
+        val lifecycleState by lifecycleStateFlow.collectAsState()
+        val preservedData by preservedDataFlow.collectAsState()
+
         Text(
             text = "App Lifecycle",
-            modifier = Modifier.semantics {
-                contentDescription = "Lifecycle state: ${
-                    when (lifecycleState) {
-                        "created" -> "Created"
-                        "paused" -> "Paused"
-                        "resumed" -> "Resumed"
-                        else -> "Unknown"
-                    }
-                }, Data: $preservedData"
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "Lifecycle state: ${
+                        when (lifecycleState) {
+                            "created" -> "Created"
+                            "paused" -> "Paused"
+                            "resumed" -> "Resumed"
+                            else -> "Unknown"
+                        }
+                    }, Data: $preservedData"
+                },
         )
     }
 
     @Composable
-    private fun TestDataLoadingStates(loadingState: String, events: WWWEvents) {
+    private fun TestDataLoadingStates(
+        loadingStateFlow: StateFlow<String>,
+        events: WWWEvents,
+    ) {
+        val loadingState by loadingStateFlow.collectAsState()
         val eventsCount by events.flow().collectAsState(initial = emptyList())
 
         Text(
             text = "Data Loading",
-            modifier = Modifier.semantics {
-                contentDescription = when (loadingState) {
-                    "loading" -> "Data loading: Loading"
-                    "success" -> "Data loading: Success, Events loaded: ${eventsCount.size}"
-                    "error" -> "Data loading: Network error"
-                    else -> "Data loading: Unknown state"
-                }
-            }
+            modifier =
+                Modifier.semantics {
+                    contentDescription =
+                        when (loadingState) {
+                            "loading" -> "Data loading: Loading"
+                            "success" -> "Data loading: Success, Events loaded: ${eventsCount.size}"
+                            "error" -> "Data loading: Network error"
+                            else -> "Data loading: Unknown state"
+                        }
+                },
         )
 
         if (loadingState == "loading") {
             CircularProgressIndicator(
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
             )
         }
     }
 
     @Composable
-    private fun TestErrorRecovery(errorState: String, retryCount: Int, onRetry: () -> Unit) {
+    private fun TestErrorRecovery(
+        errorStateFlow: StateFlow<String>,
+        retryCountFlow: StateFlow<Int>,
+        onRetry: () -> Unit,
+    ) {
+        val errorState by errorStateFlow.collectAsState()
+        val retryCount by retryCountFlow.collectAsState()
+
         Column {
             Text(
                 text = "Error Recovery",
-                modifier = Modifier.semantics {
-                    contentDescription = "Error state: ${
-                        when (errorState) {
-                            "none" -> "None"
-                            "network_failure" -> "Network failure"
-                            "recovered" -> "Recovered"
-                            else -> "Unknown"
-                        }
-                    }, Retries: $retryCount"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Error state: ${
+                            when (errorState) {
+                                "none" -> "None"
+                                "network_failure" -> "Network failure"
+                                "recovered" -> "Recovered"
+                                else -> "Unknown"
+                            }
+                        }, Retries: $retryCount"
+                    },
             )
 
             if (errorState == "network_failure") {
                 Text(
                     text = "Retry",
-                    modifier = Modifier
-                        .testTag("retry-button")
-                        .padding(8.dp)
-                        .background(Color.Red)
-                        .padding(16.dp),
-                    color = Color.White
+                    modifier =
+                        Modifier
+                            .testTag("retry-button")
+                            .padding(8.dp)
+                            .background(Color.Red)
+                            .padding(16.dp)
+                            .clickable {
+                                onRetry()
+                            },
+                    color = Color.White,
                 )
             }
         }

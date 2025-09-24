@@ -86,7 +86,7 @@ import org.junit.runners.Suite
     CommonComponentsTest::class,
     MapIntegrationTest::class,
     AccessibilityTest::class,
-    EdgeCaseTest::class
+    EdgeCaseTest::class,
 )
 class UITestSuite
 

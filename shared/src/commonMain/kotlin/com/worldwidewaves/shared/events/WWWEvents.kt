@@ -26,7 +26,7 @@ import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
-import com.worldwidewaves.shared.events.utils.Log
+import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.jvm.JvmOverloads
+import kotlin.time.ExperimentalTime
 
 // ---------------------------
 
@@ -210,13 +211,15 @@ class WWWEvents : KoinComponent {
     // --------------------------------------------------------------------
 
     /**
-     * Restarts observers for all events that should be actively observed when the
-     * simulation context (running simulation or simulation-mode) changes.
+     * Restarts observers for all events when the simulation context changes.
+     * Multiple events can be active simultaneously for the same user position.
      */
+    @OptIn(ExperimentalTime::class)
     fun restartObserversOnSimulationChange() {
         coroutineScopeProvider.launchDefault {
             list().forEach { event ->
                 try {
+                    Log.d("WWWEvents", "Simulation change - Restarting observer for event ${event.id}")
                     event.observer.stopObservation()
                     event.observer.startObservation()
                 } catch (e: Exception) {

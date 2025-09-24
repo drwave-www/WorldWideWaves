@@ -25,8 +25,6 @@ import com.worldwidewaves.shared.choreographies.SoundChoreographyManager
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.Position
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import kotlin.test.AfterTest
@@ -49,7 +47,6 @@ import kotlin.time.ExperimentalTime
  */
 @OptIn(ExperimentalTime::class)
 class NullSafetyValidationTest {
-
     private lateinit var platform: WWWPlatform
     private lateinit var coroutineScopeProvider: CoroutineScopeProvider
 
@@ -85,7 +82,9 @@ class NullSafetyValidationTest {
 
         // WHEN: Setting a valid simulation
         val testPosition = Position(37.7749, -122.4194)
-        val testDateTime = kotlin.time.Clock.System.now()
+        val testDateTime =
+            kotlin.time.Clock.System
+                .now()
         val simulation = WWWSimulation(testDateTime, testPosition)
         platform.setSimulation(simulation)
 
@@ -102,47 +101,51 @@ class NullSafetyValidationTest {
     }
 
     @Test
-    fun `should handle concurrent access to nullable simulation safely`() = runTest {
-        // GIVEN: Platform with null simulation
-        assertNull(platform.getSimulation(), "Initial simulation should be null")
+    fun `should handle concurrent access to nullable simulation safely`() =
+        runTest {
+            // GIVEN: Platform with null simulation
+            assertNull(platform.getSimulation(), "Initial simulation should be null")
 
-        // WHEN: Multiple concurrent accesses to simulation
-        val results = List(10) { index ->
-            val simulation = platform.getSimulation()
-            val isOnSim = platform.isOnSimulation()
-            Pair(simulation, isOnSim)
-        }
+            // WHEN: Multiple concurrent accesses to simulation
+            val results =
+                List(10) { index ->
+                    val simulation = platform.getSimulation()
+                    val isOnSim = platform.isOnSimulation()
+                    Pair(simulation, isOnSim)
+                }
 
-        // THEN: All should consistently return null/false
-        results.forEach { (sim, isOn) ->
-            assertNull(sim, "Concurrent access should consistently return null")
-            assertFalse(isOn, "Concurrent access should consistently return false for isOnSimulation")
+            // THEN: All should consistently return null/false
+            results.forEach { (sim, isOn) ->
+                assertNull(sim, "Concurrent access should consistently return null")
+                assertFalse(isOn, "Concurrent access should consistently return false for isOnSimulation")
+            }
         }
-    }
 
     @Test
-    fun `should handle choreography manager resource loading null states`() = runTest {
-        // GIVEN: ChoreographyManager with potential null resource
-        // Note: Testing that we can create a manager without null pointer exceptions
+    fun `should handle choreography manager resource loading null states`() =
+        runTest {
+            // GIVEN: ChoreographyManager with potential null resource
+            // Note: Testing that we can create a manager without null pointer exceptions
 
-        // WHEN: Manager is created
-        // THEN: Should handle null states gracefully
-        // We validate this by ensuring resource loading patterns don't crash
-        assertTrue(true, "Manager creation should handle null states gracefully")
-    }
+            // WHEN: Manager is created
+            // THEN: Should handle null states gracefully
+            // We validate this by ensuring resource loading patterns don't crash
+            assertTrue(true, "Manager creation should handle null states gracefully")
+        }
 
     @OptIn(ExperimentalResourceApi::class)
     @Test
-    fun `should handle sound choreography manager null resource paths`() = runTest {
-        // GIVEN: SoundChoreographyManager
-        val soundManager = SoundChoreographyManager(coroutineScopeProvider)
+    fun `should handle sound choreography manager null resource paths`() =
+        runTest {
+            // GIVEN: SoundChoreographyManager
+            val soundManager = SoundChoreographyManager(coroutineScopeProvider)
 
-        // WHEN: Attempting to preload with invalid/null-like resource path
-        val result = soundManager.preloadMidiFile("invalid/nonexistent/path.mid")
+            // WHEN: Attempting to preload with invalid/null-like resource path
+            val result = soundManager.preloadMidiFile("invalid/nonexistent/path.mid")
 
-        // THEN: Should handle gracefully and return false
-        assertFalse(result, "Should return false for invalid resource path")
-    }
+            // THEN: Should handle gracefully and return false
+            assertFalse(result, "Should return false for invalid resource path")
+        }
 
     @Test
     fun `should validate nullable return type contracts`() {
@@ -176,13 +179,14 @@ class NullSafetyValidationTest {
     }
 
     @Test
-    fun `should handle resource loading error states safely`() = runTest {
-        // GIVEN: Resource loading scenarios
+    fun `should handle resource loading error states safely`() =
+        runTest {
+            // GIVEN: Resource loading scenarios
 
-        // WHEN: Testing null safety patterns
-        // THEN: Should handle gracefully without null pointer exceptions
-        assertTrue(true, "Resource loading should handle null states gracefully")
-    }
+            // WHEN: Testing null safety patterns
+            // THEN: Should handle gracefully without null pointer exceptions
+            assertTrue(true, "Resource loading should handle null states gracefully")
+        }
 
     @Test
     fun `should validate simulation parameter null safety`() {
@@ -190,7 +194,9 @@ class NullSafetyValidationTest {
 
         // WHEN: Creating simulation with valid parameters
         val testPosition = Position(37.7749, -122.4194)
-        val testDateTime = kotlin.time.Clock.System.now()
+        val testDateTime =
+            kotlin.time.Clock.System
+                .now()
         val simulation = WWWSimulation(testDateTime, testPosition)
 
         // THEN: Simulation should handle null checks internally

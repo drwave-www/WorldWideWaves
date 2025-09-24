@@ -28,7 +28,6 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Focused tests for SoundPlayer interface contract and basic functionality.
@@ -41,42 +40,43 @@ import kotlin.time.Duration.Companion.seconds
  * This test focuses on essential interface contracts to avoid over-testing.
  */
 class SoundPlayerTest {
+    @Test
+    fun `test SoundPlayer interface contract`() =
+        runTest {
+            // GIVEN: Mock SoundPlayer implementation
+            val mockPlayer = mockk<SoundPlayer>(relaxed = true)
+
+            // WHEN: Play a tone with all parameters
+            mockPlayer.playTone(
+                frequency = 440.0,
+                amplitude = 0.8,
+                duration = 500.milliseconds,
+                waveform = SoundPlayer.Waveform.SINE,
+            )
+
+            // THEN: Interface should accept valid parameters without error
+            coVerify(exactly = 1) {
+                mockPlayer.playTone(440.0, 0.8, 500.milliseconds, SoundPlayer.Waveform.SINE)
+            }
+        }
 
     @Test
-    fun `test SoundPlayer interface contract`() = runTest {
-        // GIVEN: Mock SoundPlayer implementation
-        val mockPlayer = mockk<SoundPlayer>(relaxed = true)
+    fun `test SoundPlayer default waveform parameter`() =
+        runTest {
+            val mockPlayer = mockk<SoundPlayer>(relaxed = true)
 
-        // WHEN: Play a tone with all parameters
-        mockPlayer.playTone(
-            frequency = 440.0,
-            amplitude = 0.8,
-            duration = 500.milliseconds,
-            waveform = SoundPlayer.Waveform.SINE
-        )
+            // WHEN: Play tone without specifying waveform (should use default)
+            mockPlayer.playTone(
+                frequency = 440.0,
+                amplitude = 0.8,
+                duration = 300.milliseconds,
+            )
 
-        // THEN: Interface should accept valid parameters without error
-        coVerify(exactly = 1) {
-            mockPlayer.playTone(440.0, 0.8, 500.milliseconds, SoundPlayer.Waveform.SINE)
+            // THEN: Should use default SINE waveform
+            coVerify(exactly = 1) {
+                mockPlayer.playTone(440.0, 0.8, 300.milliseconds, SoundPlayer.Waveform.SINE)
+            }
         }
-    }
-
-    @Test
-    fun `test SoundPlayer default waveform parameter`() = runTest {
-        val mockPlayer = mockk<SoundPlayer>(relaxed = true)
-
-        // WHEN: Play tone without specifying waveform (should use default)
-        mockPlayer.playTone(
-            frequency = 440.0,
-            amplitude = 0.8,
-            duration = 300.milliseconds
-        )
-
-        // THEN: Should use default SINE waveform
-        coVerify(exactly = 1) {
-            mockPlayer.playTone(440.0, 0.8, 300.milliseconds, SoundPlayer.Waveform.SINE)
-        }
-    }
 
     @Test
     fun `test SoundPlayer release method`() {
@@ -105,26 +105,27 @@ class SoundPlayerTest {
     }
 
     @Test
-    fun `test SoundPlayer error handling simulation`() = runTest {
-        val mockPlayer = mockk<SoundPlayer>()
+    fun `test SoundPlayer error handling simulation`() =
+        runTest {
+            val mockPlayer = mockk<SoundPlayer>()
 
-        // GIVEN: Player that throws exception
-        coEvery {
-            mockPlayer.playTone(any(), any(), any(), any())
-        } throws RuntimeException("Audio system error")
+            // GIVEN: Player that throws exception
+            coEvery {
+                mockPlayer.playTone(any(), any(), any(), any())
+            } throws RuntimeException("Audio system error")
 
-        // WHEN: Try to play tone
-        var exceptionThrown = false
-        try {
-            mockPlayer.playTone(440.0, 0.5, 100.milliseconds)
-        } catch (e: RuntimeException) {
-            exceptionThrown = true
+            // WHEN: Try to play tone
+            var exceptionThrown = false
+            try {
+                mockPlayer.playTone(440.0, 0.5, 100.milliseconds)
+            } catch (e: RuntimeException) {
+                exceptionThrown = true
+            }
+
+            // THEN: Should handle the exception appropriately
+            assert(exceptionThrown)
+            coVerify(exactly = 1) {
+                mockPlayer.playTone(440.0, 0.5, 100.milliseconds, SoundPlayer.Waveform.SINE)
+            }
         }
-
-        // THEN: Should handle the exception appropriately
-        assert(exceptionThrown)
-        coVerify(exactly = 1) {
-            mockPlayer.playTone(440.0, 0.5, 100.milliseconds, SoundPlayer.Waveform.SINE)
-        }
-    }
 }

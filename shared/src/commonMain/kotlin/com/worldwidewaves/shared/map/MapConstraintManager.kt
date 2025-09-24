@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.map
  */
 
 import androidx.annotation.UiThread
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import io.github.aakira.napier.Napier
@@ -283,7 +284,7 @@ class MapConstraintManager(
             abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
-        return latChange > 0.1 || lngChange > 0.1 // 10% change threshold
+        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD || lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
     }
 
     fun getNearestValidPoint(

@@ -45,7 +45,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
-import com.worldwidewaves.shared.WWWGlobals.Companion.Timing
+import com.worldwidewaves.shared.WWWGlobals.Timing
 
 /**
  * Session-scoped in-memory marker of the last time the user declined the

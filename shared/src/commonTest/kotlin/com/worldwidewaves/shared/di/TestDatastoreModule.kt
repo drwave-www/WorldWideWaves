@@ -36,7 +36,9 @@ import org.koin.dsl.module
 val testDatastoreModule =
     module {
         single<DataStoreFactory> { TestDataStoreFactory() }
-        factory { get<DataStoreFactory>().create { "/tmp/test_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb" } }
+        factory {
+            get<DataStoreFactory>().create { "/tmp/test_${System.currentTimeMillis()}_${kotlin.random.Random.nextInt()}.preferences_pb" }
+        }
 
         // Persistent stores ------------------------------------------------------
 

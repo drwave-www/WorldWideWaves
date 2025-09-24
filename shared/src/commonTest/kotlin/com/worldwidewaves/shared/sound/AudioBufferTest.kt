@@ -32,7 +32,6 @@ import kotlin.test.assertTrue
  * Tests for AudioBuffer interface and factory functionality
  */
 class AudioBufferTest {
-
     @Test
     fun `test AudioBuffer interface contract`() {
         // GIVEN: Mock AudioBuffer implementation
@@ -98,11 +97,12 @@ class AudioBufferTest {
 
         for (bitDepth in supportedBitDepths) {
             // WHEN: Create buffer with specific bit depth
-            val buffer = AudioBufferFactory.createFromSamples(
-                samples = samples,
-                sampleRate = 44100,
-                bitsPerSample = bitDepth
-            )
+            val buffer =
+                AudioBufferFactory.createFromSamples(
+                    samples = samples,
+                    sampleRate = 44100,
+                    bitsPerSample = bitDepth,
+                )
 
             // THEN: Should create valid buffer
             assertNotNull(buffer)
@@ -116,11 +116,12 @@ class AudioBufferTest {
         val samples = doubleArrayOf(0.0, 0.5, 1.0, -0.5)
 
         // WHEN: Create stereo buffer
-        val stereoBuffer = AudioBufferFactory.createFromSamples(
-            samples = samples,
-            sampleRate = 44100,
-            channels = 2
-        )
+        val stereoBuffer =
+            AudioBufferFactory.createFromSamples(
+                samples = samples,
+                sampleRate = 44100,
+                channels = 2,
+            )
 
         // THEN: Should create valid stereo buffer
         assertNotNull(stereoBuffer)

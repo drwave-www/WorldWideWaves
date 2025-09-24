@@ -58,7 +58,7 @@ data class WWWEventWaveLinear(
 
     @Transient private val epsilonLatPosition = 0.000009
 
-        // Approximately 1 meter
+    // Approximately 1 meter
     @Transient private val epsilonLngPosition = 0.000009 // Approximately 1 meter at the equator
 
     // ---------------------------

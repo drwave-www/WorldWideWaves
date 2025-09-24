@@ -24,7 +24,7 @@ package com.worldwidewaves.map
 import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.toColorInt
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.MapCameraCallback
@@ -73,6 +73,10 @@ class AndroidMapLibreAdapter(
 
     private val _currentZoom = MutableStateFlow(0.0)
     override val currentZoom: StateFlow<Double> = _currentZoom
+
+    companion object {
+        private const val TAG = "AndroidMapLibreAdapter"
+    }
 
     override fun getWidth(): Double {
         require(mapLibreMap != null)
@@ -130,16 +134,16 @@ class AndroidMapLibreAdapter(
     ) {
         require(mapLibreMap != null)
         // Log style application start – helps diagnose early style failures
-        Log.d("MapStyle", "Applying style from URI: $stylePath")
+        Log.d(TAG, "Applying style from URI: $stylePath")
 
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
-            Log.i("MapStyle", "Style loaded successfully")
+            Log.i(TAG, "Style loaded successfully")
             callback()
         }
     }
 
-    fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
+    override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
         if (mapLibreMap != null) {
             // Map is already set, execute callback immediately
             callback(this)
@@ -271,7 +275,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newCameraPosition(builder.build()),
-            500, // Animation duration
+            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
@@ -311,7 +315,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(latLngBounds, padding),
-            500, // Animation duration
+            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom

@@ -62,6 +62,8 @@
   <string name="map_error_service_died">サービスが予期せず終了しました。もう一度お試しください。</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">アクセスが拒否されました。</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Google Play ストアのアカウントに問題があります。アカウントを確認して、もう一度お試しください。</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">不明なエラーが発生しました: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">ウェーブ中！</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">ご存じのとおり、地球の物語を1000ページの本にたとえると、人類が登場するのは最終ページの最後の段落だけです。</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">しかし、この短い物語は予想より早く終わるかもしれません。私たちは広大で荒涼とした宇宙に孤立しています。私たちはあらゆるものを破壊します。私たちは利己的です。残酷です。貪欲です。盲目です。そして支配しようとします。けれども、私たちは共感する力も持ち、驚異を生み出し、たくましく、利他的にもなれます。</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">しかし、この短い物語は予想より早く終わってしまうかもしれない。私たちは広大で荒涼とした宇宙の中で孤立している。私たちはあらゆるものを破壊する。私たちは利己的で、残酷で、貪欲で、盲目だ。しかも支配を求める。だが、私たちは共感もでき、驚異を生み出し、回復力があり、利他的にもなれる。</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">しかし、時間は多くありません。私たちは大きな進歩を遂げてきました。別の道を築けます：権利、連帯、民主主義のコミュニティです。すべては私たち次第です！</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->

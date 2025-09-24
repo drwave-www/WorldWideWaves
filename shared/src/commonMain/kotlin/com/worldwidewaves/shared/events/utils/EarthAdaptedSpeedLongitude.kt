@@ -22,7 +22,7 @@ package com.worldwidewaves.shared.events.utils
  */
 
 import androidx.annotation.VisibleForTesting
-import com.worldwidewaves.shared.WWWGlobals.Companion.Wave
+import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
 import com.worldwidewaves.shared.events.utils.GeoUtils.EPSILON

@@ -20,3 +20,8 @@ captures
 **/logs/
 scripts/images/generated_images/
 composeApp/release/
+CLAUDE.md.backup*
+
+# Firebase configuration files containing sensitive API keys
+composeApp/google-services.json
+iosApp/GoogleService-Info.plist

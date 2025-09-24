@@ -32,7 +32,6 @@ import kotlin.time.Duration.Companion.seconds
  * without requiring actual device location services.
  */
 class MockLocationProvider {
-
     private var currentPosition: Position = TestHelpers.TestLocations.PARIS
     private var accuracy: Float = 10.0f // meters
     private var isLocationEnabled: Boolean = true
@@ -54,7 +53,10 @@ class MockLocationProvider {
     /**
      * Sets the current mock location.
      */
-    fun setLocation(position: Position, accuracy: Float = 10.0f) {
+    fun setLocation(
+        position: Position,
+        accuracy: Float = 10.0f,
+    ) {
         this.currentPosition = position
         this.accuracy = accuracy
         recordLocationUpdate(position, accuracy)
@@ -67,7 +69,7 @@ class MockLocationProvider {
     fun moveTo(
         destination: Position,
         duration: Duration = 30.seconds,
-        steps: Int = 10
+        steps: Int = 10,
     ) {
         val path = createMovementPath(currentPosition, destination, steps)
         simulateMovementAlongPath(path, duration)
@@ -78,7 +80,7 @@ class MockLocationProvider {
      */
     fun simulateMovementAlongPath(
         path: List<Position>,
-        totalDuration: Duration = 60.seconds
+        totalDuration: Duration = 60.seconds,
     ) {
         movementPath = path
         currentPathIndex = 0
@@ -102,7 +104,7 @@ class MockLocationProvider {
     fun simulateRandomMovement(
         center: Position,
         radius: Double = 0.001, // degrees (~100m)
-        steps: Int = 20
+        steps: Int = 20,
     ) {
         val randomPath = generateRandomPath(center, radius, steps)
         simulateMovementAlongPath(randomPath)
@@ -229,7 +231,7 @@ class MockLocationProvider {
     private fun createMovementPath(
         start: Position,
         end: Position,
-        steps: Int
+        steps: Int,
     ): List<Position> {
         val path = mutableListOf<Position>()
         val latStep = (end.latitude - start.latitude) / steps
@@ -247,7 +249,7 @@ class MockLocationProvider {
     private fun generateRandomPath(
         center: Position,
         radius: Double,
-        steps: Int
+        steps: Int,
     ): List<Position> {
         val path = mutableListOf<Position>()
         var currentPos = currentPosition
@@ -266,22 +268,25 @@ class MockLocationProvider {
         return path
     }
 
-    private fun recordLocationUpdate(position: Position, accuracy: Float) {
+    private fun recordLocationUpdate(
+        position: Position,
+        accuracy: Float,
+    ) {
         locationHistory.add(
             LocationUpdate(
                 position = position,
                 accuracy = accuracy,
                 timestamp = System.currentTimeMillis(),
                 isEnabled = isLocationEnabled,
-                hasPermission = hasLocationPermission
-            )
+                hasPermission = hasLocationPermission,
+            ),
         )
     }
 
     private fun notifyListeners(
         position: Position?,
         accuracy: Float,
-        error: String? = null
+        error: String? = null,
     ) {
         listeners.forEach { listener ->
             if (position != null && error == null) {
@@ -300,14 +305,18 @@ class MockLocationProvider {
         val accuracy: Float,
         val timestamp: Long,
         val isEnabled: Boolean,
-        val hasPermission: Boolean
+        val hasPermission: Boolean,
     )
 
     /**
      * Interface for listening to location updates.
      */
     interface LocationListener {
-        fun onLocationUpdate(position: Position, accuracy: Float)
+        fun onLocationUpdate(
+            position: Position,
+            accuracy: Float,
+        )
+
         fun onLocationError(error: String)
     }
 
@@ -316,15 +325,16 @@ class MockLocationProvider {
          * Creates a mock location provider for city-based testing.
          */
         fun forCity(city: String): MockLocationProvider {
-            val position = when (city.lowercase()) {
-                "paris" -> TestHelpers.TestLocations.PARIS
-                "london" -> TestHelpers.TestLocations.LONDON
-                "newyork", "new_york" -> TestHelpers.TestLocations.NEW_YORK
-                "tokyo" -> TestHelpers.TestLocations.TOKYO
-                "sydney" -> TestHelpers.TestLocations.SYDNEY
-                "saopaulo", "sao_paulo" -> TestHelpers.TestLocations.SAO_PAULO
-                else -> TestHelpers.TestLocations.PARIS
-            }
+            val position =
+                when (city.lowercase()) {
+                    "paris" -> TestHelpers.TestLocations.PARIS
+                    "london" -> TestHelpers.TestLocations.LONDON
+                    "newyork", "new_york" -> TestHelpers.TestLocations.NEW_YORK
+                    "tokyo" -> TestHelpers.TestLocations.TOKYO
+                    "sydney" -> TestHelpers.TestLocations.SYDNEY
+                    "saopaulo", "sao_paulo" -> TestHelpers.TestLocations.SAO_PAULO
+                    else -> TestHelpers.TestLocations.PARIS
+                }
 
             return MockLocationProvider().apply {
                 setLocation(position)
@@ -334,28 +344,25 @@ class MockLocationProvider {
         /**
          * Creates a mock location provider that simulates no GPS signal.
          */
-        fun withNoSignal(): MockLocationProvider {
-            return MockLocationProvider().apply {
+        fun withNoSignal(): MockLocationProvider =
+            MockLocationProvider().apply {
                 simulateSignalLoss()
             }
-        }
 
         /**
          * Creates a mock location provider that simulates no location permission.
          */
-        fun withNoPermission(): MockLocationProvider {
-            return MockLocationProvider().apply {
+        fun withNoPermission(): MockLocationProvider =
+            MockLocationProvider().apply {
                 simulatePermissionDenied()
             }
-        }
 
         /**
          * Creates a mock location provider with poor GPS accuracy.
          */
-        fun withPoorAccuracy(): MockLocationProvider {
-            return MockLocationProvider().apply {
+        fun withPoorAccuracy(): MockLocationProvider =
+            MockLocationProvider().apply {
                 simulatePoorAccuracy(50.0f)
             }
-        }
     }
 }

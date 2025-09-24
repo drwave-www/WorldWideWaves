@@ -23,7 +23,6 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.not_found
-import dev.icerock.moko.resources.StringResource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -35,7 +34,6 @@ import kotlin.test.assertTrue
  * resource loading, caching, localization handling, and error scenarios.
  */
 class EventsResourcesTest {
-
     @Test
     fun `test getEventImage returns correct location images`() {
         // Test valid location images
@@ -247,10 +245,17 @@ class EventsResourcesTest {
 
     @Test
     fun `test resource loading consistency across major cities`() {
-        val majorCities = listOf(
-            "new_york_usa", "london_england", "tokyo_japan", "paris_france",
-            "berlin_germany", "sydney_australia", "mumbai_india", "sao_paulo_brazil"
-        )
+        val majorCities =
+            listOf(
+                "new_york_usa",
+                "london_england",
+                "tokyo_japan",
+                "paris_france",
+                "berlin_germany",
+                "sydney_australia",
+                "mumbai_india",
+                "sao_paulo_brazil",
+            )
 
         // Verify all major cities have consistent resource availability
         majorCities.forEach { cityId ->
@@ -300,13 +305,31 @@ class EventsResourcesTest {
         val startTime = System.currentTimeMillis()
 
         // Test loading a large number of resources
-        val allLocations = listOf(
-            "new_york_usa", "los_angeles_usa", "chicago_usa", "san_francisco_usa",
-            "london_england", "paris_france", "berlin_germany", "madrid_spain", "rome_italy",
-            "tokyo_japan", "seoul_south_korea", "beijing_china", "shanghai_china", "hong_kong_china",
-            "mumbai_india", "delhi_india", "bangalore_india", "sydney_australia", "melbourne_australia",
-            "sao_paulo_brazil", "buenos_aires_argentina", "mexico_city_mexico"
-        )
+        val allLocations =
+            listOf(
+                "new_york_usa",
+                "los_angeles_usa",
+                "chicago_usa",
+                "san_francisco_usa",
+                "london_england",
+                "paris_france",
+                "berlin_germany",
+                "madrid_spain",
+                "rome_italy",
+                "tokyo_japan",
+                "seoul_south_korea",
+                "beijing_china",
+                "shanghai_china",
+                "hong_kong_china",
+                "mumbai_india",
+                "delhi_india",
+                "bangalore_india",
+                "sydney_australia",
+                "melbourne_australia",
+                "sao_paulo_brazil",
+                "buenos_aires_argentina",
+                "mexico_city_mexico",
+            )
 
         allLocations.forEach { location ->
             getEventImage("location", location)
@@ -341,12 +364,13 @@ class EventsResourcesTest {
     @Test
     fun `test special characters and edge cases in resource IDs`() {
         // Test edge cases with special characters and unusual formatting
-        val specialCaseIds = listOf(
-            "democratic_republic_of_the_congo",
-            "united_arab_emirates",
-            "hong_kong_china",
-            "sao_paulo_brazil"
-        )
+        val specialCaseIds =
+            listOf(
+                "democratic_republic_of_the_congo",
+                "united_arab_emirates",
+                "hong_kong_china",
+                "sao_paulo_brazil",
+            )
 
         specialCaseIds.forEach { id ->
             // Should handle special characters without errors

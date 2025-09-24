@@ -32,18 +32,18 @@ class WaveViewModel: ObservableObject {
     @Published var currentFrame: Int = 0
     @Published var isReady: Bool = false
     @Published var showInstructions: Bool = true
-    
+
     // Animation properties
     @Published var animationScale: CGFloat = 1.0
     @Published var animationOpacity: Double = 1.0
     @Published var animationRotation: Double = 0.0
-    
+
     // Choreography manager from shared code
-    private var choreographyManager: ChoreographyManager? = nil
-    private var soundChoreographyManager: SoundChoreographyManager? = nil
+    private var choreographyManager: ChoreographyManager?
+    private var soundChoreographyManager: SoundChoreographyManager?
     private var cancellables = Set<AnyCancellable>()
-    private var timer: Timer? = nil
-    
+    private var timer: Timer?
+
     // Wave states
     enum WaveState {
         case waiting
@@ -54,19 +54,19 @@ class WaveViewModel: ObservableObject {
         case completed
         case error
     }
-    
+
     init(event: WWWEvent) {
         self.event = event
         setupChoreographyManager()
         startCountdown()
     }
-    
+
     private func setupChoreographyManager() {
         // Initialize the choreography manager from shared code
         let koin = KoinKt.getKoin()
         choreographyManager = koin.get(objCClass: ChoreographyManager.self) as? ChoreographyManager
         soundChoreographyManager = koin.get(objCClass: SoundChoreographyManager.self) as? SoundChoreographyManager
-        
+
         // Load choreography for this event
         choreographyManager?.loadChoreography(forEvent: event.id) { success in
             DispatchQueue.main.async {
@@ -78,23 +78,23 @@ class WaveViewModel: ObservableObject {
             }
         }
     }
-    
+
     func startCountdown() {
         // Set initial state
         waveState = .countdown
-        
+
         // Start timer to update countdown
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             self.updateCountdown()
         }
     }
-    
+
     private func updateCountdown() {
         // Calculate time until wave starts
         // This is a placeholder - actual implementation would use event time
         let timeRemaining = 30 // seconds until wave starts
-        
+
         if timeRemaining <= 0 {
             startWarmingPhase()
         } else {
@@ -103,18 +103,18 @@ class WaveViewModel: ObservableObject {
             countdownString = String(format: "%02d:%02d", minutes, seconds)
         }
     }
-    
+
     func startWarmingPhase() {
         waveState = .warming
-        
+
         // Begin warming animation sequence using choreography manager
         choreographyManager?.startWarmingSequence { currentStep, totalSteps in
             DispatchQueue.main.async {
                 self.waveProgress = Double(currentStep) / Double(totalSteps)
-                
+
                 // Update animation properties based on choreography step
                 self.updateAnimationProperties(forStep: currentStep)
-                
+
                 // When warming is complete, transition to ready state
                 if currentStep >= totalSteps {
                     self.waveState = .ready
@@ -122,22 +122,22 @@ class WaveViewModel: ObservableObject {
             }
         }
     }
-    
+
     func startWave() {
         waveState = .waving
-        
+
         // Begin wave animation sequence using choreography manager
         choreographyManager?.startWaveSequence { currentStep, totalSteps, frameIndex in
             DispatchQueue.main.async {
                 self.waveProgress = Double(currentStep) / Double(totalSteps)
                 self.currentFrame = frameIndex
-                
+
                 // Update animation properties based on choreography step
                 self.updateAnimationProperties(forStep: currentStep)
-                
+
                 // Play sound if needed
                 self.soundChoreographyManager?.playSoundForStep(step: currentStep)
-                
+
                 // When wave is complete, transition to completed state
                 if currentStep >= totalSteps {
                     self.waveState = .completed
@@ -145,7 +145,7 @@ class WaveViewModel: ObservableObject {
             }
         }
     }
-    
+
     private func updateAnimationProperties(forStep step: Int) {
         // This would be implemented to translate choreography data into SwiftUI animation properties
         // For now, just some placeholder animations
@@ -155,20 +155,20 @@ class WaveViewModel: ObservableObject {
             animationRotation = Double(step * 10) % 360
         }
     }
-    
+
     func dismissInstructions() {
         withAnimation {
             showInstructions = false
         }
     }
-    
+
     func exitWave() {
         // Clean up resources
         timer?.invalidate()
         choreographyManager?.stopAllAnimations()
         soundChoreographyManager?.stopAllSounds()
     }
-    
+
     deinit {
         cancellables.forEach { $0.cancel() }
         timer?.invalidate()
@@ -179,21 +179,21 @@ struct WaveView: View {
     @ObservedObject var viewModel: WaveViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var showExitConfirmation = false
-    
+
     // Animation states
     @State private var waveAnimationValue: CGFloat = 0
     @State private var pulseAnimationValue: CGFloat = 1.0
-    
+
     init(event: WWWEvent) {
         self.viewModel = WaveViewModel(event: event)
     }
-    
+
     var body: some View {
         ZStack {
             // Background
             Color.black
                 .edgesIgnoringSafeArea(.all)
-            
+
             // Main content based on wave state
             VStack {
                 // Header with event name and exit button
@@ -201,9 +201,9 @@ struct WaveView: View {
                     Text(viewModel.event.name)
                         .font(.headline)
                         .foregroundColor(.white)
-                    
+
                     Spacer()
-                    
+
                     Button(action: {
                         showExitConfirmation = true
                     }) {
@@ -213,9 +213,9 @@ struct WaveView: View {
                     }
                 }
                 .padding()
-                
+
                 Spacer()
-                
+
                 // Wave visualization area
                 ZStack {
                     // Wave animation container
@@ -223,7 +223,7 @@ struct WaveView: View {
                         .scaleEffect(viewModel.animationScale)
                         .opacity(viewModel.animationOpacity)
                         .rotationEffect(.degrees(viewModel.animationRotation))
-                    
+
                     // Status overlay
                     VStack(spacing: 20) {
                         // State indicator
@@ -231,7 +231,7 @@ struct WaveView: View {
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        
+
                         // Countdown or progress
                         if viewModel.waveState == .countdown {
                             Text(viewModel.countdownString)
@@ -243,7 +243,7 @@ struct WaveView: View {
                                 .frame(width: 200)
                                 .padding()
                         }
-                        
+
                         // Action button based on state
                         if viewModel.waveState == .ready {
                             Button(action: {
@@ -279,20 +279,20 @@ struct WaveView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 Spacer()
-                
+
                 // Bottom status bar
                 statusBar
                     .frame(height: 40)
                     .padding(.bottom)
             }
-            
+
             // Instructions overlay
             if viewModel.showInstructions {
                 instructionsOverlay
             }
-            
+
             // Exit confirmation dialog
             if showExitConfirmation {
                 exitConfirmationOverlay
@@ -303,9 +303,9 @@ struct WaveView: View {
             viewModel.exitWave()
         }
     }
-    
+
     // MARK: - UI Components
-    
+
     // Wave animation view - will be implemented with frame-based animations
     private var waveAnimationView: some View {
         ZStack {
@@ -321,7 +321,7 @@ struct WaveView: View {
                         waveAnimationValue = 1.0
                     }
                 }
-            
+
             // This would be replaced with actual sprite rendering using shared resources
             Text("Frame: \(viewModel.currentFrame)")
                 .font(.caption)
@@ -329,7 +329,7 @@ struct WaveView: View {
                 .position(x: 50, y: 20)
         }
     }
-    
+
     // Status bar at bottom of screen
     private var statusBar: some View {
         HStack {
@@ -341,9 +341,9 @@ struct WaveView: View {
                     .foregroundColor(.white)
             }
             .padding(.horizontal)
-            
+
             Spacer()
-            
+
             // Wave status
             Text(viewModel.event.status.name)
                 .foregroundColor(.white)
@@ -351,9 +351,9 @@ struct WaveView: View {
                 .padding(.vertical, 4)
                 .background(Color.blue.opacity(0.5))
                 .cornerRadius(10)
-            
+
             Spacer()
-            
+
             // Wave progress
             Text("\(Int(viewModel.waveProgress * 100))%")
                 .foregroundColor(.white)
@@ -361,19 +361,19 @@ struct WaveView: View {
         }
         .padding(.horizontal)
     }
-    
+
     // Instructions overlay
     private var instructionsOverlay: some View {
         ZStack {
             Color.black.opacity(0.8)
                 .edgesIgnoringSafeArea(.all)
-            
+
             VStack(spacing: 30) {
                 Text("Wave Instructions")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                
+
                 VStack(alignment: .leading, spacing: 20) {
                     instructionStep(number: "1", text: "Wait for the countdown to complete")
                     instructionStep(number: "2", text: "Hold your phone steady and upright")
@@ -383,7 +383,7 @@ struct WaveView: View {
                 .padding()
                 .background(Color.white.opacity(0.1))
                 .cornerRadius(15)
-                
+
                 Button(action: {
                     viewModel.dismissInstructions()
                 }) {
@@ -400,7 +400,7 @@ struct WaveView: View {
             .padding(30)
         }
     }
-    
+
     // Helper for instruction steps
     private func instructionStep(number: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 15) {
@@ -410,14 +410,14 @@ struct WaveView: View {
                 .foregroundColor(.white)
                 .frame(width: 36, height: 36)
                 .background(Circle().fill(Color.blue))
-            
+
             Text(text)
                 .font(.body)
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-    
+
     // Exit confirmation overlay
     private var exitConfirmationOverlay: some View {
         ZStack {
@@ -426,18 +426,18 @@ struct WaveView: View {
                 .onTapGesture {
                     showExitConfirmation = false
                 }
-            
+
             VStack(spacing: 20) {
                 Text("Exit Wave?")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                
+
                 Text("Are you sure you want to exit the wave? Your participation will end.")
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
                     .padding()
-                
+
                 HStack(spacing: 20) {
                     Button(action: {
                         showExitConfirmation = false
@@ -450,7 +450,7 @@ struct WaveView: View {
                             .background(Color.blue)
                             .cornerRadius(10)
                     }
-                    
+
                     Button(action: {
                         viewModel.exitWave()
                         presentationMode.wrappedValue.dismiss()
@@ -471,7 +471,7 @@ struct WaveView: View {
             .padding(40)
         }
     }
-    
+
     // Helper to get text for current state
     private var stateText: String {
         switch viewModel.waveState {
@@ -517,7 +517,7 @@ struct WaveView_Previews: PreviewProvider {
             participants: 1500,
             waveRadius: 2.5
         )
-        
+
         WaveView(event: event)
     }
 }

@@ -62,6 +62,8 @@
   <string name="map_error_service_died">Il servizio si è arrestato in modo imprevisto. Riprova.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">Accesso negato.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Problema con l’account di Google Play Store. Controlla il tuo account e riprova.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Si è verificato un errore sconosciuto: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,7 +178,7 @@
   <string name="wave_is_running">Onda in corso!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">Lo sai: se la storia della Terra fosse raccontata in un libro di 1.000 pagine, l'umanità comparirebbe solo nell'ultimo paragrafo dell'ultima pagina.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
   <string name="infos_core_2">Ma questa breve storia potrebbe finire prima del previsto. Siamo isolati in un universo vasto e desolato. Distruggiamo tutto. Siamo egoisti. Siamo crudeli. Siamo avidi. Siamo ciechi. E cerchiamo di dominare. Ma siamo anche capaci di empatia, creiamo meraviglie, siamo resilienti, possiamo essere altruisti.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">Ma abbiamo poco tempo. Abbiamo fatto così tanti progressi... Possiamo costruire un'alternativa: una comunità di diritti, di solidarietà, di democrazia. Dipende da noi!</string>

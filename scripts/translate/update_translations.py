@@ -424,7 +424,7 @@ def main():
     global VERBOSE
     VERBOSE = not bool(args.no_verbose)
 
-    base_root = (Path(args.base_root).resolve() / ".." / "..").resolve()
+    base_root = Path(args.base_root).resolve()
     vprint(f"Model: {MODEL}")
     vprint(f"Base root: {base_root}")
 
