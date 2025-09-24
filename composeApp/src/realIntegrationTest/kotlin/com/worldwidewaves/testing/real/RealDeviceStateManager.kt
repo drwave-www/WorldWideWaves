@@ -222,6 +222,54 @@ class RealDeviceStateManager(private val context: Context) {
     }
 
     /**
+     * Check if TalkBack is enabled (for accessibility testing)
+     */
+    fun isTalkBackEnabled(): Boolean {
+        return try {
+            val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as android.view.accessibility.AccessibilityManager
+            accessibilityManager.isEnabled && accessibilityManager.isTouchExplorationEnabled
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Check if any accessibility services are enabled
+     */
+    fun hasAccessibilityServicesEnabled(): Boolean {
+        return try {
+            val accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as android.view.accessibility.AccessibilityManager
+            accessibilityManager.isEnabled
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Simulate orientation change (for device compatibility testing)
+     */
+    fun simulateOrientationChange(orientation: Int) {
+        println("📱 Simulating orientation change to: ${if (orientation == 1) "Portrait" else "Landscape"}")
+        // Note: Real orientation change would require ActivityTestRule configuration
+        // This is a placeholder for orientation testing
+    }
+
+    /**
+     * Check if device has GPS capability
+     */
+    fun hasGpsCapability(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+    }
+
+    /**
+     * Check if device has network capability
+     */
+    fun hasNetworkCapability(): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_WIFI) ||
+               context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+    }
+
+    /**
      * Get network info for debugging
      */
     fun getNetworkInfo(): String {

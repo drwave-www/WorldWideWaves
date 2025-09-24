@@ -141,8 +141,16 @@ abstract class BaseRealIntegrationTest {
     /**
      * Create test event data for integration tests
      */
-    protected fun createTestEvent(eventId: String, latitude: Double, longitude: Double) {
-        testDataManager.createTestEvent(eventId, latitude, longitude)
+    protected fun createTestEvent(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+        isActive: Boolean = false,
+        startsSoonInSeconds: Int = 0,
+        endsInSeconds: Int = 0,
+        durationSeconds: Int = 0
+    ) {
+        testDataManager.createTestEvent(eventId, latitude, longitude, isActive, startsSoonInSeconds, endsInSeconds, durationSeconds)
     }
 
     /**

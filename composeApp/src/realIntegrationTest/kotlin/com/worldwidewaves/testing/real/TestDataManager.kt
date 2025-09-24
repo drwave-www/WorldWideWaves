@@ -53,16 +53,45 @@ class TestDataManager {
     /**
      * Create a test event for integration testing
      */
-    fun createTestEvent(eventId: String, latitude: Double, longitude: Double) {
+    fun createTestEvent(
+        eventId: String,
+        latitude: Double,
+        longitude: Double,
+        isActive: Boolean = false,
+        startsSoonInSeconds: Int = 0,
+        endsInSeconds: Int = 0,
+        durationSeconds: Int = 0
+    ) {
+        val currentTime = System.currentTimeMillis()
+        val startTime = if (startsSoonInSeconds > 0) {
+            currentTime + (startsSoonInSeconds * 1000)
+        } else {
+            currentTime + 60000 // Default: 1 minute from now
+        }
+
+        val endTime = if (endsInSeconds > 0) {
+            currentTime + (endsInSeconds * 1000)
+        } else if (durationSeconds > 0) {
+            startTime + (durationSeconds * 1000)
+        } else {
+            startTime + 300000 // Default: 5 minutes duration
+        }
+
+        val status = when {
+            isActive -> IWWWEvent.Status.RUNNING
+            startsSoonInSeconds > 0 -> IWWWEvent.Status.SOON
+            else -> IWWWEvent.Status.SOON
+        }
+
         // Create test event data
         val testEvent = TestEvent(
             id = eventId,
             title = "Test Event - $eventId",
             latitude = latitude,
             longitude = longitude,
-            status = IWWWEvent.Status.SOON,
-            startTime = System.currentTimeMillis() + 60000, // 1 minute from now
-            endTime = System.currentTimeMillis() + 300000   // 5 minutes from now
+            status = status,
+            startTime = startTime,
+            endTime = endTime
         )
 
         // Store in Firebase (placeholder - would use real Firebase SDK)
@@ -70,6 +99,7 @@ class TestDataManager {
 
         createdTestEvents.add(eventId)
         println("✅ Test event created: $eventId at ($latitude, $longitude)")
+        println("   Status: $status, Starts: ${if (startsSoonInSeconds > 0) "${startsSoonInSeconds}s" else "1min"}")
     }
 
     /**
