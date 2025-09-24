@@ -3,6 +3,11 @@
 # WorldWideWaves Sound Choreography Runner
 # This script launches the real audio crowd simulation for testing sound choreography
 # Works from any directory and auto-detects Android SDK, emulators, and devices
+#
+# Usage:
+#   ./run_sound_choreography.sh              # Default behavior (prompt for automated test)
+#   ./run_sound_choreography.sh --play       # Skip prompt and run automated test
+#   ./run_sound_choreography.sh --open       # Only open emulator with activity (no automated test)
 
 set -e
 
@@ -243,8 +248,43 @@ create_audio_avd() {
     return 0
 }
 
+# Parse command line arguments
+parse_arguments() {
+    RUN_MODE="default"  # default, play, open
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --play)
+                RUN_MODE="play"
+                shift
+                ;;
+            --open)
+                RUN_MODE="open"
+                shift
+                ;;
+            --help|-h)
+                echo "Usage: $0 [OPTIONS]"
+                echo "Options:"
+                echo "  (no options)  Default behavior - prompt user to run automated test"
+                echo "  --play        Skip prompt and automatically run the automated test"
+                echo "  --open        Only open emulator with activity (no automated test)"
+                echo "  --help, -h    Show this help message"
+                exit 0
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                echo "Use --help for usage information"
+                exit 1
+                ;;
+        esac
+    done
+}
+
 # Main script
 main() {
+    # Parse command line arguments first
+    parse_arguments "$@"
+
     print_header "WorldWideWaves Sound Choreography Test Runner"
     echo ""
 
@@ -385,18 +425,34 @@ main() {
     print_header "🎼 Recommended: Tap '🌊 Play Wave Progression' to hear the complete symphony simulation!"
     print_warning "Make sure your device/emulator volume is turned up to hear the audio!"
 
-    # Optional: Run automated test
+    # Handle automated test based on run mode
     echo ""
-    read -p "Would you like to run the automated instrumented test as well? (y/n): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_status "Running automated sound choreography test..."
-        if ANDROID_SERIAL="$SELECTED_DEVICE" ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest --no-daemon; then
-            print_status "Automated test completed successfully!"
-        else
-            print_warning "Automated test had issues (probably audio-related), but manual test should work fine."
-        fi
-    fi
+    case "$RUN_MODE" in
+        "play")
+            print_status "Running automated sound choreography test (--play mode)..."
+            if ANDROID_SERIAL="$SELECTED_DEVICE" ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest --no-daemon; then
+                print_status "Automated test completed successfully!"
+            else
+                print_warning "Automated test had issues (probably audio-related), but manual test should work fine."
+            fi
+            ;;
+        "open")
+            print_status "Emulator ready for manual testing (--open mode)."
+            print_status "No automated test will be run."
+            ;;
+        "default")
+            read -p "Would you like to run the automated instrumented test as well? (y/n): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                print_status "Running automated sound choreography test..."
+                if ANDROID_SERIAL="$SELECTED_DEVICE" ./gradlew :composeApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.worldwidewaves.compose.choreographies.RealAudioCrowdSimulationTest --no-daemon; then
+                    print_status "Automated test completed successfully!"
+                else
+                    print_warning "Automated test had issues (probably audio-related), but manual test should work fine."
+                fi
+            fi
+            ;;
+    esac
 }
 
 # Run main function
