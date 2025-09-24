@@ -62,7 +62,6 @@ val applicationModule =
                 getSortedEventsUseCase = get(),
                 filterEventsUseCase = get(),
                 checkEventFavoritesUseCase = get(),
-                mapChecker = get(),
                 platform = get()
             )
         }

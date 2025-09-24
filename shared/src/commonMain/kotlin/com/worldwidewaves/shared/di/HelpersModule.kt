@@ -50,7 +50,7 @@ val helpersModule =
         single<CoroutineScopeProvider> { DefaultCoroutineScopeProvider() }
         single<PositionManager> { PositionManager(get()) }
         single<WaveProgressionTracker> { DefaultWaveProgressionTracker(get()) }
-        single<PositionObserver> { DefaultPositionObserver(get(), get(), get(), get()) }
+        single<PositionObserver> { DefaultPositionObserver(get(), get(), get()) }
         single<EventStateManager> { DefaultEventStateManager(get(), get()) }
         single<ObservationScheduler> { DefaultObservationScheduler(get()) }
         factory { WWWShutdownHandler(get()) }

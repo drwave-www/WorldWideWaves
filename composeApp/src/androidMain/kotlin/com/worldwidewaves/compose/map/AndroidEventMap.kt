@@ -618,8 +618,10 @@ class AndroidEventMap(
                 map.locationComponent.isLocationComponentEnabled = true
                 map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
                 Log.i(TAG, "Location component setup complete")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to setup location component", e)
+            } catch (e: IllegalStateException) {
+                Log.e(TAG, "Failed to setup location component - invalid state", e)
+            } catch (e: UnsupportedOperationException) {
+                Log.e(TAG, "Failed to setup location component - operation not supported", e)
             }
         } ?: run {
             Log.e(TAG, "Cannot setup location component - map style is null")
@@ -715,7 +717,7 @@ class AndroidEventMap(
             } catch (uoe: UnsupportedOperationException) {
                 // Map operation not supported
                 Log.e(TAG, "Unsupported map operation", uoe)
-            } catch (e: RuntimeException) {
+            } catch (e: IllegalStateException) {
                 // Location component not initialized - this is expected on first run
                 if (e.message?.contains("LocationComponent has to be activated") == true) {
                     Log.d(TAG, "Location component not yet initialized, will activate it")
@@ -723,7 +725,7 @@ class AndroidEventMap(
                         setupMapLocationComponent(map, context)
                     }
                 } else {
-                    Log.e(TAG, "Unexpected runtime error with location component", e)
+                    Log.e(TAG, "Unexpected illegal state with location component", e)
                 }
             }
         } ?: run {

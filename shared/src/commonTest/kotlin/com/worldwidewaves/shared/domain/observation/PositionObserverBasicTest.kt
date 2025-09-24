@@ -3,7 +3,6 @@
 package com.worldwidewaves.shared.domain.observation
 
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
@@ -20,13 +19,11 @@ class PositionObserverBasicTest {
 
     private val mockPositionManager = mockk<PositionManager>()
     private val mockWaveProgressionTracker = mockk<WaveProgressionTracker>()
-    private val mockCoroutineScopeProvider = mockk<CoroutineScopeProvider>()
     private val mockClock = mockk<IClock>()
 
     private val observer = DefaultPositionObserver(
         mockPositionManager,
         mockWaveProgressionTracker,
-        mockCoroutineScopeProvider,
         mockClock
     )
 
@@ -35,7 +32,6 @@ class PositionObserverBasicTest {
         val observer = DefaultPositionObserver(
             mockPositionManager,
             mockWaveProgressionTracker,
-            mockCoroutineScopeProvider,
             mockClock
         )
 

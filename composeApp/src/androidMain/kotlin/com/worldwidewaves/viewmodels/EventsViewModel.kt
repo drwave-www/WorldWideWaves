@@ -21,7 +21,6 @@ import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.EventFilterCriteria
-import com.worldwidewaves.utils.MapAvailabilityChecker
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +56,6 @@ class EventsViewModel(
     private val getSortedEventsUseCase: GetSortedEventsUseCase,
     private val filterEventsUseCase: FilterEventsUseCase,
     private val checkEventFavoritesUseCase: CheckEventFavoritesUseCase,
-    private val mapChecker: MapAvailabilityChecker,
     private val platform: WWWPlatform,
 ) : ViewModel() {
     companion object {

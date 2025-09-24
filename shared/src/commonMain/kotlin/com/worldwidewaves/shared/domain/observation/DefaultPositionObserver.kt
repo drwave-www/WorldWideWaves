@@ -25,7 +25,6 @@ package com.worldwidewaves.shared.domain.observation
 
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.Log
 import com.worldwidewaves.shared.events.utils.Position
@@ -55,7 +54,6 @@ import kotlin.math.sqrt
 class DefaultPositionObserver(
     private val positionManager: PositionManager,
     private val waveProgressionTracker: WaveProgressionTracker,
-    private val coroutineScopeProvider: CoroutineScopeProvider,
     private val clock: IClock
 ) : PositionObserver {
 

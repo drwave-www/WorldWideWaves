@@ -94,7 +94,7 @@ class WWWEventObserverTest : KoinTest {
                     single<CoroutineScopeProvider> { coroutineScopeProvider }
                     single<PositionManager> { testPositionManager }
                     single<WaveProgressionTracker> { DefaultWaveProgressionTracker(get()) }
-                    single<PositionObserver> { DefaultPositionObserver(get(), get(), get(), get()) }
+                    single<PositionObserver> { DefaultPositionObserver(get(), get(), get()) }
                 }
             )
         }
