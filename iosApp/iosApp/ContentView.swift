@@ -76,47 +76,9 @@ struct ContentView: View {
                         List {
                             ForEach(events.indices, id: \.self) { index in
                                 NavigationLink(destination: EventDetailView(eventId: events[index])) {
-                                    ZStack {
-                                        VStack(alignment: .leading, spacing: 12) {
-                                            // Top row: Location (left) and Date (right) - exact Android match
-                                            HStack {
-                                                Text(formatEventName(events[index]))
-                                                    .font(.title3)
-                                                    .fontWeight(.medium)
-                                                Spacer()
-                                                Text("Dec 24")
-                                                    .font(.headline)
-                                                    .fontWeight(.bold)
-                                                    .foregroundColor(.blue)
-                                            }
-
-                                            // Bottom row: Country / Community - exact Android match
-                                            HStack {
-                                                Text(getCountryName(events[index]))
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                Text(" / ")
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                Text(getCommunityName(events[index]))
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                Spacer()
-                                            }
-                                            .padding(.top, -8)
-                                        }
-                                        .padding(.vertical, 12)
-
-                                        // Event status overlay (matching Android EventOverlays)
-                                        HStack {
-                                            Spacer()
-                                            VStack {
-                                                EventStatusOverlay(eventId: events[index])
-                                                Spacer()
-                                            }
-                                        }
-                                    }
+                                    AndroidEventRow(eventId: events[index])
                                 }
+                                .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
                             }
                         }
@@ -222,21 +184,6 @@ struct ContentView: View {
 
     private func formatLocationName(_ id: String) -> String {
         return id.replacingOccurrences(of: "_", with: " ")
-    }
-
-    private func getCountryName(_ eventId: String) -> String {
-        // Extract country from event ID (e.g., "new_york_usa" -> "USA")
-        let components = eventId.components(separatedBy: "_")
-        return components.last?.uppercased() ?? "Unknown"
-    }
-
-    private func getCommunityName(_ eventId: String) -> String {
-        // Extract community name from event ID
-        let components = eventId.components(separatedBy: "_")
-        if components.count >= 2 {
-            return components.dropLast().joined(separator: " ").capitalized
-        }
-        return "Community"
     }
 }
 
@@ -549,6 +496,138 @@ struct WaveView: View {
                 isWaveActive = false
             }
         }
+    }
+}
+
+// Android Event Row - Exact Android Event structure
+struct AndroidEventRow: View {
+    let eventId: String
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // EventOverlay - 160dp height with background image
+            AndroidEventOverlay(eventId: eventId)
+                .frame(height: 160) // OVERLAY_HEIGHT = 160dp
+
+            // EventLocationAndDate - exact Android layout
+            AndroidEventLocationAndDate(eventId: eventId)
+        }
+    }
+}
+
+// Android Event Overlay - Exact match to Android EventOverlay
+struct AndroidEventOverlay: View {
+    let eventId: String
+
+    var body: some View {
+        ZStack {
+            // Background image matching Android getLocationImage()
+            Rectangle()
+                .fill(getEventGradientColor(eventId, 0))
+                .overlay(
+                    Rectangle()
+                        .fill(getEventGradientColor(eventId, 1))
+                        .opacity(0.6)
+                )
+
+            // Overlays matching Android structure
+            VStack {
+                HStack {
+                    // Country flag (FLAG_WIDTH = 65dp)
+                    Image(systemName: "flag.fill")
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 65)
+                        .padding(.leading, 8)
+
+                    Spacer()
+
+                    // Status overlay (SOON/RUNNING)
+                    EventStatusOverlay(eventId: eventId)
+                        .padding(.trailing, 8)
+                }
+                .padding(.top, 8)
+
+                Spacer()
+            }
+        }
+    }
+
+    private func getEventGradientColor(_ eventId: String, _ index: Int) -> Color {
+        switch eventId {
+        case let id where id.contains("new_york"):
+            return index == 0 ? Color.blue.opacity(0.8) : Color.purple.opacity(0.6)
+        case let id where id.contains("los_angeles"):
+            return index == 0 ? Color.orange.opacity(0.8) : Color.red.opacity(0.6)
+        case let id where id.contains("mexico"):
+            return index == 0 ? Color.green.opacity(0.8) : Color.yellow.opacity(0.6)
+        default:
+            return index == 0 ? Color.blue.opacity(0.7) : Color.purple.opacity(0.5)
+        }
+    }
+}
+
+// Android Event Location and Date - Exact match to Android EventLocationAndDate
+struct AndroidEventLocationAndDate: View {
+    let eventId: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Row 1: Location + Date - EXACT Android layout
+            HStack {
+                Text(formatEventName(eventId))
+                    .font(.system(size: 26)) // EVENT_LOCATION_FONTSIZE = 26
+                    .foregroundColor(.primary)
+                Spacer()
+                Text("Dec 24")
+                    .font(.system(size: 30)) // EVENT_DATE_FONTSIZE = 30
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                    .padding(.trailing, 2) // end 2dp
+            }
+
+            // Row 2: Country / Community with -8dp offset - EXACT Android
+            HStack(alignment: .center, spacing: 0) {
+                Text(getCountryName(eventId))
+                    .font(.system(size: 18)) // EVENT_COUNTRY_FONTSIZE = 18
+                    .foregroundColor(.secondary)
+                    .offset(y: -8) // -8dp offset
+                    .padding(.leading, 2)
+
+                Text(" / ")
+                    .font(.system(size: 18))
+                    .foregroundColor(.secondary)
+                    .offset(y: -8)
+                    .padding(.leading, 2)
+
+                Text(getCommunityName(eventId))
+                    .font(.system(size: 16)) // EVENT_COMMUNITY_FONTSIZE = 16
+                    .foregroundColor(.quaternary)
+                    .offset(y: -8)
+                    .padding(.leading, 2)
+
+                Spacer()
+            }
+            .padding(.top, 5) // 5dp top padding
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    private func formatEventName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+
+    private func getCountryName(_ eventId: String) -> String {
+        let components = eventId.components(separatedBy: "_")
+        return components.last?.uppercased() ?? "Unknown"
+    }
+
+    private func getCommunityName(_ eventId: String) -> String {
+        let components = eventId.components(separatedBy: "_")
+        if components.count >= 2 {
+            return components.dropLast().joined(separator: " ").capitalized
+        }
+        return "Community"
     }
 }
 
