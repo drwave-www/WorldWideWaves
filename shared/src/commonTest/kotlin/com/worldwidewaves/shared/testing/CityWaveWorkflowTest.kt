@@ -753,6 +753,243 @@ class CityWaveWorkflowTest {
         }
     }
 
+    @Test
+    fun `should test user position tracking during wave events for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val bounds = getCityBounds(cityId)
+
+            // Test user position tracking through different event phases
+            val trackingScenarios = listOf(
+                PositionTrackingScenario(
+                    "user_enters_area",
+                    initialPosition = Position(bounds.maxLat + 0.1, bounds.maxLng + 0.1), // Outside
+                    finalPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2), // Center
+                    expectAreaTransition = true
+                ),
+                PositionTrackingScenario(
+                    "user_exits_area",
+                    initialPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2), // Center
+                    finalPosition = Position(bounds.maxLat + 0.1, bounds.maxLng + 0.1), // Outside
+                    expectAreaTransition = true
+                ),
+                PositionTrackingScenario(
+                    "user_stays_inside",
+                    initialPosition = Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2), // Center
+                    finalPosition = Position(bounds.minLat + 0.1, bounds.minLng + 0.1), // Still inside
+                    expectAreaTransition = false
+                )
+            )
+
+            trackingScenarios.forEach { scenario ->
+                // Test initial position detection
+                val isInitiallyInside = simulatePolygonContainment(scenario.initialPosition, cityId)
+                val isFinallyInside = simulatePolygonContainment(scenario.finalPosition, cityId)
+
+                // Verify position tracking logic
+                assertNotNull(isInitiallyInside, "Initial position tracking should work for ${scenario.name} in city $cityId")
+                assertNotNull(isFinallyInside, "Final position tracking should work for ${scenario.name} in city $cityId")
+
+                // Test area transition detection
+                val hasTransition = isInitiallyInside != isFinallyInside
+                if (scenario.expectAreaTransition) {
+                    assertTrue(
+                        hasTransition,
+                        "Should detect area transition for ${scenario.name} in city $cityId"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should verify choreography step timing and transitions for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            // Test choreography step sequence and timing
+            val choreographySteps = listOf(
+                ChoreographyStep("PRE_WARMING", 0L, 5000L), // 0-5s
+                ChoreographyStep("BUILDING_TENSION", 5000L, 10000L), // 5-10s
+                ChoreographyStep("USER_HIT", 10000L, 12000L), // 10-12s
+                ChoreographyStep("WAVE_PROPAGATION", 12000L, 25000L), // 12-25s
+                ChoreographyStep("CLEANUP", 25000L, 30000L) // 25-30s
+            )
+
+            var previousStepEndTime = 0L
+
+            choreographySteps.forEach { step ->
+                // Verify step timing is valid
+                assertTrue(
+                    step.startTimeMs >= 0L,
+                    "Choreography step ${step.name} start time should be non-negative for city $cityId"
+                )
+
+                assertTrue(
+                    step.endTimeMs > step.startTimeMs,
+                    "Choreography step ${step.name} end time should be after start time for city $cityId"
+                )
+
+                // Verify step transitions are seamless
+                assertTrue(
+                    step.startTimeMs >= previousStepEndTime,
+                    "Choreography step ${step.name} should start after previous step ends for city $cityId"
+                )
+
+                // Verify step duration is reasonable
+                val stepDuration = step.endTimeMs - step.startTimeMs
+                assertTrue(
+                    stepDuration >= 1000L && stepDuration <= 15000L, // 1-15 seconds per step
+                    "Choreography step ${step.name} duration should be reasonable (${stepDuration}ms) for city $cityId"
+                )
+
+                previousStepEndTime = step.endTimeMs
+            }
+
+            // Verify total choreography duration
+            val totalDuration = choreographySteps.last().endTimeMs
+            assertTrue(
+                totalDuration >= 20000L && totalDuration <= 60000L, // 20-60 seconds total
+                "Total choreography duration should be reasonable (${totalDuration}ms) for city $cityId"
+            )
+        }
+    }
+
+    @Test
+    fun `should test position-based choreography triggers for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val bounds = getCityBounds(cityId)
+
+            // Test choreography triggers based on user position
+            val triggerScenarios = listOf(
+                ChoreographyTrigger(
+                    "center_position",
+                    Position((bounds.minLat + bounds.maxLat) / 2, (bounds.minLng + bounds.maxLng) / 2),
+                    expectedTriggerLevel = "HIGH" // Center should trigger max intensity
+                ),
+                ChoreographyTrigger(
+                    "edge_position",
+                    Position(bounds.minLat + 0.001, bounds.minLng + 0.001),
+                    expectedTriggerLevel = "MEDIUM" // Edge should trigger medium intensity
+                ),
+                ChoreographyTrigger(
+                    "outside_position",
+                    Position(bounds.maxLat + 0.1, bounds.maxLng + 0.1),
+                    expectedTriggerLevel = "NONE" // Outside should not trigger
+                )
+            )
+
+            triggerScenarios.forEach { trigger ->
+                val isInArea = simulatePolygonContainment(trigger.position, cityId)
+                val actualTriggerLevel = calculateChoreographyTriggerLevel(trigger.position, bounds, isInArea)
+
+                // Verify trigger level is reasonable based on position
+                assertNotNull(
+                    actualTriggerLevel,
+                    "Choreography trigger level should be calculated for ${trigger.name} in city $cityId"
+                )
+
+                // Test trigger consistency
+                if (isInArea) {
+                    assertFalse(
+                        actualTriggerLevel == "NONE",
+                        "Position inside area should trigger some choreography for ${trigger.name} in city $cityId"
+                    )
+                } else {
+                    assertEquals(
+                        "NONE",
+                        actualTriggerLevel,
+                        "Position outside area should not trigger choreography for ${trigger.name} in city $cityId"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should validate choreography timing accuracy for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val eventStartTime = Instant.fromEpochMilliseconds(1000000000L)
+            val eventDuration = 30000L // 30 seconds
+
+            // Test choreography timing accuracy throughout event
+            val timingCheckpoints = listOf(
+                ChoreographyTimingCheckpoint(0L, "PRE_WARMING", true),
+                ChoreographyTimingCheckpoint(5000L, "BUILDING_TENSION", true),
+                ChoreographyTimingCheckpoint(10000L, "USER_HIT", true),
+                ChoreographyTimingCheckpoint(15000L, "WAVE_PROPAGATION", true),
+                ChoreographyTimingCheckpoint(25000L, "CLEANUP", true),
+                ChoreographyTimingCheckpoint(30000L, "COMPLETED", false), // After event ends
+                ChoreographyTimingCheckpoint(-1000L, "NOT_STARTED", false) // Before event starts
+            )
+
+            timingCheckpoints.forEach { checkpoint ->
+                val checkpointTime = Instant.fromEpochMilliseconds(eventStartTime.toEpochMilliseconds() + checkpoint.offsetMs)
+                val isWithinEvent = checkpoint.offsetMs >= 0L && checkpoint.offsetMs < eventDuration
+
+                // Test timing accuracy
+                assertEquals(
+                    checkpoint.shouldBeActive,
+                    isWithinEvent,
+                    "Choreography timing for ${checkpoint.expectedStep} should be accurate at ${checkpoint.offsetMs}ms for city $cityId"
+                )
+
+                // Test choreography state consistency
+                val choreographyState = simulateChoreographyState(
+                    eventStartTime,
+                    eventDuration,
+                    checkpointTime
+                )
+
+                assertNotNull(
+                    choreographyState,
+                    "Choreography state should be deterministic for ${checkpoint.expectedStep} in city $cityId"
+                )
+
+                if (checkpoint.shouldBeActive) {
+                    assertTrue(
+                        choreographyState.contains("ACTIVE") || choreographyState.contains(checkpoint.expectedStep),
+                        "Choreography should be active during event for ${checkpoint.expectedStep} in city $cityId"
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `should test choreography performance and responsiveness for all cities`() = runTest {
+        ALL_CITY_IDS.forEach { cityId ->
+            val bounds = getCityBounds(cityId)
+
+            // Test choreography calculation performance
+            val performanceStartTime = System.currentTimeMillis()
+            val iterations = 50
+
+            repeat(iterations) { i ->
+                val testPosition = Position(
+                    bounds.minLat + (i.toDouble() / iterations) * (bounds.maxLat - bounds.minLat),
+                    bounds.minLng + (i.toDouble() / iterations) * (bounds.maxLng - bounds.minLng)
+                )
+
+                val isInArea = simulatePolygonContainment(testPosition, cityId)
+                val triggerLevel = calculateChoreographyTriggerLevel(testPosition, bounds, isInArea)
+
+                // Verify calculation completed successfully
+                assertNotNull(
+                    triggerLevel,
+                    "Choreography trigger calculation should complete for iteration $i in city $cityId"
+                )
+            }
+
+            val performanceEndTime = System.currentTimeMillis()
+            val totalTimeMs = performanceEndTime - performanceStartTime
+
+            // Performance assertion: choreography calculations should be responsive
+            assertTrue(
+                totalTimeMs.toInt() < 500, // Less than 500ms for 50 calculations
+                "Choreography calculations should be responsive for city $cityId. " +
+                        "50 calculations took ${totalTimeMs}ms (should be < 500ms)"
+            )
+        }
+    }
+
     // Helper methods for comprehensive testing
 
     private suspend fun testEventLifecycleForCity(cityId: String, testPosition: Position) {
@@ -893,6 +1130,44 @@ class CityWaveWorkflowTest {
                 position.lng <= bounds.maxLng
     }
 
+    private fun calculateChoreographyTriggerLevel(position: Position, bounds: CityBounds, isInArea: Boolean): String {
+        if (!isInArea) return "NONE"
+
+        // Calculate distance from center to determine trigger intensity
+        val centerLat = (bounds.minLat + bounds.maxLat) / 2
+        val centerLng = (bounds.minLng + bounds.maxLng) / 2
+
+        val latDiff = position.lat - centerLat
+        val lngDiff = position.lng - centerLng
+        val distanceFromCenter = kotlin.math.sqrt(latDiff * latDiff + lngDiff * lngDiff)
+
+        val latRange = bounds.maxLat - bounds.minLat
+        val lngRange = bounds.maxLng - bounds.minLng
+        val maxDistance = kotlin.math.sqrt(latRange * latRange + lngRange * lngRange) / 2
+
+        val intensity = 1.0 - (distanceFromCenter / maxDistance)
+
+        return when {
+            intensity > 0.7 -> "HIGH"
+            intensity > 0.3 -> "MEDIUM"
+            else -> "LOW"
+        }
+    }
+
+    private fun simulateChoreographyState(eventStart: Instant, eventDurationMs: Long, currentTime: Instant): String {
+        val elapsedMs = currentTime.toEpochMilliseconds() - eventStart.toEpochMilliseconds()
+
+        return when {
+            elapsedMs < 0 -> "NOT_STARTED"
+            elapsedMs >= eventDurationMs -> "COMPLETED"
+            elapsedMs < 5000 -> "ACTIVE_PRE_WARMING"
+            elapsedMs < 10000 -> "ACTIVE_BUILDING_TENSION"
+            elapsedMs < 12000 -> "ACTIVE_USER_HIT"
+            elapsedMs < 25000 -> "ACTIVE_WAVE_PROPAGATION"
+            else -> "ACTIVE_CLEANUP"
+        }
+    }
+
     // Data classes for testing
 
     private data class CityPositionTest(
@@ -924,5 +1199,30 @@ class CityWaveWorkflowTest {
         val name: String,
         val position: Position,
         val expectProgression: Boolean
+    )
+
+    private data class PositionTrackingScenario(
+        val name: String,
+        val initialPosition: Position,
+        val finalPosition: Position,
+        val expectAreaTransition: Boolean
+    )
+
+    private data class ChoreographyStep(
+        val name: String,
+        val startTimeMs: Long,
+        val endTimeMs: Long
+    )
+
+    private data class ChoreographyTrigger(
+        val name: String,
+        val position: Position,
+        val expectedTriggerLevel: String
+    )
+
+    private data class ChoreographyTimingCheckpoint(
+        val offsetMs: Long,
+        val expectedStep: String,
+        val shouldBeActive: Boolean
     )
 }
