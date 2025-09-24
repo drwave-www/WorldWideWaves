@@ -198,11 +198,11 @@ class CityWaveWorkflowTest(private val cityId: String) {
 - [x] **Commit**: When sound system works across platforms
 
 #### Step 2.1.6: Wave Polygon Relevancy Testing
-- [ ] Test wave polygon calculations for accuracy
-- [ ] Verify polygon splitting and merging logic
-- [ ] Test polygon simplification algorithms
-- [ ] **Tests**: Add geometric accuracy tests with known coordinates
-- [ ] **Commit**: When polygon calculations are verified
+- [x] Test wave polygon calculations for accuracy
+- [x] Verify polygon splitting and merging logic
+- [x] Test polygon simplification algorithms
+- [x] **Tests**: Add geometric accuracy tests with known coordinates
+- [x] **Commit**: When polygon calculations are verified
 
 #### Step 2.1.7: Date/Time and Lifecycle Testing
 - [x] Test event scheduling and timing accuracy
@@ -394,7 +394,7 @@ object CityMapRegistry {
 ## 📊 Progress Tracking
 
 **Phase 1**: ✅ Completed (WWWEventObserver decomposition & ViewModel architecture complete)
-**Phase 2**: 🟡 Significantly Advanced (Phases 2.1.1-2.1.5 & 2.1.7 completed, comprehensive wave testing, choreography integration, and sound system testing implemented)
+**Phase 2**: 🟡 Significantly Advanced (Phases 2.1.1-2.1.7 completed, comprehensive wave testing, choreography integration, sound system testing, and polygon relevancy testing implemented)
 **Phase 3**: ✅ Completed (Phase 3.1 Temporary code cleanup completed)
 **Phase 4**: ⏳ Not Started
 
