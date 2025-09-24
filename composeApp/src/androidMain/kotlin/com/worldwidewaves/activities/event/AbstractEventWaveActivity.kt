@@ -25,12 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import com.worldwidewaves.activities.utils.WaveProgressionObserver
+import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
-import com.worldwidewaves.shared.utils.WaveProgressionObserver
 import org.koin.android.ext.android.inject
 
 /**
@@ -60,7 +61,7 @@ abstract class AbstractEventWaveActivity(
 
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
-    private var _eventMap: AbstractEventMap<*>? = null
+    private var _eventMap: AndroidEventMap? = null
 
     // ------------------------------------------------------------------------
 
@@ -81,10 +82,12 @@ abstract class AbstractEventWaveActivity(
     // ------------------------------------------------------------------------
 
     @Composable
-    protected fun <T> ObserveEventMapProgression(
+    protected fun ObserveEventMapProgression(
         event: IWWWEvent,
-        eventMap: AbstractEventMap<T>,
+        eventMap: AndroidEventMap,
     ) {
+        val context = LocalContext.current
+
         // Restart observation whenever simulation context changes
         val simulationChanged by platform.simulationChanged.collectAsState()
         val simMode by platform.simulationModeEnabled.collectAsState()
@@ -96,6 +99,7 @@ abstract class AbstractEventWaveActivity(
             if (waveProgressionObserver == null) {
                 waveProgressionObserver =
                     WaveProgressionObserver(
+                        context = context,
                         scope = appScope,
                         eventMap = eventMap,
                         event = event,

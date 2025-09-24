@@ -10,6 +10,8 @@ package com.worldwidewaves.shared.viewmodels
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
+import com.worldwidewaves.shared.utils.WWWLogger
+import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.repository.EventsRepository
@@ -18,8 +20,6 @@ import com.worldwidewaves.shared.domain.usecases.EventFilterCriteria
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.BaseViewModel
-import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers

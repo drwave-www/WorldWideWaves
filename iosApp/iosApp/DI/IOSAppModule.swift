@@ -26,60 +26,61 @@ import Shared
 
 /// Manages dependency injection for iOS-specific components
 class IOSAppModule {
+    
     /// Singleton instance of the module
     static let shared = IOSAppModule()
-
+    
     private init() {
         // Private initializer to enforce singleton pattern
     }
-
+    
     /// Initialize the iOS-specific dependencies and register them with Koin
     func initialize() {
         // Ensure Koin is initialized from the shared module first
         if KoinKt.getKoin() == nil {
             HelperKt.doInitKoin()
         }
-
+        
         // Register iOS-specific dependencies with Koin
         registerIOSViewModels()
     }
-
+    
     /// Register iOS-specific view models with Koin
     private func registerIOSViewModels() {
         let koin = KoinKt.getKoin()
-
+        
         // Register EventsListViewModel
-        koin.registerFactory { koinInstance -> AnyObject in
+        koin.registerFactory { (koinInstance) -> AnyObject in
             let wwwEvents = koinInstance.get(objCClass: WWWEvents.self) as! WWWEvents
             return EventsListViewModel(wwwEvents: wwwEvents)
         }
-
+        
         // Register AboutViewModel
-        koin.registerFactory { _ -> AnyObject in
-            AboutViewModel()
+        koin.registerFactory { (_) -> AnyObject in
+            return AboutViewModel()
         }
-
+        
         // Register SettingsViewModel
-        koin.registerFactory { _ -> AnyObject in
-            SettingsViewModel()
+        koin.registerFactory { (_) -> AnyObject in
+            return SettingsViewModel()
         }
     }
-
+    
     // MARK: - Convenience Accessors
-
+    
     /// Get the EventsListViewModel instance
     func getEventsListViewModel() -> EventsListViewModel {
-        KoinKt.getKoin().get(objCClass: EventsListViewModel.self) as! EventsListViewModel
+        return KoinKt.getKoin().get(objCClass: EventsListViewModel.self) as! EventsListViewModel
     }
-
+    
     /// Get the AboutViewModel instance
     func getAboutViewModel() -> AboutViewModel {
-        KoinKt.getKoin().get(objCClass: AboutViewModel.self) as! AboutViewModel
+        return KoinKt.getKoin().get(objCClass: AboutViewModel.self) as! AboutViewModel
     }
-
+    
     /// Get the SettingsViewModel instance
     func getSettingsViewModel() -> SettingsViewModel {
-        KoinKt.getKoin().get(objCClass: SettingsViewModel.self) as! SettingsViewModel
+        return KoinKt.getKoin().get(objCClass: SettingsViewModel.self) as! SettingsViewModel
     }
 }
 
@@ -89,8 +90,8 @@ class IOSAppModule {
 extension Koin {
     /// Register a factory with Koin
     func registerFactory<T: AnyObject>(_ factory: @escaping (Koin) -> T) {
-        _koin.registerFactory(createdAtStart: false, qualifier: nil) { koin in
+        _koin.registerFactory(createdAtStart: false, qualifier: nil, definition: { koin in
             factory(koin as! Koin)
-        }
+        })
     }
 }

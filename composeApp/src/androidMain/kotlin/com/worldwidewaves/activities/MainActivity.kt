@@ -27,34 +27,67 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
+import com.worldwidewaves.compose.common.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
+import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.components.SplashScreen
-import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
-import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
+import com.worldwidewaves.shared.generated.resources.about_icon
+import com.worldwidewaves.shared.generated.resources.about_icon_selected
+import com.worldwidewaves.shared.generated.resources.background
+import com.worldwidewaves.shared.generated.resources.debug_icon
+import com.worldwidewaves.shared.generated.resources.debug_icon_selected
+import com.worldwidewaves.shared.generated.resources.waves_icon
+import com.worldwidewaves.shared.generated.resources.waves_icon_selected
+import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.theme.AppTheme
+import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
+import com.worldwidewaves.shared.generated.resources.Res as ShRes
+
+// ----------------------------
+
+private fun getTabInfo(includeDebug: Boolean) =
+    if (includeDebug) {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+            Pair(ShRes.drawable.debug_icon, ShRes.drawable.debug_icon_selected),
+        )
+    } else {
+        listOf(
+            Pair(ShRes.drawable.waves_icon, ShRes.drawable.waves_icon_selected),
+            Pair(ShRes.drawable.about_icon, ShRes.drawable.about_icon_selected),
+        )
+    }
 
 // ----------------------------
 
@@ -86,7 +119,7 @@ open class MainActivity : AppCompatActivity() {
         TabManager(
             screens.toList(),
         ) { isSelected, tabIndex, contentDescription ->
-            ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
+            TabBarItem(isSelected, tabIndex, contentDescription, screens.size)
         }
     }
 
@@ -146,7 +179,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            WorldWideWavesTheme {
+            AppTheme {
                 Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     // Box to stack main content and simulation-mode overlay
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -189,6 +222,21 @@ open class MainActivity : AppCompatActivity() {
 
     // ----------------------------
 
+    @Composable
+    private fun TabBarItem(
+        isSelected: Boolean,
+        tabIndex: Int,
+        contentDescription: String?,
+        totalTabs: Int,
+    ) {
+        val tabInfo = getTabInfo(totalTabs > 2)
+        Image(
+            painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
+            contentDescription = contentDescription,
+            modifier = Modifier.height(TabBar.EXT_HEIGHT.dp),
+            contentScale = ContentScale.Fit,
+        )
+    }
 
     // -------------------------------------------------
     // Programmatic Splash UI (mirrors previous design)
@@ -196,6 +244,21 @@ open class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun ProgrammaticSplashScreen() {
-        SplashScreen()
+        Box {
+            Image(
+                painter = painterResource(ShRes.drawable.background),
+                contentDescription = stringResource(MokoRes.strings.background_description),
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Image(
+                painter = painterResource(ShRes.drawable.www_logo_transparent),
+                contentDescription = stringResource(MokoRes.strings.logo_description),
+                modifier =
+                    Modifier
+                        .align(androidx.compose.ui.Alignment.BottomCenter)
+                        .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // original SplashActivity padding
+            )
+        }
     }
 }

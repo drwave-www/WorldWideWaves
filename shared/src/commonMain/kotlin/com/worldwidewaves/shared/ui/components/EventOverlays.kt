@@ -23,13 +23,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,22 +34,16 @@ import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Common
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Event
-import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import dev.icerock.moko.resources.compose.stringResource
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import kotlin.time.ExperimentalTime
 
 /**
  * Shared cross-platform event overlay components.
  * These components provide visual indicators for event states.
  */
-
 
 /**
  * Top-right banner indicating SOON / RUNNING event states.
@@ -64,18 +54,12 @@ fun EventOverlaySoonOrRunning(
     modifier: Modifier = Modifier,
 ) {
     if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
-        val backgroundColor =
+        val (backgroundColor, textId) =
             if (eventStatus == Status.SOON) {
-                MaterialTheme.colorScheme.secondary
+                MaterialTheme.colorScheme.secondary to MokoRes.strings.event_soon
             } else {
-                MaterialTheme.colorScheme.tertiary
+                MaterialTheme.colorScheme.tertiary to MokoRes.strings.event_running
             }
-
-        val textResource = if (eventStatus == Status.SOON) {
-            MokoRes.strings.event_soon
-        } else {
-            MokoRes.strings.event_running
-        }
 
         Box(
             modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
@@ -91,7 +75,7 @@ fun EventOverlaySoonOrRunning(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = stringResource(textResource),
+                    text = stringResource(textId),
                     style = TextStyle(
                         fontSize = Common.SOONRUNNING_FONTSIZE.sp,
                         fontWeight = FontWeight.Normal,
@@ -123,72 +107,6 @@ fun EventOverlayDone(
                 contentDescription = stringResource(MokoRes.strings.event_done),
                 modifier = Modifier.width(Common.DONE_IMAGE_WIDTH.dp),
             )
-        }
-    }
-}
-
-/**
- * Event overlay date component - EXACT copy of historical implementation.
- * Positions date in center normally, at bottom when event is done.
- */
-@Composable
-fun EventOverlayDate(
-    eventStatus: Status?,
-    eventDate: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
-        contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
-    ) {
-        // EXACT historical implementation using shared theme functions
-        val textStyle = com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
-        Text(
-            text = eventDate,
-            style = textStyle.copy(color = com.worldwidewaves.shared.ui.theme.sharedExtendedLight.quinary.color),
-        )
-        Text(
-            text = eventDate,
-            style = textStyle.copy(
-                color = MaterialTheme.colorScheme.primary,
-                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
-                    miter = Event.DATE_MITER,
-                    width = Event.DATE_STROKE,
-                    join = androidx.compose.ui.graphics.StrokeJoin.Miter,
-                ),
-            ),
-        )
-    }
-}
-
-/**
- * Complete shared event overlay combining location image with status overlays.
- * This is the main overlay composable that includes the background image and all status indicators.
- */
-@OptIn(ExperimentalTime::class)
-@Composable
-fun EventOverlay(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier,
-) {
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val localizedDate = remember(event.id) {
-        DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
-    }
-
-    Box(modifier = modifier) {
-        Image(
-            modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-            painter = painterResource(event.getLocationImage() as DrawableResource),
-            contentDescription = stringResource(event.getLocation()),
-        )
-        Box(modifier = Modifier.matchParentSize()) {
-            EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDone(eventStatus)
-            EventOverlayDate(eventStatus, localizedDate)
         }
     }
 }

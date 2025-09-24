@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.domain.observation.PositionObserver
 import com.worldwidewaves.shared.domain.progression.WaveProgressionTracker
@@ -253,7 +254,7 @@ class WWWEventObserver(
     // Cache last emitted values for throttling
     private var lastEmittedProgression: Double = -1.0
     private var lastEmittedPositionRatio: Double = -1.0
-    private var lastEmittedTimeBeforeHit: Duration = INFINITE
+    private var lastEmittedTimeBeforeHit: Duration = Duration.INFINITE
 
     private var unifiedObservationJob: Job? = null
 
@@ -299,6 +300,10 @@ class WWWEventObserver(
                             .catch { e ->
                                 Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
                             }.onEach { observation ->
+                                Log.v(
+                                    "WWWEventObserver",
+                                    "Unified observation update: progression=${observation.progression}, status=${observation.status}",
+                                )
                                 updateStates(observation.progression, observation.status)
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -307,6 +312,10 @@ class WWWEventObserver(
                         positionObserver
                             .observePositionForEvent(event)
                             .onEach { observation ->
+                                Log.v(
+                                    "WWWEventObserver",
+                                    "Position observation for event ${event.id}: position=${observation.position}, inArea=${observation.isInArea}",
+                                )
                                 _userIsInArea.updateIfChanged(observation.isInArea)
                             }.launchIn(coroutineScopeProvider.scopeDefault())
 
@@ -411,6 +420,8 @@ class WWWEventObserver(
                     val status = event.getStatus()
                     val eventObservation = EventObservation(progression, status)
                     send(eventObservation)
+
+                    Log.v("WWWEventObserver", "Emitted observation for event ${event.id}: progression=$progression, status=$status")
                 }
             } catch (e: Exception) {
                 Log.e("periodicObservationFlow", "Error in periodic observation flow: $e")
@@ -465,6 +476,8 @@ class WWWEventObserver(
         progression: Double,
         status: Status,
     ) {
+        Log.v("WWWEventObserver", "updateStates called: progression=$progression, status=$status, eventId=${event.id}")
+
         // User in area - ensure immediate detection alongside PositionObserver
         updateAreaDetection()
         val userIsInArea = _userIsInArea.value
@@ -524,6 +537,13 @@ class WWWEventObserver(
             updateProgressionIfSignificant(progression)
             _eventStatus.updateIfChanged(status)
         }
+
+        // Log final state for debugging
+        Log.v(
+            "WWWEventObserver",
+            "State updated - userIsInArea=${_userIsInArea.value}, " +
+                "progression=${_progression.value}, status=${_eventStatus.value}",
+        )
     }
 
     /**
@@ -580,6 +600,57 @@ class WWWEventObserver(
     }
 
     /**
+     * Validates the current state consistency for debugging purposes.
+     * This method helps identify state management issues during development.
+     */
+    @VisibleForTesting
+    suspend fun validateStateConsistency(): List<String> {
+        val issues = mutableListOf<String>()
+
+        try {
+            // Check progression bounds
+            val progression = _progression.value
+            if (progression < 0.0 || progression > 100.0) {
+                issues.add("Progression out of bounds: $progression (should be 0-100)")
+            }
+
+            // Check user position vs area consistency
+            val userPosition = positionManager.getCurrentPosition()
+            val observerUserInArea = _userIsInArea.value
+
+            if (userPosition != null) {
+                val actualUserInArea =
+                    try {
+                        waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                    } catch (e: Exception) {
+                        Log.e("WWWEventObserver", "Error validating user in area: $e")
+                        false
+                    }
+                if (actualUserInArea != observerUserInArea) {
+                    issues.add("userIsInArea inconsistency: observer=$observerUserInArea, actual=$actualUserInArea")
+                }
+            } else if (observerUserInArea) {
+                issues.add("userIsInArea=true but no user position available")
+            }
+
+            // Check status consistency
+            val observerStatus = _eventStatus.value
+            val actualStatus = event.getStatus()
+            if (observerStatus != actualStatus) {
+                issues.add("Status inconsistency: observer=$observerStatus, actual=$actualStatus")
+            }
+        } catch (e: Exception) {
+            issues.add("Error during state validation: ${e.message}")
+        }
+
+        if (issues.isNotEmpty()) {
+            Log.w("WWWEventObserver", "State validation issues for event ${event.id}: ${issues.joinToString("; ")}")
+        }
+
+        return issues
+    }
+
+    /**
      * Smart throttling functions to reduce unnecessary state updates and improve performance.
      * These functions only emit updates when changes exceed predefined thresholds.
      */
@@ -619,7 +690,7 @@ class WWWEventObserver(
      */
     private fun updateTimeBeforeHitIfSignificant(newTime: Duration) {
         // Handle infinite durations to prevent arithmetic errors
-        if (newTime == INFINITE || lastEmittedTimeBeforeHit == INFINITE) {
+        if (newTime == Duration.INFINITE || lastEmittedTimeBeforeHit == Duration.INFINITE) {
             if (newTime != lastEmittedTimeBeforeHit) {
                 _timeBeforeHit.updateIfChanged(newTime)
                 lastEmittedTimeBeforeHit = newTime

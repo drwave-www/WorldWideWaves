@@ -24,7 +24,7 @@ package com.worldwidewaves.testing.real
 import android.app.Application
 import android.content.Context
 import androidx.test.runner.AndroidJUnitRunner
-import com.worldwidewaves.shared.testing.PerformanceMonitor
+import com.worldwidewaves.shared.monitoring.PerformanceMonitor
 
 /**
  * Custom test runner for real integration tests.

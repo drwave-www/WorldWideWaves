@@ -25,43 +25,66 @@ import Combine
 
 // iOS ViewModel wrapper for shared EventsViewModel
 class EventsListViewModel: ObservableObject {
-    @Published var events: [WWWEvent] = []
+    @Published var events: [any IWWWEvent] = []
     @Published var isLoading: Bool = false
     @Published var hasLoadingError: Bool = false
+    @Published var hasFavorites: Bool = false
 
-    private let wwwEvents: WWWEvents
+    private let sharedViewModel: EventsViewModel
+    private var cancellables: Set<AnyCancellable> = []
 
-    init(wwwEvents: WWWEvents = WWWEvents()) {
-        self.wwwEvents = wwwEvents
-        loadEvents()
-    }
-
-    func loadEvents() {
-        isLoading = true
-        hasLoadingError = false
-
-        // Get events from shared WWWEvents
-        DispatchQueue.main.async {
-            self.events = self.wwwEvents.list().compactMap { $0 as? WWWEvent }
-            self.isLoading = false
+    init() {
+        // Initialize Koin DI if not already done
+        if KoinKt.getKoin() == nil {
+            HelperKt.doInitKoin()
         }
+
+        // Initialize shared EventsViewModel with DI
+        self.sharedViewModel = DIContainer.shared.eventsViewModel
+        setupStateObservers()
     }
 
-    func refreshEvents() {
-        wwwEvents.loadEvents {
+    private func setupStateObservers() {
+        // Observe shared ViewModel StateFlows using iOS reactive bridge
+        sharedViewModel.events.toIOSObservable().sink { [weak self] events in
             DispatchQueue.main.async {
-                self.events = self.wwwEvents.list().compactMap { $0 as? WWWEvent }
-                self.isLoading = false
+                self?.events = events
             }
-        }
+        }.store(in: &cancellables)
+
+        sharedViewModel.isLoading.toIOSObservable().sink { [weak self] loading in
+            DispatchQueue.main.async {
+                self?.isLoading = loading
+            }
+        }.store(in: &cancellables)
+
+        sharedViewModel.hasLoadingError.toIOSObservable().sink { [weak self] error in
+            DispatchQueue.main.async {
+                self?.hasLoadingError = error
+            }
+        }.store(in: &cancellables)
+
+        sharedViewModel.hasFavorites.toIOSObservable().sink { [weak self] favorites in
+            DispatchQueue.main.async {
+                self?.hasFavorites = favorites
+            }
+        }.store(in: &cancellables)
+    }
+
+    func filterEvents(onlyFavorites: Bool = false, onlyDownloaded: Bool = false) {
+        sharedViewModel.filterEvents(onlyFavorites: onlyFavorites, onlyDownloaded: onlyDownloaded)
+    }
+
+    deinit {
+        cancellables.removeAll()
     }
 }
 
 struct EventsListView: View {
     @ObservedObject var viewModel: EventsListViewModel
-    @State private var selectedEvent: WWWEvent?
+    @State private var selectedEvent: (any IWWWEvent)? = nil
     @State private var navigateToEventDetail = false
-
+    
     var body: some View {
         NavigationView {
             if viewModel.isLoading && viewModel.events.isEmpty {
@@ -102,8 +125,9 @@ struct EventsListView: View {
                 .background(
                     NavigationLink(
                         destination: EventDetailView(event: selectedEvent),
-                        isActive: $navigateToEventDetail
-                    ) { EmptyView() }
+                        isActive: $navigateToEventDetail,
+                        label: { EmptyView() }
+                    )
                     .hidden()
                 )
             }
@@ -115,44 +139,67 @@ struct EventsListView: View {
 
 // Row item for each event in the list
 struct EventRow: View {
-    let event: WWWEvent
+    let event: any IWWWEvent
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(event.name)
+            // Event title (using ID for now, will be enhanced)
+            Text(event.id.replacingOccurrences(of: "_", with: " ").capitalized)
                 .font(.headline)
 
-            Text(event.location)
+            // Event location/description placeholder
+            Text("Wave event in \(event.id.replacingOccurrences(of: "_", with: " "))")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
 
             HStack {
-                Text("Date: \(formattedDate(event.date))")
-                    .font(.caption)
-                Spacer()
-                Text("Status: \(event.status.name)")
+                // Status indicator
+                Text("Status: \(statusText(event.status))")
                     .font(.caption)
                     .padding(4)
                     .background(statusColor(event.status))
                     .cornerRadius(4)
+                Spacer()
+
+                // Event type indicator
+                Text("Wave Event")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 8)
     }
 
-    // Helper function to format the date
-    private func formattedDate(_ date: Kotlinx_datetimeLocalDateTime) -> String {
-        "\(date.dayOfMonth)/\(date.monthNumber)/\(date.year) \(date.hour):\(String(format: "%02d", date.minute))"
+    // Helper function to get status text
+    private func statusText(_ status: IWWWEventStatus?) -> String {
+        guard let status = status else { return "Unknown" }
+
+        switch status {
+        case .upcomingValue:
+            return "Upcoming"
+        case .soonValue:
+            return "Soon"
+        case .runningValue:
+            return "Running"
+        case .doneValue:
+            return "Done"
+        default:
+            return "Unknown"
+        }
     }
 
     // Helper function to determine status color
-    private func statusColor(_ status: WWWEventStatus) -> Color {
+    private func statusColor(_ status: IWWWEventStatus?) -> Color {
+        guard let status = status else { return Color.gray.opacity(0.3) }
+
         switch status {
-        case .upcoming:
+        case .upcomingValue:
             return Color.blue.opacity(0.3)
-        case .active:
+        case .soonValue:
+            return Color.orange.opacity(0.3)
+        case .runningValue:
             return Color.green.opacity(0.3)
-        case .completed:
+        case .doneValue:
             return Color.gray.opacity(0.3)
         default:
             return Color.gray.opacity(0.3)
@@ -162,7 +209,7 @@ struct EventRow: View {
 
 // Placeholder for the event detail view
 struct EventDetailView: View {
-    let event: WWWEvent?
+    let event: (any IWWWEvent)?
 
     var body: some View {
         if let event = event {

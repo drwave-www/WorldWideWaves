@@ -30,31 +30,31 @@ class EventViewModel: ObservableObject {
     @Published var countdownString: String = "--:--:--"
     @Published var eventStatus: WWWEventStatus
     @Published var showWaveView: Bool = false
-
+    
     init(event: WWWEvent) {
         self.event = event
         self.eventStatus = event.status
         updateCountdown()
     }
-
+    
     func updateCountdown() {
         // Placeholder for countdown logic
         // Will be implemented to calculate time until event starts
         countdownString = "00:30:00"
     }
-
+    
     func toggleParticipation() {
         isParticipating.toggle()
         // Will implement actual participation logic
     }
-
+    
     func joinWave() {
         showWaveView = true
         // Will implement wave joining logic
     }
-
+    
     func formattedDate(_ date: Kotlinx_datetimeLocalDateTime) -> String {
-        "\(date.dayOfMonth)/\(date.monthNumber)/\(date.year) \(date.hour):\(String(format: "%02d", date.minute))"
+        return "\(date.dayOfMonth)/\(date.monthNumber)/\(date.year) \(date.hour):\(String(format: "%02d", date.minute))"
     }
 }
 
@@ -62,11 +62,11 @@ struct EventView: View {
     @ObservedObject var viewModel: EventViewModel
     @State private var showFullMap: Bool = false
     @Environment(\.presentationMode) var presentationMode
-
+    
     init(event: WWWEvent) {
         self.viewModel = EventViewModel(event: event)
     }
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -75,17 +75,17 @@ struct EventView: View {
                     Text(viewModel.event.name)
                         .font(.largeTitle)
                         .fontWeight(.bold)
-
+                    
                     Text(viewModel.event.location)
                         .font(.headline)
                         .foregroundColor(.secondary)
-
+                    
                     HStack {
                         Text("Date: \(viewModel.formattedDate(viewModel.event.date))")
                             .font(.subheadline)
-
+                        
                         Spacer()
-
+                        
                         Text(viewModel.event.status.name)
                             .font(.subheadline)
                             .padding(6)
@@ -94,7 +94,7 @@ struct EventView: View {
                     }
                 }
                 .padding()
-
+                
                 // Map preview (tappable to open full map)
                 ZStack(alignment: .bottomTrailing) {
                     // Placeholder map view
@@ -108,7 +108,7 @@ struct EventView: View {
                         .onTapGesture {
                             showFullMap = true
                         }
-
+                    
                     Button(action: {
                         showFullMap = true
                     }) {
@@ -121,12 +121,12 @@ struct EventView: View {
                     }
                     .padding(12)
                 }
-
+                
                 // Countdown section
                 VStack(spacing: 8) {
                     Text("Event starts in:")
                         .font(.headline)
-
+                    
                     Text(viewModel.countdownString)
                         .font(.system(size: 36, weight: .bold, design: .monospaced))
                         .foregroundColor(.blue)
@@ -136,18 +136,18 @@ struct EventView: View {
                 .background(Color.blue.opacity(0.1))
                 .cornerRadius(12)
                 .padding(.horizontal)
-
+                
                 // Event description
                 VStack(alignment: .leading, spacing: 8) {
                     Text("About this event")
                         .font(.headline)
-
+                    
                     Text(viewModel.event.description_)
                         .font(.body)
                         .foregroundColor(.secondary)
                 }
                 .padding()
-
+                
                 // Participation section
                 VStack(spacing: 16) {
                     if viewModel.isParticipating {
@@ -163,7 +163,7 @@ struct EventView: View {
                                 .cornerRadius(12)
                         }
                         .padding(.horizontal)
-
+                        
                         Button(action: {
                             viewModel.toggleParticipation()
                         }) {
@@ -192,7 +192,7 @@ struct EventView: View {
                     }
                 }
                 .padding(.vertical)
-
+                
                 Spacer(minLength: 40)
             }
         }
@@ -201,17 +201,19 @@ struct EventView: View {
         .background(
             NavigationLink(
                 destination: EventFullMapView(event: viewModel.event),
-                isActive: $showFullMap
-            ) { EmptyView() }
+                isActive: $showFullMap,
+                label: { EmptyView() }
+            )
         )
         .background(
             NavigationLink(
                 destination: WaveView(event: viewModel.event),
-                isActive: $viewModel.showWaveView
-            ) { EmptyView() }
+                isActive: $viewModel.showWaveView,
+                label: { EmptyView() }
+            )
         )
     }
-
+    
     // Helper function to determine status color
     private func statusColor(_ status: WWWEventStatus) -> Color {
         switch status {
@@ -230,7 +232,7 @@ struct EventView: View {
 // Placeholder for EventFullMapView
 struct EventFullMapView: View {
     let event: WWWEvent
-
+    
     var body: some View {
         Text("Full Map View - To be implemented")
             .navigationTitle("Event Map")
@@ -240,7 +242,7 @@ struct EventFullMapView: View {
 // Placeholder for WaveView
 struct WaveView: View {
     let event: WWWEvent
-
+    
     var body: some View {
         Text("Wave View - To be implemented")
             .navigationTitle("Wave")
@@ -271,7 +273,7 @@ struct EventView_Previews: PreviewProvider {
             participants: 1500,
             waveRadius: 2.5
         )
-
+        
         NavigationView {
             EventView(event: event)
         }
