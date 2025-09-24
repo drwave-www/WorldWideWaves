@@ -82,9 +82,9 @@ class EventsListViewModel: ObservableObject {
 
 struct EventsListView: View {
     @ObservedObject var viewModel: EventsListViewModel
-    @State private var selectedEvent: (any IWWWEvent)? = nil
+    @State private var selectedEvent: (any IWWWEvent)?
     @State private var navigateToEventDetail = false
-    
+
     var body: some View {
         NavigationView {
             if viewModel.isLoading && viewModel.events.isEmpty {
@@ -125,9 +125,8 @@ struct EventsListView: View {
                 .background(
                     NavigationLink(
                         destination: EventDetailView(event: selectedEvent),
-                        isActive: $navigateToEventDetail,
-                        label: { EmptyView() }
-                    )
+                        isActive: $navigateToEventDetail
+                    )                        { EmptyView() }
                     .hidden()
                 )
             }
