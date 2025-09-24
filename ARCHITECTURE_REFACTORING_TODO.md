@@ -147,11 +147,11 @@ class GetSortedEventsUseCase(private val repository: EventRepository) {
 **Target**: Test complete wave lifecycle for all supported cities
 
 #### Step 2.1.1: Dynamic City Support Testing
-- [ ] Create `CityWaveWorkflowTest` test suite
-- [ ] Dynamically discover all available city maps (39+ modules)
-- [ ] Test map loading for each city independently
-- [ ] **Tests**: Verify each city map loads without errors
-- [ ] **Commit**: When city discovery and loading tests pass
+- [x] Create `CityWaveWorkflowTest` test suite
+- [x] Dynamically discover all available city maps (41 modules)
+- [x] Test map loading for each city independently
+- [x] **Tests**: Verify each city map loads without errors
+- [x] **Commit**: When city discovery and loading tests pass
 
 ```kotlin
 @RunWith(Parameterized::class)
@@ -170,18 +170,18 @@ class CityWaveWorkflowTest(private val cityId: String) {
 ```
 
 #### Step 2.1.2: GeoJSON and Area Determination Testing
-- [ ] Test GeoJSON loading for each city map
-- [ ] Verify area boundary calculations are correct
-- [ ] Test polygon containment checks with edge cases
-- [ ] **Tests**: Add property-based testing for geometric calculations
-- [ ] **Commit**: When GeoJSON processing is thoroughly tested
+- [x] Test GeoJSON loading for each city map
+- [x] Verify area boundary calculations are correct
+- [x] Test polygon containment checks with edge cases
+- [x] **Tests**: Add property-based testing for geometric calculations
+- [x] **Commit**: When GeoJSON processing is thoroughly tested
 
 #### Step 2.1.3: Wave Progression Testing
-- [ ] Test wave progression calculation accuracy
-- [ ] Verify progression monotonicity (never goes backward)
-- [ ] Test edge cases: user at boundary, outside area
-- [ ] **Tests**: Add performance tests for progression calculation
-- [ ] **Commit**: When wave progression is mathematically verified
+- [x] Test wave progression calculation accuracy
+- [x] Verify progression monotonicity (never goes backward)
+- [x] Test edge cases: user at boundary, outside area
+- [x] **Tests**: Add performance tests for progression calculation
+- [x] **Commit**: When wave progression is mathematically verified
 
 #### Step 2.1.4: User Positioning and Choreography Testing
 - [ ] Test user position tracking during wave events
@@ -394,11 +394,11 @@ object CityMapRegistry {
 ## 📊 Progress Tracking
 
 **Phase 1**: ✅ Completed (WWWEventObserver decomposition & ViewModel architecture complete)
-**Phase 2**: 🟡 Partially Complete (Phase 2.1.7 Date/Time testing completed, other phases pending)
+**Phase 2**: 🟡 Significantly Advanced (Phases 2.1.1-2.1.3 & 2.1.7 completed, comprehensive wave testing implemented)
 **Phase 3**: ✅ Completed (Phase 3.1 Temporary code cleanup completed)
 **Phase 4**: ⏳ Not Started
 
-**Overall Progress**: 2/4 Phases Complete, 1 Partially Complete
+**Overall Progress**: 2/4 Phases Complete, 1 Significantly Advanced
 
 ---
 
