@@ -10,7 +10,7 @@ package com.worldwidewaves.viewmodels
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
@@ -78,7 +78,7 @@ class EventsViewModel(
     // Exception handler for coroutines
     private val exceptionHandler =
         CoroutineExceptionHandler { _, throwable ->
-            Log.e(::EventsViewModel.name, "Coroutine error: ${throwable.message}", throwable)
+            WWWLogger.e("EventsViewModel", "Coroutine error: ${throwable.message}", throwable)
             if (throwable !is CancellationException) {
                 _loadingError.value = true
             }
@@ -100,7 +100,7 @@ class EventsViewModel(
             try {
                 // Start loading events through repository
                 eventsRepository.loadEvents { exception ->
-                    Log.e(::EventsViewModel.name, "Error loading events", exception)
+                    WWWLogger.e("EventsViewModel", "Error loading events", exception)
                     _loadingError.value = true
                 }
 
@@ -116,7 +116,7 @@ class EventsViewModel(
                     .onEach { error ->
                         _loadingError.value = error != null
                         error?.let {
-                            Log.e(::EventsViewModel.name, "Repository error: ${it.message}", it)
+                            WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
                         }
                     }.launchIn(viewModelScope)
 
@@ -128,7 +128,7 @@ class EventsViewModel(
                     }.flowOn(Dispatchers.Default)
                     .launchIn(viewModelScope)
             } catch (e: Exception) {
-                Log.e(::EventsViewModel.name, "Error in loadEvents", e)
+                WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
                 _loadingError.value = true
             }
         }
@@ -147,7 +147,7 @@ class EventsViewModel(
         // Start observing all events - multiple events can be active simultaneously
         // The user has a single position that needs to be checked against all event areas
         sortedEvents.forEach { event ->
-            Log.d("EventsViewModel", "Starting observation for event ${event.id}")
+            WWWLogger.d("EventsViewModel", "Starting observation for event ${event.id}")
 
             // Start event observation for all events
             event.observer.startObservation()
@@ -217,7 +217,7 @@ class EventsViewModel(
                         _events.value = filteredEvents
                     }.launchIn(viewModelScope)
             } catch (e: Exception) {
-                Log.e(::EventsViewModel.name, "Error filtering events", e)
+                WWWLogger.e("EventsViewModel", "Error filtering events", e)
                 _loadingError.value = true
             }
         }
