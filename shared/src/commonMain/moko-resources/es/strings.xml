@@ -62,6 +62,8 @@
   <string name="map_error_service_died">El servicio se detuvo inesperadamente. Inténtalo de nuevo.</string>
   <!-- src_hash: e94f01944780237c76880d082fc13daa54cd5a5a -->
   <string name="map_error_access_denied">Acceso denegado.</string>
+  <!-- src_hash: 20169abc596f1c7663a04f37a636b4a4a6ff3554 -->
+  <string name="map_error_account_issue">Problema con la cuenta de Google Play Store. Comprueba tu cuenta y vuelve a intentarlo.</string>
   <!-- src_hash: de0ea141b68593457276ada8959571cc8cbfac5c -->
   <string name="map_error_unknown">Se produjo un error desconocido: %1$d</string>
   <!-- src_hash: 1ea5aba3c50cbe249a0c71f1e91e7a7a30ffd0b7 -->
@@ -176,8 +178,8 @@
   <string name="wave_is_running">¡Haciendo la ola!</string>
   <!-- src_hash: 7b0479107f75d80f08ac267c9f9c355c1dffea7b -->
   <string name="infos_core_1">Lo sabes: si la historia de la Tierra se contara en un libro de 1.000 páginas, la humanidad aparecería solo en el último párrafo de la última página.</string>
-  <!-- src_hash: 8db724b05cca54028aad07906034a58e0e9275b3 -->
-  <string name="infos_core_2">Pero esta breve historia podría terminar antes de lo esperado. Estamos aislados en un universo vasto y desolado. Lo destruimos todo. Somos egoístas. Somos crueles. Somos codiciosos. Somos ciegos. Y buscamos dominar. Pero también somos capaces de empatía, creamos maravillas, somos resilientes, podemos ser altruistas.</string>
+  <!-- src_hash: cdf004ef42570ae357fff9444100ba7683da1779 -->
+  <string name="infos_core_2">Pero esta breve historia podría terminar antes de lo esperado. Estamos aislados en un universo vasto y desolado. Lo destruimos todo. Somos egoístas. Somos crueles. Somos codiciosos. Estamos ciegos. Y buscamos dominar. Pero también somos capaces de empatía, creamos maravillas, somos resilientes, podemos ser altruistas.</string>
   <!-- src_hash: 34400e7447b01833b5c89f9426038435afe574fb -->
   <string name="infos_core_3">Pero tenemos poco tiempo. Hemos avanzado tanto. Podemos construir una alternativa: una comunidad de derechos, de solidaridad, de democracia. Está en nuestras manos.</string>
   <!-- src_hash: 52d2c33854c2582a636678b9a222eb132a9db8f5 -->
