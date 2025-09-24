@@ -176,7 +176,7 @@ class AudioTestActivity : ComponentActivity() {
                 onClick = {
                     scope.launch {
                         isPlaying = true
-                        statusMessage = "🌊 Wave passing through crowd (10 per 100ms)..."
+                        statusMessage = "🌊 Playing full symphony - wave through crowd (10 per 100ms)..."
                         playWaveProgression()
                         statusMessage = "✅ Wave progression completed"
                         isPlaying = false
@@ -347,56 +347,70 @@ class AudioTestActivity : ComponentActivity() {
     }
 
     /**
-     * Simulate a wave passing through a crowd - full MIDI with realistic timing
+     * Simulate a wave passing through a crowd - using real WorldWideWaves approach
+     *
+     * This simulation mimics how the actual app works:
+     * - Each person calls playCurrentSoundTone(waveStartTime) when hit by the wave
+     * - SoundChoreographyManager calculates elapsed time and plays appropriate notes
+     * - Multiple people are "hit" every 100ms to simulate wave propagation
      */
     private suspend fun playWaveProgression() {
         val track = midiTrack ?: return
-        Log.d(TAG, "🌊 Starting wave progression through crowd")
+        Log.d(TAG, "🌊 Starting realistic wave progression through crowd")
+        Log.d(TAG, "🎼 Full symphony duration: ${track.totalDuration.inWholeSeconds}s")
 
+        // Create a SoundChoreographyManager-like simulation
+        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         val waveSlotDurationMs = 100L // 100ms time slots
         val peoplePerSlot = 10 // 10 people per slot
-        val totalDurationSeconds = 30L // Play for 30 seconds
-        val totalDurationMs = totalDurationSeconds * 1000
+        val totalDurationMs = track.totalDuration.inWholeMilliseconds
 
         var currentSlotIndex = 0
 
         while (currentSlotIndex * waveSlotDurationMs < totalDurationMs) {
-            val slotStartTime = currentSlotIndex * waveSlotDurationMs
-            val midiPositionMs = slotStartTime % track.totalDuration.inWholeMilliseconds
+            val currentTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+            val elapsedTime = currentTime - waveStartTime
 
-            // Find all active notes at this MIDI position
-            val midiPosition = midiPositionMs.milliseconds
-            val activeNotes = track.notes.filter { it.isActiveAt(midiPosition) }
+            Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits ${peoplePerSlot} people at ${elapsedTime.inWholeSeconds}s")
 
-            if (activeNotes.isNotEmpty()) {
-                Log.d(TAG, "🎵 Slot $currentSlotIndex: ${activeNotes.size} active notes")
+            // Simulate 10 people getting hit by the wave at this time
+            repeat(peoplePerSlot) { personIndex ->
+                // Each person has random micro-timing within the 100ms slot
+                val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())
 
-                // Create 10 people for this time slot with random micro-timing
-                repeat(peoplePerSlot) { personIndex ->
-                    // Random offset within the 100ms slot (0-99ms)
-                    val randomOffsetMs = kotlin.random.Random.nextInt(0, waveSlotDurationMs.toInt())
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                    delay(randomOffsetMs.milliseconds)
 
-                    // Each person gets a different note if available
-                    val note = activeNotes[personIndex % activeNotes.size]
-                    val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
-                    val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.12 // Quieter for crowd
+                    // Calculate what this person should play (like SoundChoreographyManager.playCurrentSoundTone)
+                    val personHitTime = currentTime.plus(randomOffsetMs.milliseconds)
+                    val elapsedSinceWaveStart = personHitTime - waveStartTime
 
-                    // Vary waveforms for realistic human sound variation
-                    val waveform = when (personIndex % 4) {
-                        0 -> SoundPlayer.Waveform.SINE
-                        1 -> SoundPlayer.Waveform.SQUARE
-                        2 -> SoundPlayer.Waveform.SAWTOOTH
-                        else -> SoundPlayer.Waveform.SINE
+                    // Calculate position in track with looping
+                    val trackPosition = if (track.totalDuration > Duration.ZERO) {
+                        (elapsedSinceWaveStart.inWholeNanoseconds % track.totalDuration.inWholeNanoseconds).milliseconds
+                    } else {
+                        elapsedSinceWaveStart
                     }
 
-                    // Launch each person's note with their random timing offset
-                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                        delay(randomOffsetMs.milliseconds)
+                    // Find active notes at this position (like real SoundChoreographyManager)
+                    val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
+
+                    if (activeNotes.isNotEmpty()) {
+                        // Pick a random note from active ones (like real implementation)
+                        val note = activeNotes[kotlin.random.Random.nextInt(activeNotes.size)]
+                        val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
+                        val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.15
+
+                        // All people use SQUARE waveform (like real SoundChoreographyManager)
+                        // SQUARE waveform has richer harmonics for better perceived loudness
+                        val waveform = SoundPlayer.Waveform.SQUARE
+
+                        Log.v(TAG, "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms")
 
                         soundPlayer.playTone(
                             frequency = frequency,
                             amplitude = amplitude,
-                            duration = (waveSlotDurationMs * 0.9).milliseconds, // Slight overlap
+                            duration = (waveSlotDurationMs * 0.8).milliseconds,
                             waveform = waveform
                         )
                     }
@@ -408,7 +422,7 @@ class AudioTestActivity : ComponentActivity() {
             currentSlotIndex++
         }
 
-        Log.d(TAG, "🌊 Wave progression completed - $currentSlotIndex time slots processed")
+        Log.d(TAG, "🌊 Wave progression completed - played full ${track.totalDuration.inWholeSeconds}s symphony")
     }
 
     override fun onDestroy() {

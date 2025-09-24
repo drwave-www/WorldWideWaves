@@ -69,7 +69,6 @@ class RealAudioCrowdSimulationTest {
         // Wave progression constants for realistic simulation
         private const val WAVE_PEOPLE_PER_SLOT = 10 // 10 people per 100ms slot
         private const val WAVE_SLOT_DURATION_MS = 100L // 100ms time slots
-        private const val WAVE_TOTAL_DURATION_SECONDS = 60L // Play full MIDI for 60 seconds
     }
 
     @Test
@@ -304,9 +303,11 @@ class RealAudioCrowdSimulationTest {
     ) {
         Log.d(TAG, "🌊 Wave passing through crowd - playing full MIDI track")
         Log.d(TAG, "⏰ Each ${WAVE_SLOT_DURATION_MS}ms: $WAVE_PEOPLE_PER_SLOT people play together")
+        Log.d(TAG, "🎼 Full symphony duration: ${midiTrack.totalDuration.inWholeSeconds}s")
 
         val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
-        val totalDurationMs = WAVE_TOTAL_DURATION_SECONDS * 1000
+        // Play the complete MIDI/symphony duration
+        val totalDurationMs = midiTrack.totalDuration.inWholeMilliseconds
         var currentSlotIndex = 0
 
         while (currentSlotIndex * WAVE_SLOT_DURATION_MS < totalDurationMs) {
@@ -330,16 +331,12 @@ class RealAudioCrowdSimulationTest {
                     val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
                     val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.15 // Quieter for crowd
 
-                    // Vary waveforms for realistic human sound variation
-                    val waveform = when (personIndex % 4) {
-                        0 -> SoundPlayer.Waveform.SINE
-                        1 -> SoundPlayer.Waveform.SQUARE
-                        2 -> SoundPlayer.Waveform.SAWTOOTH
-                        else -> SoundPlayer.Waveform.SINE
-                    }
+                    // Use SQUARE waveform like real SoundChoreographyManager
+                    // SQUARE has richer harmonics for better perceived loudness
+                    val waveform = SoundPlayer.Waveform.SQUARE
 
                     // Launch each person's note with their random timing offset
-                    launch {
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                         delay(randomOffsetMs.milliseconds)
 
                         Log.v(TAG, "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} (${frequency.toInt()}Hz)")
