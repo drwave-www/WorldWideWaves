@@ -266,24 +266,18 @@ struct EventDetailView: View {
                     .frame(height: 1)
                     .padding(.horizontal)
 
-                // Wave button section (matching Android ButtonWave)
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        // Navigate to WaveActivity equivalent
-                        print("Navigate to wave for \(eventId)")
-                    }) {
-                        HStack {
-                            Image(systemName: "waveform.path.ecg")
-                            Text("Wave Now")
-                        }
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 12)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+                // Wave button section with navigation (matching Android ButtonWave)
+                NavigationLink(destination: WaveView(eventId: eventId)) {
+                    HStack {
+                        Image(systemName: "waveform.path.ecg")
+                        Text("Wave Now")
                     }
-                    Spacer()
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
                 }
                 .padding()
 
@@ -396,6 +390,146 @@ struct EventMapView: View {
 
     private func formatEventName(_ id: String) -> String {
         return id.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+}
+
+// Wave Participation Screen - Matching Android WaveActivity
+struct WaveView: View {
+    let eventId: String
+    @State private var waveProgress: Double = 0.0
+    @State private var isWaveActive: Bool = false
+    @State private var userHit: Bool = false
+
+    var body: some View {
+        ZStack {
+            // Background gradient matching Android
+            LinearGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.8), Color.purple.opacity(0.6)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 30) {
+                // Event title
+                Text(formatEventName(eventId))
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 20)
+
+                // Wave progress indicator (matching Android)
+                VStack(spacing: 16) {
+                    Text("Wave Progress")
+                        .font(.title2)
+                        .foregroundColor(.white)
+
+                    ZStack {
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 8)
+                            .frame(width: 150, height: 150)
+
+                        Circle()
+                            .trim(from: 0, to: waveProgress)
+                            .stroke(Color.white, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                            .frame(width: 150, height: 150)
+                            .rotationEffect(.degrees(-90))
+                            .animation(.easeInOut(duration: 0.5), value: waveProgress)
+
+                        Text("\(Int(waveProgress * 100))%")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                    }
+                }
+
+                // Wave status (matching Android choreography states)
+                VStack(spacing: 12) {
+                    if userHit {
+                        Text("🎉 Wave Hit!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.yellow)
+                    } else if isWaveActive {
+                        Text("🌊 Wave In Progress")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                        Text("Get ready for the wave!")
+                            .font(.body)
+                            .foregroundColor(.white.opacity(0.9))
+                    } else {
+                        Text("⏳ Waiting for Wave")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                        Text("Wave will start soon...")
+                            .font(.body)
+                            .foregroundColor(.white.opacity(0.9))
+                    }
+                }
+
+                Spacer()
+
+                // Action buttons (matching Android)
+                VStack(spacing: 16) {
+                    Button(action: {
+                        startWaveSimulation()
+                    }) {
+                        HStack {
+                            Image(systemName: "play.circle.fill")
+                            Text("Start Wave Demo")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.white)
+                        .foregroundColor(.blue)
+                        .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+
+                    Button(action: {
+                        print("Leave wave for \(eventId)")
+                    }) {
+                        Text("Leave Wave")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+                }
+                .padding(.bottom, 30)
+            }
+        }
+        .navigationTitle("Wave")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            startWaveSimulation()
+        }
+    }
+
+    private func formatEventName(_ id: String) -> String {
+        return id.replacingOccurrences(of: "_", with: " ").capitalized
+    }
+
+    private func startWaveSimulation() {
+        isWaveActive = true
+
+        // Simulate wave progression
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            waveProgress += 0.02
+
+            if waveProgress >= 0.8 && !userHit {
+                userHit = true
+                print("iOS Wave hit for \(eventId)!")
+            }
+
+            if waveProgress >= 1.0 {
+                timer.invalidate()
+                isWaveActive = false
+            }
+        }
     }
 }
 
