@@ -39,8 +39,18 @@ fun doInitKoin() {
     // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
     if (koinApp != null) return
 
-    // TODO: Temporarily disable initNapier() to prevent crash - will fix NSLogAntilog
-    // initNapier()
+    // Initialize Napier logging for iOS
+    try {
+        // Direct NSLog test first
+        platform.Foundation.NSLog("HELPER: doInitKoin() starting - direct NSLog test")
+
+        initNapier()
+
+        // Test logging through our system
+        com.worldwidewaves.shared.utils.Log.i("Helper", "doInitKoin() completed successfully")
+    } catch (e: Exception) {
+        platform.Foundation.NSLog("ERROR: initNapier() failed: ${e.message}")
+    }
 
     koinApp =
         startKoin {

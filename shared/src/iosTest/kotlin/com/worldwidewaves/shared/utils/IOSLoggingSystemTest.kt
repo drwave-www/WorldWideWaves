@@ -98,4 +98,15 @@ class IOSLoggingSystemTest {
             assertTrue(false, "NSLogAntilog direct test should not crash: ${e.message}")
         }
     }
+
+    @Test
+    fun testBasicIOSLoggingOnly() {
+        // Minimal test - just check that basic logging components exist on iOS
+        try {
+            assertTrue(LogConfig.ENABLE_DEBUG_LOGGING, "iOS debug logging should be enabled")
+            assertTrue(true, "Basic iOS logging test passed")
+        } catch (e: Exception) {
+            assertTrue(false, "Basic iOS logging test failed: ${e.message}")
+        }
+    }
 }

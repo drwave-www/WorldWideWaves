@@ -15,10 +15,10 @@ import io.github.aakira.napier.LogLevel
 import platform.Foundation.NSLog
 
 /**
- * iOS Antilog implementation that uses NSLog for output to Apple's Unified Logging.
- * This ensures logs are visible via:
- * - xcrun simctl spawn <UDID> log show --last 10s --predicate 'process == "WorldWideWaves"'
- * - xcrun simctl spawn <UDID> log stream --level debug --predicate 'process == "WorldWideWaves"'
+ * iOS Antilog implementation that uses NSLog for Apple's Unified Logging.
+ * Logs should be visible via:
+ * - xcrun simctl spawn <UDID> log stream --level debug --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
+ * - xcrun simctl spawn <UDID> log show --style compact --last 2m --debug --info --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
  */
 internal class NSLogAntilog : Antilog() {
     override fun isEnable(priority: LogLevel, tag: String?) = true
@@ -30,24 +30,12 @@ internal class NSLogAntilog : Antilog() {
         message: String?
     ) {
         try {
-            val level = when (priority) {
-                LogLevel.VERBOSE -> "V"
-                LogLevel.DEBUG -> "D"
-                LogLevel.INFO -> "I"
-                LogLevel.WARNING -> "W"
-                LogLevel.ERROR -> "E"
-                LogLevel.ASSERT -> "A"
-            }
-
-            val tagStr = tag ?: "WorldWideWaves"
-            val messageStr = message ?: ""
-            val throwableStr = throwable?.let { " | ${it::class.simpleName}: ${it.message}" } ?: ""
-
-            val fullMessage = "[$level] $tagStr: $messageStr$throwableStr"
-            NSLog(fullMessage)
-        } catch (e: Exception) {
-            // Fallback: if NSLog fails, don't crash the app
-            platform.Foundation.NSLog("NSLogAntilog error: ${e.message}")
+            val lvl = priority.name
+            val tagOr = tag ?: "LOG"
+            val err = throwable?.let { " | ${it::class.simpleName}: ${it.message}" } ?: ""
+            platform.Foundation.NSLog("%@ %@: %@%@", lvl, tagOr, message ?: "no message", err)
+        } catch (e: Throwable) {
+            // Fallback - don't crash the app
         }
     }
 }

@@ -67,8 +67,7 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
-// Temporarily remove complex dependencies until basic Compose works
-// Will implement koin integration after basic Compose works
+import com.worldwidewaves.shared.utils.Log
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -78,6 +77,8 @@ import com.worldwidewaves.shared.WWWGlobals.EventsList
  */
 @Composable
 fun SharedApp() {
+    Log.i("SharedApp", "🚀 SharedApp starting")
+
     SharedWorldWideWavesThemeWithExtended {
         // Navigation state for shared screens
         var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.EventsList) }
@@ -185,24 +186,60 @@ private fun SharedAboutScreen() {
  */
 @Composable
 private fun SharedEventsScreen(onEventClick: (String) -> Unit = {}) {
+    Log.i("SharedEventsScreen", "🎯 SharedEventsScreen starting")
+
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
-    val wwwEvents = remember { WWWEvents() }
+
+    // Safely create WWWEvents with proper error handling
+    val wwwEvents = remember {
+        try {
+            Log.i("SharedEventsScreen", "🏗️ Creating WWWEvents instance")
+            WWWEvents()
+        } catch (e: Exception) {
+            Log.e("SharedEventsScreen", "💥 Failed to create WWWEvents: ${e.message}", throwable = e)
+            null
+        }
+    }
 
     // Filter state - exact Android match
     var starredSelected by remember { mutableStateOf(false) }
     var downloadedSelected by remember { mutableStateOf(false) }
     var hasLoadingError by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        // Load real events from shared business logic
-        wwwEvents.loadEvents(
-            onLoaded = {
-                events = wwwEvents.list()
-            },
-            onLoadingError = { error ->
+    LaunchedEffect(wwwEvents) {
+        try {
+            if (wwwEvents == null) {
+                Log.e("SharedEventsScreen", "💥 CRITICAL: WWWEvents instance is null")
                 hasLoadingError = true
+                return@LaunchedEffect
             }
-        )
+
+            Log.i("SharedEventsScreen", "📞 Starting event loading via WWWEvents")
+
+            // Load real events from shared business logic with detailed logging
+            wwwEvents.loadEvents(
+                onLoaded = {
+                    try {
+                        Log.i("SharedEventsScreen", "✅ onLoaded callback triggered")
+                        val loadedEvents = wwwEvents.list()
+                        Log.i("SharedEventsScreen", "📊 Retrieved ${loadedEvents.size} events")
+                        events = loadedEvents
+                        Log.i("SharedEventsScreen", "🎯 UI state updated with ${events.size} events")
+                    } catch (e: Exception) {
+                        Log.e("SharedEventsScreen", "💥 Exception in onLoaded: ${e.message}", throwable = e)
+                    }
+                },
+                onLoadingError = { error ->
+                    Log.e("SharedEventsScreen", "❌ Event loading error: ${error.message}", throwable = error)
+                    hasLoadingError = true
+                }
+            )
+
+            Log.i("SharedEventsScreen", "📋 Event loading initiated successfully")
+        } catch (e: Exception) {
+            Log.e("SharedEventsScreen", "💥 CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
+            hasLoadingError = true
+        }
     }
 
     Column(

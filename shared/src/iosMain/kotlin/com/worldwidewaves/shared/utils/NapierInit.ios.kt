@@ -14,7 +14,7 @@ import io.github.aakira.napier.Napier
 
 /**
  * iOS implementation of Napier initialization.
- * Uses NSLogAntilog which outputs to Apple's Unified Logging system,
+ * Uses OSLogAntilog which outputs to Apple's Unified Logging system,
  * making logs visible via xcrun simctl log commands.
  */
 actual fun initNapier() {
