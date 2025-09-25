@@ -48,6 +48,8 @@ import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.navigation.SharedTabBarItem
+import com.worldwidewaves.shared.ui.components.SharedSplashScreen
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
@@ -230,11 +232,11 @@ open class MainActivity : AppCompatActivity() {
         totalTabs: Int,
     ) {
         val tabInfo = getTabInfo(totalTabs > 2)
-        Image(
-            painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
+        SharedTabBarItem(
+            isSelected = isSelected,
+            selectedIcon = tabInfo[tabIndex].second,
+            unselectedIcon = tabInfo[tabIndex].first,
             contentDescription = contentDescription,
-            modifier = Modifier.height(TabBar.EXT_HEIGHT.dp),
-            contentScale = ContentScale.Fit,
         )
     }
 
@@ -244,21 +246,6 @@ open class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun ProgrammaticSplashScreen() {
-        Box {
-            Image(
-                painter = painterResource(ShRes.drawable.background),
-                contentDescription = stringResource(MokoRes.strings.background_description),
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Image(
-                painter = painterResource(ShRes.drawable.www_logo_transparent),
-                contentDescription = stringResource(MokoRes.strings.logo_description),
-                modifier =
-                    Modifier
-                        .align(androidx.compose.ui.Alignment.BottomCenter)
-                        .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // original SplashActivity padding
-            )
-        }
+        SharedSplashScreen()
     }
 }

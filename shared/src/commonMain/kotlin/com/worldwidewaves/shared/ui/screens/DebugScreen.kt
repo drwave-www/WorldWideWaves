@@ -66,8 +66,8 @@ fun SharedDebugScreen(
 
 /**
  * Platform-specific performance dashboard component.
- * Android: Uses AndroidPerformanceMonitor and PerformanceDashboard
- * iOS: Uses iOS-specific performance monitoring or simple placeholder
+ * Android: Simple debug screen placeholder
+ * iOS: Simple debug screen placeholder
  */
 @Composable
 expect fun PlatformSpecificPerformanceDashboard(
