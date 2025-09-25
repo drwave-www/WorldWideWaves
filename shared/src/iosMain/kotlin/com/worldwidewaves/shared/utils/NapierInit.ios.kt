@@ -20,5 +20,7 @@ import io.github.aakira.napier.Napier
 actual fun initNapier() {
     if (LogConfig.ENABLE_DEBUG_LOGGING) {
         Napier.base(NSLogAntilog())
+    } else {
+        Napier.takeLogarithm()
     }
 }

@@ -12,6 +12,7 @@ package com.worldwidewaves.shared
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.worldwidewaves.shared.ui.SharedApp
+import com.worldwidewaves.shared.debugBuild
 import platform.UIKit.UIViewController
 
 /**
@@ -21,10 +22,13 @@ import platform.UIKit.UIViewController
  * ensuring perfect UI parity between platforms.
  */
 fun MainViewController(): UIViewController {
-    // Initialize Koin for iOS - required for dependency injection
-    doInitKoin()
+    // NOTE: Logging and Koin are already initialized in ContentView.swift
+
+    // Add platform-specific logging test
+    platform.Foundation.NSLog("🚀 MainViewController: Starting iOS app")
 
     return ComposeUIViewController {
+        platform.Foundation.NSLog("🎯 MainViewController: About to call SharedApp()")
         SharedApp() // Same Compose UI as Android with full DI support
     }
 }

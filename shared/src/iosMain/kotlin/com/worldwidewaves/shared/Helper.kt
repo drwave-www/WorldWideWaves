@@ -23,8 +23,11 @@ package com.worldwidewaves.shared
 
 import com.worldwidewaves.shared.di.IOSModule
 import com.worldwidewaves.shared.di.sharedModule
+import com.worldwidewaves.shared.utils.initNapier
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
+import org.koin.core.logger.PrintLogger
 
 /**
  * Initialise Koin for iOS.
@@ -36,8 +39,13 @@ fun doInitKoin() {
     // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
     if (koinApp != null) return
 
+    // TODO: Temporarily disable initNapier() to prevent crash - will fix NSLogAntilog
+    // initNapier()
+
     koinApp =
         startKoin {
+            // Add iOS logging equivalent to Android's androidLogger()
+            logger(PrintLogger(Level.DEBUG))
             // `sharedModule` is already a List<Module>; add the iOS-specific one.
             modules(sharedModule + IOSModule)
         }

@@ -20,31 +20,34 @@ import platform.Foundation.NSLog
  * - xcrun simctl spawn <UDID> log show --last 10s --predicate 'process == "WorldWideWaves"'
  * - xcrun simctl spawn <UDID> log stream --level debug --predicate 'process == "WorldWideWaves"'
  */
-class NSLogAntilog : Antilog {
+internal class NSLogAntilog : Antilog() {
+    override fun isEnable(priority: LogLevel, tag: String?) = true
+
     override fun performLog(
         priority: LogLevel,
         tag: String?,
         throwable: Throwable?,
         message: String?
     ) {
-        val logTag = tag ?: "WorldWideWaves"
-        val logMessage = message ?: ""
+        try {
+            val level = when (priority) {
+                LogLevel.VERBOSE -> "V"
+                LogLevel.DEBUG -> "D"
+                LogLevel.INFO -> "I"
+                LogLevel.WARNING -> "W"
+                LogLevel.ERROR -> "E"
+                LogLevel.ASSERT -> "A"
+            }
 
-        val level = when (priority) {
-            LogLevel.VERBOSE -> "V"
-            LogLevel.DEBUG -> "D"
-            LogLevel.INFO -> "I"
-            LogLevel.WARNING -> "W"
-            LogLevel.ERROR -> "E"
-            LogLevel.ASSERT -> "A"
+            val tagStr = tag ?: "WorldWideWaves"
+            val messageStr = message ?: ""
+            val throwableStr = throwable?.let { " | ${it::class.simpleName}: ${it.message}" } ?: ""
+
+            val fullMessage = "[$level] $tagStr: $messageStr$throwableStr"
+            NSLog(fullMessage)
+        } catch (e: Exception) {
+            // Fallback: if NSLog fails, don't crash the app
+            platform.Foundation.NSLog("NSLogAntilog error: ${e.message}")
         }
-
-        val fullMessage = if (throwable != null) {
-            "[$level] $logTag: $logMessage | ${throwable.message}"
-        } else {
-            "[$level] $logTag: $logMessage"
-        }
-
-        NSLog(fullMessage)
     }
 }
