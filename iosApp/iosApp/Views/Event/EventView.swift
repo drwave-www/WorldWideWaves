@@ -202,13 +202,13 @@ struct EventView: View {
             NavigationLink(
                 destination: EventFullMapView(event: viewModel.event),
                 isActive: $showFullMap
-            )                { EmptyView() }
+            ) { EmptyView() }
         )
         .background(
             NavigationLink(
                 destination: WaveView(event: viewModel.event),
                 isActive: $viewModel.showWaveView
-            )                { EmptyView() }
+            ) { EmptyView() }
         )
     }
 

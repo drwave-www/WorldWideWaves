@@ -2072,6 +2072,44 @@ import com.worldwidewaves.shared.WWWGlobals.EventsList
 - **Performance**: 95%+ (smooth 60fps on iOS)
 - **Test Coverage**: 90%+ (comprehensive cross-platform testing)
 
+## 🚨 **CRITICAL LOGGING SYSTEM LEARNINGS - September 25, 2025**
+
+### **iOS Framework Integration Issue Identified**
+
+#### Root Cause Analysis
+- **Android Logging**: ✅ Working perfectly with proper initNapier() in MainApplication.onCreate()
+- **iOS Framework Build**: ✅ Kotlin shared module compiles successfully
+- **iOS App Launch**: ❌ **APP CRASHES** during initialization when initNapier() called in doInitKoin()
+
+#### Technical Investigation Results
+1. **Framework Export**: doInitKoin() properly exported to Swift as HelperKt.doInitKoin()
+2. **NSLogAntilog Implementation**: Created with proper NSLog() calls for Unified Logging
+3. **Logging Tests**: Android unit tests pass (BUILD SUCCESSFUL)
+4. **iOS Crash**: App launches (gets PID) but crashes before UI appears
+
+#### Suspected Issues
+- **NSLogAntilog Compatibility**: NSLog() calls from Kotlin/Native might have different behavior
+- **Initialization Order**: Calling initNapier() inside doInitKoin() might create circular dependency
+- **Framework Caching**: iOS framework caching issues requiring clean rebuilds
+
+#### Working iOS Logging Requirements
+- ✅ **LogConfig expect/actual**: Properly implemented for all platforms
+- ✅ **initNapier expect/actual**: Proper pattern with NSLogAntilog for iOS
+- ✅ **Android Integration**: Working in MainApplication.onCreate()
+- ❌ **iOS Integration**: Causes app crash during initialization
+
+#### Immediate Solution
+- **Priority**: Fix iOS app crash first, perfect logging system second
+- **Approach**: Temporarily disable initNapier() in iOS to get app running
+- **Strategy**: Use UI-based debug panel for immediate debugging needs
+- **Future**: Perfect NSLogAntilog implementation once events loading works
+
+#### Key Learnings
+1. **iOS Framework Changes**: Require complete clean + rebuild to be picked up
+2. **Initialization Order**: iOS app initialization is more fragile than Android
+3. **Debug Strategy**: UI-based debugging is more reliable than console logs for iOS development
+4. **Testing Priority**: Get core functionality working before perfecting auxiliary systems
+
 ---
 
 ### 📋 **ORIGINAL IMPLEMENTATION PLAN** (Historical Reference)

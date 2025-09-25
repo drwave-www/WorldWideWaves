@@ -34,6 +34,7 @@ import com.worldwidewaves.shared.di.androidModule
 import com.worldwidewaves.shared.di.sharedModule
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.initNapier
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -69,6 +70,9 @@ class MainApplication :
     @OptIn(ExperimentalTime::class)
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize Napier logging for Android
+        initNapier()
 
         // Ensure split compat is installed
         SplitCompat.install(this)
