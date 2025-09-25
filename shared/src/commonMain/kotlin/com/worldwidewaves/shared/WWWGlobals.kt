@@ -427,6 +427,7 @@ object WWWGlobals {
         const val GEOLOCME_HEIGHT = 45
         const val GEOLOCME_BORDER = 2
         const val GEOLOCME_FONTSIZE = Dimensions.FONTSIZE_SMALL2
+        const val GEOLOC_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
 
         // Numbers Display
         const val NUMBERS_BORDERWIDTH = 2
@@ -436,6 +437,7 @@ object WWWGlobals {
         const val NUMBERS_LABEL_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
         const val NUMBERS_VALUE_FONTSIZE = Dimensions.FONTSIZE_BIG
         const val NUMBERS_TZ_FONTSIZE = Dimensions.FONTSIZE_SMALL
+        const val NUMBERS_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
