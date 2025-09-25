@@ -1,19 +1,14 @@
 package com.worldwidewaves.compose.common
 
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.WWWGlobals.Dimensions
+/*
+ * Copyright 2025 DrWave
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
 
-/** Horizontal white divider reused across screens. */
-@Composable
-fun DividerLine(modifier: Modifier = Modifier) {
-    HorizontalDivider(
-        modifier = modifier.width(Dimensions.DIVIDER_WIDTH.dp),
-        color = Color.White,
-        thickness = Dimensions.DIVIDER_THICKNESS.dp,
-    )
-}
+// Re-export shared component for backward compatibility
+import com.worldwidewaves.shared.ui.components.DividerLine

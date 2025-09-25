@@ -78,8 +78,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.common.AutoResizeSingleLineText
-import com.worldwidewaves.compose.common.DividerLine
+import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
+import com.worldwidewaves.shared.ui.components.DividerLine
 import com.worldwidewaves.shared.ui.components.ButtonWave
 import com.worldwidewaves.shared.ui.components.EventOverlayDone
 import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
