@@ -42,7 +42,6 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.ui.components.ButtonWave
 import com.worldwidewaves.shared.ui.components.WaveNavigator
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.ui.components.SharedMapActions
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Event
@@ -118,16 +117,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
                 },
                 Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
             )
-            SharedMapActions(
-                event = event,
-                clock = clock,
-                onTargetWave = {
-                    eventMap.markUserInteracted()
-                },
-                onCenterWave = {
-                    // Map centering functionality
-                }
-            )
+            MapActions(event, eventMap, clock)
         }
     }
 }
