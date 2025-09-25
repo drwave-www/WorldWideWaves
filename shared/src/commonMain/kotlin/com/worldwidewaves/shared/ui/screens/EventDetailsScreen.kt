@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.ui.screens
  * limitations under the License.
  */
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -45,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.ui.components.ButtonWave
@@ -119,10 +121,16 @@ fun SharedEventDetailsScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
         ) {
+            // Event overlay with status indicators
             EventOverlay(event)
+
+            // Event description text
             EventDescription(event)
+
+            // White divider line
             DividerLine()
 
+            // Wave button with simulation overlay
             Box(modifier = Modifier.fillMaxWidth()) {
                 ButtonWave(
                     event.id,
@@ -136,21 +144,26 @@ fun SharedEventDetailsScreen(
                     modifier = Modifier.align(Alignment.Center),
                 )
 
-                // Launch simulation button
+                // Simulation button overlay when simulation mode enabled
                 if (isSimulationModeEnabled) {
                     SimulationButton(scope, event, platform)
                 }
             }
 
-            // Platform-specific map integration
+            // Event map with calculated height
             PlatformEventMap(
                 event = event,
                 onMapClick = { onNavigateToFullMap(event.id) },
                 modifier = Modifier.fillMaxWidth().height(calculatedHeight)
             )
 
+            // User position notification
             NotifyAreaUserPosition(event)
+
+            // Event statistics and numbers
             EventNumbers(event)
+
+            // Social networks links
             WWWEventSocialNetworks(event, onUrlOpen)
         }
     }
