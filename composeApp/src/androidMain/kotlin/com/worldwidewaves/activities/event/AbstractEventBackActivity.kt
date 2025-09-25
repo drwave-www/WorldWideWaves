@@ -55,6 +55,7 @@ import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.navigation.BackwardScreen as SharedBackwardScreen
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.WWWPlatform

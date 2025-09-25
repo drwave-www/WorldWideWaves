@@ -58,6 +58,7 @@ import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies as SharedWaveChoreographies
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay

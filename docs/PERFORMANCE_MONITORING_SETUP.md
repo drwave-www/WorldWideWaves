@@ -19,10 +19,10 @@ WorldWideWaves now includes a comprehensive Application Performance Monitoring (
    - Compose performance tracking
    - Frame metrics collection
 
-3. **PerformanceDashboard** (UI Component)
-   - Real-time performance visualization
-   - Critical issue alerts
-   - Performance recommendations
+3. **Performance Integration** (Utility)
+   - Centralized performance tracking access
+   - Wave timing and participation recording
+   - Screen load and interaction measurement
 
 ## Integration Setup
 
@@ -147,16 +147,15 @@ Add the performance dashboard to debug builds:
 fun DebugScreen() {
     val performanceMonitor = rememberPerformanceMonitor()
 
-    PerformanceDashboard(
-        monitor = performanceMonitor,
-        modifier = Modifier.fillMaxSize()
-    )
+    // Performance dashboard UI has been removed
+    // Performance monitoring continues through PerformanceIntegration
+    Text("Performance monitoring active")
 }
 ```
 
-### Dashboard Features
+### Performance Tracking Features
 
-- **Real-time Metrics**: Wave timing accuracy, participation rates
+- **Wave Metrics**: Wave timing accuracy, participation rates
 - **System Health**: Memory usage, network latency, screen load times
 - **Critical Alerts**: Performance issues requiring immediate attention
 - **Recommendations**: Actionable insights for performance improvements

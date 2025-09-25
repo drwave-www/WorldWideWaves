@@ -17,14 +17,14 @@ import androidx.compose.ui.Modifier
 
 /**
  * iOS implementation of performance dashboard.
- * Uses a simple placeholder until iOS-specific performance monitoring is implemented.
+ * Placeholder for future performance monitoring features.
  */
 @Composable
 actual fun PlatformSpecificPerformanceDashboard(
     modifier: Modifier,
 ) {
     Text(
-        text = "iOS Performance Dashboard\n(iOS-specific monitoring to be implemented)",
+        text = "Performance monitoring features coming soon",
         modifier = modifier
     )
 }

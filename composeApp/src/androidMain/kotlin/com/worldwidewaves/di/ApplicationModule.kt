@@ -101,7 +101,7 @@ val applicationModule =
         // Debug screen - only in debug builds
         single<DebugScreen?> {
             if (BuildConfig.DEBUG) {
-                DebugScreen(get<AndroidPerformanceMonitor>())
+                DebugScreen()
             } else {
                 null
             }

@@ -17,15 +17,14 @@ import androidx.compose.ui.Modifier
 
 /**
  * Android implementation of performance dashboard.
- * For now, uses a simple placeholder since PerformanceDashboard has complex dependencies.
- * TODO: Integrate proper AndroidPerformanceMonitor when available in shared DI.
+ * Placeholder for future performance monitoring features.
  */
 @Composable
 actual fun PlatformSpecificPerformanceDashboard(
     modifier: Modifier,
 ) {
     Text(
-        text = "Android Performance Dashboard\n(Integration pending - see PerformanceDashboard)",
+        text = "Performance monitoring features coming soon",
         modifier = modifier
     )
 }
