@@ -83,16 +83,16 @@ private fun LocationPermissionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDenied,
-        title = { Text(stringResource(MokoRes.strings.geoloc_request_title)) },
-        text = { Text(stringResource(MokoRes.strings.geoloc_request_message)) },
+        title = { Text(stringResource(MokoRes.strings.geoloc_yourein)) },
+        text = { Text(stringResource(MokoRes.strings.geoloc_yourenotin)) },
         confirmButton = {
             Button(onClick = onGranted) {
-                Text(stringResource(MokoRes.strings.geoloc_request_allow))
+                Text(stringResource(MokoRes.strings.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDenied) {
-                Text(stringResource(MokoRes.strings.geoloc_request_deny))
+                Text(stringResource(MokoRes.strings.map_cancel_download))
             }
         }
     )
@@ -151,16 +151,16 @@ private fun GPSEnableDialog(
 ) {
     AlertDialog(
         onDismissRequest = onCancel,
-        title = { Text(stringResource(MokoRes.strings.geoloc_enable_title)) },
-        text = { Text(stringResource(MokoRes.strings.geoloc_enable_message)) },
+        title = { Text(stringResource(MokoRes.strings.geoloc_yourein)) },
+        text = { Text(stringResource(MokoRes.strings.geoloc_yourenotin)) },
         confirmButton = {
             Button(onClick = onEnable) {
-                Text(stringResource(MokoRes.strings.geoloc_enable_settings))
+                Text(stringResource(MokoRes.strings.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onCancel) {
-                Text(stringResource(MokoRes.strings.geoloc_enable_cancel))
+                Text(stringResource(MokoRes.strings.map_cancel_download))
             }
         }
     )
