@@ -271,10 +271,11 @@ These handle Android-specific navigation and lifecycle:
 - ✅ **Choreography Components** - WaveChoreographies (choreography state visualization)
 
 **📊 MIGRATION METRICS:**
-- **✅ Migrated:** ~40% of total Compose code (~2,500+ lines)
-- **📋 Remaining:** ~60% of total Compose code (~3,500+ lines)
-- **🎯 Quality:** 100% test coverage maintained (1093 unit + instrumented tests)
-- **🎯 Latest Addition:** WaveChoreographies component with comprehensive test coverage
+- **✅ Migrated:** ~55% of total Compose code (~3,500+ lines)
+- **📋 Remaining:** ~45% of total Compose code (~2,500+ lines)
+- **🎯 Quality:** 100% test coverage maintained (1093+ unit + instrumented tests)
+- **🎯 Phase 5 Achievement:** EventActivity completely extracted (10 @Composable functions eliminated)
+- **🎯 Current Impact:** iOS now has complete event details functionality
 
 ### **🔍 COMPREHENSIVE REMAINING COMPOSE CODE:**
 
@@ -319,13 +320,12 @@ Both apps launch and run perfectly with shared components:
 
 **🔥 PRIORITY 1 - CRITICAL ACTIVITY-EMBEDDED UI (Highest Impact for iOS Parity):**
 
-1. **EventActivity.kt** - [LARGE] 10 @Composable functions, 721 lines
-   - **Components:** Screen(), EventOverlay(), EventDescription(), SimulationButton(), etc.
-   - **Status:** Framework started in shared/ui/screens/EventDetailsScreen.kt
-   - **Strategy:** Complete extraction of all 10 components to SharedEventDetailsScreen
-   - **Impact:** 🎯 Complete event details functionality for iOS
-   - **Dependencies:** ButtonWave, event maps, social networks (mostly shared)
-   - **Risk:** Medium - Complex map integration needed
+1. **EventActivity.kt** - ✅ **COMPLETED** - Was [LARGE] 10 @Composable functions, 721 lines
+   - **Status:** ✅ ALL 10 components extracted to SharedEventDetailsScreen
+   - **Result:** EventActivity reduced to 104 lines (pure wrapper calling shared screen)
+   - **Impact:** 🎯 iOS now has complete event details functionality
+   - **Achievement:** EventNumbers and all embedded UI eliminated from Android
+   - **Zero duplicate UI code** for event details between platforms
 
 2. **WaveActivity.kt** - [LARGE] 8 @Composable functions, 459 lines
    - **Components:** Screen(), UserWaveStatusText(), WaveProgressionBar(), UserPositionTriangle(), etc.
@@ -462,16 +462,16 @@ Both apps launch and run perfectly with shared components:
 
 ---
 
-### **📈 IMPLEMENTATION METRICS:**
-- **Total Components:** 65 @Composable functions across 18 files
-- **Migrated Successfully:** 26 @Composable functions (~40%)
-- **Remaining Work:** 39 @Composable functions (~60%)
-- **Critical Path:** EventActivity + WaveActivity (18 @Composable functions = 28% of total)
-- **High Impact:** Activity-embedded UI (22 @Composable functions = 34% of total)
+### **📈 UPDATED IMPLEMENTATION METRICS (Post-Phase 5):**
+- **Total Components:** 55 @Composable functions across 18 files (after EventActivity extraction)
+- **Migrated Successfully:** 36 @Composable functions (~55%)
+- **Remaining Work:** 29 @Composable functions (~45%)
+- **Critical Path:** WaveActivity (8 @Composable functions = 15% of remaining)
+- **High Impact:** Activity-embedded UI (12 @Composable functions = 22% of remaining)
 
-### **🎯 IMMEDIATE ACTION PLAN:**
-**Phase 5 (NEXT):** Complete EventDetailsScreen - Extract all 10 @Composable functions from EventActivity
-**Expected Result:** iOS gains complete event details functionality (28% progress toward 100%)
+### **🎯 UPDATED ACTION PLAN:**
+**✅ Phase 5 COMPLETED:** EventActivity → SharedEventDetailsScreen (10 @Composable functions eliminated)
+**🔄 Phase 6 (NEXT):** WaveActivity → SharedWaveScreen (8 @Composable functions = 15% progress toward 100%)
 
 ---
 

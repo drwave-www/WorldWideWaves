@@ -346,15 +346,57 @@ private fun NotifyAreaUserPosition(event: IWWWEvent) {
 @Composable
 private fun EventNumbers(event: IWWWEvent) {
     val eventStatus by event.observer.eventStatus.collectAsState()
+    val progression by event.observer.progression.collectAsState()
+    val startWarmingInProgress by event.observer.isStartWarmingInProgress.collectAsState()
+
+    var waveNumbers by remember { mutableStateOf<String?>(null) }
+    var totalMinutes by remember { mutableStateOf<Long?>(null) }
+    var startTimeText by remember { mutableStateOf<String?>(null) }
+    var endTimeText by remember { mutableStateOf<String?>(null) }
+
+    // Load event numbers
+    LaunchedEffect(event.id) {
+        try {
+            @OptIn(ExperimentalTime::class)
+            startTimeText = DateTimeFormats.timeShort(event.getStartDateTime(), event.getTZ())
+        } catch (e: Exception) {
+            Log.e("EventNumbers", "Error loading start time", throwable = e)
+        }
+    }
+
+    LaunchedEffect(event.id, progression) {
+        try {
+            @OptIn(ExperimentalTime::class)
+            endTimeText = DateTimeFormats.timeShort(event.getEndDateTime(), event.getTZ())
+        } catch (e: Exception) {
+            Log.e("EventNumbers", "Error loading end time", throwable = e)
+        }
+    }
 
     if (eventStatus == Status.RUNNING || eventStatus == Status.DONE) {
         Column(
             modifier = Modifier.padding(horizontal = Dimensions.DEFAULT_EXT_PADDING.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Wave information placeholder - TODO: Add proper wave metrics
+            // Start time
+            startTimeText?.let { time ->
+                Text(
+                    text = "${stringResource(MokoRes.strings.wave_start_time)}: $time",
+                    style = sharedCommonTextStyle(Event.NUMBERS_FONTSIZE),
+                )
+            }
+
+            // End time
+            endTimeText?.let { time ->
+                Text(
+                    text = "${stringResource(MokoRes.strings.wave_end_time)}: $time",
+                    style = sharedCommonTextStyle(Event.NUMBERS_FONTSIZE),
+                )
+            }
+
+            // Progression
             Text(
-                text = stringResource(MokoRes.strings.wave_speed),
+                text = "${stringResource(MokoRes.strings.wave_progression)}: ${(progression * 100).toInt()}%",
                 style = sharedCommonTextStyle(Event.NUMBERS_FONTSIZE),
             )
         }
