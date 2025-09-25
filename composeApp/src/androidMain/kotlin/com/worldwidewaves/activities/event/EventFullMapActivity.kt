@@ -39,8 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.WaveNavigator
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
@@ -54,10 +52,11 @@ import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.worldwidewaves.shared.ui.components.ButtonWave
+import com.worldwidewaves.shared.ui.components.WaveNavigator
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant

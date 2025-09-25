@@ -38,14 +38,6 @@ import androidx.core.view.WindowCompat
  */
 
 fun setStatusBarColor(window: Window) {
-    // Make the status bar transparent
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        window.setDecorFitsSystemWindows(false)
-    } else {
-        @Suppress("DEPRECATION")
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
-    }
-
     // Make the navigation bar transparent on newer devices
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         window.isNavigationBarContrastEnforced = false

@@ -54,7 +54,7 @@ import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

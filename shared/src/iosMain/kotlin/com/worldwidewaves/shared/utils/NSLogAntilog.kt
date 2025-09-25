@@ -12,7 +12,6 @@ package com.worldwidewaves.shared.utils
 
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.LogLevel
-import platform.Foundation.NSLog
 
 /**
  * iOS Antilog implementation that uses NSLog for Apple's Unified Logging.

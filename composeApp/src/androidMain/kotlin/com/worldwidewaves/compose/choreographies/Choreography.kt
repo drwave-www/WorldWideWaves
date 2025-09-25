@@ -251,11 +251,8 @@ fun ChoreographyDisplay(
         while (this.isActive) {
             // Check if we should stop showing the sequence
             val elapsed = clock.now() - startTime
-            if (remainingTime != null) {
-                if (elapsed >= remainingTime!!) break
-            } else if (elapsed >= sequence.duration) {
-                break
-            }
+            val shouldStop = remainingTime?.let { elapsed >= it } ?: (elapsed >= sequence.duration)
+            if (shouldStop) break
 
             delay(sequence.timing.inWholeMilliseconds)
 

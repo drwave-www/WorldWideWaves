@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared.monitoring
+package com.worldwidewaves.shared.testing
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

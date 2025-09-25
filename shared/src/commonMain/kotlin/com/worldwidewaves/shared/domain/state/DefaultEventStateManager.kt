@@ -101,7 +101,7 @@ class DefaultEventStateManager(
         val issues = mutableListOf<StateValidationIssue>()
 
         // Validate progression bounds
-        if (input.progression < 0.0 || input.progression > 100.0 || input.progression.isNaN() || input.progression.isInfinite()) {
+        if (isInvalidProgression(input.progression)) {
             issues.add(
                 StateValidationIssue(
                     field = "progression",
@@ -285,5 +285,9 @@ class DefaultEventStateManager(
         }
 
         return isAboutToBeHit
+    }
+
+    private fun isInvalidProgression(progression: Double): Boolean {
+        return progression < 0.0 || progression > 100.0 || progression.isNaN() || progression.isInfinite()
     }
 }

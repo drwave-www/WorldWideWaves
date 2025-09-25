@@ -11,5 +11,3 @@ package com.worldwidewaves.compose.common
  */
 
 // Re-export shared components for backward compatibility
-import com.worldwidewaves.shared.ui.components.LoadingIndicator
-import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator

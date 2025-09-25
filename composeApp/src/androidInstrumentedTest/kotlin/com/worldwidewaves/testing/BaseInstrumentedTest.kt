@@ -22,7 +22,7 @@
 package com.worldwidewaves.testing
 
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule

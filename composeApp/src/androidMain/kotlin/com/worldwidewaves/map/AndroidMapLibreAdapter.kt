@@ -22,7 +22,7 @@ package com.worldwidewaves.map
  */
 
 import android.graphics.Color
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import androidx.core.graphics.toColorInt
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.BoundingBox
@@ -109,7 +109,7 @@ class AndroidMapLibreAdapter(
         updateCameraInfo()
 
         // Debug: log initial camera details
-        Log.d(
+        WWWLogger.d(
             "Camera",
             "Initial camera: target=${map.cameraPosition.target?.latitude}," +
                 "${map.cameraPosition.target?.longitude} " +
@@ -134,11 +134,11 @@ class AndroidMapLibreAdapter(
     ) {
         require(mapLibreMap != null)
         // Log style application start – helps diagnose early style failures
-        Log.d(TAG, "Applying style from URI: $stylePath")
+        WWWLogger.d(TAG, "Applying style from URI: $stylePath")
 
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
-            Log.i(TAG, "Style loaded successfully")
+            WWWLogger.i(TAG, "Style loaded successfully")
             callback()
         }
     }
@@ -242,7 +242,7 @@ class AndroidMapLibreAdapter(
 
     override fun moveCamera(bounds: BoundingBox) {
         require(mapLibreMap != null)
-        Log.v(
+        WWWLogger.v(
             "Camera",
             "Moving camera to bounds: SW=${bounds.southwest.latitude},${bounds.southwest.longitude} " +
                 "NE=${bounds.northeast.latitude},${bounds.northeast.longitude}",
@@ -258,7 +258,7 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
 
-        Log.v(
+        WWWLogger.v(
             "Camera",
             "Animating to position: lat=${position.latitude}, " +
                 "lng=${position.longitude}, zoom=$zoom",
@@ -298,7 +298,7 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
 
-        Log.v(
+        WWWLogger.v(
             "Camera",
             "Animating to bounds: SW=${bounds.southwest.latitude}," +
                 "${bounds.southwest.longitude} " +
@@ -332,7 +332,7 @@ class AndroidMapLibreAdapter(
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
-        Log.v(
+        WWWLogger.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
                 "${constraintBounds.southwest.longitude} " +
@@ -391,11 +391,11 @@ class AndroidMapLibreAdapter(
                     waveLayerIds.add(layerId)
                 }
             } catch (ise: IllegalStateException) {
-                Log.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
+                WWWLogger.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {
-                Log.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
+                WWWLogger.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
             } catch (uoe: UnsupportedOperationException) {
-                Log.e("MapUpdate", "Unsupported map operation", uoe)
+                WWWLogger.e("MapUpdate", "Unsupported map operation", uoe)
             }
         }
     }
@@ -405,7 +405,7 @@ class AndroidMapLibreAdapter(
     override fun drawOverridenBbox(bbox: BoundingBox) {
         require(mapLibreMap != null)
 
-        Log.v(
+        WWWLogger.v(
             "Camera",
             "Drawing override bbox: SW=${bbox.southwest.latitude}," +
                 "${bbox.southwest.longitude} " +

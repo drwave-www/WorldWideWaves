@@ -14,15 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
-import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
 
 /**
  * Android wrapper for SharedDebugScreen.
  * Delegates to shared implementation for perfect cross-platform parity.
  */
-class DebugScreen(
-    private val performanceMonitor: AndroidPerformanceMonitor,
-) : TabScreen {
+class DebugScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
@@ -30,7 +27,7 @@ class DebugScreen(
         SharedDebugScreen(
             modifier = modifier,
             onPerformanceClick = {
-                // Performance monitor integration handled by shared debug screen
+                // Debug functionality handled by shared debug screen
             }
         )
     }

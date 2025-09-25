@@ -27,18 +27,16 @@ import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
 import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
-import com.worldwidewaves.monitoring.PerformanceIntegration
 import com.worldwidewaves.shared.domain.repository.EventsRepository
 import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
-import com.worldwidewaves.shared.monitoring.AndroidPerformanceMonitor
-import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
-import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -91,17 +89,11 @@ val applicationModule =
         single { WWWSimulationEnabledLocationEngine(get()) }
         factory { AndroidWWWLocationProvider() }
 
-        // Performance monitoring - only in debug builds
-        single<AndroidPerformanceMonitor> {
-            AndroidPerformanceMonitor(androidContext()).also { monitor ->
-                PerformanceIntegration.initialize(androidContext())
-            }
-        }
 
         // Debug screen - only in debug builds
         single<DebugScreen?> {
             if (BuildConfig.DEBUG) {
-                DebugScreen(get<AndroidPerformanceMonitor>())
+                DebugScreen()
             } else {
                 null
             }

@@ -22,7 +22,7 @@ package com.worldwidewaves.utils
  */
 
 import android.content.Context
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallStateUpdatedListener
@@ -77,8 +77,8 @@ class MapAvailabilityChecker(
             SplitInstallStateUpdatedListener { state ->
                 when (state.status()) {
                     SplitInstallSessionStatus.INSTALLED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation completed")
-                        Log.d(
+                        WWWLogger.d(::MapAvailabilityChecker.name, "Module installation completed")
+                        WWWLogger.d(
                             TAG,
                             "session=${state.sessionId()} INSTALLED modules=${state.moduleNames()}",
                         )
@@ -91,16 +91,16 @@ class MapAvailabilityChecker(
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.FAILED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
-                        Log.w(
+                        WWWLogger.d(::MapAvailabilityChecker.name, "Module installation failed: ${state.errorCode()}")
+                        WWWLogger.w(
                             TAG,
                             "session=${state.sessionId()} FAILED code=${state.errorCode()}",
                         )
                         refreshAvailability()
                     }
                     SplitInstallSessionStatus.CANCELED -> {
-                        Log.d(::MapAvailabilityChecker.name, "Module installation canceled")
-                        Log.i(TAG, "session=${state.sessionId()} CANCELED")
+                        WWWLogger.d(::MapAvailabilityChecker.name, "Module installation canceled")
+                        WWWLogger.i(TAG, "session=${state.sessionId()} CANCELED")
                         refreshAvailability()
                     }
                     else -> {
@@ -130,8 +130,8 @@ class MapAvailabilityChecker(
      */
     override fun refreshAvailability() {
         val installedModules = splitInstallManager.installedModules
-        Log.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
-        Log.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
+        WWWLogger.d(::MapAvailabilityChecker.name, "Refreshing availability. Installed modules: $installedModules")
+        WWWLogger.d(TAG, "queried=$queriedMaps forcedUnavailable=$forcedUnavailable")
 
         // Build updated state map
         val updatedStates = HashMap<String, Boolean>()
@@ -145,7 +145,7 @@ class MapAvailabilityChecker(
 
         // Update the state flow with the new map
         _mapStates.value = updatedStates
-        Log.d(TAG, "Updated availability: $updatedStates")
+        WWWLogger.d(TAG, "Updated availability: $updatedStates")
     }
 
     /**
@@ -154,12 +154,12 @@ class MapAvailabilityChecker(
     fun trackMaps(mapIds: Collection<String>) {
         queriedMaps.addAll(mapIds)
         // Don't refresh here - caller should call refreshAvailability() if needed
-        Log.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
+        WWWLogger.d(TAG, "trackMaps added=${mapIds.joinToString()} totalTracked=${queriedMaps.size}")
     }
 
     override fun isMapDownloaded(eventId: String): Boolean {
         val downloaded = mapStates.value[eventId] == true
-        Log.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
+        WWWLogger.d(TAG, "isMapDownloaded id=$eventId -> $downloaded")
         return downloaded
     }
 
@@ -169,22 +169,18 @@ class MapAvailabilityChecker(
                 .filterValues { it == true }
                 .keys
                 .toList()
-        Log.d(TAG, "getDownloadedMaps -> $downloaded")
+        WWWLogger.d(TAG, "getDownloadedMaps -> $downloaded")
         return downloaded
     }
 
     fun canUninstallMap(eventId: String): Boolean {
-        try {
+        return try {
             val splitInstallManager = SplitInstallManagerFactory.create(context)
-            return splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
-        } catch (ise: IllegalStateException) {
-            Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state: ${ise.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${ise.message}")
-            return false // If there's an error, assume it can't be uninstalled
-        } catch (uoe: UnsupportedOperationException) {
-            Log.e("MapAvailabilityChecker", "Unsupported operation on SplitInstallManager: ${uoe.message}")
-            Log.e(TAG, "canUninstallMap id=$eventId exception=${uoe.message}")
-            return false // If there's an error, assume it can't be uninstalled
+            splitInstallManager.installedModules.contains(eventId) // Not installed, so can't uninstall
+        } catch (e: Exception) {
+            WWWLogger.e("MapAvailabilityChecker", "Error checking map uninstall capability: ${e.message}")
+            WWWLogger.e(TAG, "canUninstallMap id=$eventId exception=${e.message}")
+            false // If there's an error, assume it can't be uninstalled
         }
     }
 
@@ -199,7 +195,7 @@ class MapAvailabilityChecker(
     suspend fun uninstallMap(eventId: String): Boolean =
         suspendCancellableCoroutine { cont ->
             try {
-                Log.i(TAG, "uninstallMap requested for $eventId")
+                WWWLogger.i(TAG, "uninstallMap requested for $eventId")
                 val splitInstallManager = SplitInstallManagerFactory.create(context)
 
                 splitInstallManager
@@ -223,28 +219,28 @@ class MapAvailabilityChecker(
                             // ignore cache cleanup errors
                         }
 
-                        Log.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
-                        Log.i(TAG, "uninstallMap success (scheduled) id=$eventId")
+                        WWWLogger.i("MapAvailabilityChecker", "Uninstall scheduled for map/event: $eventId")
+                        WWWLogger.i(TAG, "uninstallMap success (scheduled) id=$eventId")
                         if (cont.isActive) cont.resume(true)
                     }.addOnFailureListener { e ->
-                        Log.e(
+                        WWWLogger.e(
                             "MapAvailabilityChecker",
                             "Deferred uninstall failed for $eventId: ${e.message}",
                         )
-                        Log.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
+                        WWWLogger.e(TAG, "uninstallMap failure id=$eventId err=${e.message}")
                         if (cont.isActive) cont.resume(false)
                     }
             } catch (ise: IllegalStateException) {
-                Log.e("MapAvailabilityChecker", "SplitInstallManager in invalid state for $eventId: ${ise.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${ise.message}")
+                WWWLogger.e("MapAvailabilityChecker", "SplitInstallManager in invalid state for $eventId: ${ise.message}")
+                WWWLogger.e(TAG, "uninstallMap exception id=$eventId err=${ise.message}")
                 if (cont.isActive) cont.resume(false)
             } catch (iae: IllegalArgumentException) {
-                Log.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
+                WWWLogger.e("MapAvailabilityChecker", "Invalid module name for uninstall $eventId: ${iae.message}")
+                WWWLogger.e(TAG, "uninstallMap exception id=$eventId err=${iae.message}")
                 if (cont.isActive) cont.resume(false)
             } catch (uoe: UnsupportedOperationException) {
-                Log.e("MapAvailabilityChecker", "Unsupported operation during uninstall for $eventId: ${uoe.message}")
-                Log.e(TAG, "uninstallMap exception id=$eventId err=${uoe.message}")
+                WWWLogger.e("MapAvailabilityChecker", "Unsupported operation during uninstall for $eventId: ${uoe.message}")
+                WWWLogger.e(TAG, "uninstallMap exception id=$eventId err=${uoe.message}")
                 if (cont.isActive) cont.resume(false)
             }
         }

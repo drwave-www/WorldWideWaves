@@ -21,11 +21,11 @@ import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.events.IWWWEvent
 
 /**
- * Android implementation of event map component.
+ * Android implementation of wave map component.
  * Placeholder until AndroidEventMap is fully migrated to shared.
  */
 @Composable
-actual fun PlatformEventMap(
+actual fun PlatformWaveMap(
     event: IWWWEvent,
     onMapClick: () -> Unit,
     modifier: Modifier,
@@ -37,7 +37,7 @@ actual fun PlatformEventMap(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Android Map for ${event.id}\n(Tap to open full map)",
+            text = "Android Wave Map for ${event.id}\n(Tap to open full map)",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
