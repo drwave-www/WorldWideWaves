@@ -66,7 +66,7 @@ val applicationModule =
             )
         }
 
-        single { AboutScreen(get(), get()) }
+        single { AboutScreen(get()) }
         single { AboutInfoScreen() }
         // Inject the shared WWWPlatform instance into AboutFaqScreen
         single { AboutFaqScreen(get()) }

@@ -471,6 +471,15 @@ object WWWGlobals {
         const val RULE_CONTENTS_FONTSIZE = Dimensions.FONTSIZE_SMALL
         const val RULE_QUESTION_FONTSIZE = Dimensions.FONTSIZE_SMALL2
         const val RULE_ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+
+        // Additional FAQ constants for About screens
+        const val TEXT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val ACCESS_LINK_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val RULES_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val RULES_TEXT_FONTSIZE = Dimensions.FONTSIZE_SMALL
+        const val QUESTION_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val SIMULATE_BUTTON_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
