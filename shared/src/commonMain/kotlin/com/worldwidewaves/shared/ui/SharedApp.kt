@@ -48,6 +48,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
@@ -57,6 +59,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +70,10 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
+import com.worldwidewaves.shared.data.SetEventFavorite
+import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.launch
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -77,11 +83,16 @@ import com.worldwidewaves.shared.utils.Log
  */
 @Composable
 fun SharedApp() {
-    Log.i("SharedApp", "🚀 SharedApp starting")
+    Log.i("SharedApp", "SharedApp starting with working logging")
 
     SharedWorldWideWavesThemeWithExtended {
+        Log.i("SharedApp", "Theme applied successfully")
+
         // Navigation state for shared screens
-        var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.EventsList) }
+        var currentScreen by remember {
+            Log.i("SharedApp", "Setting up navigation state")
+            mutableStateOf<AppScreen>(AppScreen.EventsList)
+        }
         var selectedEventId by remember { mutableStateOf<String?>(null) }
 
         // Simple Compose UI - identical on both Android and iOS
@@ -99,7 +110,7 @@ fun SharedApp() {
             ) {
                 when (currentScreen) {
                     AppScreen.EventsList -> {
-                        SharedEventsScreen(
+                        SharedEventsScreenWrapper(
                             onEventClick = { eventId ->
                                 selectedEventId = eventId
                                 currentScreen = AppScreen.EventDetails
@@ -182,253 +193,101 @@ private fun SharedAboutScreen() {
 }
 
 /**
- * Shared Events Screen - EXACT Android EventsListScreen match
+ * Wrapper that loads events and passes them to the shared EventsListScreen
  */
 @Composable
-private fun SharedEventsScreen(onEventClick: (String) -> Unit = {}) {
-    Log.i("SharedEventsScreen", "🎯 SharedEventsScreen starting")
+private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
+    Log.i("SharedEventsScreen", "SharedEventsScreen starting")
 
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
+
+    // Get SetEventFavorite through existing wwwEvents for now
+    // TODO: Use proper DI injection when koin-compose is fully integrated
 
     // Safely create WWWEvents with proper error handling
     val wwwEvents = remember {
         try {
-            Log.i("SharedEventsScreen", "🏗️ Creating WWWEvents instance")
+            Log.i("SharedEventsScreen", "Creating WWWEvents instance")
             WWWEvents()
         } catch (e: Exception) {
-            Log.e("SharedEventsScreen", "💥 Failed to create WWWEvents: ${e.message}", throwable = e)
+            Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
             null
         }
     }
 
-    // Filter state - exact Android match
+    // Filter state - exact Android match with proper state management
     var starredSelected by remember { mutableStateOf(false) }
     var downloadedSelected by remember { mutableStateOf(false) }
     var hasLoadingError by remember { mutableStateOf(false) }
+    var allEvents by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
 
     LaunchedEffect(wwwEvents) {
         try {
             if (wwwEvents == null) {
-                Log.e("SharedEventsScreen", "💥 CRITICAL: WWWEvents instance is null")
+                Log.e("SharedEventsScreen", "CRITICAL: WWWEvents instance is null")
                 hasLoadingError = true
                 return@LaunchedEffect
             }
 
-            Log.i("SharedEventsScreen", "📞 Starting event loading via WWWEvents")
+            Log.i("SharedEventsScreen", "Starting event loading via WWWEvents")
 
             // Load real events from shared business logic with detailed logging
             wwwEvents.loadEvents(
                 onLoaded = {
                     try {
-                        Log.i("SharedEventsScreen", "✅ onLoaded callback triggered")
+                        Log.i("SharedEventsScreen", "onLoaded callback triggered")
                         val loadedEvents = wwwEvents.list()
-                        Log.i("SharedEventsScreen", "📊 Retrieved ${loadedEvents.size} events")
-                        events = loadedEvents
-                        Log.i("SharedEventsScreen", "🎯 UI state updated with ${events.size} events")
+                        Log.i("SharedEventsScreen", "Retrieved ${loadedEvents.size} events")
+                        allEvents = loadedEvents
+                        events = loadedEvents // Initial state shows all events
+                        Log.i("SharedEventsScreen", "UI state updated with events")
                     } catch (e: Exception) {
-                        Log.e("SharedEventsScreen", "💥 Exception in onLoaded: ${e.message}", throwable = e)
+                        Log.e("SharedEventsScreen", "Exception in onLoaded: ${e.message}", throwable = e)
                     }
                 },
                 onLoadingError = { error ->
-                    Log.e("SharedEventsScreen", "❌ Event loading error: ${error.message}", throwable = error)
+                    Log.e("SharedEventsScreen", "Event loading error: ${error.message}", throwable = error)
                     hasLoadingError = true
                 }
             )
 
-            Log.i("SharedEventsScreen", "📋 Event loading initiated successfully")
+            Log.i("SharedEventsScreen", "Event loading initiated successfully")
         } catch (e: Exception) {
-            Log.e("SharedEventsScreen", "💥 CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
+            Log.e("SharedEventsScreen", "CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
             hasLoadingError = true
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dimensions.DEFAULT_EXT_PADDING.dp)
-    ) {
-        // 3-way filter selector - EXACT Android match
-        SharedFavoritesSelector(
-            starredSelected = starredSelected,
-            downloadedSelected = downloadedSelected,
-            onAllEventsClicked = {
-                starredSelected = false
-                downloadedSelected = false
-            },
-            onFavoriteEventsClicked = {
-                starredSelected = true
-                downloadedSelected = false
-            },
-            onDownloadedEventsClicked = {
-                starredSelected = false
-                downloadedSelected = true
-            }
-        )
-
-        Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
-
-        // Events list - EXACT Android EventsListScreen structure
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(events) { event ->
-                // Exact Android Event structure with click handling
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(0.dp) // No padding - exact Android match
-                        .clickable {
-                            // Navigate to event details - same behavior as Android
-                            onEventClick(event.id)
-                        }
-                ) {
-                    // EventOverlay - 160dp height with REAL shared background images
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .height(160.dp) // OVERLAY_HEIGHT = 160dp
-                    ) {
-                        // Background with ACTUAL shared event images - exact Android match
-                        val eventImageResource = getEventImageResource(event.id)
-                        if (eventImageResource != null) {
-                            Image(
-                                painter = painterResource(eventImageResource),
-                                contentDescription = "Event location for ${event.id}",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            // Fallback background
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(getEventBackgroundColor(event.id))
-                            )
-                        }
-
-                        // Event overlays - EXACT Android match with all 4 overlay types
-                        Box(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            // 1. Country and Community flags (bottom-left, top-left)
-                            SharedEventOverlayCountryAndCommunityFlags(event, Modifier.fillMaxSize())
-
-                            // 2. Soon/Running status overlay (top-right banner)
-                            val eventStatus = getEventStatusEnum(event.id)
-                            EventOverlaySoonOrRunning(eventStatus)
-
-                            // 3. Done overlay (center with semi-transparent background)
-                            EventOverlayDone(eventStatus)
-
-                            // 4. Map Downloaded overlay (bottom-right)
-                            SharedEventOverlayMapDownloaded(event.id, false) // TODO: real map state
-
-                            // 5. Favorite overlay (bottom-right, next to map downloaded)
-                            SharedEventOverlayFavorite(event, false) // TODO: real favorite state
-                        }
-                    }
-
-                    // EventLocationAndDate - exact Android layout
-                    SharedEventLocationAndDate(event = event)
-                }
-            }
+    // Filter logic - EXACT Android match
+    LaunchedEffect(starredSelected, downloadedSelected, allEvents) {
+        events = when {
+            starredSelected -> allEvents.filter { it.favorite }
+            downloadedSelected -> allEvents.filter { false } // TODO: Add map download state
+            else -> allEvents
         }
+        Log.i("SharedEventsScreen", "Event loading and filtering completed")
     }
+
+    // Use the shared EventsListScreen for perfect Android parity
+    SharedEventsListScreen(
+        events = events,
+        mapStates = emptyMap(), // TODO: Add map state integration
+        onEventClick = onEventClick,
+        setEventFavorite = null, // TODO: Inject SetEventFavorite via DI
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
-// Removed complex overlay components temporarily to fix crash
-// Will add them back one by one systematically
-
-/**
- * Shared Event Location and Date - Exact Android EventLocationAndDate match
- */
-@Composable
-private fun SharedEventLocationAndDate(event: IWWWEvent) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        // Row 1: Location (left) + Date (right) - EXACT Android layout
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Text(
-                text = event.id.replace("_", " ").uppercase(),
-                style = sharedQuinaryColoredTextStyle(EventsList.EVENT_LOCATION_FONTSIZE)
-            )
-            Text(
-                text = "Dec 24", // TODO: Use real date formatting
-                modifier = Modifier.padding(end = 2.dp),
-                style = sharedPrimaryColoredBoldTextStyle(EventsList.EVENT_DATE_FONTSIZE)
-            )
-        }
-
-        // Row 2: Country / Community with -8dp offset - EXACT Android
-        Row(
-            modifier = Modifier.padding(top = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = getCountryName(event.id),
-                style = sharedQuinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
-                modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-            )
-            Text(
-                text = " / ",
-                style = sharedQuinaryColoredTextStyle(EventsList.EVENT_COUNTRY_FONTSIZE),
-                modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-            )
-            Text(
-                text = getCommunityName(event.id),
-                style = sharedQuaternaryColoredTextStyle(EventsList.EVENT_COMMUNITY_FONTSIZE),
-                modifier = Modifier.offset(y = (-8).dp).padding(start = 2.dp)
-            )
-        }
-    }
-}
-
-// Helper functions matching Android logic
-private fun getEventStatus(eventId: String): String? {
+// Temporary helper functions - TODO: Remove when fully migrated to shared EventsListScreen
+private fun getEventBackgroundColor(eventId: String): androidx.compose.ui.graphics.Color {
     return when {
-        eventId.contains("new_york") -> "soon"
-        eventId.contains("paris") -> "running"
-        eventId.contains("tokyo") -> "done"
-        else -> null
+        eventId.contains("new_york") -> androidx.compose.ui.graphics.Color(0xFF2196F3).copy(alpha = 0.8f)
+        eventId.contains("los_angeles") -> androidx.compose.ui.graphics.Color(0xFFFF5722).copy(alpha = 0.8f)
+        eventId.contains("mexico") -> androidx.compose.ui.graphics.Color(0xFF4CAF50).copy(alpha = 0.8f)
+        eventId.contains("sao_paulo") -> androidx.compose.ui.graphics.Color(0xFFFFEB3B).copy(alpha = 0.8f)
+        eventId.contains("buenos_aires") -> androidx.compose.ui.graphics.Color(0xFF00BCD4).copy(alpha = 0.8f)
+        else -> androidx.compose.ui.graphics.Color(0xFF3F51B5).copy(alpha = 0.7f)
     }
-}
-
-// Convert to shared Status enum for overlay components
-private fun getEventStatusEnum(eventId: String): com.worldwidewaves.shared.events.IWWWEvent.Status? {
-    return when {
-        eventId.contains("new_york") -> com.worldwidewaves.shared.events.IWWWEvent.Status.SOON
-        eventId.contains("paris") -> com.worldwidewaves.shared.events.IWWWEvent.Status.RUNNING
-        eventId.contains("tokyo") -> com.worldwidewaves.shared.events.IWWWEvent.Status.DONE
-        else -> null
-    }
-}
-
-private fun getStatusColor(status: String): Color {
-    return when (status) {
-        "soon" -> Color(0xFFFF9800) // Orange
-        "running" -> Color(0xFF4CAF50) // Green
-        "done" -> Color(0xFF9E9E9E) // Gray
-        else -> Color.Blue
-    }
-}
-
-private fun getEventBackgroundColor(eventId: String): Color {
-    return when {
-        eventId.contains("new_york") -> Color(0xFF2196F3).copy(alpha = 0.8f)
-        eventId.contains("los_angeles") -> Color(0xFFFF5722).copy(alpha = 0.8f)
-        eventId.contains("mexico") -> Color(0xFF4CAF50).copy(alpha = 0.8f)
-        eventId.contains("sao_paulo") -> Color(0xFFFFEB3B).copy(alpha = 0.8f)
-        eventId.contains("buenos_aires") -> Color(0xFF00BCD4).copy(alpha = 0.8f)
-        else -> Color(0xFF3F51B5).copy(alpha = 0.7f)
-    }
-}
-
-private fun getCountryName(eventId: String): String {
-    val components = eventId.split("_")
-    return components.lastOrNull()?.uppercase() ?: "UNKNOWN"
 }
 
 private fun getCommunityName(eventId: String): String {
@@ -438,13 +297,6 @@ private fun getCommunityName(eventId: String): String {
     } else {
         "COMMUNITY"
     }
-}
-
-// Get actual shared event image resource - exact Android match
-private fun getEventImageResource(eventId: String): org.jetbrains.compose.resources.DrawableResource? {
-    // For now, use fallback colors until we fix resource generation
-    // TODO: Use actual shared drawable resources once resource names are confirmed
-    return null
 }
 
 /**
@@ -601,216 +453,6 @@ private fun SharedMapScreen(
     }
 }
 
-/**
- * Shared 3-way Filter Selector - EXACT Android match
- */
-@Composable
-private fun SharedFavoritesSelector(
-    starredSelected: Boolean,
-    downloadedSelected: Boolean,
-    onAllEventsClicked: () -> Unit,
-    onFavoriteEventsClicked: () -> Unit,
-    onDownloadedEventsClicked: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // Determine colors and weights based on which tab is selected - EXACT Android logic
-    val allSelected = !starredSelected && !downloadedSelected
-
-    val allColor = if (allSelected) sharedExtendedLight.quinary else sharedExtendedLight.quaternary
-    val starredColor = if (starredSelected) sharedExtendedLight.quinary else sharedExtendedLight.quaternary
-    val downloadedColor = if (downloadedSelected) sharedExtendedLight.quinary else sharedExtendedLight.quaternary
-
-    val allWeight = if (allSelected) FontWeight.Bold else FontWeight.Normal
-    val starredWeight = if (starredSelected) FontWeight.Bold else FontWeight.Normal
-    val downloadedWeight = if (downloadedSelected) FontWeight.Bold else FontWeight.Normal
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
-            .background(sharedExtendedLight.quaternary.color)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            SharedSelectorBox(
-                modifier = Modifier.fillMaxWidth(1f / 3f), // ALL_EVENTS_BUTTON_WIDTH
-                backgroundColor = allColor.color,
-                onClick = onAllEventsClicked,
-                textColor = allColor.onColor,
-                fontWeight = allWeight,
-                text = "All Events" // TODO: Use MokoRes strings
-            )
-            SharedSelectorBox(
-                modifier = Modifier.fillMaxWidth(0.5f), // FAVORITES_BUTTON_WIDTH
-                backgroundColor = starredColor.color,
-                onClick = onFavoriteEventsClicked,
-                textColor = starredColor.onColor,
-                fontWeight = starredWeight,
-                text = "Favorites" // TODO: Use MokoRes strings
-            )
-            SharedSelectorBox(
-                modifier = Modifier.fillMaxWidth(1f),
-                backgroundColor = downloadedColor.color,
-                onClick = onDownloadedEventsClicked,
-                textColor = downloadedColor.onColor,
-                fontWeight = downloadedWeight,
-                text = "Downloaded" // TODO: Use MokoRes strings
-            )
-        }
-    }
-}
-
-@Composable
-private fun SharedSelectorBox(
-    modifier: Modifier,
-    backgroundColor: Color,
-    onClick: () -> Unit,
-    textColor: Color,
-    fontWeight: FontWeight,
-    text: String
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
-            .height(EventsList.SELECTOR_HEIGHT.dp)
-            .background(backgroundColor)
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE).copy(
-                color = textColor,
-                fontWeight = fontWeight
-            )
-        )
-    }
-}
-
-/**
- * Shared Event Overlay Components - EXACT Android match
- */
-@Composable
-private fun SharedEventOverlayCountryAndCommunityFlags(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        // Community flag (top-left)
-        val communityImageResource = getCommunityImageResource(event.id)
-        if (communityImageResource != null) {
-            Image(
-                modifier = Modifier
-                    .padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        top = Dimensions.DEFAULT_INT_PADDING.dp
-                    )
-                    .width(EventsList.FLAG_WIDTH.dp),
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(communityImageResource),
-                contentDescription = getCommunityName(event.id)
-            )
-        }
-
-        // Country flag (bottom-left)
-        val countryImageResource = getCountryImageResource(event.id)
-        if (countryImageResource != null) {
-            Image(
-                modifier = Modifier
-                    .padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        bottom = Dimensions.DEFAULT_INT_PADDING.dp
-                    )
-                    .width(EventsList.FLAG_WIDTH.dp),
-                contentScale = ContentScale.FillWidth,
-                painter = painterResource(countryImageResource),
-                contentDescription = getCountryName(event.id)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SharedEventOverlayMapDownloaded(
-    eventId: String,
-    isMapInstalled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    if (isMapInstalled) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(
-                    end = Dimensions.DEFAULT_INT_PADDING.dp * 2 + EventsList.MAPDL_IMAGE_SIZE.dp,
-                    bottom = Dimensions.DEFAULT_INT_PADDING.dp
-                ),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            // TODO: Add downloaded icon when available
-            Surface(
-                modifier = Modifier.size(EventsList.MAPDL_IMAGE_SIZE.dp),
-                color = Color.Green,
-                shape = CircleShape
-            ) {
-                Text(
-                    text = "✓",
-                    color = Color.White,
-                    modifier = Modifier.padding(8.dp),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SharedEventOverlayFavorite(
-    event: IWWWEvent,
-    isFavorite: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                end = Dimensions.DEFAULT_INT_PADDING.dp,
-                bottom = Dimensions.DEFAULT_INT_PADDING.dp
-            ),
-        contentAlignment = Alignment.BottomEnd
-    ) {
-        Surface(
-            modifier = Modifier.clip(CircleShape),
-            color = MaterialTheme.colorScheme.primary
-        ) {
-            Surface(
-                modifier = Modifier.size(EventsList.FAVS_IMAGE_SIZE.dp),
-                color = if (isFavorite) Color.Yellow else Color.Gray,
-                shape = CircleShape
-            ) {
-                Text(
-                    text = if (isFavorite) "★" else "☆",
-                    color = Color.White,
-                    modifier = Modifier.padding(8.dp),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-// Image resource helpers - placeholder until real resources are available
-private fun getCommunityImageResource(eventId: String): org.jetbrains.compose.resources.DrawableResource? {
-    // TODO: Return actual community flag resources
-    return null
-}
-
-private fun getCountryImageResource(eventId: String): org.jetbrains.compose.resources.DrawableResource? {
-    // TODO: Return actual country flag resources
-    return null
-}
 
 /**
  * Placeholder for shared Debug screen
