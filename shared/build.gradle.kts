@@ -25,7 +25,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = true
+            isStatic = false // Change to dynamic framework for better bundle loading
         }
     }
 

@@ -40,25 +40,52 @@ fun doInitKoin() {
     if (koinApp != null) return
 
     // Initialize Napier logging for iOS
+    platform.Foundation.NSLog("HELPER: doInitKoin() starting - direct NSLog test")
+
+    // Initialize MokoRes bundle BEFORE anything else
+    platform.Foundation.NSLog("HELPER: About to initialize MokoRes bundle")
     try {
-        // Direct NSLog test first
-        platform.Foundation.NSLog("HELPER: doInitKoin() starting - direct NSLog test")
+        val bundleInitialized = BundleInitializer.initializeBundle()
+        platform.Foundation.NSLog("HELPER: MokoRes bundle initialization result: $bundleInitialized")
+    } catch (e: Exception) {
+        platform.Foundation.NSLog("ERROR: MokoRes bundle initialization failed: ${e.message}")
+    }
 
+    // Re-enable initNapier with bulletproof NSLogAntilog
+    platform.Foundation.NSLog("HELPER: About to call initNapier()")
+    try {
         initNapier()
-
-        // Test logging through our system
-        com.worldwidewaves.shared.utils.Log.i("Helper", "doInitKoin() completed successfully")
+        platform.Foundation.NSLog("HELPER: initNapier() completed successfully")
     } catch (e: Exception) {
         platform.Foundation.NSLog("ERROR: initNapier() failed: ${e.message}")
     }
 
-    koinApp =
-        startKoin {
-            // Add iOS logging equivalent to Android's androidLogger()
-            logger(PrintLogger(Level.DEBUG))
-            // `sharedModule` is already a List<Module>; add the iOS-specific one.
-            modules(sharedModule + IOSModule)
-        }
+    platform.Foundation.NSLog("HELPER: About to call startKoin")
+    try {
+        platform.Foundation.NSLog("HELPER: Testing sharedModule access...")
+        val sharedModulesCount = sharedModule.size
+        platform.Foundation.NSLog("HELPER: sharedModule has $sharedModulesCount modules")
+
+        platform.Foundation.NSLog("HELPER: Testing IOSModule access...")
+        val iosModuleName = IOSModule.toString()
+        platform.Foundation.NSLog("HELPER: IOSModule: $iosModuleName")
+
+        platform.Foundation.NSLog("HELPER: About to create startKoin block...")
+        koinApp =
+            startKoin {
+                platform.Foundation.NSLog("HELPER: Inside startKoin block")
+                // Add iOS logging equivalent to Android's androidLogger()
+                logger(PrintLogger(Level.DEBUG))
+                platform.Foundation.NSLog("HELPER: Logger added")
+                // `sharedModule` is already a List<Module>; add the iOS-specific one.
+                modules(sharedModule + IOSModule)
+                platform.Foundation.NSLog("HELPER: Modules added")
+            }
+        platform.Foundation.NSLog("HELPER: startKoin completed successfully")
+    } catch (e: Exception) {
+        platform.Foundation.NSLog("ERROR: startKoin failed: ${e.message}")
+        platform.Foundation.NSLog("ERROR: Exception type: ${e::class.simpleName}")
+    }
 }
 
 /**
