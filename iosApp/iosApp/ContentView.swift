@@ -25,6 +25,9 @@ struct ContentView: UIViewControllerRepresentable {
     // iOS Compose Multiplatform integration - Uses same UI as Android
 
     func makeUIViewController(context: Context) -> UIViewController {
+        // Initialize Napier logging for iOS - CRITICAL for debugging
+        WWWGlobalsKt.debugBuild()
+
         // Initialize Koin DI
         HelperKt.doInitKoin()
 
