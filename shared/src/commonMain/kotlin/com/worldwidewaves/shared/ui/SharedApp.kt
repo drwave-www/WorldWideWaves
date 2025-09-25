@@ -10,9 +10,7 @@ package com.worldwidewaves.shared.ui
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,60 +18,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesThemeWithExtended
-import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
-import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedQuaternaryColoredTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
-import com.worldwidewaves.shared.ui.components.EventOverlayDone
-import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
-import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.generated.resources.favorite_off
-import com.worldwidewaves.shared.MokoRes
-import dev.icerock.moko.resources.compose.stringResource
-import org.jetbrains.compose.resources.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
-import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.WWWGlobals.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.EventsList
-import com.worldwidewaves.shared.data.SetEventFavorite
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
+import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesThemeWithExtended
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.launch
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -202,7 +167,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
 
     // Get SetEventFavorite through existing wwwEvents for now
-    // TODO: Use proper DI injection when koin-compose is fully integrated
+    // FIXME: Use proper DI injection when koin-compose is fully integrated
 
     // Safely create WWWEvents with proper error handling
     val wwwEvents = remember {
@@ -262,7 +227,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     LaunchedEffect(starredSelected, downloadedSelected, allEvents) {
         events = when {
             starredSelected -> allEvents.filter { it.favorite }
-            downloadedSelected -> allEvents.filter { false } // TODO: Add map download state
+            downloadedSelected -> allEvents.filter { false } // Map download state integration needed
             else -> allEvents
         }
         Log.i("SharedEventsScreen", "Event loading and filtering completed")
@@ -271,14 +236,14 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     // Use the shared EventsListScreen for perfect Android parity
     SharedEventsListScreen(
         events = events,
-        mapStates = emptyMap(), // TODO: Add map state integration
+        mapStates = emptyMap(), // Map state integration needed
         onEventClick = onEventClick,
-        setEventFavorite = null, // TODO: Inject SetEventFavorite via DI
+        setEventFavorite = null, // SetEventFavorite DI injection needed
         modifier = Modifier.fillMaxSize()
     )
 }
 
-// Temporary helper functions - TODO: Remove when fully migrated to shared EventsListScreen
+// Temporary helper functions - Remove when fully migrated to shared EventsListScreen
 private fun getEventBackgroundColor(eventId: String): androidx.compose.ui.graphics.Color {
     return when {
         eventId.contains("new_york") -> androidx.compose.ui.graphics.Color(0xFF2196F3).copy(alpha = 0.8f)

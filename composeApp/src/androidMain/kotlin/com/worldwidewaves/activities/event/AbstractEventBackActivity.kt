@@ -27,15 +27,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,22 +44,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.worldwidewaves.R
 import com.worldwidewaves.activities.MainActivity
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
+import com.worldwidewaves.shared.ui.components.navigation.BackwardScreen as SharedBackwardScreen
 import com.worldwidewaves.theme.AppTheme
-import com.worldwidewaves.theme.primaryColoredTextStyle
 import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -108,7 +105,45 @@ abstract class AbstractEventBackActivity(
                 ) {
                     // Stack content & global simulation-mode chip
                     Box(modifier = Modifier.fillMaxSize()) {
-                        tabManager.TabView(startScreen = { BackwardScreen() })
+                        // Back navigation using shared component
+                        SharedBackwardScreen(
+                            onBackClick = { finish() },
+                            modifier = Modifier
+                        )
+
+                        // Event content overlay - positioned below navigation
+                        if (selectedEvent != null) {
+                            EventContentArea(selectedEvent!!)
+                        } else {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                LoadingIndicator(message = stringResource(MokoRes.strings.events_not_found_loading))
+                            }
+                        }
+
+                        // Event location display overlay in navigation area
+                        if (selectedEvent != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = BackNav.PADDING[0].dp,
+                                        end = BackNav.PADDING[1].dp,
+                                        top = BackNav.PADDING[2].dp,
+                                        bottom = BackNav.PADDING[3].dp,
+                                    )
+                            ) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth().align(Center),
+                                    text = stringResource(selectedEvent!!.getLocation()),
+                                    style = quinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
+                                        textAlign = TextAlign.Center,
+                                    ),
+                                )
+                            }
+                        }
 
                         // Global Simulation-Mode overlay
                         SimulationModeChip(platform)
@@ -134,74 +169,24 @@ abstract class AbstractEventBackActivity(
     // ----------------------------
 
     @Composable
-    private fun BackwardScreen() {
+    private fun EventContentArea(event: IWWWEvent) {
         val scrollState = rememberScrollState()
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Back layer
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = BackNav.PADDING[0].dp,
-                            end = BackNav.PADDING[1].dp,
-                            top = BackNav.PADDING[2].dp,
-                            bottom = BackNav.PADDING[3].dp,
-                        ),
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomStart)
-                                .clickable { finish() },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(MokoRes.strings.back),
-                            modifier =
-                                Modifier
-                                    .size(20.dp)
-                                    .padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Text(
-                            text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(BackNav.FONTSIZE),
-                        )
-                    }
-                    if (selectedEvent != null) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth().align(Center),
-                            text = stringResource(selectedEvent!!.getLocation()),
-                            style =
-                                quinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
-                                    textAlign = TextAlign.Center,
-                                ),
-                        )
-                    }
-                }
+        // Position content below navigation area
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = (BackNav.PADDING[2] + 60).dp // Navigation height + padding
+                )
+        ) {
+            var screenModifier = Modifier.fillMaxSize()
+            if (activateInfiniteScroll) {
+                screenModifier = screenModifier.verticalScroll(scrollState)
             }
 
-            // Default page to manage initializations, download process and errors
-            if (selectedEvent != null) { // Event has been loaded
-
-                // Content Event screen
-                var screenModifier = Modifier.fillMaxSize()
-                if (activateInfiniteScroll) {
-                    screenModifier = screenModifier.verticalScroll(scrollState)
-                }
-
-                Box(modifier = screenModifier) {
-                    Screen(modifier = Modifier.fillMaxSize(), selectedEvent!!)
-                }
-            } else {
-                Text(
-                    text = stringResource(MokoRes.strings.events_not_found_loading),
-                    style = primaryColoredTextStyle(),
-                )
+            Box(modifier = screenModifier) {
+                Screen(modifier = Modifier.fillMaxSize(), event)
             }
         }
     }

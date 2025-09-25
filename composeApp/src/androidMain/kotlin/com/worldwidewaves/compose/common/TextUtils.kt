@@ -11,4 +11,3 @@ package com.worldwidewaves.compose.common
  */
 
 // Re-export shared component for backward compatibility
-import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText

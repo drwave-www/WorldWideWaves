@@ -67,8 +67,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.compose.choreographies.WaveChoreographies
-import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
+import com.worldwidewaves.shared.ui.components.SharedUserWaveStatusText
+import com.worldwidewaves.shared.ui.components.SharedWaveHitCounter
+import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
+import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
+import com.worldwidewaves.shared.ui.screens.UserPositionTriangle
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.DisplayText
@@ -78,6 +81,7 @@ import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
 import com.worldwidewaves.theme.extendedLight
 import com.worldwidewaves.theme.extraElementsLight
 import com.worldwidewaves.theme.onPrimaryLight
@@ -123,20 +127,6 @@ class WaveActivity : AbstractEventWaveActivity() {
         val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
         val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
-        // Derive choreography active state
-        val isChoreographyActive =
-            remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-                isWarmingInProgress ||
-                    isGoingToBeHit ||
-                    run {
-                        if (hasBeenHit) {
-                            val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                            secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                        } else {
-                            false
-                        }
-                    }
-            }
 
         // Construct the event Map
         val eventMap =
@@ -156,7 +146,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
 
-        // Play the hit sound when the user has been hit - FIXME: move in WaveProgressionObserver
+        // Play the hit sound when the user has been hit
         LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
             val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
             if (hasBeenHit && secondsSinceHit in 0..1 && !hasPlayedHitSound) {
@@ -175,7 +165,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp),
             ) {
-                UserWaveStatusText(event)
+                SharedUserWaveStatusText(event)
                 eventMap.Screen(
                     autoMapDownload = true,
                     Modifier
@@ -286,7 +276,7 @@ fun WaveProgressionBar(
             WaveProgressionFillArea(progression)
 
             Text(
-                text = "${String.format("%.1f", progression)}%",
+                text = "${String.format(java.util.Locale.US, "%.1f", progression)}%",
                 style = primaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
                 color = Color.Black,
                 textAlign = TextAlign.Center,

@@ -85,10 +85,22 @@ fun sharedQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAUL
     sharedQuinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
+    sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedPrimaryColoredBoldTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
+
+fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedTypography.displayMedium.fontFamily)
+
+fun sharedExtraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+
+fun sharedExtraPrimaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    sharedExtraTextStyle(fontSize).copy(color = SharedLightColorScheme.primary)
+
+fun sharedExtraQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    sharedExtraTextStyle(fontSize).copy(color = sharedExtendedLight.quinary.color, fontWeight = FontWeight.Bold)
 
 /**
  * Shared Material Theme with extended colors - IDENTICAL to Android

@@ -61,23 +61,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.ui.components.EventOverlayDone
-import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
-import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
-import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
+import com.worldwidewaves.shared.generated.resources.favorite_off
+import com.worldwidewaves.shared.generated.resources.favorite_on
+import com.worldwidewaves.shared.ui.components.EventOverlayDone
+import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuaternaryColoredTextStyle
-import com.worldwidewaves.shared.format.DateTimeFormats
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -462,7 +462,7 @@ private fun EventOverlayMapDownloaded(
                 modifier = Modifier
                     .size(EventsList.MAPDL_IMAGE_SIZE.dp)
                     .clickable {
-                        // TODO: Implement map uninstall dialog
+                        // Map uninstall dialog implementation needed
                     },
                 painter = painterResource(Res.drawable.downloaded_icon),
                 contentDescription = stringResource(MokoRes.strings.map_downloaded),
@@ -536,6 +536,7 @@ private fun EventLocationAndDate(
         try {
             DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
         } catch (e: Exception) {
+            Log.w("EventsListScreen", "Failed to format date for event ${event.id}", e)
             "Dec 24" // Fallback date
         }
     }

@@ -24,9 +24,23 @@ package com.worldwidewaves.debug
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,10 +50,9 @@ import com.worldwidewaves.shared.sound.MidiParser
 import com.worldwidewaves.shared.sound.MidiTrack
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.shared.sound.WaveformGenerator
-import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -210,10 +223,10 @@ class AudioTestActivity : ComponentActivity() {
      */
     private suspend fun loadMidiTrack(): MidiTrack? =
         try {
-            Log.d(TAG, "Loading MIDI file: ${FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE}")
+            WWWLogger.d(TAG, "Loading MIDI file: ${FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE}")
             MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to load MIDI file, creating demo track: ${e.message}")
+            WWWLogger.w(TAG, "Failed to load MIDI file, creating demo track: ${e.message}")
             createDemoMidiTrack()
         }
 
@@ -244,7 +257,7 @@ class AudioTestActivity : ComponentActivity() {
      * Play a single test note to verify audio works
      */
     private suspend fun playTestNote() {
-        Log.d(TAG, "Playing test note: A4 (440Hz)")
+        WWWLogger.d(TAG, "Playing test note: A4 (440Hz)")
 
         soundPlayer.playTone(
             frequency = 440.0, // A4
@@ -255,7 +268,7 @@ class AudioTestActivity : ComponentActivity() {
 
         // Wait for the tone to finish
         delay(2.5.seconds)
-        Log.d(TAG, "Test note completed")
+        WWWLogger.d(TAG, "Test note completed")
     }
 
     /**
@@ -263,14 +276,14 @@ class AudioTestActivity : ComponentActivity() {
      */
     private suspend fun playMidiSequence() {
         val track = midiTrack ?: return
-        Log.d(TAG, "Playing MIDI sequence: ${track.notes.size} notes")
+        WWWLogger.d(TAG, "Playing MIDI sequence: ${track.notes.size} notes")
 
         // Play first DEFAULT_OCTAVE notes to keep demo reasonable
         track.notes.take(com.worldwidewaves.shared.WWWGlobals.Midi.DEFAULT_OCTAVE).forEachIndexed { index, note ->
             val frequency = WaveformGenerator.midiPitchToFrequency(note.pitch)
             val amplitude = WaveformGenerator.midiVelocityToAmplitude(note.velocity) * 0.6
 
-            Log.d(TAG, "Note ${index + 1}: MIDI ${note.pitch} -> ${frequency.toInt()}Hz")
+            WWWLogger.d(TAG, "Note ${index + 1}: MIDI ${note.pitch} -> ${frequency.toInt()}Hz")
 
             soundPlayer.playTone(
                 frequency = frequency,
@@ -282,7 +295,7 @@ class AudioTestActivity : ComponentActivity() {
             delay(1000.milliseconds) // Gap between notes
         }
 
-        Log.d(TAG, "MIDI sequence completed")
+        WWWLogger.d(TAG, "MIDI sequence completed")
     }
 
     /**
@@ -290,7 +303,7 @@ class AudioTestActivity : ComponentActivity() {
      */
     private suspend fun playCrowdSimulation() {
         val track = midiTrack ?: return
-        Log.d(TAG, "Starting crowd simulation")
+        WWWLogger.d(TAG, "Starting crowd simulation")
 
         val simulationDuration = 8.seconds
         val crowdSize = 5
@@ -312,7 +325,7 @@ class AudioTestActivity : ComponentActivity() {
             val activeNotes = track.notes.filter { it.isActiveAt(trackPosition) }
 
             if (activeNotes.isNotEmpty()) {
-                Log.d(TAG, "Time: ${currentTime.inWholeSeconds}s, Active notes: ${activeNotes.size}")
+                WWWLogger.d(TAG, "Time: ${currentTime.inWholeSeconds}s, Active notes: ${activeNotes.size}")
 
                 // Simulate multiple people playing different notes
                 repeat(crowdSize.coerceAtMost(activeNotes.size)) { personIndex ->
@@ -328,7 +341,7 @@ class AudioTestActivity : ComponentActivity() {
                             else -> SoundPlayer.Waveform.SAWTOOTH
                         }
 
-                    Log.d(TAG, "  Person ${personIndex + 1}: MIDI ${note.pitch} (${frequency.toInt()}Hz, ${waveform.name})")
+                    WWWLogger.d(TAG, "  Person ${personIndex + 1}: MIDI ${note.pitch} (${frequency.toInt()}Hz, ${waveform.name})")
 
                     // Play the note (this produces actual sound!)
                     soundPlayer.playTone(
@@ -345,7 +358,7 @@ class AudioTestActivity : ComponentActivity() {
             currentTime = currentTime.plus(playbackInterval)
         }
 
-        Log.d(TAG, "Crowd simulation completed")
+        WWWLogger.d(TAG, "Crowd simulation completed")
     }
 
     /**
@@ -358,8 +371,8 @@ class AudioTestActivity : ComponentActivity() {
      */
     private suspend fun playWaveProgression() {
         val track = midiTrack ?: return
-        Log.d(TAG, "🌊 Starting realistic wave progression through crowd")
-        Log.d(TAG, "🎼 Full symphony duration: ${track.totalDuration.inWholeSeconds}s")
+        WWWLogger.d(TAG, "🌊 Starting realistic wave progression through crowd")
+        WWWLogger.d(TAG, "🎼 Full symphony duration: ${track.totalDuration.inWholeSeconds}s")
 
         // Create a SoundChoreographyManager-like simulation
         val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
@@ -373,7 +386,7 @@ class AudioTestActivity : ComponentActivity() {
             val currentTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             val elapsedTime = currentTime - waveStartTime
 
-            Log.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits $peoplePerSlot people at ${elapsedTime.inWholeSeconds}s")
+            WWWLogger.d(TAG, "🌊 Slot $currentSlotIndex: Wave hits $peoplePerSlot people at ${elapsedTime.inWholeSeconds}s")
 
             // Simulate people getting hit by the wave at this time
             repeat(peoplePerSlot) { personIndex ->
@@ -408,9 +421,10 @@ class AudioTestActivity : ComponentActivity() {
                         // SQUARE waveform has richer harmonics for better perceived loudness
                         val waveform = SoundPlayer.Waveform.SQUARE
 
-                        Log.v(
+                        WWWLogger.v(
                             TAG,
-                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
+                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): " +
+                                "MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
                         )
 
                         soundPlayer.playTone(
@@ -428,7 +442,7 @@ class AudioTestActivity : ComponentActivity() {
             currentSlotIndex++
         }
 
-        Log.d(TAG, "🌊 Wave progression completed - played full ${track.totalDuration.inWholeSeconds}s symphony")
+        WWWLogger.d(TAG, "🌊 Wave progression completed - played full ${track.totalDuration.inWholeSeconds}s symphony")
     }
 
     override fun onDestroy() {

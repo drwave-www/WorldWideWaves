@@ -25,11 +25,17 @@ struct ContentView: UIViewControllerRepresentable {
     // iOS Compose Multiplatform integration - Uses same UI as Android
 
     func makeUIViewController(context: Context) -> UIViewController {
+        NSLog("📱 ContentView: makeUIViewController called")
+
         // Initialize Koin DI (now includes Napier logging initialization)
         HelperKt.doInitKoin()
+        NSLog("📱 ContentView: doInitKoin completed")
 
         // Return Compose UI - Same as Android for perfect UI parity
-        return MainViewControllerKt.MainViewController()
+        NSLog("📱 ContentView: About to call MainViewController")
+        let controller = MainViewControllerKt.MainViewController()
+        NSLog("📱 ContentView: MainViewController created successfully")
+        return controller
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {

@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
@@ -62,7 +61,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertHasClickAction
@@ -80,7 +78,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import kotlinx.coroutines.delay
 import org.junit.Assert.assertTrue
 import org.junit.Before

@@ -27,49 +27,40 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.about_icon
 import com.worldwidewaves.shared.generated.resources.about_icon_selected
-import com.worldwidewaves.shared.generated.resources.background
 import com.worldwidewaves.shared.generated.resources.debug_icon
 import com.worldwidewaves.shared.generated.resources.debug_icon_selected
 import com.worldwidewaves.shared.generated.resources.waves_icon
 import com.worldwidewaves.shared.generated.resources.waves_icon_selected
-import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.components.SharedSplashScreen
+import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.navigation.SharedTabBarItem
 import com.worldwidewaves.theme.AppTheme
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
 import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
@@ -171,12 +162,7 @@ open class MainActivity : AppCompatActivity() {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
             }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false)
-        } else {
-            @Suppress("DEPRECATION")
-            window.statusBarColor = android.graphics.Color.TRANSPARENT
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             AppTheme {
@@ -207,7 +193,9 @@ open class MainActivity : AppCompatActivity() {
 
         // Also enforce minimum duration
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS) // Timing.SPLASH_MIN_DURATION
+            kotlinx.coroutines.delay(
+                com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS
+            )
             checkSplashFinished(startTime)
         }
     }
@@ -215,7 +203,9 @@ open class MainActivity : AppCompatActivity() {
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded && elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+        if (isDataLoaded &&
+            elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS
+        ) {
             isSplashFinished.update { true }
         }
     }
@@ -230,11 +220,11 @@ open class MainActivity : AppCompatActivity() {
         totalTabs: Int,
     ) {
         val tabInfo = getTabInfo(totalTabs > 2)
-        Image(
-            painter = painterResource(if (!isSelected) tabInfo[tabIndex].first else tabInfo[tabIndex].second),
+        SharedTabBarItem(
+            isSelected = isSelected,
+            selectedIcon = tabInfo[tabIndex].second,
+            unselectedIcon = tabInfo[tabIndex].first,
             contentDescription = contentDescription,
-            modifier = Modifier.height(TabBar.EXT_HEIGHT.dp),
-            contentScale = ContentScale.Fit,
         )
     }
 
@@ -244,21 +234,6 @@ open class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun ProgrammaticSplashScreen() {
-        Box {
-            Image(
-                painter = painterResource(ShRes.drawable.background),
-                contentDescription = stringResource(MokoRes.strings.background_description),
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Image(
-                painter = painterResource(ShRes.drawable.www_logo_transparent),
-                contentDescription = stringResource(MokoRes.strings.logo_description),
-                modifier =
-                    Modifier
-                        .align(androidx.compose.ui.Alignment.BottomCenter)
-                        .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // original SplashActivity padding
-            )
-        }
+        SharedSplashScreen()
     }
 }

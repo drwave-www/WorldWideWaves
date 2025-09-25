@@ -43,6 +43,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -615,56 +616,72 @@ data class WWWEventArea(
      */
     private suspend fun computeExtentFromGeoJson(): BoundingBox? =
         try {
-            var minLat = Double.POSITIVE_INFINITY
-            var minLng = Double.POSITIVE_INFINITY
-            var maxLat = Double.NEGATIVE_INFINITY
-            var maxLng = Double.NEGATIVE_INFINITY
-            var pointsFound = 0
-
-            fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
-                // Deep-walk coordinates arrays of unknown depth
-                array.forEach { element ->
-                    if (element is kotlinx.serialization.json.JsonArray &&
-                        element.firstOrNull() is JsonElement &&
-                        element.first() is kotlinx.serialization.json.JsonPrimitive &&
-                        element.size == 2 &&
-                        element[0].jsonPrimitive.isString.not()
-                    ) {
-                        // Element looks like [lng,lat]
-                        val lng = element[0].jsonPrimitive.double
-                        val lat = element[1].jsonPrimitive.double
-                        minLat = minOf(minLat, lat)
-                        maxLat = maxOf(maxLat, lat)
-                        minLng = minOf(minLng, lng)
-                        maxLng = maxOf(maxLng, lng)
-                        pointsFound++
-                    } else if (element is kotlinx.serialization.json.JsonArray) {
-                        consumeCoords(element)
-                    }
-                }
-            }
+            val extentCalculator = ExtentCalculator()
 
             geoJsonDataProvider.getGeoJsonData(event.id)?.let { root ->
-                when (root["type"]?.jsonPrimitive?.content) {
-                    "FeatureCollection" -> {
-                        root["features"]?.jsonArray?.forEach { feature ->
-                            feature.jsonObject["geometry"]
-                                ?.jsonObject
-                                ?.get("coordinates")
-                                ?.jsonArray
-                                ?.let { consumeCoords(it) }
-                        }
-                    }
-                    "Polygon", "MultiPolygon" -> {
-                        root["coordinates"]?.jsonArray?.let { consumeCoords(it) }
-                    }
-                }
+                processGeoJsonForExtent(root, extentCalculator)
             }
 
-            if (pointsFound > 0) {
+            extentCalculator.createBoundingBox(event.id)
+        } catch (e: Exception) {
+            Log.w(
+                ::computeExtentFromGeoJson.name,
+                "${event.id}: Error scanning GeoJSON for extent (${e.message})",
+            )
+            null
+        }
+
+    private fun processGeoJsonForExtent(
+        root: JsonObject,
+        extentCalculator: ExtentCalculator
+    ) {
+        when (root["type"]?.jsonPrimitive?.content) {
+            "FeatureCollection" -> {
+                root["features"]?.jsonArray?.forEach { feature ->
+                    feature.jsonObject["geometry"]
+                        ?.jsonObject
+                        ?.get("coordinates")
+                        ?.jsonArray
+                        ?.let { extentCalculator.consumeCoords(it) }
+                }
+            }
+            "Polygon", "MultiPolygon" -> {
+                root["coordinates"]?.jsonArray?.let { extentCalculator.consumeCoords(it) }
+            }
+        }
+    }
+
+    private inner class ExtentCalculator {
+        var minLat = Double.POSITIVE_INFINITY
+        var minLng = Double.POSITIVE_INFINITY
+        var maxLat = Double.NEGATIVE_INFINITY
+        var maxLng = Double.NEGATIVE_INFINITY
+        var pointsFound = 0
+
+        fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
+            // Deep-walk coordinates arrays of unknown depth
+            array.forEach { element ->
+                if (isCoordinatePair(element)) {
+                    // Element looks like [lng,lat]
+                    val elementArray = element as kotlinx.serialization.json.JsonArray
+                    val lng = elementArray[0].jsonPrimitive.double
+                    val lat = elementArray[1].jsonPrimitive.double
+                    minLat = minOf(minLat, lat)
+                    maxLat = maxOf(maxLat, lat)
+                    minLng = minOf(minLng, lng)
+                    maxLng = maxOf(maxLng, lng)
+                    pointsFound++
+                } else if (element is kotlinx.serialization.json.JsonArray) {
+                    consumeCoords(element)
+                }
+            }
+        }
+
+        fun createBoundingBox(eventId: String): BoundingBox? {
+            return if (pointsFound > 0) {
                 Log.i(
                     ::computeExtentFromGeoJson.name,
-                    "${event.id}: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)",
+                    "$eventId: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)",
                 )
                 BoundingBox.fromCorners(
                     sw = Position(minLat, minLng),
@@ -673,17 +690,20 @@ data class WWWEventArea(
             } else {
                 Log.d(
                     ::computeExtentFromGeoJson.name,
-                    "${event.id}: No coordinates found while scanning GeoJSON for extent",
+                    "$eventId: No coordinates found while scanning GeoJSON for extent",
                 )
                 null
             }
-        } catch (e: Exception) {
-            Log.w(
-                ::computeExtentFromGeoJson.name,
-                "${event.id}: Error scanning GeoJSON for extent (${e.message})",
-            )
-            null
         }
+    }
+
+    private fun isCoordinatePair(element: JsonElement): Boolean {
+        return element is kotlinx.serialization.json.JsonArray &&
+            element.firstOrNull() is JsonElement &&
+            element.first() is kotlinx.serialization.json.JsonPrimitive &&
+            element.size == 2 &&
+            element[0].jsonPrimitive.isString.not()
+    }
 
     // ---------------------------
 

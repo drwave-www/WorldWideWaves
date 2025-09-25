@@ -24,7 +24,7 @@ package com.worldwidewaves.utils
 import android.annotation.SuppressLint
 import android.location.LocationListener
 import android.os.Looper
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.WWWLocationProvider
@@ -72,7 +72,7 @@ class AndroidWWWLocationProvider :
                 }
 
                 override fun onFailure(exception: Exception) {
-                    Log.e("EventMap", "Failed to get location: $exception")
+                    WWWLogger.e("EventMap", "Failed to get location: $exception")
                 }
             }
 

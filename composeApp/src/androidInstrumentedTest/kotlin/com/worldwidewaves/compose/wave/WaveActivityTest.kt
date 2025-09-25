@@ -39,7 +39,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 

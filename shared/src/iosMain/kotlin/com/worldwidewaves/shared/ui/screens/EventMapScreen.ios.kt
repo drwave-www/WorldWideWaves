@@ -11,6 +11,7 @@ package com.worldwidewaves.shared.ui.screens
  */
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -21,25 +22,31 @@ import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.events.IWWWEvent
 
 /**
- * iOS implementation of event map component.
- * Placeholder until iOS-specific map implementation is available.
+ * iOS implementation of map renderer.
+ * Will integrate with iOS Maps or iOS MapLibre equivalent.
  */
 @Composable
-actual fun PlatformEventMap(
+actual fun PlatformMapRenderer(
     event: IWWWEvent,
+    onMapLoaded: () -> Unit,
+    onMapError: () -> Unit,
     onMapClick: () -> Unit,
     modifier: Modifier,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant),
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { onMapClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "iOS Map for ${event.id}\n(Tap to open full map)",
+            text = "iOS Maps for ${event.id}\n(Click for interactions)",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+
+    // Simulate map loaded
+    onMapLoaded()
 }

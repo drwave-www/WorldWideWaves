@@ -10,7 +10,6 @@ package com.worldwidewaves.shared.ui.theme
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 

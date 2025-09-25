@@ -37,13 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.screens.about.SharedAboutInfoScreen
-import com.worldwidewaves.shared.ui.screens.about.SharedAboutFaqScreen
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.screens.about.SharedAboutFaqScreen
+import com.worldwidewaves.shared.ui.screens.about.SharedAboutInfoScreen
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 

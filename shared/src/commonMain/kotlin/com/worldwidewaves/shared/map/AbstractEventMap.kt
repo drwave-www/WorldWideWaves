@@ -368,11 +368,7 @@ abstract class AbstractEventMap<T>(
         }
 
         // Auto-target the user the first time (optional) if no interaction yet
-        if (mapConfig.autoTargetUserOnFirstLocation &&
-            !userHasBeenLocated &&
-            !userInteracted &&
-            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-        ) {
+        if (shouldAutoTargetUser()) {
             scope.launch {
                 targetUser()
             }
@@ -399,4 +395,11 @@ abstract class AbstractEventMap<T>(
      * Gets the current position source from PositionManager
      */
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
+
+    private fun shouldAutoTargetUser(): Boolean {
+        return mapConfig.autoTargetUserOnFirstLocation &&
+            !userHasBeenLocated &&
+            !userInteracted &&
+            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+    }
 }

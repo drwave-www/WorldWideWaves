@@ -23,7 +23,7 @@ package com.worldwidewaves.shared
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
@@ -42,11 +42,11 @@ actual suspend fun readGeoJson(eventId: String): String? {
 
     return if (filePath != null) {
         withContext(Dispatchers.IO) {
-            Log.i(::readGeoJson.name, "Loading geojson data for event $eventId from $filePath")
+            WWWLogger.i(::readGeoJson.name, "Loading geojson data for event $eventId from $filePath")
             File(filePath).readText()
         }
     } else {
-        Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
+        WWWLogger.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
         null
     }
 }
@@ -69,119 +69,157 @@ actual suspend fun getMapFileAbsolutePath(
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
 
-    // First check if we have a valid cached file that doesn't need updating
-    val needsUpdate =
-        when {
-            !cachedFile.exists() -> {
-                Log.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
-                true
-            }
-            !metadataFile.exists() -> {
-                Log.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
-                true
-            }
-            else -> {
-                val lastCacheTime =
-                    try {
-                        metadataFile.readText().toLong()
-                    } catch (_: Exception) {
-                        0L
-                    }
+    // Check if we have a valid cached file
+    val needsUpdate = shouldUpdateCache(cachedFile, metadataFile, eventId, extension, context)
 
-                // Check if the app was installed/updated after we cached the file
-                val appInstallTime =
-                    try {
-                        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
-                    } catch (_: Exception) {
-                        System.currentTimeMillis()
-                    }
-
-                val isStale = appInstallTime > lastCacheTime
-                if (isStale) {
-                    Log.d(
-                        ::getMapFileAbsolutePath.name,
-                        "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
-                    )
-                } else {
-                    Log.d(
-                        ::getMapFileAbsolutePath.name,
-                        "Cache is up-to-date for $eventId.$extension",
-                    )
-                }
-                isStale
-            }
-        }
-
-    // If we have a valid cached file, return its path immediately
     if (!needsUpdate) {
-        Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
+        WWWLogger.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
         return cachedFile.absolutePath
     }
 
-    // If we need to update the cache, try to open the asset from feature module
-    Log.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
-
-    val assetPath = "$eventId.$extension"
-
-    /* ------------------------------------------------------------------
-     * Play Feature Delivery race mitigation:
-     * Immediately after SplitInstall reports INSTALLED the asset might
-     * not yet be visible to the running Activity/process. Retry a few
-     * times with a fresh split-aware context before giving up.
-     * ---------------------------------------------------------------- */
-
-    // Implement actual retry logic as mentioned in the comment above
-    var lastException: Exception? = null
-    val maxRetries = 3
-    val retryDelayMs = 100L
-
-    for (attempt in 1..maxRetries) {
-        try {
-            val ctx =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    try {
-                        context.createContextForSplit(eventId)
-                    } catch (_: Exception) {
-                        context
-                    }
-                } else {
-                    context
-                }
-
-            // Ensure split-compat hooks into this context
-            SplitCompat.install(ctx)
-
-            // Try to access the asset immediately
-            return cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
-        } catch (e: java.io.FileNotFoundException) {
-            lastException = e
-            if (attempt < maxRetries) {
-                Log.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
-                kotlinx.coroutines.delay(retryDelayMs)
-            }
-        }
-    }
-
-    // If we get here, all retries failed - handle the final exception intelligently
-    if (lastException is java.io.FileNotFoundException) {
-        Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
-    } else {
-        Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
-    }
-    return null
+    // Try to fetch and cache from feature module
+    return tryFetchFromFeatureModule(context, eventId, extension, cachedFile, metadataFile)
 }
 
 /**
  * Helper function to cache asset from a given context.
  * Separated for the retry logic above.
  */
+private fun shouldUpdateCache(
+    cachedFile: File,
+    metadataFile: File,
+    eventId: String,
+    extension: String,
+    context: Context
+): Boolean {
+    return when {
+        !cachedFile.exists() -> {
+            WWWLogger.d(::getMapFileAbsolutePath.name, "Cache file doesn't exist for $eventId.$extension")
+            true
+        }
+        !metadataFile.exists() -> {
+            WWWLogger.d(::getMapFileAbsolutePath.name, "Metadata file doesn't exist for $eventId.$extension")
+            true
+        }
+        else -> {
+            val lastCacheTime = getCacheTimestamp(metadataFile)
+            val appInstallTime = getAppInstallTime(context)
+            val isStale = appInstallTime > lastCacheTime
+
+            if (isStale) {
+                WWWLogger.d(
+                    ::getMapFileAbsolutePath.name,
+                    "Cache is stale for $eventId.$extension (app: $appInstallTime, cache: $lastCacheTime)",
+                )
+            } else {
+                WWWLogger.d(
+                    ::getMapFileAbsolutePath.name,
+                    "Cache is up-to-date for $eventId.$extension",
+                )
+            }
+            isStale
+        }
+    }
+}
+
+private fun getCacheTimestamp(metadataFile: File): Long {
+    return try {
+        metadataFile.readText().toLong()
+    } catch (_: Exception) {
+        0L
+    }
+}
+
+private fun getAppInstallTime(context: Context): Long {
+    return try {
+        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+    } catch (_: Exception) {
+        System.currentTimeMillis()
+    }
+}
+
+private suspend fun tryFetchFromFeatureModule(
+    context: Context,
+    eventId: String,
+    extension: String,
+    cachedFile: File,
+    metadataFile: File
+): String? {
+    WWWLogger.i(::getMapFileAbsolutePath.name, "Fetching $eventId.$extension from feature module")
+
+    val assetPath = "$eventId.$extension"
+    var lastException: Exception? = null
+    val maxRetries = 3
+    val retryDelayMs = 100L
+
+    for (attempt in 1..maxRetries) {
+        val result = tryFetchAttempt(context, eventId, assetPath, cachedFile, metadataFile, extension, attempt)
+        if (result.success) {
+            return result.path
+        }
+        lastException = result.exception
+
+        if (attempt < maxRetries) {
+            WWWLogger.d(::getMapFileAbsolutePath.name, "Asset not accessible on attempt $attempt for $eventId.$extension, retrying...")
+            kotlinx.coroutines.delay(retryDelayMs)
+        }
+    }
+
+    handleFetchFailure(lastException, eventId, extension)
+    return null
+}
+
+private data class FetchResult(val success: Boolean, val path: String? = null, val exception: Exception? = null)
+
+private suspend fun tryFetchAttempt(
+    context: Context,
+    eventId: String,
+    assetPath: String,
+    cachedFile: File,
+    metadataFile: File,
+    extension: String,
+    attempt: Int
+): FetchResult {
+    return try {
+        val ctx = createSplitContext(context, eventId)
+        SplitCompat.install(ctx)
+        val path = cacheAssetFromContext(ctx, assetPath, cachedFile, metadataFile, eventId, extension)
+        FetchResult(success = true, path = path)
+    } catch (e: java.io.FileNotFoundException) {
+        FetchResult(success = false, exception = e)
+    }
+}
+
+private fun createSplitContext(context: Context, eventId: String): Context {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        try {
+            context.createContextForSplit(eventId)
+        } catch (_: Exception) {
+            context
+        }
+    } else {
+        context
+    }
+}
+
+private fun handleFetchFailure(lastException: Exception?, eventId: String, extension: String) {
+    when (lastException) {
+        is java.io.FileNotFoundException -> {
+            WWWLogger.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
+        }
+        else -> {
+            WWWLogger.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
+        }
+    }
+}
+
 private suspend fun cacheAssetFromContext(
     ctx: Context,
     assetPath: String,
     cachedFile: File,
     metadataFile: File,
-    eventId: String,
-    extension: String,
+    @Suppress("UNUSED_PARAMETER") eventId: String,
+    @Suppress("UNUSED_PARAMETER") extension: String,
 ): String {
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
@@ -224,7 +262,7 @@ actual fun cachedFileExists(fileName: String): Boolean {
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
-        Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
+        WWWLogger.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
         false
     } else {
         File(context.cacheDir, fileName).exists()
@@ -257,7 +295,7 @@ actual fun cacheStringToFile(
     content: String,
 ): String {
     val context: Context by inject(Context::class.java)
-    Log.v(::cacheStringToFile.name, "Caching data to $fileName")
+    WWWLogger.v(::cacheStringToFile.name, "Caching data to $fileName")
     File(context.cacheDir, fileName).writeText(content)
     return fileName
 }
@@ -279,13 +317,10 @@ actual suspend fun cacheDeepFile(fileName: String) {
 
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
+    } catch (e: java.io.FileNotFoundException) {
+        WWWLogger.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
     } catch (e: Exception) {
-        // Only log full stack trace for unexpected errors
-        if (e is java.io.FileNotFoundException) {
-            Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
-        } else {
-            Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
-        }
+        WWWLogger.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
     }
 }
 
@@ -312,29 +347,35 @@ actual fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
 
-    val targets =
-        listOf(
-            "$eventId.mbtiles",
-            "$eventId.mbtiles.metadata",
-            "$eventId.geojson",
-            "$eventId.geojson.metadata",
-            "style-$eventId.json",
-            "style-$eventId.json.metadata",
-        )
+    val targets = getCacheTargets(eventId)
+    targets.forEach { name ->
+        deleteCacheFile(cacheDir, name)
+    }
+}
 
-    for (name in targets) {
-        try {
-            val f = File(cacheDir, name)
-            if (f.exists()) {
-                if (f.delete()) {
-                    Log.i(::clearEventCache.name, "Deleted cached file $name")
-                } else {
-                    Log.e(::clearEventCache.name, "Failed to delete cached file $name")
-                }
+private fun getCacheTargets(eventId: String): List<String> {
+    return listOf(
+        "$eventId.mbtiles",
+        "$eventId.mbtiles.metadata",
+        "$eventId.geojson",
+        "$eventId.geojson.metadata",
+        "style-$eventId.json",
+        "style-$eventId.json.metadata",
+    )
+}
+
+private fun deleteCacheFile(cacheDir: File, name: String) {
+    try {
+        val f = File(cacheDir, name)
+        if (f.exists()) {
+            if (f.delete()) {
+                WWWLogger.i(::clearEventCache.name, "Deleted cached file $name")
+            } else {
+                WWWLogger.e(::clearEventCache.name, "Failed to delete cached file $name")
             }
-        } catch (e: Exception) {
-            Log.e(::clearEventCache.name, "Error while deleting $name", e)
         }
+    } catch (e: Exception) {
+        WWWLogger.e(::clearEventCache.name, "Error while deleting $name", e)
     }
 }
 
@@ -377,7 +418,7 @@ actual fun updateCacheMetadata(fileName: String) {
     try {
         metadataFile.writeText(System.currentTimeMillis().toString())
     } catch (e: Exception) {
-        Log.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
+        WWWLogger.e(::updateCacheMetadata.name, "Could not write metadata for $fileName", e)
     }
 }
 

@@ -26,6 +26,7 @@ package com.worldwidewaves.shared.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
+import com.worldwidewaves.shared.utils.WWWLogger
 
 /**
  * Registry for managing city maps and their availability.
@@ -152,6 +153,7 @@ object CityMapRegistry {
                 hasGeoJson = true,
             )
         } catch (e: Exception) {
+            WWWLogger.w("CityMapRegistry", "Failed to load city map entry", e)
             null
         }
 

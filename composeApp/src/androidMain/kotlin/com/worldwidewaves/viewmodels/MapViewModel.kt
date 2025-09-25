@@ -24,7 +24,7 @@ package com.worldwidewaves.viewmodels
 import android.app.Application
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import com.worldwidewaves.shared.utils.WWWLogger
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.play.core.splitinstall.SplitInstallManager
@@ -42,45 +42,15 @@ import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.worldwidewaves.shared.map.MapFeatureState as SharedMapFeatureState
 
-/**
- * Represents possible states during map feature installation.
- */
-sealed class MapFeatureState {
-    data object NotChecked : MapFeatureState()
+// Use shared MapFeatureState for cross-platform compatibility
+typealias MapFeatureState = SharedMapFeatureState
 
-    data object Available : MapFeatureState()
-
-    data object NotAvailable : MapFeatureState()
-
-    data object Pending : MapFeatureState()
-
-    data class Downloading(
-        val progress: Int,
-    ) : MapFeatureState()
-
-    data object Installing : MapFeatureState()
-
-    data object Installed : MapFeatureState()
-
-    data class Failed(
-        val errorCode: Int,
-        val errorMessage: String? = null,
-    ) : MapFeatureState()
-
-    data class RequiresUserConfirmation(
-        val sessionState: SplitInstallSessionState,
-    ) : MapFeatureState()
-
-    data object Canceling : MapFeatureState()
-
-    data object Unknown : MapFeatureState()
-
-    data class Retrying(
-        val attempt: Int,
-        val maxAttempts: Int,
-    ) : MapFeatureState()
-}
+// Android-specific state for user confirmation (not shareable due to SplitInstallSessionState)
+data class AndroidMapConfirmationState(
+    val sessionState: SplitInstallSessionState,
+)
 
 // ----------------------------------------------------------------------------
 
@@ -97,7 +67,7 @@ class MapViewModel(
 
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
 
-    private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
+    private val _featureState = MutableStateFlow<MapFeatureState>(SharedMapFeatureState.NotChecked)
     val featureState: StateFlow<MapFeatureState> = _featureState
 
     private var currentSessionId = 0
@@ -155,7 +125,7 @@ class MapViewModel(
         if (state.status() == SplitInstallSessionStatus.FAILED &&
             state.errorCode() == SplitInstallErrorCode.SERVICE_DIED
         ) {
-            Log.w(TAG, "SERVICE_DIED for session ${state.sessionId()} – scheduling retry")
+            WWWLogger.w(TAG, "SERVICE_DIED for session ${state.sessionId()} – scheduling retry")
 
             val moduleId = getCurrentModuleFromState(state) ?: currentMapId
             if (moduleId != null && retryCount < MAX_RETRIES) {
@@ -170,8 +140,8 @@ class MapViewModel(
         val delay = RETRY_DELAY_MILLIS * (1 shl retryCount)
         retryCount++
 
-        _featureState.value = MapFeatureState.Retrying(retryCount, MAX_RETRIES)
-        Log.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
+        _featureState.value = SharedMapFeatureState.Retrying(retryCount, MAX_RETRIES)
+        WWWLogger.i(TAG, "Retry #$retryCount for $moduleId after ${delay}ms")
 
         val request =
             SplitInstallRequest
@@ -209,21 +179,21 @@ class MapViewModel(
             } else {
                 0
             }
-        _featureState.value = MapFeatureState.Downloading(progressPercent)
+        _featureState.value = SharedMapFeatureState.Downloading(progressPercent)
     }
 
     private fun handleDownloadedStatus() {
-        _featureState.value = MapFeatureState.Downloading(PROGRESS_MULTIPLIER)
+        _featureState.value = SharedMapFeatureState.Downloading(PROGRESS_MULTIPLIER)
     }
 
     private fun handleInstallingStatus() {
-        _featureState.value = MapFeatureState.Installing
+        _featureState.value = SharedMapFeatureState.Installing
     }
 
     private fun handleInstalledStatus(state: SplitInstallSessionState) {
-        Log.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
+        WWWLogger.i(TAG, "Status: INSTALLED – modules=${state.moduleNames()}")
         clearCacheForInstalledModules(state)
-        _featureState.value = MapFeatureState.Installed
+        _featureState.value = SharedMapFeatureState.Installed
         currentSessionId = 0
     }
 
@@ -252,13 +222,13 @@ class MapViewModel(
         }
 
     private fun handlePendingStatus() {
-        _featureState.value = MapFeatureState.Pending
+        _featureState.value = SharedMapFeatureState.Pending
     }
 
     private fun handleFailedStatus(state: SplitInstallSessionState) {
-        Log.e(TAG, "Status: FAILED code=${state.errorCode()}")
+        WWWLogger.e(TAG, "Status: FAILED code=${state.errorCode()}")
         _featureState.value =
-            MapFeatureState.Failed(
+            SharedMapFeatureState.Failed(
                 state.errorCode(),
                 getErrorMessage(state.errorCode()),
             )
@@ -266,23 +236,24 @@ class MapViewModel(
     }
 
     private fun handleCanceledStatus() {
-        Log.w(TAG, "Status: CANCELED")
-        _featureState.value = MapFeatureState.NotAvailable
+        WWWLogger.w(TAG, "Status: CANCELED")
+        _featureState.value = SharedMapFeatureState.NotAvailable
         currentSessionId = 0
     }
 
     private fun handleCancelingStatus() {
-        Log.w(TAG, "Status: CANCELING")
-        _featureState.value = MapFeatureState.Canceling
+        WWWLogger.w(TAG, "Status: CANCELING")
+        _featureState.value = SharedMapFeatureState.Canceling
     }
 
     private fun handleUserConfirmationStatus(state: SplitInstallSessionState) {
-        Log.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
-        _featureState.value = MapFeatureState.RequiresUserConfirmation(state)
+        WWWLogger.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
+        // TODO: Handle user confirmation - for now treat as pending
+        _featureState.value = SharedMapFeatureState.Pending
     }
 
     private fun handleUnknownStatus() {
-        _featureState.value = MapFeatureState.Unknown
+        _featureState.value = SharedMapFeatureState.Unknown
     }
 
     // ------------------------------------------------------------------------
@@ -342,12 +313,12 @@ class MapViewModel(
         autoDownload: Boolean = false,
     ) {
         viewModelScope.launch {
-            Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
+            WWWLogger.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
             currentMapId = mapId
             if (splitInstallManager.installedModules.contains(mapId)) {
-                _featureState.value = MapFeatureState.Available
+                _featureState.value = SharedMapFeatureState.Available
             } else {
-                _featureState.value = MapFeatureState.NotAvailable
+                _featureState.value = SharedMapFeatureState.NotAvailable
                 // Only auto-download if explicitly requested
                 if (autoDownload) {
                     downloadMap(mapId)
@@ -362,15 +333,15 @@ class MapViewModel(
         mapId: String,
         onMapDownloaded: (() -> Unit)? = null,
     ) {
-        Log.i(TAG, "downloadMap called for $mapId")
-        if (_featureState.value is MapFeatureState.Downloading ||
-            _featureState.value is MapFeatureState.Pending
+        WWWLogger.i(TAG, "downloadMap called for $mapId")
+        if (_featureState.value is SharedMapFeatureState.Downloading ||
+            _featureState.value is SharedMapFeatureState.Pending
         ) {
-            Log.w(TAG, "downloadMap ignored – already downloading")
+            WWWLogger.w(TAG, "downloadMap ignored – already downloading")
             return // Already downloading
         }
 
-        _featureState.value = MapFeatureState.Pending
+        _featureState.value = SharedMapFeatureState.Pending
         retryCount = 0 // Reset retry count
         currentMapId = mapId
 
@@ -394,20 +365,20 @@ class MapViewModel(
         splitInstallManager
             .startInstall(request)
             .addOnSuccessListener { sessionId ->
-                Log.i(TAG, "startInstall success session=$sessionId")
+                WWWLogger.i(TAG, "startInstall success session=$sessionId")
                 currentSessionId = sessionId
                 retryCount = 0 // Reset retry count on success
                 onMapDownloaded?.invoke()
             }.addOnFailureListener { exception ->
-                Log.e(TAG, "startInstall failure ${exception.message}")
+                WWWLogger.e(TAG, "startInstall failure ${exception.message}")
                 // Check if it's worth retrying
                 if (retryCount < MAX_RETRIES) {
                     // Use exponential backoff for retries
                     val nextDelay = delay * (1 shl retryCount)
                     retryCount++
 
-                    _featureState.value = MapFeatureState.Retrying(retryCount, MAX_RETRIES)
-                    Log.i(TAG, "Scheduling retry #$retryCount after ${nextDelay}ms")
+                    _featureState.value = SharedMapFeatureState.Retrying(retryCount, MAX_RETRIES)
+                    WWWLogger.i(TAG, "Scheduling retry #$retryCount after ${nextDelay}ms")
 
                     // Schedule retry after delay
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -415,9 +386,9 @@ class MapViewModel(
                     }, nextDelay)
                 } else {
                     // We've exhausted our retry attempts
-                    Log.e(TAG, "Exhausted retries for $mapId")
+                    WWWLogger.e(TAG, "Exhausted retries for $mapId")
                     _featureState.value =
-                        MapFeatureState.Failed(
+                        SharedMapFeatureState.Failed(
                             0,
                             StringDesc
                                 .Resource(
@@ -432,7 +403,7 @@ class MapViewModel(
 
     fun cancelDownload() {
         if (currentSessionId > 0) {
-            Log.i(TAG, "cancelDownload session=$currentSessionId")
+            WWWLogger.i(TAG, "cancelDownload session=$currentSessionId")
             splitInstallManager.cancelInstall(currentSessionId)
             // State will be updated via the listener when cancellation completes
         }
