@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
+            implementation(compose.ui)
             implementation(libs.napier)
         }
         commonTest.dependencies {
