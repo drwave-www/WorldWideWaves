@@ -103,7 +103,7 @@ struct EventsListView: View {
                     NavigationLink(
                         destination: EventDetailView(event: selectedEvent),
                         isActive: $navigateToEventDetail
-                    )                        { EmptyView() }
+                    ) { EmptyView() }
                     .hidden()
                 )
             }

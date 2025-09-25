@@ -45,6 +45,7 @@ import org.jetbrains.compose.resources.painterResource
  * These components provide visual indicators for event states.
  */
 
+
 /**
  * Top-right banner indicating SOON / RUNNING event states.
  */
@@ -54,12 +55,18 @@ fun EventOverlaySoonOrRunning(
     modifier: Modifier = Modifier,
 ) {
     if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
-        val (backgroundColor, textId) =
+        val backgroundColor =
             if (eventStatus == Status.SOON) {
-                MaterialTheme.colorScheme.secondary to MokoRes.strings.event_soon
+                MaterialTheme.colorScheme.secondary
             } else {
-                MaterialTheme.colorScheme.tertiary to MokoRes.strings.event_running
+                MaterialTheme.colorScheme.tertiary
             }
+
+        val textResource = if (eventStatus == Status.SOON) {
+            MokoRes.strings.event_soon
+        } else {
+            MokoRes.strings.event_running
+        }
 
         Box(
             modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
@@ -75,7 +82,7 @@ fun EventOverlaySoonOrRunning(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = stringResource(textId),
+                    text = stringResource(textResource),
                     style = TextStyle(
                         fontSize = Common.SOONRUNNING_FONTSIZE.sp,
                         fontWeight = FontWeight.Normal,
