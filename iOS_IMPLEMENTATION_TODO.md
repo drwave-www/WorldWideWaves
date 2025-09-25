@@ -1620,6 +1620,450 @@ The iOS implementation has been **successfully completed** with excellent code s
 
 **Status**: READY FOR APP STORE DEPLOYMENT 🚀
 
+---
+
+## 🎯 SCREEN-BY-SCREEN UI PARITY IMPLEMENTATION
+
+**Date**: September 25, 2025
+**Status**: DETAILED UI MATCHING IN PROGRESS
+**Objective**: Recreate every Android Compose UI element exactly on iOS
+
+### 🔍 CURRENT ISSUE IDENTIFIED
+- iOS UI is close but NOT exactly matching Android
+- Need to use shared drawables and MokoResources translations
+- Must match exact fonts, sizes, colors, positioning
+- Complex SwiftUI views causing compilation issues
+
+### 📋 SCREEN-BY-SCREEN APPROACH
+
+#### SCREEN 1: EventsListScreen Analysis ✅
+**Android Structure Analyzed**:
+```kotlin
+Column(clickable) {
+    EventOverlay {
+        Image(event.getLocationImage()) // height: 160dp
+        EventOverlayCountryAndCommunityFlags
+        EventOverlaySoonOrRunning
+        EventOverlayDone
+        EventOverlayMapDownloaded
+        EventOverlayFavorite
+    }
+    EventLocationAndDate {
+        Row { Location (26sp) + Date (30sp bold blue) }
+        Row { Country (18sp) + " / " + Community (16sp) with -8dp offset }
+    }
+}
+```
+
+**Exact Android Specifications**:
+- **OVERLAY_HEIGHT**: 160dp
+- **EVENT_LOCATION_FONTSIZE**: 26sp
+- **EVENT_DATE_FONTSIZE**: 30sp
+- **EVENT_COUNTRY_FONTSIZE**: 18sp (MEDIUM)
+- **EVENT_COMMUNITY_FONTSIZE**: 16sp (DEFAULT)
+- **Country/Community offset**: -8dp vertical
+- **Date padding**: end 2dp
+
+#### iOS Implementation Issues Found 🔍
+1. **Complex SwiftUI Structure**: Causing compilation timeouts
+2. **Missing Shared Assets**: Not using actual shared drawables
+3. **Font Size Approximation**: Using SwiftUI defaults instead of exact specs
+4. **Color Mismatch**: Not using shared color system
+5. **Layout Precision**: Missing exact padding and offsets
+
+### 🛠️ IMMEDIATE FIXES REQUIRED
+
+#### FIX 1: Simplify iOS View Structure
+- Break down complex ZStack into separate components
+- Use @ViewBuilder for better compilation
+- Separate EventOverlay and EventLocationAndDate
+
+#### FIX 2: Use Shared Resources
+- Integrate shared drawables from `shared/src/commonMain/resources/`
+- Use MokoResources for translations
+- Match exact Android color system
+
+#### FIX 3: Exact Measurements
+- Use precise font sizes (26sp, 30sp, 18sp, 16sp)
+- Apply exact padding and offsets (-8dp, 2dp, etc.)
+- Match Android Row and Column layouts precisely
+
+### 📋 UPDATED IMMEDIATE TASKS
+
+1. **URGENT**: Fix iOS compilation by simplifying view structure
+2. **HIGH**: Implement exact Android EventOverlay with background images
+3. **HIGH**: Implement exact Android EventLocationAndDate layout
+4. **MEDIUM**: Integrate shared MokoResources translations
+5. **MEDIUM**: Use shared drawables and color system
+
+**Current Status**: FIXING COMPILATION ISSUES TO ENABLE EXACT UI MATCHING 🔧
+
+---
+
+## 🚀 NEW APPROACH: COMPOSE MULTIPLATFORM FOR iOS
+
+**Date**: September 25, 2025
+**Decision**: Pivot from SwiftUI to Compose Multiplatform for perfect UI parity
+**Objective**: Achieve exactly identical UI on both platforms using shared Compose code
+
+### 🎯 WHY COMPOSE MULTIPLATFORM IS THE RIGHT SOLUTION
+
+#### Current SwiftUI Approach Issues ❌
+- **UI Parity Challenge**: Nearly impossible to match Compose UI exactly with SwiftUI
+- **Development Speed**: Too slow recreating every component twice
+- **Maintenance Burden**: Two different UI codebases (SwiftUI vs Compose)
+- **Compilation Complexity**: SwiftUI timeouts with complex Android-matching layouts
+- **Resource Duplication**: Separate assets and translations needed
+
+#### Compose Multiplatform Benefits ✅
+- **Perfect UI Parity**: Same Compose code = identical UI guaranteed
+- **Maximum Code Sharing**: 90%+ UI code shared vs current 75%
+- **Single UI Codebase**: Write once, run on both platforms
+- **Faster Development**: No need to recreate components
+- **Shared Resources**: Same drawables, translations, themes
+
+### 📋 DETAILED COMPOSE MULTIPLATFORM IMPLEMENTATION PLAN
+
+#### **PHASE 1: Setup and Architecture (Days 1-2)**
+
+##### Day 1: Create New Branch and Project Setup
+**Tasks**:
+1. Create new branch: `feature/compose-multiplatform-ios`
+2. Remove SwiftUI code from iOS app
+3. Configure Compose Multiplatform build system
+4. Update iOS project structure
+
+**Build Configuration Updates**:
+```kotlin
+// composeApp/build.gradle.kts
+kotlin {
+    androidTarget()
+
+    listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+            freeCompilerArgs += listOf("-Xbinary=bundleId=com.worldwidewaves.ComposeApp")
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+        }
+
+        iosMain.dependencies {
+            implementation(compose.ui)
+        }
+    }
+}
+```
+
+##### Day 2: iOS Compose Entry Point
+**Create iOS Compose integration**:
+```kotlin
+// composeApp/src/iosMain/kotlin/main.ios.kt
+import androidx.compose.ui.window.ComposeUIViewController
+import platform.UIKit.UIViewController
+
+fun MainViewController(): UIViewController {
+    return ComposeUIViewController {
+        App() // Same App composable as Android
+    }
+}
+```
+
+```swift
+// iosApp/iosApp/ContentView.swift
+import SwiftUI
+import ComposeApp
+
+struct ContentView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        return MainViewControllerKt.MainViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+```
+
+#### **PHASE 2: Shared UI Migration (Days 3-5)**
+
+##### Day 3: Move Android UI to Common
+**Migration Tasks**:
+1. Move `EventsListScreen.kt` to `composeApp/src/commonMain/kotlin/`
+2. Move `EventActivity.kt` UI to `composeApp/src/commonMain/kotlin/`
+3. Update package imports and dependencies
+4. Ensure Android continues working
+
+**File Structure**:
+```
+composeApp/src/commonMain/kotlin/com/worldwidewaves/
+├── ui/
+│   ├── screens/
+│   │   ├── EventsListScreen.kt      // Moved from Android
+│   │   ├── EventDetailScreen.kt     // Moved from Android
+│   │   ├── EventMapScreen.kt        // New shared
+│   │   └── WaveScreen.kt           // New shared
+│   ├── components/
+│   │   ├── EventOverlays.kt        // Already exists in shared
+│   │   ├── ButtonWave.kt           // Already exists in shared
+│   │   └── CommonComponents.kt     // New
+│   └── theme/
+│       ├── Colors.kt               // Shared color system
+│       ├── Typography.kt           // Shared fonts
+│       └── Dimensions.kt           // Shared measurements
+```
+
+##### Day 4: Platform-Specific Navigation
+**Android Navigation** (existing):
+```kotlin
+// composeApp/src/androidMain/kotlin/
+├── MainActivity.kt                 // Uses shared screens
+└── navigation/AndroidNavigation.kt // Intent-based navigation
+```
+
+**iOS Navigation** (new):
+```kotlin
+// composeApp/src/iosMain/kotlin/
+├── IOSApp.kt                      // Uses same shared screens
+└── navigation/IOSNavigation.kt    // Compose navigation
+```
+
+##### Day 5: Shared Theme and Resources
+**Shared Theme System**:
+```kotlin
+// composeApp/src/commonMain/kotlin/theme/
+@Composable
+fun WorldWideWavesTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = SharedColorScheme,
+        typography = SharedTypography,
+        content = content
+    )
+}
+```
+
+#### **PHASE 3: Component Implementation (Days 6-8)**
+
+##### Day 6: EventsListScreen Shared Implementation
+```kotlin
+// composeApp/src/commonMain/kotlin/ui/screens/EventsListScreen.kt
+@Composable
+fun EventsListScreen(
+    viewModel: EventsViewModel,
+    onEventClick: (String) -> Unit
+) {
+    // Exact existing Android implementation
+    // Works identically on both platforms
+}
+```
+
+##### Day 7: Event Detail and Map Screens
+```kotlin
+// composeApp/src/commonMain/kotlin/ui/screens/EventDetailScreen.kt
+@Composable
+fun EventDetailScreen(
+    eventId: String,
+    onWaveClick: () -> Unit,
+    onMapClick: () -> Unit
+) {
+    // Shared implementation matching Android EventActivity
+}
+```
+
+##### Day 8: Wave Participation Screen
+```kotlin
+// composeApp/src/commonMain/kotlin/ui/screens/WaveScreen.kt
+@Composable
+fun WaveScreen(
+    eventId: String,
+    viewModel: WaveViewModel
+) {
+    // Shared implementation matching Android WaveActivity
+}
+```
+
+#### **PHASE 4: Platform Integration (Days 9-10)**
+
+##### Day 9: iOS Platform Services
+- iOS location services integration
+- iOS audio system integration
+- iOS performance monitoring
+- iOS platform-specific features
+
+##### Day 10: Testing and Optimization
+- Cross-platform UI testing
+- Performance verification
+- iOS App Store compliance
+- Final optimization
+
+### 📊 **Expected Outcomes**
+
+#### Code Sharing Achievement
+| Component | Current (SwiftUI) | With Compose MP | Improvement |
+|-----------|------------------|-----------------|-------------|
+| **UI Screens** | 5% | 95% | +90% |
+| **UI Components** | 20% | 95% | +75% |
+| **Business Logic** | 100% | 100% | Maintained |
+| **Overall Codebase** | 75% | 92%+ | +17% |
+
+#### Quality Benefits
+- **Perfect UI Parity**: Guaranteed identical appearance
+- **Faster Development**: Single UI codebase to maintain
+- **Better Testing**: Test UI components once for both platforms
+- **Easier Maintenance**: Changes affect both platforms automatically
+- **Consistent Behavior**: Same interactions and animations
+
+### 🎖️ **Quality Assurance Plan**
+
+#### Testing Strategy
+- **Unit Tests**: Shared UI component testing
+- **Integration Tests**: Platform-specific integration verification
+- **UI Tests**: Cross-platform UI consistency testing
+- **Performance Tests**: iOS Compose performance validation
+
+#### Clean Architecture Maintenance
+- **Repository Pattern**: Maintained in shared module
+- **Use Cases**: Continue using existing business logic
+- **ViewModels**: Shared across platforms
+- **Platform Services**: expect/actual pattern for iOS specifics
+
+### 📋 **IMMEDIATE ACTION PLAN**
+
+#### **STEP 1**: Create New Branch
+```bash
+git checkout -b feature/compose-multiplatform-ios
+```
+
+#### **STEP 2**: Remove iOS SwiftUI Code
+- Remove `iosApp/iosApp/ContentView.swift` complex UI
+- Keep basic iOS app structure for Compose integration
+- Clean up SwiftUI-specific files
+
+#### **STEP 3**: Configure Compose iOS
+- Update `composeApp/build.gradle.kts` for iOS targets
+- Add Compose iOS dependencies
+- Set up iOS framework export
+
+#### **STEP 4**: Implement Shared Compose App
+```kotlin
+// composeApp/src/commonMain/kotlin/App.kt
+@Composable
+fun App() {
+    WorldWideWavesTheme {
+        Navigation() // Shared navigation and screens
+    }
+}
+```
+
+#### **STEP 5**: Platform-Specific Entry Points
+- **Android**: Minimal changes to use shared App()
+- **iOS**: UIViewController wrapper for Compose App()
+
+### 🏆 **SUCCESS CRITERIA**
+
+#### Technical Goals
+- [ ] iOS app uses Compose Multiplatform instead of SwiftUI
+- [ ] 90%+ UI code shared between platforms
+- [ ] Identical appearance and behavior on both platforms
+- [ ] All existing tests continue passing
+- [ ] Performance acceptable on iOS
+
+#### Quality Goals
+- [ ] Clean architecture maintained
+- [ ] No regressions in Android functionality
+- [ ] Comprehensive test coverage for shared UI
+- [ ] Perfect UI parity achieved
+- [ ] Easy maintenance and updates
+
+**Ready to begin Compose Multiplatform iOS implementation for perfect UI parity!** 🚀
+
+---
+
+## 📋 COMPOSE MULTIPLATFORM IMPLEMENTATION PROGRESS
+
+**Date**: September 25, 2025
+**Status**: ACTIVELY IMPLEMENTING COMPOSE MULTIPLATFORM FOR iOS
+
+### ✅ COMPLETED TASKS
+
+#### STEP 1: New Branch Created ✅
+- **Branch**: `feature/compose-multiplatform-ios` created
+- **Clean Slate**: Ready for Compose Multiplatform implementation
+
+#### STEP 2: Project Structure Corrected ✅
+- **Removed**: Incorrect `composeApp/src/iosMain` (composeApp is Android-only)
+- **Clarified Structure**:
+  - `composeApp/`: Android-specific code only
+  - `shared/`: Common code and platform adaptations (perfect for Compose MP)
+  - `iosApp/`: iOS-specific wrapper
+
+#### STEP 3: iOS Compose Entry Point Created ✅
+- **File**: `shared/src/iosMain/kotlin/com/worldwidewaves/shared/MainViewController.kt`
+- **Function**: `fun MainViewController(): UIViewController = ComposeUIViewController { SharedApp() }`
+- **Purpose**: iOS UIViewController wrapper for shared Compose UI
+
+#### STEP 4: Shared Compose App Foundation ✅
+- **File**: `shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/SharedApp.kt`
+- **Purpose**: Identical Compose UI for both Android and iOS
+- **Structure**: Scaffold with bottom tabs, shared screens
+
+### 🔄 CURRENT IMPLEMENTATION STATUS
+
+#### Architecture Design ✅
+```
+shared/src/commonMain/kotlin/com/worldwidewaves/shared/ui/
+├── SharedApp.kt                    // Main app - identical on both platforms
+├── screens/
+│   ├── SharedEventsListScreen.kt   // Will move Android EventsListScreen here
+│   ├── SharedEventDetailScreen.kt  // Will move Android EventActivity UI here
+│   ├── SharedEventMapScreen.kt     // Will move Android EventFullMapActivity UI
+│   └── SharedWaveScreen.kt         // Will move Android WaveActivity UI
+├── components/
+│   ├── EventOverlays.kt           // Already exists - will use
+│   ├── ButtonWave.kt              // Already exists - will use
+│   └── SharedTabBar.kt            // New - identical tab bar
+└── theme/
+    ├── SharedTheme.kt             // Identical theming
+    └── SharedDimensions.kt        // Same measurements
+```
+
+#### iOS Integration Plan ✅
+```swift
+// iosApp/iosApp/ContentView.swift
+import SwiftUI
+import Shared
+
+struct ContentView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        return MainViewControllerKt.MainViewController() // Uses shared Compose UI
+    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+```
+
+### 📋 NEXT IMMEDIATE TASKS
+
+#### **URGENT**: Move Android EventsListScreen to Shared
+1. **Copy** `composeApp/src/androidMain/.../EventsListScreen.kt` to `shared/src/commonMain/`
+2. **Update** package imports and dependencies
+3. **Test** Android continues working with shared UI
+4. **Configure** iOS to use same shared UI
+
+#### **HIGH PRIORITY**: Implement Perfect UI Sharing
+1. **EventsListScreen**: Move Android Compose to shared (100% identical)
+2. **EventActivity**: Move Android UI to shared EventDetailScreen
+3. **Shared Theme**: Use same colors, fonts, dimensions
+4. **Shared Resources**: Use same drawables and translations
+
+**Current Status**: FOUNDATION READY - Moving Android UI to shared next 🚀
+
 **Deliverables**:
 - [ ] Native iOS look and feel
 - [ ] iOS system integrations (notifications, etc.)
