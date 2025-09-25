@@ -46,7 +46,7 @@ import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapA
 
 val applicationModule =
     module {
-        single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
+        single { EventsListScreen(viewModel = get(), mapChecker = get()) }
 
         // Repository layer
         single<EventsRepository> { EventsRepositoryImpl(get()) }

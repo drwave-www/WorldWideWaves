@@ -1,7 +1,13 @@
 # Compose UI Migration Plan: Android → Shared
 
-## Current Status
+## Current Status - Phase 2 Complete
 ✅ **EventsListScreen** - COMPLETED - Moved to shared/ui/screens/EventsListScreen.kt
+✅ **Dividers.kt** - COMPLETED - Moved to shared/ui/components/Dividers.kt
+✅ **TextUtils.kt** - COMPLETED - Moved to shared/ui/utils/TextUtils.kt
+✅ **Indicators.kt** - COMPLETED - Moved to shared/ui/components/Indicators.kt
+✅ **SimulationModeChip.kt** - COMPLETED - Moved to shared/ui/components/SimulationModeChip.kt
+✅ **SocialNetworks.kt** - COMPLETED - Moved to shared/ui/components/SocialNetworks.kt
+✅ **DebugScreen.kt** - COMPLETED - Moved to shared/ui/screens/DebugScreen.kt
 
 ## Analysis of Android Compose UI Code
 

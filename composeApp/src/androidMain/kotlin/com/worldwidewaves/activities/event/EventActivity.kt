@@ -84,7 +84,7 @@ import com.worldwidewaves.shared.ui.components.ButtonWave
 import com.worldwidewaves.shared.ui.components.EventOverlayDone
 import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.ui.components.WaveNavigator
-import com.worldwidewaves.compose.common.WWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
