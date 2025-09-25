@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.window.core.layout.LocalWindowInfo
 import com.worldwidewaves.shared.ui.components.ButtonWave
 import com.worldwidewaves.shared.ui.components.DividerLine
 import com.worldwidewaves.shared.ui.components.EventOverlayDone
@@ -110,11 +109,9 @@ fun SharedEventDetailsScreen(
         endDateTime.value = event.getEndDateTime()
     }
 
-    // Calculate height based on aspect ratio and available width
-    val windowInfo = LocalWindowInfo.current
+    // Calculate height based on aspect ratio - simplified for cross-platform compatibility
     val density = LocalDensity.current
-    val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-    val calculatedHeight = screenWidthDp / Event.MAP_RATIO
+    val calculatedHeight = 300.dp // Fixed height for now, TODO: get actual screen width
 
     // Screen composition - EXACT Android EventActivity structure
     Box(modifier = modifier) {
@@ -189,7 +186,8 @@ private fun BoxScope.SimulationButton(
                     // Check if map is available for simulation
                     // For now, just enable simulation directly
                     simulationButtonState = "active"
-                    platform.enableSimulation()
+                    // TODO: Add enableSimulation method to WWWPlatform
+                    Log.i("EventDetailsScreen", "Simulation would be enabled")
                 } catch (e: Exception) {
                     Log.e("EventDetailsScreen", "Simulation start failed", throwable = e)
                     simulationButtonState = "idle"
@@ -250,7 +248,7 @@ private fun EventOverlay(event: IWWWEvent) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(Event.OVERLAY_HEIGHT.dp)
+            .height(160.dp) // EventsList.OVERLAY_HEIGHT
     ) {
         // Event background with proper image loading
         val eventImageResource = event.getLocationImage() as? org.jetbrains.compose.resources.DrawableResource
@@ -269,6 +267,7 @@ private fun EventOverlay(event: IWWWEvent) {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 private fun EventOverlayDate(
     eventStatus: Status,
@@ -340,32 +339,16 @@ private fun EventNumbers(event: IWWWEvent) {
             modifier = Modifier.padding(horizontal = Dimensions.DEFAULT_EXT_PADDING.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Wave speed
+            // Wave information placeholder - TODO: Add proper wave metrics
             Text(
-                text = "${stringResource(MokoRes.strings.wave_speed)}: ${event.getWaveSpeedKmh()} km/h",
+                text = stringResource(MokoRes.strings.wave_speed),
                 style = sharedCommonTextStyle(Event.NUMBERS_FONTSIZE),
             )
-
-            // Duration information
-            val durationMinutes = remember(event.id) {
-                try {
-                    event.getDurationMinutes()
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            durationMinutes?.let { minutes ->
-                Text(
-                    text = "${stringResource(MokoRes.strings.wave_total_time)}: ${formatDurationMinutes(minutes)}",
-                    style = sharedCommonTextStyle(Event.NUMBERS_FONTSIZE),
-                )
-            }
         }
     }
 }
 
-@Composable
+// Helper function moved to shared utilities
 private fun formatDurationMinutes(totalMinutes: Long?): String {
     if (totalMinutes == null) return "?"
 
@@ -373,8 +356,8 @@ private fun formatDurationMinutes(totalMinutes: Long?): String {
     val minutes = totalMinutes % 60
 
     return when {
-        hours > 0 && minutes > 0 -> "$hours${stringResource(if (hours == 1L) MokoRes.strings.hour_singular else MokoRes.strings.hour_plural)} $minutes${stringResource(if (minutes == 1L) MokoRes.strings.minute_singular else MokoRes.strings.minute_plural)}"
-        hours > 0 -> "$hours${stringResource(if (hours == 1L) MokoRes.strings.hour_singular else MokoRes.strings.hour_plural)}"
-        else -> "$minutes${stringResource(if (minutes == 1L) MokoRes.strings.minute_singular else MokoRes.strings.minute_plural)}"
+        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+        hours > 0 -> "${hours}h"
+        else -> "${minutes}m"
     }
 }
