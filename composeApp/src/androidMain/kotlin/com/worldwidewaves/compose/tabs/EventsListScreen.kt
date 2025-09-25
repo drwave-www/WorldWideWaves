@@ -34,7 +34,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.utils.MapAvailabilityChecker
 
@@ -46,7 +45,6 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 class EventsListScreen(
     private val viewModel: EventsViewModel,
     private val mapChecker: MapAvailabilityChecker,
-    private val setEventFavorite: SetEventFavorite,
 ) : TabScreen {
     override val name = "Events"
 

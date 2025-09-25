@@ -46,7 +46,7 @@ import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker as IMapA
 
 val applicationModule =
     module {
-        single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
+        single { EventsListScreen(viewModel = get(), mapChecker = get()) }
 
         // Repository layer
         single<EventsRepository> { EventsRepositoryImpl(get()) }
@@ -66,7 +66,7 @@ val applicationModule =
             )
         }
 
-        single { AboutScreen(get(), get()) }
+        single { AboutScreen(get()) }
         single { AboutInfoScreen() }
         // Inject the shared WWWPlatform instance into AboutFaqScreen
         single { AboutFaqScreen(get()) }

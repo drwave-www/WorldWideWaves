@@ -26,32 +26,22 @@ import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
-import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 /**
  * UI-related dependencies for shared components.
- * This includes ViewModels, Use Cases, and Repository implementations
+ * This includes basic Use Cases and Repository implementations
  * that are needed for shared UI components like EventsListScreen.
+ *
+ * Note: EventsViewModel is kept in platform-specific modules since it
+ * may have platform-specific dependencies like MapAvailabilityChecker.
  */
 val uiModule = module {
     // Repository layer
     single<EventsRepository> { EventsRepositoryImpl(get()) }
 
-    // Use cases layer
+    // Use cases layer - only the ones without platform dependencies
     single { GetSortedEventsUseCase(get()) }
     single { FilterEventsUseCase(get()) }
     single { CheckEventFavoritesUseCase() }
-
-    // ViewModels - Use factory instead of viewModel for shared module
-    factory {
-        EventsViewModel(
-            eventsRepository = get(),
-            getSortedEventsUseCase = get(),
-            filterEventsUseCase = get(),
-            checkEventFavoritesUseCase = get(),
-            platform = get(),
-        )
-    }
 }

@@ -47,7 +47,7 @@ import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.activities.utils.hideStatusBar
 import com.worldwidewaves.activities.utils.setStatusBarColor
-import com.worldwidewaves.compose.common.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.SimulationModeChip
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen

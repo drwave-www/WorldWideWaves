@@ -74,8 +74,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
-import com.worldwidewaves.compose.common.DownloadProgressIndicator
-import com.worldwidewaves.compose.common.LoadingIndicator
+import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing

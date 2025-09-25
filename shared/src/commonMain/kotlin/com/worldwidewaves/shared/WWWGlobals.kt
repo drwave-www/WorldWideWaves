@@ -427,6 +427,7 @@ object WWWGlobals {
         const val GEOLOCME_HEIGHT = 45
         const val GEOLOCME_BORDER = 2
         const val GEOLOCME_FONTSIZE = Dimensions.FONTSIZE_SMALL2
+        const val GEOLOC_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
 
         // Numbers Display
         const val NUMBERS_BORDERWIDTH = 2
@@ -436,6 +437,7 @@ object WWWGlobals {
         const val NUMBERS_LABEL_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
         const val NUMBERS_VALUE_FONTSIZE = Dimensions.FONTSIZE_BIG
         const val NUMBERS_TZ_FONTSIZE = Dimensions.FONTSIZE_SMALL
+        const val NUMBERS_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**
@@ -471,6 +473,15 @@ object WWWGlobals {
         const val RULE_CONTENTS_FONTSIZE = Dimensions.FONTSIZE_SMALL
         const val RULE_QUESTION_FONTSIZE = Dimensions.FONTSIZE_SMALL2
         const val RULE_ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+
+        // Additional FAQ constants for About screens
+        const val TEXT_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val ACCESS_LINK_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val RULES_TITLE_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val RULES_TEXT_FONTSIZE = Dimensions.FONTSIZE_SMALL
+        const val QUESTION_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val ANSWER_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
+        const val SIMULATE_BUTTON_FONTSIZE = Dimensions.FONTSIZE_DEFAULT
     }
 
     /**

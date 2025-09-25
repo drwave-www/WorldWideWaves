@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.shared.ui.components
 
 /*
  * Copyright 2025 DrWave
@@ -21,9 +21,22 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-val sharedModule =
-    listOf(
-        commonModule,
-        helpersModule,
-        datastoreModule,
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+
+/**
+ * Shared horizontal white divider reused across screens on both platforms.
+ */
+@Composable
+fun DividerLine(modifier: Modifier = Modifier) {
+    HorizontalDivider(
+        modifier = modifier.width(Dimensions.DIVIDER_WIDTH.dp),
+        color = Color.White,
+        thickness = Dimensions.DIVIDER_THICKNESS.dp,
     )
+}
