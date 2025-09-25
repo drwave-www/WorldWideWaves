@@ -67,8 +67,31 @@ import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.EventsList
-// Temporarily remove complex dependencies until basic Compose works
-// Will implement koin integration after basic Compose works
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+
+/**
+ * Helper class to load events using Koin dependency injection
+ */
+private class SharedEventsLoader : KoinComponent {
+    private val wwwEvents: WWWEvents by inject()
+
+    suspend fun loadEvents(): List<IWWWEvent> {
+        return try {
+            wwwEvents.loadEvents(
+                onLoaded = {
+                    // Events loaded successfully
+                },
+                onLoadingError = { error ->
+                    throw error
+                }
+            )
+            wwwEvents.list()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+}
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -186,23 +209,25 @@ private fun SharedAboutScreen() {
 @Composable
 private fun SharedEventsScreen(onEventClick: (String) -> Unit = {}) {
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
-    val wwwEvents = remember { WWWEvents() }
+    var isLoading by remember { mutableStateOf(true) }
+    var hasLoadingError by remember { mutableStateOf(false) }
+
+    val eventsLoader = remember { SharedEventsLoader() }
 
     // Filter state - exact Android match
     var starredSelected by remember { mutableStateOf(false) }
     var downloadedSelected by remember { mutableStateOf(false) }
-    var hasLoadingError by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        // Load real events from shared business logic
-        wwwEvents.loadEvents(
-            onLoaded = {
-                events = wwwEvents.list()
-            },
-            onLoadingError = { error ->
-                hasLoadingError = true
-            }
-        )
+        try {
+            isLoading = true
+            hasLoadingError = false
+            events = eventsLoader.loadEvents()
+            isLoading = false
+        } catch (e: Exception) {
+            hasLoadingError = true
+            isLoading = false
+        }
     }
 
     Column(
@@ -232,7 +257,48 @@ private fun SharedEventsScreen(onEventClick: (String) -> Unit = {}) {
 
         // Events list - EXACT Android EventsListScreen structure
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(events) { event ->
+            when {
+                isLoading -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Loading events...",
+                                style = sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE)
+                            )
+                        }
+                    }
+                }
+                hasLoadingError -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Failed to load events. Please try again.",
+                                style = sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE)
+                            )
+                        }
+                    }
+                }
+                events.isEmpty() -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No events available",
+                                style = sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE)
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    items(events) { event ->
                 // Exact Android Event structure with click handling
                 Column(
                     modifier = Modifier
@@ -291,8 +357,10 @@ private fun SharedEventsScreen(onEventClick: (String) -> Unit = {}) {
 
                     // EventLocationAndDate - exact Android layout
                     SharedEventLocationAndDate(event = event)
+                    }
                 }
-            }
+            } // Close else block
+            } // Close when block
         }
     }
 }

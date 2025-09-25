@@ -20,6 +20,11 @@ import platform.UIKit.UIViewController
  * This creates a UIViewController that hosts the same Compose UI as Android,
  * ensuring perfect UI parity between platforms.
  */
-fun MainViewController(): UIViewController = ComposeUIViewController {
-    SharedApp() // Same Compose UI as Android
+fun MainViewController(): UIViewController {
+    // Initialize Koin for iOS - required for dependency injection
+    doInitKoin()
+
+    return ComposeUIViewController {
+        SharedApp() // Same Compose UI as Android with full DI support
+    }
 }
