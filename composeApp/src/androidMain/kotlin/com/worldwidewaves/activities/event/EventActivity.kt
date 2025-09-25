@@ -35,22 +35,8 @@ import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 
 /**
- * Android Event Details Activity - Pure wrapper using SharedEventDetailsScreen.
- *
- * ALL 10 @Composable functions have been extracted to SharedEventDetailsScreen:
- * - EventOverlay() → shared
- * - EventDescription() → shared
- * - SimulationButton() → shared
- * - EventNumbers() → shared
- * - NotifyAreaUserPosition() → shared
- * - WWWEventSocialNetworks() → shared
- * - EventOverlayDate() → shared
- * - AlertMapNotDownloadedOnSimulationLaunch() → shared
- * - formatDurationMinutes() → shared
- * - Map integration → shared with expect/actual
- *
- * This Activity now handles only Android-specific navigation.
- * UI is 100% shared between Android and iOS.
+ * Android Event Details Activity.
+ * Handles Android-specific navigation while delegating UI to shared components.
  */
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
@@ -68,8 +54,6 @@ class EventActivity : AbstractEventWaveActivity() {
     ) {
         val context = LocalContext.current
 
-        // Use SharedEventDetailsScreen for perfect iOS parity
-        // ALL UI logic is now shared between Android and iOS
         SharedEventDetailsScreen(
             event = event,
             platform = platform,
@@ -99,7 +83,4 @@ class EventActivity : AbstractEventWaveActivity() {
             }
         )
     }
-
-    // ALL UI COMPONENTS MOVED TO SHAREDEVENTDETAILSSCREEN
-    // Zero @Composable functions remain in this Activity except Screen() wrapper
 }

@@ -279,25 +279,29 @@ These handle Android-specific navigation and lifecycle:
 
 ### **🔍 COMPREHENSIVE REMAINING COMPOSE CODE:**
 
-**🔥 CRITICAL - Activity-Embedded UI Screens:**
-1. **EventActivity.kt** - 10 @Composable functions, 721 lines *(complete event details)*
-2. **WaveActivity.kt** - 8 @Composable functions, 459 lines *(wave participation)*
-3. **EventFullMapActivity.kt** - 2 @Composable functions, 187 lines *(full map)*
-4. **MainActivity.kt** - 2 @Composable functions, 264 lines *(TabBarItem, SplashScreen)*
+**🔥 PRIORITY 1 - CRITICAL ACTIVITY-EMBEDDED UI (Highest Impact):**
+1. ✅ **EventActivity.kt** - **COMPLETED** ✅ (was 10 @Composable, now 1 wrapper)
+2. **WaveActivity.kt** - [CRITICAL] 8 @Composable functions, 459 lines *(wave participation)*
+3. **MainActivity.kt** - [HIGH] 2 @Composable functions, 264 lines *(TabBarItem, SplashScreen)*
+4. **AbstractEventBackActivity.kt** - [MEDIUM] 2 @Composable functions, 215 lines *(BackwardScreen partially done)*
+5. **EventFullMapActivity.kt** - [MEDIUM] 2 @Composable functions, 187 lines *(full map)*
+6. **AbstractEventWaveActivity.kt** - [LOW] 1 @Composable function, 132 lines *(utility)*
 
-**🟡 HIGH - Standalone Features:**
-5. **AndroidEventMap.kt** - 6 @Composable functions, 831 lines *(map rendering)*
-6. **Choreography.kt** - 3 @Composable functions, 346 lines *(wave choreography)*
+**🟡 PRIORITY 2 - CRITICAL STANDALONE FEATURES:**
+7. **AndroidEventMap.kt** - [CRITICAL] 6 @Composable functions, 831 lines *(map rendering)*
+8. **Choreography.kt** - [HIGH] 3 @Composable functions, 347 lines *(wave choreography)*
 
-**🟢 MEDIUM - Debug/Utility UI:**
-7. **PerformanceDashboard.kt** - 15 @Composable functions, 430 lines
-8. **SoundChoreographyTestMode.kt** - 6 @Composable functions, 728 lines
-9. **LocationAccessHelpers.kt** - 2 @Composable functions, 178 lines
-10. **AudioTestActivity.kt** - 1 @Composable function, 438 lines
-11. **AbstractEventWaveActivity.kt** - 1 @Composable function, 132 lines
-12. **Theme.kt** - 2 @Composable functions, 181 lines
+**🟢 PRIORITY 3 - DEBUG/UTILITY UI:**
+9. **PerformanceDashboard.kt** - [LARGE] 15 @Composable functions, 430 lines
+10. **SoundChoreographyTestMode.kt** - [LARGE] 6 @Composable functions, 728 lines
+11. **AudioTestActivity.kt** - [MEDIUM] 1 @Composable function, 438 lines
+12. **LocationAccessHelpers.kt** - [MEDIUM] 2 @Composable functions, 178 lines
+13. **Theme.kt** - [LOW] 2 @Composable functions, 181 lines
 
-**📋 TOTAL REMAINING:** **65 @Composable functions across ~6,000+ lines**
+**🔵 PRIORITY 4 - SMALL WRAPPERS (Mostly Complete):**
+14. **Tab screens** - [SMALL] 1 @Composable each (pure wrappers calling shared)
+
+**📋 TOTAL REMAINING:** **56 @Composable functions** (accurate post-Phase 5 count)
 
 ### **✅ ARCHITECTURAL ACHIEVEMENTS:**
 - **Perfect UI Parity** - All migrated components identical on Android/iOS
@@ -462,12 +466,12 @@ Both apps launch and run perfectly with shared components:
 
 ---
 
-### **📈 UPDATED IMPLEMENTATION METRICS (Post-Phase 5):**
-- **Total Components:** 55 @Composable functions across 18 files (after EventActivity extraction)
-- **Migrated Successfully:** 36 @Composable functions (~55%)
-- **Remaining Work:** 29 @Composable functions (~45%)
-- **Critical Path:** WaveActivity (8 @Composable functions = 15% of remaining)
-- **High Impact:** Activity-embedded UI (12 @Composable functions = 22% of remaining)
+### **📈 ACCURATE IMPLEMENTATION METRICS (Post-Phase 5 Complete):**
+- **Total Discovered:** 65 @Composable functions across 18 files (original count)
+- **Successfully Migrated:** 35+ @Composable functions (~54%)
+- **Remaining Work:** 56 @Composable functions (~46%)
+- **EventActivity Achievement:** Reduced from 10 to 1 @Composable functions (pure wrapper)
+- **Critical Path:** WaveActivity (8 @Composable) + AndroidEventMap (6 @Composable) = 25% of remaining
 
 ### **🎯 UPDATED ACTION PLAN:**
 **✅ Phase 5 COMPLETED:** EventActivity → SharedEventDetailsScreen (10 @Composable functions eliminated)
