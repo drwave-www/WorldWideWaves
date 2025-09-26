@@ -32,7 +32,8 @@ fun AlertMapNotDownloadedOnSimulationLaunch(
         title = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_title),
-                style = MaterialTheme.typography.titleLarge.copy(
+                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle().copy(
+                    color = com.worldwidewaves.shared.ui.theme.scrimLight,
                     fontWeight = FontWeight.Bold
                 ),
             )
@@ -40,7 +41,7 @@ fun AlertMapNotDownloadedOnSimulationLaunch(
         text = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = MaterialTheme.typography.bodyMedium,
+                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle(),
             )
         },
         confirmButton = {

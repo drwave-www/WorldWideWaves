@@ -180,8 +180,7 @@ fun EventNumbers(
                                 ) {
                                     Text(
                                         text = " $eventTimeZone",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontSize = Event.NUMBERS_TZ_FONTSIZE.sp,
+                                        style = com.worldwidewaves.shared.ui.theme.sharedExtraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
                                             color = when (key) {
                                                 MokoRes.strings.wave_start_time -> Color.Yellow
                                                 else -> MaterialTheme.colorScheme.primary

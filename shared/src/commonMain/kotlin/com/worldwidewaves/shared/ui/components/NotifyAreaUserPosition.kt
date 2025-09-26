@@ -99,10 +99,7 @@ fun NotifyAreaUserPosition(
         ) {
             Text(
                 text = displayText,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = Event.GEOLOCME_FONTSIZE.sp,
-                    color = Color(0xFFE0E0E0) // quinaryLight equivalent
-                ),
+                style = com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
             )
         }
     }
