@@ -62,8 +62,8 @@ class MainActivityTest {
         runTest {
             // Test that splash screen is displayed for at least minimum duration
 
-            // Measure start time
-            val startTime = System.currentTimeMillis()
+            // Measure start time with deterministic source
+            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
 
             // Try to wait for splash screen to be visible, but don't fail if it's not found
             // The splash screen might finish too quickly or use a different implementation
@@ -92,7 +92,7 @@ class MainActivityTest {
             }
 
             // Verify minimum duration was respected (at least 2 seconds)
-            val elapsedTime = System.currentTimeMillis() - startTime
+            val elapsedTime = startMark.elapsedNow().inWholeMilliseconds
             try {
                 UITestAssertions.assertTimingAccuracy(
                     expected = 2000, // Minimum 2 seconds

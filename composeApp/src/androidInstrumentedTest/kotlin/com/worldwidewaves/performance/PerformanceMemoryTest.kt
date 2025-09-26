@@ -135,7 +135,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
             val performanceMonitor = mockPerformanceMonitor
             val taskManager = createMockTaskManager()
 
-            val startTime = System.currentTimeMillis()
+            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
 
             val task1 = taskManager.executeAsync("data-fetch", 1000)
             val task2 = taskManager.executeAsync("image-processing", 800)
@@ -143,7 +143,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
             val task4 = taskManager.executeAsync("sync-events", 1200)
 
             val results = listOf(task1, task2, task3, task4).map { it.await() }
-            val totalTime = System.currentTimeMillis() - startTime
+            val totalTime = startMark.elapsedNow().inWholeMilliseconds
 
             assertTrue("All concurrent tasks should complete successfully", results.all { it.isSuccess })
             assertTrue("Concurrent execution should be faster than sequential", totalTime < 2000)
@@ -274,9 +274,9 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         onRenderComplete: (Long) -> Unit,
     ) {
         LaunchedEffect(locations) {
-            val startTime = System.currentTimeMillis()
+            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
             delay(100)
-            val renderTime = System.currentTimeMillis() - startTime
+            val renderTime = startMark.elapsedNow().inWholeMilliseconds
             onRenderComplete(renderTime)
         }
 

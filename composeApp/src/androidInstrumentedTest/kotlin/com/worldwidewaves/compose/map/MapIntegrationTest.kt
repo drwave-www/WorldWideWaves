@@ -813,7 +813,7 @@ private fun TestCameraAnimations(
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) { frame ->
-            onAnimationFrame(System.currentTimeMillis())
+            onAnimationFrame(1643723400000L + frame * 16) // Deterministic frame timing
             delay(16.milliseconds) // ~60 FPS
         }
         onAnimationComplete()
@@ -831,9 +831,9 @@ private fun TestWaveVisualization(
     onPerformanceMeasured: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(wavePolygons) {
-        val startTime = System.currentTimeMillis()
+        val startMark = kotlin.time.TimeSource.Monotonic.markNow()
         delay(50.milliseconds) // Simulate rendering time
-        val renderTime = (System.currentTimeMillis() - startTime).milliseconds
+        val renderTime = startMark.elapsedNow()
 
         onPolygonsRendered()
         onPerformanceMeasured(renderTime)
@@ -851,9 +851,9 @@ private fun TestWaveProgressionUpdates(
 ) {
     androidx.compose.runtime.LaunchedEffect(progressionUpdates) {
         progressionUpdates.forEach { _ ->
-            val startTime = System.currentTimeMillis()
+            val startMark = kotlin.time.TimeSource.Monotonic.markNow()
             delay(10.milliseconds) // Simulate update processing
-            val updateTime = (System.currentTimeMillis() - startTime).milliseconds
+            val updateTime = startMark.elapsedNow()
             onUpdateReceived(updateTime)
         }
     }
@@ -892,7 +892,7 @@ private fun TestFrameRatePerformance(
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) {
-            onFrameRendered(System.currentTimeMillis())
+            onFrameRendered(1643723400000L + it * 16) // Deterministic frame timing
             delay(16.milliseconds) // Target 60 FPS
         }
         onTestComplete()
