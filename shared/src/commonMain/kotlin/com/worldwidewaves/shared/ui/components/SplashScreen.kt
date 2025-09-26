@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
@@ -48,7 +49,11 @@ import org.jetbrains.compose.resources.painterResource
 fun SplashScreen(
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("splash-screen")
+    ) {
         Image(
             painter = painterResource(Res.drawable.background),
             contentDescription = stringResource(MokoRes.strings.background_description),
