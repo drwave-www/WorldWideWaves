@@ -215,7 +215,7 @@ fun UserWaveStatusText(event: IWWWEvent) {
     ) {
         com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText(
             text = stringResource(message),
-            style = sharedPrimaryColoredBoldTextStyle(STATUS_TEXT_FONT_SIZE),
+            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
@@ -249,7 +249,7 @@ fun WaveProgressionBar(event: IWWWEvent) {
 
             Text(
                 text = "${String.format(Locale.getDefault(), "%.1f", progression)}%",
-                style = sharedPrimaryColoredBoldTextStyle(PROGRESSION_FONT_SIZE),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
@@ -335,7 +335,7 @@ fun WaveHitCounter(event: IWWWEvent) {
         ) {
             AutoSizeText(
                 text = text,
-                style = sharedPrimaryColoredBoldTextStyle(STATUS_TEXT_FONT_SIZE),
+                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp),

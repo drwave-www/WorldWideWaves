@@ -30,10 +30,10 @@ val onQuaternaryLight = Color(0xFFBDBDBD)
 val quinaryLight = Color.White // White
 val onQuinaryLight = Color(0xFF5DB075)
 
-// Background colors - exact Android match
-val backgroundLight = Color(0xFF011026)
+// Background colors - EXACT historical match (dark blue)
+val backgroundLight = Color(0xFF011026) // Dark blue background
 val onBackgroundLight = Color.White
-val surfaceLight = Color(0xFF011026)
+val surfaceLight = Color(0xFF011026) // Dark blue surface
 val onSurfaceLight = Color.White
 
 // Container colors - exact Android match

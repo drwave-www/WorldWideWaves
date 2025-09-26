@@ -50,7 +50,7 @@ import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
 import com.worldwidewaves.shared.ui.components.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
-import com.worldwidewaves.theme.AppTheme
+import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -146,7 +146,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            AppTheme {
+            WorldWideWavesTheme {
                 Surface(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),
                     color = MaterialTheme.colorScheme.background
