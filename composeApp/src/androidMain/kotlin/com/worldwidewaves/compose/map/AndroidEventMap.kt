@@ -807,10 +807,16 @@ class AndroidEventMap(
         clearPolygons: Boolean
     ) {
         Log.i(TAG, "updateWavePolygons called with ${wavePolygons.size} polygons, clear=$clearPolygons")
-        (context as? AppCompatActivity)?.runOnUiThread {
-            val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
-            Log.i(TAG, "Converting ${wavePolygons.size} polygons to MapLibre, calling addWavePolygons")
-            mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
+        Log.i(TAG, "Context type: ${context?.javaClass?.simpleName}, is AppCompatActivity: ${context is AppCompatActivity}")
+
+        if (context is AppCompatActivity) {
+            context.runOnUiThread {
+                val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
+                Log.i(TAG, "Converting ${wavePolygons.size} polygons to MapLibre, calling addWavePolygons")
+                mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
+            }
+        } else {
+            Log.e(TAG, "Context is not AppCompatActivity - cannot run on UI thread! Context: $context")
         }
     }
 
