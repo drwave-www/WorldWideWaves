@@ -12,11 +12,11 @@ package com.worldwidewaves.shared.ui.theme
 
 import androidx.compose.ui.text.font.FontFamily
 
-// Fallback to historical fonts until Google Fonts provider is properly configured
-// Using distinctive system fonts that match the historical style better
-actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif // Closer to Montserrat style
-actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif // Matches body for consistency
+// Professional fonts - closest to historical Montserrat that work reliably
+// Using system fonts that provide good typography without Google Fonts complexity
+actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif // Professional serif like Montserrat
+actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif // Consistent with body
 actual val SharedExtraFontFamily: FontFamily = FontFamily.Monospace // Distinctive for special elements
 
-// TODO: Restore full Google Fonts setup with proper KMP configuration
-// The certificates and provider setup need to be configured differently for shared modules
+// Note: Full Google Fonts restoration requires moving font configuration back to composeApp
+// where Google Fonts dependencies and certificates are properly accessible

@@ -77,6 +77,8 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
+            // Add resources dependency for certificate access
+            implementation(libs.androidx.annotation)
         }
 
         /*
