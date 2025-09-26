@@ -45,6 +45,7 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
 class EventsListScreen(
     private val viewModel: EventsViewModel,
     private val mapChecker: MapAvailabilityChecker,
+    private val setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite,
 ) : TabScreen {
     override val name = "Events"
 
@@ -87,6 +88,7 @@ class EventsListScreen(
                     }
                 )
             },
+            setEventFavorite = setEventFavorite,
             modifier = modifier
         )
     }

@@ -54,10 +54,6 @@ class DefaultEventStateManager(
         input: EventStateInput,
         userIsInArea: Boolean,
     ): EventState {
-        Log.v(
-            "DefaultEventStateManager",
-            "Calculating state for event ${event.id}: progression=${input.progression}, status=${input.status}",
-        )
 
         // Calculate warming phases
         val warmingInProgress = calculateWarmingPhase(event)
