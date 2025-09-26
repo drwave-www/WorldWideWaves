@@ -50,12 +50,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
-    private val clock: IClock by inject()
-    private val platform: WWWPlatform by inject()
-
-    companion object {
-        private const val TAG = "EventActivity"
-    }
+    // Dependencies injected as needed
 
     // ------------------------------------------------------------------------
 
@@ -65,6 +60,7 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
     ) {
         val context = LocalContext.current
+
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(context)
 
@@ -103,14 +99,12 @@ class EventActivity : AbstractEventWaveActivity() {
         // Use simplified shared standard event layout
         StandardEventLayout(
             event = event,
-            platform = platform,
-            clock = clock,
             mapFeatureState = mapFeatureState,
             onNavigateToWave = { eventId ->
                 context.startActivity(
                     Intent(context, WaveActivity::class.java).apply {
                         putExtra("eventId", eventId)
-                    }
+                    },
                 )
             },
             onSimulationStarted = { message ->
@@ -127,7 +121,7 @@ class EventActivity : AbstractEventWaveActivity() {
             mapHeight = calculatedHeight,
             mapArea = {
                 eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            }
+            },
         )
 
         // Show map required dialog for simulation
@@ -135,5 +129,4 @@ class EventActivity : AbstractEventWaveActivity() {
             AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
         }
     }
-
 }

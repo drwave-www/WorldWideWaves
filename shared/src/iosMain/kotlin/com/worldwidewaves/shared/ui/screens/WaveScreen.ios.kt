@@ -32,16 +32,17 @@ actual fun PlatformWaveMap(
     modifier: Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { onMapClick() },
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable { onMapClick() },
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "iOS Wave Map for ${event.id}\n(Tap to open full map)",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

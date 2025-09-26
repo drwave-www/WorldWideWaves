@@ -53,11 +53,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.onQuaternaryLight
 import com.worldwidewaves.shared.ui.theme.onQuinaryLight
-import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.quinaryLight
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
+import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.tertiaryLight
 import kotlin.math.min
 

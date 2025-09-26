@@ -403,7 +403,6 @@ abstract class AbstractEventMap<T>(
 
     abstract fun updateWavePolygons(
         wavePolygons: List<Polygon>,
-        clearPolygons: Boolean
+        clearPolygons: Boolean,
     )
-
 }

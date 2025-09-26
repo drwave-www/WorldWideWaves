@@ -77,7 +77,7 @@ fun SharedEventMapScreen(
             onMapLoaded = { isMapLoaded = true },
             onMapError = { mapError = true },
             onMapClick = onMapClick,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         )
 
         // Shared UI overlays
@@ -89,7 +89,7 @@ fun SharedEventMapScreen(
                         scope.launch {
                             onMapDownload()
                         }
-                    }
+                    },
                 )
             }
             isMapDownloading -> {
@@ -98,7 +98,7 @@ fun SharedEventMapScreen(
                     onCancel = {
                         isMapDownloading = false
                         onMapCancel()
-                    }
+                    },
                 )
             }
             !isMapLoaded && autoMapDownload -> {
@@ -152,7 +152,7 @@ private fun MapErrorOverlay(onRetry: () -> Unit) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(
                 onClick = onRetry,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             ) {
                 Text(stringResource(MokoRes.strings.map_cancel_download))
             }

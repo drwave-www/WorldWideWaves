@@ -89,7 +89,6 @@ val applicationModule =
         single { WWWSimulationEnabledLocationEngine(get()) }
         factory { AndroidWWWLocationProvider() }
 
-
         // Debug screen - only in debug builds
         single<DebugScreen?> {
             if (BuildConfig.DEBUG) {

@@ -40,9 +40,7 @@ import dev.icerock.moko.resources.compose.stringResource
  * iOS: Uses iOS location authorization
  */
 @Composable
-fun SharedLocationPermissionRequest(
-    onPermissionResult: (Boolean) -> Unit = {},
-): Boolean {
+fun SharedLocationPermissionRequest(onPermissionResult: (Boolean) -> Unit = {}): Boolean {
     var showPermissionDialog by remember { mutableStateOf(false) }
     var permissionGranted by remember { mutableStateOf(false) }
 
@@ -68,7 +66,7 @@ fun SharedLocationPermissionRequest(
                 showPermissionDialog = false
                 permissionGranted = false
                 onPermissionResult(false)
-            }
+            },
         )
     }
 
@@ -93,7 +91,7 @@ private fun LocationPermissionDialog(
             TextButton(onClick = onDenied) {
                 Text(stringResource(MokoRes.strings.map_cancel_download))
             }
-        }
+        },
     )
 }
 
@@ -117,9 +115,7 @@ expect fun PlatformRequestLocationPermission()
  * Prompts user to enable GPS/location services if disabled.
  */
 @Composable
-fun SharedGPSEnableCheck(
-    onResult: (Boolean) -> Unit = {},
-) {
+fun SharedGPSEnableCheck(onResult: (Boolean) -> Unit = {}) {
     var showGPSDialog by remember { mutableStateOf(false) }
 
     val isGPSEnabled = PlatformGPSEnabledCheck()
@@ -138,7 +134,7 @@ fun SharedGPSEnableCheck(
             onCancel = {
                 showGPSDialog = false
                 onResult(false)
-            }
+            },
         )
     }
 }
@@ -161,7 +157,7 @@ private fun GPSEnableDialog(
             TextButton(onClick = onCancel) {
                 Text(stringResource(MokoRes.strings.map_cancel_download))
             }
-        }
+        },
     )
 }
 

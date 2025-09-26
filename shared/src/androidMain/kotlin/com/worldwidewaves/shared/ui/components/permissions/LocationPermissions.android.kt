@@ -22,7 +22,7 @@ actual fun PlatformLocationPermissionCheck(): Boolean {
     val context = LocalContext.current
     return ContextCompat.checkSelfPermission(
         context,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
     ) == PackageManager.PERMISSION_GRANTED
 }
 

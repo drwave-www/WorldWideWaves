@@ -26,7 +26,6 @@ import org.jetbrains.compose.resources.DrawableResource
  * Provides consistent tab structure and icon management across platforms.
  */
 object TabConfiguration {
-
     /**
      * Gets tab information (icons) based on configuration.
      * iOS and Android will use identical tab structure.
@@ -36,12 +35,12 @@ object TabConfiguration {
             listOf(
                 Res.drawable.waves_icon to Res.drawable.waves_icon_selected,
                 Res.drawable.about_icon to Res.drawable.about_icon_selected,
-                Res.drawable.debug_icon to Res.drawable.debug_icon_selected
+                Res.drawable.debug_icon to Res.drawable.debug_icon_selected,
             )
         } else {
             listOf(
                 Res.drawable.waves_icon to Res.drawable.waves_icon_selected,
-                Res.drawable.about_icon to Res.drawable.about_icon_selected
+                Res.drawable.about_icon to Res.drawable.about_icon_selected,
             )
         }
 }
@@ -65,6 +64,6 @@ fun ConfigurableTabBarItem(
         selectedIcon = tabInfo[tabIndex].second,
         unselectedIcon = tabInfo[tabIndex].first,
         contentDescription = contentDescription,
-        modifier = modifier
+        modifier = modifier,
     )
 }

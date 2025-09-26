@@ -355,7 +355,8 @@ object MidiParser {
             notes.take(5).forEachIndexed { index, note ->
                 Log.d(
                     "MidiParser",
-                    "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, Duration=${note.duration.inWholeMilliseconds}ms",
+                    "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, " +
+                        "Duration=${note.duration.inWholeMilliseconds}ms",
                 )
             }
 

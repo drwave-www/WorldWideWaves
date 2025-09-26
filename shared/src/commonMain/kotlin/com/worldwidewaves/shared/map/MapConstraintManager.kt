@@ -136,12 +136,7 @@ class MapConstraintManager(
      */
     private fun isCameraWithinConstraints(cameraPosition: Position): Boolean = constraintBounds?.contains(cameraPosition) ?: false
 
-    /**
-     * Moves the camera to fit specified bounds
-     */
-    private fun fitMapToBounds(bounds: BoundingBox) {
-        mapLibreAdapter.moveCamera(bounds)
-    }
+    // fitMapToBounds removed - was unused
 
     /**
      * Updates visible region padding from the map
@@ -282,7 +277,8 @@ class MapConstraintManager(
             abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
-        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD || lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
+        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD ||
+            lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
     }
 
     fun getNearestValidPoint(

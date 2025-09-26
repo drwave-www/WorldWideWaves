@@ -40,25 +40,27 @@ data class SharedColorFamily(
 /**
  * Shared extended theme - IDENTICAL to Android extendedLight
  */
-val sharedExtendedLight = SharedExtendedColorScheme(
-    quaternary = SharedColorFamily(
-        quaternaryLight,
-        onQuaternaryLight,
-        quaternaryContainerLight,
-        onQuaternaryContainerLight,
-    ),
-    quinary = SharedColorFamily(
-        quinaryLight,
-        onQuinaryLight,
-        quinaryContainerLight,
-        onQuinaryContainerLight,
-    ),
-)
+val sharedExtendedLight =
+    SharedExtendedColorScheme(
+        quaternary =
+            SharedColorFamily(
+                quaternaryLight,
+                onQuaternaryLight,
+                quaternaryContainerLight,
+                onQuaternaryContainerLight,
+            ),
+        quinary =
+            SharedColorFamily(
+                quinaryLight,
+                onQuinaryLight,
+                quinaryContainerLight,
+                onQuinaryContainerLight,
+            ),
+    )
 
 // -- Shared Text Presets - EXACT Android match --------------------------------------------------------
 
-fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    TextStyle(fontSize = fontSize.sp)
+fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = TextStyle(fontSize = fontSize.sp)
 
 fun sharedCommonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedBodyFontFamily)
@@ -85,7 +87,7 @@ fun sharedQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAUL
     sharedQuinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
+    sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 
 fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedExtraFontFamily)
@@ -100,12 +102,10 @@ fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_D
  * Shared Material Theme with extended colors - IDENTICAL to Android
  */
 @Composable
-fun SharedWorldWideWavesThemeWithExtended(
-    content: @Composable () -> Unit
-) {
+fun SharedWorldWideWavesThemeWithExtended(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = SharedLightColorScheme,
         typography = SharedTypography,
-        content = content
+        content = content,
     )
 }

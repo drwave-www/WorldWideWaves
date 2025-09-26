@@ -36,14 +36,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.ExperimentalTime
@@ -62,44 +61,48 @@ fun NotifyAreaUserPosition(
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val formattedTime = remember(hitDateTime) {
-        try {
-            IClock.instantToLiteral(hitDateTime, event.getTZ())
-        } catch (e: Exception) {
-            Log.w("NotifyAreaUserPosition", "Failed to format hit time", e)
-            ""
+    val formattedTime =
+        remember(hitDateTime) {
+            try {
+                IClock.instantToLiteral(hitDateTime, event.getTZ())
+            } catch (e: Exception) {
+                Log.w("NotifyAreaUserPosition", "Failed to format hit time", e)
+                ""
+            }
         }
-    }
 
-    val geolocText = if (isInArea) {
-        stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
-    } else {
-        stringResource(MokoRes.strings.geoloc_yourenotin)
-    }
+    val geolocText =
+        if (isInArea) {
+            stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
+        } else {
+            stringResource(MokoRes.strings.geoloc_yourenotin)
+        }
 
     // Simplified text display for cross-platform compatibility
     val displayText = geolocText
 
     Row(
-        modifier = modifier
-            .height(Event.GEOLOCME_HEIGHT.dp)
-            .padding(
-                start = Dimensions.DEFAULT_EXT_PADDING.dp,
-                end = Dimensions.DEFAULT_EXT_PADDING.dp
-            ),
+        modifier =
+            modifier
+                .height(Event.GEOLOCME_HEIGHT.dp)
+                .padding(
+                    start = Dimensions.DEFAULT_EXT_PADDING.dp,
+                    end = Dimensions.DEFAULT_EXT_PADDING.dp,
+                ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
-                .fillMaxHeight()
-                .weight(1f),
+            modifier =
+                Modifier
+                    .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
+                    .fillMaxHeight()
+                    .weight(1f),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = displayText,
-                style = com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
+                style = sharedQuinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
             )
         }
     }

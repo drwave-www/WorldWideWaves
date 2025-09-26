@@ -291,5 +291,7 @@ class WWWEventObserverIntegrationTest : KoinTest {
 
             val validationResult = observer.validateStateConsistency()
             assertNotNull(validationResult)
+            // Validation result should be a list of issues (empty if consistent)
+            assertTrue(validationResult is List<*>, "Validation result should be a list")
         }
 }

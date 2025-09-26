@@ -30,12 +30,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.splitcompat.SplitCompat
@@ -81,7 +93,7 @@ open class MainActivity : AppCompatActivity() {
                 eventsListScreen,
                 aboutScreen,
             )
-        debugScreen?.let { screens.add(it) }
+        // Debug screen removed from tab bar - will be accessed via floating icon
 
         TabManager(
             screens.toList(),
@@ -149,13 +161,19 @@ open class MainActivity : AppCompatActivity() {
             WorldWideWavesTheme {
                 Surface(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     // Box to stack main content and simulation-mode overlay
                     Box(modifier = Modifier.fillMaxSize()) {
+                        var showDebugScreen by remember { mutableStateOf(false) }
+
                         val ready by isSplashFinished.collectAsState()
                         if (ready) {
-                            tabManager.TabView()
+                            if (showDebugScreen && debugScreen != null) {
+                                debugScreen!!.Screen(Modifier.fillMaxSize())
+                            } else {
+                                tabManager.TabView()
+                            }
                         } else {
                             ProgrammaticSplashScreen()
                         }
@@ -164,6 +182,27 @@ open class MainActivity : AppCompatActivity() {
                         //  Global Simulation-Mode chip shown whenever the mode is enabled
                         // -----------------------------------------------------------------
                         SimulationModeChip(platform)
+
+                        // -----------------------------------------------------------------
+                        //  Floating Debug Icon (green) - bottom right corner
+                        // -----------------------------------------------------------------
+                        if (ready && debugScreen != null) {
+                            FloatingActionButton(
+                                onClick = { showDebugScreen = !showDebugScreen },
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(16.dp),
+                                containerColor = Color(0xFF4CAF50), // Green color
+                                shape = CircleShape,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.BugReport,
+                                    contentDescription = "Debug Screen",
+                                    tint = Color.White,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -177,7 +216,9 @@ open class MainActivity : AppCompatActivity() {
 
         // Also enforce minimum duration
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS) // Timing.SPLASH_MIN_DURATION
+            kotlinx.coroutines.delay(
+                com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MAX_DURATION_MS
+            ) // Timing.SPLASH_MIN_DURATION
             checkSplashFinished(startTime)
         }
     }
@@ -185,13 +226,14 @@ open class MainActivity : AppCompatActivity() {
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = System.currentTimeMillis() - startTime
-        if (isDataLoaded && elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+        if (isDataLoaded &&
+            elapsed >= com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_CHECK_INTERVAL_MS
+        ) { // Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
             isSplashFinished.update { true }
         }
     }
 
     // ----------------------------
-
 
     // -------------------------------------------------
     // Programmatic Splash UI (mirrors previous design)

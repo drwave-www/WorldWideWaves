@@ -45,7 +45,7 @@ data class WaveState(
     val isWarmingInProgress: Boolean,
     val hitDateTime: kotlin.time.Instant,
     val isGoingToBeHit: Boolean,
-    val hasBeenHit: Boolean
+    val hasBeenHit: Boolean,
 )
 
 /**
@@ -64,7 +64,7 @@ fun rememberWaveState(event: IWWWEvent): WaveState {
         isWarmingInProgress = isWarmingInProgress,
         hitDateTime = hitDateTime,
         isGoingToBeHit = isGoingToBeHit,
-        hasBeenHit = hasBeenHit
+        hasBeenHit = hasBeenHit,
     )
 }
 
@@ -87,7 +87,7 @@ fun WaveScreenLayout(
     mapHeight: Dp,
     mapArea: @Composable () -> Unit = {},
 ) {
-    val helper = remember { WaveScreenLayoutHelper() }
+    // WaveScreenLayoutHelper removed - was unused
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -115,6 +115,6 @@ fun WaveScreenLayout(
         }
 
         // Integrated wave choreographies with proper z-index layering
-        WaveChoreographies(event, helper.clock, Modifier.zIndex(10f))
+        WaveChoreographies(event, Modifier.zIndex(10f))
     }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -61,9 +62,10 @@ fun AboutWWWLogo() {
     Image(
         painter = painterResource(Res.drawable.www_logo_transparent),
         contentDescription = stringResource(MokoRes.strings.logo_description),
-        modifier = Modifier
-            .width(250.dp)
-            .padding(top = 10.dp),
+        modifier =
+            Modifier
+                .width(250.dp)
+                .padding(top = 10.dp),
     )
     Spacer(modifier = Modifier.size(20.dp))
 }
@@ -75,7 +77,7 @@ fun AboutWWWLogo() {
 @Composable
 fun AboutWWWSocialNetworks(
     onUrlOpen: (String) -> Unit = { url ->
-        com.worldwidewaves.shared.utils.Log.i("AboutWWWSocialNetworks", "URL click: $url")
+        Log.i("AboutWWWSocialNetworks", "URL click: $url")
     },
 ) {
     WWWSocialNetworks(

@@ -48,6 +48,8 @@ import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 /**
@@ -59,55 +61,65 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun SharedMapActions(
     event: IWWWEvent,
-    clock: IClock,
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
     onCenterWave: () -> Unit = {},
 ) {
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
+    val clock = clockComponent.clock
+
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by event.observer.userIsInArea.collectAsState()
+    // isInArea removed - was unused
 
     val isRunning = eventStatus == Status.RUNNING
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                end = Dimensions.DEFAULT_INT_PADDING.dp,
-                bottom = Dimensions.DEFAULT_INT_PADDING.dp
-            ),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(
+                    end = Dimensions.DEFAULT_INT_PADDING.dp,
+                    bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                ),
         contentAlignment = Alignment.BottomEnd,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
             // Target wave button
             Image(
-                modifier = Modifier
-                    .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
-                    .clickable {
-                        if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                            scope.launch {
-                                onTargetWave()
+                modifier =
+                    Modifier
+                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
+                        .clickable {
+                            if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
+                                scope.launch {
+                                    onTargetWave()
+                                }
                             }
-                        }
-                    },
-                painter = painterResource(
-                    if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive
-                ),
-                contentDescription = stringResource(
-                    if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off
-                ),
+                        },
+                painter =
+                    painterResource(
+                        if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive,
+                    ),
+                contentDescription =
+                    stringResource(
+                        if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
+                    ),
             )
 
             // Center wave button
             Image(
-                modifier = Modifier
-                    .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
-                    .clickable {
-                        scope.launch {
-                            onCenterWave()
-                        }
-                    },
+                modifier =
+                    Modifier
+                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
+                        .clickable {
+                            scope.launch {
+                                onCenterWave()
+                            }
+                        },
                 painter = painterResource(Res.drawable.target_wave_inactive),
                 contentDescription = stringResource(MokoRes.strings.map_cancel_download),
             )

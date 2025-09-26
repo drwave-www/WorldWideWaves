@@ -34,16 +34,17 @@ actual fun PlatformMapRenderer(
     modifier: Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { onMapClick() },
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable { onMapClick() },
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = "Android MapLibre for ${event.id}\n(Click for interactions)",
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 

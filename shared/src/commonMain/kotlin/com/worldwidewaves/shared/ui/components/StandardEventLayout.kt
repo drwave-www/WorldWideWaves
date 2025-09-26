@@ -27,6 +27,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.utils.rememberEventState
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Standard event screen layout pattern used across multiple event activities.
@@ -37,8 +39,6 @@ import com.worldwidewaves.shared.ui.utils.rememberEventState
 @Composable
 fun StandardEventLayout(
     event: IWWWEvent,
-    platform: WWWPlatform,
-    clock: IClock,
     mapFeatureState: MapFeatureState,
     onNavigateToWave: (String) -> Unit,
     onSimulationStarted: (String) -> Unit = {},
@@ -50,6 +50,14 @@ fun StandardEventLayout(
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
 ) {
+    val platformComponent =
+        object : KoinComponent {
+            val platform: WWWPlatform by inject()
+            val clock: IClock by inject()
+        }
+    val platform = platformComponent.platform
+    val clock = platformComponent.clock
+
     val eventState = rememberEventState(event, platform)
 
     Box(modifier = modifier) {
@@ -68,11 +76,11 @@ fun StandardEventLayout(
                     event.id,
                     eventState.eventStatus,
                     eventState.endDateTime,
-                    clock,
                     eventState.isInArea,
-                    onNavigateToWave = WaveNavigator { eventId ->
-                        onNavigateToWave(eventId)
-                    },
+                    onNavigateToWave =
+                        WaveNavigator { eventId ->
+                            onNavigateToWave(eventId)
+                        },
                     modifier = Modifier.align(Alignment.Center),
                 )
 
@@ -80,12 +88,11 @@ fun StandardEventLayout(
                 if (eventState.isSimulationModeEnabled) {
                     SimulationButton(
                         event = event,
-                        platform = platform,
                         mapFeatureState = mapFeatureState,
                         onMapNotAvailable = onMapNotAvailable,
                         onSimulationStarted = onSimulationStarted,
                         onSimulationStopped = onSimulationStopped,
-                        onError = onSimulationError
+                        onError = onSimulationError,
                     )
                 }
             }

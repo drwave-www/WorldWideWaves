@@ -21,26 +21,13 @@ package com.worldwidewaves.shared.ui.screens
  * limitations under the License.
  */
 
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,45 +37,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.AbstractEventMap
+import com.worldwidewaves.shared.ui.components.MapZoomAndLocationUpdate
+import com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
-import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
-import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.WWWGlobals.Event
-import com.worldwidewaves.shared.WWWGlobals.WaveTiming
-import com.worldwidewaves.shared.WWWPlatform
-import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.ExperimentalTime
-import kotlin.time.Duration.Companion.hours
-import java.util.Locale
 
 // Constants
 private const val MAP_HEIGHT_DP = 300
-private const val PROGRESSION_BAR_HEIGHT_DP = 40
-private const val TRIANGLE_SIZE_PX = 20f
-private const val HIT_COUNTER_WIDTH_DP = 200
-private const val STATUS_TEXT_FONT_SIZE = 24
-private const val PROGRESSION_FONT_SIZE = 16
-
-// UI Colors
-private const val PROGRESS_COLOR = 0xFF2196F3 // Blue
-private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 
 /**
  * Complete Wave Screen implementation with exact same behavior and look as the working version.
@@ -96,15 +57,21 @@ private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
  */
 @OptIn(ExperimentalTime::class)
 @Composable
-fun SharedWaveScreen(
+fun WaveScreen(
     event: IWWWEvent,
+    eventMap: AbstractEventMap<*>,
     modifier: Modifier = Modifier,
     mapContent: @Composable (Modifier) -> Unit,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
+
+    // Start event/map coordination and map zoom/location updates
+    MapZoomAndLocationUpdate(event, eventMap)
+
     // States for sound coordination
     var hasPlayedHitSound by remember { mutableStateOf(false) }
 
@@ -116,21 +83,6 @@ fun SharedWaveScreen(
     val hitDateTime by event.observer.hitDateTime.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
-
-    // Derive choreography active state (exact working logic)
-    val isChoreographyActive =
-        remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-            isWarmingInProgress ||
-                isGoingToBeHit ||
-                run {
-                    if (hasBeenHit) {
-                        val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                        secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                    } else {
-                        false
-                    }
-                }
-        }
 
     // Play the hit sound when the user has been hit (exact working implementation)
     LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
@@ -153,22 +105,21 @@ fun SharedWaveScreen(
             mapContent(
                 Modifier
                     .fillMaxWidth()
-                    .height(calculatedHeight)
+                    .height(calculatedHeight),
             )
 
             WaveProgressionBar(event)
 
             // Always show counter in the proper position with spacing (exact working layout)
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
             WaveHitCounter(event)
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
         // Working choreographies with proper z-index
-        com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies(
+        WorkingWaveChoreographies(
             event = event,
-            modifier = Modifier.zIndex(10f)
+            modifier = Modifier.zIndex(10f),
         )
     }
 }
-

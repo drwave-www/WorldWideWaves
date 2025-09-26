@@ -28,7 +28,7 @@ class DebugScreen : TabScreen {
             modifier = modifier,
             onPerformanceClick = {
                 // Debug functionality handled by shared debug screen
-            }
+            },
         )
     }
 }
