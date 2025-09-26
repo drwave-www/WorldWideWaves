@@ -23,6 +23,7 @@ package com.worldwidewaves.activities.event
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -85,7 +86,7 @@ class EventActivity : AbstractEventWaveActivity() {
             remember(event.id) {
                 AndroidEventMap(
                     event,
-                    activityContext = context, // Pass Activity context for UI thread operations
+                    context = context as AppCompatActivity, // Pass Activity context for UI thread operations
                     onMapClick = {
                         context.startActivity(
                             Intent(context, EventFullMapActivity::class.java).apply {

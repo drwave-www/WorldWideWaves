@@ -21,6 +21,7 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -92,7 +93,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
             remember(event.id) {
                 AndroidEventMap(
                     event,
-                    activityContext = context, // Pass Activity context for wave layer UI thread operations
+                    context = context as AppCompatActivity, // Pass Activity context for wave layer UI thread operations
                     mapConfig =
                         EventMapConfig(
                             initialCameraPosition = MapCameraPosition.WINDOW,

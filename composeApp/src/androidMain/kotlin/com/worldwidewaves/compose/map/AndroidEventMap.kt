@@ -136,7 +136,7 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
  */
 class AndroidEventMap(
     event: IWWWEvent,
-    private val activityContext: Context, // MANDATORY - required for wave layer UI thread operations
+    private val context: AppCompatActivity, // MANDATORY - required for wave layer UI thread operations
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
@@ -179,7 +179,6 @@ class AndroidEventMap(
     ) {
         Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
 
-        val context = LocalContext.current
         val scope = rememberCoroutineScope()
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
@@ -219,7 +218,7 @@ class AndroidEventMap(
                     Log.i(TAG, "Map installed: ${event.id}")
                     // Make the just-installed split immediately visible to this
                     // running Activity – required for MapLibre to see assets.
-                    (context as? AppCompatActivity)?.let {
+                    context.let {
                         SplitCompat.installActivity(it)
                     }
                     isMapDownloading = false
@@ -806,13 +805,9 @@ class AndroidEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean
     ) {
-        if (activityContext is AppCompatActivity) {
-            activityContext.runOnUiThread {
-                val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
-                mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
-            }
-        } else {
-            Log.e(TAG, "Activity context is not AppCompatActivity - cannot run on UI thread! Context type: ${activityContext::class.simpleName}")
+        context.runOnUiThread {
+            val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
+            mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
 
