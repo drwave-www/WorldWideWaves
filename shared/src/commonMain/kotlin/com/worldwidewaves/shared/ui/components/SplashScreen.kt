@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.background
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
@@ -58,9 +60,9 @@ fun SharedSplashScreen(
             painter = painterResource(Res.drawable.www_logo_transparent),
             contentDescription = stringResource(MokoRes.strings.logo_description),
             modifier = Modifier
-                .size(300.dp) // Use size() instead of width() to maintain aspect ratio
-                .align(Alignment.Center),
-            contentScale = ContentScale.Fit, // Ensure proper scaling
+                .width(250.dp) // Historical size
+                .align(Alignment.BottomCenter) // Historical positioning
+                .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // Historical bottom padding
         )
     }
 }
