@@ -67,9 +67,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.shared.ui.components.WaveScreenLayout
-import com.worldwidewaves.shared.ui.components.calculateEventMapHeight
 import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
+import com.worldwidewaves.shared.ui.screens.UserWaveStatusText
+import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
+import com.worldwidewaves.shared.ui.components.WaveHitCounter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.DisplayText
 import com.worldwidewaves.shared.WWWGlobals.Event
@@ -107,7 +109,12 @@ class WaveActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
     ) {
         val context = LocalContext.current
-        val calculatedHeight = calculateEventMapHeight()
+
+        // Calculate height based on aspect ratio and available width
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val calculatedHeight = screenWidthDp / Event.MAP_RATIO
 
         // Construct the event Map
         val eventMap =
@@ -130,18 +137,29 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Always target the closest view to have user and wave in the same view
         MapZoomAndLocationUpdate(event, eventMap)
 
-        // Use shared wave screen layout
-        WaveScreenLayout(
-            event = event,
-            modifier = modifier,
-            mapHeight = calculatedHeight,
-            mapArea = {
+        // Screen composition matching existing Android WaveActivity
+        Box(modifier = modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(30.dp),
+            ) {
+                UserWaveStatusText(event)
                 eventMap.Screen(
                     autoMapDownload = true,
                     Modifier.fillMaxWidth().height(calculatedHeight)
                 )
+                WaveProgressionBar(event)
+
+                // Spacer and hit counter
+                Spacer(modifier = Modifier.weight(1f))
+                WaveHitCounter(event)
+                Spacer(modifier = Modifier.height(30.dp))
             }
-        )
+
+            // Choreography overlay
+            WaveChoreographies(event, clock, Modifier.zIndex(10f))
+        }
     }
 }
 

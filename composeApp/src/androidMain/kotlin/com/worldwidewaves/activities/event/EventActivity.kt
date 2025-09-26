@@ -81,8 +81,12 @@ import com.worldwidewaves.R
 import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
 import com.worldwidewaves.shared.ui.components.DividerLine
 import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.EventOverlayDone
-import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.EventOverlay
+import com.worldwidewaves.shared.ui.components.StandardEventLayout
+import com.worldwidewaves.shared.ui.components.SimulationButton
+import com.worldwidewaves.shared.ui.components.calculateEventMapHeight
+import com.worldwidewaves.shared.ui.components.rememberEventState
+import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
 import com.worldwidewaves.shared.ui.components.WaveNavigator
 import com.worldwidewaves.shared.ui.components.WWWSocialNetworks
 import com.worldwidewaves.compose.map.AndroidEventMap
@@ -138,23 +142,19 @@ class EventActivity : AbstractEventWaveActivity() {
         val context = LocalContext.current
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(context)
-        val scope = rememberCoroutineScope()
-        val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-        val endDateTime = remember { mutableStateOf<Instant?>(null) }
-        val progression by event.observer.progression.collectAsState()
-        val isInArea by event.observer.userIsInArea.collectAsState()
-        val isSimulationModeEnabled by platform.simulationModeEnabled.collectAsState()
 
-        // Recompute end date-time each time progression changes (after polygons load, duration becomes accurate)
-        LaunchedEffect(event.id, progression) {
-            endDateTime.value = event.getEndDateTime()
+        // Map availability for simulation button
+        val mapViewModel: MapViewModel = viewModel()
+        val mapFeatureState by mapViewModel.featureState.collectAsState()
+        var showMapRequiredDialog by remember { mutableStateOf(false) }
+
+        // Check map availability for simulation
+        LaunchedEffect(Unit) {
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
         }
 
-        // Calculate height based on aspect ratio and available width
-        val windowInfo = LocalWindowInfo.current
-        val density = LocalDensity.current
-        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-        val calculatedHeight = screenWidthDp / Event.MAP_RATIO
+        // Calculate responsive map height
+        val calculatedHeight = calculateEventMapHeight()
 
         // Construct the event map
         val eventMap =
@@ -174,269 +174,46 @@ class EventActivity : AbstractEventWaveActivity() {
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
 
-        // Screen composition
-        Box {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp),
-            ) {
-                EventOverlay(event)
-                EventDescription(event)
-                DividerLine()
-
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    ButtonWave(
-                        event.id,
-                        eventStatus,
-                        endDateTime.value,
-                        clock,
-                        isInArea,
-                        onNavigateToWave = WaveNavigator { eventId ->
-                            context.startActivity(
-                                Intent(context, WaveActivity::class.java).apply {
-                                    putExtra("eventId", eventId)
-                                }
-                            )
-                        },
-                        modifier = Modifier.align(Alignment.Center),
-                    )
-
-                    // Launch simulation button
-                    if (isSimulationModeEnabled) {
-                        SimulationButton(scope, event, context)
+        // Use simplified shared standard event layout
+        StandardEventLayout(
+            event = event,
+            platform = platform,
+            mapFeatureState = mapFeatureState,
+            onNavigateToWave = { eventId ->
+                context.startActivity(
+                    Intent(context, WaveActivity::class.java).apply {
+                        putExtra("eventId", eventId)
                     }
-                }
-
+                )
+            },
+            onSimulationStarted = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            },
+            onSimulationStopped = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            },
+            onSimulationError = { title, message ->
+                Toast.makeText(context, "$title: $message", Toast.LENGTH_SHORT).show()
+            },
+            onMapNotAvailable = { showMapRequiredDialog = true },
+            modifier = modifier,
+            mapHeight = calculatedHeight,
+            mapArea = {
                 eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-                NotifyAreaUserPosition(event)
-                EventNumbers(event)
-                WWWEventSocialNetworks(event)
             }
-        }
-    }
+        )
 
-    @Composable
-    private fun BoxScope.SimulationButton(
-        scope: CoroutineScope,
-        event: IWWWEvent,
-        context: Context,
-    ) {
-        // Simulation button states: idle, loading, active
-        var simulationButtonState by remember { mutableStateOf("idle") }
-        val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
-
-        // Map availability check
-        val mapViewModel: MapViewModel = viewModel()
-        val mapFeatureState by mapViewModel.featureState.collectAsState()
-        var showMapRequiredDialog by remember { mutableStateOf(false) }
-
-        // Check if map is available for simulation
-        val isMapAvailableForSimulation =
-            when (mapFeatureState) {
-                is MapFeatureState.Installed -> true
-                is MapFeatureState.Available -> true
-                else -> false
-            }
-
-        // Check map availability when component initializes
-        LaunchedEffect(Unit) {
-            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
-        }
-
-        Box(
-            modifier =
-                Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 16.dp)
-                    .offset(y = (-8).dp)
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(onPrimaryLight)
-                    .clickable(enabled = simulationButtonState != "loading") {
-                        if (simulationButtonState == "idle") {
-                            if (!isMapAvailableForSimulation) {
-                                showMapRequiredDialog = true
-                                return@clickable
-                            }
-                            simulationButtonState = "loading"
-                            scope.launch {
-                                try {
-                                    // Generate random position within event area
-                                    val position = event.area.generateRandomPositionInArea()
-
-                                    // Calculate time 5 minutes before event start
-                                    val simulationDelay = 0.minutes // Start NOW
-                                    val simulationTime = event.getStartDateTime() + simulationDelay
-
-                                    // Reset any existing simulation
-                                    platform.disableSimulation()
-
-                                    // Create new simulation with the calculated time and position
-                                    val simulation =
-                                        WWWSimulation(
-                                            startDateTime = simulationTime,
-                                            userPosition = position,
-                                            initialSpeed = Wave.DEFAULT_SPEED_SIMULATION, // Use current default speed
-                                        )
-
-                                    // Set the simulation
-                                    Log.i(TAG, "Setting simulation starting time to $simulationTime from event ${event.id}")
-                                    Log.i(TAG, "Setting simulation user position to $position from event ${event.id}")
-                                    platform.setSimulation(simulation)
-
-                                    // Restart event observation to apply simulation (observation delay changes)
-                                    event.observer.stopObservation()
-                                    event.observer.startObservation()
-
-                                    // Show feedback
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            context.getString(MokoRes.strings.test_simulation_started.resourceId),
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
-
-                                    simulationButtonState = "active"
-                                } catch (ise: IllegalStateException) {
-                                    simulationButtonState = "idle"
-                                    Log.e(TAG, "Invalid state for simulation setup", ise)
-                                } catch (iae: IllegalArgumentException) {
-                                    simulationButtonState = "idle"
-                                    Log.e(TAG, "Invalid simulation parameters", iae)
-                                } catch (uoe: UnsupportedOperationException) {
-                                    simulationButtonState = "idle"
-                                    Log.e(TAG, "Unsupported simulation operation", uoe)
-                                }
-                            }
-                        } else if (simulationButtonState == "active") {
-                            // Stop simulation
-                            simulationButtonState = "idle"
-                            scope.launch {
-                                platform.disableSimulation()
-                                event.observer.stopObservation()
-                                event.observer.startObservation()
-                                Toast
-                                    .makeText(
-                                        context,
-                                        "Simulation stopped",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
-                        }
-                    },
-            contentAlignment = Alignment.Center,
-        ) {
-            when (simulationButtonState) {
-                "idle" -> {
-                    Icon(
-                        painter = painterResourceAndroid(R.drawable.ic_timer),
-                        contentDescription = stringResource(MokoRes.strings.test_simulation),
-                        tint = Color.Red,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-                "loading" -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = Color.Red,
-                    )
-                }
-                "active" -> {
-                    Icon(
-                        painter = painterResourceAndroid(R.drawable.ic_stop),
-                        contentDescription = "Stop simulation",
-                        tint = Color.Red,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }
-            }
-        }
-
-        // Reset button state when simulation is disabled externally
-        LaunchedEffect(isSimulationEnabled) {
-            if (!isSimulationEnabled && simulationButtonState == "active") {
-                simulationButtonState = "idle"
-            }
-        }
-
-        // Show map required dialog
+        // Show map required dialog for simulation
         if (showMapRequiredDialog) {
             AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
         }
     }
+
 }
 
-@Composable
-private fun AlertMapNotDownloadedOnSimulationLaunch(hideDialog: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = hideDialog,
-        title = {
-            Text(
-                text = stringResource(MokoRes.strings.simulation_map_required_title),
-                style = commonTextStyle().copy(color = scrimLight),
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = hideDialog,
-            ) {
-                Text(stringResource(MokoRes.strings.ok))
-            }
-        },
-    )
-}
 
 // ----------------------------------------------------------------------------
 
-@Composable
-private fun EventDescription(
-    event: IWWWEvent,
-    modifier: Modifier = Modifier,
-) {
-    val dir = LocalLayoutDirection.current
-    Text(
-        modifier = modifier.padding(horizontal = Dimensions.DEFAULT_EXT_PADDING.dp),
-        text = stringResource(event.getDescription()),
-        style = extraQuinaryColoredBoldTextStyle(),
-        fontSize = Event.DESC_FONTSIZE.sp,
-        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-    )
-}
-
-// ----------------------------------------------------------------------------
-
-@OptIn(ExperimentalTime::class)
-@Composable
-private fun EventOverlay(event: IWWWEvent) {
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-
-    val localizedDate =
-        remember(event.id) {
-            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
-        }
-
-    Box {
-        Image(
-            modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-            painter = painterResource(event.getLocationImage() as DrawableResource),
-            contentDescription = stringResource(event.getLocation()),
-        )
-        Box(modifier = Modifier.matchParentSize()) {
-            EventOverlaySoonOrRunning(eventStatus)
-            EventOverlayDone(eventStatus)
-            EventOverlayDate(eventStatus, localizedDate)
-        }
-    }
-}
 
 // ----------------------------------------------------------------------------
 
