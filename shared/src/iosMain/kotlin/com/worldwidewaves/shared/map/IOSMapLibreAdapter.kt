@@ -16,6 +16,14 @@ import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+// Geographic constants
+private const val MIN_LATITUDE = -90.0
+private const val MAX_LATITUDE = 90.0
+private const val MIN_LONGITUDE = -180.0
+private const val MAX_LONGITUDE = 180.0
+private const val DEFAULT_IPHONE_WIDTH = 375.0
+private const val DEFAULT_IPHONE_HEIGHT = 812.0
+
 /**
  * iOS implementation of MapLibreAdapter using iOS MapLibre SDK.
  *
@@ -58,12 +66,12 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun getWidth(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        return 375.0 // Default iPhone width for now
+        return DEFAULT_IPHONE_WIDTH
     }
 
     override fun getHeight(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        return 812.0 // Default iPhone height for now
+        return DEFAULT_IPHONE_HEIGHT
     }
 
     override fun getCameraPosition(): Position? {
@@ -78,8 +86,8 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         val sw = Position(0.0, 0.0)
         val ne = Position(0.0, 0.0)
         return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(listOf(
-            Position(-90.0, -180.0),
-            Position(90.0, 180.0)
+            Position(MIN_LATITUDE, MIN_LONGITUDE),
+            Position(MAX_LATITUDE, MAX_LONGITUDE)
         ))!!
     }
 
