@@ -22,7 +22,7 @@ import SwiftUI
 import Shared
 
 @main
-struct iOSApp: App {
+struct IOSApp: App {
     var body: some Scene {
         WindowGroup {
             // Root view of the application

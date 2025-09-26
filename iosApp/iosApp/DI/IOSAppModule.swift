@@ -50,7 +50,9 @@ class IOSAppModule {
 
         // Register EventsListViewModel
         koin.registerFactory { koinInstance -> AnyObject in
-            let wwwEvents = koinInstance.get(objCClass: WWWEvents.self) as! WWWEvents
+            guard let wwwEvents = koinInstance.get(objCClass: WWWEvents.self) as? WWWEvents else {
+                fatalError("Failed to resolve WWWEvents from Koin")
+            }
             return EventsListViewModel(wwwEvents: wwwEvents)
         }
 
@@ -69,17 +71,26 @@ class IOSAppModule {
 
     /// Get the EventsListViewModel instance
     func getEventsListViewModel() -> EventsListViewModel {
-        KoinKt.getKoin().get(objCClass: EventsListViewModel.self) as! EventsListViewModel
+        guard let viewModel = KoinKt.getKoin().get(objCClass: EventsListViewModel.self) as? EventsListViewModel else {
+            fatalError("Failed to resolve EventsListViewModel from Koin")
+        }
+        return viewModel
     }
 
     /// Get the AboutViewModel instance
     func getAboutViewModel() -> AboutViewModel {
-        KoinKt.getKoin().get(objCClass: AboutViewModel.self) as! AboutViewModel
+        guard let viewModel = KoinKt.getKoin().get(objCClass: AboutViewModel.self) as? AboutViewModel else {
+            fatalError("Failed to resolve AboutViewModel from Koin")
+        }
+        return viewModel
     }
 
     /// Get the SettingsViewModel instance
     func getSettingsViewModel() -> SettingsViewModel {
-        KoinKt.getKoin().get(objCClass: SettingsViewModel.self) as! SettingsViewModel
+        guard let viewModel = KoinKt.getKoin().get(objCClass: SettingsViewModel.self) as? SettingsViewModel else {
+            fatalError("Failed to resolve SettingsViewModel from Koin")
+        }
+        return viewModel
     }
 }
 
@@ -90,7 +101,10 @@ extension Koin {
     /// Register a factory with Koin
     func registerFactory<T: AnyObject>(_ factory: @escaping (Koin) -> T) {
         _koin.registerFactory(createdAtStart: false, qualifier: nil) { koin in
-            factory(koin as! Koin)
+            guard let koinInstance = koin as? Koin else {
+                fatalError("Invalid Koin instance")
+            }
+            return factory(koinInstance)
         }
     }
 }
