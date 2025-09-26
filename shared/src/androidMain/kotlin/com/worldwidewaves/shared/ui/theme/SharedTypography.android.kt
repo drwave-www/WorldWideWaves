@@ -11,40 +11,12 @@ package com.worldwidewaves.shared.ui.theme
  */
 
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 
-// EXACT historical Google Fonts setup restored
-private val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = com.worldwidewaves.shared.R.array.com_google_android_gms_fonts_certs,
-)
+// Fallback to historical fonts until Google Fonts provider is properly configured
+// Using distinctive system fonts that match the historical style better
+actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif // Closer to Montserrat style
+actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif // Matches body for consistency
+actual val SharedExtraFontFamily: FontFamily = FontFamily.Monospace // Distinctive for special elements
 
-// Google Fonts with manual fallback handling
-actual val SharedBodyFontFamily: FontFamily = try {
-    FontFamily(
-        Font(GoogleFont("Montserrat"), provider),
-        Font(GoogleFont("Noto Sans"), provider),
-    )
-} catch (e: Exception) {
-    FontFamily.Serif // Fallback if Google Fonts fail
-}
-
-actual val SharedDisplayFontFamily: FontFamily = try {
-    FontFamily(
-        Font(GoogleFont("Montserrat"), provider),
-        Font(GoogleFont("Noto Sans"), provider),
-    )
-} catch (e: Exception) {
-    FontFamily.Serif // Fallback if Google Fonts fail
-}
-
-actual val SharedExtraFontFamily: FontFamily = try {
-    FontFamily(
-        Font(GoogleFont("Montserrat Alternates"), provider),
-        Font(GoogleFont("Noto Sans"), provider),
-    )
-} catch (e: Exception) {
-    FontFamily.Monospace // Distinctive fallback for extra fonts
-}
+// TODO: Restore full Google Fonts setup with proper KMP configuration
+// The certificates and provider setup need to be configured differently for shared modules
