@@ -28,6 +28,9 @@ import io.mockk.mockk
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Clock
+
+@OptIn(kotlin.time.ExperimentalTime::class)
 
 /**
  * Test data builders for consistent, reusable test fixtures.
@@ -141,7 +144,7 @@ object TestDataBuilders {
         fun advanceStep(step: kotlin.time.Duration) = apply { this.advanceStep = step }
 
         fun fixedAt2022() = apply { baseTime(BASE_TIMESTAMP) }
-        fun fixedAtNow() = apply { baseTime(kotlinx.datetime.Clock.System.now()) }
+        fun fixedAtNow() = apply { baseTime(Clock.System.now()) }
 
         fun build(): IClock {
             val mockClock = mockk<IClock>()
