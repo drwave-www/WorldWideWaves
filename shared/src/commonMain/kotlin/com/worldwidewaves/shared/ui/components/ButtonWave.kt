@@ -40,6 +40,7 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import dev.icerock.moko.resources.compose.stringResource
+import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -105,10 +106,7 @@ fun ButtonWave(
                     .fillMaxSize()
                     .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
-            style =
-                TextStyle(
-                    fontSize = Event.WAVEBUTTON_FONTSIZE.sp,
-                    fontWeight = FontWeight.Bold,
+            style = sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 ),

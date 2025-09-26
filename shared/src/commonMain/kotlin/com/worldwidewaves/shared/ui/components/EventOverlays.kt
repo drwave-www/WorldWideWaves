@@ -44,6 +44,7 @@ import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
+import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -92,8 +93,7 @@ fun EventOverlaySoonOrRunning(
             ) {
                 Text(
                     text = stringResource(textResource),
-                    style = TextStyle(
-                        fontSize = Common.SOONRUNNING_FONTSIZE.sp,
+                    style = sharedCommonTextStyle(Common.SOONRUNNING_FONTSIZE).copy(
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSecondary
                     ),

@@ -85,7 +85,7 @@ fun sharedQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAUL
     sharedQuinaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
+    sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 
 fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedExtraFontFamily)

@@ -35,7 +35,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.viewmodels.MapFeatureState
+import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import io.mockk.every
 import io.mockk.mockk

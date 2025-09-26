@@ -80,7 +80,7 @@ class MainActivityTest {
 
     @Test
     fun testSplashScreenTimingAndTransition() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testSplashScreenTimingAndTransition") } returns trace
 
         val mockEvents = mockk<WWWEvents>(relaxed = true)
@@ -134,7 +134,7 @@ class MainActivityTest {
 
     @Test
     fun testTabNavigationFunctionality() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testTabNavigationFunctionality") } returns trace
 
         val mockEventsScreen = mockk<EventsListScreen>(relaxed = true)
@@ -189,7 +189,7 @@ class MainActivityTest {
 
     @Test
     fun testLocationPermissionFlow() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testLocationPermissionFlow") } returns trace
 
         val locationPermissionState = MutableStateFlow("not_requested")
@@ -249,7 +249,7 @@ class MainActivityTest {
 
     @Test
     fun testAppLifecycleHandling() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testAppLifecycleHandling") } returns trace
 
         val lifecycleState = MutableStateFlow("created")
@@ -293,7 +293,7 @@ class MainActivityTest {
 
     @Test
     fun testInitialDataLoadingStates() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testInitialDataLoadingStates") } returns trace
 
         val loadingState = MutableStateFlow("loading")
@@ -349,7 +349,7 @@ class MainActivityTest {
 
     @Test
     fun testMainActivityErrorRecovery() {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.testing.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testMainActivityErrorRecovery") } returns trace
 
         val errorState = MutableStateFlow("none")
