@@ -37,12 +37,13 @@ class AboutFaqScreen(
                 try {
                     uriHandler.openUri(url)
                 } catch (e: Exception) {
-                    com.worldwidewaves.shared.utils.Log.e("AboutFaqScreen", "Failed to open URL: $url", throwable = e)
+                    com.worldwidewaves.shared.utils.Log
+                        .e("AboutFaqScreen", "Failed to open URL: $url", throwable = e)
                 }
             },
             onSimulateClick = {
                 platform.enableSimulationMode()
-            }
+            },
         )
     }
 }

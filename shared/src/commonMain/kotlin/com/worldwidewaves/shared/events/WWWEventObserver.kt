@@ -638,4 +638,55 @@ class WWWEventObserver(
             lastEmittedTimeBeforeHit = newTime
         }
     }
+
+    /**
+     * Validates the current state consistency for debugging purposes.
+     * This method helps identify state management issues during development.
+     */
+    @androidx.annotation.VisibleForTesting
+    suspend fun validateStateConsistency(): List<String> {
+        val issues = mutableListOf<String>()
+
+        try {
+            // Check progression bounds
+            val progression = _progression.value
+            if (progression < 0.0 || progression > 100.0) {
+                issues.add("Progression out of bounds: $progression (should be 0-100)")
+            }
+
+            // Check user position vs area consistency
+            val userPosition = positionManager.getCurrentPosition()
+            val observerUserInArea = _userIsInArea.value
+
+            if (userPosition != null) {
+                val actualUserInArea =
+                    try {
+                        waveProgressionTracker.isUserInWaveArea(userPosition, event.area)
+                    } catch (e: Exception) {
+                        Log.e("WWWEventObserver", "Error validating user in area: $e")
+                        false
+                    }
+                if (actualUserInArea != observerUserInArea) {
+                    issues.add("userIsInArea inconsistency: observer=$observerUserInArea, actual=$actualUserInArea")
+                }
+            } else if (observerUserInArea) {
+                issues.add("userIsInArea=true but no user position available")
+            }
+
+            // Check status consistency
+            val observerStatus = _eventStatus.value
+            val actualStatus = event.getStatus()
+            if (observerStatus != actualStatus) {
+                issues.add("Status inconsistency: observer=$observerStatus, actual=$actualStatus")
+            }
+        } catch (e: Exception) {
+            issues.add("Error during state validation: ${e.message}")
+        }
+
+        if (issues.isNotEmpty()) {
+            Log.w("WWWEventObserver", "State validation issues for event ${event.id}: ${issues.joinToString("; ")}")
+        }
+
+        return issues
+    }
 }

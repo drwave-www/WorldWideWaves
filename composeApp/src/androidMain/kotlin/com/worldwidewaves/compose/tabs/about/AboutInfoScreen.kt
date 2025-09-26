@@ -33,9 +33,10 @@ class AboutInfoScreen : TabScreen {
                 try {
                     uriHandler.openUri(url)
                 } catch (e: Exception) {
-                    com.worldwidewaves.shared.utils.Log.e("AboutInfoScreen", "Failed to open URL: $url", throwable = e)
+                    com.worldwidewaves.shared.utils.Log
+                        .e("AboutInfoScreen", "Failed to open URL: $url", throwable = e)
                 }
-            }
+            },
         )
     }
 }

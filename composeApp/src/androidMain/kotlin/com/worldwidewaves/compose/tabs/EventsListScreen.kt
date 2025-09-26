@@ -85,11 +85,11 @@ class EventsListScreen(
                 context.startActivity(
                     Intent(context, EventActivity::class.java).apply {
                         putExtra("eventId", eventId)
-                    }
+                    },
                 )
             },
             setEventFavorite = setEventFavorite,
-            modifier = modifier
+            modifier = modifier,
         )
     }
 }

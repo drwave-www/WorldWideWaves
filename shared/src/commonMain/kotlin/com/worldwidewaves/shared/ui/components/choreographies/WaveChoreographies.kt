@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.ui.components.choreographies
  */
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -52,9 +50,10 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.math.max
 import kotlin.time.ExperimentalTime
-
 
 /**
  * EXACT historical choreography implementation moved to shared.
@@ -72,9 +71,13 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun WaveChoreographies(
     event: IWWWEvent,
-    clock: IClock,
-    modifier: Modifier = Modifier,
+    @Suppress("UNUSED_PARAMETER") modifier: Modifier = Modifier,
 ) {
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
+    val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
@@ -138,7 +141,7 @@ fun WaveChoreographies(
             Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing waiting sequence for ${event.id}")
             ChoreographySprite(
                 resource = Res.drawable.e_choreography_waiting,
-                contentDescription = "Wave waiting choreography"
+                contentDescription = "Wave waiting choreography",
             )
         }
 
@@ -147,7 +150,7 @@ fun WaveChoreographies(
             Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing hit sequence for ${event.id}")
             ChoreographySprite(
                 resource = Res.drawable.e_choreography_hit,
-                contentDescription = "Wave hit choreography"
+                contentDescription = "Wave hit choreography",
             )
         }
     }
@@ -180,14 +183,15 @@ private fun WarmingSequence(
 ) {
     var currentFrame by remember(key) { mutableIntStateOf(0) }
 
-    val warmingFrames = listOf(
-        Res.drawable.e_choreography_warming_seq_1,
-        Res.drawable.e_choreography_warming_seq_2,
-        Res.drawable.e_choreography_warming_seq_3,
-        Res.drawable.e_choreography_warming_seq_4,
-        Res.drawable.e_choreography_warming_seq_5,
-        Res.drawable.e_choreography_warming_seq_6,
-    )
+    val warmingFrames =
+        listOf(
+            Res.drawable.e_choreography_warming_seq_1,
+            Res.drawable.e_choreography_warming_seq_2,
+            Res.drawable.e_choreography_warming_seq_3,
+            Res.drawable.e_choreography_warming_seq_4,
+            Res.drawable.e_choreography_warming_seq_5,
+            Res.drawable.e_choreography_warming_seq_6,
+        )
 
     // Auto-advance frames
     LaunchedEffect(key, currentFrame) {
@@ -203,8 +207,7 @@ private fun WarmingSequence(
     if (currentFrame < warmingFrames.size) {
         ChoreographySprite(
             resource = warmingFrames[currentFrame],
-            contentDescription = "Warming sequence frame ${currentFrame + 1}"
+            contentDescription = "Warming sequence frame ${currentFrame + 1}",
         )
     }
 }
-

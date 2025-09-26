@@ -20,88 +20,89 @@ import kotlin.test.assertTrue
  * Tests for shared MapStateManager component.
  */
 class MapStateManagerTest {
+    @Test
+    fun `initial state is NotChecked`() =
+        runTest {
+            val mockPlatformManager = MockPlatformMapManager()
+            val mapStateManager = MapStateManager(mockPlatformManager)
+
+            val initialState = mapStateManager.featureState.first()
+            assertEquals(MapFeatureState.NotChecked, initialState)
+        }
 
     @Test
-    fun `initial state is NotChecked`() = runTest {
-        val mockPlatformManager = MockPlatformMapManager()
-        val mapStateManager = MapStateManager(mockPlatformManager)
+    fun `checkMapAvailability sets Available when map exists`() =
+        runTest {
+            val mockPlatformManager = MockPlatformMapManager(availableMaps = setOf("paris_france"))
+            val mapStateManager = MapStateManager(mockPlatformManager)
 
-        val initialState = mapStateManager.featureState.first()
-        assertEquals(MapFeatureState.NotChecked, initialState)
-    }
+            mapStateManager.checkMapAvailability("paris_france")
 
-    @Test
-    fun `checkMapAvailability sets Available when map exists`() = runTest {
-        val mockPlatformManager = MockPlatformMapManager(availableMaps = setOf("paris_france"))
-        val mapStateManager = MapStateManager(mockPlatformManager)
+            val state = mapStateManager.featureState.first()
+            assertEquals(MapFeatureState.Available, state)
 
-        mapStateManager.checkMapAvailability("paris_france")
-
-        val state = mapStateManager.featureState.first()
-        assertEquals(MapFeatureState.Available, state)
-
-        val mapStates = mapStateManager.mapStates.first()
-        assertEquals(true, mapStates["paris_france"])
-    }
+            val mapStates = mapStateManager.mapStates.first()
+            assertEquals(true, mapStates["paris_france"])
+        }
 
     @Test
-    fun `checkMapAvailability sets NotAvailable when map missing`() = runTest {
-        val mockPlatformManager = MockPlatformMapManager(availableMaps = emptySet())
-        val mapStateManager = MapStateManager(mockPlatformManager)
+    fun `checkMapAvailability sets NotAvailable when map missing`() =
+        runTest {
+            val mockPlatformManager = MockPlatformMapManager(availableMaps = emptySet())
+            val mapStateManager = MapStateManager(mockPlatformManager)
 
-        mapStateManager.checkMapAvailability("paris_france")
+            mapStateManager.checkMapAvailability("paris_france")
 
-        val state = mapStateManager.featureState.first()
-        assertEquals(MapFeatureState.NotAvailable, state)
+            val state = mapStateManager.featureState.first()
+            assertEquals(MapFeatureState.NotAvailable, state)
 
-        val mapStates = mapStateManager.mapStates.first()
-        assertEquals(false, mapStates["paris_france"])
-    }
-
-    @Test
-    fun `downloadMap calls platform manager and updates state`() = runTest {
-        val mockPlatformManager = MockPlatformMapManager()
-        val mapStateManager = MapStateManager(mockPlatformManager)
-
-        mapStateManager.downloadMap("paris_france")
-
-        // Verify platform manager was called
-        assertTrue(mockPlatformManager.downloadCalled)
-        assertEquals("paris_france", mockPlatformManager.lastDownloadedMapId)
-    }
+            val mapStates = mapStateManager.mapStates.first()
+            assertEquals(false, mapStates["paris_france"])
+        }
 
     @Test
-    fun `cancelDownload calls platform manager`() = runTest {
-        val mockPlatformManager = MockPlatformMapManager()
-        val mapStateManager = MapStateManager(mockPlatformManager)
+    fun `downloadMap calls platform manager and updates state`() =
+        runTest {
+            val mockPlatformManager = MockPlatformMapManager()
+            val mapStateManager = MapStateManager(mockPlatformManager)
 
-        // Start a download first
-        mapStateManager.downloadMap("paris_france")
-        mapStateManager.cancelDownload()
+            mapStateManager.downloadMap("paris_france")
 
-        assertTrue(mockPlatformManager.cancelCalled)
-    }
+            // Verify platform manager was called
+            assertTrue(mockPlatformManager.downloadCalled)
+            assertEquals("paris_france", mockPlatformManager.lastDownloadedMapId)
+        }
+
+    @Test
+    fun `cancelDownload calls platform manager`() =
+        runTest {
+            val mockPlatformManager = MockPlatformMapManager()
+            val mapStateManager = MapStateManager(mockPlatformManager)
+
+            // Start a download first
+            mapStateManager.downloadMap("paris_france")
+            mapStateManager.cancelDownload()
+
+            assertTrue(mockPlatformManager.cancelCalled)
+        }
 
     /**
      * Mock implementation of PlatformMapManager for testing.
      */
     private class MockPlatformMapManager(
-        private val availableMaps: Set<String> = emptySet()
+        private val availableMaps: Set<String> = emptySet(),
     ) : PlatformMapManager {
-
         var downloadCalled = false
         var cancelCalled = false
         var lastDownloadedMapId: String? = null
 
-        override fun isMapAvailable(mapId: String): Boolean {
-            return availableMaps.contains(mapId)
-        }
+        override fun isMapAvailable(mapId: String): Boolean = availableMaps.contains(mapId)
 
         override suspend fun downloadMap(
             mapId: String,
             onProgress: (Int) -> Unit,
             onSuccess: () -> Unit,
-            onError: (Int, String?) -> Unit
+            onError: (Int, String?) -> Unit,
         ) {
             downloadCalled = true
             lastDownloadedMapId = mapId

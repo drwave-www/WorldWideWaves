@@ -18,19 +18,20 @@ object BundleInitializer {
      * Initialize the resource bundle before any MokoRes access.
      * This should be called early in the app lifecycle.
      */
-    fun initializeBundle(): Boolean {
-        return try {
+    fun initializeBundle(): Boolean =
+        try {
             if (!_isInitialized) {
                 // Try to load the bundle with various identifiers using moko-resources utilities
-                _bundle = try {
-                    NSBundle.loadableBundle("com.worldwidewaves.shared.main")
-                } catch (e: Exception) {
+                _bundle =
                     try {
-                        NSBundle.loadableBundle("com.worldwidewaves.shared")
-                    } catch (e2: Exception) {
-                        NSBundle.mainBundle
+                        NSBundle.loadableBundle("com.worldwidewaves.shared.main")
+                    } catch (e: Exception) {
+                        try {
+                            NSBundle.loadableBundle("com.worldwidewaves.shared")
+                        } catch (e2: Exception) {
+                            NSBundle.mainBundle
+                        }
                     }
-                }
 
                 _isInitialized = _bundle != null
 
@@ -45,7 +46,6 @@ object BundleInitializer {
             platform.Foundation.NSLog("BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
             false
         }
-    }
 
     /**
      * Get the initialized bundle, ensuring it's loaded first.

@@ -117,7 +117,6 @@ class DefaultWaveProgressionTracker(
             if (progressionHistory.size > maxHistorySize) {
                 progressionHistory.removeAt(0)
             }
-
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")
         }

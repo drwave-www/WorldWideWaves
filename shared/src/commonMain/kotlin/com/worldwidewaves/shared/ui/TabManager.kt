@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 
@@ -94,7 +95,12 @@ class TabManager(
         var currentTab by remember { mutableIntStateOf(selectedTab) }
         var originalScreen by remember { mutableStateOf(startScreen) }
 
-        Column(modifier = Modifier.fillMaxHeight()) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .testTag("tab-view"),
+        ) {
             // Display the selected tab screen
             Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
                 originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)

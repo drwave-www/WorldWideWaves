@@ -21,7 +21,6 @@ import platform.Foundation.NSBundle
  * dynamic downloads, which is more suitable for iOS App Store guidelines.
  */
 class IOSPlatformMapManager : PlatformMapManager {
-
     companion object {
         private const val MAP_BUNDLE_PREFIX = "map_"
         private const val MAP_BUNDLE_EXTENSION = "geojson"
@@ -31,7 +30,7 @@ class IOSPlatformMapManager : PlatformMapManager {
      * Check if a map is available in the iOS app bundle.
      */
     override fun isMapAvailable(mapId: String): Boolean {
-        val resourcePath = "${MAP_BUNDLE_PREFIX}${mapId}"
+        val resourcePath = "${MAP_BUNDLE_PREFIX}$mapId"
         val bundle = NSBundle.mainBundle
 
         val isAvailable = bundle.pathForResource(resourcePath, MAP_BUNDLE_EXTENSION) != null
@@ -50,7 +49,7 @@ class IOSPlatformMapManager : PlatformMapManager {
         mapId: String,
         onProgress: (Int) -> Unit,
         onSuccess: () -> Unit,
-        onError: (Int, String?) -> Unit
+        onError: (Int, String?) -> Unit,
     ) {
         WWWLogger.i("IOSPlatformMapManager", "Starting map 'download' (bundle verification): $mapId")
 

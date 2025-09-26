@@ -16,6 +16,14 @@ import com.worldwidewaves.shared.utils.WWWLogger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+// Geographic constants
+private const val MIN_LATITUDE = -90.0
+private const val MAX_LATITUDE = 90.0
+private const val MIN_LONGITUDE = -180.0
+private const val MAX_LONGITUDE = 180.0
+private const val DEFAULT_IPHONE_WIDTH = 375.0
+private const val DEFAULT_IPHONE_HEIGHT = 812.0
+
 /**
  * iOS implementation of MapLibreAdapter using iOS MapLibre SDK.
  *
@@ -26,7 +34,6 @@ import kotlinx.coroutines.flow.StateFlow
  * bindings are properly configured in the build system.
  */
 class IOSMapLibreAdapter : MapLibreAdapter<Any> {
-
     private var mapView: Any? = null
     private val _currentPosition = MutableStateFlow<Position?>(null)
     private val _currentZoom = MutableStateFlow(10.0)
@@ -42,7 +49,10 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         // This will be implemented when iOS MapLibre SDK integration is completed
     }
 
-    override fun setStyle(stylePath: String, callback: () -> Unit?) {
+    override fun setStyle(
+        stylePath: String,
+        callback: () -> Unit?,
+    ) {
         if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Setting map style: $stylePath")
 
@@ -58,12 +68,12 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun getWidth(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        return 375.0 // Default iPhone width for now
+        return DEFAULT_IPHONE_WIDTH
     }
 
     override fun getHeight(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        return 812.0 // Default iPhone height for now
+        return DEFAULT_IPHONE_HEIGHT
     }
 
     override fun getCameraPosition(): Position? {
@@ -77,10 +87,12 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         // Will be implemented when MapLibre iOS SDK bindings are available
         val sw = Position(0.0, 0.0)
         val ne = Position(0.0, 0.0)
-        return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(listOf(
-            Position(-90.0, -180.0),
-            Position(90.0, 180.0)
-        ))!!
+        return BoundingBox.fromCorners(listOf(sw, ne)) ?: BoundingBox.fromCorners(
+            listOf(
+                Position(MIN_LATITUDE, MIN_LONGITUDE),
+                Position(MAX_LATITUDE, MAX_LONGITUDE),
+            ),
+        )!!
     }
 
     override fun moveCamera(bounds: BoundingBox) {
@@ -92,7 +104,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         }
     }
 
-    override fun animateCamera(position: Position, zoom: Double?, callback: MapCameraCallback?) {
+    override fun animateCamera(
+        position: Position,
+        zoom: Double?,
+        callback: MapCameraCallback?,
+    ) {
         if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to position: ${position.lat}, ${position.lng}")
 
@@ -103,7 +119,11 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         }
     }
 
-    override fun animateCameraToBounds(bounds: BoundingBox, padding: Int, callback: MapCameraCallback?) {
+    override fun animateCameraToBounds(
+        bounds: BoundingBox,
+        padding: Int,
+        callback: MapCameraCallback?,
+    ) {
         if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Animating camera to bounds with padding: $padding")
 
@@ -142,14 +162,22 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         }
     }
 
-    override fun setAttributionMargins(left: Int, top: Int, right: Int, bottom: Int) {
+    override fun setAttributionMargins(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    ) {
         WWWLogger.d("IOSMapLibreAdapter", "Setting attribution margins: $left, $top, $right, $bottom")
 
         // TODO: Implement iOS MapLibre attribution positioning
         // Set attribution view margins
     }
 
-    override fun addWavePolygons(polygons: List<Any>, clearExisting: Boolean) {
+    override fun addWavePolygons(
+        polygons: List<Any>,
+        clearExisting: Boolean,
+    ) {
         if (mapView != null) {
             WWWLogger.d("IOSMapLibreAdapter", "Adding ${polygons.size} wave polygons, clearExisting: $clearExisting")
 
@@ -181,4 +209,3 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         // Draw visual bounds overlay on map
     }
 }
-

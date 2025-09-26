@@ -82,7 +82,8 @@ class DefaultObservationScheduler(
         val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
         Log.v(
             "DefaultObservationScheduler",
-            "Should observe continuously: $shouldObserve (running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})",
+            "Should observe continuously: $shouldObserve " +
+                "(running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})",
         )
         return shouldObserve
     }

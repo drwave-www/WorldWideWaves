@@ -86,5 +86,6 @@ interface MapLibreAdapter<T> {
     fun addOnCameraIdleListener(callback: () -> Unit)
 
     fun drawOverridenBbox(bbox: BoundingBox)
+
     fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit)
 }

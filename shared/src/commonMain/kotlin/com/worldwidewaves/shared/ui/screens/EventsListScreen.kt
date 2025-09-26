@@ -115,7 +115,7 @@ fun SharedEventsListScreen(
     mapStates: Map<String, Boolean> = emptyMap(),
     onEventClick: (String) -> Unit = {},
     setEventFavorite: SetEventFavorite? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Log.i("SharedEventsListScreen", "SharedEventsListScreen starting with ${events.size} events")
 
@@ -126,36 +126,42 @@ fun SharedEventsListScreen(
 
     // Filter logic - EXACT Android match
     LaunchedEffect(starredSelected, downloadedSelected, events) {
-        filteredEvents = when {
-            starredSelected -> events.filter { it.favorite }
-            downloadedSelected -> events.filter { mapStates[it.id] == true }
-            else -> events
-        }
-        Log.i("SharedEventsListScreen", "Filtered events: ${filteredEvents.size} (starred: $starredSelected, downloaded: $downloadedSelected)")
+        filteredEvents =
+            when {
+                starredSelected -> events.filter { it.favorite }
+                downloadedSelected -> events.filter { mapStates[it.id] == true }
+                else -> events
+            }
+        Log.i(
+            "SharedEventsListScreen",
+            "Filtered events: ${filteredEvents.size} (starred: $starredSelected, downloaded: $downloadedSelected)",
+        )
     }
 
     EventsList(
         modifier = modifier,
         events = filteredEvents,
         mapStates = mapStates,
-        filterState = EventsFilterState(
-            starredSelected = starredSelected,
-            downloadedSelected = downloadedSelected,
-        ),
-        filterCallbacks = EventsFilterCallbacks(
-            onAllEventsClicked = {
-                starredSelected = false
-                downloadedSelected = false
-            },
-            onFavoriteEventsClicked = {
-                starredSelected = true
-                downloadedSelected = false
-            },
-            onDownloadedEventsClicked = {
-                starredSelected = false
-                downloadedSelected = true
-            },
-        ),
+        filterState =
+            EventsFilterState(
+                starredSelected = starredSelected,
+                downloadedSelected = downloadedSelected,
+            ),
+        filterCallbacks =
+            EventsFilterCallbacks(
+                onAllEventsClicked = {
+                    starredSelected = false
+                    downloadedSelected = false
+                },
+                onFavoriteEventsClicked = {
+                    starredSelected = true
+                    downloadedSelected = false
+                },
+                onDownloadedEventsClicked = {
+                    starredSelected = false
+                    downloadedSelected = true
+                },
+            ),
         onEventClick = onEventClick,
         setEventFavorite = setEventFavorite,
     )
@@ -172,9 +178,10 @@ private fun EventsList(
     setEventFavorite: SetEventFavorite?,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(Dimensions.DEFAULT_EXT_PADDING.dp),
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .padding(Dimensions.DEFAULT_EXT_PADDING.dp),
     ) {
         FavoritesSelector(
             starredSelected = filterState.starredSelected,
@@ -226,9 +233,10 @@ private fun FavoritesSelector(
     val downloadedWeight = if (downloadedSelected) FontWeight.Bold else FontWeight.Normal
 
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
-            .background(sharedExtendedLight.quaternary.color),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
+                .background(sharedExtendedLight.quaternary.color),
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             SelectorBox(
@@ -269,19 +277,21 @@ private fun SelectorBox(
     text: String,
 ) {
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
-            .height(EventsList.SELECTOR_HEIGHT.dp)
-            .background(backgroundColor)
-            .clickable { onClick() },
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(EventsList.SELECTOR_ROUND.dp))
+                .height(EventsList.SELECTOR_HEIGHT.dp)
+                .background(backgroundColor)
+                .clickable { onClick() },
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
-            style = sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE).copy(
-                color = textColor,
-                fontWeight = fontWeight,
-            ),
+            style =
+                sharedCommonTextStyle(EventsList.SELECTOR_FONTSIZE).copy(
+                    color = textColor,
+                    fontWeight = fontWeight,
+                ),
         )
     }
 }
@@ -311,16 +321,18 @@ private fun Events(
             item {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(
-                        when {
-                            starredSelected -> MokoRes.strings.events_favorites_empty
-                            downloadedSelected -> MokoRes.strings.events_downloaded_empty
-                            else -> MokoRes.strings.events_empty
-                        },
-                    ),
-                    style = sharedQuinaryColoredTextStyle(EventsList.NOEVENTS_FONTSIZE).copy(
-                        textAlign = TextAlign.Center,
-                    ),
+                    text =
+                        stringResource(
+                            when {
+                                starredSelected -> MokoRes.strings.events_favorites_empty
+                                downloadedSelected -> MokoRes.strings.events_downloaded_empty
+                                else -> MokoRes.strings.events_empty
+                            },
+                        ),
+                    style =
+                        sharedQuinaryColoredTextStyle(EventsList.NOEVENTS_FONTSIZE).copy(
+                            textAlign = TextAlign.Center,
+                        ),
                 )
             }
         }
@@ -337,9 +349,10 @@ private fun Event(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.clickable {
-            onEventClick(event.id)
-        },
+        modifier =
+            modifier.clickable {
+                onEventClick(event.id)
+            },
     ) {
         EventOverlay(event, isMapInstalled, starredSelected, setEventFavorite)
         EventLocationAndDate(event)
@@ -372,9 +385,10 @@ private fun EventOverlay(
             } else {
                 // Fallback background color
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                 )
             }
         }
@@ -401,10 +415,11 @@ private fun EventOverlayCountryAndCommunityFlags(
             val communityImageResource = event.getCommunityImage() as? DrawableResource
             if (communityImageResource != null) {
                 EventFlag(
-                    modifier = Modifier.padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        top = Dimensions.DEFAULT_INT_PADDING.dp,
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            top = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = communityImageResource,
                     contentDescription = event.community!!,
                 )
@@ -416,10 +431,11 @@ private fun EventOverlayCountryAndCommunityFlags(
             val countryImageResource = event.getCountryImage() as? DrawableResource
             if (countryImageResource != null) {
                 EventFlag(
-                    modifier = Modifier.padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        bottom = Dimensions.DEFAULT_INT_PADDING.dp,
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ),
                     imageResource = countryImageResource,
                     contentDescription = event.country!!,
                 )
@@ -444,26 +460,28 @@ private fun EventFlag(
 
 @Composable
 private fun EventOverlayMapDownloaded(
-    eventId: String,
+    @Suppress("UNUSED_PARAMETER") eventId: String,
     isMapInstalled: Boolean,
     modifier: Modifier = Modifier,
 ) {
     if (isMapInstalled) {
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(
-                    end = Dimensions.DEFAULT_INT_PADDING.dp * 2 + EventsList.MAPDL_IMAGE_SIZE.dp,
-                    bottom = Dimensions.DEFAULT_INT_PADDING.dp,
-                ),
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .padding(
+                        end = Dimensions.DEFAULT_INT_PADDING.dp * 2 + EventsList.MAPDL_IMAGE_SIZE.dp,
+                        bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                    ),
             contentAlignment = Alignment.BottomEnd,
         ) {
             Image(
-                modifier = Modifier
-                    .size(EventsList.MAPDL_IMAGE_SIZE.dp)
-                    .clickable {
-                        // TODO: Implement map uninstall dialog
-                    },
+                modifier =
+                    Modifier
+                        .size(EventsList.MAPDL_IMAGE_SIZE.dp)
+                        .clickable {
+                            // NOTE: Map uninstall dialog implementation pending
+                        },
                 painter = painterResource(Res.drawable.downloaded_icon),
                 contentDescription = stringResource(MokoRes.strings.map_downloaded),
             )
@@ -474,7 +492,7 @@ private fun EventOverlayMapDownloaded(
 @Composable
 private fun EventOverlayFavorite(
     event: IWWWEvent,
-    starredSelected: Boolean,
+    @Suppress("UNUSED_PARAMETER") starredSelected: Boolean,
     setEventFavorite: SetEventFavorite?,
     modifier: Modifier = Modifier,
 ) {
@@ -487,12 +505,13 @@ private fun EventOverlayFavorite(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                end = Dimensions.DEFAULT_INT_PADDING.dp,
-                bottom = Dimensions.DEFAULT_INT_PADDING.dp
-            ),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(
+                    end = Dimensions.DEFAULT_INT_PADDING.dp,
+                    bottom = Dimensions.DEFAULT_INT_PADDING.dp,
+                ),
         contentAlignment = Alignment.BottomEnd,
     ) {
         Surface(
@@ -500,23 +519,26 @@ private fun EventOverlayFavorite(
             color = MaterialTheme.colorScheme.primary,
         ) {
             Image(
-                modifier = Modifier
-                    .size(EventsList.FAVS_IMAGE_SIZE.dp)
-                    .clickable {
-                        setEventFavorite?.let { favoriteSetter ->
-                            scope.launch {
-                                isFavorite = !isFavorite
-                                favoriteSetter.call(event, isFavorite)
-                                Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
+                modifier =
+                    Modifier
+                        .size(EventsList.FAVS_IMAGE_SIZE.dp)
+                        .clickable {
+                            setEventFavorite?.let { favoriteSetter ->
+                                scope.launch {
+                                    isFavorite = !isFavorite
+                                    favoriteSetter.call(event, isFavorite)
+                                    Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
+                                }
                             }
-                        }
-                    },
-                painter = painterResource(
-                    if (isFavorite) Res.drawable.favorite_on else Res.drawable.favorite_off
-                ),
-                contentDescription = stringResource(
-                    if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off
-                ),
+                        },
+                painter =
+                    painterResource(
+                        if (isFavorite) Res.drawable.favorite_on else Res.drawable.favorite_off,
+                    ),
+                contentDescription =
+                    stringResource(
+                        if (isFavorite) MokoRes.strings.event_favorite_on else MokoRes.strings.event_favorite_off,
+                    ),
             )
         }
     }
@@ -532,17 +554,18 @@ private fun EventLocationAndDate(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {
-    val eventDate = remember(event.id) {
-        try {
-            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
-        } catch (e: Exception) {
-            "Dec 24" // Fallback date
+    val eventDate =
+        remember(event.id) {
+            try {
+                DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
+            } catch (e: Exception) {
+                "Dec 24" // Fallback date
+            }
         }
-    }
 
     Box(modifier = modifier) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             // Row 1: Location (left) + Date (right) - EXACT Android layout
             Row(

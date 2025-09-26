@@ -38,7 +38,8 @@ import com.worldwidewaves.shared.events.WWWEventObserver
 import com.worldwidewaves.shared.events.WWWEventWave
 import com.worldwidewaves.shared.events.WWWEventWaveWarming
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.monitoring.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceTrace
 import com.worldwidewaves.shared.sound.SoundPlayer
 import com.worldwidewaves.testing.UITestFactory
 import io.mockk.coEvery

@@ -30,16 +30,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -61,11 +61,16 @@ fun ButtonWave(
     eventId: String,
     eventState: Status,
     endDateTime: Instant?,
-    clock: IClock,
     isInArea: Boolean,
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
 ) {
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
+    val clock = clockComponent.clock
+
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON
     val isEndDateTimeRecent =
@@ -106,9 +111,7 @@ fun ButtonWave(
                     .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
             style =
-                TextStyle(
-                    fontSize = Event.WAVEBUTTON_FONTSIZE.sp,
-                    fontWeight = FontWeight.Bold,
+                sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 ),
