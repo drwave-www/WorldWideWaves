@@ -219,6 +219,13 @@ class MockMapAdapter : MapLibreAdapter<Any> {
         boundsOperations.add(BoundsOperation("drawOverridenBbox", bbox, System.currentTimeMillis()))
     }
 
+    override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
+        // For testing purposes, immediately call the callback with this instance
+        if (mockMap != null) {
+            callback(this)
+        }
+    }
+
     // Testing utilities
 
     /**

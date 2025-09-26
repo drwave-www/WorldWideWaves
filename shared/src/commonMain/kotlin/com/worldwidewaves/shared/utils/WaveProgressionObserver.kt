@@ -18,12 +18,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.worldwidewaves.activities.utils
+package com.worldwidewaves.shared.utils
 
-import android.content.Context
-import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.toMapLibrePolygon
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.map.AbstractEventMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,16 +32,16 @@ import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Observes a single wave **progression** and mirrors it on the Android map.
+ * Observes a single wave **progression** and mirrors it on the map.
  *
  * Responsibilities:
  * • At start-up it inspects the current event status and either begins a
  *   running-phase polygon stream or instantly draws the final wave outline
  *   (DONE).                                                       <br/>
- * • Listens to [IWWWEvent.observer.eventStatus] so it can switch between the
+ * • Listens to [IWWWEvent.observer] so it can switch between the
  *   two behaviours when the status flips from *RUNNING → DONE*.    <br/>
- * • While *RUNNING*, collects the wave’s `progression` flow and pushes
- *   traversed polygons to [AndroidEventMap] – throttled to one update every
+ * • While *RUNNING*, collects the wave's `progression` flow and pushes
+ *   traversed polygons to [AbstractEventMap] – throttled to one update every
  *   250 ms to avoid flooding the UI thread.                         <br/>
  * • Persists the last non-empty polygon list so, if the shared logic delivers
  *   an empty set for a short period, the map keeps showing the previous frame
@@ -52,21 +51,19 @@ import kotlin.time.Duration.Companion.milliseconds
  * (also aliased by [stopObservation]) and lifecycle-safe internal clean-up.
  */
 class WaveProgressionObserver(
-    private val context: Context,
     private val scope: CoroutineScope,
-    private val eventMap: AndroidEventMap?,
+    private val eventMap: AbstractEventMap<*>,
     private val event: IWWWEvent?,
 ) {
     private var statusJob: Job? = null
     private var polygonsJob: Job? = null
-    private var lastWavePolygons: List<org.maplibre.geojson.Polygon> = emptyList()
+    private var lastWavePolygons: List<Polygon> = emptyList()
 
     /**
      * Entry-point – inspects current state then launches coroutines that will
      * keep the map in sync with the wave until [pauseObservation] is called.
      */
     fun startObservation() {
-        val eventMap = eventMap ?: return
         val event = event ?: return
 
         scope.launch {
@@ -87,7 +84,7 @@ class WaveProgressionObserver(
      */
     private fun startPolygonsObservation(
         event: IWWWEvent,
-        eventMap: AndroidEventMap,
+        eventMap: AbstractEventMap<*>,
     ) {
         polygonsJob?.cancel()
 
@@ -104,15 +101,12 @@ class WaveProgressionObserver(
 
     private fun addFullWavePolygons(
         event: IWWWEvent,
-        eventMap: AndroidEventMap,
+        eventMap: AbstractEventMap<*>,
     ) {
         eventMap.mapLibreAdapter.onMapSet { mapLibre ->
             scope.launch(Dispatchers.Main) {
                 // Render all original polygons independently (no holes merge)
-                val polygons =
-                    event.area
-                        .getPolygons()
-                        .map { it.toMapLibrePolygon() }
+                val polygons = event.area.getPolygons()
 
                 mapLibre.addWavePolygons(polygons, true)
             }
@@ -125,7 +119,7 @@ class WaveProgressionObserver(
      */
     private fun startStatusObservation(
         event: IWWWEvent,
-        eventMap: AndroidEventMap,
+        eventMap: AbstractEventMap<*>,
     ) {
         statusJob?.cancel()
         statusJob =
@@ -165,7 +159,7 @@ class WaveProgressionObserver(
      */
     private suspend fun updateWavePolygons(
         event: IWWWEvent,
-        eventMap: AndroidEventMap,
+        eventMap: AbstractEventMap<*>,
     ) {
         if (!event.isRunning() && !event.isDone()) return
 
@@ -174,7 +168,6 @@ class WaveProgressionObserver(
                 event.wave
                     .getWavePolygons()
                     ?.traversedPolygons
-                    ?.map { it.toMapLibrePolygon() }
                     ?: emptyList()
             }
 
@@ -182,12 +175,12 @@ class WaveProgressionObserver(
             if (lastWavePolygons.isNotEmpty()) {
                 // Keep displaying the previous frame to avoid flicker when the
                 // shared layer temporarily returns an empty list.
-                eventMap.updateWavePolygons(context, lastWavePolygons, false)
+                eventMap.updateWavePolygons(lastWavePolygons, false)
             }
             return
         } else {
             lastWavePolygons = polygons
-            eventMap.updateWavePolygons(context, polygons, true)
+            eventMap.updateWavePolygons(polygons, true)
         }
     }
 }
