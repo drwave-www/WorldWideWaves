@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import dev.icerock.moko.resources.compose.stringResource
 import com.worldwidewaves.shared.utils.Log
+import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 
 /**

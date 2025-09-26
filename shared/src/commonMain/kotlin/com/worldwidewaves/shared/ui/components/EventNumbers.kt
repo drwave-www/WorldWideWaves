@@ -42,8 +42,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraLightTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
 import com.worldwidewaves.shared.ui.utils.formatDurationMinutes
 import dev.icerock.moko.resources.compose.stringResource

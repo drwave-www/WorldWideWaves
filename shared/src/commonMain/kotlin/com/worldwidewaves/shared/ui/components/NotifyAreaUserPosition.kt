@@ -42,9 +42,9 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
-import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import kotlin.time.ExperimentalTime
 
 /**

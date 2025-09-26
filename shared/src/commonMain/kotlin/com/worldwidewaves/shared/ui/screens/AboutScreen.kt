@@ -42,11 +42,11 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.about.SharedAboutFaqScreen
 import com.worldwidewaves.shared.ui.screens.about.SharedAboutInfoScreen
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.ui.TabScreen
 import dev.icerock.moko.resources.compose.stringResource
 
 private val tabInfo = listOf(

@@ -70,7 +70,6 @@ private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 fun WaveScreen(
     event: IWWWEvent,
     eventMap: AbstractEventMap<*>,
-    onObserveEventMapProgression: @Composable (IWWWEvent, AbstractEventMap<*>) -> Unit,
     modifier: Modifier = Modifier,
     mapContent: @Composable (Modifier) -> Unit,
 ) {
@@ -80,7 +79,6 @@ fun WaveScreen(
     val clock = clockComponent.clock
 
     // Start event/map coordination and map zoom/location updates
-    onObserveEventMapProgression(event, eventMap)
     MapZoomAndLocationUpdate(event, eventMap)
 
     // States for sound coordination

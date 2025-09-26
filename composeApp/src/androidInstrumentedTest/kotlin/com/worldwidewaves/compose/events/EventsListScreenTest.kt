@@ -63,7 +63,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
-import PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceTrace
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test

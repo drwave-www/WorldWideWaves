@@ -23,6 +23,7 @@ package com.worldwidewaves.testing
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.worldwidewaves.shared.testing.PerformanceMonitor
+import com.worldwidewaves.shared.testing.PerformanceTrace
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
@@ -64,8 +65,8 @@ abstract class BaseInstrumentedTest {
      * Helper function to create performance traces for tests.
      * Standardizes performance monitoring across all test suites.
      */
-    protected fun createPerformanceTrace(traceName: String): com.worldwidewaves.shared.monitoring.PerformanceTrace {
-        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
+    protected fun createPerformanceTrace(traceName: String): PerformanceTrace {
+        val trace = mockk<PerformanceTrace>(relaxed = true)
         io.mockk.every { mockPerformanceMonitor.startTrace(traceName) } returns trace
         return trace
     }

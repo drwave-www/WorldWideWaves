@@ -50,10 +50,10 @@ import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.max
-import kotlin.time.ExperimentalTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.math.max
+import kotlin.time.ExperimentalTime
 
 
 /**

@@ -59,7 +59,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                 )
             }
 
-        // Start event/map coordination and map zoom/location updates
+        // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
 
         // Use the complete shared wave screen with exact working behavior
