@@ -30,8 +30,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material3.FloatingActionButton
@@ -195,12 +198,18 @@ open class MainActivity : AppCompatActivity() {
                         com.worldwidewaves.shared.utils.Log.d("MainActivity", "Debug screen status: debugScreen=${debugScreen != null}, ready=$ready")
                         // Show debug button in debug builds even if debugScreen is null
                         if (ready && (debugScreen != null || com.worldwidewaves.BuildConfig.DEBUG)) {
+                            // Calculate position at 15% from bottom
+                            val windowInfo = LocalWindowInfo.current
+                            val density = LocalDensity.current
+                            val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
+                            val bottomOffset = screenHeight * 0.15f
+
                             FloatingActionButton(
                                 onClick = { showDebugScreen = !showDebugScreen },
                                 modifier =
                                     Modifier
                                         .align(Alignment.BottomEnd)
-                                        .padding(16.dp),
+                                        .padding(end = 16.dp, bottom = bottomOffset),
                                 containerColor = Color(0xFF4CAF50), // Green color
                                 shape = CircleShape,
                             ) {
