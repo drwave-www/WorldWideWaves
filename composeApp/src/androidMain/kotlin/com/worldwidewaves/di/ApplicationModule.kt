@@ -25,17 +25,15 @@ import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.compose.tabs.AboutScreen
 import com.worldwidewaves.compose.tabs.DebugScreen
 import com.worldwidewaves.compose.tabs.EventsListScreen
-import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
-import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 import com.worldwidewaves.shared.domain.repository.EventsRepository
 import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import org.koin.android.ext.koin.androidContext
@@ -66,9 +64,6 @@ val applicationModule =
         }
 
         single { AboutScreen(get()) }
-        single { AboutInfoScreen() }
-        // Inject the shared WWWPlatform instance into AboutFaqScreen
-        single { AboutFaqScreen(get()) }
 
         // Map availability checker as a singleton
         single {

@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose.tabs
+package com.worldwidewaves.shared.compose.tabs
 
 /*
  * Copyright 2025 DrWave
@@ -21,31 +21,22 @@ package com.worldwidewaves.compose.tabs
  * limitations under the License.
  */
 
-import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import com.worldwidewaves.utils.MapAvailabilityChecker
+import com.worldwidewaves.shared.utils.Log
 
 /**
- * Android wrapper for SharedEventsListScreen.
- * Handles Android-specific navigation and lifecycle management while
- * delegating all UI to the shared component for perfect parity.
+ * iOS wrapper for SharedEventsListScreen.
+ * Handles iOS-specific navigation while delegating all UI to the shared component for perfect parity.
  */
 class EventsListScreen(
     private val viewModel: EventsViewModel,
-    private val mapChecker: MapAvailabilityChecker,
     private val setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite,
 ) : TabScreen {
     override val name = "Events"
@@ -53,41 +44,14 @@ class EventsListScreen(
     @Composable
     override fun Screen(modifier: Modifier) {
         val events by viewModel.events.collectAsState()
-        val mapStates by mapChecker.mapStates.collectAsState()
-        val context = LocalContext.current
-
-        // Refresh map availability when screen resumes
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_RESUME) {
-                        mapChecker.refreshAvailability()
-                    }
-                }
-
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
-        // Pre-track all event IDs
-        LaunchedEffect(events) {
-            mapChecker.trackMaps(events.map { it.id })
-            mapChecker.refreshAvailability()
-        }
 
         // Use shared EventsListScreen for perfect UI parity
         SharedEventsListScreen(
             events = events,
-            mapStates = mapStates,
+            mapStates = emptyMap(), // iOS simplified implementation for now
             onEventClick = { eventId ->
-                context.startActivity(
-                    Intent(context, EventActivity::class.java).apply {
-                        putExtra("eventId", eventId)
-                    },
-                )
+                Log.i("EventsListScreen", "iOS Event click: $eventId")
+                // TODO: Navigate to event detail screen on iOS
             },
             setEventFavorite = setEventFavorite,
             modifier = modifier,

@@ -63,7 +63,7 @@ private val tabInfo =
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun AboutScreen(
+fun SharedAboutScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->

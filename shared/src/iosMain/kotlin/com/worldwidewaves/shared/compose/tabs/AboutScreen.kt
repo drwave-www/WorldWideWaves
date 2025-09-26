@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose.tabs
+package com.worldwidewaves.shared.compose.tabs
 
 /*
  * Copyright 2025 DrWave
@@ -12,15 +12,16 @@ package com.worldwidewaves.compose.tabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
 import com.worldwidewaves.shared.utils.Log
+import platform.Foundation.NSURL
+import platform.UIKit.UIApplication
 
 /**
- * Android wrapper for SharedAboutScreen.
- * Handles Android-specific URL opening while delegating UI to shared component.
+ * iOS wrapper for SharedAboutScreen.
+ * Handles iOS-specific URL opening while delegating UI to shared component.
  */
 class AboutScreen(
     private val platform: WWWPlatform,
@@ -29,17 +30,19 @@ class AboutScreen(
 
     @Composable
     override fun Screen(modifier: Modifier) {
-        val uriHandler = LocalUriHandler.current
-
         SharedAboutScreen(
             platform = platform,
             modifier = modifier,
             onUrlOpen = { url ->
                 try {
-                    uriHandler.openUri(url)
+                    val nsUrl = NSURL.URLWithString(url)
+                    if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+                        UIApplication.sharedApplication.openURL(nsUrl)
+                    } else {
+                        Log.e("AboutScreen", "Cannot open URL: $url")
+                    }
                 } catch (e: Exception) {
-                    Log
-                        .e("AboutScreen", "Failed to open URL: $url", throwable = e)
+                    Log.e("AboutScreen", "Failed to open URL: $url", throwable = e)
                 }
             },
         )
