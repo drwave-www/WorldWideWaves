@@ -57,14 +57,14 @@ import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableS
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.math.min
 import kotlin.time.ExperimentalTime
 
@@ -150,7 +150,6 @@ fun WorkingWaveChoreographies(
             if (warmingSequence != null) {
                 TimedSequenceDisplay(
                     sequence = warmingSequence,
-                    clock = clock,
                     modifier =
                         modifier
                             .fillMaxWidth()
@@ -164,7 +163,6 @@ fun WorkingWaveChoreographies(
         isGoingToBeHit -> {
             ChoreographyDisplay(
                 event.wave.waitingChoregraphySequence(),
-                clock,
                 modifier
                     .fillMaxWidth()
                     .padding(bottom = 120.dp),
@@ -175,7 +173,6 @@ fun WorkingWaveChoreographies(
         showHitSequence -> {
             ChoreographyDisplay(
                 event.wave.hitChoregraphySequence(),
-                clock,
                 modifier
                     .fillMaxWidth()
                     .padding(bottom = 120.dp),
@@ -191,13 +188,12 @@ fun WorkingWaveChoreographies(
 @Composable
 fun TimedSequenceDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
     modifier: Modifier = Modifier,
     onSequenceComplete: () -> Unit,
 ) {
     if (sequence == null) return
 
-    ChoreographyDisplay(sequence, clock, modifier)
+    ChoreographyDisplay(sequence, modifier)
 
     LaunchedEffect(sequence) {
         delay(sequence.remainingDuration ?: sequence.duration)
@@ -214,10 +210,14 @@ fun TimedSequenceDisplay(
 @Composable
 fun ChoreographyDisplay(
     sequence: DisplayableSequence<DrawableResource>?,
-    clock: IClock,
     modifier: Modifier = Modifier,
 ) {
     if (sequence == null || sequence.image == null) return
+
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
+    }
+    val clock = clockComponent.clock
 
     var currentImageIndex by remember { mutableIntStateOf(0) }
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }

@@ -57,7 +57,6 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun BoxScope.SimulationButton(
     event: IWWWEvent,
-    platform: WWWPlatform,
     mapFeatureState: MapFeatureState,
     onMapNotAvailable: () -> Unit = {},
     onSimulationStarted: (String) -> Unit = {},
@@ -65,6 +64,10 @@ fun BoxScope.SimulationButton(
     onError: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
+    val platformComponent = object : org.koin.core.component.KoinComponent {
+        val platform: WWWPlatform by org.koin.core.component.inject()
+    }
+    val platform = platformComponent.platform
     val scope = rememberCoroutineScope()
     var simulationButtonState by remember { mutableStateOf("idle") }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()

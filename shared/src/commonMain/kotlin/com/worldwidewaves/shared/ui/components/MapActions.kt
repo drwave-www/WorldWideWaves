@@ -59,11 +59,15 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun SharedMapActions(
     event: IWWWEvent,
-    clock: IClock,
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
     onCenterWave: () -> Unit = {},
 ) {
+    val clockComponent = object : org.koin.core.component.KoinComponent {
+        val clock: IClock by org.koin.core.component.inject()
+    }
+    val clock = clockComponent.clock
+
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()

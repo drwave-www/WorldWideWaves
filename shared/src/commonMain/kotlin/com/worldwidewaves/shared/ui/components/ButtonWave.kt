@@ -30,17 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import dev.icerock.moko.resources.compose.stringResource
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -62,11 +59,15 @@ fun ButtonWave(
     eventId: String,
     eventState: Status,
     endDateTime: Instant?,
-    clock: IClock,
     isInArea: Boolean,
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
 ) {
+    val clockComponent = object : org.koin.core.component.KoinComponent {
+        val clock: IClock by org.koin.core.component.inject()
+    }
+    val clock = clockComponent.clock
+
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON
     val isEndDateTimeRecent =

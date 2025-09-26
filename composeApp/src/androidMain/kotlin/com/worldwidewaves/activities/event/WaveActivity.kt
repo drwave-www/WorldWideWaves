@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.ui.screens.WaveScreen
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
@@ -70,7 +71,7 @@ class WaveActivity : AbstractEventWaveActivity() {
         MapZoomAndLocationUpdate(event, eventMap)
 
         // Use the complete shared wave screen with exact working behavior
-        com.worldwidewaves.shared.ui.screens.SharedWaveScreen(
+        WaveScreen(
             event = event,
             modifier = modifier,
             mapContent = { mapModifier ->

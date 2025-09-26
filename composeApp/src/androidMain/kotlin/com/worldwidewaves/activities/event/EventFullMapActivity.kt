@@ -48,6 +48,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.target_me_active
+import com.worldwidewaves.shared.ui.components.SharedMapActions
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
@@ -119,7 +120,20 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
                 },
                 Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
             )
-            MapActions(event, eventMap, clock)
+            SharedMapActions(
+                event = event,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                onTargetWave = {
+                    scope.launch {
+                        eventMap.targetUserAndWave()
+                    }
+                },
+                onCenterWave = {
+                    scope.launch {
+                        eventMap.targetWave()
+                    }
+                }
+            )
         }
     }
 }

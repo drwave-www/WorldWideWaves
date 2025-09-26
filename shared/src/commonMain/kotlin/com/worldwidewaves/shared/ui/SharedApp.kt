@@ -322,7 +322,8 @@ private fun SharedEventDetailsScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
-                text = "Experience the wave in ${getCommunityName(eventId)}. Join thousands of participants in this synchronized human wave event.",
+                text = "Experience the wave in ${getCommunityName(eventId)}. " +
+                    "Join thousands of participants in this synchronized human wave event.",
                 style = sharedCommonTextStyle()
             )
         }

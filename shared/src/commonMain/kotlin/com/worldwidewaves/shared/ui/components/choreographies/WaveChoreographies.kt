@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.ui.components.choreographies
  */
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +31,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -72,9 +70,12 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun WaveChoreographies(
     event: IWWWEvent,
-    clock: IClock,
     modifier: Modifier = Modifier,
 ) {
+    val clockComponent = object : org.koin.core.component.KoinComponent {
+        val clock: IClock by org.koin.core.component.inject()
+    }
+    val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()

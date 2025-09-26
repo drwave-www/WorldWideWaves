@@ -37,8 +37,6 @@ import com.worldwidewaves.shared.ui.utils.rememberEventState
 @Composable
 fun StandardEventLayout(
     event: IWWWEvent,
-    platform: WWWPlatform,
-    clock: IClock,
     mapFeatureState: MapFeatureState,
     onNavigateToWave: (String) -> Unit,
     onSimulationStarted: (String) -> Unit = {},
@@ -50,6 +48,13 @@ fun StandardEventLayout(
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
 ) {
+    val platformComponent = object : org.koin.core.component.KoinComponent {
+        val platform: WWWPlatform by org.koin.core.component.inject()
+        val clock: IClock by org.koin.core.component.inject()
+    }
+    val platform = platformComponent.platform
+    val clock = platformComponent.clock
+
     val eventState = rememberEventState(event, platform)
 
     Box(modifier = modifier) {
@@ -68,7 +73,6 @@ fun StandardEventLayout(
                     event.id,
                     eventState.eventStatus,
                     eventState.endDateTime,
-                    clock,
                     eventState.isInArea,
                     onNavigateToWave = WaveNavigator { eventId ->
                         onNavigateToWave(eventId)
@@ -80,7 +84,6 @@ fun StandardEventLayout(
                 if (eventState.isSimulationModeEnabled) {
                     SimulationButton(
                         event = event,
-                        platform = platform,
                         mapFeatureState = mapFeatureState,
                         onMapNotAvailable = onMapNotAvailable,
                         onSimulationStarted = onSimulationStarted,

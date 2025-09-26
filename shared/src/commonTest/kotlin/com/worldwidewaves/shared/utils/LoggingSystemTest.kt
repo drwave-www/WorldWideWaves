@@ -10,8 +10,6 @@ package com.worldwidewaves.shared.utils
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import com.worldwidewaves.shared.utils.Log
-import com.worldwidewaves.shared.utils.initNapier
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

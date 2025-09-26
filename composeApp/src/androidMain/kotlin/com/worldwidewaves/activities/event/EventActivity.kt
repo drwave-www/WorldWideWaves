@@ -103,8 +103,6 @@ class EventActivity : AbstractEventWaveActivity() {
         // Use simplified shared standard event layout
         StandardEventLayout(
             event = event,
-            platform = platform,
-            clock = clock,
             mapFeatureState = mapFeatureState,
             onNavigateToWave = { eventId ->
                 context.startActivity(
