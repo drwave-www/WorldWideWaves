@@ -136,6 +136,7 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
  */
 class AndroidEventMap(
     event: IWWWEvent,
+    private val activityContext: Context? = null,
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
@@ -156,7 +157,6 @@ class AndroidEventMap(
         private const val BUTTON_HEIGHT_DP = 60f
     }
 
-    val context: Context by inject(Context::class.java)
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
@@ -807,18 +807,18 @@ class AndroidEventMap(
         clearPolygons: Boolean
     ) {
         Log.i(TAG, "updateWavePolygons called with ${wavePolygons.size} polygons, clear=$clearPolygons")
-        val ctx = context
-        Log.i(TAG, "Context type: ${ctx?.javaClass?.simpleName}, is AppCompatActivity: ${ctx is AppCompatActivity}")
 
-        if (ctx is AppCompatActivity) {
+        Log.i(TAG, "Activity context type: ${activityContext?.javaClass?.simpleName}, is AppCompatActivity: ${activityContext is AppCompatActivity}")
+
+        if (activityContext is AppCompatActivity) {
             Log.i(TAG, "Running on UI thread to add wave polygons")
-            ctx.runOnUiThread {
+            activityContext.runOnUiThread {
                 val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
                 Log.i(TAG, "Converting ${wavePolygons.size} polygons to MapLibre, calling addWavePolygons")
                 mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
             }
         } else {
-            Log.e(TAG, "Context is not AppCompatActivity - cannot run on UI thread! Context: $ctx")
+            Log.e(TAG, "Activity context is not AppCompatActivity - cannot run on UI thread! activityContext: $activityContext")
         }
     }
 

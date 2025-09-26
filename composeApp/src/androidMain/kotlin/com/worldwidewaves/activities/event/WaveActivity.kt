@@ -107,6 +107,7 @@ class WaveActivity : AbstractEventWaveActivity() {
             remember(event.id) {
                 AndroidEventMap(
                     event,
+                    activityContext = context, // Pass Activity context for UI thread operations
                     onMapClick = {
                         context.startActivity(
                             Intent(context, EventFullMapActivity::class.java).apply {
