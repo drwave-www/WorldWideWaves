@@ -55,11 +55,6 @@ import org.jetbrains.compose.resources.painterResource
 import kotlin.math.max
 import kotlin.time.ExperimentalTime
 
-// Constants for choreography display
-private object ChoreographyConstants {
-    const val CHOREOGRAPHY_SIZE = 200 // Size for choreography sprites
-    const val WARMING_FRAME_DURATION_MS = 500L // Duration each warming frame shows
-}
 
 /**
  * EXACT historical choreography implementation moved to shared.
@@ -169,7 +164,7 @@ private fun ChoreographySprite(
     Image(
         painter = painterResource(resource),
         contentDescription = contentDescription,
-        modifier = Modifier.size(ChoreographyConstants.CHOREOGRAPHY_SIZE.dp),
+        modifier = Modifier.size(200.dp),
         contentScale = ContentScale.Fit,
     )
 }
@@ -197,10 +192,10 @@ private fun WarmingSequence(
     // Auto-advance frames
     LaunchedEffect(key, currentFrame) {
         if (currentFrame < warmingFrames.size - 1) {
-            delay(ChoreographyConstants.WARMING_FRAME_DURATION_MS)
+            delay(500L)
             currentFrame++
         } else {
-            delay(ChoreographyConstants.WARMING_FRAME_DURATION_MS)
+            delay(500L)
             onComplete()
         }
     }
@@ -213,57 +208,3 @@ private fun WarmingSequence(
     }
 }
 
-/**
- * Displays a choreography sequence with timing.
- */
-@Composable
-private fun TimedSequenceDisplay(
-    sequence: com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier,
-    onSequenceComplete: () -> Unit = {}
-) {
-    if (sequence != null) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            if (sequence.image != null) {
-                ChoreographySprite(
-                    resource = sequence.image!!,
-                    contentDescription = "Choreography sequence"
-                )
-            }
-        }
-
-        // Auto-complete after sequence duration
-        LaunchedEffect(sequence) {
-            delay(2000) // Default sequence duration
-            onSequenceComplete()
-        }
-    }
-}
-
-/**
- * Displays a simple choreography.
- */
-@Composable
-private fun ChoreographyDisplay(
-    sequence: com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence<DrawableResource>?,
-    clock: IClock,
-    modifier: Modifier = Modifier
-) {
-    if (sequence != null) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            if (sequence.image != null) {
-                ChoreographySprite(
-                    resource = sequence.image!!,
-                    contentDescription = "Choreography display"
-                )
-            }
-        }
-    }
-}

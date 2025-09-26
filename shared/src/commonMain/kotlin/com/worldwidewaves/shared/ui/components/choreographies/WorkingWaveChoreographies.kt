@@ -56,7 +56,9 @@ import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.ui.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.delay
@@ -82,9 +84,12 @@ private object ChoreographyConstants {
 @Composable
 fun WorkingWaveChoreographies(
     event: IWWWEvent,
-    clock: IClock,
     modifier: Modifier = Modifier,
 ) {
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
+    }
+    val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
@@ -135,10 +140,11 @@ fun WorkingWaveChoreographies(
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
             // Get the current sequence
-            val warmingSequence =
-                remember(warmingKey) {
-                    event.warming.getCurrentChoregraphySequence()
-                }
+            var warmingSequence by remember { mutableStateOf<DisplayableSequence<DrawableResource>?>(null) }
+
+            LaunchedEffect(warmingKey) {
+                warmingSequence = event.warming.getCurrentChoregraphySequence()
+            }
 
             // When this sequence ends, request a new one
             if (warmingSequence != null) {
@@ -221,10 +227,12 @@ fun ChoreographyDisplay(
 
     // Create a timer to cycle through images
     LaunchedEffect(sequence) {
+        @OptIn(ExperimentalTime::class)
         val startTime = clock.now()
 
         while (this.isActive) {
             // Check if we should stop showing the sequence
+            @OptIn(ExperimentalTime::class)
             val elapsed = clock.now() - startTime
             if (remainingTime != null) {
                 if (elapsed >= remainingTime!!) break
@@ -253,12 +261,12 @@ fun ChoreographyDisplay(
                 Modifier
                     .widthIn(max = 400.dp)
                     .heightIn(max = 600.dp)
-                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp)
+                    .padding(24.dp)
                     .shadow(8.dp)
                     .background(Color.Black.copy(alpha = 0.7f))
                     .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                     .clip(RoundedCornerShape(12.dp))
-                    .padding(ChoreographyConstants.CHOREOGRAPHY_PADDING.dp),
+                    .padding(24.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -310,7 +318,7 @@ fun ChoreographyDisplay(
 
                 Text(
                     text = stringResource(sequence.text),
-                    style = quinaryColoredBoldTextStyle(ChoreographyConstants.CHOREOGRAPHY_TEXT_SIZE.toInt()),
+                    style = sharedQuinaryColoredBoldTextStyle(24),
                     color = Color.White,
                     textAlign = TextAlign.Center,
                 )

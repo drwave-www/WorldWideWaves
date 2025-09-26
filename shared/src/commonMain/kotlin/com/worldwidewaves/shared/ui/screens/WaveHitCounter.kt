@@ -45,7 +45,7 @@ import com.worldwidewaves.shared.WWWGlobals.DisplayText
 import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
-import com.worldwidewaves.shared.ui.theme.primaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -75,7 +75,7 @@ fun WaveHitCounter(
         ) {
             AutoSizeText(
                 text = text,
-                style = primaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE),
+                style = sharedPrimaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE),
                 color = Color.White,
                 textAlign = TextAlign.Center,
                 maxLines = 1,

@@ -58,7 +58,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.map.AbstractEventMap
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.MokoRes
@@ -87,32 +91,25 @@ private const val PROGRESS_COLOR = 0xFF2196F3 // Blue
 private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 
 /**
- * Shared Wave Participation Screen - Complete wave interaction UI.
- * Extracted from Android WaveActivity to provide identical functionality on both platforms.
- *
- * Displays:
- * • Wave status and user state
- * • Interactive map with zoom and location
- * • Wave progression visualization
- * • User position triangle
- * • Hit counter and choreography
- * • Auto-sizing text components
- *
- * Works identically on both Android and iOS platforms.
+ * Complete Wave Screen implementation with exact same behavior and look as the working version.
+ * Restored from working commit with proper choreography display and counter positioning.
  */
 @OptIn(ExperimentalTime::class)
 @Composable
 fun SharedWaveScreen(
     event: IWWWEvent,
-    clock: IClock,
     modifier: Modifier = Modifier,
-    onNavigateToFullMap: (String) -> Unit = {},
+    mapContent: @Composable (Modifier) -> Unit,
 ) {
-    // States
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
+    }
+    val clock = clockComponent.clock
+    // States for sound coordination
     var hasPlayedHitSound by remember { mutableStateOf(false) }
 
-    // Calculate height based on aspect ratio
-    val calculatedHeight = MAP_HEIGHT_DP.dp // Fixed for cross-platform compatibility
+    // Calculate height based on aspect ratio and available width (exact working implementation)
+    val calculatedHeight = MAP_HEIGHT_DP.dp
 
     // Get choreography-related states
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
@@ -120,268 +117,58 @@ fun SharedWaveScreen(
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
 
-    // Derive choreography active state
-    val isChoreographyActive = remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-        isWarmingInProgress || isGoingToBeHit || run {
-            if (hasBeenHit) {
-                val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-            } else {
-                false
-            }
+    // Derive choreography active state (exact working logic)
+    val isChoreographyActive =
+        remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
+            isWarmingInProgress ||
+                isGoingToBeHit ||
+                run {
+                    if (hasBeenHit) {
+                        val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
+                        secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
+                    } else {
+                        false
+                    }
+                }
         }
-    }
 
-    // Play hit sound when user has been hit
+    // Play the hit sound when the user has been hit (exact working implementation)
     LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
         val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
         if (hasBeenHit && secondsSinceHit in 0..1 && !hasPlayedHitSound) {
-            try {
-                event.warming.playCurrentSoundChoreographyTone()
-                hasPlayedHitSound = true
-            } catch (e: Exception) {
-                Log.e("WaveScreen", "Failed to play hit sound", throwable = e)
-            }
+            event.warming.playCurrentSoundChoreographyTone()
+            hasPlayedHitSound = true
         }
     }
 
-    // Screen composition
+    // EXACT historical screen composition that was working
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
         ) {
-            // User wave status text
             UserWaveStatusText(event)
 
-            // Platform-specific map with zoom and location
-            PlatformWaveMap(
-                event = event,
-                onMapClick = { onNavigateToFullMap(event.id) },
-                modifier = Modifier.fillMaxWidth().height(calculatedHeight)
+            mapContent(
+                Modifier
+                    .fillMaxWidth()
+                    .height(calculatedHeight)
             )
 
-            // Wave progression bar
             WaveProgressionBar(event)
 
-            // Hit counter
+            // Always show counter in the proper position with spacing (exact working layout)
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
             WaveHitCounter(event)
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(30.dp))
         }
 
-        // User position triangle overlay (removed as it's now integrated in WaveProgressionBar)
-
-        // Choreography overlay when active
-        if (isChoreographyActive) {
-            WaveChoreographies(
-                event = event,
-                clock = clock,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-/**
- * Platform-specific wave map component.
- * Android: Uses AndroidEventMap
- * iOS: Uses iOS-specific map implementation
- */
-@Composable
-expect fun PlatformWaveMap(
-    event: IWWWEvent,
-    onMapClick: () -> Unit,
-    modifier: Modifier = Modifier,
-)
-
-@Composable
-fun UserWaveStatusText(event: IWWWEvent) {
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
-    val isInArea by event.observer.userIsInArea.collectAsState()
-    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
-
-    val message = when {
-        eventStatus == Status.DONE -> MokoRes.strings.wave_done
-        hasBeenHit -> MokoRes.strings.wave_hit
-        isWarming && isInArea -> MokoRes.strings.wave_warming
-        isInArea -> MokoRes.strings.wave_be_ready
-        else -> MokoRes.strings.wave_is_running
-    }
-
-    Box(
-        modifier = Modifier.padding(vertical = 16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText(
-            text = stringResource(message),
-            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
+        // Working choreographies with proper z-index
+        com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies(
+            event = event,
+            modifier = Modifier.zIndex(10f)
         )
     }
 }
 
-@Composable
-fun WaveProgressionBar(event: IWWWEvent) {
-    val progression by event.observer.progression.collectAsState()
-    val isInArea by event.observer.userIsInArea.collectAsState()
-    val userPositionRatio by event.observer.userPositionRatio.collectAsState()
-    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
-    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
-
-    // Calculate responsive width - 80% of screen width
-    val triangleSize = TRIANGLE_SIZE_PX // Fixed triangle size
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(PROGRESSION_BAR_HEIGHT_DP.dp) // WaveDisplay.PROGRESSION_HEIGHT
-                .clip(RoundedCornerShape(25.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
-        ) {
-            WaveProgressionFillArea(progression)
-
-            Text(
-                text = "${String.format(Locale.getDefault(), "%.1f", progression)}%",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-            )
-        }
-        if (isInArea) {
-            UserPositionTriangle(userPositionRatio, triangleSize, isGoingToBeHit, hasBeenHit)
-        }
-    }
-}
-
-@Composable
-private fun WaveProgressionFillArea(progression: Double) {
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(PROGRESSION_BAR_HEIGHT_DP.dp),
-    ) {
-        val width = size.width
-        val height = size.height
-        val traversedWidth = (width * kotlin.math.min(progression, 100.0).toFloat() / 100f)
-
-        // Draw the progression bar - filled area (blue/primary)
-        drawRect(
-            color = androidx.compose.ui.graphics.Color(PROGRESS_COLOR), // Blue color for progress
-            size = androidx.compose.ui.geometry.Size(traversedWidth, height),
-        )
-        // Draw the remaining area (gray)
-        drawRect(
-            color = androidx.compose.ui.graphics.Color(REMAINING_COLOR), // Light gray for remaining
-            topLeft = androidx.compose.ui.geometry.Offset(traversedWidth, 0f),
-            size = androidx.compose.ui.geometry.Size(width - traversedWidth, height),
-        )
-    }
-}
-
-@Composable
-fun UserPositionTriangle(
-    userPositionRatio: Double,
-    triangleSize: Float,
-    isGoingToBeHit: Boolean,
-    hasBeenHit: Boolean,
-) {
-    val triangleColor = when {
-        isGoingToBeHit -> androidx.compose.ui.graphics.Color(0xFFFF6B35) // Orange for about to be hit
-        hasBeenHit -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Green for hit
-        else -> androidx.compose.ui.graphics.Color(0xFF9E9E9E) // Gray for idle
-    }
-
-    Canvas(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(triangleSize.toInt().dp)
-            .padding(top = 4.dp),
-    ) {
-        val width = size.width
-        val trianglePosition = (width * userPositionRatio).toFloat().coerceIn(0f, width)
-        val path = androidx.compose.ui.graphics.Path().apply {
-            moveTo(trianglePosition, 0f)
-            lineTo(trianglePosition - triangleSize / 2f, triangleSize)
-            lineTo(trianglePosition + triangleSize / 2f, triangleSize)
-            close()
-        }
-        drawPath(path, triangleColor, style = androidx.compose.ui.graphics.drawscope.Fill)
-    }
-}
-
-
-@Composable
-fun WaveHitCounter(event: IWWWEvent) {
-    val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
-
-    val text = formatDuration(timeBeforeHit)
-
-    if (text != "--:--") {
-        val boxWidth = HIT_COUNTER_WIDTH_DP.dp // Fixed width for cross-platform compatibility
-
-        Box(
-            modifier = Modifier
-                .width(boxWidth)
-                .background(Color.Transparent)
-                .padding(2.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            AutoSizeText(
-                text = text,
-                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-            )
-        }
-    }
-}
-
-private fun formatDuration(duration: kotlin.time.Duration): String =
-    when {
-        duration.isInfinite() || duration < kotlin.time.Duration.ZERO -> "--:--" // Protection
-        duration < 1.hours -> {
-            val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
-            val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
-            "$minutes:$seconds"
-        }
-
-        duration < 99.hours -> {
-            val hours = duration.inWholeHours.toString().padStart(2, '0')
-            val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
-            "$hours:$minutes"
-        }
-
-        else -> "--:--"
-    }
-
-@Composable
-fun AutoSizeText(
-    text: String,
-    style: androidx.compose.ui.text.TextStyle,
-    modifier: Modifier = Modifier,
-) {
-    var fontSize by remember { mutableStateOf(style.fontSize) }
-
-    Text(
-        text = text,
-        style = style.copy(fontSize = fontSize),
-        color = Color.White,
-        textAlign = TextAlign.Center,
-        maxLines = 1,
-        softWrap = false,
-        onTextLayout = { textLayoutResult ->
-            if (textLayoutResult.hasVisualOverflow) {
-                fontSize = fontSize * 0.9f
-            }
-        },
-        modifier = modifier,
-    )
-}

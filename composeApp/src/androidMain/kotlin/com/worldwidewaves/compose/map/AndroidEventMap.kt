@@ -136,7 +136,7 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
  */
 class AndroidEventMap(
     event: IWWWEvent,
-    private val activityContext: Context? = null,
+    private val activityContext: Context, // MANDATORY - required for wave layer UI thread operations
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
     private val onMapClick: (() -> Unit)? = null,
@@ -812,7 +812,7 @@ class AndroidEventMap(
                 mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
             }
         } else {
-            Log.e(TAG, "Activity context is not AppCompatActivity - cannot run on UI thread! activityContext: $activityContext")
+            Log.e(TAG, "Activity context is not AppCompatActivity - cannot run on UI thread! Context type: ${activityContext::class.simpleName}")
         }
     }
 

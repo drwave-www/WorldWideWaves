@@ -35,7 +35,7 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.components.AutoResizeSingleLineText
-import com.worldwidewaves.shared.ui.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
 @Composable
@@ -63,7 +63,7 @@ fun UserWaveStatusText(
     ) {
         AutoResizeSingleLineText(
             text = stringResource(message),
-            style = quinaryColoredBoldTextStyle(WaveDisplay.BEREADY_FONTSIZE),
+            style = sharedQuinaryColoredBoldTextStyle(WaveDisplay.BEREADY_FONTSIZE),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )

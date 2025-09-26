@@ -22,38 +22,18 @@
 
 package com.worldwidewaves.activities.event
 
-// Debug-only utilities -------------------------------------------------------
 import android.content.Intent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.WWWGlobals.Event
-import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.ui.screens.UserWaveStatusText
-import com.worldwidewaves.shared.ui.screens.WaveHitCounter
-import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
@@ -61,9 +41,6 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
     private val clock: IClock by inject()
-    private val platform: WWWPlatform by inject()
-
-    // ------------------------------------------------------------------------
 
     @Composable
     override fun Screen(
@@ -72,42 +49,12 @@ class WaveActivity : AbstractEventWaveActivity() {
     ) {
         val context = LocalContext.current
 
-        // States
-        var hasPlayedHitSound = false
-
-        // Calculate height based on aspect ratio and available width
-        val windowInfo = LocalWindowInfo.current
-        val density = LocalDensity.current
-        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-        val calculatedHeight = screenWidthDp / Event.MAP_RATIO
-
-        // Get choreography-related states
-        val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
-        val hitDateTime by event.observer.hitDateTime.collectAsState()
-        val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
-        val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
-
-        // Derive choreography active state
-        val isChoreographyActive =
-            remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-                isWarmingInProgress ||
-                    isGoingToBeHit ||
-                    run {
-                        if (hasBeenHit) {
-                            val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                            secondsSinceHit in 0..com.worldwidewaves.shared.WWWGlobals.WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                        } else {
-                            false
-                        }
-                    }
-            }
-
         // Construct the event Map
         val eventMap =
             remember(event.id) {
                 AndroidEventMap(
                     event,
-                    activityContext = context, // Pass Activity context for UI thread operations
+                    activityContext = context,
                     onMapClick = {
                         context.startActivity(
                             Intent(context, EventFullMapActivity::class.java).apply {
@@ -121,46 +68,22 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Start event/map coordination
         ObserveEventMapProgression(event, eventMap)
 
-        // Play the hit sound when the user has been hit - FIXME: move in WaveProgressionObserver
-        LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-            val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-            if (hasBeenHit && secondsSinceHit in 0..1 && !hasPlayedHitSound) {
-                event.warming.playCurrentSoundChoreographyTone()
-                hasPlayedHitSound = true
-            }
-        }
-
         // Always target the closest view to have user and wave in the same view
         MapZoomAndLocationUpdate(event, eventMap)
 
-        // EXACT historical screen composition
-        Box(modifier = modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp),
-            ) {
-                UserWaveStatusText(event)
+        // Use the complete shared wave screen with exact working behavior
+        com.worldwidewaves.shared.ui.screens.SharedWaveScreen(
+            event = event,
+            modifier = modifier,
+            mapContent = { mapModifier ->
                 eventMap.Screen(
                     autoMapDownload = true,
-                    Modifier
-                        .fillMaxWidth()
-                        .height(calculatedHeight),
+                    modifier = mapModifier,
                 )
-                WaveProgressionBar(event)
-
-                // Always show counter in the proper position with spacing
-                Spacer(modifier = Modifier.weight(1f))
-                WaveHitCounter(event)
-                Spacer(modifier = Modifier.height(30.dp))
             }
-
-            com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies(event, clock, Modifier.zIndex(10f))
-        }
+        )
     }
 }
-
-// ------------------------------------------------------------------------
 
 @Composable
 fun MapZoomAndLocationUpdate(
@@ -180,3 +103,238 @@ fun MapZoomAndLocationUpdate(
     }
 }
 
+@Composable
+fun UserWaveStatusText(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
+
+    val message =
+        when {
+            eventStatus == Status.DONE -> MokoRes.strings.wave_done
+            hasBeenHit -> MokoRes.strings.wave_hit
+            isWarming && isInArea -> MokoRes.strings.wave_warming
+            isInArea -> MokoRes.strings.wave_be_ready
+            else -> MokoRes.strings.wave_is_running
+        }
+
+    Box(
+        modifier = modifier.padding(vertical = WaveDisplay.BEREADY_PADDING.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        AutoResizeSingleLineText(
+            text = stringResource(message),
+            style = quinaryColoredBoldTextStyle(WaveDisplay.BEREADY_FONTSIZE),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@SuppressLint("DefaultLocale")
+@Composable
+fun WaveProgressionBar(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val userPositionRatio by event.observer.userPositionRatio.collectAsState()
+    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
+    val barWidth = screenWidth * 0.8f
+
+    val triangleSize = with(density) { WaveDisplay.TRIANGLE_SIZE.dp.toPx() }
+
+    Column(
+        modifier = modifier.width(barWidth),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(WaveDisplay.PROGRESSION_HEIGHT.dp)
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(extendedLight.quaternary.color),
+            contentAlignment = Alignment.Center,
+        ) {
+            WaveProgressionFillArea(progression)
+
+            Text(
+                text = "${String.format("%.1f", progression)}%",
+                style = primaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (isInArea) {
+            UserPositionTriangle(userPositionRatio, triangleSize, isGoingToBeHit, hasBeenHit)
+        }
+    }
+}
+
+@Composable
+private fun WaveProgressionFillArea(progression: Double) {
+    val density = LocalDensity.current
+    val barHeight = with(density) { WaveDisplay.PROGRESSION_HEIGHT.dp.toPx() }
+
+    Canvas(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(barHeight.dp),
+    ) {
+        val width = size.width
+        val height = barHeight
+        val traversedWidth = (width * min(progression, 100.0).toFloat() / 100f)
+
+        drawRect(
+            color = onQuinaryLight,
+            size = Size(traversedWidth, height),
+        )
+        drawRect(
+            color = quinaryLight,
+            topLeft = Offset(traversedWidth, 0f),
+            size = Size(width - traversedWidth, height),
+        )
+    }
+}
+
+@Composable
+fun UserPositionTriangle(
+    userPositionRatio: Double,
+    triangleSize: Float,
+    isGoingToBeHit: Boolean,
+    hasBeenHit: Boolean,
+) {
+    val triangleColor =
+        when {
+            isGoingToBeHit -> {
+                val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
+                val animatedColor by infiniteTransition.animateColor(
+                    initialValue = extraElementsLight,
+                    targetValue = tertiaryLight,
+                    animationSpec =
+                        infiniteRepeatable(
+                            animation = tween(durationMillis = 500),
+                            repeatMode = RepeatMode.Reverse,
+                        ),
+                    label = "BlinkingTriangleColorAnimation",
+                )
+                animatedColor
+            }
+            hasBeenHit -> onQuaternaryLight
+            else -> extraElementsLight
+        }
+
+    Canvas(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(triangleSize.toInt().dp)
+                .padding(top = 4.dp),
+    ) {
+        val width = size.width
+        val trianglePosition = (width * userPositionRatio).toFloat().coerceIn(0f, width)
+        val path =
+            Path().apply {
+                moveTo(trianglePosition, 0f)
+                lineTo(trianglePosition - triangleSize / 2f, triangleSize)
+                lineTo(trianglePosition + triangleSize / 2f, triangleSize)
+                close()
+            }
+        drawPath(path, triangleColor, style = Fill)
+    }
+}
+
+@Composable
+fun WaveHitCounter(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
+    val timeBeforeHitProgression by event.observer.timeBeforeHit.collectAsState()
+    val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
+
+    val text = formatDuration(minOf(timeBeforeHit, timeBeforeHitProgression))
+
+    if (text != DisplayText.EMPTY_COUNTER) {
+        val windowInfo = LocalWindowInfo.current
+        val density = LocalDensity.current
+        val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
+        val boxWidth = screenWidthDp * 0.5f
+
+        Box(
+            modifier =
+                modifier
+                    .width(boxWidth)
+                    .border(2.dp, onPrimaryLight),
+            contentAlignment = Alignment.Center,
+        ) {
+            AutoSizeText(
+                text = text,
+                style = primaryColoredBoldTextStyle(WaveDisplay.TIMEBEFOREHIT_FONTSIZE),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
+fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    textAlign: TextAlign,
+    maxLines: Int,
+    modifier: Modifier = Modifier,
+) {
+    var fontSize by remember { mutableStateOf(style.fontSize) }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = fontSize),
+        color = color,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        softWrap = false,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.hasVisualOverflow) {
+                fontSize = fontSize * 0.9f
+            }
+        },
+        modifier = modifier,
+    )
+}
+
+private fun formatDuration(duration: Duration): String =
+    when {
+        duration.isInfinite() || duration < Duration.ZERO -> "--:--"
+        duration < 1.hours -> {
+            val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
+            val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
+            "$minutes:$seconds"
+        }
+
+        duration < 99.hours -> {
+            val hours = duration.inWholeHours.toString().padStart(2, '0')
+            val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
+            "$hours:$minutes"
+        }
+
+        else -> DisplayText.EMPTY_COUNTER
+    }

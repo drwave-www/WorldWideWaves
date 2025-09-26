@@ -79,6 +79,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         modifier: Modifier,
         event: IWWWEvent,
     ) {
+        val context = androidx.compose.ui.platform.LocalContext.current
         val eventStatus by event.observer.eventStatus.collectAsState()
         val progression by event.observer.progression.collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
@@ -91,6 +92,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
             remember(event.id) {
                 AndroidEventMap(
                     event,
+                    activityContext = context, // Pass Activity context for wave layer UI thread operations
                     mapConfig =
                         EventMapConfig(
                             initialCameraPosition = MapCameraPosition.WINDOW,

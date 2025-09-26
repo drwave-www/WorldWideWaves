@@ -53,11 +53,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.theme.extendedLight
-import com.worldwidewaves.shared.ui.theme.extraElementsLight
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.onQuaternaryLight
 import com.worldwidewaves.shared.ui.theme.onQuinaryLight
-import com.worldwidewaves.shared.ui.theme.primaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.quinaryLight
 import com.worldwidewaves.shared.ui.theme.tertiaryLight
 import kotlin.math.min
@@ -90,14 +89,14 @@ fun WaveProgressionBar(
                     .fillMaxWidth()
                     .height(WaveDisplay.PROGRESSION_HEIGHT.dp)
                     .clip(RoundedCornerShape(25.dp))
-                    .background(extendedLight.quaternary.color),
+                    .background(sharedExtendedLight.quaternary.color),
             contentAlignment = Alignment.Center,
         ) {
             WaveProgressionFillArea(progression)
 
             Text(
                 text = "${String.format("%.1f", progression)}%",
-                style = primaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
+                style = sharedPrimaryColoredBoldTextStyle(WaveDisplay.PROGRESSION_FONTSIZE),
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
@@ -147,7 +146,7 @@ fun UserPositionTriangle(
             isGoingToBeHit -> {
                 val infiniteTransition = rememberInfiniteTransition(label = "BlinkingTriangleTransition")
                 val animatedColor by infiniteTransition.animateColor(
-                    initialValue = extraElementsLight,
+                    initialValue = onQuaternaryLight,
                     targetValue = tertiaryLight,
                     animationSpec =
                         infiniteRepeatable(
@@ -159,7 +158,7 @@ fun UserPositionTriangle(
                 animatedColor
             }
             hasBeenHit -> onQuaternaryLight
-            else -> extraElementsLight
+            else -> onQuaternaryLight
         }
 
     Canvas(
