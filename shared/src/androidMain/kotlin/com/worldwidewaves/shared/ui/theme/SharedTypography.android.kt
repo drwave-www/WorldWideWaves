@@ -11,9 +11,28 @@ package com.worldwidewaves.shared.ui.theme
  */
 
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 
-// Android font fallbacks - using distinctive system fonts
-// TODO: Restore Google Fonts with proper dependency setup for Montserrat
-actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif // Distinctive serif font
-actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif
-actual val SharedExtraFontFamily: FontFamily = FontFamily.Monospace // Very distinctive for special text
+// EXACT historical Google Fonts setup restored
+private val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = com.worldwidewaves.shared.R.array.com_google_android_gms_fonts_certs,
+)
+
+// EXACT historical font families with Montserrat + Noto Sans
+actual val SharedBodyFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
+
+actual val SharedDisplayFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
+
+actual val SharedExtraFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat Alternates"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
