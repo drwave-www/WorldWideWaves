@@ -11,6 +11,7 @@ package com.worldwidewaves.shared.ui
  */
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,7 @@ import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesThemeWithExtended
 import com.worldwidewaves.shared.utils.Log
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.ExperimentalTime
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -93,7 +95,11 @@ private fun SharedMainContent(
     // Debug screen state (matching Android pattern)
     var showDebugScreen by remember { mutableStateOf(false) }
 
-    // Create tab manager (matching Android pattern)
+    // Navigation state management (matching Android Activity navigation)
+    var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.EventsList) }
+    var selectedEventId by remember { mutableStateOf<String?>(null) }
+
+    // Create tab manager for main navigation (matching Android pattern)
     val tabManager = remember {
         val screens = mutableListOf<TabScreen>()
 
@@ -102,7 +108,12 @@ private fun SharedMainContent(
             override val name = "Events"
             @Composable
             override fun Screen(modifier: Modifier) {
-                SharedEventsScreenWrapper()
+                SharedEventsScreenWrapper(
+                    onEventClick = { eventId ->
+                        selectedEventId = eventId
+                        currentScreen = AppScreen.EventDetails
+                    }
+                )
             }
         })
 
@@ -118,14 +129,15 @@ private fun SharedMainContent(
         TabManager(
             screens = screens.toList(),
             tabBarItem = { isSelected, tabIndex, contentDescription ->
-                // Simple tab bar item for now - will enhance later
+                // Enhanced tab bar item (matching Android design)
                 Box(
                     modifier = Modifier.padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     androidx.compose.material3.Text(
                         text = screens[tabIndex].name,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -165,8 +177,49 @@ private fun SharedMainContent(
                 // Debug screen overlay
                 SharedDebugScreen(modifier = Modifier.fillMaxSize())
             } else {
-                // Main tab navigation
-                tabManager.TabView()
+                // Navigation between main screens (matching Android Activity navigation)
+                when (currentScreen) {
+                    AppScreen.EventsList, AppScreen.About -> {
+                        // Tab navigation for main screens
+                        tabManager.TabView()
+                    }
+                    AppScreen.EventDetails -> {
+                        selectedEventId?.let { eventId ->
+                            SharedEventDetailsScreen(
+                                eventId = eventId,
+                                onBackClick = {
+                                    currentScreen = AppScreen.EventsList
+                                },
+                                onWaveClick = {
+                                    currentScreen = AppScreen.Wave
+                                },
+                                onMapClick = {
+                                    currentScreen = AppScreen.Map
+                                }
+                            )
+                        }
+                    }
+                    AppScreen.Wave -> {
+                        selectedEventId?.let { eventId ->
+                            SharedWaveScreen(
+                                eventId = eventId,
+                                onBackClick = {
+                                    currentScreen = AppScreen.EventDetails
+                                }
+                            )
+                        }
+                    }
+                    AppScreen.Map -> {
+                        selectedEventId?.let { eventId ->
+                            SharedMapScreen(
+                                eventId = eventId,
+                                onBackClick = {
+                                    currentScreen = AppScreen.EventDetails
+                                }
+                            )
+                        }
+                    }
+                }
             }
         } else {
             // Splash screen
@@ -196,11 +249,261 @@ private fun SharedMainContent(
     }
 }
 
+// Navigation states for shared app (matching Android Activity navigation)
+sealed class AppScreen {
+    object EventsList : AppScreen()
+    object About : AppScreen()
+    object EventDetails : AppScreen()
+    object Wave : AppScreen()
+    object Map : AppScreen()
+}
+
+/**
+ * Shared Event Details Screen - Matching Android EventActivity exactly
+ */
+@Composable
+private fun SharedEventDetailsScreen(
+    eventId: String,
+    onBackClick: () -> Unit,
+    onWaveClick: () -> Unit,
+    onMapClick: () -> Unit
+) {
+    // Get the actual event from WWWEvents
+    val wwwEvents = remember {
+        try {
+            WWWEvents()
+        } catch (e: Exception) {
+            Log.e("SharedEventDetails", "Failed to create WWWEvents", throwable = e)
+            null
+        }
+    }
+
+    val event = remember(eventId, wwwEvents) {
+        wwwEvents?.flow()?.value?.find { it.id == eventId }
+    }
+
+    if (event != null) {
+        // Use StandardEventLayout exactly like Android EventActivity
+        com.worldwidewaves.shared.ui.components.StandardEventLayout(
+            event = event,
+            mapFeatureState = com.worldwidewaves.shared.map.MapFeatureState.Available, // Simplified for now
+            onNavigateToWave = { _ -> onWaveClick() },
+            onSimulationStarted = { message ->
+                Log.i("SharedEventDetails", "Simulation started: $message")
+            },
+            onSimulationStopped = { message ->
+                Log.i("SharedEventDetails", "Simulation stopped: $message")
+            },
+            onSimulationError = { title, message ->
+                Log.e("SharedEventDetails", "Simulation error: $title - $message")
+            },
+            onMapNotAvailable = {
+                Log.w("SharedEventDetails", "Map not available for simulation")
+            },
+            modifier = Modifier.fillMaxSize(),
+            mapHeight = 300.dp, // Using shared constant
+            mapArea = {
+                // Placeholder map area - will be enhanced with actual map
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onMapClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.Text(
+                        text = "Event Map Preview\n(Click for full map)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            additionalContent = {
+                // Back button
+                androidx.compose.material3.Button(
+                    onClick = onBackClick,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    androidx.compose.material3.Text("← Back to Events")
+                }
+            }
+        )
+    } else {
+        // Error state - event not found
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        ) {
+            androidx.compose.material3.Text(
+                text = "Event not found: $eventId",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            androidx.compose.material3.Button(
+                onClick = onBackClick,
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                androidx.compose.material3.Text("← Back to Events")
+            }
+        }
+    }
+}
+
+/**
+ * Shared Wave Screen - Matching Android WaveActivity exactly
+ */
+@OptIn(ExperimentalTime::class)
+@Composable
+private fun SharedWaveScreen(
+    eventId: String,
+    onBackClick: () -> Unit
+) {
+    // Get the actual event from WWWEvents
+    val wwwEvents = remember {
+        try {
+            WWWEvents()
+        } catch (e: Exception) {
+            Log.e("SharedWaveScreen", "Failed to create WWWEvents", throwable = e)
+            null
+        }
+    }
+
+    val event = remember(eventId, wwwEvents) {
+        wwwEvents?.flow()?.value?.find { it.id == eventId }
+    }
+
+    if (event != null) {
+        // Use WaveScreenLayout for basic wave experience (simpler for initial implementation)
+        com.worldwidewaves.shared.ui.components.WaveScreenLayout(
+            event = event,
+            modifier = Modifier.fillMaxSize(),
+            mapHeight = 300.dp,
+            mapArea = {
+                // Placeholder map content - will be enhanced with iOS map integration
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onBackClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.Text(
+                        text = "Wave Map\n(Tap to go back)",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        )
+    } else {
+        // Error state - event not found
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        ) {
+            androidx.compose.material3.Text(
+                text = "Event not found: $eventId",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            androidx.compose.material3.Button(
+                onClick = onBackClick,
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                androidx.compose.material3.Text("← Back")
+            }
+        }
+    }
+}
+
+/**
+ * Shared Map Screen - Matching Android EventFullMapActivity exactly
+ */
+@OptIn(ExperimentalTime::class)
+@Composable
+private fun SharedMapScreen(
+    eventId: String,
+    onBackClick: () -> Unit
+) {
+    // Get the actual event from WWWEvents
+    val wwwEvents = remember {
+        try {
+            WWWEvents()
+        } catch (e: Exception) {
+            Log.e("SharedMapScreen", "Failed to create WWWEvents", throwable = e)
+            null
+        }
+    }
+
+    val event = remember(eventId, wwwEvents) {
+        wwwEvents?.flow()?.value?.find { it.id == eventId }
+    }
+
+    if (event != null) {
+        // Full screen map view (simplified for initial implementation)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Full screen map placeholder - will be enhanced with iOS map integration
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { onBackClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.Text(
+                    text = "Full Event Map\n${eventId.replace("_", " ").uppercase()}\n(Tap to go back)",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // ButtonWave overlay (matching Android EventFullMapActivity)
+            com.worldwidewaves.shared.ui.components.ButtonWave(
+                eventId = event.id,
+                eventState = com.worldwidewaves.shared.events.IWWWEvent.Status.RUNNING,
+                endDateTime = null,
+                isInArea = true,
+                onNavigateToWave = com.worldwidewaves.shared.ui.components.WaveNavigator { _ ->
+                    // Navigate to wave screen from map
+                    onBackClick() // For now, just go back
+                },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 40.dp)
+            )
+        }
+    } else {
+        // Error state - event not found
+        androidx.compose.foundation.layout.Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        ) {
+            androidx.compose.material3.Text(
+                text = "Event not found: $eventId",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            androidx.compose.material3.Button(
+                onClick = onBackClick,
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                androidx.compose.material3.Text("← Back")
+            }
+        }
+    }
+}
+
 /**
  * Wrapper for events screen with data loading (matching Android pattern)
  */
 @Composable
-private fun SharedEventsScreenWrapper() {
+private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     Log.i("SharedEventsScreen", "SharedEventsScreen starting")
 
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
