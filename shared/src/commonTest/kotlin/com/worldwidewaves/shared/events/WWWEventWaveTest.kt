@@ -69,7 +69,7 @@ class WWWEventWaveTest : KoinTest {
 
     @BeforeTest
     fun setUp() {
-        every { mockClock.now() } returns Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        every { mockClock.now() } returns Instant.fromEpochMilliseconds(1643723400000L) // Fixed deterministic time: 2022-02-01 12:00:00 UTC
         startKoin { modules(module { single { mockClock } }) }
 
         wave =

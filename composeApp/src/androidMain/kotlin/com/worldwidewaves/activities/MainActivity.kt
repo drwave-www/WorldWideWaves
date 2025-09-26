@@ -169,8 +169,13 @@ open class MainActivity : AppCompatActivity() {
 
                         val ready by isSplashFinished.collectAsState()
                         if (ready) {
-                            if (showDebugScreen && debugScreen != null) {
-                                debugScreen!!.Screen(Modifier.fillMaxSize())
+                            if (showDebugScreen) {
+                                debugScreen?.Screen(Modifier.fillMaxSize()) ?: run {
+                                    // Fallback debug screen if injection failed
+                                    com.worldwidewaves.shared.ui.screens.SharedDebugScreen(
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             } else {
                                 tabManager.TabView()
                             }
@@ -186,7 +191,10 @@ open class MainActivity : AppCompatActivity() {
                         // -----------------------------------------------------------------
                         //  Floating Debug Icon (green) - bottom right corner
                         // -----------------------------------------------------------------
-                        if (ready && debugScreen != null) {
+                        // Debug logging to investigate visibility issue
+                        com.worldwidewaves.shared.utils.Log.d("MainActivity", "Debug screen status: debugScreen=${debugScreen != null}, ready=$ready")
+                        // Show debug button in debug builds even if debugScreen is null
+                        if (ready && (debugScreen != null || com.worldwidewaves.BuildConfig.DEBUG)) {
                             FloatingActionButton(
                                 onClick = { showDebugScreen = !showDebugScreen },
                                 modifier =

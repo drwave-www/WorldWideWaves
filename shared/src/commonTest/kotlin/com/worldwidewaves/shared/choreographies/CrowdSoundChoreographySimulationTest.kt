@@ -196,7 +196,7 @@ class CrowdSoundChoreographySimulationTest {
         crowd: List<SimulatedPerson>,
         midiTrack: MidiTrack,
     ): SimulationResults {
-        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        val waveStartTime = Instant.fromEpochMilliseconds(1643723400000L) // Fixed deterministic time
         val allPlaybackEvents = mutableListOf<PlaybackEvent>()
         val simulationDuration = midiTrack.totalDuration + 2.seconds // Add buffer time
 

@@ -35,6 +35,7 @@ import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
+import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.WWWSimulationEnabledLocationEngine
 import org.koin.android.ext.koin.androidContext
@@ -91,7 +92,9 @@ val applicationModule =
 
         // Debug screen - only in debug builds
         single<DebugScreen?> {
-            if (BuildConfig.DEBUG) {
+            val isDebug = BuildConfig.DEBUG
+            Log.d("ApplicationModule", "Debug screen injection: BuildConfig.DEBUG=$isDebug")
+            if (isDebug) {
                 DebugScreen()
             } else {
                 null
