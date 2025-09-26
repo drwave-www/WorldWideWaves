@@ -11,19 +11,16 @@ package com.worldwidewaves.shared.ui
  */
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,147 +31,190 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.ui.TabManager
+import com.worldwidewaves.shared.ui.TabScreen
+import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.SplashScreen
+import com.worldwidewaves.shared.ui.screens.AboutScreen
+import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesThemeWithExtended
-import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.utils.Log
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
  *
- * This composable provides the exact same UI experience on both platforms,
- * using shared business logic and identical styling.
+ * Matches Android MainActivity exactly: splash coordination, tab navigation,
+ * floating debug icon, simulation mode chip overlay.
  */
 @Composable
 fun SharedApp() {
-    Log.i("SharedApp", "SharedApp starting with working logging")
+    Log.i("SharedApp", "SharedApp starting")
+
+    // Inject dependencies using Koin (matching Android pattern)
+    val dependencies = remember {
+        object : KoinComponent {
+            val platform: WWWPlatform by inject()
+            val events: WWWEvents by inject()
+        }
+    }
 
     SharedWorldWideWavesThemeWithExtended {
-        Log.i("SharedApp", "Theme applied successfully")
-
-        // Navigation state for shared screens
-        var currentScreen by remember {
-            Log.i("SharedApp", "Setting up navigation state")
-            mutableStateOf<AppScreen>(AppScreen.EventsList)
+        Surface(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            SharedMainContent(
+                platform = dependencies.platform,
+                events = dependencies.events
+            )
         }
-        var selectedEventId by remember { mutableStateOf<String?>(null) }
+    }
+}
 
-        // Simple Compose UI - identical on both Android and iOS
-        Scaffold(
-            bottomBar = {
-                if (currentScreen == AppScreen.EventsList) {
-                    SharedBottomTabBar()
+/**
+ * Main content with splash coordination and tab navigation.
+ * Matches Android MainActivity pattern exactly.
+ */
+@Composable
+private fun SharedMainContent(
+    platform: WWWPlatform,
+    events: WWWEvents
+) {
+    // Splash screen state management (matching Android pattern)
+    var isSplashFinished by remember { mutableStateOf(false) }
+    var isDataLoaded by remember { mutableStateOf(false) }
+
+    // Debug screen state (matching Android pattern)
+    var showDebugScreen by remember { mutableStateOf(false) }
+
+    // Create tab manager (matching Android pattern)
+    val tabManager = remember {
+        val screens = mutableListOf<TabScreen>()
+
+        // Events list screen
+        screens.add(object : TabScreen {
+            override val name = "Events"
+            @Composable
+            override fun Screen(modifier: Modifier) {
+                SharedEventsScreenWrapper()
+            }
+        })
+
+        // About screen
+        screens.add(object : TabScreen {
+            override val name = "About"
+            @Composable
+            override fun Screen(modifier: Modifier) {
+                AboutScreen(platform = platform)
+            }
+        })
+
+        TabManager(
+            screens = screens.toList(),
+            tabBarItem = { isSelected, tabIndex, contentDescription ->
+                // Simple tab bar item for now - will enhance later
+                Box(
+                    modifier = Modifier.padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.Text(
+                        text = screens[tabIndex].name,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White
+                    )
                 }
-            },
-        ) { paddingValues ->
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+            }
+        )
+    }
+
+    // Data loading coordination (matching Android pattern)
+    LaunchedEffect(Unit) {
+        try {
+            events.loadEvents(
+                onTermination = { exception ->
+                    isDataLoaded = true
+                    if (isDataLoaded) {
+                        isSplashFinished = true
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("SharedApp", "Failed to load events", throwable = e)
+            isDataLoaded = true
+            isSplashFinished = true
+        }
+    }
+
+    // Enforce minimum splash duration (matching Android pattern)
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(3000) // 3 second minimum
+        if (isDataLoaded) {
+            isSplashFinished = true
+        }
+    }
+
+    // Box to stack main content and overlays (matching Android pattern exactly)
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (isSplashFinished) {
+            if (showDebugScreen) {
+                // Debug screen overlay
+                SharedDebugScreen(modifier = Modifier.fillMaxSize())
+            } else {
+                // Main tab navigation
+                tabManager.TabView()
+            }
+        } else {
+            // Splash screen
+            SplashScreen()
+        }
+
+        // Global Simulation-Mode chip (matching Android pattern exactly)
+        SimulationModeChip(platform)
+
+        // Floating Debug Icon (matching Android pattern exactly)
+        if (isSplashFinished) {
+            FloatingActionButton(
+                onClick = { showDebugScreen = !showDebugScreen },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = Color(0xFF4CAF50), // Green color
+                shape = CircleShape
             ) {
-                when (currentScreen) {
-                    AppScreen.EventsList -> {
-                        SharedEventsScreenWrapper(
-                            onEventClick = { eventId ->
-                                selectedEventId = eventId
-                                currentScreen = AppScreen.EventDetails
-                            },
-                        )
-                    }
-                    AppScreen.EventDetails -> {
-                        selectedEventId?.let { eventId ->
-                            SharedEventDetailsScreen(
-                                eventId = eventId,
-                                onBackClick = {
-                                    currentScreen = AppScreen.EventsList
-                                },
-                                onWaveClick = {
-                                    currentScreen = AppScreen.Wave
-                                },
-                                onMapClick = {
-                                    currentScreen = AppScreen.Map
-                                },
-                            )
-                        }
-                    }
-                    AppScreen.Wave -> {
-                        selectedEventId?.let { eventId ->
-                            SharedWaveScreen(
-                                eventId = eventId,
-                                onBackClick = {
-                                    currentScreen = AppScreen.EventDetails
-                                },
-                            )
-                        }
-                    }
-                    AppScreen.Map -> {
-                        selectedEventId?.let { eventId ->
-                            SharedMapScreen(
-                                eventId = eventId,
-                                onBackClick = {
-                                    currentScreen = AppScreen.EventDetails
-                                },
-                            )
-                        }
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Default.BugReport,
+                    contentDescription = "Debug Screen",
+                    tint = Color.White
+                )
             }
         }
     }
 }
 
-// Navigation states for shared app
-sealed class AppScreen {
-    object EventsList : AppScreen()
-
-    object EventDetails : AppScreen()
-
-    object Wave : AppScreen()
-
-    object Map : AppScreen()
-}
-
 /**
- * Shared bottom tab bar - identical on both platforms
+ * Wrapper for events screen with data loading (matching Android pattern)
  */
 @Composable
-private fun SharedBottomTabBar() {
-    // Simple shared tab bar implementation
-    Box(
-        modifier = Modifier.padding(16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text("Shared Tab Bar - Events | About | Debug")
-    }
-}
-
-// SharedAboutScreen removed - was unused
-
-/**
- * Wrapper that loads events and passes them to the shared EventsListScreen
- */
-@Composable
-private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
+private fun SharedEventsScreenWrapper() {
     Log.i("SharedEventsScreen", "SharedEventsScreen starting")
 
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
 
     // Get SetEventFavorite through existing wwwEvents for now
-
-    // Safely create WWWEvents with proper error handling
-    val wwwEvents =
-        remember {
-            try {
-                Log.i("SharedEventsScreen", "Creating WWWEvents instance")
-                WWWEvents()
-            } catch (e: Exception) {
-                Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
-                null
-            }
+    val wwwEvents = remember {
+        try {
+            Log.i("SharedEventsScreen", "Creating WWWEvents instance")
+            WWWEvents()
+        } catch (e: Exception) {
+            Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
+            null
         }
+    }
 
     // Filter state - exact Android match with proper state management
     var starredSelected by remember { mutableStateOf(false) }
@@ -183,50 +223,34 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     var allEvents by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
 
     LaunchedEffect(wwwEvents) {
-        try {
-            if (wwwEvents == null) {
-                Log.e("SharedEventsScreen", "CRITICAL: WWWEvents instance is null")
-                hasLoadingError = true
-                return@LaunchedEffect
-            }
-
-            Log.i("SharedEventsScreen", "Starting event loading via WWWEvents")
-
-            // Load real events from shared business logic with detailed logging
-            wwwEvents.loadEvents(
-                onLoaded = {
-                    try {
-                        Log.i("SharedEventsScreen", "onLoaded callback triggered")
-                        val loadedEvents = wwwEvents.list()
-                        Log.i("SharedEventsScreen", "Retrieved ${loadedEvents.size} events")
-                        allEvents = loadedEvents
-                        events = loadedEvents // Initial state shows all events
+        wwwEvents?.let { eventsInstance ->
+            try {
+                eventsInstance.loadEvents(
+                    onLoaded = {
+                        Log.i("SharedEventsScreen", "Events loaded successfully")
+                        allEvents = eventsInstance.flow().value
                         Log.i("SharedEventsScreen", "UI state updated with events")
-                    } catch (e: Exception) {
-                        Log.e("SharedEventsScreen", "Exception in onLoaded: ${e.message}", throwable = e)
+                    },
+                    onLoadingError = { error ->
+                        Log.e("SharedEventsScreen", "Event loading error: ${error.message}", throwable = error)
+                        hasLoadingError = true
                     }
-                },
-                onLoadingError = { error ->
-                    Log.e("SharedEventsScreen", "Event loading error: ${error.message}", throwable = error)
-                    hasLoadingError = true
-                },
-            )
-
-            Log.i("SharedEventsScreen", "Event loading initiated successfully")
-        } catch (e: Exception) {
-            Log.e("SharedEventsScreen", "CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
-            hasLoadingError = true
+                )
+                Log.i("SharedEventsScreen", "Event loading initiated successfully")
+            } catch (e: Exception) {
+                Log.e("SharedEventsScreen", "CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
+                hasLoadingError = true
+            }
         }
     }
 
     // Filter logic - EXACT Android match
     LaunchedEffect(starredSelected, downloadedSelected, allEvents) {
-        events =
-            when {
-                starredSelected -> allEvents.filter { it.favorite }
-                downloadedSelected -> allEvents.filter { false } // NOTE: Map download state integration pending
-                else -> allEvents
-            }
+        events = when {
+            starredSelected -> allEvents.filter { it.favorite }
+            downloadedSelected -> allEvents.filter { false } // NOTE: Map download state integration pending
+            else -> allEvents
+        }
         Log.i("SharedEventsScreen", "Event loading and filtering completed")
     }
 
@@ -234,203 +258,11 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     SharedEventsListScreen(
         events = events,
         mapStates = emptyMap(), // NOTE: Map state integration pending
-        onEventClick = onEventClick,
+        onEventClick = { eventId ->
+            Log.i("SharedEventsScreen", "Event clicked: $eventId")
+            // TODO: Implement navigation to event details
+        },
         setEventFavorite = null,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
     )
 }
-
-private fun getEventBackgroundColor(eventId: String): Color =
-    when {
-        eventId.contains("new_york") -> Color(0xFF2196F3).copy(alpha = 0.8f)
-        eventId.contains("los_angeles") -> Color(0xFFFF5722).copy(alpha = 0.8f)
-        eventId.contains("mexico") -> Color(0xFF4CAF50).copy(alpha = 0.8f)
-        eventId.contains("sao_paulo") -> Color(0xFFFFEB3B).copy(alpha = 0.8f)
-        eventId.contains("buenos_aires") -> Color(0xFF00BCD4).copy(alpha = 0.8f)
-        else -> Color(0xFF3F51B5).copy(alpha = 0.7f)
-    }
-
-private fun getCommunityName(eventId: String): String {
-    val components = eventId.split("_")
-    return if (components.size >= 2) {
-        components.dropLast(1).joinToString(" ") { it.uppercase() }
-    } else {
-        "COMMUNITY"
-    }
-}
-
-/**
- * Shared Event Details Screen - Exact Android EventActivity match
- */
-@Composable
-private fun SharedEventDetailsScreen(
-    eventId: String,
-    onBackClick: () -> Unit,
-    onWaveClick: () -> Unit,
-    onMapClick: () -> Unit,
-) {
-    // Exact Android EventActivity structure: Column > EventOverlay + EventDescription + DividerLine + ButtonWave
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(30.dp),
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        // Event overlay section - matching Android
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(160.dp), // Same overlay height as list
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(getEventBackgroundColor(eventId)),
-            )
-
-            // Event title overlay
-            Box(
-                modifier = Modifier.align(Alignment.Center),
-            ) {
-                Text(
-                    text = eventId.replace("_", " ").uppercase(),
-                    style =
-                        sharedCommonTextStyle().copy(
-                            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                            fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
-                            color = Color.White,
-                        ),
-                )
-            }
-        }
-
-        // Event description - matching Android
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = "Event Description",
-                style =
-                    sharedCommonTextStyle().copy(
-                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                        fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
-                    ),
-                modifier = Modifier.padding(bottom = 16.dp),
-            )
-            Text(
-                text =
-                    "Experience the wave in ${getCommunityName(eventId)}. " +
-                        "Join thousands of participants in this synchronized human wave event.",
-                style = sharedCommonTextStyle(),
-            )
-        }
-
-        // Divider line - matching Android DividerLine
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-        )
-
-        // Action buttons - matching Android ButtonWave
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(horizontal = 16.dp),
-        ) {
-            // Wave Now button
-            Button(
-                onClick = onWaveClick,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text("Wave Now")
-            }
-
-            // View Map button
-            Button(
-                onClick = onMapClick,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text("View Map")
-            }
-        }
-
-        // Back button
-        Button(
-            onClick = onBackClick,
-            modifier = Modifier.padding(top = 16.dp),
-        ) {
-            Text("← Back to Events")
-        }
-    }
-}
-
-/**
- * Shared Wave Screen - Matching Android WaveActivity
- */
-@Composable
-private fun SharedWaveScreen(
-    eventId: String,
-    onBackClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = "🌊 Wave: ${eventId.replace("_", " ").uppercase()}",
-            style =
-                sharedCommonTextStyle().copy(
-                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
-                ),
-            modifier = Modifier.padding(bottom = 32.dp),
-        )
-
-        Text(
-            text = "Wave participation screen - identical on both platforms",
-            style = sharedCommonTextStyle(),
-            modifier = Modifier.padding(bottom = 32.dp),
-        )
-
-        Button(onClick = onBackClick) {
-            Text("← Back")
-        }
-    }
-}
-
-/**
- * Shared Map Screen - Matching Android EventFullMapActivity
- */
-@Composable
-private fun SharedMapScreen(
-    eventId: String,
-    onBackClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = "🗺️ Map: ${eventId.replace("_", " ").uppercase()}",
-            style =
-                sharedCommonTextStyle().copy(
-                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
-                ),
-            modifier = Modifier.padding(bottom = 32.dp),
-        )
-
-        Text(
-            text = "Event map screen - identical on both platforms",
-            style = sharedCommonTextStyle(),
-            modifier = Modifier.padding(bottom = 32.dp),
-        )
-
-        Button(onClick = onBackClick) {
-            Text("← Back")
-        }
-    }
-}
-
-// SharedDebugScreen removed - was unused
