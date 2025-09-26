@@ -25,7 +25,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
@@ -37,35 +36,8 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-
-// Session cache to remember unavailable geojson within the same app session
-private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
-
-/**
- * Clear the unavailable cache for a specific event when a map is downloaded
- */
-fun clearUnavailableGeoJsonCache(eventId: String) {
-    unavailableGeoJsonCache.remove(eventId)
-
-    // Also invalidate GeoJSON cache in memory to force fresh load
-    try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
-            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
-        )
-        geoJsonProvider.invalidateCache(eventId)
-    } catch (e: Exception) {
-        Log.w("clearUnavailableGeoJsonCache", "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
-    }
-
-    Log.d("clearUnavailableGeoJsonCache", "Cleared cache for event $eventId")
-}
 
 actual suspend fun readGeoJson(eventId: String): String? {
-    // Quick session cache check to avoid repeated calls for known unavailable maps
-    if (unavailableGeoJsonCache.contains(eventId)) {
-        return null
-    }
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
 
     return if (filePath != null) {
@@ -75,8 +47,6 @@ actual suspend fun readGeoJson(eventId: String): String? {
         }
     } else {
         Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
-        // Cache this unavailable result to avoid repeated attempts in the same session
-        unavailableGeoJsonCache.add(eventId)
         null
     }
 }
@@ -96,7 +66,6 @@ actual suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String? {
     val context: Context by inject(Context::class.java)
-    val mapChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
 
@@ -147,12 +116,6 @@ actual suspend fun getMapFileAbsolutePath(
     if (!needsUpdate) {
         Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
         return cachedFile.absolutePath
-    }
-
-    // Check if the map is actually downloaded before attempting expensive operations
-    if (!mapChecker.isMapDownloaded(eventId)) {
-        Log.d(::getMapFileAbsolutePath.name, "Map feature not downloaded for $eventId.$extension, skipping file access attempts")
-        return null
     }
 
     // If we need to update the cache, try to open the asset from feature module
@@ -217,8 +180,8 @@ private suspend fun cacheAssetFromContext(
     assetPath: String,
     cachedFile: File,
     metadataFile: File,
-    @Suppress("UNUSED_PARAMETER") eventId: String,
-    @Suppress("UNUSED_PARAMETER") extension: String,
+    eventId: String,
+    extension: String,
 ): String {
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
@@ -261,15 +224,8 @@ actual fun cachedFileExists(fileName: String): Boolean {
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
-        // Allow caching for generated style files to prevent performance issues
-        if (fileName.startsWith("style-") && fileName.endsWith(".json")) {
-            val fileExists = File(context.cacheDir, fileName).exists()
-            Log.i(::cachedFileExists.name, "Development mode (allowing style cache): $fileName -> $fileExists")
-            fileExists
-        } else {
-            Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
-            false
-        }
+        Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
+        false
     } else {
         File(context.cacheDir, fileName).exists()
     }
@@ -323,14 +279,13 @@ actual suspend fun cacheDeepFile(fileName: String) {
 
         cacheFile.parentFile?.mkdirs()
         cacheFile.outputStream().use { it.write(fileBytes) }
-    } catch (e: java.io.FileNotFoundException) {
-        Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)", e)
-    } catch (e: SecurityException) {
-        Log.e(::cacheDeepFile.name, "Security error caching file: $fileName", e)
-    } catch (e: java.io.IOException) {
-        Log.e(::cacheDeepFile.name, "IO error caching file: $fileName", e)
     } catch (e: Exception) {
-        Log.e(::cacheDeepFile.name, "Unexpected error caching file: $fileName", e)
+        // Only log full stack trace for unexpected errors
+        if (e is java.io.FileNotFoundException) {
+            Log.w(::cacheDeepFile.name, "Cannot cache deep file: $fileName (resource not found)")
+        } else {
+            Log.e(::cacheDeepFile.name, "Error caching file: $fileName", e)
+        }
     }
 }
 
@@ -356,16 +311,6 @@ actual fun getCacheDir(): String {
 actual fun clearEventCache(eventId: String) {
     val context: Context by inject(Context::class.java)
     val cacheDir = context.cacheDir
-
-    // Also invalidate GeoJSON cache in memory
-    try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
-            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
-        )
-        geoJsonProvider.invalidateCache(eventId)
-    } catch (e: Exception) {
-        Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
-    }
 
     val targets =
         listOf(

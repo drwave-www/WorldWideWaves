@@ -12,12 +12,11 @@ package com.worldwidewaves.shared.ui.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.ui.theme.scrimLight
-import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -25,23 +24,24 @@ import dev.icerock.moko.resources.compose.stringResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun AlertMapNotDownloadedOnSimulationLaunch(onDismiss: () -> Unit) {
+fun AlertMapNotDownloadedOnSimulationLaunch(
+    onDismiss: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_title),
-                style =
-                    sharedCommonTextStyle().copy(
-                        color = scrimLight,
-                        fontWeight = FontWeight.Bold,
-                    ),
+                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle().copy(
+                    color = com.worldwidewaves.shared.ui.theme.scrimLight,
+                    fontWeight = FontWeight.Bold
+                ),
             )
         },
         text = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = sharedCommonTextStyle(),
+                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle(),
             )
         },
         confirmButton = {

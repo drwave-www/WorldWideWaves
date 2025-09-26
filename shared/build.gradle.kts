@@ -1,22 +1,3 @@
-/* * Copyright 2025 DrWave
- *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License. */
-
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -44,8 +25,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "Shared"
-            isStatic = true
-            linkerOpts("-ObjC")
+            isStatic = false // Change to dynamic framework for better bundle loading
         }
     }
 
@@ -56,11 +36,9 @@ kotlin {
      */
     targets.configureEach {
         compilations.configureEach {
-            // Updated for Kotlin 2.0+ compatibility
-            compileTaskProvider.configure {
-                compilerOptions {
-                    freeCompilerArgs.add("-Xexpect-actual-classes")
-                }
+            // NB: `compilerOptions.configure {}` works for Kotlin 1.9.x-2.0
+            compilerOptions.configure {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
             }
         }
     }
@@ -73,73 +51,32 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.coroutines.core)
-
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
             implementation(compose.materialIconsExtended)
+            implementation(compose.components.resources)
+            implementation(libs.androidx.annotation)
+            implementation(libs.datastore.preferences)
             implementation(libs.kotlinx.atomic)
             implementation(libs.koin.core)
+            implementation(compose.ui)
             implementation(libs.napier)
-
-            implementation("org.jetbrains.compose.runtime:runtime:1.8.2")
-            implementation("org.jetbrains.compose.ui:ui:1.8.2")
-            implementation("org.jetbrains.compose.foundation:foundation:1.8.2")
-            implementation("org.jetbrains.compose.material:material:1.8.2")
-            implementation("org.jetbrains.compose.material3:material3:1.8.2")
-            implementation("org.jetbrains.compose.components:components-resources:1.8.2")
-
-            // REQUIRED so IOSLifecycleOwner can link:
-            // implementation("org.jetbrains.androidx.lifecycle:lifecycle-common:2.8.4")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
+            implementation(libs.mockk.common.v1120)
         }
         androidUnitTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.koin.test)
-            implementation("io.mockk:mockk:1.13.12")
-        }
-        iosMain.dependencies {
-            implementation("org.jetbrains.compose.ui:ui-uikit:1.8.2") {
-                exclude(group = "androidx.lifecycle")
-                exclude(group = "org.jetbrains.androidx.lifecycle")
-            }
+            implementation(libs.mockk.android.v1120)
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.text.google.fonts)
-            implementation(libs.androidx.annotation)
-
-            implementation(libs.koin.android)
-            implementation(libs.kotlinx.datetime)
-            implementation(libs.maplibre.android)
-            implementation(libs.androidx.datastore.preferences)
-
-            implementation("androidx.compose.material:material-icons-extended")
-
-            implementation(libs.places)
-            implementation(libs.androidx.ui.graphics.android)
-            implementation(libs.androidx.annotation.jvm)
-            implementation(libs.feature.delivery.ktx)
-
-            // Compose (Android) via BOM
-            implementation("androidx.compose:compose-bom:2024.09.01")
-            implementation("androidx.compose.ui:ui")
-            implementation("androidx.compose.foundation:foundation")
-            implementation("androidx.compose.material:material")
-            implementation("androidx.compose.material3:material3")
-
-            // Lifecycle + Compose lifecycle (Android-only)
-            implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
-            implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-
-            // Compose Material3 for Android (you can keep JB MPP in common; this ensures Android has it)
-            // implementation("org.jetbrains.compose.material3:material3:1.8.2")
-
-            // Coroutines on Android
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
         }
 
         /*
@@ -150,18 +87,6 @@ kotlin {
          */
         if (project.hasProperty("disableCommonTest")) {
             named("commonTest") {
-                kotlin.setSrcDirs(emptySet<String>())
-                resources.setSrcDirs(emptySet<String>())
-            }
-        }
-
-        /*
-         * Allow build scripts to skip compiling `iosTest` sources
-         *
-         *   ./gradlew build -PdisableIosTest
-         */
-        if (project.hasProperty("disableIosTest")) {
-            named("iosTest") {
                 kotlin.setSrcDirs(emptySet<String>())
                 resources.setSrcDirs(emptySet<String>())
             }
@@ -220,6 +145,15 @@ android {
     sourceSets["main"].apply {
         res.srcDirs("src/commonMain/res")
     }
+    dependencies {
+        implementation(libs.koin.android)
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.maplibre.android)
+        implementation(libs.androidx.datastore.preferences)
+        implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+        implementation(libs.maplibre.android)
+    }
 
     /*
      * Configure the Android test runner so that common JVM tests can be executed
@@ -249,9 +183,14 @@ compose.resources {
 }
 
 dependencies {
+    implementation(libs.places)
+    implementation(libs.androidx.ui.graphics.android)
+    implementation(libs.androidx.annotation.jvm)
+    implementation(libs.feature.delivery.ktx)
     // MockK is only needed for unit tests; keep it out of the runtime classpath.
     commonMainApi(libs.icerock.moko.resources)
     commonMainApi(libs.icerock.moko.resources.compose)
+    testImplementation(libs.mockk.android.v1120)
 }
 
 multiplatformResources {
@@ -261,58 +200,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = true // iOS test compilation enabled (MockK tests moved to androidInstrumentedTest)
-}
-
-// Test Quality and Performance Configuration
-tasks.register("testFast") {
-    group = "verification"
-    description = "Run fast unit tests only (under 100ms budget)"
-    dependsOn("testDebugUnitTest")
-    doFirst {
-        println("🏃‍♂️ Running fast unit tests with 100ms budget enforcement")
-    }
-}
-
-tasks.register("testSecurity") {
-    group = "verification"
-    description = "Run security and input validation tests"
-    doFirst {
-        println("🔒 Running security validation tests")
-    }
-}
-
-// Anti-pattern detection integration
-tasks.register("detectTestAntipatterns") {
-    group = "verification"
-    description = "Detect test anti-patterns and quality violations"
-    doLast {
-        project.providers.exec {
-            workingDir(project.rootDir)
-            commandLine("bash", "scripts/detect-test-antipatterns.sh")
-        }
-    }
-}
-
-// Comprehensive test quality check
-tasks.register("testQuality") {
-    group = "verification"
-    description = "Run complete test quality validation"
-    dependsOn("testDebugUnitTest", "detectTestAntipatterns")
-    doFirst {
-        println("🎯 Running comprehensive test quality validation")
-    }
-    doLast {
-        println("✅ Test quality validation complete")
-    }
+    enabled = false  // Disable until commonTest JVM dependencies are resolved
 }
 
 // Custom Gradle task for crowd sound choreography simulation

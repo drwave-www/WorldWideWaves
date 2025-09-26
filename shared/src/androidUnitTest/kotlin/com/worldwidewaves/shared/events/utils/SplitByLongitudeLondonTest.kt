@@ -1,5 +1,10 @@
 package com.worldwidewaves.shared.events.utils
 
+import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.ComposedLongitude
+import com.worldwidewaves.shared.events.utils.Polygon
+import com.worldwidewaves.shared.events.utils.PolygonUtils
+import com.worldwidewaves.shared.events.utils.Position
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray

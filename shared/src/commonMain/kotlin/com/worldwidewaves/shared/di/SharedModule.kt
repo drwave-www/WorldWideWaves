@@ -26,5 +26,4 @@ val sharedModule =
         commonModule,
         helpersModule,
         datastoreModule,
-        uiModule,
     )

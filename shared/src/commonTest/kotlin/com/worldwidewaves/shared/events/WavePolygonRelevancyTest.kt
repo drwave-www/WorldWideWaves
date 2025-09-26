@@ -118,7 +118,7 @@ class WavePolygonRelevancyTest {
                 )
 
             testCases.forEach { (name, polygon, cutLongitude) ->
-                polygon.bbox()
+                val originalBbox = polygon.bbox()
 
                 // Test polygon splitting accuracy
                 val splitResult = PolygonUtils.splitByLongitude(polygon, cutLongitude)
@@ -382,9 +382,7 @@ class WavePolygonRelevancyTest {
                 val performanceMeasurements = mutableListOf<Long>()
 
                 repeat(iterations) {
-                    val startTime =
-                        kotlin.time.TimeSource.Monotonic
-                            .markNow()
+                    val startTime = System.currentTimeMillis()
 
                     // Test splitting performance (most complex operation)
                     val cutLongitude =
@@ -400,8 +398,8 @@ class WavePolygonRelevancyTest {
                         )
                     polygon.containsPosition(centerPoint)
 
-                    val duration = startTime.elapsedNow()
-                    performanceMeasurements.add(duration.inWholeMilliseconds)
+                    val endTime = System.currentTimeMillis()
+                    performanceMeasurements.add(endTime - startTime)
                 }
 
                 val averageTime = performanceMeasurements.average()
@@ -410,11 +408,11 @@ class WavePolygonRelevancyTest {
                 // Relaxed performance assertions for testing
                 assertTrue(
                     averageTime <= POLYGON_PERFORMANCE_THRESHOLD_MS * 2, // More lenient threshold
-                    "$size polygon operations average time (${averageTime.toString().take(5)}ms) exceeds relaxed threshold",
+                    "$size polygon operations average time (${String.format("%.2f", averageTime)}ms) exceeds relaxed threshold",
                 )
 
                 println("✅ $size polygon performance verified:")
-                println("   Vertices: ${polygon.size}, Average: ${averageTime.toString().take(5)}ms, Max: ${maxTime}ms")
+                println("   Vertices: ${polygon.size}, Average: ${String.format("%.2f", averageTime)}ms, Max: ${maxTime}ms")
             }
 
             println("✅ Polygon performance and scalability test completed")

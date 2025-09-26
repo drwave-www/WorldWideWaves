@@ -36,14 +36,14 @@ actual abstract class BaseViewModel actual constructor() {
     /**
      * iOS-compatible coroutine scope
      */
-    protected actual val scope: CoroutineScope =
+    actual val viewModelScope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     /**
      * iOS lifecycle cleanup
      */
-    protected actual open fun onCleared() {
-        scope.cancel()
+    actual protected open fun onCleared() {
+        viewModelScope.cancel()
     }
 
     /**

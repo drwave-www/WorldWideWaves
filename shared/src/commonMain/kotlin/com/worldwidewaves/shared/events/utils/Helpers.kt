@@ -38,6 +38,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
@@ -84,29 +85,23 @@ class SystemClock :
     KoinComponent {
     private var platform: WWWPlatform? = null
 
-    // iOS FIX: Removed init{} block that calls DI get() to prevent potential deadlocks
-    // Platform is now resolved lazily on first access
-
-    private fun getPlatformSafely(): WWWPlatform? {
-        if (platform == null) {
-            try {
-                platform = get()
-            } catch (_: Exception) {
-                Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
-            }
+    init {
+        try {
+            platform = get()
+        } catch (_: Exception) {
+            Napier.w("${SystemClock::class.simpleName}: Platform not found, simulation disabled")
         }
-        return platform
     }
 
     override fun now(): Instant =
-        if (getPlatformSafely()?.isOnSimulation() == true) {
+        if (platform?.isOnSimulation() == true) {
             platform!!.getSimulation()!!.now()
         } else {
             Clock.System.now()
         }
 
     override suspend fun delay(duration: Duration) {
-        val simulation = getPlatformSafely()?.takeIf { it.isOnSimulation() }?.getSimulation()
+        val simulation = platform?.takeIf { it.isOnSimulation() }?.getSimulation()
 
         if (simulation != null) {
             val speed =
@@ -147,25 +142,17 @@ class DefaultCoroutineScopeProvider(
     private val supervisorJob = SupervisorJob()
     private val exceptionHandler =
         CoroutineExceptionHandler { _, exception ->
-            Napier.e("CoroutineExceptionHandler caught unhandled exception: $exception", exception)
-            // Log additional context for debugging
-            Napier.e("Exception type: ${exception::class.simpleName}")
-            Napier.e("Exception message: ${exception.message}")
-            // Don't rethrow - this prevents the app crash
+            Napier.e("CoroutineExceptionHandler got $exception")
         }
-
-    // Create scopes with exception handler included
-    private val ioScope = CoroutineScope(supervisorJob + ioDispatcher + exceptionHandler)
-    private val defaultScope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
     private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
 
-    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = ioScope.launch(block = block)
+    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(ioDispatcher, block = block)
 
-    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = defaultScope.launch(block = block)
+    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(defaultDispatcher, block = block)
 
-    override fun scopeIO(): CoroutineScope = ioScope
+    override fun scopeIO(): CoroutineScope = scope + ioDispatcher
 
-    override fun scopeDefault(): CoroutineScope = defaultScope
+    override fun scopeDefault(): CoroutineScope = scope + defaultDispatcher
 
     override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(ioDispatcher) { block() }
 
@@ -188,48 +175,8 @@ class DefaultEventsConfigurationProvider(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String =
         coroutineScopeProvider.withIOContext {
-            Log.i("EventsConfigurationProvider", "=== STARTING EVENTS CONFIGURATION LOAD ===")
-            Log.i("EventsConfigurationProvider", "Target file: ${FileSystem.EVENTS_CONF}")
-
-            try {
-                Log.i("EventsConfigurationProvider", "Attempting Res.readBytes() call...")
-                val bytes = Res.readBytes(FileSystem.EVENTS_CONF)
-                Log.i("EventsConfigurationProvider", "Successfully read ${bytes.size} bytes from Compose Resources")
-
-                val result = bytes.decodeToString()
-                Log.i("EventsConfigurationProvider", "Successfully decoded ${result.length} characters")
-                Log.i("EventsConfigurationProvider", "First 100 chars: ${result.take(100)}")
-                Log.i("EventsConfigurationProvider", "=== EVENTS CONFIGURATION LOAD SUCCESSFUL ===")
-                result
-            } catch (e: Exception) {
-                Log.e("EventsConfigurationProvider", "=== EVENTS CONFIGURATION LOAD FAILED ===")
-                Log.e("EventsConfigurationProvider", "Exception type: ${e::class.simpleName}")
-                Log.e("EventsConfigurationProvider", "Exception message: ${e.message}")
-                Log.e("EventsConfigurationProvider", "Falling back to hardcoded minimal event for iOS debugging")
-
-                // Fallback to hardcoded minimal event JSON for debugging
-                """[
-                {
-                    "id": "debug_event_ios",
-                    "title": "iOS Debug Event",
-                    "location": {
-                        "latitude": 40.7589,
-                        "longitude": -73.9851,
-                        "address": "New York, NY"
-                    },
-                    "scheduledStartTime": "2025-09-27T12:00:00Z",
-                    "duration": "PT30M",
-                    "description": "Debug event for iOS Compose Resources issue",
-                    "status": "upcoming",
-                    "waveSettings": {
-                        "radius": 100,
-                        "speed": 0.5,
-                        "color": "#FF0000"
-                    },
-                    "soundChoreographyId": "debug_sound"
-                }
-                ]"""
-            }
+            Log.i(::geoEventsConfiguration.name, "Loading events configuration from ${FileSystem.EVENTS_CONF}")
+            Res.readBytes(FileSystem.EVENTS_CONF).decodeToString()
         }
 }
 
@@ -237,76 +184,43 @@ class DefaultEventsConfigurationProvider(
 
 interface GeoJsonDataProvider {
     suspend fun getGeoJsonData(eventId: String): JsonObject?
-
-    /**
-     * Invalidate cached data for a specific event.
-     * Called when event data (e.g., downloaded maps) changes.
-     */
-    fun invalidateCache(eventId: String)
-
-    /**
-     * Clear all cached data.
-     */
-    fun clearCache()
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
-    private val cache = mutableMapOf<String, JsonObject?>()
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? =
+        try {
+            // 1) Starting log -------------------------------------------------
+            Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
 
-    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
-        // Check cache first
-        if (cache.containsKey(eventId)) {
-            return cache[eventId]
-        }
+            val geojsonData = readGeoJson(eventId)
 
-        // Not in cache, load and cache the result
-        val result =
-            try {
-                Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
+            if (geojsonData != null) {
+                // 2) Raw string diagnostics -----------------------------------
+                val preview = geojsonData.take(80).replace("\n", "")
+                Log.i(
+                    ::getGeoJsonData.name,
+                    "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
+                )
 
-                val geojsonData = readGeoJson(eventId)
+                // 3) Parse and post-parse diagnostics -------------------------
+                val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
+                val keysSummary = jsonObj.keys.joinToString(", ")
+                val rootType = jsonObj["type"]?.toString()
+                Log.d(
+                    ::getGeoJsonData.name,
+                    "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
+                )
 
-                if (geojsonData != null) {
-                    val preview = geojsonData.take(80).replace("\n", "")
-                    Log.i(
-                        ::getGeoJsonData.name,
-                        "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
-                    )
-
-                    val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
-                    val keysSummary = jsonObj.keys.joinToString(", ")
-                    val rootType = jsonObj["type"]?.toString()
-                    Log.d(
-                        ::getGeoJsonData.name,
-                        "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
-                    )
-
-                    jsonObj
-                } else {
-                    Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
-                    null
-                }
-            } catch (e: Exception) {
-                Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
+                jsonObj
+            } else {
+                // Missing data warning ----------------------------------------
+                Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
                 null
             }
-
-        // Cache the result (even if null) to avoid repeated attempts
-        cache[eventId] = result
-        return result
-    }
-
-    override fun invalidateCache(eventId: String) {
-        if (cache.remove(eventId) != null) {
-            Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
+        } catch (e: Exception) {
+            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
+            null
         }
-    }
-
-    override fun clearCache() {
-        val size = cache.size
-        cache.clear()
-        Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")
-    }
 }
 
 // ---------------------------

@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
@@ -184,7 +185,7 @@ data class WWWEvent(
             localDateTime.toInstant(getTZ())
         } catch (e: Exception) {
             Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $e")
-            error("$id: Error parsing start date and time")
+            throw IllegalStateException("$id: Error parsing start date and time")
         }
 
     override suspend fun getTotalTime(): Duration {
@@ -224,6 +225,7 @@ data class WWWEvent(
 
     override fun getLiteralStartTime(): String = IClock.instantToLiteral(getStartDateTime(), getTZ())
 
+    @VisibleForTesting
     override suspend fun getLiteralEndTime(): String = IClock.instantToLiteral(getEndDateTime(), getTZ())
 
     // -----------------------------------------------------------------------

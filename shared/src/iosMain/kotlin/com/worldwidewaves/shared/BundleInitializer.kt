@@ -1,27 +1,5 @@
 package com.worldwidewaves.shared
 
-/*
- * Copyright 2025 DrWave
- *
- * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
- * countries. The project aims to transcend physical and cultural
- * boundaries, fostering unity, community, and shared human experience by leveraging real-time
- * coordination and location-based services.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.utils.loadableBundle
 import platform.Foundation.NSBundle
 
@@ -33,8 +11,6 @@ import platform.Foundation.NSBundle
  * MokoRes tries to access the bundle during static initialization.
  */
 object BundleInitializer {
-    private const val TAG = "BundleInitializer"
-
     private var _isInitialized = false
     private var _bundle: NSBundle? = null
 
@@ -42,36 +18,34 @@ object BundleInitializer {
      * Initialize the resource bundle before any MokoRes access.
      * This should be called early in the app lifecycle.
      */
-    fun initializeBundle(): Boolean =
-        try {
+    fun initializeBundle(): Boolean {
+        return try {
             if (!_isInitialized) {
                 // Try to load the bundle with various identifiers using moko-resources utilities
-                _bundle =
+                _bundle = try {
+                    NSBundle.loadableBundle("com.worldwidewaves.shared.main")
+                } catch (e: Exception) {
                     try {
-                        NSBundle.loadableBundle("com.worldwidewaves.shared.main")
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared.main'", e)
-                        try {
-                            NSBundle.loadableBundle("com.worldwidewaves.shared")
-                        } catch (e2: Exception) {
-                            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared', falling back to main bundle", e2)
-                            NSBundle.mainBundle
-                        }
+                        NSBundle.loadableBundle("com.worldwidewaves.shared")
+                    } catch (e2: Exception) {
+                        NSBundle.mainBundle
                     }
+                }
 
                 _isInitialized = _bundle != null
 
                 if (_isInitialized) {
-                    Log.i(TAG, "BUNDLE_INIT: MokoRes bundle initialized successfully")
+                    platform.Foundation.NSLog("BUNDLE_INIT: MokoRes bundle initialized successfully")
                 } else {
-                    Log.e(TAG, "BUNDLE_INIT: Failed to load MokoRes bundle")
+                    platform.Foundation.NSLog("BUNDLE_INIT: Failed to load MokoRes bundle")
                 }
             }
             _isInitialized
         } catch (e: Exception) {
-            Log.e(TAG, "BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
+            platform.Foundation.NSLog("BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
             false
         }
+    }
 
     /**
      * Get the initialized bundle, ensuring it's loaded first.

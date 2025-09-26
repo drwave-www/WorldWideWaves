@@ -31,51 +31,51 @@ import androidx.compose.ui.unit.dp
  * Shows iOS-specific system and app information.
  */
 @Composable
-actual fun PlatformSpecificPerformanceDashboard(modifier: Modifier) {
+actual fun PlatformSpecificPerformanceDashboard(
+    modifier: Modifier,
+) {
     Card(
         modifier = modifier,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = "iOS System Information",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val iosInfo =
-                listOf(
-                    "Platform" to "iOS",
-                    "Runtime" to "Kotlin/Native",
-                    "Compose" to "Multiplatform",
-                    "Status" to "Development Mode",
-                    "Architecture" to "ARM64",
-                )
+            val iosInfo = listOf(
+                "Platform" to "iOS",
+                "Runtime" to "Kotlin/Native",
+                "Compose" to "Multiplatform",
+                "Status" to "Development Mode",
+                "Architecture" to "ARM64"
+            )
 
             iosInfo.forEach { (label, value) ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = value,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

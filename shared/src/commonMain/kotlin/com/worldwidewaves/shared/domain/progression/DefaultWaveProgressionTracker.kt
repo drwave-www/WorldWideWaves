@@ -76,6 +76,7 @@ class DefaultWaveProgressionTracker(
             val polygons = waveArea.getPolygons()
 
             if (polygons.isEmpty()) {
+                Log.v("WaveProgressionTracker", "No polygons available for area detection")
                 return false
             }
 
@@ -116,6 +117,7 @@ class DefaultWaveProgressionTracker(
             if (progressionHistory.size > maxHistorySize) {
                 progressionHistory.removeAt(0)
             }
+
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")
         }

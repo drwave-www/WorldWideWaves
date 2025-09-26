@@ -40,7 +40,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.testing.PerformanceMonitor
-import com.worldwidewaves.shared.testing.PerformanceTrace
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -68,7 +67,7 @@ class WaveActivityTest {
 
     @Test
     fun testWaveCountdownTimerAccuracy() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testWaveCountdownTimerAccuracy") } returns trace
 
         // Create mock event with countdown timer
@@ -110,7 +109,7 @@ class WaveActivityTest {
 
     @Test
     fun testWaveChoreographyAnimations() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testWaveChoreographyAnimations") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -173,7 +172,7 @@ class WaveActivityTest {
 
     @Test
     fun testLocationTrackingDuringWave() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testLocationTrackingDuringWave") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -221,7 +220,7 @@ class WaveActivityTest {
 
     @Test
     fun testSoundVibrationCoordination() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testSoundVibrationCoordination") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -257,7 +256,7 @@ class WaveActivityTest {
 
     @Test
     fun testWavePhaseTransitions() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testWavePhaseTransitions") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -328,7 +327,7 @@ class WaveActivityTest {
 
     @Test
     fun testWaveParticipationErrorHandling() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testWaveParticipationErrorHandling") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -386,7 +385,7 @@ class WaveActivityTest {
 
     @Test
     fun testRealTimeWaveCoordination() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testRealTimeWaveCoordination") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)
@@ -431,7 +430,7 @@ class WaveActivityTest {
 
     @Test
     fun testWaveHitAccuracyValidation() {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         every { performanceMonitor.startTrace("testWaveHitAccuracyValidation") } returns trace
 
         val mockEvent = mockk<IWWWEvent>(relaxed = true)

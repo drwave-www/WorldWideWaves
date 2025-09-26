@@ -21,13 +21,6 @@ package com.worldwidewaves.shared.sound
  * limitations under the License.
  */
 
-// Audio conversion constants
-private const val SAMPLE_CONVERSION_FACTOR = 32767.0
-private const val SAMPLE_MIN_VALUE = -32768
-private const val SAMPLE_MAX_VALUE = 32767
-private const val LOW_BYTE_MASK = 0xFF
-private const val BYTE_SHIFT = 8
-
 /**
  * iOS-specific audio buffer implementation
  */
@@ -64,10 +57,10 @@ class IOSAudioBuffer(
         val result = ByteArray(this.size * 2)
         for (i in this.indices) {
             // Scale to -32768..32767 range
-            val sample = (this[i] * SAMPLE_CONVERSION_FACTOR).toInt().coerceIn(SAMPLE_MIN_VALUE, SAMPLE_MAX_VALUE)
+            val sample = (this[i] * 32767.0).toInt().coerceIn(-32768, 32767)
             // Little endian
-            result[i * 2] = (sample and LOW_BYTE_MASK).toByte()
-            result[i * 2 + 1] = ((sample shr BYTE_SHIFT) and LOW_BYTE_MASK).toByte()
+            result[i * 2] = (sample and 0xFF).toByte()
+            result[i * 2 + 1] = ((sample shr 8) and 0xFF).toByte()
         }
         return result
     }

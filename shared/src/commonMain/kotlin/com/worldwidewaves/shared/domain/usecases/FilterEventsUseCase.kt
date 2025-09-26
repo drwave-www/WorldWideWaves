@@ -22,7 +22,6 @@ package com.worldwidewaves.shared.domain.usecases
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Use case for filtering events based on various criteria.
@@ -108,13 +107,9 @@ data class EventFilterCriteria(
  * This interface will be implemented by platform-specific map checkers.
  */
 interface MapAvailabilityChecker {
-    val mapStates: StateFlow<Map<String, Boolean>>
-
     fun refreshAvailability()
 
     fun isMapDownloaded(eventId: String): Boolean
 
     fun getDownloadedMaps(): List<String>
-
-    fun trackMaps(mapIds: Collection<String>)
 }

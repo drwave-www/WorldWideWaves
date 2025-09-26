@@ -21,22 +21,20 @@
 
 package com.worldwidewaves.constants
 
-import com.worldwidewaves.shared.WWWGlobals
-
 /**
- * Android-specific UI constants.
+ * Android-specific UI constants for colors and Android-specific timing values.
  * This file contains constants specific to the Android implementation.
- * Most timing constants are now in shared WWWGlobals for cross-platform consistency.
+ * For shared constants, see WWWGlobals.
  */
 object AndroidUIConstants {
     object Timing {
-        /** System splash screen duration - short handoff to programmatic splash */
-        val SPLASH_MIN_DURATION_MS = WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds
+        /** Splash screen minimum duration for Android implementation (milliseconds) */
+        const val SPLASH_MIN_DURATION_MS = 500L
 
-        /** Splash screen maximum duration - uses shared constant */
-        val SPLASH_MAX_DURATION_MS = WWWGlobals.Timing.SPLASH_MAX_DURATION.inWholeMilliseconds
+        /** Splash screen maximum duration for Android implementation (milliseconds) */
+        const val SPLASH_MAX_DURATION_MS = 2000L
 
-        /** Splash screen check interval - uses shared constant */
-        const val SPLASH_CHECK_INTERVAL_MS = WWWGlobals.Timing.SPLASH_CHECK_INTERVAL_MS
+        /** Splash screen check interval (milliseconds) */
+        const val SPLASH_CHECK_INTERVAL_MS = 2000
     }
 }

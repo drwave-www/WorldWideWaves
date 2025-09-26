@@ -23,7 +23,6 @@ package com.worldwidewaves.testing
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.worldwidewaves.shared.testing.PerformanceMonitor
-import com.worldwidewaves.shared.testing.PerformanceTrace
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
@@ -65,9 +64,20 @@ abstract class BaseInstrumentedTest {
      * Helper function to create performance traces for tests.
      * Standardizes performance monitoring across all test suites.
      */
-    protected fun createPerformanceTrace(traceName: String): PerformanceTrace {
-        val trace = mockk<PerformanceTrace>(relaxed = true)
+    protected fun createPerformanceTrace(traceName: String): com.worldwidewaves.shared.monitoring.PerformanceTrace {
+        val trace = mockk<com.worldwidewaves.shared.monitoring.PerformanceTrace>(relaxed = true)
         io.mockk.every { mockPerformanceMonitor.startTrace(traceName) } returns trace
         return trace
+    }
+
+    /**
+     * Standard timeout values for different types of operations.
+     * Using consistent timeouts helps reduce flaky tests.
+     */
+    companion object {
+        const val STANDARD_TIMEOUT = 3000L
+        const val LONG_TIMEOUT = 5000L
+        const val SHORT_TIMEOUT = 1000L
+        const val ANIMATION_TIMEOUT = 2000L
     }
 }

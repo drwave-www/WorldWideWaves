@@ -71,20 +71,18 @@ fun WWWSocialNetworks(
             horizontalAlignment = Alignment.Start,
         ) {
             Text(
-                modifier =
-                    Modifier.clickable(onClick = {
-                        try {
-                            val uri = "https://www.instagram.com/${instagramAccount.removePrefix("@")}"
-                            onUrlOpen(uri)
-                        } catch (e: Exception) {
-                            Log.e("WWWSocialNetworks", "Error opening Instagram URI", throwable = e)
-                        }
-                    }),
+                modifier = Modifier.clickable(onClick = {
+                    try {
+                        val uri = "https://www.instagram.com/${instagramAccount.removePrefix("@")}"
+                        onUrlOpen(uri)
+                    } catch (e: Exception) {
+                        Log.e("WWWSocialNetworks", "Error opening Instagram URI", throwable = e)
+                    }
+                }),
                 text = instagramAccount,
-                style =
-                    sharedCommonBoldStyle(Common.SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
-                        textDecoration = TextDecoration.Underline,
-                    ),
+                style = sharedCommonBoldStyle(Common.SOCIALNETWORKS_ACCOUNT_FONTSIZE).copy(
+                    textDecoration = TextDecoration.Underline,
+                ),
             )
             Text(
                 text = instagramHashtag,

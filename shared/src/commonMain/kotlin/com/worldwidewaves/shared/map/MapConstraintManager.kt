@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.annotation.UiThread
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -61,6 +62,7 @@ class MapConstraintManager(
     /**
      * Apply constraints to a MapLibre map
      */
+    @UiThread
     fun applyConstraints() {
         // Calculate visible region padding from the map
         updateVisibleRegionPadding()
@@ -134,7 +136,12 @@ class MapConstraintManager(
      */
     private fun isCameraWithinConstraints(cameraPosition: Position): Boolean = constraintBounds?.contains(cameraPosition) ?: false
 
-    // fitMapToBounds removed - was unused
+    /**
+     * Moves the camera to fit specified bounds
+     */
+    private fun fitMapToBounds(bounds: BoundingBox) {
+        mapLibreAdapter.moveCamera(bounds)
+    }
 
     /**
      * Updates visible region padding from the map
@@ -275,8 +282,7 @@ class MapConstraintManager(
             abs(newPadding.lngPadding - visibleRegionPadding.lngPadding) /
                 visibleRegionPadding.lngPadding
 
-        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD ||
-            lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
+        return latChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD || lngChange > WWWGlobals.MapDisplay.CHANGE_THRESHOLD // 10% change threshold
     }
 
     fun getNearestValidPoint(

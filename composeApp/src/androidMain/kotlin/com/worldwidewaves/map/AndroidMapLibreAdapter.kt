@@ -24,7 +24,6 @@ package com.worldwidewaves.map
 import android.graphics.Color
 import android.util.Log
 import androidx.core.graphics.toColorInt
-import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -276,7 +275,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newCameraPosition(builder.build()),
-            WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
+            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
@@ -316,7 +315,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(latLngBounds, padding),
-            WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
+            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom

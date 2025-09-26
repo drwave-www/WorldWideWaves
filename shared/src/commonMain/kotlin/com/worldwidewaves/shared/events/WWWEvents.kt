@@ -21,17 +21,20 @@ package com.worldwidewaves.shared.events
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.data.InitFavoriteEvent
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.utils.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.jvm.JvmOverloads
@@ -57,10 +60,6 @@ import kotlin.time.ExperimentalTime
  * StateFlow exposed by this service to drive their lists or selectors.
  */
 class WWWEvents : KoinComponent {
-    companion object {
-        private const val JSON_PREVIEW_LENGTH = 200
-    }
-
     private val loadingMutex = Mutex()
 
     private val initFavoriteEvent: InitFavoriteEvent by inject()
@@ -103,7 +102,7 @@ class WWWEvents : KoinComponent {
                     // Double-check if events are already loaded after acquiring the lock
                     if (!eventsLoaded && loadingError == null) {
                         currentLoadJob = loadEventsJob()
-                        // Don't join here - let the job run asynchronously to prevent deadlock
+                        currentLoadJob?.join() // Wait for the loading job to complete
                     }
                 }
             }
@@ -116,80 +115,42 @@ class WWWEvents : KoinComponent {
     private fun loadEventsJob() =
         coroutineScopeProvider.launchIO {
             try {
-                Log.i("WWWEvents.loadEventsJob", "=== STARTING loadEventsJob() ===")
-                Log.i("WWWEvents.loadEventsJob", "Calling eventsConfigurationProvider.geoEventsConfiguration()...")
-
-                val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
-                Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
-                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(JSON_PREVIEW_LENGTH)}")
-
-                Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
-                val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
-                Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
-                Log.i("WWWEvents.loadEventsJob", "Running validation on decoded events...")
-
-                // Restore proper validation but with error handling
-                val validatedEvents =
-                    try {
-                        confValidationErrors(events)
-                    } catch (e: Exception) {
-                        Log.e("WWWEvents.loadEventsJob", "Error during validation: ${e.message}")
-                        // Fall back to no validation if validation itself crashes
-                        events.associateWith { null }
-                    }
+                val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
+                val events = eventsDecoder.decodeFromJson(eventsJsonString)
+                val validatedEvents = confValidationErrors(events)
 
                 validatedEvents
                     .filterValues { it?.isNotEmpty() == true } // Log validation errors
                     .forEach { (event, errors) ->
-                        Log.e("WWWEvents.loadEventsJob", "Validation Errors for Event ID: ${event.id}")
+                        Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
                         errors?.forEach { errorMessage ->
-                            Log.e("WWWEvents.loadEventsJob", errorMessage)
+                            Log.e(::WWWEvents.name, errorMessage)
                         }
                         validationErrors.add(event to errors!!)
                     }
 
-                // Filter out invalid events and initialize favorites
+                // Filter out invalid events
                 val validEvents =
                     validatedEvents
                         .filterValues { it.isNullOrEmpty() }
                         .keys
-                        .onEach {
-                            try {
-                                initFavoriteEvent.call(it)
-                                Log.d("WWWEvents.loadEventsJob", "Initialized favorite for event: ${it.id}")
-                            } catch (e: Exception) {
-                                Log.e("WWWEvents.loadEventsJob", "Error initializing favorite for event ${it.id}: ${e.message}")
-                            }
-                        }.toList()
+                        .onEach { initFavoriteEvent.call(it) } // Initialize favorite status
+                        .toList()
 
-                Log.i("WWWEvents.loadEventsJob", "After validation: ${validEvents.size} valid events out of ${events.size} total")
-
-                Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
-
-                // Update the _eventsFlow directly (StateFlow is thread-safe)
-                try {
+                // Update the _eventsFlow in the main dispatcher to ensure thread safety
+                withContext(Dispatchers.Main) {
                     _eventsFlow.value = validEvents
-                    Log.i("WWWEvents.loadEventsJob", "Successfully updated events flow")
-                } catch (e: Exception) {
-                    Log.e("WWWEvents.loadEventsJob", "Error updating events flow: ${e.message}")
-                    throw e
                 }
 
-                Log.i("WWWEvents.loadEventsJob", "About to call onEventsLoaded()")
                 // The events have been loaded, so we can now call any pending callbacks
-                try {
-                    onEventsLoaded()
-                    Log.i("WWWEvents.loadEventsJob", "Successfully called onEventsLoaded()")
-                } catch (e: Exception) {
-                    Log.e("WWWEvents.loadEventsJob", "Error in onEventsLoaded(): ${e.message}")
-                    throw e
-                }
+                onEventsLoaded()
             } catch (e: Exception) {
                 Log.e(::WWWEvents.name, "Unexpected error loading events: ${e.message}", e)
                 onLoadingError(e)
             }
         }
 
+    @VisibleForTesting
     fun confValidationErrors(events: List<IWWWEvent>) = events.associateWith(IWWWEvent::validationErrors)
 
     // ---------------------------
@@ -208,20 +169,13 @@ class WWWEvents : KoinComponent {
 
     // ---------------------------
 
+    @VisibleForTesting
     fun onEventsLoaded() {
-        Log.i(::WWWEvents.name, "Events loaded successfully. Calling ${pendingLoadedCallbacks.size} pending callbacks")
         eventsLoaded = true
-        pendingLoadedCallbacks
-            .onEach { callback ->
-                try {
-                    callback.invoke()
-                    Log.d(::WWWEvents.name, "Successfully called events loaded callback")
-                } catch (e: Exception) {
-                    Log.e(::WWWEvents.name, "Error calling events loaded callback: ${e.message}", e)
-                }
-            }.clear()
+        pendingLoadedCallbacks.onEach { callback -> callback.invoke() }.clear()
     }
 
+    @VisibleForTesting
     fun onLoadingError(exception: Exception) {
         loadingError = exception
         pendingErrorCallbacks.onEach { callback -> callback.invoke(exception) }.clear()
@@ -265,6 +219,7 @@ class WWWEvents : KoinComponent {
         coroutineScopeProvider.launchDefault {
             list().forEach { event ->
                 try {
+                    Log.d("WWWEvents", "Simulation change - Restarting observer for event ${event.id}")
                     event.observer.stopObservation()
                     event.observer.startObservation()
                 } catch (e: Exception) {

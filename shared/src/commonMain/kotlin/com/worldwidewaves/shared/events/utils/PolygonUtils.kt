@@ -28,8 +28,6 @@ import kotlin.math.min
 // ----------------------------------------------------------------------------
 
 object PolygonUtils {
-    private const val FLOATING_POINT_EPSILON = 1e-12
-
     data class Quad<A, B, C, D>(
         val first: A,
         val second: B,
@@ -459,13 +457,7 @@ object PolygonUtils {
 
         val output = mutableListOf<Position>()
 
-        fun isInside(p: Position): Boolean =
-            if (keepLeft) {
-                p.lng <= cutLng + FLOATING_POINT_EPSILON
-            } else {
-                p.lng >=
-                    cutLng - FLOATING_POINT_EPSILON
-            }
+        fun isInside(p: Position): Boolean = if (keepLeft) p.lng <= cutLng + 1e-12 else p.lng >= cutLng - 1e-12
 
         var prev = points.last()
         var prevInside = isInside(prev)
@@ -541,19 +533,19 @@ object PolygonUtils {
                 // Remove duplicate anchors and sort by latitude to get proper order along composed longitude
                 val uniqueAnchors = onLine.distinctBy { "${it.lat},${it.lng}" }.sortedBy { it.lat }
 
-                // Helper function to process anchor pair and insert intermediate points
-                fun processAnchorPair(
-                    anchor1: Position,
-                    anchor2: Position,
-                ) {
+                // Process consecutive anchors in latitude order (along composed longitude)
+                for (idx in 0 until uniqueAnchors.size - 1) {
+                    val anchor1 = uniqueAnchors[idx]
+                    val anchor2 = uniqueAnchors[idx + 1]
+
                     // Calculate midpoint latitude
                     val midLat = (anchor1.lat + anchor2.lat) / 2
-                    val midLng = lngToCut.lngAt(midLat) ?: return
+                    val midLng = lngToCut.lngAt(midLat) ?: continue
 
                     // Include intermediate points only when the composed-longitude
                     // segment between anchors lies inside the source polygon.
                     val insideMid = source.containsPosition(Position(midLat, midLng))
-                    if (!insideMid) return
+                    if (!insideMid) continue
 
                     // Get intermediate points between anchors
                     val between = lngToCut.positionsBetween(anchor1.lat, anchor2.lat)
@@ -589,13 +581,6 @@ object PolygonUtils {
                             }
                         }
                     }
-                }
-
-                // Process consecutive anchors in latitude order (along composed longitude)
-                for (idx in 0 until uniqueAnchors.size - 1) {
-                    val anchor1 = uniqueAnchors[idx]
-                    val anchor2 = uniqueAnchors[idx + 1]
-                    processAnchorPair(anchor1, anchor2)
                 }
                 polygon
             }

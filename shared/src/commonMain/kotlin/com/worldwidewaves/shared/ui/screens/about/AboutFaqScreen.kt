@@ -48,27 +48,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.FAQ
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.faq_contents
 import com.worldwidewaves.shared.rules_hierarchy
-import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
-import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
-import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.AboutDividerLine
+import com.worldwidewaves.shared.ui.components.AboutWWWLogo
+import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.ui.theme.sharedCommonBoldStyle
 import com.worldwidewaves.shared.ui.theme.sharedCommonJustifiedTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
-import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -87,11 +83,11 @@ import kotlin.math.roundToInt
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun AboutFaqScreen(
+fun SharedAboutFaqScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
-        Log.i("AboutFaqScreen", "URL click: $url")
+        com.worldwidewaves.shared.utils.Log.i("AboutFaqScreen", "URL click: $url")
     },
     onSimulateClick: () -> Unit = {
         platform.enableSimulationMode()
@@ -125,11 +121,10 @@ fun AboutFaqScreen(
             // FAQ title
             Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             Text(
-                modifier =
-                    Modifier.onGloballyPositioned { coordinates ->
-                        // Save the position of the FAQ section
-                        scrollToFAQPosition = coordinates.positionInRoot().y
-                    },
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    // Save the position of the FAQ section
+                    scrollToFAQPosition = coordinates.positionInRoot().y
+                },
                 text = stringResource(MokoRes.strings.faq),
                 style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
             )
@@ -150,7 +145,6 @@ fun AboutFaqScreen(
                 FAQDividerLine()
             }
 
-            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
             AboutWWWSocialNetworks(onUrlOpen = onUrlOpen)
         }
     }
@@ -161,62 +155,48 @@ private const val LAYOUT_HALF_WIDTH = 0.5f
 private const val SPACER_SMALL_SIZE = 10f
 
 @Composable
-private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
+private fun FAQTitle(onJumpToFaq: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
-            text = stringResource(MokoRes.strings.warn_rules_security_title),
-            style =
-                sharedExtraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start,
-                ),
-        )
-        Text(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = scrollToFAQPosition),
-            text = stringResource(MokoRes.strings.faq_access),
-            style =
-                sharedQuinaryColoredBoldTextStyle(FAQ.LINK_FONTSIZE).copy(
+        Box(modifier = Modifier.weight(LAYOUT_HALF_WIDTH)) {
+            Column {
+                Text(
+                    text = stringResource(MokoRes.strings.warn_rules_security_title),
+                    style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
+                )
+                Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
+                Text(
+                    text = stringResource(MokoRes.strings.warn_rules_security_text),
+                    style = sharedCommonJustifiedTextStyle(FAQ.TEXT_FONTSIZE),
+                )
+            }
+        }
+        Box(modifier = Modifier.weight(LAYOUT_HALF_WIDTH), contentAlignment = Alignment.TopEnd) {
+            Text(
+                text = stringResource(MokoRes.strings.faq_access),
+                style = sharedPrimaryColoredBoldTextStyle(FAQ.ACCESS_LINK_FONTSIZE).copy(
                     textDecoration = TextDecoration.Underline,
-                    textAlign = TextAlign.End,
                 ),
-        )
+                modifier = Modifier.clickable { onJumpToFaq() },
+            )
+        }
     }
-    Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
-    Text(
-        text = stringResource(MokoRes.strings.warn_rules_security_text),
-        fontSize = FAQ.INTRO_FONTSIZE.sp,
-        style = sharedCommonTextStyle().copy(textAlign = TextAlign.Justify),
-    )
 }
 
 @Composable
 private fun ShowRulesHierarchy() {
     rules_hierarchy.forEach { (title, items) ->
         Text(
-            modifier = Modifier.fillMaxWidth(),
             text = stringResource(title),
-            style =
-                sharedExtraPrimaryColoredBoldTextStyle(FAQ.RULE_TITLE_FONTSIZE).copy(
-                    textAlign = TextAlign.Start,
-                ),
+            style = sharedQuinaryColoredBoldTextStyle(FAQ.RULES_TITLE_FONTSIZE),
         )
-        Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
-        items.forEachIndexed { index, item ->
-            Row(modifier = Modifier.padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp / 2)) {
-                Text(
-                    modifier = Modifier.width(FAQ.RULE_NBRING_WIDTH.dp),
-                    text = (index + 1).toString() + ".",
-                    style = sharedCommonBoldStyle(FAQ.RULE_CONTENTS_FONTSIZE),
-                )
-                Text(
-                    modifier = Modifier.padding(start = Dimensions.DEFAULT_INT_PADDING.dp),
-                    text = stringResource(item),
-                    style = sharedCommonJustifiedTextStyle(FAQ.RULE_CONTENTS_FONTSIZE),
-                )
-            }
+        Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
+
+        items.forEach { itemRes ->
+            Text(
+                text = stringResource(itemRes),
+                style = sharedCommonJustifiedTextStyle(FAQ.RULES_TEXT_FONTSIZE),
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
         }
         Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
     }
@@ -224,60 +204,57 @@ private fun ShowRulesHierarchy() {
 
 @Composable
 private fun FAQItem(
-    itemIndex: Int,
-    questionResource: StringResource,
-    answerResource: StringResource,
+    index: Int,
+    question: StringResource,
+    answer: StringResource,
     expandedFaqItem: Int,
     onExpand: (Int) -> Unit,
-    showSimulateButton: Boolean = false,
+    showSimulateButton: Boolean,
     onSimulateClick: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(Dimensions.DEFAULT_INT_PADDING.dp)
-                .clickable {
-                    onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
-                },
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = stringResource(questionResource),
-                style = sharedPrimaryColoredBoldTextStyle(FAQ.RULE_QUESTION_FONTSIZE),
-                modifier = Modifier.weight(1f),
-            )
-        }
+    val isExpanded = expandedFaqItem == index
 
-        if (expandedFaqItem == itemIndex) {
-            Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
-            Text(
-                text = stringResource(answerResource),
-                style = sharedCommonJustifiedTextStyle(FAQ.RULE_ANSWER_FONTSIZE),
-            )
-            if (showSimulateButton) {
-                Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
-                OutlinedButton(
-                    onClick = onSimulateClick,
-                ) {
-                    Text(
-                        text = stringResource(MokoRes.strings.test_simulation),
-                        style = sharedPrimaryColoredBoldTextStyle(FAQ.RULE_QUESTION_FONTSIZE - 2),
-                    )
-                }
+    // Question
+    Text(
+        text = stringResource(question),
+        style = sharedExtraPrimaryColoredBoldTextStyle(FAQ.QUESTION_FONTSIZE).copy(
+            textDecoration = TextDecoration.Underline,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onExpand(if (isExpanded) -1 else index)
+            },
+    )
+
+    if (isExpanded) {
+        Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
+
+        // Answer
+        Text(
+            text = stringResource(answer),
+            style = sharedCommonJustifiedTextStyle(FAQ.ANSWER_FONTSIZE),
+        )
+
+        if (showSimulateButton) {
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
+            OutlinedButton(onClick = onSimulateClick) {
+                Text(
+                    text = stringResource(MokoRes.strings.test_simulation),
+                    style = sharedCommonBoldStyle(FAQ.SIMULATE_BUTTON_FONTSIZE),
+                )
             }
         }
+        Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
     }
 }
 
 @Composable
 private fun FAQDividerLine() {
     HorizontalDivider(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.width(300.dp),
         color = Color.White,
-        thickness = 2.dp,
+        thickness = 1.dp,
     )
+    Spacer(modifier = Modifier.size(SPACER_SMALL_SIZE.dp))
 }

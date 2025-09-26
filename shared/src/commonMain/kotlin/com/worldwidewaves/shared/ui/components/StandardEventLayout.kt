@@ -26,15 +26,6 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.MapFeatureState
-import com.worldwidewaves.shared.ui.components.event.EventNumbers
-import com.worldwidewaves.shared.ui.components.event.EventOverlay
-import com.worldwidewaves.shared.ui.components.event.NotifyAreaUserPosition
-import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
-import com.worldwidewaves.shared.ui.components.shared.ButtonWave
-import com.worldwidewaves.shared.ui.components.shared.SimulationButton
-import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
-import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
-import com.worldwidewaves.shared.ui.utils.getIOSSafePlatform
 import com.worldwidewaves.shared.ui.utils.rememberEventState
 
 /**
@@ -46,6 +37,8 @@ import com.worldwidewaves.shared.ui.utils.rememberEventState
 @Composable
 fun StandardEventLayout(
     event: IWWWEvent,
+    platform: WWWPlatform,
+    clock: IClock,
     mapFeatureState: MapFeatureState,
     onNavigateToWave: (String) -> Unit,
     onSimulationStarted: (String) -> Unit = {},
@@ -56,13 +49,7 @@ fun StandardEventLayout(
     mapHeight: Dp,
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
-    // iOS FIX: Dependencies passed as parameters to prevent deadlock
-    platform: WWWPlatform = getIOSSafePlatform(),
-    clock: IClock = getIOSSafeClock(),
 ) {
-    // iOS FIX: Removed dangerous object : KoinComponent pattern
-    // Dependencies now resolved safely outside composition
-
     val eventState = rememberEventState(event, platform)
 
     Box(modifier = modifier) {
@@ -81,11 +68,11 @@ fun StandardEventLayout(
                     event.id,
                     eventState.eventStatus,
                     eventState.endDateTime,
+                    clock,
                     eventState.isInArea,
-                    onNavigateToWave =
-                        WaveNavigator { eventId ->
-                            onNavigateToWave(eventId)
-                        },
+                    onNavigateToWave = WaveNavigator { eventId ->
+                        onNavigateToWave(eventId)
+                    },
                     modifier = Modifier.align(Alignment.Center),
                 )
 
@@ -93,11 +80,12 @@ fun StandardEventLayout(
                 if (eventState.isSimulationModeEnabled) {
                     SimulationButton(
                         event = event,
+                        platform = platform,
                         mapFeatureState = mapFeatureState,
                         onMapNotAvailable = onMapNotAvailable,
                         onSimulationStarted = onSimulationStarted,
                         onSimulationStopped = onSimulationStopped,
-                        onError = onSimulationError,
+                        onError = onSimulationError
                     )
                 }
             }
