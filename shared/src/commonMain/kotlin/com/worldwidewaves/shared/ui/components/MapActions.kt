@@ -73,7 +73,7 @@ fun SharedMapActions(
 
     val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by event.observer.userIsInArea.collectAsState()
+    // isInArea removed - was unused
 
     val isRunning = eventStatus == Status.RUNNING
 

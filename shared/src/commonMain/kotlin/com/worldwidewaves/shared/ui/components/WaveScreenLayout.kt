@@ -87,7 +87,7 @@ fun WaveScreenLayout(
     mapHeight: Dp,
     mapArea: @Composable () -> Unit = {},
 ) {
-    val helper = remember { WaveScreenLayoutHelper() }
+    // WaveScreenLayoutHelper removed - was unused
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(

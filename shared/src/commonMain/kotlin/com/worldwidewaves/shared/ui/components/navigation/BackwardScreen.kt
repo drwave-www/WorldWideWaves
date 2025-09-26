@@ -50,7 +50,7 @@ fun BackwardScreen(
     onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val scrollState = rememberScrollState()
+    // scrollState removed - was unused
 
     Column(modifier = modifier.fillMaxSize()) {
         // Back layer

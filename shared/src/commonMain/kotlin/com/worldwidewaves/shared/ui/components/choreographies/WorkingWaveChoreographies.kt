@@ -100,7 +100,8 @@ fun WorkingWaveChoreographies(
     LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit) {
         Log.v(
             "WaveChoreographies",
-            "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit",
+            "[CHOREO_DEBUG] State change for ${event.id}: " +
+                "warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit",
         )
     }
 

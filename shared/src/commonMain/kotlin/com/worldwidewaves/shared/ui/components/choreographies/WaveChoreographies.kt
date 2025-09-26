@@ -71,7 +71,7 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun WaveChoreographies(
     event: IWWWEvent,
-    modifier: Modifier = Modifier,
+    @Suppress("UNUSED_PARAMETER") modifier: Modifier = Modifier,
 ) {
     val clockComponent =
         object : KoinComponent {
