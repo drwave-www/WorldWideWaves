@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -57,8 +58,9 @@ fun SharedSplashScreen(
             painter = painterResource(Res.drawable.www_logo_transparent),
             contentDescription = stringResource(MokoRes.strings.logo_description),
             modifier = Modifier
-                .width(250.dp)
+                .size(300.dp) // Use size() instead of width() to maintain aspect ratio
                 .align(Alignment.Center),
+            contentScale = ContentScale.Fit, // Ensure proper scaling
         )
     }
 }
