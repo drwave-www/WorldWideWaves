@@ -49,7 +49,7 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
 @Composable
 fun SharedDebugScreen(
     modifier: Modifier = Modifier,
-    onPerformanceClick: () -> Unit = {},
+    @Suppress("UNUSED_PARAMETER") onPerformanceClick: () -> Unit = {},
 ) {
     Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
         LazyColumn(

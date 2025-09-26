@@ -103,7 +103,8 @@ class MapViewModel(
                         SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED -> MokoRes.strings.map_error_active_sessions_limit
                         SplitInstallErrorCode.INVALID_REQUEST -> MokoRes.strings.map_error_invalid_request
                         SplitInstallErrorCode.API_NOT_AVAILABLE -> MokoRes.strings.map_error_api_not_available
-                        SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION -> MokoRes.strings.map_error_incompatible_with_existing_session
+                        SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION ->
+                            MokoRes.strings.map_error_incompatible_with_existing_session
                         SplitInstallErrorCode.SERVICE_DIED -> MokoRes.strings.map_error_service_died
                         SplitInstallErrorCode.ACCESS_DENIED -> MokoRes.strings.map_error_access_denied
                         PLAY_STORE_AUTH_ERROR_CODE -> MokoRes.strings.map_error_account_issue

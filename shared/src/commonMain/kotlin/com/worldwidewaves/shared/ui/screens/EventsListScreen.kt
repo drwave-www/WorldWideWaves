@@ -460,7 +460,7 @@ private fun EventFlag(
 
 @Composable
 private fun EventOverlayMapDownloaded(
-    eventId: String,
+    @Suppress("UNUSED_PARAMETER") eventId: String,
     isMapInstalled: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -492,7 +492,7 @@ private fun EventOverlayMapDownloaded(
 @Composable
 private fun EventOverlayFavorite(
     event: IWWWEvent,
-    starredSelected: Boolean,
+    @Suppress("UNUSED_PARAMETER") starredSelected: Boolean,
     setEventFavorite: SetEventFavorite?,
     modifier: Modifier = Modifier,
 ) {

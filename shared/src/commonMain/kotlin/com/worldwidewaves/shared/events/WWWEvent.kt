@@ -185,7 +185,7 @@ data class WWWEvent(
             localDateTime.toInstant(getTZ())
         } catch (e: Exception) {
             Log.e(::getStartDateTime.name, "$id: Error parsing start date and time: $e")
-            throw IllegalStateException("$id: Error parsing start date and time")
+            error("$id: Error parsing start date and time")
         }
 
     override suspend fun getTotalTime(): Duration {

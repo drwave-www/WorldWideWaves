@@ -71,14 +71,4 @@ abstract class BaseInstrumentedTest {
         return trace
     }
 
-    /**
-     * Standard timeout values for different types of operations.
-     * Using consistent timeouts helps reduce flaky tests.
-     */
-    companion object {
-        const val STANDARD_TIMEOUT = 3000L
-        const val LONG_TIMEOUT = 5000L
-        const val SHORT_TIMEOUT = 1000L
-        const val ANIMATION_TIMEOUT = 2000L
-    }
 }

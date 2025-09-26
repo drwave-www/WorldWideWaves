@@ -423,7 +423,8 @@ class AudioTestActivity : ComponentActivity() {
 
                         Log.v(
                             TAG,
-                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
+                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): " +
+                                "MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
                         )
 
                         soundPlayer.playTone(

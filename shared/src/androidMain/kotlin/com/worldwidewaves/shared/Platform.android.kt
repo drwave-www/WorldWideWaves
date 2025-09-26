@@ -180,8 +180,8 @@ private suspend fun cacheAssetFromContext(
     assetPath: String,
     cachedFile: File,
     metadataFile: File,
-    eventId: String,
-    extension: String,
+    @Suppress("UNUSED_PARAMETER") eventId: String,
+    @Suppress("UNUSED_PARAMETER") extension: String,
 ): String {
     withContext(Dispatchers.IO) {
         // Use a buffered approach for better memory efficiency
