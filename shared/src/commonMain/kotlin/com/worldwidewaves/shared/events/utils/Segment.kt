@@ -82,7 +82,7 @@ data class Segment(
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
 
-        if (isIntersectionOutsideSegments(ua, ub)) return null // Intersection point is outside of both line segments
+        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // Intersection point is outside of both line segments
 
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
@@ -143,14 +143,10 @@ data class Segment(
 
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denominator
-        if (isIntersectionOutsideSegments(ua, ub)) return null // outside segments
+        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null // outside segments
 
         val x = x1 + ua * (x2 - x1)
         val y = y1 + ua * (y2 - y1)
         return Position(lat = y, lng = x)
-    }
-
-    private fun isIntersectionOutsideSegments(ua: Double, ub: Double): Boolean {
-        return ua < 0 || ua > 1 || ub < 0 || ub > 1
     }
 }

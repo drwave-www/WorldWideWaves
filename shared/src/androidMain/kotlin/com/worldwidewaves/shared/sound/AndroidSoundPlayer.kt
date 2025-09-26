@@ -62,8 +62,8 @@ class AndroidAudioBuffer(
     init {
         buffer =
             when (bitsPerSample) {
-                8 -> convert8Bit(samples)
-                16 -> convert16Bit(samples)
+                WWWGlobals.Audio.BITS_PER_SAMPLE_8BIT -> convert8Bit(samples)
+                WWWGlobals.Audio.DEFAULT_BITS_PER_SAMPLE -> convert16Bit(samples)
                 else -> throw IllegalArgumentException("Unsupported bits per sample: $bitsPerSample")
             }
     }
@@ -168,8 +168,8 @@ class AndroidSoundPlayer(
                     AudioBufferFactory.createFromSamples(
                         samples = samples,
                         sampleRate = sampleRate,
-                        bitsPerSample = 16,
-                        channels = 1,
+                        bitsPerSample = WWWGlobals.Audio.DEFAULT_BITS_PER_SAMPLE,
+                        channels = WWWGlobals.Audio.DEFAULT_CHANNELS,
                     )
 
                 playBuffer(buffer, duration)

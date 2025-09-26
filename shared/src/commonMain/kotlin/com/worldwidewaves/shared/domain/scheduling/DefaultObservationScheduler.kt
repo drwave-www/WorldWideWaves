@@ -66,75 +66,25 @@ class DefaultObservationScheduler(
         val timeBeforeEvent = eventStartTime - now
         val timeBeforeHit = event.wave.timeBeforeUserHit()
 
-        Log.performance(
-            "DefaultObservationScheduler",
-            "Calculating interval: timeBeforeEvent=$timeBeforeEvent, timeBeforeHit=$timeBeforeHit",
-        )
-
         return when {
-            // Event is far in the future - minimal battery usage
-            timeBeforeEvent > 1.hours + 5.minutes -> {
-                Log.v("DefaultObservationScheduler", "Event is distant (>1h), using 1 hour interval")
-                1.hours
-            }
-
-            // Event is approaching - moderate monitoring
-            timeBeforeEvent > 5.minutes + 30.seconds -> {
-                Log.v("DefaultObservationScheduler", "Event is approaching (5-60min), using 5 minute interval")
-                5.minutes
-            }
-
-            // Event is near - active monitoring
-            timeBeforeEvent > 35.seconds -> {
-                Log.v("DefaultObservationScheduler", "Event is near (35s-5min), using 1 second interval")
-                1.seconds
-            }
-
-            // For events that have started or are about to start, check hit timing first
-            timeBeforeHit != null && timeBeforeHit < ZERO -> {
-                Log.v("DefaultObservationScheduler", "User already hit or event done, stopping observation")
-                INFINITE
-            }
-
-            // Critical hit timing - maximum accuracy for sound synchronization
-            timeBeforeHit != null && timeBeforeHit < 1.seconds -> {
-                Log.performance("DefaultObservationScheduler", "Critical hit timing (<1s), using 50ms interval")
-                50.milliseconds
-            }
-
-            // Near hit timing - high accuracy with battery consideration
-            timeBeforeHit != null && timeBeforeHit < 5.seconds -> {
-                Log.performance("DefaultObservationScheduler", "Near hit timing (<5s), using 200ms interval")
-                200.milliseconds
-            }
-
-            // Event is active or about to start - real-time updates
-            timeBeforeEvent > 0.seconds || event.isRunning() -> {
-                Log.performance("DefaultObservationScheduler", "Event is active/starting, using 500ms interval")
-                500.milliseconds
-            }
-
-            // Default post-event monitoring - battery friendly
-            else -> {
-                Log.v("DefaultObservationScheduler", "Post-event monitoring, using 30 second interval")
-                30.seconds
-            }
+            timeBeforeEvent > 1.hours + 5.minutes -> 1.hours
+            timeBeforeEvent > 5.minutes + 30.seconds -> 5.minutes
+            timeBeforeEvent > 35.seconds -> 1.seconds
+            timeBeforeHit != null && timeBeforeHit < ZERO -> INFINITE
+            timeBeforeHit != null && timeBeforeHit < 1.seconds -> 50.milliseconds
+            timeBeforeHit != null && timeBeforeHit < 5.seconds -> 200.milliseconds
+            timeBeforeEvent > 0.seconds || event.isRunning() -> 500.milliseconds
+            else -> 30.seconds
         }
     }
 
     override suspend fun shouldObserveContinuously(event: IWWWEvent): Boolean {
         val shouldObserve = event.isRunning() || (event.isSoon() && event.isNearTime())
-        Log.v(
-            "DefaultObservationScheduler",
-            "Should observe continuously: $shouldObserve (running=${event.isRunning()}, soon=${event.isSoon()}, nearTime=${event.isNearTime()})",
-        )
         return shouldObserve
     }
 
     override fun createObservationFlow(event: IWWWEvent): Flow<Unit> =
         callbackFlow {
-            Log.v("DefaultObservationScheduler", "Creating observation flow for event ${event.id}")
-
             try {
                 if (shouldObserveContinuously(event)) {
                     Log.v("DefaultObservationScheduler", "Starting continuous observation for event ${event.id}")
@@ -152,7 +102,6 @@ class DefaultObservationScheduler(
                         }
 
                         // Wait for next observation
-                        Log.v("DefaultObservationScheduler", "Waiting $observationDelay for next observation")
                         clock.delay(observationDelay)
                     }
 
@@ -161,7 +110,6 @@ class DefaultObservationScheduler(
                     send(Unit)
                 } else {
                     // For events not ready for continuous observation, emit once
-                    Log.v("DefaultObservationScheduler", "Event ${event.id} not ready for continuous observation, emitting once")
                     send(Unit)
                 }
             } catch (e: Exception) {

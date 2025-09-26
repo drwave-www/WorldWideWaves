@@ -21,9 +21,12 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
@@ -368,7 +371,11 @@ abstract class AbstractEventMap<T>(
         }
 
         // Auto-target the user the first time (optional) if no interaction yet
-        if (shouldAutoTargetUser()) {
+        if (mapConfig.autoTargetUserOnFirstLocation &&
+            !userHasBeenLocated &&
+            !userInteracted &&
+            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
+        ) {
             scope.launch {
                 targetUser()
             }
@@ -396,10 +403,14 @@ abstract class AbstractEventMap<T>(
      */
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
 
-    private fun shouldAutoTargetUser(): Boolean {
-        return mapConfig.autoTargetUserOnFirstLocation &&
-            !userHasBeenLocated &&
-            !userInteracted &&
-            mapConfig.initialCameraPosition == MapCameraPosition.WINDOW
-    }
+    abstract fun updateWavePolygons(
+        wavePolygons: List<Polygon>,
+        clearPolygons: Boolean,
+    )
+
+    @Composable
+    abstract fun Draw(
+        autoMapDownload: Boolean,
+        modifier: Modifier,
+    )
 }

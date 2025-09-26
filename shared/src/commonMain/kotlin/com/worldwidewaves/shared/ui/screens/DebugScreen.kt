@@ -47,20 +47,20 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
  * Only visible in debug builds.
  */
 @Composable
-fun SharedDebugScreen(
+fun DebugScreen(
     modifier: Modifier = Modifier,
-    onPerformanceClick: () -> Unit = {},
+    @Suppress("UNUSED_PARAMETER") onPerformanceClick: () -> Unit = {},
 ) {
     Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 Text(
                     text = "Debug Information",
                     style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
@@ -68,11 +68,12 @@ fun SharedDebugScreen(
             item {
                 DebugInfoCard(
                     title = "Platform Information",
-                    items = listOf(
-                        "Platform" to "Multiplatform",
-                        "Version" to "1.0.0", // Could be dynamic from BuildConfig
-                        "Build Type" to "Debug"
-                    )
+                    items =
+                        listOf(
+                            "Platform" to "Multiplatform",
+                            "Version" to "1.0.0", // Could be dynamic from BuildConfig
+                            "Build Type" to "Debug",
+                        ),
                 )
             }
 
@@ -80,11 +81,12 @@ fun SharedDebugScreen(
             item {
                 DebugInfoCard(
                     title = "Application State",
-                    items = listOf(
-                        "Simulation Mode" to "Disabled", // Could be dynamic
-                        "Location Provider" to "GPS", // Could be dynamic
-                        "Network Status" to "Connected" // Could be dynamic
-                    )
+                    items =
+                        listOf(
+                            "Simulation Mode" to "Disabled", // Could be dynamic
+                            "Location Provider" to "GPS", // Could be dynamic
+                            "Network Status" to "Connected", // Could be dynamic
+                        ),
                 )
             }
 
@@ -92,18 +94,19 @@ fun SharedDebugScreen(
             item {
                 DebugInfoCard(
                     title = "System Resources",
-                    items = listOf(
-                        "Memory Usage" to "Calculating...", // Could show actual memory
-                        "Storage Available" to "Available", // Could show actual storage
-                        "Device Orientation" to "Portrait" // Could be dynamic
-                    )
+                    items =
+                        listOf(
+                            "Memory Usage" to "Calculating...", // Could show actual memory
+                            "Storage Available" to "Available", // Could show actual storage
+                            "Device Orientation" to "Portrait", // Could be dynamic
+                        ),
                 )
             }
 
             // Platform-specific information
             item {
                 PlatformSpecificPerformanceDashboard(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -113,22 +116,23 @@ fun SharedDebugScreen(
 @Composable
 private fun DebugInfoCard(
     title: String,
-    items: List<Pair<String, String>>
+    items: List<Pair<String, String>>,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -144,23 +148,23 @@ private fun DebugInfoCard(
 @Composable
 private fun DebugInfoRow(
     label: String,
-    value: String
+    value: String,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -171,6 +175,4 @@ private fun DebugInfoRow(
  * iOS: Simple debug screen placeholder
  */
 @Composable
-expect fun PlatformSpecificPerformanceDashboard(
-    modifier: Modifier = Modifier,
-)
+expect fun PlatformSpecificPerformanceDashboard(modifier: Modifier = Modifier)

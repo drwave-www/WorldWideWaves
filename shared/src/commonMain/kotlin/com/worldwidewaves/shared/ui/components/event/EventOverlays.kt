@@ -1,0 +1,200 @@
+package com.worldwidewaves.shared.ui.components.event
+
+/*
+ * Copyright 2025 DrWave
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.WWWGlobals.Common
+import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Event
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.IWWWEvent.Status
+import com.worldwidewaves.shared.format.DateTimeFormats
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.event_done
+import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
+import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import dev.icerock.moko.resources.compose.stringResource
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+import kotlin.time.ExperimentalTime
+
+/**
+ * Shared cross-platform event overlay components.
+ * These components provide visual indicators for event states.
+ */
+
+/**
+ * Top-right banner indicating SOON / RUNNING event states.
+ */
+@Composable
+fun EventOverlaySoonOrRunning(
+    eventStatus: Status?,
+    modifier: Modifier = Modifier,
+) {
+    if (eventStatus == Status.SOON || eventStatus == Status.RUNNING) {
+        val backgroundColor =
+            if (eventStatus == Status.SOON) {
+                MaterialTheme.colorScheme.secondary
+            } else {
+                MaterialTheme.colorScheme.tertiary
+            }
+
+        val textResource =
+            if (eventStatus == Status.SOON) {
+                MokoRes.strings.event_soon
+            } else {
+                MokoRes.strings.event_running
+            }
+
+        Box(
+            modifier = modifier.fillMaxWidth().offset(y = (-5).dp),
+            contentAlignment = Alignment.TopEnd,
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .padding(top = Common.SOONRUNNING_PADDING.dp, end = Common.SOONRUNNING_PADDING.dp)
+                        .height(Common.SOONRUNNING_HEIGHT.dp)
+                        .background(backgroundColor)
+                        .padding(horizontal = Dimensions.DEFAULT_INT_PADDING.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(textResource),
+                    style =
+                        sharedCommonTextStyle(Common.SOONRUNNING_FONTSIZE).copy(
+                            fontWeight = FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                        ),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Semi-transparent overlay with "done" image when the event is finished.
+ */
+@Composable
+fun EventOverlayDone(
+    eventStatus: Status?,
+    modifier: Modifier = Modifier,
+) {
+    if (eventStatus == Status.DONE) {
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+            Surface(
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.fillMaxSize(),
+            ) { }
+            Image(
+                painter = painterResource(Res.drawable.event_done),
+                contentDescription = stringResource(MokoRes.strings.event_done),
+                modifier = Modifier.width(Common.DONE_IMAGE_WIDTH.dp),
+            )
+        }
+    }
+}
+
+/**
+ * Event overlay date component
+ * Positions date in center normally, at bottom when event is done.
+ */
+@Composable
+fun EventOverlayDate(
+    eventStatus: Status?,
+    eventDate: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
+        contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
+    ) {
+        val textStyle = sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
+        Text(
+            text = eventDate,
+            style = textStyle.copy(color = sharedExtendedLight.quinary.color),
+        )
+        Text(
+            text = eventDate,
+            style =
+                textStyle.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    drawStyle =
+                        Stroke(
+                            miter = Event.DATE_MITER,
+                            width = Event.DATE_STROKE,
+                            join = StrokeJoin.Miter,
+                        ),
+                ),
+        )
+    }
+}
+
+/**
+ * Complete shared event overlay combining location image with status overlays.
+ * This is the main overlay composable that includes the background image and all status indicators.
+ */
+@OptIn(ExperimentalTime::class)
+@Composable
+fun EventOverlay(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val localizedDate =
+        remember(event.id) {
+            DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
+        }
+
+    Box(modifier = modifier) {
+        Image(
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.FillWidth,
+            painter = painterResource(event.getLocationImage() as DrawableResource),
+            contentDescription = stringResource(event.getLocation()),
+        )
+        Box(modifier = Modifier.matchParentSize()) {
+            EventOverlaySoonOrRunning(eventStatus)
+            EventOverlayDone(eventStatus)
+            EventOverlayDate(eventStatus, localizedDate)
+        }
+    }
+}

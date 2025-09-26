@@ -54,11 +54,6 @@ class DefaultEventStateManager(
         input: EventStateInput,
         userIsInArea: Boolean,
     ): EventState {
-        Log.v(
-            "DefaultEventStateManager",
-            "Calculating state for event ${event.id}: progression=${input.progression}, status=${input.status}",
-        )
-
         // Calculate warming phases
         val warmingInProgress = calculateWarmingPhase(event)
         val isStartWarmingInProgress = calculateStartWarmingPhase(event, input.currentTime)
@@ -101,7 +96,7 @@ class DefaultEventStateManager(
         val issues = mutableListOf<StateValidationIssue>()
 
         // Validate progression bounds
-        if (isInvalidProgression(input.progression)) {
+        if (input.progression < 0.0 || input.progression > 100.0 || input.progression.isNaN() || input.progression.isInfinite()) {
             issues.add(
                 StateValidationIssue(
                     field = "progression",
@@ -179,7 +174,9 @@ class DefaultEventStateManager(
             issues.add(
                 StateValidationIssue(
                     field = "progression",
-                    issue = "Progression went backwards: ${previousState.progression} -> ${newState.progression} (status: ${newState.status})",
+                    issue =
+                        "Progression went backwards: ${previousState.progression} -> " +
+                            "${newState.progression} (status: ${newState.status})",
                     severity = StateValidationIssue.Severity.WARNING,
                 ),
             )
@@ -270,24 +267,5 @@ class DefaultEventStateManager(
     private fun calculateUserGoingToBeHit(
         timeBeforeHit: Duration,
         userIsInArea: Boolean,
-    ): Boolean {
-        if (!userIsInArea) {
-            return false
-        }
-
-        val isAboutToBeHit = timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
-
-        if (isAboutToBeHit) {
-            Log.v(
-                "DefaultEventStateManager",
-                "[CHOREO_DEBUG] User is going to be hit - timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}",
-            )
-        }
-
-        return isAboutToBeHit
-    }
-
-    private fun isInvalidProgression(progression: Double): Boolean {
-        return progression < 0.0 || progression > 100.0 || progression.isNaN() || progression.isInfinite()
-    }
+    ): Boolean = userIsInArea && timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
 }

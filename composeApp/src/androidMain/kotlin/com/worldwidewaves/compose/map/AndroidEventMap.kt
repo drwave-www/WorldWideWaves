@@ -33,7 +33,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import com.worldwidewaves.shared.utils.WWWLogger
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
@@ -74,23 +74,26 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
+import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.map.WWWLocationProvider
+import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
+import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
-import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.shared.map.MapFeatureState
-import com.worldwidewaves.viewmodels.MapViewModel
+import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +115,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.geojson.Polygon
 import java.io.File
 import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
@@ -135,9 +137,9 @@ import androidx.compose.ui.res.painterResource as painterResourceAndroid
  */
 class AndroidEventMap(
     event: IWWWEvent,
+    private val context: AppCompatActivity, // MANDATORY - required for wave layer UI thread operations
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
-    private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig(),
 ) : AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate),
     KoinComponent {
@@ -164,21 +166,19 @@ class AndroidEventMap(
     private var currentMap: MapLibreMap? = null
 
     // Map availability and download state tracking
-    private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
+    private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
 
     /**
      * The Compose UI for the map
      */
     @Composable
-    fun Screen(
-        autoMapDownload: Boolean = false,
+    override fun Draw(
+        autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
-        WWWLogger.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
+        Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
 
-        val context = LocalContext.current
         val scope = rememberCoroutineScope()
-        val lifecycleOwner = LocalLifecycleOwner.current
         var isMapLoaded by remember { mutableStateOf(false) }
         var mapError by remember { mutableStateOf(false) }
         var hasLocationPermission by remember { mutableStateOf(false) }
@@ -196,25 +196,50 @@ class AndroidEventMap(
         val mapLibreView: MapView =
             rememberMapLibreViewWithLifecycle(key = "${event.id}-$isMapAvailable")
 
-        val mapViewModel: MapViewModel = viewModel()
+        val mapViewModel: AndroidMapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
 
         // Check if map is downloaded
         LaunchedEffect(Unit) {
             mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
             isMapAvailable = mapAvailabilityChecker.isMapDownloaded(event.id)
-            WWWLogger.i(TAG, "Initial map availability check result: ${event.id} available=$isMapAvailable")
+            Log.i(TAG, "Initial map availability check result: ${event.id} available=$isMapAvailable")
         }
 
         // Update download state based on MapViewModel state
-        HandleMapFeatureStateUpdates(
-            mapFeatureState = mapFeatureState,
-            context = context,
-            onDownloadingChange = { isMapDownloading = it },
-            onMapAvailableChange = { isMapAvailable = it },
-            onMapErrorChange = { mapError = it },
-            onInitStartedChange = { initStarted = it }
-        )
+        LaunchedEffect(mapFeatureState) {
+            when (mapFeatureState) {
+                is MapFeatureState.Downloading -> {
+                    isMapDownloading = true
+                }
+                is MapFeatureState.Pending -> isMapDownloading = true
+                is MapFeatureState.Installed -> {
+                    Log.i(TAG, "Map installed: ${event.id}")
+                    // Make the just-installed split immediately visible to this
+                    // running Activity – required for MapLibre to see assets.
+                    context.let {
+                        SplitCompat.installActivity(it)
+                    }
+                    isMapDownloading = false
+                    isMapAvailable = true
+                    mapError = false
+                    // Allow a fresh initialization attempt now that install finished
+                    initStarted = false
+                }
+                is MapFeatureState.Failed -> {
+                    val errorCode = (mapFeatureState as MapFeatureState.Failed).errorCode
+                    Log.e(TAG, "Map download failed: ${event.id}, errorCode=$errorCode")
+                    mapError = true
+                    isMapDownloading = false
+                    // Reset init flag so a new attempt can be triggered after failure
+                    initStarted = false
+                }
+                is MapFeatureState.Canceling -> isMapDownloading = false
+                is MapFeatureState.Installing -> isMapDownloading = true
+                is MapFeatureState.NotAvailable -> isMapDownloading = false
+                else -> {}
+            }
+        }
 
         // Request GPS location Android permissions
         hasLocationPermission = requestLocationPermission()
@@ -223,18 +248,45 @@ class AndroidEventMap(
         }
 
         // Monitor permissions and GPS provider changes
-        HandleLocationPermissions(
-            context = context,
-            onPermissionChange = { granted ->
-                hasLocationPermission = granted
-                updateLocationComponent(context, granted)
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer =
+                LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_RESUME) {
+                        val granted = isLocationPermissionGranted(context)
+                        hasLocationPermission = granted
+                        updateLocationComponent(context, granted)
+                    }
+                }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
             }
-        )
+        }
+
+        DisposableEffect(Unit) {
+            val receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(
+                        c: Context?,
+                        i: Intent?,
+                    ) {
+                        val granted = isLocationPermissionGranted(context)
+                        hasLocationPermission = granted
+                        updateLocationComponent(context, granted)
+                    }
+                }
+            val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+            context.registerReceiver(receiver, filter)
+            onDispose {
+                context.unregisterReceiver(receiver)
+            }
+        }
 
         // Auto-download map once when requested by caller
         LaunchedEffect(isMapAvailable, autoMapDownload, userCanceled) {
             if (!isMapAvailable && autoMapDownload && !userCanceled) {
-                WWWLogger.i(TAG, "Auto-downloading map: ${event.id}")
+                Log.i(TAG, "Auto-downloading map: ${event.id}")
                 mapViewModel.downloadMap(event.id)
             }
         }
@@ -262,7 +314,7 @@ class AndroidEventMap(
 
                     if (isMapAvailable && !isMapLoaded && !initStarted) {
                         initStarted = true
-                        WWWLogger.i(TAG, "Starting map init from AndroidView.update")
+                        Log.i(TAG, "Starting map init from AndroidView.update")
                         loadMap(
                             context = context,
                             scope = scope,
@@ -270,12 +322,12 @@ class AndroidEventMap(
                             hasLocationPermission = hasLocationPermission,
                             lifecycle = lifecycleOwner.lifecycle,
                             onMapLoaded = {
-                                WWWLogger.i(TAG, "Map successfully loaded: ${event.id}")
+                                Log.i(TAG, "Map successfully loaded: ${event.id}")
                                 isMapLoaded = true
                                 onMapLoaded()
                             },
                             onMapError = {
-                                WWWLogger.e(TAG, "Error loading map: ${event.id}")
+                                Log.e(TAG, "Error loading map: ${event.id}")
                                 mapError = true
                                 initStarted = false // allow retry
                             },
@@ -309,89 +361,6 @@ class AndroidEventMap(
                         userCanceled = false
                         mapViewModel.downloadMap(event.id)
                     }
-            }
-        }
-    }
-
-    @Composable
-    private fun HandleMapFeatureStateUpdates(
-        mapFeatureState: MapFeatureState,
-        context: Context,
-        onDownloadingChange: (Boolean) -> Unit,
-        onMapAvailableChange: (Boolean) -> Unit,
-        onMapErrorChange: (Boolean) -> Unit,
-        onInitStartedChange: (Boolean) -> Unit
-    ) {
-        LaunchedEffect(mapFeatureState) {
-            when (mapFeatureState) {
-                is MapFeatureState.Downloading -> {
-                    onDownloadingChange(true)
-                }
-                is MapFeatureState.Pending -> onDownloadingChange(true)
-                is MapFeatureState.Installed -> {
-                    WWWLogger.i(TAG, "Map installed: ${event.id}")
-                    // Make the just-installed split immediately visible to this
-                    // running Activity – required for MapLibre to see assets.
-                    (context as? AppCompatActivity)?.let {
-                        SplitCompat.installActivity(it)
-                    }
-                    onDownloadingChange(false)
-                    onMapAvailableChange(true)
-                    onMapErrorChange(false)
-                    // Allow a fresh initialization attempt now that install finished
-                    onInitStartedChange(false)
-                }
-                is MapFeatureState.Failed -> {
-                    val errorCode = (mapFeatureState as MapFeatureState.Failed).errorCode
-                    WWWLogger.e(TAG, "Map download failed: ${event.id}, errorCode=$errorCode")
-                    onMapErrorChange(true)
-                    onDownloadingChange(false)
-                    // Reset init flag so a new attempt can be triggered after failure
-                    onInitStartedChange(false)
-                }
-                is MapFeatureState.Canceling -> onDownloadingChange(false)
-                is MapFeatureState.Installing -> onDownloadingChange(true)
-                is MapFeatureState.NotAvailable -> onDownloadingChange(false)
-                else -> {}
-            }
-        }
-    }
-
-    @Composable
-    private fun HandleLocationPermissions(
-        context: Context,
-        onPermissionChange: (Boolean) -> Unit
-    ) {
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    if (event == Lifecycle.Event.ON_RESUME) {
-                        val granted = isLocationPermissionGranted(context)
-                        onPermissionChange(granted)
-                    }
-                }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-
-        DisposableEffect(Unit) {
-            val receiver =
-                object : BroadcastReceiver() {
-                    override fun onReceive(
-                        c: Context?,
-                        i: Intent?,
-                    ) {
-                        val granted = isLocationPermissionGranted(context)
-                        onPermissionChange(granted)
-                    }
-                }
-            val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-            context.registerReceiver(receiver, filter)
-            onDispose {
-                context.unregisterReceiver(receiver)
             }
         }
     }
@@ -529,34 +498,43 @@ class AndroidEventMap(
         onMapLoaded: () -> Unit,
         onMapError: () -> Unit = {},
     ) {
-        WWWLogger.i(TAG, "Loading map for event: ${event.id}")
+        Log.i(TAG, "Loading map for event: ${event.id}")
         // Ensure SplitCompat is installed before accessing any dynamic feature assets
         SplitCompat.install(context)
 
         scope.launch {
             withContext(Dispatchers.IO) {
                 // IO actions
+                Log.e(TAG, "🔥 STARTING STYLE RESOLUTION RETRY LOOP for event: ${event.id}")
                 var stylePath: String? = null
                 var attempts = 0
+                var styleResolved = false
+
                 repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
+                    if (styleResolved) return@repeat // Skip if already resolved
+
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
-                    if (candidate != null && File(candidate).exists()) {
-                        WWWLogger.i(TAG, "Style URI resolved: $candidate")
+                    val fileExists = candidate?.let { File(it).exists() } ?: false
+
+                    Log.d(TAG, "Style resolution attempt $attempts: candidate='$candidate', exists=$fileExists")
+
+                    if (candidate != null && fileExists) {
+                        Log.i(TAG, "Style URI resolved: $candidate")
                         stylePath = candidate
+                        styleResolved = true // Set flag to stop processing
                         return@repeat
                     }
 
-                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
-                        WWWLogger.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) {
+                        Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
-                    // Give Play-Core/asset manager time to expose freshly installed split assets
                     delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 
                 if (stylePath == null) {
-                    WWWLogger.e(TAG, "Failed to resolve style URI after $attempts attempts")
+                    Log.e(TAG, "Failed to resolve style URI after $attempts attempts")
                     onMapError()
                     return@withContext
                 }
@@ -568,7 +546,7 @@ class AndroidEventMap(
                     // Encapsulate the original logic so we can call it from multiple places
                     fun invokeGetMapAsync() {
                         mapLibreView.getMapAsync { map ->
-                            WWWLogger.i(TAG, "MapLibreMap instance received")
+                            Log.i(TAG, "MapLibreMap instance received")
                             // Save reference so we can refresh location component later
                             currentMap = map
                             // Setup Map
@@ -577,7 +555,7 @@ class AndroidEventMap(
                                 scope,
                                 uri.toString(),
                                 onMapLoaded = {
-                                    WWWLogger.i(TAG, "Map setup complete, initializing location if needed")
+                                    Log.i(TAG, "Map setup complete, initializing location if needed")
                                     // Initialize location component only if permission granted
                                     // and the lifecycle is at least STARTED (Activity/Fragment visible).
                                     if (hasLocationPermission &&
@@ -588,7 +566,11 @@ class AndroidEventMap(
                                     onMapLoaded()
                                 },
                                 onMapClick = { _, _ ->
-                                    onMapClick?.invoke()
+                                    context.startActivity(
+                                        Intent(context, EventFullMapActivity::class.java).apply {
+                                            putExtra("eventId", event.id)
+                                        },
+                                    )
                                 },
                             )
                         }
@@ -612,7 +594,7 @@ class AndroidEventMap(
                         // Safety timeout in case attachment never happens
                         Handler(Looper.getMainLooper()).postDelayed({
                             if (mapLibreView.isAttachedToWindow.not()) {
-                                WWWLogger.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
+                                Log.w(TAG, "MapView still not attached after timeout; forcing getMapAsync")
                                 try {
                                     mapLibreView.removeOnAttachStateChangeListener(listener)
                                 } catch (_: IllegalStateException) {
@@ -637,7 +619,7 @@ class AndroidEventMap(
         map: MapLibreMap,
         context: Context,
     ) {
-        WWWLogger.i(TAG, "Setting up map location component")
+        Log.i(TAG, "Setting up map location component")
         map.style?.let { style ->
             try {
                 // Check if already activated to avoid double activation
@@ -649,14 +631,14 @@ class AndroidEventMap(
                 }
                 map.locationComponent.isLocationComponentEnabled = true
                 map.locationComponent.cameraMode = CameraMode.NONE // Do not track user
-                WWWLogger.i(TAG, "Location component setup complete")
+                Log.i(TAG, "Location component setup complete")
             } catch (e: IllegalStateException) {
-                WWWLogger.e(TAG, "Failed to setup location component - invalid state", e)
+                Log.e(TAG, "Failed to setup location component - invalid state", e)
             } catch (e: UnsupportedOperationException) {
-                WWWLogger.e(TAG, "Failed to setup location component - operation not supported", e)
+                Log.e(TAG, "Failed to setup location component - operation not supported", e)
             }
         } ?: run {
-            WWWLogger.e(TAG, "Cannot setup location component - map style is null")
+            Log.e(TAG, "Cannot setup location component - map style is null")
         }
     }
 
@@ -722,58 +704,46 @@ class AndroidEventMap(
         context: Context,
         hasPermission: Boolean,
     ) {
-        WWWLogger.i(TAG, "Updating location component, permission=$hasPermission")
-        val map = currentMap ?: run {
-            WWWLogger.w(TAG, "Cannot update location component - map is null")
+        Log.i(TAG, "Updating location component, permission=$hasPermission")
+        val map = currentMap
+        if (map == null) {
+            Log.w(TAG, "Cannot update location component - map is null")
             return
         }
 
-        val style = map.style ?: run {
-            WWWLogger.w(TAG, "Cannot update location component - map style is null")
-            return
-        }
+        map.style?.let {
+            try {
+                // Check if location component is activated before trying to disable it
+                if (map.locationComponent.isLocationComponentActivated) {
+                    // Always disable first to avoid stale state
+                    map.locationComponent.isLocationComponentEnabled = false
+                }
 
-        handleLocationComponentUpdate(map, context, hasPermission)
-    }
-
-    private fun handleLocationComponentUpdate(
-        map: MapLibreMap,
-        context: Context,
-        hasPermission: Boolean
-    ) {
-        try {
-            disableLocationComponentIfActivated(map)
-            if (hasPermission) {
-                setupMapLocationComponent(map, context)
+                if (hasPermission) {
+                    setupMapLocationComponent(map, context)
+                }
+            } catch (se: SecurityException) {
+                // Permission might have been revoked between check and use
+                Log.w(TAG, "Location permission missing when enabling component", se)
+            } catch (ise: IllegalStateException) {
+                // Map component might be in invalid state
+                Log.e(TAG, "Map component in invalid state", ise)
+            } catch (uoe: UnsupportedOperationException) {
+                // Map operation not supported
+                Log.e(TAG, "Unsupported map operation", uoe)
+            } catch (e: IllegalStateException) {
+                // Location component not initialized - this is expected on first run
+                if (e.message?.contains("LocationComponent has to be activated") == true) {
+                    Log.d(TAG, "Location component not yet initialized, will activate it")
+                    if (hasPermission) {
+                        setupMapLocationComponent(map, context)
+                    }
+                } else {
+                    Log.e(TAG, "Unexpected illegal state with location component", e)
+                }
             }
-        } catch (se: SecurityException) {
-            WWWLogger.w(TAG, "Location permission missing when enabling component", se)
-        } catch (ise: IllegalStateException) {
-            handleLocationComponentError(ise, map, context, hasPermission)
-        } catch (uoe: UnsupportedOperationException) {
-            WWWLogger.e(TAG, "Unsupported map operation", uoe)
-        }
-    }
-
-    private fun disableLocationComponentIfActivated(map: MapLibreMap) {
-        if (map.locationComponent.isLocationComponentActivated) {
-            map.locationComponent.isLocationComponentEnabled = false
-        }
-    }
-
-    private fun handleLocationComponentError(
-        error: IllegalStateException,
-        map: MapLibreMap,
-        context: Context,
-        hasPermission: Boolean
-    ) {
-        if (error.message?.contains("LocationComponent has to be activated") == true) {
-            WWWLogger.d(TAG, "Location component not yet initialized, will activate it")
-            if (hasPermission) {
-                setupMapLocationComponent(map, context)
-            }
-        } else {
-            WWWLogger.e(TAG, "Unexpected illegal state with location component", error)
+        } ?: run {
+            Log.w(TAG, "Cannot update location component - map style is null")
         }
     }
 
@@ -784,7 +754,7 @@ class AndroidEventMap(
      */
     @Composable
     fun rememberMapLibreViewWithLifecycle(key: Any? = Unit): MapView {
-        WWWLogger.d(TAG, "Creating MapLibreView with key: $key")
+        Log.d(TAG, "Creating MapLibreView with key: $key")
         val context = LocalContext.current
 
         // Build the MapLibre view
@@ -799,7 +769,7 @@ class AndroidEventMap(
                     .build(),
             )
 
-            localIdeographFontFamily("Droid Sans")
+            localIdeographFontFamily("Droid Sans") // NOTE: Will be replaced with MapLibre font-maker in future version
 
             compassEnabled(true)
             compassFadesWhenFacingNorth(true)
@@ -843,14 +813,13 @@ class AndroidEventMap(
     /**
      * Update wave polygons on the map
      */
-    fun updateWavePolygons(
-        context: Context,
+    override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean,
     ) {
-        WWWLogger.v(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
-        (context as? AppCompatActivity)?.runOnUiThread {
-            mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
+        context.runOnUiThread {
+            val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
+            mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
 }
@@ -870,6 +839,6 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             Lifecycle.Event.ON_PAUSE -> mapView.onPause()
             Lifecycle.Event.ON_STOP -> mapView.onStop()
             Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
-            else -> error("Unexpected lifecycle event")
+            else -> error("Unexpected lifecycle event: $event")
         }
     }

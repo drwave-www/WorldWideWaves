@@ -1,7 +1,6 @@
 package com.worldwidewaves.shared.di
 
-/*
- * Copyright 2025 DrWave
+/* * Copyright 2025 DrWave
  *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
@@ -18,9 +17,15 @@ package com.worldwidewaves.shared.di
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * limitations under the License. */
 
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.choreographies.ChoreographyManager
+import com.worldwidewaves.shared.data.FavoriteEventsStore
+import com.worldwidewaves.shared.data.IOSFavoriteEventsStore
+import com.worldwidewaves.shared.debugBuild
+import com.worldwidewaves.shared.domain.usecases.IOSMapAvailabilityChecker
+import com.worldwidewaves.shared.domain.usecases.MapAvailabilityChecker
 import com.worldwidewaves.shared.map.IOSMapLibreAdapter
 import com.worldwidewaves.shared.map.IOSPlatformMapManager
 import com.worldwidewaves.shared.map.IOSWWWLocationProvider
@@ -30,9 +35,14 @@ import com.worldwidewaves.shared.map.PlatformMapManager
 import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.sound.IOSSoundPlayer
 import com.worldwidewaves.shared.sound.SoundPlayer
+import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.IOSImageResolver
 import com.worldwidewaves.shared.utils.ImageResolver
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.viewmodels.IOSMapViewModel
+import com.worldwidewaves.shared.viewmodels.MapViewModel
 import org.koin.dsl.module
+import platform.UIKit.UIDevice
 import platform.UIKit.UIImage
 
 val IOSModule =
@@ -41,8 +51,42 @@ val IOSModule =
         single<ImageResolver<UIImage>> { IOSImageResolver() }
         single<WWWLocationProvider> { IOSWWWLocationProvider() }
 
+        // Note: PlatformEnabler is injected into koin by Swift IOS
+
+        // Platform descriptor for iOS
+        single<WWWPlatform> {
+            debugBuild()
+            val device = UIDevice.currentDevice
+            WWWPlatform("iOS ${device.systemVersion}", get())
+        }
+
+        single {
+            EventsViewModel(
+                eventsRepository = get(),
+                getSortedEventsUseCase = get(),
+                filterEventsUseCase = get(),
+                checkEventFavoritesUseCase = get(),
+                platform = get(),
+            )
+        }
+
+        // ChoreographyManager for iOS
+        single(createdAtStart = true) { ChoreographyManager<UIImage>() }
+
+        // iOS Map Availability Checker (production-grade iOS implementation)
+        single<MapAvailabilityChecker> { IOSMapAvailabilityChecker() }
+
+        // Debug screen - iOS implementation
+        single<DebugTabScreen?> { DebugTabScreen() }
+
+        // Data persistence
+        single<FavoriteEventsStore> { IOSFavoriteEventsStore() }
+
         // Map services
         single<PlatformMapManager> { IOSPlatformMapManager() }
         single<MapLibreAdapter<Any>> { IOSMapLibreAdapter() }
         single { MapStateManager(get()) }
+
+        // iOS MapViewModel
+        single<MapViewModel> { IOSMapViewModel(get()) }
     }

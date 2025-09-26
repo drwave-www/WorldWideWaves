@@ -17,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * iOS-specific tests for IOSWWWLocationProvider.
@@ -24,91 +25,96 @@ import kotlin.test.assertNull
  * These tests verify the iOS Core Location integration and StateFlow behavior.
  */
 class IOSWWWLocationProviderTest {
+    @Test
+    fun `initial state has no location`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
+
+            val initialLocation = locationProvider.currentLocation.first()
+            assertNull(initialLocation)
+        }
 
     @Test
-    fun `initial state has no location`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
+    fun `startLocationUpdates sets up location tracking`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
+            var receivedPosition: Position? = null
 
-        val initialLocation = locationProvider.currentLocation.first()
-        assertNull(initialLocation)
-    }
+            locationProvider.startLocationUpdates { position ->
+                receivedPosition = position
+            }
+
+            // Should have received default location (San Francisco)
+            // Note: In real iOS environment, this would eventually get GPS location
+            assertNotNull(receivedPosition)
+        }
 
     @Test
-    fun `startLocationUpdates sets up location tracking`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
-        var receivedPosition: Position? = null
+    fun `stopLocationUpdates stops tracking`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
+            var updateCount = 0
 
-        locationProvider.startLocationUpdates { position ->
-            receivedPosition = position
+            locationProvider.startLocationUpdates { position ->
+                updateCount++
+            }
+
+            locationProvider.stopLocationUpdates()
+
+            // After stopping, no more updates should be received
+            // This is a basic test - in real implementation we'd verify CLLocationManager is stopped
         }
-
-        // Should have received default location (San Francisco)
-        // Note: In real iOS environment, this would eventually get GPS location
-        assertNotNull(receivedPosition)
-    }
 
     @Test
-    fun `stopLocationUpdates stops tracking`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
-        var updateCount = 0
+    fun `default location is San Francisco coordinates`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
+            var receivedPosition: Position? = null
 
-        locationProvider.startLocationUpdates { position ->
-            updateCount++
+            locationProvider.startLocationUpdates { position ->
+                receivedPosition = position
+            }
+
+            // Should receive San Francisco coordinates as default
+            receivedPosition?.let { position ->
+                assertEquals(37.7749, position.lat, 0.0001)
+                assertEquals(-122.4194, position.lng, 0.0001)
+            }
         }
-
-        locationProvider.stopLocationUpdates()
-
-        // After stopping, no more updates should be received
-        // This is a basic test - in real implementation we'd verify CLLocationManager is stopped
-    }
 
     @Test
-    fun `default location is San Francisco coordinates`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
-        var receivedPosition: Position? = null
+    fun `multiple startLocationUpdates calls are handled gracefully`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
+            var updateCount = 0
 
-        locationProvider.startLocationUpdates { position ->
-            receivedPosition = position
-        }
+            locationProvider.startLocationUpdates { position ->
+                updateCount++
+            }
 
-        // Should receive San Francisco coordinates as default
-        receivedPosition?.let { position ->
-            assertEquals(37.7749, position.lat, 0.0001)
-            assertEquals(-122.4194, position.lng, 0.0001)
+            // Second call should not duplicate tracking
+            locationProvider.startLocationUpdates { position ->
+                updateCount++
+            }
+
+            // Should handle multiple calls gracefully without errors
+            assertTrue(updateCount > 0)
         }
-    }
 
     @Test
-    fun `multiple startLocationUpdates calls are handled gracefully`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
-        var updateCount = 0
+    fun `StateFlow currentLocation updates correctly`() =
+        runTest {
+            val locationProvider = IOSWWWLocationProvider()
 
-        locationProvider.startLocationUpdates { position ->
-            updateCount++
+            locationProvider.startLocationUpdates { position ->
+                // Callback received
+            }
+
+            val currentLocation = locationProvider.currentLocation.first()
+            assertNotNull(currentLocation)
+
+            // Should be San Francisco default coordinates
+            assertEquals(37.7749, currentLocation.lat, 0.0001)
+            assertEquals(-122.4194, currentLocation.lng, 0.0001)
         }
-
-        // Second call should not duplicate tracking
-        locationProvider.startLocationUpdates { position ->
-            updateCount++
-        }
-
-        // Should handle multiple calls gracefully without errors
-        assertTrue(updateCount > 0)
-    }
-
-    @Test
-    fun `StateFlow currentLocation updates correctly`() = runTest {
-        val locationProvider = IOSWWWLocationProvider()
-
-        locationProvider.startLocationUpdates { position ->
-            // Callback received
-        }
-
-        val currentLocation = locationProvider.currentLocation.first()
-        assertNotNull(currentLocation)
-
-        // Should be San Francisco default coordinates
-        assertEquals(37.7749, currentLocation.lat, 0.0001)
-        assertEquals(-122.4194, currentLocation.lng, 0.0001)
-    }
 }

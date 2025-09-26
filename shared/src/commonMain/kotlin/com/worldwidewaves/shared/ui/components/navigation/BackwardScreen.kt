@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,25 +49,27 @@ fun BackwardScreen(
     onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val scrollState = rememberScrollState()
+    // scrollState removed - was unused
 
     Column(modifier = modifier.fillMaxSize()) {
         // Back layer
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = BackNav.PADDING[0].dp,
-                    end = BackNav.PADDING[1].dp,
-                    top = BackNav.PADDING[2].dp,
-                    bottom = BackNav.PADDING[3].dp,
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = BackNav.PADDING[0].dp,
+                        end = BackNav.PADDING[1].dp,
+                        top = BackNav.PADDING[2].dp,
+                        bottom = BackNav.PADDING[3].dp,
+                    ),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .clickable { onBackClick() },
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .clickable { onBackClick() },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(

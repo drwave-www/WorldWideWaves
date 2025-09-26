@@ -22,8 +22,9 @@ package com.worldwidewaves.map
  */
 
 import android.graphics.Color
-import com.worldwidewaves.shared.utils.WWWLogger
+import android.util.Log
 import androidx.core.graphics.toColorInt
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
@@ -109,7 +110,7 @@ class AndroidMapLibreAdapter(
         updateCameraInfo()
 
         // Debug: log initial camera details
-        WWWLogger.d(
+        Log.d(
             "Camera",
             "Initial camera: target=${map.cameraPosition.target?.latitude}," +
                 "${map.cameraPosition.target?.longitude} " +
@@ -134,16 +135,16 @@ class AndroidMapLibreAdapter(
     ) {
         require(mapLibreMap != null)
         // Log style application start – helps diagnose early style failures
-        WWWLogger.d(TAG, "Applying style from URI: $stylePath")
+        Log.d(TAG, "Applying style from URI: $stylePath")
 
         mapLibreMap!!.setStyle(Style.Builder().fromUri(stylePath)) { _ ->
             // Log successful style load – confirms MapLibre has parsed the style
-            WWWLogger.i(TAG, "Style loaded successfully")
+            Log.i(TAG, "Style loaded successfully")
             callback()
         }
     }
 
-    fun onMapSet(callback: (AndroidMapLibreAdapter) -> Unit) {
+    override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
         if (mapLibreMap != null) {
             // Map is already set, execute callback immediately
             callback(this)
@@ -242,7 +243,7 @@ class AndroidMapLibreAdapter(
 
     override fun moveCamera(bounds: BoundingBox) {
         require(mapLibreMap != null)
-        WWWLogger.v(
+        Log.v(
             "Camera",
             "Moving camera to bounds: SW=${bounds.southwest.latitude},${bounds.southwest.longitude} " +
                 "NE=${bounds.northeast.latitude},${bounds.northeast.longitude}",
@@ -258,7 +259,7 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
 
-        WWWLogger.v(
+        Log.v(
             "Camera",
             "Animating to position: lat=${position.latitude}, " +
                 "lng=${position.longitude}, zoom=$zoom",
@@ -275,7 +276,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newCameraPosition(builder.build()),
-            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
+            WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
@@ -298,7 +299,7 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
 
-        WWWLogger.v(
+        Log.v(
             "Camera",
             "Animating to bounds: SW=${bounds.southwest.latitude}," +
                 "${bounds.southwest.longitude} " +
@@ -315,7 +316,7 @@ class AndroidMapLibreAdapter(
 
         map.animateCamera(
             CameraUpdateFactory.newLatLngBounds(latLngBounds, padding),
-            com.worldwidewaves.shared.WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
+            WWWGlobals.Timing.MAP_CAMERA_ANIMATION_DURATION_MS,
             object : CancelableCallback {
                 override fun onFinish() {
                     _currentZoom.value = map.cameraPosition.zoom
@@ -332,7 +333,7 @@ class AndroidMapLibreAdapter(
     override fun setBoundsForCameraTarget(constraintBounds: BoundingBox) {
         require(mapLibreMap != null)
 
-        WWWLogger.v(
+        Log.v(
             "Camera",
             "Setting camera target bounds constraint: SW=${constraintBounds.southwest.latitude}," +
                 "${constraintBounds.southwest.longitude} " +
@@ -350,7 +351,10 @@ class AndroidMapLibreAdapter(
     ) {
         val map = mapLibreMap ?: return
         val wavePolygons = polygons.filterIsInstance<Polygon>()
-        if (wavePolygons.isEmpty()) return
+        if (wavePolygons.isEmpty()) {
+            Log.w(TAG, "No valid Polygon objects found in ${polygons.size} input polygons")
+            return
+        }
 
         map.getStyle { style ->
             try {
@@ -391,11 +395,11 @@ class AndroidMapLibreAdapter(
                     waveLayerIds.add(layerId)
                 }
             } catch (ise: IllegalStateException) {
-                WWWLogger.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
+                Log.e("MapUpdate", "Map style in invalid state for wave polygons", ise)
             } catch (iae: IllegalArgumentException) {
-                WWWLogger.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
+                Log.e("MapUpdate", "Invalid arguments for wave polygon styling", iae)
             } catch (uoe: UnsupportedOperationException) {
-                WWWLogger.e("MapUpdate", "Unsupported map operation", uoe)
+                Log.e("MapUpdate", "Unsupported map operation", uoe)
             }
         }
     }
@@ -405,7 +409,7 @@ class AndroidMapLibreAdapter(
     override fun drawOverridenBbox(bbox: BoundingBox) {
         require(mapLibreMap != null)
 
-        WWWLogger.v(
+        Log.v(
             "Camera",
             "Drawing override bbox: SW=${bbox.southwest.latitude}," +
                 "${bbox.southwest.longitude} " +

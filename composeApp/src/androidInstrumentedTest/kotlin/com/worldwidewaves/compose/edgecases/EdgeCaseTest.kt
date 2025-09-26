@@ -1013,10 +1013,12 @@ private fun TestLargeDatasetHandling(
     ) {
         androidx.compose.material3.Button(
             onClick = {
-                val startTime = System.currentTimeMillis()
+                val startMark =
+                    kotlin.time.TimeSource.Monotonic
+                        .markNow()
                 datasetLoaded.value = true
                 onDatasetLoaded()
-                val renderTime = (System.currentTimeMillis() - startTime).milliseconds
+                val renderTime = startMark.elapsedNow()
                 onPerformanceChecked(renderTime)
             },
             modifier =

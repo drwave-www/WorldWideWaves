@@ -43,7 +43,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -74,9 +73,15 @@ data class WWWEventArea(
     val bbox: String? = null,
 ) : KoinComponent,
     DataValidator {
+    companion object {
+        private const val MIN_SHRINK_FACTOR = 0.1
+        private const val POSITION_ATTEMPTS_PER_SHRINK = 20
+        private const val SHRINK_FACTOR_MULTIPLIER = 0.8
+    }
+
     private var _event: IWWWEvent? = null
     private var event: IWWWEvent
-        get() = _event ?: throw IllegalStateException("Event not set")
+        get() = _event ?: error("Event not set")
         set(value) {
             _event = value
         }
@@ -207,13 +212,13 @@ data class WWWEventArea(
         var attempts = 0
         var shrinkFactor = 1.0
 
-        while (attempts < maxAttempts && shrinkFactor > 0.1) {
+        while (attempts < maxAttempts && shrinkFactor > MIN_SHRINK_FACTOR) {
             val center = event.area.getCenter()
             val latRange = (bbox.ne.lat - bbox.sw.lat) * shrinkFactor
             val lngRange = (bbox.ne.lng - bbox.sw.lng) * shrinkFactor
 
-            repeat(20) {
-                // Try 20 times with current shrink factor
+            repeat(POSITION_ATTEMPTS_PER_SHRINK) {
+                // Try multiple times with current shrink factor
                 val randomLat = center.lat + (Random.nextDouble() - 0.5) * latRange
                 val randomLng = center.lng + (Random.nextDouble() - 0.5) * lngRange
                 val position = Position(randomLat, randomLng)
@@ -223,7 +228,7 @@ data class WWWEventArea(
                 }
             }
 
-            shrinkFactor *= 0.8 // Shrink the sampling area
+            shrinkFactor *= SHRINK_FACTOR_MULTIPLIER // Shrink the sampling area
             attempts++
         }
 
@@ -333,7 +338,11 @@ data class WWWEventArea(
                 coroutineScopeProvider.withDefaultContext {
                     loadPolygonsFromGeoJson(tempPolygons)
                 }
-            } catch (ignored: Exception) {
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+                // Polygon loading errors are handled gracefully - empty polygon list is acceptable
+            } catch (e: Exception) {
+                Log.w("WWWEventArea", "Error loading polygons for event ${event.id}: ${e.message}")
                 // Polygon loading errors are handled gracefully - empty polygon list is acceptable
             }
 
@@ -355,7 +364,11 @@ data class WWWEventArea(
             if (geoJsonData != null) {
                 processGeoJsonData(geoJsonData, tempPolygons)
             }
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.w("WWWEventArea", "GeoJSON parsing error for event ${event.id}: ${e.message}")
+            // GeoJSON data loading errors are handled gracefully
+        } catch (e: Exception) {
+            Log.w("WWWEventArea", "Error loading GeoJSON for event ${event.id}: ${e.message}")
             // GeoJSON data loading errors are handled gracefully
         }
     }
@@ -387,7 +400,11 @@ data class WWWEventArea(
                 if (geometry != null) {
                     processGeometry(geometry, tempPolygons)
                 }
-            } catch (ignored: Exception) {
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.v("WWWEventArea", "GeoJSON feature parsing error: ${e.message}")
+                // Feature geometry processing errors are handled gracefully
+            } catch (e: Exception) {
+                Log.v("WWWEventArea", "Unexpected feature geometry processing error: ${e.message}")
                 // Feature geometry processing errors are handled gracefully
             }
         }
@@ -399,7 +416,11 @@ data class WWWEventArea(
     ) {
         try {
             processGeometry(geoJsonData, tempPolygons)
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "GeoJSON direct geometry parsing error: ${e.message}")
+            // Direct geometry processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected direct geometry processing error: ${e.message}")
             // Direct geometry processing errors are handled gracefully
         }
     }
@@ -418,7 +439,14 @@ data class WWWEventArea(
                     coordinates?.forEachIndexed { ringIndex, ring ->
                         try {
                             processRing(ring, tempPolygons)
-                        } catch (ignored: Exception) {
+                        } catch (e: NumberFormatException) {
+                            Log.v("WWWEventArea", "Invalid numeric data in ring geometry: ${e.message}")
+                            // Ignore invalid ring geometry and continue processing
+                        } catch (e: kotlinx.serialization.SerializationException) {
+                            Log.v("WWWEventArea", "Ring geometry parsing error: ${e.message}")
+                            // Ignore invalid ring geometry and continue processing
+                        } catch (e: Exception) {
+                            Log.v("WWWEventArea", "Unexpected ring geometry error: ${e.message}")
                             // Ignore invalid ring geometry and continue processing
                         }
                     }
@@ -430,7 +458,11 @@ data class WWWEventArea(
                 else -> {
                 }
             }
-        } catch (ignored: Exception) {
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "Geometry processing parsing error: ${e.message}")
+            // Geometry processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected geometry processing error: ${e.message}")
             // Geometry processing errors are handled gracefully
         }
     }
@@ -454,6 +486,7 @@ data class WWWEventArea(
                     try {
                         polygon.jsonArray
                     } catch (e: Exception) {
+                        Log.w("WWWEventArea", "Invalid polygon JSON array at index $polygonIndex in MultiPolygon", e)
                         return@forEachIndexed
                     }
 
@@ -469,6 +502,7 @@ data class WWWEventArea(
                             try {
                                 ring.jsonArray
                             } catch (e: Exception) {
+                                Log.w("WWWEventArea", "Invalid ring JSON array at index $ringIndex in polygon", e)
                                 return@forEachIndexed
                             }
 
@@ -477,11 +511,25 @@ data class WWWEventArea(
                         }
 
                         processRing(ring, tempPolygons)
-                    } catch (ignored: Exception) {
+                    } catch (e: NumberFormatException) {
+                        Log.v("WWWEventArea", "Invalid numeric data in MultiPolygon ring: ${e.message}")
+                        // Ring processing errors are handled gracefully
+                    } catch (e: kotlinx.serialization.SerializationException) {
+                        Log.v("WWWEventArea", "MultiPolygon ring parsing error: ${e.message}")
+                        // Ring processing errors are handled gracefully
+                    } catch (e: Exception) {
+                        Log.v("WWWEventArea", "Unexpected MultiPolygon ring error: ${e.message}")
                         // Ring processing errors are handled gracefully
                     }
                 }
-            } catch (ignored: Exception) {
+            } catch (e: NumberFormatException) {
+                Log.v("WWWEventArea", "Invalid numeric data in MultiPolygon: ${e.message}")
+                // MultiPolygon processing errors are handled gracefully
+            } catch (e: kotlinx.serialization.SerializationException) {
+                Log.v("WWWEventArea", "MultiPolygon parsing error: ${e.message}")
+                // MultiPolygon processing errors are handled gracefully
+            } catch (e: Exception) {
+                Log.v("WWWEventArea", "Unexpected MultiPolygon processing error: ${e.message}")
                 // MultiPolygon processing errors are handled gracefully
             }
         }
@@ -497,6 +545,7 @@ data class WWWEventArea(
                 try {
                     ring.jsonArray
                 } catch (e: Exception) {
+                    Log.w("WWWEventArea", "Invalid ring JSON array in processRing", e)
                     return
                 }
 
@@ -512,6 +561,7 @@ data class WWWEventArea(
                                 try {
                                     point.jsonArray
                                 } catch (e: Exception) {
+                                    Log.w("WWWEventArea", "Invalid point JSON array at index $pointIndex", e)
                                     return@mapIndexed null
                                 }
 
@@ -520,6 +570,7 @@ data class WWWEventArea(
                                     try {
                                         pointArray[0].jsonPrimitive.double
                                     } catch (e: Exception) {
+                                        Log.w("WWWEventArea", "Invalid longitude value at point index $pointIndex", e)
                                         return@mapIndexed null
                                     }
 
@@ -527,6 +578,7 @@ data class WWWEventArea(
                                     try {
                                         pointArray[1].jsonPrimitive.double
                                     } catch (e: Exception) {
+                                        Log.w("WWWEventArea", "Invalid latitude value at point index $pointIndex", e)
                                         return@mapIndexed null
                                     }
 
@@ -535,6 +587,7 @@ data class WWWEventArea(
                                 null
                             }
                         } catch (e: Exception) {
+                            Log.w("WWWEventArea", "Failed to process point at index $pointIndex", e)
                             null
                         }
                     }.filterNotNull()
@@ -547,6 +600,7 @@ data class WWWEventArea(
                 try {
                     positions.toPolygon
                 } catch (e: Exception) {
+                    Log.w("WWWEventArea", "Failed to convert positions to polygon", e)
                     return
                 }
 
@@ -555,7 +609,14 @@ data class WWWEventArea(
             } else {
                 // Polygon with only one point is ignored
             }
-        } catch (ignored: Exception) {
+        } catch (e: NumberFormatException) {
+            Log.v("WWWEventArea", "Invalid numeric data in ring processing: ${e.message}")
+            // Ring processing errors are handled gracefully
+        } catch (e: kotlinx.serialization.SerializationException) {
+            Log.v("WWWEventArea", "Ring processing parsing error: ${e.message}")
+            // Ring processing errors are handled gracefully
+        } catch (e: Exception) {
+            Log.v("WWWEventArea", "Unexpected ring processing error: ${e.message}")
             // Ring processing errors are handled gracefully
         }
     }
@@ -616,13 +677,64 @@ data class WWWEventArea(
      */
     private suspend fun computeExtentFromGeoJson(): BoundingBox? =
         try {
-            val extentCalculator = ExtentCalculator()
+            var minLat = Double.POSITIVE_INFINITY
+            var minLng = Double.POSITIVE_INFINITY
+            var maxLat = Double.NEGATIVE_INFINITY
+            var maxLng = Double.NEGATIVE_INFINITY
+            var pointsFound = 0
 
-            geoJsonDataProvider.getGeoJsonData(event.id)?.let { root ->
-                processGeoJsonForExtent(root, extentCalculator)
+            fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
+                // Deep-walk coordinates arrays of unknown depth
+                array.forEach { element ->
+                    if (element is kotlinx.serialization.json.JsonArray &&
+                        element.firstOrNull() is JsonElement &&
+                        element.first() is kotlinx.serialization.json.JsonPrimitive &&
+                        element.size == 2 &&
+                        element[0].jsonPrimitive.isString.not()
+                    ) {
+                        // Element looks like [lng,lat]
+                        val lng = element[0].jsonPrimitive.double
+                        val lat = element[1].jsonPrimitive.double
+                        minLat = minOf(minLat, lat)
+                        maxLat = maxOf(maxLat, lat)
+                        minLng = minOf(minLng, lng)
+                        maxLng = maxOf(maxLng, lng)
+                        pointsFound++
+                    } else if (element is kotlinx.serialization.json.JsonArray) {
+                        consumeCoords(element)
+                    }
+                }
             }
 
-            extentCalculator.createBoundingBox(event.id)
+            geoJsonDataProvider.getGeoJsonData(event.id)?.let { root ->
+                when (root["type"]?.jsonPrimitive?.content) {
+                    "FeatureCollection" -> {
+                        root["features"]?.jsonArray?.forEach { feature ->
+                            feature.jsonObject["geometry"]
+                                ?.jsonObject
+                                ?.get("coordinates")
+                                ?.jsonArray
+                                ?.let { consumeCoords(it) }
+                        }
+                    }
+                    "Polygon", "MultiPolygon" -> {
+                        root["coordinates"]?.jsonArray?.let { consumeCoords(it) }
+                    }
+                }
+            }
+
+            if (pointsFound > 0) {
+                Log.i(
+                    ::computeExtentFromGeoJson.name,
+                    "${event.id}: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)",
+                )
+                BoundingBox.fromCorners(
+                    sw = Position(minLat, minLng),
+                    ne = Position(maxLat, maxLng),
+                )
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Log.w(
                 ::computeExtentFromGeoJson.name,
@@ -630,80 +742,6 @@ data class WWWEventArea(
             )
             null
         }
-
-    private fun processGeoJsonForExtent(
-        root: JsonObject,
-        extentCalculator: ExtentCalculator
-    ) {
-        when (root["type"]?.jsonPrimitive?.content) {
-            "FeatureCollection" -> {
-                root["features"]?.jsonArray?.forEach { feature ->
-                    feature.jsonObject["geometry"]
-                        ?.jsonObject
-                        ?.get("coordinates")
-                        ?.jsonArray
-                        ?.let { extentCalculator.consumeCoords(it) }
-                }
-            }
-            "Polygon", "MultiPolygon" -> {
-                root["coordinates"]?.jsonArray?.let { extentCalculator.consumeCoords(it) }
-            }
-        }
-    }
-
-    private inner class ExtentCalculator {
-        var minLat = Double.POSITIVE_INFINITY
-        var minLng = Double.POSITIVE_INFINITY
-        var maxLat = Double.NEGATIVE_INFINITY
-        var maxLng = Double.NEGATIVE_INFINITY
-        var pointsFound = 0
-
-        fun consumeCoords(array: kotlinx.serialization.json.JsonArray) {
-            // Deep-walk coordinates arrays of unknown depth
-            array.forEach { element ->
-                if (isCoordinatePair(element)) {
-                    // Element looks like [lng,lat]
-                    val elementArray = element as kotlinx.serialization.json.JsonArray
-                    val lng = elementArray[0].jsonPrimitive.double
-                    val lat = elementArray[1].jsonPrimitive.double
-                    minLat = minOf(minLat, lat)
-                    maxLat = maxOf(maxLat, lat)
-                    minLng = minOf(minLng, lng)
-                    maxLng = maxOf(maxLng, lng)
-                    pointsFound++
-                } else if (element is kotlinx.serialization.json.JsonArray) {
-                    consumeCoords(element)
-                }
-            }
-        }
-
-        fun createBoundingBox(eventId: String): BoundingBox? {
-            return if (pointsFound > 0) {
-                Log.i(
-                    ::computeExtentFromGeoJson.name,
-                    "$eventId: Extent computed from GeoJSON [$minLng,$minLat,$maxLng,$maxLat] (points=$pointsFound)",
-                )
-                BoundingBox.fromCorners(
-                    sw = Position(minLat, minLng),
-                    ne = Position(maxLat, maxLng),
-                )
-            } else {
-                Log.d(
-                    ::computeExtentFromGeoJson.name,
-                    "$eventId: No coordinates found while scanning GeoJSON for extent",
-                )
-                null
-            }
-        }
-    }
-
-    private fun isCoordinatePair(element: JsonElement): Boolean {
-        return element is kotlinx.serialization.json.JsonArray &&
-            element.firstOrNull() is JsonElement &&
-            element.first() is kotlinx.serialization.json.JsonPrimitive &&
-            element.size == 2 &&
-            element[0].jsonPrimitive.isString.not()
-    }
 
     // ---------------------------
 
