@@ -143,15 +143,11 @@ fun EventOverlayDate(
             .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
-        // EXACT historical implementation - shared theme equivalent
-        val textStyle = androidx.compose.ui.text.TextStyle(
-            fontSize = Event.DATE_FONTSIZE.sp,
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = androidx.compose.ui.text.font.FontFamily.Default
-        )
+        // EXACT historical implementation using shared theme functions
+        val textStyle = com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
         Text(
             text = eventDate,
-            style = textStyle.copy(color = Color(0xFFFFFFFF)), // quinaryLight
+            style = textStyle.copy(color = com.worldwidewaves.shared.ui.theme.sharedExtendedLight.quinary.color),
         )
         Text(
             text = eventDate,

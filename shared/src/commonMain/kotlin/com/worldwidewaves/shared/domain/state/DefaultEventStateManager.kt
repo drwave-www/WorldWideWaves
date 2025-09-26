@@ -266,20 +266,6 @@ class DefaultEventStateManager(
     private fun calculateUserGoingToBeHit(
         timeBeforeHit: Duration,
         userIsInArea: Boolean,
-    ): Boolean {
-        if (!userIsInArea) {
-            return false
-        }
+    ): Boolean = userIsInArea && timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
 
-        val isAboutToBeHit = timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
-
-        if (isAboutToBeHit) {
-            Log.v(
-                "DefaultEventStateManager",
-                "[CHOREO_DEBUG] User is going to be hit - timeBeforeHit=$timeBeforeHit, WARN_BEFORE_HIT=${WaveTiming.WARN_BEFORE_HIT}",
-            )
-        }
-
-        return isAboutToBeHit
-    }
 }
