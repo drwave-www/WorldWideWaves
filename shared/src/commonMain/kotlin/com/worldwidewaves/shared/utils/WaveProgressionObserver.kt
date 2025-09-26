@@ -68,10 +68,25 @@ class WaveProgressionObserver(
 
         scope.launch {
             // Initial observation setup
+            val status = when {
+                event.isRunning() -> "RUNNING"
+                event.isDone() -> "DONE"
+                else -> "OTHER"
+            }
+            com.worldwidewaves.shared.utils.Log.i("WaveProgressionObserver", "Starting observation for event ${event.id}, status: $status")
+
             when {
-                event.isRunning() -> startPolygonsObservation(event, eventMap)
-                event.isDone() -> addFullWavePolygons(event, eventMap)
-                else -> { /* wait for RUNNING status */ }
+                event.isRunning() -> {
+                    com.worldwidewaves.shared.utils.Log.i("WaveProgressionObserver", "Event ${event.id} is RUNNING - starting polygon observation")
+                    startPolygonsObservation(event, eventMap)
+                }
+                event.isDone() -> {
+                    com.worldwidewaves.shared.utils.Log.i("WaveProgressionObserver", "Event ${event.id} is DONE - adding full wave polygons")
+                    addFullWavePolygons(event, eventMap)
+                }
+                else -> {
+                    com.worldwidewaves.shared.utils.Log.i("WaveProgressionObserver", "Event ${event.id} is not running/done - waiting for status change")
+                }
             }
 
             // Observe status changes
@@ -93,7 +108,8 @@ class WaveProgressionObserver(
             scope.launch(Dispatchers.Default) {
                 event.observer.progression
                     .sample(250.milliseconds) // Built-in throttling for better performance
-                    .collect {
+                    .collect { progression ->
+                        com.worldwidewaves.shared.utils.Log.v("WaveProgressionObserver", "Progression update for ${event.id}: $progression")
                         updateWavePolygons(event, eventMap)
                     }
             }
@@ -161,7 +177,10 @@ class WaveProgressionObserver(
         event: IWWWEvent,
         eventMap: AbstractEventMap<*>,
     ) {
-        if (!event.isRunning() && !event.isDone()) return
+        if (!event.isRunning() && !event.isDone()) {
+            com.worldwidewaves.shared.utils.Log.v("WaveProgressionObserver", "Event ${event.id} not running/done - skipping polygon update")
+            return
+        }
 
         val polygons =
             withContext(Dispatchers.Default) {
@@ -171,15 +190,21 @@ class WaveProgressionObserver(
                     ?: emptyList()
             }
 
+        com.worldwidewaves.shared.utils.Log.v("WaveProgressionObserver", "Generated ${polygons.size} wave polygons for event ${event.id}")
+
         if (polygons.isEmpty()) {
             if (lastWavePolygons.isNotEmpty()) {
                 // Keep displaying the previous frame to avoid flicker when the
                 // shared layer temporarily returns an empty list.
+                com.worldwidewaves.shared.utils.Log.v("WaveProgressionObserver", "Using cached polygons (${lastWavePolygons.size}) for event ${event.id}")
                 eventMap.updateWavePolygons(lastWavePolygons, false)
+            } else {
+                com.worldwidewaves.shared.utils.Log.v("WaveProgressionObserver", "No polygons to display for event ${event.id}")
             }
             return
         } else {
             lastWavePolygons = polygons
+            com.worldwidewaves.shared.utils.Log.i("WaveProgressionObserver", "Updating map with ${polygons.size} polygons for event ${event.id}")
             eventMap.updateWavePolygons(polygons, true)
         }
     }

@@ -68,6 +68,12 @@ kotlin {
             implementation(libs.koin.test)
             implementation(libs.mockk.common.v1120)
         }
+        androidUnitTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.koin.test)
+            implementation(libs.mockk.android.v1120)
+        }
 
         /*
          * Allow build scripts to skip compiling `commonTest` sources (useful when running

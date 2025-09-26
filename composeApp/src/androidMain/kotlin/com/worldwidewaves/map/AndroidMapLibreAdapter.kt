@@ -348,9 +348,14 @@ class AndroidMapLibreAdapter(
         polygons: List<Any>,
         clearExisting: Boolean,
     ) {
+        Log.i(TAG, "addWavePolygons called with ${polygons.size} polygons, clear=$clearExisting")
         val map = mapLibreMap ?: return
         val wavePolygons = polygons.filterIsInstance<Polygon>()
-        if (wavePolygons.isEmpty()) return
+        if (wavePolygons.isEmpty()) {
+            Log.w(TAG, "No valid Polygon objects found in ${polygons.size} input polygons")
+            return
+        }
+        Log.i(TAG, "Processing ${wavePolygons.size} valid wave polygons")
 
         map.getStyle { style ->
             try {
@@ -385,6 +390,8 @@ class AndroidMapLibreAdapter(
                             PropertyFactory.fillOpacity(Wave.BACKGROUND_OPACITY),
                         )
                     style.addLayer(layer)
+
+                    Log.i(TAG, "Added wave layer $layerId with color ${Wave.BACKGROUND_COLOR} and opacity ${Wave.BACKGROUND_OPACITY}")
 
                     // Track for next cleanup
                     waveSourceIds.add(sourceId)

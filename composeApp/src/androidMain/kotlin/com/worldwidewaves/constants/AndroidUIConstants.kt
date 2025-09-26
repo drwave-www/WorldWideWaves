@@ -27,28 +27,6 @@ package com.worldwidewaves.constants
  * For shared constants, see WWWGlobals.
  */
 object AndroidUIConstants {
-    object Colors {
-        /** Success/good performance indicator color (Material Design Green 500) */
-        const val GREEN_SUCCESS = 0xFF4CAF50
-
-        /** Warning/medium performance indicator color (Material Design Orange 500) */
-        const val ORANGE_WARNING = 0xFFFF9800
-
-        /** Error/poor performance indicator color (Material Design Red 600) */
-        const val RED_ERROR = 0xFFF44336
-    }
-
-    object Audio {
-        /** Default audio volume for sound tests (Android-specific default) */
-        const val DEFAULT_VOLUME = 0.8f
-
-        /** 8-bit audio bit depth (Android audio format) */
-        const val AUDIO_8_BIT = 8
-
-        /** 16-bit audio bit depth (Android audio format) */
-        const val AUDIO_16_BIT = 16
-    }
-
     object Timing {
         /** Splash screen minimum duration for Android implementation (milliseconds) */
         const val SPLASH_MIN_DURATION_MS = 500L
