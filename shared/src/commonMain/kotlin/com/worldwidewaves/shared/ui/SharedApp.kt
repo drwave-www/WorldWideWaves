@@ -147,6 +147,8 @@ private fun SharedMainContent(
     // Data loading coordination (matching Android pattern)
     LaunchedEffect(Unit) {
         try {
+            // Add delay to ensure initialization is complete
+            kotlinx.coroutines.delay(1000)
             events.loadEvents(
                 onTermination = { exception ->
                     isDataLoaded = true
@@ -563,7 +565,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
         mapStates = emptyMap(), // NOTE: Map state integration pending
         onEventClick = { eventId ->
             Log.i("SharedEventsScreen", "Event clicked: $eventId")
-            // TODO: Implement navigation to event details
+            onEventClick(eventId)
         },
         setEventFavorite = null,
         modifier = Modifier.fillMaxSize()
