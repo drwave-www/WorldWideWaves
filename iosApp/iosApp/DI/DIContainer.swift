@@ -21,6 +21,9 @@ class DIContainer {
     lazy var eventsViewModel: EventsViewModel = {
         // Get the shared EventsViewModel from Koin DI
         let koin = KoinKt.getKoin()
-        return koin.get(objCClass: EventsViewModel.self) as! EventsViewModel
+        guard let viewModel = koin.get(objCClass: EventsViewModel.self) as? EventsViewModel else {
+            fatalError("Failed to resolve EventsViewModel from Koin")
+        }
+        return viewModel
     }()
 }

@@ -200,15 +200,15 @@ multiplatformResources {
 }
 
 tasks.named("compileTestKotlinIosArm64").configure {
-    enabled = false // Disable until commonTest JVM dependencies are resolved
+    enabled = true // iOS test compilation re-enabled
 }
 
 tasks.named("compileTestKotlinIosSimulatorArm64").configure {
-    enabled = false // Disable until commonTest JVM dependencies are resolved
+    enabled = true // iOS test compilation re-enabled
 }
 
 tasks.named("compileTestKotlinIosX64").configure {
-    enabled = false // Disable until commonTest JVM dependencies are resolved
+    enabled = true // iOS test compilation re-enabled
 }
 
 // Custom Gradle task for crowd sound choreography simulation

@@ -208,4 +208,10 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
         // TODO: Implement iOS MapLibre bounding box overlay
         // Draw visual bounds overlay on map
     }
+
+    override fun onMapSet(callback: (MapLibreAdapter<*>) -> Unit) {
+        WWWLogger.d("IOSMapLibreAdapter", "Map set callback")
+        // TODO: Implement map ready callback for iOS
+        callback(this)
+    }
 }
