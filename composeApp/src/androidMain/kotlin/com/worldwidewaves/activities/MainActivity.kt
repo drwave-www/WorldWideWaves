@@ -147,7 +147,10 @@ open class MainActivity : AppCompatActivity() {
 
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+                Surface(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     // Box to stack main content and simulation-mode overlay
                     Box(modifier = Modifier.fillMaxSize()) {
                         val ready by isSplashFinished.collectAsState()
