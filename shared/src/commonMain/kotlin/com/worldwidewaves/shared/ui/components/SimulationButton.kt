@@ -49,6 +49,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Shared simulation button component for testing event waves.
@@ -64,8 +66,8 @@ fun BoxScope.SimulationButton(
     onError: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
-    val platformComponent = object : org.koin.core.component.KoinComponent {
-        val platform: WWWPlatform by org.koin.core.component.inject()
+    val platformComponent = object : KoinComponent {
+        val platform: WWWPlatform by inject()
     }
     val platform = platformComponent.platform
     val scope = rememberCoroutineScope()

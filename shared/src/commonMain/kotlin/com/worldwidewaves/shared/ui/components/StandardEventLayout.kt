@@ -27,6 +27,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.utils.rememberEventState
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Standard event screen layout pattern used across multiple event activities.
@@ -48,9 +50,9 @@ fun StandardEventLayout(
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
 ) {
-    val platformComponent = object : org.koin.core.component.KoinComponent {
-        val platform: WWWPlatform by org.koin.core.component.inject()
-        val clock: IClock by org.koin.core.component.inject()
+    val platformComponent = object : KoinComponent {
+        val platform: WWWPlatform by inject()
+        val clock: IClock by inject()
     }
     val platform = platformComponent.platform
     val clock = platformComponent.clock

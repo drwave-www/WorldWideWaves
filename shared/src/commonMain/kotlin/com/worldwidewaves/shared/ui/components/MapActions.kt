@@ -43,6 +43,8 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import dev.icerock.moko.resources.compose.stringResource
@@ -63,8 +65,8 @@ fun SharedMapActions(
     onTargetWave: () -> Unit = {},
     onCenterWave: () -> Unit = {},
 ) {
-    val clockComponent = object : org.koin.core.component.KoinComponent {
-        val clock: IClock by org.koin.core.component.inject()
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
     }
     val clock = clockComponent.clock
 

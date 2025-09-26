@@ -115,6 +115,6 @@ fun WaveScreenLayout(
         }
 
         // Integrated wave choreographies with proper z-index layering
-        WaveChoreographies(event, helper.clock, Modifier.zIndex(10f))
+        WaveChoreographies(event, Modifier.zIndex(10f))
     }
 }

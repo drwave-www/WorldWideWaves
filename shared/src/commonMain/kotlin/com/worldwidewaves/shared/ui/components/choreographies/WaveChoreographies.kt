@@ -52,6 +52,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.max
 import kotlin.time.ExperimentalTime
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 
 /**
@@ -72,8 +74,8 @@ fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent = object : org.koin.core.component.KoinComponent {
-        val clock: IClock by org.koin.core.component.inject()
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
     }
     val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()

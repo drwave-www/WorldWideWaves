@@ -22,14 +22,9 @@ package com.worldwidewaves.activities.event
  */
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,28 +36,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.WWWGlobals.Dimensions
-import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.generated.resources.target_me_active
-import com.worldwidewaves.shared.ui.components.SharedMapActions
-import com.worldwidewaves.shared.generated.resources.target_me_inactive
-import com.worldwidewaves.shared.generated.resources.target_wave_active
-import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.ui.components.ButtonWave
+import com.worldwidewaves.shared.ui.screens.FullMapScreen
 import com.worldwidewaves.shared.ui.components.WaveNavigator
-import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import com.worldwidewaves.shared.generated.resources.Res as ShRes
 
 @OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
@@ -82,6 +66,7 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         event: IWWWEvent,
     ) {
         val context = androidx.compose.ui.platform.LocalContext.current
+        val scope = rememberCoroutineScope()
         val eventStatus by event.observer.eventStatus.collectAsState()
         val progression by event.observer.progression.collectAsState()
         val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
@@ -113,7 +98,6 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
                 event.id,
                 eventStatus,
                 endDateTime,
-                clock,
                 isInArea,
                 onNavigateToWave = WaveNavigator { eventId ->
                     // This is already in an event activity, so we stay here
@@ -138,66 +122,3 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
     }
 }
 
-// ----------------------------------------------------------------------------
-
-@OptIn(ExperimentalTime::class)
-@Composable
-fun MapActions(
-    event: IWWWEvent,
-    eventMap: AndroidEventMap,
-    clock: IClock,
-    modifier: Modifier = Modifier,
-) {
-    val scope = rememberCoroutineScope()
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    val isInArea by event.observer.userIsInArea.collectAsState()
-
-    val isRunning = eventStatus == Status.RUNNING
-
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(end = Dimensions.DEFAULT_INT_PADDING.dp, bottom = Dimensions.DEFAULT_INT_PADDING.dp),
-        contentAlignment = Alignment.BottomEnd,
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
-            Image(
-                modifier =
-                    Modifier
-                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
-                        .clickable {
-                            if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                                eventMap.markUserInteracted()
-                                scope.launch {
-                                    eventMap.targetWave()
-                                }
-                            }
-                        },
-                painter = painterResource(if (isRunning) ShRes.drawable.target_wave_active else ShRes.drawable.target_wave_inactive),
-                contentDescription =
-                    stringResource(
-                        if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
-                    ),
-            )
-            Image(
-                modifier =
-                    Modifier
-                        .size(Event.TARGET_ME_IMAGE_SIZE.dp)
-                        .clickable {
-                            if (isInArea) {
-                                eventMap.markUserInteracted()
-                                scope.launch {
-                                    eventMap.targetUser()
-                                }
-                            }
-                        },
-                painter = painterResource(if (isInArea) ShRes.drawable.target_me_active else ShRes.drawable.target_me_inactive),
-                contentDescription =
-                    stringResource(
-                        if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
-                    ),
-            )
-        }
-    }
-}

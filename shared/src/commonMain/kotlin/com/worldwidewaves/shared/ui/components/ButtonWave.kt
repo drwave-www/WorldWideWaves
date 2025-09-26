@@ -38,6 +38,8 @@ import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -63,8 +65,8 @@ fun ButtonWave(
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent = object : org.koin.core.component.KoinComponent {
-        val clock: IClock by org.koin.core.component.inject()
+    val clockComponent = object : KoinComponent {
+        val clock: IClock by inject()
     }
     val clock = clockComponent.clock
 
