@@ -39,6 +39,7 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.BaseMapDownloadViewModel
 import com.worldwidewaves.shared.viewmodels.MapDownloadUtils
+import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ class MapViewModel(
 
     // Composition over inheritance - use shared logic
     private val sharedLogic = object : BaseMapDownloadViewModel() {
+
         override suspend fun isMapInstalled(mapId: String): Boolean {
             return splitInstallManager.installedModules.contains(mapId)
         }
