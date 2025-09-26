@@ -806,15 +806,9 @@ class AndroidEventMap(
         wavePolygons: List<Polygon>,
         clearPolygons: Boolean
     ) {
-        Log.i(TAG, "updateWavePolygons called with ${wavePolygons.size} polygons, clear=$clearPolygons")
-
-        Log.i(TAG, "Activity context type: ${activityContext?.javaClass?.simpleName}, is AppCompatActivity: ${activityContext is AppCompatActivity}")
-
         if (activityContext is AppCompatActivity) {
-            Log.i(TAG, "Running on UI thread to add wave polygons")
             activityContext.runOnUiThread {
                 val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
-                Log.i(TAG, "Converting ${wavePolygons.size} polygons to MapLibre, calling addWavePolygons")
                 mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
             }
         } else {

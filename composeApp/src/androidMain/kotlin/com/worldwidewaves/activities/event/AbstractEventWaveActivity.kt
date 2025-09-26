@@ -94,17 +94,13 @@ abstract class AbstractEventWaveActivity(
         // Only create the observer once per activity instance
         LaunchedEffect(Unit) {
             if (waveProgressionObserver == null) {
-                android.util.Log.i("AbstractEventWaveActivity", "Creating WaveProgressionObserver for event ${event.id}")
                 waveProgressionObserver =
                     WaveProgressionObserver(
                         scope = appScope,
                         eventMap = eventMap,
                         event = event,
                     )
-                android.util.Log.i("AbstractEventWaveActivity", "Starting WaveProgressionObserver for event ${event.id}")
                 waveProgressionObserver!!.startObservation()
-            } else {
-                android.util.Log.i("AbstractEventWaveActivity", "WaveProgressionObserver already exists for event ${event.id}")
             }
         }
 
