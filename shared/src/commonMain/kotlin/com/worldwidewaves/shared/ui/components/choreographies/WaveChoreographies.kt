@@ -59,6 +59,15 @@ import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.e_choreography_hit
+import com.worldwidewaves.shared.generated.resources.e_choreography_waiting
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_1
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_2
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_3
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_4
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_5
+import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_6
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -239,5 +248,60 @@ private fun WarmingSequence(
             resource = warmingFrames[currentFrame],
             contentDescription = "Warming sequence frame ${currentFrame + 1}"
         )
+    }
+}
+
+/**
+ * Displays a choreography sequence with timing.
+ */
+@Composable
+private fun TimedSequenceDisplay(
+    sequence: com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence<DrawableResource>?,
+    clock: IClock,
+    modifier: Modifier = Modifier,
+    onSequenceComplete: () -> Unit = {}
+) {
+    if (sequence != null) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            if (sequence.image != null) {
+                ChoreographySprite(
+                    resource = sequence.image!!,
+                    contentDescription = "Choreography sequence"
+                )
+            }
+        }
+
+        // Auto-complete after sequence duration
+        LaunchedEffect(sequence) {
+            delay(2000) // Default sequence duration
+            onSequenceComplete()
+        }
+    }
+}
+
+/**
+ * Displays a simple choreography.
+ */
+@Composable
+private fun ChoreographyDisplay(
+    sequence: com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence<DrawableResource>?,
+    clock: IClock,
+    modifier: Modifier = Modifier
+) {
+    if (sequence != null) {
+        Box(
+            modifier = modifier,
+            contentAlignment = Alignment.Center
+        ) {
+            if (sequence.image != null) {
+                ChoreographySprite(
+                    resource = sequence.image!!,
+                    contentDescription = "Choreography display"
+                )
+            }
+        }
     }
 }
