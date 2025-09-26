@@ -8,11 +8,10 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package com.worldwidewaves.compose.tabs
+package com.worldwidewaves.shared.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
 
 /**

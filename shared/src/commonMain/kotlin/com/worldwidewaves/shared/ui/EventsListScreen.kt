@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose.tabs
+package com.worldwidewaves.shared.ui
 
 /*
  * Copyright 2025 DrWave
@@ -21,22 +21,22 @@ package com.worldwidewaves.compose.tabs
  * limitations under the License.
  */
 
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.worldwidewaves.activities.event.EventActivity
-import com.worldwidewaves.shared.ui.TabScreen
+import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.data.SetEventFavorite
+import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
-import com.worldwidewaves.utils.MapAvailabilityChecker
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Android wrapper for SharedEventsListScreen.
@@ -45,16 +45,17 @@ import com.worldwidewaves.utils.MapAvailabilityChecker
  */
 class EventsListScreen(
     private val viewModel: EventsViewModel,
-    private val mapChecker: MapAvailabilityChecker,
-    private val setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite,
-) : TabScreen {
+    private val mapChecker: IMapAvailabilityChecker,
+    private val setEventFavorite: SetEventFavorite,
+) : TabScreen, KoinComponent {
+
+    private val platformEnabler: PlatformEnabler by inject()
     override val name = "Events"
 
     @Composable
     override fun Screen(modifier: Modifier) {
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
-        val context = LocalContext.current
 
         // Refresh map availability when screen resumes
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -82,13 +83,7 @@ class EventsListScreen(
         SharedEventsListScreen(
             events = events,
             mapStates = mapStates,
-            onEventClick = { eventId ->
-                context.startActivity(
-                    Intent(context, EventActivity::class.java).apply {
-                        putExtra("eventId", eventId)
-                    },
-                )
-            },
+            onEventClick = { eventId -> platformEnabler.openEventActivity(eventId) },
             setEventFavorite = setEventFavorite,
             modifier = modifier,
         )

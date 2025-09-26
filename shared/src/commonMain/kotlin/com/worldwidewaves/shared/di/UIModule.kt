@@ -26,6 +26,8 @@ import com.worldwidewaves.shared.domain.repository.EventsRepositoryImpl
 import com.worldwidewaves.shared.domain.usecases.CheckEventFavoritesUseCase
 import com.worldwidewaves.shared.domain.usecases.FilterEventsUseCase
 import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
+import com.worldwidewaves.shared.ui.AboutScreen
+import com.worldwidewaves.shared.ui.EventsListScreen
 import org.koin.dsl.module
 
 /**
@@ -45,4 +47,16 @@ val uiModule =
         single { GetSortedEventsUseCase(get()) }
         single { FilterEventsUseCase(get()) }
         single { CheckEventFavoritesUseCase() }
+
+        single { AboutScreen(get()) }
+        single { EventsListScreen(viewModel = get(), mapChecker = get(), setEventFavorite = get()) }
+
+        // Repository layer
+        single<EventsRepository> { EventsRepositoryImpl(get()) }
+
+        // Use cases layer
+        single { GetSortedEventsUseCase(get()) }
+        single { FilterEventsUseCase(get()) }
+        single { CheckEventFavoritesUseCase() }
+
     }

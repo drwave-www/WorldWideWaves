@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.utils
 
 /*
  * Copyright 2025 DrWave
@@ -21,10 +21,19 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-val sharedModule =
-    listOf(
-        commonModule,
-        helpersModule,
-        datastoreModule,
-        uiModule
-    )
+import android.content.Context
+import android.content.Intent
+import com.worldwidewaves.activities.event.EventActivity
+import com.worldwidewaves.shared.PlatformEnabler
+import org.koin.mp.KoinPlatform
+
+class AndroidPlatformEnabler : PlatformEnabler {
+    override fun openEventActivity(eventId: String) {
+        val context: Context = KoinPlatform.getKoin().get()
+        context.startActivity(
+            Intent(context, EventActivity::class.java).apply {
+                putExtra("eventId", eventId)
+            }
+        )
+    }
+}

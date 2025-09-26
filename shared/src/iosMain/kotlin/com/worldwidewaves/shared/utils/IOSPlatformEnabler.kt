@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.di
+package com.worldwidewaves.shared.utils
 
 /*
  * Copyright 2025 DrWave
@@ -21,10 +21,10 @@ package com.worldwidewaves.shared.di
  * limitations under the License.
  */
 
-val sharedModule =
-    listOf(
-        commonModule,
-        helpersModule,
-        datastoreModule,
-        uiModule
-    )
+import com.worldwidewaves.shared.PlatformEnabler
+
+class IOSPlatformEnabler : PlatformEnabler {
+    override fun openEventActivity(eventId: String) {
+        TODO()
+    }
+}

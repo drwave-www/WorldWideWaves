@@ -1,4 +1,4 @@
-package com.worldwidewaves.compose.tabs
+package com.worldwidewaves.shared.ui
 
 /*
  * Copyright 2025 DrWave
@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
 import com.worldwidewaves.shared.utils.Log
 

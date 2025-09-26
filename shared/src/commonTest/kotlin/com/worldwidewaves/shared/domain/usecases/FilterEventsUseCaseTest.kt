@@ -32,7 +32,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FilterEventsUseCaseTest {
-    private val mockMapChecker = mockk<MapAvailabilityChecker>()
+    private val mockMapChecker = mockk<IMapAvailabilityChecker>()
     private val useCase = FilterEventsUseCase(mockMapChecker)
 
     private fun createMockEvent(

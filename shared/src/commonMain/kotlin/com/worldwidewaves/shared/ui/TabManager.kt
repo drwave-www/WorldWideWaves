@@ -56,7 +56,6 @@ import com.worldwidewaves.shared.WWWGlobals.TabBar
  */
 interface TabScreen {
     @Composable fun Screen(modifier: Modifier)
-
     val name: String
 }
 

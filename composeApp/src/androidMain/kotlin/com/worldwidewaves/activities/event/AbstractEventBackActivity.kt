@@ -108,7 +108,7 @@ abstract class AbstractEventBackActivity(
                 ) {
                     // Stack content & global simulation-mode chip
                     Box(modifier = Modifier.fillMaxSize()) {
-                        tabManager.TabView(startScreen = { BackwardScreen() })
+                        // tabManager.TabView(startScreen = { BackwardScreen() })
 
                         // Global Simulation-Mode overlay
                         SimulationModeChip(platform)

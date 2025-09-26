@@ -92,6 +92,7 @@ class WWWPlatform(
     fun getSimulation(): WWWSimulation? = _simulation
 
     fun isOnSimulation(): Boolean = _simulation != null
+
 }
 
 class WWWShutdownHandler(
@@ -137,3 +138,8 @@ expect fun clearEventCache(eventId: String)
 expect fun isCachedFileStale(fileName: String): Boolean
 
 expect fun updateCacheMetadata(fileName: String)
+
+interface PlatformEnabler {
+    // Open an event activity / screen
+    fun openEventActivity(eventId: String)
+}
