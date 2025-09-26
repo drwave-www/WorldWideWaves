@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.map
 import com.worldwidewaves.shared.WWWGlobals.MapDisplay
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.PolygonUtils.Quad
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.position.PositionManager
@@ -399,4 +400,10 @@ abstract class AbstractEventMap<T>(
      * Gets the current position source from PositionManager
      */
     fun getCurrentPositionSource(): PositionManager.PositionSource? = positionManager.getCurrentSource()
+
+    abstract fun updateWavePolygons(
+        wavePolygons: List<Polygon>,
+        clearPolygons: Boolean
+    )
+
 }

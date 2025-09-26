@@ -69,26 +69,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
-import com.worldwidewaves.shared.ui.screens.UserWaveStatusText
-import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
-import com.worldwidewaves.shared.ui.components.WaveHitCounter
+import com.worldwidewaves.shared.ui.components.WaveScreenLayout
+import com.worldwidewaves.shared.ui.utils.calculateEventMapHeight
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.DisplayText
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.WWWGlobals.WaveDisplay
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.theme.extendedLight
-import com.worldwidewaves.theme.extraElementsLight
-import com.worldwidewaves.theme.onPrimaryLight
-import com.worldwidewaves.theme.onQuaternaryLight
-import com.worldwidewaves.theme.onQuinaryLight
-import com.worldwidewaves.theme.primaryColoredBoldTextStyle
-import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
-import com.worldwidewaves.theme.quinaryLight
-import com.worldwidewaves.theme.tertiaryLight
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
+import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -100,6 +94,7 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
     private val clock: IClock by inject()
+    private val platform: WWWPlatform by inject()
 
     // ------------------------------------------------------------------------
 
@@ -137,29 +132,18 @@ class WaveActivity : AbstractEventWaveActivity() {
         // Always target the closest view to have user and wave in the same view
         MapZoomAndLocationUpdate(event, eventMap)
 
-        // Screen composition matching existing Android WaveActivity
-        Box(modifier = modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp),
-            ) {
-                UserWaveStatusText(event)
+        // Use shared wave screen layout
+        WaveScreenLayout(
+            event = event,
+            modifier = modifier,
+            mapHeight = calculatedHeight,
+            mapArea = {
                 eventMap.Screen(
                     autoMapDownload = true,
                     Modifier.fillMaxWidth().height(calculatedHeight)
                 )
-                WaveProgressionBar(event)
-
-                // Spacer and hit counter
-                Spacer(modifier = Modifier.weight(1f))
-                WaveHitCounter(event)
-                Spacer(modifier = Modifier.height(30.dp))
             }
-
-            // Choreography overlay
-            WaveChoreographies(event, clock, Modifier.zIndex(10f))
-        }
+        )
     }
 }
 

@@ -74,17 +74,19 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
-import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
-import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
 import com.worldwidewaves.shared.map.WWWLocationProvider
+import com.worldwidewaves.shared.toMapLibrePolygon
+import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
+import com.worldwidewaves.shared.ui.components.LoadingIndicator
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
@@ -112,7 +114,6 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
-import org.maplibre.geojson.Polygon
 import java.io.File
 import androidx.compose.ui.res.painterResource as painterResourceAndroid
 
@@ -154,6 +155,8 @@ class AndroidEventMap(
         private const val BUTTON_WIDTH_DP = 200f
         private const val BUTTON_HEIGHT_DP = 60f
     }
+
+    val context: Context by inject(Context::class.java)
 
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
@@ -799,16 +802,17 @@ class AndroidEventMap(
     /**
      * Update wave polygons on the map
      */
-    fun updateWavePolygons(
-        context: Context,
+    override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
-        clearPolygons: Boolean,
+        clearPolygons: Boolean
     ) {
         Log.v(TAG, "Updating wave polygons: count=${wavePolygons.size}, clear=$clearPolygons")
         (context as? AppCompatActivity)?.runOnUiThread {
-            mapLibreAdapter.addWavePolygons(wavePolygons, clearPolygons)
+            val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
+            mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
+
 }
 
 // ----------------------------------------------------------------------------

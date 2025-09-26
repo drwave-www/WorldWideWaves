@@ -31,13 +31,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.layout.ContentScale
+import kotlin.time.ExperimentalTime
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Common
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
+import com.worldwidewaves.shared.format.DateTimeFormats
 import dev.icerock.moko.resources.compose.stringResource
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -114,6 +125,62 @@ fun EventOverlayDone(
                 contentDescription = stringResource(MokoRes.strings.event_done),
                 modifier = Modifier.width(Common.DONE_IMAGE_WIDTH.dp),
             )
+        }
+    }
+}
+
+/**
+ * Event overlay date component that shows the event date with proper positioning.
+ * Positions date in center normally, at bottom when event is done.
+ */
+@Composable
+fun EventOverlayDate(
+    eventStatus: Status?,
+    eventDate: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
+        contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
+    ) {
+        Text(
+            text = eventDate,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.ExtraBold
+            ),
+        )
+    }
+}
+
+/**
+ * Complete shared event overlay combining location image with status overlays.
+ * This is the main overlay composable that includes the background image and all status indicators.
+ */
+@OptIn(ExperimentalTime::class)
+@Composable
+fun EventOverlay(
+    event: IWWWEvent,
+    modifier: Modifier = Modifier,
+) {
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val localizedDate = remember(event.id) {
+        DateTimeFormats.dayMonth(event.getStartDateTime(), event.getTZ())
+    }
+
+    Box(modifier = modifier) {
+        Image(
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.FillWidth,
+            painter = painterResource(event.getLocationImage() as DrawableResource),
+            contentDescription = stringResource(event.getLocation()),
+        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            EventOverlaySoonOrRunning(eventStatus)
+            EventOverlayDone(eventStatus)
+            EventOverlayDate(eventStatus, localizedDate)
         }
     }
 }

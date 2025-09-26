@@ -61,9 +61,9 @@ import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.theme.AppTheme
-import com.worldwidewaves.theme.primaryColoredTextStyle
-import com.worldwidewaves.theme.quinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesTheme
+import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -100,7 +100,7 @@ abstract class AbstractEventBackActivity(
         }
 
         setContent {
-            AppTheme {
+            SharedWorldWideWavesTheme {
                 Surface(
                     modifier =
                         Modifier
@@ -170,7 +170,7 @@ abstract class AbstractEventBackActivity(
                         )
                         Text(
                             text = stringResource(MokoRes.strings.back),
-                            style = primaryColoredTextStyle(BackNav.FONTSIZE),
+                            style = sharedPrimaryColoredTextStyle(BackNav.FONTSIZE),
                         )
                     }
                     if (selectedEvent != null) {
