@@ -28,12 +28,19 @@ import kotlinx.coroutines.flow.StateFlow
  */
 sealed class MapFeatureState {
     object NotChecked : MapFeatureState()
+
     object Available : MapFeatureState()
+
     object NotAvailable : MapFeatureState()
+
     object Pending : MapFeatureState()
 
-    data class Downloading(val progress: Int) : MapFeatureState()
+    data class Downloading(
+        val progress: Int,
+    ) : MapFeatureState()
+
     object Installing : MapFeatureState()
+
     object Installed : MapFeatureState()
 
     data class Failed(
@@ -42,6 +49,7 @@ sealed class MapFeatureState {
     ) : MapFeatureState()
 
     object Canceling : MapFeatureState()
+
     object Unknown : MapFeatureState()
 
     data class Retrying(
@@ -54,7 +62,7 @@ sealed class MapFeatureState {
  * Shared map state manager that coordinates map availability across platforms.
  */
 class MapStateManager(
-    private val platformMapManager: PlatformMapManager
+    private val platformMapManager: PlatformMapManager,
 ) {
     private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     val featureState: StateFlow<MapFeatureState> = _featureState
@@ -67,7 +75,10 @@ class MapStateManager(
     /**
      * Check if a specific map is available on the current platform.
      */
-    suspend fun checkMapAvailability(mapId: String, autoDownload: Boolean = false) {
+    suspend fun checkMapAvailability(
+        mapId: String,
+        autoDownload: Boolean = false,
+    ) {
         WWWLogger.d("MapStateManager", "Checking availability for map: $mapId")
         currentMapId = mapId
 
@@ -108,7 +119,7 @@ class MapStateManager(
                 onError = { errorCode, errorMessage ->
                     _featureState.value = MapFeatureState.Failed(errorCode, errorMessage)
                     WWWLogger.e("MapStateManager", "Map download failed: $mapId, error: $errorMessage")
-                }
+                },
             )
         } catch (e: Exception) {
             _featureState.value = MapFeatureState.Failed(-1, e.message)
@@ -130,7 +141,10 @@ class MapStateManager(
     /**
      * Update the availability state for a specific map.
      */
-    private fun updateMapState(mapId: String, isAvailable: Boolean) {
+    private fun updateMapState(
+        mapId: String,
+        isAvailable: Boolean,
+    ) {
         val currentStates = _mapStates.value.toMutableMap()
         currentStates[mapId] = isAvailable
         _mapStates.value = currentStates
@@ -159,7 +173,7 @@ interface PlatformMapManager {
         mapId: String,
         onProgress: (Int) -> Unit,
         onSuccess: () -> Unit,
-        onError: (Int, String?) -> Unit
+        onError: (Int, String?) -> Unit,
     )
 
     fun cancelDownload(mapId: String)

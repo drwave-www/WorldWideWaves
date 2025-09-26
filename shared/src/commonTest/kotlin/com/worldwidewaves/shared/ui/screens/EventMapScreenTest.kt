@@ -18,7 +18,6 @@ import kotlin.test.assertTrue
  * Ensures map screen works correctly on both platforms.
  */
 class EventMapScreenTest {
-
     @Test
     fun testSharedEventMapScreenExists() {
         assertTrue(true, "SharedEventMapScreen is available in shared module")

@@ -35,12 +35,18 @@ interface IMapDownloadManager {
     /**
      * Check if a map is available for the given event ID.
      */
-    suspend fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean = false)
+    suspend fun checkIfMapIsAvailable(
+        mapId: String,
+        autoDownload: Boolean = false,
+    )
 
     /**
      * Start downloading a map for the given event ID.
      */
-    suspend fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)? = null)
+    suspend fun downloadMap(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)? = null,
+    )
 
     /**
      * Cancel any ongoing download.
@@ -58,7 +64,6 @@ interface IMapDownloadManager {
  * Contains platform-agnostic logic that can be reused across Android/iOS.
  */
 object MapDownloadUtils {
-
     /**
      * Shared retry management with exponential backoff.
      */
@@ -71,29 +76,36 @@ object MapDownloadUtils {
         }
 
         fun canRetry(): Boolean = retryCount < MAX_RETRIES
+
         fun getNextRetryDelay(): Long = BASE_RETRY_DELAY_MS * (1 shl retryCount)
+
         fun incrementRetryCount(): Int = ++retryCount
-        fun resetRetryCount() { retryCount = 0 }
+
+        fun resetRetryCount() {
+            retryCount = 0
+        }
+
         fun getCurrentRetryCount(): Int = retryCount
     }
 
     /**
      * Calculate download progress percentage.
      */
-    fun calculateProgressPercent(totalBytes: Long, downloadedBytes: Long): Int {
-        return if (totalBytes > 0) {
+    fun calculateProgressPercent(
+        totalBytes: Long,
+        downloadedBytes: Long,
+    ): Int =
+        if (totalBytes > 0) {
             (downloadedBytes * 100L / totalBytes).toInt()
         } else {
             0
         }
-    }
 
     /**
      * Check if state represents an active download.
      */
-    fun isActiveDownload(state: MapFeatureState): Boolean {
-        return state is MapFeatureState.Downloading ||
-               state is MapFeatureState.Pending ||
-               state is MapFeatureState.Installing
-    }
+    fun isActiveDownload(state: MapFeatureState): Boolean =
+        state is MapFeatureState.Downloading ||
+            state is MapFeatureState.Pending ||
+            state is MapFeatureState.Installing
 }

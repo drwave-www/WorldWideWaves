@@ -18,7 +18,6 @@ import kotlin.test.assertTrue
  * Ensures event details screen works correctly on both platforms.
  */
 class EventDetailsScreenTest {
-
     @Test
     fun testSharedEventDetailsScreenExists() {
         // Verify that the SharedEventDetailsScreen is available in shared

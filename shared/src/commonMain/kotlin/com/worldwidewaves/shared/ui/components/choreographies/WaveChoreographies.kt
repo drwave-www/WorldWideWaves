@@ -55,7 +55,6 @@ import org.koin.core.component.inject
 import kotlin.math.max
 import kotlin.time.ExperimentalTime
 
-
 /**
  * EXACT historical choreography implementation moved to shared.
  * High-level choreography container displayed on the **Wave** screen.
@@ -74,9 +73,10 @@ fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
@@ -141,7 +141,7 @@ fun WaveChoreographies(
             Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing waiting sequence for ${event.id}")
             ChoreographySprite(
                 resource = Res.drawable.e_choreography_waiting,
-                contentDescription = "Wave waiting choreography"
+                contentDescription = "Wave waiting choreography",
             )
         }
 
@@ -150,7 +150,7 @@ fun WaveChoreographies(
             Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing hit sequence for ${event.id}")
             ChoreographySprite(
                 resource = Res.drawable.e_choreography_hit,
-                contentDescription = "Wave hit choreography"
+                contentDescription = "Wave hit choreography",
             )
         }
     }
@@ -183,14 +183,15 @@ private fun WarmingSequence(
 ) {
     var currentFrame by remember(key) { mutableIntStateOf(0) }
 
-    val warmingFrames = listOf(
-        Res.drawable.e_choreography_warming_seq_1,
-        Res.drawable.e_choreography_warming_seq_2,
-        Res.drawable.e_choreography_warming_seq_3,
-        Res.drawable.e_choreography_warming_seq_4,
-        Res.drawable.e_choreography_warming_seq_5,
-        Res.drawable.e_choreography_warming_seq_6,
-    )
+    val warmingFrames =
+        listOf(
+            Res.drawable.e_choreography_warming_seq_1,
+            Res.drawable.e_choreography_warming_seq_2,
+            Res.drawable.e_choreography_warming_seq_3,
+            Res.drawable.e_choreography_warming_seq_4,
+            Res.drawable.e_choreography_warming_seq_5,
+            Res.drawable.e_choreography_warming_seq_6,
+        )
 
     // Auto-advance frames
     LaunchedEffect(key, currentFrame) {
@@ -206,8 +207,7 @@ private fun WarmingSequence(
     if (currentFrame < warmingFrames.size) {
         ChoreographySprite(
             resource = warmingFrames[currentFrame],
-            contentDescription = "Warming sequence frame ${currentFrame + 1}"
+            contentDescription = "Warming sequence frame ${currentFrame + 1}",
         )
     }
 }
-

@@ -25,18 +25,17 @@ import dev.icerock.moko.resources.compose.stringResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun AlertMapNotDownloadedOnSimulationLaunch(
-    onDismiss: () -> Unit
-) {
+fun AlertMapNotDownloadedOnSimulationLaunch(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_title),
-                style = sharedCommonTextStyle().copy(
-                    color = scrimLight,
-                    fontWeight = FontWeight.Bold
-                ),
+                style =
+                    sharedCommonTextStyle().copy(
+                        color = scrimLight,
+                        fontWeight = FontWeight.Bold,
+                    ),
             )
         },
         text = {

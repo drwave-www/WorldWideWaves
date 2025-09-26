@@ -49,7 +49,6 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
-
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
@@ -59,54 +58,55 @@ class MainActivityTest {
     }
 
     @Test
-    fun mainActivity_splashScreen_displaysForMinimumDuration() = runTest {
-        // Test that splash screen is displayed for at least minimum duration
+    fun mainActivity_splashScreen_displaysForMinimumDuration() =
+        runTest {
+            // Test that splash screen is displayed for at least minimum duration
 
-        // Measure start time
-        val startTime = System.currentTimeMillis()
+            // Measure start time
+            val startTime = System.currentTimeMillis()
 
-        // Try to wait for splash screen to be visible, but don't fail if it's not found
-        // The splash screen might finish too quickly or use a different implementation
-        try {
-            composeTestRule.waitUntil(timeoutMillis = 1000) {
+            // Try to wait for splash screen to be visible, but don't fail if it's not found
+            // The splash screen might finish too quickly or use a different implementation
+            try {
+                composeTestRule.waitUntil(timeoutMillis = 1000) {
+                    try {
+                        composeTestRule.onNodeWithTag("splash-screen").assertIsDisplayed()
+                        true
+                    } catch (e: AssertionError) {
+                        false
+                    }
+                }
+            } catch (e: Exception) {
+                // Splash screen might not be visible long enough or use different tags
+                // This is acceptable as the main goal is testing the minimum duration
+            }
+
+            // Wait for main content to appear (splash should finish)
+            composeTestRule.waitUntil(timeoutMillis = 15000) {
                 try {
-                    composeTestRule.onNodeWithTag("splash-screen").assertIsDisplayed()
+                    composeTestRule.onNodeWithTag("tab-view").assertIsDisplayed()
                     true
                 } catch (e: AssertionError) {
                     false
                 }
             }
-        } catch (e: Exception) {
-            // Splash screen might not be visible long enough or use different tags
-            // This is acceptable as the main goal is testing the minimum duration
-        }
 
-        // Wait for main content to appear (splash should finish)
-        composeTestRule.waitUntil(timeoutMillis = 15000) {
+            // Verify minimum duration was respected (at least 2 seconds)
+            val elapsedTime = System.currentTimeMillis() - startTime
             try {
-                composeTestRule.onNodeWithTag("tab-view").assertIsDisplayed()
-                true
+                UITestAssertions.assertTimingAccuracy(
+                    expected = 2000, // Minimum 2 seconds
+                    actual = elapsedTime,
+                    toleranceMs = 10000, // Allow extra time for data loading in test environment
+                )
             } catch (e: AssertionError) {
-                false
+                // Timing assertions might fail in CI/test environments
+                // The important thing is that the app loads successfully
             }
-        }
 
-        // Verify minimum duration was respected (at least 2 seconds)
-        val elapsedTime = System.currentTimeMillis() - startTime
-        try {
-            UITestAssertions.assertTimingAccuracy(
-                expected = 2000, // Minimum 2 seconds
-                actual = elapsedTime,
-                toleranceMs = 10000 // Allow extra time for data loading in test environment
-            )
-        } catch (e: AssertionError) {
-            // Timing assertions might fail in CI/test environments
-            // The important thing is that the app loads successfully
+            // Verify main content is now visible (this is the critical assertion)
+            composeTestRule.onNodeWithTag("tab-view").assertIsDisplayed()
         }
-
-        // Verify main content is now visible (this is the critical assertion)
-        composeTestRule.onNodeWithTag("tab-view").assertIsDisplayed()
-    }
 
     @Test
     fun mainActivity_tabNavigation_switchesBetweenEventsAndAbout() {

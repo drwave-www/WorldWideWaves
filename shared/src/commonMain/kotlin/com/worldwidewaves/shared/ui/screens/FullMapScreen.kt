@@ -47,9 +47,10 @@ fun <T> FullMapScreen(
     onNavigateToWave: (String) -> Unit = {},
     mapContent: @Composable (Modifier) -> Unit,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
     val scope = rememberCoroutineScope()
 
@@ -69,10 +70,11 @@ fun <T> FullMapScreen(
             eventStatus,
             endDateTime,
             isInArea,
-            onNavigateToWave = WaveNavigator { eventId ->
-                onNavigateToWave(eventId)
-            },
-            Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
+            onNavigateToWave =
+                WaveNavigator { eventId ->
+                    onNavigateToWave(eventId)
+                },
+            Modifier.align(Alignment.TopCenter).padding(top = 40.dp),
         )
 
         SharedMapActions(
@@ -87,7 +89,7 @@ fun <T> FullMapScreen(
                 scope.launch {
                     eventMap.targetWave()
                 }
-            }
+            },
         )
     }
 }

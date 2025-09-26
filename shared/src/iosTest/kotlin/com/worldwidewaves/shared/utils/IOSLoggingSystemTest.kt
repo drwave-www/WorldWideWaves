@@ -19,7 +19,6 @@ import kotlin.test.assertTrue
  * Tests NSLogAntilog and iOS Napier initialization.
  */
 class IOSLoggingSystemTest {
-
     @Test
     fun testIOSLogConfigExists() {
         // Test that iOS LogConfig is properly configured
@@ -90,7 +89,7 @@ class IOSLoggingSystemTest {
                 io.github.aakira.napier.LogLevel.INFO,
                 "iOS_DIRECT_TEST",
                 null,
-                "Direct NSLogAntilog test message"
+                "Direct NSLogAntilog test message",
             )
 
             assertTrue(true, "NSLogAntilog direct test completed")

@@ -109,7 +109,7 @@ class EventActivity : AbstractEventWaveActivity() {
                 context.startActivity(
                     Intent(context, WaveActivity::class.java).apply {
                         putExtra("eventId", eventId)
-                    }
+                    },
                 )
             },
             onSimulationStarted = { message ->
@@ -126,7 +126,7 @@ class EventActivity : AbstractEventWaveActivity() {
             mapHeight = calculatedHeight,
             mapArea = {
                 eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
-            }
+            },
         )
 
         // Show map required dialog for simulation
@@ -134,5 +134,4 @@ class EventActivity : AbstractEventWaveActivity() {
             AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
         }
     }
-
 }

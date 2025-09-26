@@ -67,12 +67,13 @@ fun SharedApp() {
                 if (currentScreen == AppScreen.EventsList) {
                     SharedBottomTabBar()
                 }
-            }
+            },
         ) { paddingValues ->
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
             ) {
                 when (currentScreen) {
                     AppScreen.EventsList -> {
@@ -80,7 +81,7 @@ fun SharedApp() {
                             onEventClick = { eventId ->
                                 selectedEventId = eventId
                                 currentScreen = AppScreen.EventDetails
-                            }
+                            },
                         )
                     }
                     AppScreen.EventDetails -> {
@@ -95,7 +96,7 @@ fun SharedApp() {
                                 },
                                 onMapClick = {
                                     currentScreen = AppScreen.Map
-                                }
+                                },
                             )
                         }
                     }
@@ -105,7 +106,7 @@ fun SharedApp() {
                                 eventId = eventId,
                                 onBackClick = {
                                     currentScreen = AppScreen.EventDetails
-                                }
+                                },
                             )
                         }
                     }
@@ -115,7 +116,7 @@ fun SharedApp() {
                                 eventId = eventId,
                                 onBackClick = {
                                     currentScreen = AppScreen.EventDetails
-                                }
+                                },
                             )
                         }
                     }
@@ -128,8 +129,11 @@ fun SharedApp() {
 // Navigation states for shared app
 sealed class AppScreen {
     object EventsList : AppScreen()
+
     object EventDetails : AppScreen()
+
     object Wave : AppScreen()
+
     object Map : AppScreen()
 }
 
@@ -141,7 +145,7 @@ private fun SharedBottomTabBar() {
     // Simple shared tab bar implementation
     Box(
         modifier = Modifier.padding(16.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text("Shared Tab Bar - Events | About | Debug")
     }
@@ -153,10 +157,14 @@ private fun SharedBottomTabBar() {
 @Composable
 private fun SharedAboutScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("About WorldWideWaves", style = sharedCommonTextStyle().copy(
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-        ))
+        Text(
+            "About WorldWideWaves",
+            style =
+                sharedCommonTextStyle().copy(
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
+                ),
+        )
         Text("Shared about screen - identical on both platforms", style = sharedCommonTextStyle())
     }
 }
@@ -173,15 +181,16 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     // Get SetEventFavorite through existing wwwEvents for now
 
     // Safely create WWWEvents with proper error handling
-    val wwwEvents = remember {
-        try {
-            Log.i("SharedEventsScreen", "Creating WWWEvents instance")
-            WWWEvents()
-        } catch (e: Exception) {
-            Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
-            null
+    val wwwEvents =
+        remember {
+            try {
+                Log.i("SharedEventsScreen", "Creating WWWEvents instance")
+                WWWEvents()
+            } catch (e: Exception) {
+                Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
+                null
+            }
         }
-    }
 
     // Filter state - exact Android match with proper state management
     var starredSelected by remember { mutableStateOf(false) }
@@ -216,7 +225,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
                 onLoadingError = { error ->
                     Log.e("SharedEventsScreen", "Event loading error: ${error.message}", throwable = error)
                     hasLoadingError = true
-                }
+                },
             )
 
             Log.i("SharedEventsScreen", "Event loading initiated successfully")
@@ -228,11 +237,12 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
 
     // Filter logic - EXACT Android match
     LaunchedEffect(starredSelected, downloadedSelected, allEvents) {
-        events = when {
-            starredSelected -> allEvents.filter { it.favorite }
-            downloadedSelected -> allEvents.filter { false } // TODO: Add map download state
-            else -> allEvents
-        }
+        events =
+            when {
+                starredSelected -> allEvents.filter { it.favorite }
+                downloadedSelected -> allEvents.filter { false } // TODO: Add map download state
+                else -> allEvents
+            }
         Log.i("SharedEventsScreen", "Event loading and filtering completed")
     }
 
@@ -242,12 +252,12 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
         mapStates = emptyMap(), // TODO: Add map state integration
         onEventClick = onEventClick,
         setEventFavorite = null,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     )
 }
 
-private fun getEventBackgroundColor(eventId: String): Color {
-    return when {
+private fun getEventBackgroundColor(eventId: String): Color =
+    when {
         eventId.contains("new_york") -> Color(0xFF2196F3).copy(alpha = 0.8f)
         eventId.contains("los_angeles") -> Color(0xFFFF5722).copy(alpha = 0.8f)
         eventId.contains("mexico") -> Color(0xFF4CAF50).copy(alpha = 0.8f)
@@ -255,7 +265,6 @@ private fun getEventBackgroundColor(eventId: String): Color {
         eventId.contains("buenos_aires") -> Color(0xFF00BCD4).copy(alpha = 0.8f)
         else -> Color(0xFF3F51B5).copy(alpha = 0.7f)
     }
-}
 
 private fun getCommunityName(eventId: String): String {
     val components = eventId.split("_")
@@ -274,57 +283,62 @@ private fun SharedEventDetailsScreen(
     eventId: String,
     onBackClick: () -> Unit,
     onWaveClick: () -> Unit,
-    onMapClick: () -> Unit
+    onMapClick: () -> Unit,
 ) {
     // Exact Android EventActivity structure: Column > EventOverlay + EventDescription + DividerLine + ButtonWave
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(30.dp),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         // Event overlay section - matching Android
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp) // Same overlay height as list
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(160.dp), // Same overlay height as list
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(getEventBackgroundColor(eventId))
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(getEventBackgroundColor(eventId)),
             )
 
             // Event title overlay
             Box(
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
             ) {
                 Text(
                     text = eventId.replace("_", " ").uppercase(),
-                    style = sharedCommonTextStyle().copy(
-                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                        fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
-                        color = Color.White
-                    )
+                    style =
+                        sharedCommonTextStyle().copy(
+                            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                            fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
+                            color = Color.White,
+                        ),
                 )
             }
         }
 
         // Event description - matching Android
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             Text(
                 text = "Event Description",
-                style = sharedCommonTextStyle().copy(
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-                ),
-                modifier = Modifier.padding(bottom = 16.dp)
+                style =
+                    sharedCommonTextStyle().copy(
+                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                        fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
+                    ),
+                modifier = Modifier.padding(bottom = 16.dp),
             )
             Text(
-                text = "Experience the wave in ${getCommunityName(eventId)}. " +
-                    "Join thousands of participants in this synchronized human wave event.",
-                style = sharedCommonTextStyle()
+                text =
+                    "Experience the wave in ${getCommunityName(eventId)}. " +
+                        "Join thousands of participants in this synchronized human wave event.",
+                style = sharedCommonTextStyle(),
             )
         }
 
@@ -332,18 +346,18 @@ private fun SharedEventDetailsScreen(
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 16.dp),
             thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
         )
 
         // Action buttons - matching Android ButtonWave
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
         ) {
             // Wave Now button
             Button(
                 onClick = onWaveClick,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text("Wave Now")
             }
@@ -351,7 +365,7 @@ private fun SharedEventDetailsScreen(
             // View Map button
             Button(
                 onClick = onMapClick,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             ) {
                 Text("View Map")
             }
@@ -360,7 +374,7 @@ private fun SharedEventDetailsScreen(
         // Back button
         Button(
             onClick = onBackClick,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 16.dp),
         ) {
             Text("← Back to Events")
         }
@@ -373,25 +387,26 @@ private fun SharedEventDetailsScreen(
 @Composable
 private fun SharedWaveScreen(
     eventId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "🌊 Wave: ${eventId.replace("_", " ").uppercase()}",
-            style = sharedCommonTextStyle().copy(
-                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
-            ),
-            modifier = Modifier.padding(bottom = 32.dp)
+            style =
+                sharedCommonTextStyle().copy(
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
+                ),
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         Text(
             text = "Wave participation screen - identical on both platforms",
             style = sharedCommonTextStyle(),
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         Button(onClick = onBackClick) {
@@ -406,25 +421,26 @@ private fun SharedWaveScreen(
 @Composable
 private fun SharedMapScreen(
     eventId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = "🗺️ Map: ${eventId.replace("_", " ").uppercase()}",
-            style = sharedCommonTextStyle().copy(
-                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
-            ),
-            modifier = Modifier.padding(bottom = 32.dp)
+            style =
+                sharedCommonTextStyle().copy(
+                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
+                ),
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         Text(
             text = "Event map screen - identical on both platforms",
             style = sharedCommonTextStyle(),
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         Button(onClick = onBackClick) {
@@ -433,17 +449,20 @@ private fun SharedMapScreen(
     }
 }
 
-
 /**
  * Placeholder for shared Debug screen
  */
 @Composable
 private fun SharedDebugScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Debug Settings", style = sharedCommonTextStyle().copy(
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-        ))
+        Text(
+            "Debug Settings",
+            style =
+                sharedCommonTextStyle().copy(
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
+                ),
+        )
         Text("Shared debug screen - identical on both platforms", style = sharedCommonTextStyle())
     }
 }

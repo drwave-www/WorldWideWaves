@@ -86,9 +86,10 @@ fun WorkingWaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
@@ -97,7 +98,10 @@ fun WorkingWaveChoreographies(
 
     // Debug logging for choreography states
     LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit) {
-        Log.v("WaveChoreographies", "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit")
+        Log.v(
+            "WaveChoreographies",
+            "[CHOREO_DEBUG] State change for ${event.id}: warming=$isWarmingInProgress, goingToBeHit=$isGoingToBeHit, hasBeenHit=$hasBeenHit",
+        )
     }
 
     // State to track if we should show the hit sequence
@@ -214,9 +218,10 @@ fun ChoreographyDisplay(
 ) {
     if (sequence == null || sequence.image == null) return
 
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
 
     var currentImageIndex by remember { mutableIntStateOf(0) }

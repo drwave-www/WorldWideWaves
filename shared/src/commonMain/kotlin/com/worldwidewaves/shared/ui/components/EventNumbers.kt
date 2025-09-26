@@ -100,59 +100,65 @@ fun EventNumbers(
     }
 
     val eventTimeZone = waveNumbers?.waveTimezone
-    val orderedLabels = listOf(
-        MokoRes.strings.wave_start_time,
-        MokoRes.strings.wave_end_time,
-        MokoRes.strings.wave_speed,
-        MokoRes.strings.wave_total_time,
-        MokoRes.strings.wave_progression,
-    )
+    val orderedLabels =
+        listOf(
+            MokoRes.strings.wave_start_time,
+            MokoRes.strings.wave_end_time,
+            MokoRes.strings.wave_speed,
+            MokoRes.strings.wave_total_time,
+            MokoRes.strings.wave_progression,
+        )
 
     Box(
-        modifier = modifier.padding(
-            start = Dimensions.DEFAULT_EXT_PADDING.dp,
-            end = Dimensions.DEFAULT_EXT_PADDING.dp
-        )
+        modifier =
+            modifier.padding(
+                start = Dimensions.DEFAULT_EXT_PADDING.dp,
+                end = Dimensions.DEFAULT_EXT_PADDING.dp,
+            ),
     ) {
         Box(
-            modifier = Modifier
-                .border(
-                    width = Event.NUMBERS_BORDERWIDTH.dp,
-                    color = Color(0xFFFFFFFF), // quinaryLight
-                    shape = RoundedCornerShape(
-                        topStart = Event.NUMBERS_BORDERROUND.dp,
-                        bottomEnd = Event.NUMBERS_BORDERROUND.dp,
-                    ),
-                )
-                .padding(Dimensions.DEFAULT_EXT_PADDING.dp),
+            modifier =
+                Modifier
+                    .border(
+                        width = Event.NUMBERS_BORDERWIDTH.dp,
+                        color = Color(0xFFFFFFFF), // quinaryLight
+                        shape =
+                            RoundedCornerShape(
+                                topStart = Event.NUMBERS_BORDERROUND.dp,
+                                bottomEnd = Event.NUMBERS_BORDERROUND.dp,
+                            ),
+                    ).padding(Dimensions.DEFAULT_EXT_PADDING.dp),
         ) {
             Column(
-                modifier = Modifier.padding(
-                    start = Dimensions.DEFAULT_INT_PADDING.dp,
-                    end = Dimensions.DEFAULT_INT_PADDING.dp
-                )
+                modifier =
+                    Modifier.padding(
+                        start = Dimensions.DEFAULT_INT_PADDING.dp,
+                        end = Dimensions.DEFAULT_INT_PADDING.dp,
+                    ),
             ) {
                 AutoResizeSingleLineText(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = sharedExtraBoldTextStyle(Event.NUMBERS_TITLE_FONTSIZE).copy(
-                        textAlign = TextAlign.End,
-                    ),
+                    style =
+                        sharedExtraBoldTextStyle(Event.NUMBERS_TITLE_FONTSIZE).copy(
+                            textAlign = TextAlign.End,
+                        ),
                     textAlign = TextAlign.End,
                 )
                 Spacer(modifier = Modifier.height(Event.NUMBERS_SPACER.dp))
                 if (eventNumbers.isNotEmpty()) {
                     orderedLabels.forEach { key ->
                         val value = eventNumbers[key]!!
-                        val displayValue = if (key == MokoRes.strings.wave_total_time) {
-                            formatDurationMinutes(totalMinutes, value)
-                        } else if (key == MokoRes.strings.wave_start_time && startTimeText != null) {
-                            startTimeText!!
-                        } else if (key == MokoRes.strings.wave_end_time && endTimeText != null) {
-                            endTimeText!!
-                        } else {
-                            value
-                        }
+                        val displayValue =
+                            if (key == MokoRes.strings.wave_total_time) {
+                                formatDurationMinutes(totalMinutes, value)
+                            } else if (key == MokoRes.strings.wave_start_time && startTimeText != null) {
+                                startTimeText!!
+                            } else if (key == MokoRes.strings.wave_end_time && endTimeText != null) {
+                                endTimeText!!
+                            } else {
+                                value
+                            }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -165,27 +171,32 @@ fun EventNumbers(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = displayValue,
-                                    style = sharedExtraBoldTextStyle(Event.NUMBERS_VALUE_FONTSIZE).copy(
-                                        color = when (key) {
-                                            MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
-                                            MokoRes.strings.wave_start_time -> Color.Yellow
-                                            else -> MaterialTheme.colorScheme.primary
-                                        },
-                                    ),
+                                    style =
+                                        sharedExtraBoldTextStyle(Event.NUMBERS_VALUE_FONTSIZE).copy(
+                                            color =
+                                                when (key) {
+                                                    MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
+                                                    MokoRes.strings.wave_start_time -> Color.Yellow
+                                                    else -> MaterialTheme.colorScheme.primary
+                                                },
+                                        ),
                                 )
-                                if (key in listOf(
+                                if (key in
+                                    listOf(
                                         MokoRes.strings.wave_start_time,
                                         MokoRes.strings.wave_end_time,
                                     )
                                 ) {
                                     Text(
                                         text = " $eventTimeZone",
-                                        style = sharedExtraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
-                                            color = when (key) {
-                                                MokoRes.strings.wave_start_time -> Color.Yellow
-                                                else -> MaterialTheme.colorScheme.primary
-                                            },
-                                        ),
+                                        style =
+                                            sharedExtraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
+                                                color =
+                                                    when (key) {
+                                                        MokoRes.strings.wave_start_time -> Color.Yellow
+                                                        else -> MaterialTheme.colorScheme.primary
+                                                    },
+                                            ),
                                     )
                                 }
                             }

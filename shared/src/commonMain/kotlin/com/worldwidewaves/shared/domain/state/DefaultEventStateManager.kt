@@ -54,7 +54,6 @@ class DefaultEventStateManager(
         input: EventStateInput,
         userIsInArea: Boolean,
     ): EventState {
-
         // Calculate warming phases
         val warmingInProgress = calculateWarmingPhase(event)
         val isStartWarmingInProgress = calculateStartWarmingPhase(event, input.currentTime)
@@ -267,5 +266,4 @@ class DefaultEventStateManager(
         timeBeforeHit: Duration,
         userIsInArea: Boolean,
     ): Boolean = userIsInArea && timeBeforeHit > ZERO && timeBeforeHit <= WaveTiming.WARN_BEFORE_HIT
-
 }

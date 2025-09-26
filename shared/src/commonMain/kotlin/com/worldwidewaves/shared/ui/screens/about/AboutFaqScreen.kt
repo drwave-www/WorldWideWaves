@@ -125,10 +125,11 @@ fun SharedAboutFaqScreen(
             // FAQ title
             Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
             Text(
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    // Save the position of the FAQ section
-                    scrollToFAQPosition = coordinates.positionInRoot().y
-                },
+                modifier =
+                    Modifier.onGloballyPositioned { coordinates ->
+                        // Save the position of the FAQ section
+                        scrollToFAQPosition = coordinates.positionInRoot().y
+                    },
                 text = stringResource(MokoRes.strings.faq),
                 style = sharedExtraBoldTextStyle(FAQ.TITLE_FONTSIZE),
             )
@@ -165,19 +166,22 @@ private fun FAQTitle(scrollToFAQPosition: () -> Unit) {
         Text(
             modifier = Modifier.fillMaxWidth(LAYOUT_HALF_WIDTH),
             text = stringResource(MokoRes.strings.warn_rules_security_title),
-            style = sharedExtraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
-                textAlign = TextAlign.Start,
-            ),
+            style =
+                sharedExtraPrimaryColoredBoldTextStyle(FAQ.SECTION_TITLE_FONTSIZE).copy(
+                    textAlign = TextAlign.Start,
+                ),
         )
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = scrollToFAQPosition),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = scrollToFAQPosition),
             text = stringResource(MokoRes.strings.faq_access),
-            style = sharedQuinaryColoredBoldTextStyle(FAQ.LINK_FONTSIZE).copy(
-                textDecoration = TextDecoration.Underline,
-                textAlign = TextAlign.End,
-            ),
+            style =
+                sharedQuinaryColoredBoldTextStyle(FAQ.LINK_FONTSIZE).copy(
+                    textDecoration = TextDecoration.Underline,
+                    textAlign = TextAlign.End,
+                ),
         )
     }
     Spacer(modifier = Modifier.size(Dimensions.SPACER_MEDIUM.dp))
@@ -194,9 +198,10 @@ private fun ShowRulesHierarchy() {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(title),
-            style = sharedExtraPrimaryColoredBoldTextStyle(FAQ.RULE_TITLE_FONTSIZE).copy(
-                textAlign = TextAlign.Start,
-            ),
+            style =
+                sharedExtraPrimaryColoredBoldTextStyle(FAQ.RULE_TITLE_FONTSIZE).copy(
+                    textAlign = TextAlign.Start,
+                ),
         )
         Spacer(modifier = Modifier.size(Dimensions.SPACER_SMALL.dp))
         items.forEachIndexed { index, item ->
@@ -228,12 +233,13 @@ private fun FAQItem(
     onSimulateClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(Dimensions.DEFAULT_INT_PADDING.dp)
-            .clickable {
-                onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
-            },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(Dimensions.DEFAULT_INT_PADDING.dp)
+                .clickable {
+                    onExpand(if (expandedFaqItem == itemIndex) -1 else itemIndex)
+                },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

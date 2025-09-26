@@ -51,95 +51,101 @@ import kotlinx.coroutines.launch
 class MapViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
-
     // Composition over inheritance - use shared logic
-    private val sharedLogic = object : BaseMapDownloadViewModel() {
+    private val sharedLogic =
+        object : BaseMapDownloadViewModel() {
+            override suspend fun isMapInstalled(mapId: String): Boolean = splitInstallManager.installedModules.contains(mapId)
 
-        override suspend fun isMapInstalled(mapId: String): Boolean {
-            return splitInstallManager.installedModules.contains(mapId)
-        }
-
-        override suspend fun startPlatformDownload(mapId: String, onMapDownloaded: (() -> Unit)?) {
-            if (MapDownloadUtils.isActiveDownload(_featureState.value)) {
-                Log.w(TAG, "downloadMap ignored – already downloading")
-                return
-            }
-
-            _featureState.value = MapFeatureState.Pending
-            retryManager.resetRetryCount()
-
-            val request = SplitInstallRequest.newBuilder()
-                .addModule(mapId)
-                .build()
-
-            splitInstallManager.startInstall(request)
-                .addOnSuccessListener { sessionId ->
-                    Log.i(TAG, "startInstall success session=$sessionId")
-                    currentSessionId = sessionId
-                    retryManager.resetRetryCount()
-                    onMapDownloaded?.invoke()
+            override suspend fun startPlatformDownload(
+                mapId: String,
+                onMapDownloaded: (() -> Unit)?,
+            ) {
+                if (MapDownloadUtils.isActiveDownload(_featureState.value)) {
+                    Log.w(TAG, "downloadMap ignored – already downloading")
+                    return
                 }
-                .addOnFailureListener { exception ->
-                    Log.e(TAG, "startInstall failure ${exception.message}")
-                    handleRetryWithExponentialBackoff(mapId, onMapDownloaded)
-                }
-        }
 
-        override suspend fun cancelPlatformDownload() {
-            if (currentSessionId > 0) {
-                splitInstallManager.cancelInstall(currentSessionId)
-            }
-        }
+                _featureState.value = MapFeatureState.Pending
+                retryManager.resetRetryCount()
 
-        override fun getLocalizedErrorMessage(errorCode: Int): String {
-            @Suppress("DEPRECATION")
-            val resource = when (errorCode) {
-                SplitInstallErrorCode.NETWORK_ERROR -> MokoRes.strings.map_error_network
-                SplitInstallErrorCode.INSUFFICIENT_STORAGE -> MokoRes.strings.map_error_insufficient_storage
-                SplitInstallErrorCode.MODULE_UNAVAILABLE -> MokoRes.strings.map_error_module_unavailable
-                SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED -> MokoRes.strings.map_error_active_sessions_limit
-                SplitInstallErrorCode.INVALID_REQUEST -> MokoRes.strings.map_error_invalid_request
-                SplitInstallErrorCode.API_NOT_AVAILABLE -> MokoRes.strings.map_error_api_not_available
-                SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION -> MokoRes.strings.map_error_incompatible_with_existing_session
-                SplitInstallErrorCode.SERVICE_DIED -> MokoRes.strings.map_error_service_died
-                SplitInstallErrorCode.ACCESS_DENIED -> MokoRes.strings.map_error_access_denied
-                PLAY_STORE_AUTH_ERROR_CODE -> MokoRes.strings.map_error_account_issue
-                else -> MokoRes.strings.map_error_unknown
-            }
+                val request =
+                    SplitInstallRequest
+                        .newBuilder()
+                        .addModule(mapId)
+                        .build()
 
-            return if (resource == MokoRes.strings.map_error_unknown) {
-                StringDesc.ResourceFormatted(resource, errorCode).toString(application)
-            } else {
-                StringDesc.Resource(resource).toString(application)
-            }
-        }
-
-        override fun clearCacheForInstalledMaps(mapIds: List<String>) {
-            mapIds.forEach { id ->
-                try {
-                    clearEventCache(id)
-                } catch (_: Exception) {
-                    // Non-critical cache cleanup failure
-                }
-            }
-        }
-
-        private fun handleRetryWithExponentialBackoff(mapId: String, onMapDownloaded: (() -> Unit)?) {
-            if (retryManager.canRetry()) {
-                val delay = retryManager.getNextRetryDelay()
-                val retryCount = retryManager.incrementRetryCount()
-                _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    viewModelScope.launch {
-                        downloadMap(mapId, onMapDownloaded)
+                splitInstallManager
+                    .startInstall(request)
+                    .addOnSuccessListener { sessionId ->
+                        Log.i(TAG, "startInstall success session=$sessionId")
+                        currentSessionId = sessionId
+                        retryManager.resetRetryCount()
+                        onMapDownloaded?.invoke()
+                    }.addOnFailureListener { exception ->
+                        Log.e(TAG, "startInstall failure ${exception.message}")
+                        handleRetryWithExponentialBackoff(mapId, onMapDownloaded)
                     }
-                }, delay)
-            } else {
-                handleDownloadFailure(0, shouldRetry = false)
+            }
+
+            override suspend fun cancelPlatformDownload() {
+                if (currentSessionId > 0) {
+                    splitInstallManager.cancelInstall(currentSessionId)
+                }
+            }
+
+            override fun getLocalizedErrorMessage(errorCode: Int): String {
+                @Suppress("DEPRECATION")
+                val resource =
+                    when (errorCode) {
+                        SplitInstallErrorCode.NETWORK_ERROR -> MokoRes.strings.map_error_network
+                        SplitInstallErrorCode.INSUFFICIENT_STORAGE -> MokoRes.strings.map_error_insufficient_storage
+                        SplitInstallErrorCode.MODULE_UNAVAILABLE -> MokoRes.strings.map_error_module_unavailable
+                        SplitInstallErrorCode.ACTIVE_SESSIONS_LIMIT_EXCEEDED -> MokoRes.strings.map_error_active_sessions_limit
+                        SplitInstallErrorCode.INVALID_REQUEST -> MokoRes.strings.map_error_invalid_request
+                        SplitInstallErrorCode.API_NOT_AVAILABLE -> MokoRes.strings.map_error_api_not_available
+                        SplitInstallErrorCode.INCOMPATIBLE_WITH_EXISTING_SESSION -> MokoRes.strings.map_error_incompatible_with_existing_session
+                        SplitInstallErrorCode.SERVICE_DIED -> MokoRes.strings.map_error_service_died
+                        SplitInstallErrorCode.ACCESS_DENIED -> MokoRes.strings.map_error_access_denied
+                        PLAY_STORE_AUTH_ERROR_CODE -> MokoRes.strings.map_error_account_issue
+                        else -> MokoRes.strings.map_error_unknown
+                    }
+
+                return if (resource == MokoRes.strings.map_error_unknown) {
+                    StringDesc.ResourceFormatted(resource, errorCode).toString(application)
+                } else {
+                    StringDesc.Resource(resource).toString(application)
+                }
+            }
+
+            override fun clearCacheForInstalledMaps(mapIds: List<String>) {
+                mapIds.forEach { id ->
+                    try {
+                        clearEventCache(id)
+                    } catch (_: Exception) {
+                        // Non-critical cache cleanup failure
+                    }
+                }
+            }
+
+            private fun handleRetryWithExponentialBackoff(
+                mapId: String,
+                onMapDownloaded: (() -> Unit)?,
+            ) {
+                if (retryManager.canRetry()) {
+                    val delay = retryManager.getNextRetryDelay()
+                    val retryCount = retryManager.incrementRetryCount()
+                    _featureState.value = MapFeatureState.Retrying(retryCount, MapDownloadUtils.RetryManager.MAX_RETRIES)
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        viewModelScope.launch {
+                            downloadMap(mapId, onMapDownloaded)
+                        }
+                    }, delay)
+                } else {
+                    handleDownloadFailure(0, shouldRetry = false)
+                }
             }
         }
-    }
 
     // Android-specific Play Core components
     private val splitInstallManager: SplitInstallManager = SplitInstallManagerFactory.create(application)
@@ -162,13 +168,19 @@ class MapViewModel(
     // Public API (delegates to shared logic)
     // ------------------------------------------------------------------------
 
-    fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean = false) {
+    fun checkIfMapIsAvailable(
+        mapId: String,
+        autoDownload: Boolean = false,
+    ) {
         viewModelScope.launch {
             sharedLogic.checkIfMapIsAvailable(mapId, autoDownload)
         }
     }
 
-    fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)? = null) {
+    fun downloadMap(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)? = null,
+    ) {
         viewModelScope.launch {
             sharedLogic.downloadMap(mapId, onMapDownloaded)
         }
@@ -185,13 +197,14 @@ class MapViewModel(
     // ------------------------------------------------------------------------
 
     private fun registerAndroidListeners() {
-        installStateListener = SplitInstallStateUpdatedListener { state ->
-            // Only process updates for our current session (original behavior preserved)
-            if (state.sessionId() != currentSessionId && currentSessionId != 0) {
-                return@SplitInstallStateUpdatedListener
+        installStateListener =
+            SplitInstallStateUpdatedListener { state ->
+                // Only process updates for our current session (original behavior preserved)
+                if (state.sessionId() != currentSessionId && currentSessionId != 0) {
+                    return@SplitInstallStateUpdatedListener
+                }
+                processAndroidInstallState(state)
             }
-            processAndroidInstallState(state)
-        }
         installStateListener?.let {
             splitInstallManager.registerListener(it)
         }

@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.StateFlow
  * • Wave progression tracking
  */
 class IOSWWWLocationProvider : WWWLocationProvider {
-
     private val _currentLocation = MutableStateFlow<Position?>(null)
     override val currentLocation: StateFlow<Position?> = _currentLocation
 
@@ -65,10 +64,11 @@ class IOSWWWLocationProvider : WWWLocationProvider {
 
         // Provide default location for now
         // Full Core Location integration will be completed with native iOS code
-        val defaultLocation = Position(
-            lat = 37.7749, // San Francisco coordinates as default
-            lng = -122.4194
-        )
+        val defaultLocation =
+            Position(
+                lat = 37.7749, // San Francisco coordinates as default
+                lng = -122.4194,
+            )
 
         _currentLocation.value = defaultLocation
         onLocationUpdate(defaultLocation)
@@ -87,7 +87,10 @@ class IOSWWWLocationProvider : WWWLocationProvider {
      * Update location from iOS native code integration.
      * This method will be called from Swift/iOS native code once Core Location is integrated.
      */
-    fun updateLocationFromNative(latitude: Double, longitude: Double) {
+    fun updateLocationFromNative(
+        latitude: Double,
+        longitude: Double,
+    ) {
         if (isUpdating) {
             val position = Position(lat = latitude, lng = longitude)
             _currentLocation.value = position

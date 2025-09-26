@@ -35,7 +35,6 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AbstractEventWaveActivity() {
-
     @Composable
     override fun Screen(
         modifier: Modifier,
@@ -72,9 +71,7 @@ class WaveActivity : AbstractEventWaveActivity() {
                     autoMapDownload = true,
                     modifier = mapModifier,
                 )
-            }
+            },
         )
     }
 }
-
-

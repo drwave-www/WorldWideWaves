@@ -18,7 +18,6 @@ import kotlin.test.assertTrue
  * Ensures choreography UI components work correctly on both platforms.
  */
 class WaveChoreographiesTest {
-
     @Test
     fun testWaveChoreographiesComponentExists() {
         // Verify that the WaveChoreographies component is available in shared

@@ -161,7 +161,7 @@ open class MainActivity : AppCompatActivity() {
             WorldWideWavesTheme {
                 Surface(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     // Box to stack main content and simulation-mode overlay
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -189,16 +189,17 @@ open class MainActivity : AppCompatActivity() {
                         if (ready && debugScreen != null) {
                             FloatingActionButton(
                                 onClick = { showDebugScreen = !showDebugScreen },
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(16.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(16.dp),
                                 containerColor = Color(0xFF4CAF50), // Green color
-                                shape = CircleShape
+                                shape = CircleShape,
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.BugReport,
                                     contentDescription = "Debug Screen",
-                                    tint = Color.White
+                                    tint = Color.White,
                                 )
                             }
                         }
@@ -229,7 +230,6 @@ open class MainActivity : AppCompatActivity() {
     }
 
     // ----------------------------
-
 
     // -------------------------------------------------
     // Programmatic Splash UI (mirrors previous design)

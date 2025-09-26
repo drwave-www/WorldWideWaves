@@ -61,39 +61,43 @@ fun NotifyAreaUserPosition(
     val isInArea by event.observer.userIsInArea.collectAsState()
     val hitDateTime by event.observer.hitDateTime.collectAsState()
 
-    val formattedTime = remember(hitDateTime) {
-        try {
-            IClock.instantToLiteral(hitDateTime, event.getTZ())
-        } catch (e: Exception) {
-            Log.w("NotifyAreaUserPosition", "Failed to format hit time", e)
-            ""
+    val formattedTime =
+        remember(hitDateTime) {
+            try {
+                IClock.instantToLiteral(hitDateTime, event.getTZ())
+            } catch (e: Exception) {
+                Log.w("NotifyAreaUserPosition", "Failed to format hit time", e)
+                ""
+            }
         }
-    }
 
-    val geolocText = if (isInArea) {
-        stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
-    } else {
-        stringResource(MokoRes.strings.geoloc_yourenotin)
-    }
+    val geolocText =
+        if (isInArea) {
+            stringResource(MokoRes.strings.geoloc_yourein_at, formattedTime)
+        } else {
+            stringResource(MokoRes.strings.geoloc_yourenotin)
+        }
 
     // Simplified text display for cross-platform compatibility
     val displayText = geolocText
 
     Row(
-        modifier = modifier
-            .height(Event.GEOLOCME_HEIGHT.dp)
-            .padding(
-                start = Dimensions.DEFAULT_EXT_PADDING.dp,
-                end = Dimensions.DEFAULT_EXT_PADDING.dp
-            ),
+        modifier =
+            modifier
+                .height(Event.GEOLOCME_HEIGHT.dp)
+                .padding(
+                    start = Dimensions.DEFAULT_EXT_PADDING.dp,
+                    end = Dimensions.DEFAULT_EXT_PADDING.dp,
+                ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
-                .fillMaxHeight()
-                .weight(1f),
+            modifier =
+                Modifier
+                    .border(Event.GEOLOCME_BORDER.dp, MaterialTheme.colorScheme.primary)
+                    .fillMaxHeight()
+                    .weight(1f),
             contentAlignment = Alignment.Center,
         ) {
             Text(

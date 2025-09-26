@@ -96,9 +96,10 @@ class TabManager(
         var originalScreen by remember { mutableStateOf(startScreen) }
 
         Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .testTag("tab-view")
+            modifier =
+                Modifier
+                    .fillMaxHeight()
+                    .testTag("tab-view"),
         ) {
             // Display the selected tab screen
             Surface(modifier = Modifier.weight(1f).fillMaxSize()) {

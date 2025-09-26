@@ -50,10 +50,11 @@ fun StandardEventLayout(
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
 ) {
-    val platformComponent = object : KoinComponent {
-        val platform: WWWPlatform by inject()
-        val clock: IClock by inject()
-    }
+    val platformComponent =
+        object : KoinComponent {
+            val platform: WWWPlatform by inject()
+            val clock: IClock by inject()
+        }
     val platform = platformComponent.platform
     val clock = platformComponent.clock
 
@@ -76,9 +77,10 @@ fun StandardEventLayout(
                     eventState.eventStatus,
                     eventState.endDateTime,
                     eventState.isInArea,
-                    onNavigateToWave = WaveNavigator { eventId ->
-                        onNavigateToWave(eventId)
-                    },
+                    onNavigateToWave =
+                        WaveNavigator { eventId ->
+                            onNavigateToWave(eventId)
+                        },
                     modifier = Modifier.align(Alignment.Center),
                 )
 
@@ -90,7 +92,7 @@ fun StandardEventLayout(
                         onMapNotAvailable = onMapNotAvailable,
                         onSimulationStarted = onSimulationStarted,
                         onSimulationStopped = onSimulationStopped,
-                        onError = onSimulationError
+                        onError = onSimulationError,
                     )
                 }
             }

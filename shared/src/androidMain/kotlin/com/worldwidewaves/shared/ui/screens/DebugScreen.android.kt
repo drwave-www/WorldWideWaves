@@ -31,52 +31,54 @@ import androidx.compose.ui.unit.dp
  * Shows Android-specific system and app information.
  */
 @Composable
-actual fun PlatformSpecificPerformanceDashboard(
-    modifier: Modifier,
-) {
+actual fun PlatformSpecificPerformanceDashboard(modifier: Modifier) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         ) {
             Text(
                 text = "Android System Information",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val androidInfo = listOf(
-                "API Level" to android.os.Build.VERSION.SDK_INT.toString(),
-                "Device Model" to "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
-                "Android Version" to android.os.Build.VERSION.RELEASE,
-                "Hardware" to android.os.Build.HARDWARE,
-                "Architecture" to (System.getProperty("os.arch")?.toString() ?: "Unknown")
-            )
+            val androidInfo =
+                listOf(
+                    "API Level" to
+                        android.os.Build.VERSION.SDK_INT
+                            .toString(),
+                    "Device Model" to "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
+                    "Android Version" to android.os.Build.VERSION.RELEASE,
+                    "Hardware" to android.os.Build.HARDWARE,
+                    "Architecture" to (System.getProperty("os.arch")?.toString() ?: "Unknown"),
+                )
 
             androidInfo.forEach { pair ->
                 val (label, value) = pair
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     Text(
                         text = value,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

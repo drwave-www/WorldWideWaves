@@ -66,43 +66,46 @@ fun BoxScope.SimulationButton(
     onError: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
-    val platformComponent = object : KoinComponent {
-        val platform: WWWPlatform by inject()
-    }
+    val platformComponent =
+        object : KoinComponent {
+            val platform: WWWPlatform by inject()
+        }
     val platform = platformComponent.platform
     val scope = rememberCoroutineScope()
     var simulationButtonState by remember { mutableStateOf("idle") }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
 
     // Check if map is available for simulation
-    val isMapAvailableForSimulation = when (mapFeatureState) {
-        is MapFeatureState.Installed -> true
-        is MapFeatureState.Available -> true
-        else -> false
-    }
+    val isMapAvailableForSimulation =
+        when (mapFeatureState) {
+            is MapFeatureState.Installed -> true
+            is MapFeatureState.Available -> true
+            else -> false
+        }
 
     Box(
-        modifier = modifier
-            .align(Alignment.CenterEnd)
-            .padding(end = 16.dp)
-            .offset(y = (-8).dp)
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(onPrimaryLight)
-            .clickable(enabled = simulationButtonState != "loading") {
-                handleSimulationClick(
-                    simulationButtonState = simulationButtonState,
-                    isMapAvailableForSimulation = isMapAvailableForSimulation,
-                    onMapNotAvailable = onMapNotAvailable,
-                    onStateChange = { simulationButtonState = it },
-                    scope = scope,
-                    event = event,
-                    platform = platform,
-                    onSimulationStarted = onSimulationStarted,
-                    onSimulationStopped = onSimulationStopped,
-                    onError = onError
-                )
-            },
+        modifier =
+            modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp)
+                .offset(y = (-8).dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(onPrimaryLight)
+                .clickable(enabled = simulationButtonState != "loading") {
+                    handleSimulationClick(
+                        simulationButtonState = simulationButtonState,
+                        isMapAvailableForSimulation = isMapAvailableForSimulation,
+                        onMapNotAvailable = onMapNotAvailable,
+                        onStateChange = { simulationButtonState = it },
+                        scope = scope,
+                        event = event,
+                        platform = platform,
+                        onSimulationStarted = onSimulationStarted,
+                        onSimulationStopped = onSimulationStopped,
+                        onError = onError,
+                    )
+                },
         contentAlignment = Alignment.Center,
     ) {
         when (simulationButtonState) {
@@ -209,11 +212,12 @@ private suspend fun startSimulation(
         platform.disableSimulation()
 
         // Create new simulation
-        val simulation = WWWSimulation(
-            startDateTime = simulationTime,
-            userPosition = position,
-            initialSpeed = Wave.DEFAULT_SPEED_SIMULATION,
-        )
+        val simulation =
+            WWWSimulation(
+                startDateTime = simulationTime,
+                userPosition = position,
+                initialSpeed = Wave.DEFAULT_SPEED_SIMULATION,
+            )
 
         // Set the simulation
         Log.i("SimulationButton", "Setting simulation starting time to $simulationTime from event ${event.id}")

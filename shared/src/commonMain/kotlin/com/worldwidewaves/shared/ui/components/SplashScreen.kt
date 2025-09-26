@@ -46,13 +46,12 @@ import org.jetbrains.compose.resources.painterResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SplashScreen(
-    modifier: Modifier = Modifier,
-) {
+fun SplashScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag("splash-screen")
+        modifier =
+            modifier
+                .fillMaxSize()
+                .testTag("splash-screen"),
     ) {
         Image(
             painter = painterResource(Res.drawable.background),
@@ -63,10 +62,12 @@ fun SplashScreen(
         Image(
             painter = painterResource(Res.drawable.www_logo_transparent),
             contentDescription = stringResource(MokoRes.strings.logo_description),
-            modifier = Modifier
-                .width(250.dp) // Historical size
-                .align(Alignment.BottomCenter) // Historical positioning
-                .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp), // Historical bottom padding
+            modifier =
+                Modifier
+                    .width(250.dp) // Historical size
+                    .align(Alignment.BottomCenter) // Historical positioning
+                    .padding(bottom = Dimensions.DEFAULT_INT_PADDING.dp),
+            // Historical bottom padding
         )
     }
 }

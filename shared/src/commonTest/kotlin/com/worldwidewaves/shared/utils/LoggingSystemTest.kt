@@ -19,7 +19,6 @@ import kotlin.test.assertTrue
  * Verifies LogConfig, initNapier(), and Log wrapper functionality.
  */
 class LoggingSystemTest {
-
     @Test
     fun testLogConfigExists() {
         // Test that LogConfig is properly configured on all platforms

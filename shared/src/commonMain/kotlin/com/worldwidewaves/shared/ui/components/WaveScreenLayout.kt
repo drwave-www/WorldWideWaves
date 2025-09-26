@@ -45,7 +45,7 @@ data class WaveState(
     val isWarmingInProgress: Boolean,
     val hitDateTime: kotlin.time.Instant,
     val isGoingToBeHit: Boolean,
-    val hasBeenHit: Boolean
+    val hasBeenHit: Boolean,
 )
 
 /**
@@ -64,7 +64,7 @@ fun rememberWaveState(event: IWWWEvent): WaveState {
         isWarmingInProgress = isWarmingInProgress,
         hitDateTime = hitDateTime,
         isGoingToBeHit = isGoingToBeHit,
-        hasBeenHit = hasBeenHit
+        hasBeenHit = hasBeenHit,
     )
 }
 

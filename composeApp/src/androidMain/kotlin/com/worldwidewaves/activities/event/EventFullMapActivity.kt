@@ -81,13 +81,12 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
                 context.startActivity(
                     Intent(context, WaveActivity::class.java).apply {
                         putExtra("eventId", eventId)
-                    }
+                    },
                 )
             },
             mapContent = { mapModifier ->
                 eventMap.Screen(modifier = mapModifier, autoMapDownload = true)
-            }
+            },
         )
     }
 }
-

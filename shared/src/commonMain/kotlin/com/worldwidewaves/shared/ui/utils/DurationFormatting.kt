@@ -37,47 +37,50 @@ import kotlin.time.Duration.Companion.hours
 fun formatDurationMinutes(
     totalMinutes: Long?,
     defaultValue: String,
-): String = totalMinutes?.let { mins ->
-    val hours = (mins / 60).toInt()
-    val minutesLeft = (mins % 60).toInt()
-    val parts = buildList {
-        if (hours > 0) {
-            add(
-                if (hours == 1) {
-                    stringResource(MokoRes.strings.hour_singular, hours)
-                } else {
-                    stringResource(MokoRes.strings.hour_plural, hours)
+): String =
+    totalMinutes?.let { mins ->
+        val hours = (mins / 60).toInt()
+        val minutesLeft = (mins % 60).toInt()
+        val parts =
+            buildList {
+                if (hours > 0) {
+                    add(
+                        if (hours == 1) {
+                            stringResource(MokoRes.strings.hour_singular, hours)
+                        } else {
+                            stringResource(MokoRes.strings.hour_plural, hours)
+                        },
+                    )
                 }
-            )
-        }
-        if (minutesLeft > 0) {
-            add(
-                if (minutesLeft == 1) {
-                    stringResource(MokoRes.strings.minute_singular, minutesLeft)
-                } else {
-                    stringResource(MokoRes.strings.minute_plural, minutesLeft)
+                if (minutesLeft > 0) {
+                    add(
+                        if (minutesLeft == 1) {
+                            stringResource(MokoRes.strings.minute_singular, minutesLeft)
+                        } else {
+                            stringResource(MokoRes.strings.minute_plural, minutesLeft)
+                        },
+                    )
                 }
-            )
-        }
-    }
-    if (parts.isNotEmpty()) parts.joinToString(" ") else defaultValue
-} ?: defaultValue
+            }
+        if (parts.isNotEmpty()) parts.joinToString(" ") else defaultValue
+    } ?: defaultValue
 
 /**
  * Formats a Duration into time display format (MM:SS or HH:MM).
  * EXACT replica of original Android WaveActivity formatDuration function.
  */
-fun formatDuration(duration: Duration): String = when {
-    duration.isInfinite() || duration < Duration.ZERO -> "--:--" // Protection
-    duration < 1.hours -> {
-        val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
-        val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
-        "$minutes:$seconds"
+fun formatDuration(duration: Duration): String =
+    when {
+        duration.isInfinite() || duration < Duration.ZERO -> "--:--" // Protection
+        duration < 1.hours -> {
+            val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
+            val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
+            "$minutes:$seconds"
+        }
+        duration < 99.hours -> {
+            val hours = duration.inWholeHours.toString().padStart(2, '0')
+            val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
+            "$hours:$minutes"
+        }
+        else -> DisplayText.EMPTY_COUNTER
     }
-    duration < 99.hours -> {
-        val hours = duration.inWholeHours.toString().padStart(2, '0')
-        val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
-        "$hours:$minutes"
-    }
-    else -> DisplayText.EMPTY_COUNTER
-}

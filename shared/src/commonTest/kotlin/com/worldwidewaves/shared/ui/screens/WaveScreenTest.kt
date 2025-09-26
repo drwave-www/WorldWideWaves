@@ -18,7 +18,6 @@ import kotlin.test.assertTrue
  * Ensures wave participation screen works correctly on both platforms.
  */
 class WaveScreenTest {
-
     @Test
     fun testSharedWaveScreenExists() {
         assertTrue(true, "SharedWaveScreen is available in shared module")

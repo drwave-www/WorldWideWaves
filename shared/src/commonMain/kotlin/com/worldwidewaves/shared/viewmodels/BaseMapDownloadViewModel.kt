@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.viewmodels
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.Log
@@ -33,8 +32,9 @@ import kotlinx.coroutines.flow.StateFlow
  * Contains all platform-agnostic logic extracted from Android MapViewModel.
  * Platform-specific subclasses provide download implementation details.
  */
-abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
-
+abstract class BaseMapDownloadViewModel :
+    BaseViewModel(),
+    IMapDownloadManager {
     val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
     override val featureState: StateFlow<MapFeatureState> = _featureState
 
@@ -58,7 +58,10 @@ abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
      * Platform-specific map download initiation.
      * Should call handleDownloadProgress, handleDownloadSuccess, or handleDownloadFailure.
      */
-    protected abstract suspend fun startPlatformDownload(mapId: String, onMapDownloaded: (() -> Unit)?)
+    protected abstract suspend fun startPlatformDownload(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)?,
+    )
 
     /**
      * Platform-specific download cancellation.
@@ -79,7 +82,10 @@ abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
     // Shared implementation (extracted from Android MapViewModel)
     // ------------------------------------------------------------------------
 
-    override suspend fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean) {
+    override suspend fun checkIfMapIsAvailable(
+        mapId: String,
+        autoDownload: Boolean,
+    ) {
         Log.d(TAG, "checkIfMapIsAvailable id=$mapId auto=$autoDownload")
         currentMapId = mapId
 
@@ -93,7 +99,10 @@ abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
         }
     }
 
-    override suspend fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)?) {
+    override suspend fun downloadMap(
+        mapId: String,
+        onMapDownloaded: (() -> Unit)?,
+    ) {
         Log.i(TAG, "downloadMap called for $mapId")
 
         // Prevent concurrent downloads
@@ -114,15 +123,16 @@ abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
         cancelPlatformDownload()
     }
 
-    override fun getErrorMessage(errorCode: Int): String {
-        return getLocalizedErrorMessage(errorCode)
-    }
+    override fun getErrorMessage(errorCode: Int): String = getLocalizedErrorMessage(errorCode)
 
     // ------------------------------------------------------------------------
     // Shared helper methods for platform implementations
     // ------------------------------------------------------------------------
 
-    fun handleDownloadProgress(totalBytes: Long, downloadedBytes: Long) {
+    fun handleDownloadProgress(
+        totalBytes: Long,
+        downloadedBytes: Long,
+    ) {
         val progressPercent = MapDownloadUtils.calculateProgressPercent(totalBytes, downloadedBytes)
         _featureState.value = MapFeatureState.Downloading(progressPercent)
     }
@@ -133,7 +143,10 @@ abstract class BaseMapDownloadViewModel : BaseViewModel(), IMapDownloadManager {
         retryManager.resetRetryCount()
     }
 
-    fun handleDownloadFailure(errorCode: Int, shouldRetry: Boolean = true) {
+    fun handleDownloadFailure(
+        errorCode: Int,
+        shouldRetry: Boolean = true,
+    ) {
         Log.e(TAG, "Download failed with error code: $errorCode")
 
         if (shouldRetry && retryManager.canRetry()) {

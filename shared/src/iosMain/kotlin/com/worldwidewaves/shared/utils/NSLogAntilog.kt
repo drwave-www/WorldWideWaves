@@ -20,13 +20,16 @@ import io.github.aakira.napier.LogLevel
  * - xcrun simctl spawn <UDID> log show --style compact --last 2m --debug --info --predicate 'processImagePath CONTAINS[c] "WorldWideWaves"'
  */
 internal class NSLogAntilog : Antilog() {
-    override fun isEnable(priority: LogLevel, tag: String?) = true
+    override fun isEnable(
+        priority: LogLevel,
+        tag: String?,
+    ) = true
 
     override fun performLog(
         priority: LogLevel,
         tag: String?,
         throwable: Throwable?,
-        message: String?
+        message: String?,
     ) {
         // Ultra-safe implementation that cannot crash and handles character encoding
         try {
@@ -52,8 +55,8 @@ internal class NSLogAntilog : Antilog() {
      * Sanitize strings to prevent character encoding issues that cause API errors.
      * Removes problematic characters like \M-p\M^_ that cause JSON parsing errors.
      */
-    private fun sanitizeForLog(input: String): String {
-        return try {
+    private fun sanitizeForLog(input: String): String =
+        try {
             input
                 // Remove escape sequences like \M-p\M^_\M^N\M-( that cause JSON errors
                 .replace(Regex("\\\\M-[^\\s]*"), "") // Remove \M- sequences
@@ -72,5 +75,4 @@ internal class NSLogAntilog : Antilog() {
         } catch (e: Exception) {
             "SANITIZE_ERROR"
         }
-    }
 }

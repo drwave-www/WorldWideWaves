@@ -65,9 +65,10 @@ fun ButtonWave(
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
 
     val isRunning = eventState == Status.RUNNING
@@ -109,7 +110,8 @@ fun ButtonWave(
                     .fillMaxSize()
                     .wrapContentHeight(align = Alignment.CenterVertically),
             text = stringResource(MokoRes.strings.wave_now),
-            style = sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
+            style =
+                sharedExtraBoldTextStyle(Event.WAVEBUTTON_FONTSIZE).copy(
                     color = if (isEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 ),

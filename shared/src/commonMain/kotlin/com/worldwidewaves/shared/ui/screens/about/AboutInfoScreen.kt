@@ -95,9 +95,10 @@ private fun MainInfo() {
         infos_core.forEach { res ->
             Text(
                 text = stringResource(res),
-                style = sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
-                    textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                ),
+                style =
+                    sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
+                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
+                    ),
             )
         }
     }

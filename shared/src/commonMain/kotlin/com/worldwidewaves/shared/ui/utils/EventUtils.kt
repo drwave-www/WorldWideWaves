@@ -47,7 +47,7 @@ data class EventState(
     val progression: Double,
     val isInArea: Boolean,
     val endDateTime: Instant?,
-    val isSimulationModeEnabled: Boolean
+    val isSimulationModeEnabled: Boolean,
 )
 
 /**
@@ -59,7 +59,7 @@ data class EventState(
 @Composable
 fun rememberEventState(
     event: IWWWEvent,
-    platform: WWWPlatform
+    platform: WWWPlatform,
 ): EventState {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val progression by event.observer.progression.collectAsState()
@@ -77,6 +77,6 @@ fun rememberEventState(
         progression = progression,
         isInArea = isInArea,
         endDateTime = endDateTime.value,
-        isSimulationModeEnabled = isSimulationModeEnabled
+        isSimulationModeEnabled = isSimulationModeEnabled,
     )
 }

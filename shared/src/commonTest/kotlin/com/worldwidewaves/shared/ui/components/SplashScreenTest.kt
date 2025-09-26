@@ -17,7 +17,6 @@ import kotlin.test.assertTrue
  * Tests for SharedSplashScreen component.
  */
 class SplashScreenTest {
-
     @Test
     fun testSharedSplashScreenExists() {
         assertTrue(true, "SharedSplashScreen is available in shared module")

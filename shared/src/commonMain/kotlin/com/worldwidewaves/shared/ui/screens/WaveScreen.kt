@@ -73,9 +73,10 @@ fun WaveScreen(
     modifier: Modifier = Modifier,
     mapContent: @Composable (Modifier) -> Unit,
 ) {
-    val clockComponent = object : KoinComponent {
-        val clock: IClock by inject()
-    }
+    val clockComponent =
+        object : KoinComponent {
+            val clock: IClock by inject()
+        }
     val clock = clockComponent.clock
 
     // Start event/map coordination and map zoom/location updates
@@ -129,7 +130,7 @@ fun WaveScreen(
             mapContent(
                 Modifier
                     .fillMaxWidth()
-                    .height(calculatedHeight)
+                    .height(calculatedHeight),
             )
 
             WaveProgressionBar(event)
@@ -143,8 +144,7 @@ fun WaveScreen(
         // Working choreographies with proper z-index
         WorkingWaveChoreographies(
             event = event,
-            modifier = Modifier.zIndex(10f)
+            modifier = Modifier.zIndex(10f),
         )
     }
 }
-

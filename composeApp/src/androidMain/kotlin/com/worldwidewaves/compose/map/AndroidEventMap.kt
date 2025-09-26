@@ -157,7 +157,6 @@ class AndroidEventMap(
         private const val BUTTON_HEIGHT_DP = 60f
     }
 
-
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
     override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
@@ -803,14 +802,13 @@ class AndroidEventMap(
      */
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
-        clearPolygons: Boolean
+        clearPolygons: Boolean,
     ) {
         context.runOnUiThread {
             val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
             mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
-
 }
 
 // ----------------------------------------------------------------------------

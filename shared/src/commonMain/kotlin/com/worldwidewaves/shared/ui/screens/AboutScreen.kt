@@ -49,10 +49,11 @@ import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 
-private val tabInfo = listOf(
-    MokoRes.strings.tab_infos_name,
-    MokoRes.strings.tab_faq_name,
-)
+private val tabInfo =
+    listOf(
+        MokoRes.strings.tab_infos_name,
+        MokoRes.strings.tab_faq_name,
+    )
 
 /**
  * Shared About root screen that aggregates the Info and FAQ sub-sections.
@@ -70,34 +71,38 @@ fun AboutScreen(
     },
 ) {
     // Create tab manager with shared sub-screens
-    val tabManager = TabManager(
-        screens = listOf(
-            object : TabScreen {
-                override val name = "Infos"
-                @Composable
-                override fun Screen(modifier: Modifier) {
-                    SharedAboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
-                }
-            },
-            object : TabScreen {
-                override val name = "FAQ"
-                @Composable
-                override fun Screen(modifier: Modifier) {
-                    SharedAboutFaqScreen(
-                        platform = platform,
-                        modifier = modifier,
-                        onUrlOpen = onUrlOpen,
-                        onSimulateClick = {
-                            platform.enableSimulationMode()
+    val tabManager =
+        TabManager(
+            screens =
+                listOf(
+                    object : TabScreen {
+                        override val name = "Infos"
+
+                        @Composable
+                        override fun Screen(modifier: Modifier) {
+                            SharedAboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
                         }
-                    )
-                }
-            }
-        ),
-        tabBarItem = { isSelected, tabIndex, _ ->
-            TabBarItem(isSelected = isSelected, tabIndex = tabIndex)
-        }
-    )
+                    },
+                    object : TabScreen {
+                        override val name = "FAQ"
+
+                        @Composable
+                        override fun Screen(modifier: Modifier) {
+                            SharedAboutFaqScreen(
+                                platform = platform,
+                                modifier = modifier,
+                                onUrlOpen = onUrlOpen,
+                                onSimulateClick = {
+                                    platform.enableSimulationMode()
+                                },
+                            )
+                        }
+                    },
+                ),
+            tabBarItem = { isSelected, tabIndex, _ ->
+                TabBarItem(isSelected = isSelected, tabIndex = tabIndex)
+            },
+        )
 
     Surface(modifier = modifier.padding(Dimensions.DEFAULT_EXT_PADDING.dp)) {
         tabManager.TabView()
@@ -110,30 +115,32 @@ private fun TabBarItem(
     tabIndex: Int,
 ) {
     Box(
-        modifier = Modifier
-            .height(TabBar.INT_HEIGHT.dp)
-            .width(TabBar.INT_ITEM_WIDTH.dp),
+        modifier =
+            Modifier
+                .height(TabBar.INT_HEIGHT.dp)
+                .width(TabBar.INT_ITEM_WIDTH.dp),
         contentAlignment = Alignment.Center,
     ) {
         if (isSelected) { // Draw a line on top of the selected tab
             HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = Dimensions.DEFAULT_INT_PADDING.dp,
-                        end = Dimensions.DEFAULT_INT_PADDING.dp
-                    )
-                    .offset(y = (-Dimensions.DEFAULT_EXT_PADDING).dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = Dimensions.DEFAULT_INT_PADDING.dp,
+                            end = Dimensions.DEFAULT_INT_PADDING.dp,
+                        ).offset(y = (-Dimensions.DEFAULT_EXT_PADDING).dp),
                 color = Color.White,
                 thickness = 2.dp,
             )
         }
         Text(
             text = stringResource(tabInfo[tabIndex]),
-            style = sharedCommonTextStyle(TabBar.INT_ITEM_FONTSIZE).copy(
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
-            ),
+            style =
+                sharedCommonTextStyle(TabBar.INT_ITEM_FONTSIZE).copy(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Normal,
+                ),
         )
     }
 }

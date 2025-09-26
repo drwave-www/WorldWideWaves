@@ -55,20 +55,22 @@ fun BackwardScreen(
     Column(modifier = modifier.fillMaxSize()) {
         // Back layer
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = BackNav.PADDING[0].dp,
-                    end = BackNav.PADDING[1].dp,
-                    top = BackNav.PADDING[2].dp,
-                    bottom = BackNav.PADDING[3].dp,
-                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = BackNav.PADDING[0].dp,
+                        end = BackNav.PADDING[1].dp,
+                        top = BackNav.PADDING[2].dp,
+                        bottom = BackNav.PADDING[3].dp,
+                    ),
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .clickable { onBackClick() },
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .clickable { onBackClick() },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(

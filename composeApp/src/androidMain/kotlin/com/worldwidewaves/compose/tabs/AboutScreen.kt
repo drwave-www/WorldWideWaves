@@ -37,9 +37,10 @@ class AboutScreen(
                 try {
                     uriHandler.openUri(url)
                 } catch (e: Exception) {
-                    com.worldwidewaves.shared.utils.Log.e("AboutScreen", "Failed to open URL: $url", throwable = e)
+                    com.worldwidewaves.shared.utils.Log
+                        .e("AboutScreen", "Failed to open URL: $url", throwable = e)
                 }
-            }
+            },
         )
     }
 }

@@ -23,7 +23,6 @@ import kotlin.test.assertTrue
  * Ensures all implementations follow the expected interface contract.
  */
 class IMapDownloadManagerTest {
-
     private class MockMapDownloadManager : IMapDownloadManager {
         private val _featureState = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
         override val featureState: StateFlow<MapFeatureState> = _featureState
@@ -32,20 +31,27 @@ class IMapDownloadManagerTest {
         var lastDownloadedMapId: String? = null
         var cancelCalled = false
 
-        override suspend fun checkIfMapIsAvailable(mapId: String, autoDownload: Boolean) {
+        override suspend fun checkIfMapIsAvailable(
+            mapId: String,
+            autoDownload: Boolean,
+        ) {
             lastCheckedMapId = mapId
-            _featureState.value = if (mapId == "available_map") {
-                MapFeatureState.Available
-            } else {
-                MapFeatureState.NotAvailable
-            }
+            _featureState.value =
+                if (mapId == "available_map") {
+                    MapFeatureState.Available
+                } else {
+                    MapFeatureState.NotAvailable
+                }
 
             if (autoDownload && _featureState.value == MapFeatureState.NotAvailable) {
                 downloadMap(mapId)
             }
         }
 
-        override suspend fun downloadMap(mapId: String, onMapDownloaded: (() -> Unit)?) {
+        override suspend fun downloadMap(
+            mapId: String,
+            onMapDownloaded: (() -> Unit)?,
+        ) {
             lastDownloadedMapId = mapId
             _featureState.value = MapFeatureState.Downloading(0)
             onMapDownloaded?.invoke()
@@ -56,60 +62,62 @@ class IMapDownloadManagerTest {
             _featureState.value = MapFeatureState.NotAvailable
         }
 
-        override fun getErrorMessage(errorCode: Int): String {
-            return "Error $errorCode"
-        }
+        override fun getErrorMessage(errorCode: Int): String = "Error $errorCode"
     }
 
     @Test
-    fun `interface contract - checkIfMapIsAvailable behavior`() = runTest {
-        val manager = MockMapDownloadManager()
+    fun `interface contract - checkIfMapIsAvailable behavior`() =
+        runTest {
+            val manager = MockMapDownloadManager()
 
-        // Test available map
-        manager.checkIfMapIsAvailable("available_map")
-        assertEquals("available_map", manager.lastCheckedMapId)
-        assertEquals(MapFeatureState.Available, manager.featureState.value)
+            // Test available map
+            manager.checkIfMapIsAvailable("available_map")
+            assertEquals("available_map", manager.lastCheckedMapId)
+            assertEquals(MapFeatureState.Available, manager.featureState.value)
 
-        // Test unavailable map
-        manager.checkIfMapIsAvailable("unavailable_map")
-        assertEquals("unavailable_map", manager.lastCheckedMapId)
-        assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
-    }
-
-    @Test
-    fun `interface contract - autoDownload triggers download`() = runTest {
-        val manager = MockMapDownloadManager()
-
-        manager.checkIfMapIsAvailable("unavailable_map", autoDownload = true)
-
-        assertEquals("unavailable_map", manager.lastCheckedMapId)
-        assertEquals("unavailable_map", manager.lastDownloadedMapId)
-        assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
-    }
-
-    @Test
-    fun `interface contract - downloadMap behavior`() = runTest {
-        val manager = MockMapDownloadManager()
-        var callbackCalled = false
-
-        manager.downloadMap("test_map") {
-            callbackCalled = true
+            // Test unavailable map
+            manager.checkIfMapIsAvailable("unavailable_map")
+            assertEquals("unavailable_map", manager.lastCheckedMapId)
+            assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
         }
 
-        assertEquals("test_map", manager.lastDownloadedMapId)
-        assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
-        assertTrue(callbackCalled)
-    }
+    @Test
+    fun `interface contract - autoDownload triggers download`() =
+        runTest {
+            val manager = MockMapDownloadManager()
+
+            manager.checkIfMapIsAvailable("unavailable_map", autoDownload = true)
+
+            assertEquals("unavailable_map", manager.lastCheckedMapId)
+            assertEquals("unavailable_map", manager.lastDownloadedMapId)
+            assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
+        }
 
     @Test
-    fun `interface contract - cancelDownload behavior`() = runTest {
-        val manager = MockMapDownloadManager()
+    fun `interface contract - downloadMap behavior`() =
+        runTest {
+            val manager = MockMapDownloadManager()
+            var callbackCalled = false
 
-        manager.cancelDownload()
+            manager.downloadMap("test_map") {
+                callbackCalled = true
+            }
 
-        assertTrue(manager.cancelCalled)
-        assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
-    }
+            assertEquals("test_map", manager.lastDownloadedMapId)
+            assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
+            assertTrue(callbackCalled)
+        }
+
+    @Test
+    fun `interface contract - cancelDownload behavior`() =
+        runTest {
+            val manager = MockMapDownloadManager()
+
+            manager.cancelDownload()
+
+            assertTrue(manager.cancelCalled)
+            assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
+        }
 
     @Test
     fun `interface contract - getErrorMessage behavior`() {
@@ -121,20 +129,21 @@ class IMapDownloadManagerTest {
     }
 
     @Test
-    fun `interface contract - featureState is reactive`() = runTest {
-        val manager = MockMapDownloadManager()
+    fun `interface contract - featureState is reactive`() =
+        runTest {
+            val manager = MockMapDownloadManager()
 
-        // Initial state
-        assertEquals(MapFeatureState.NotChecked, manager.featureState.value)
+            // Initial state
+            assertEquals(MapFeatureState.NotChecked, manager.featureState.value)
 
-        // State changes should be reflected
-        manager.checkIfMapIsAvailable("available_map")
-        assertEquals(MapFeatureState.Available, manager.featureState.value)
+            // State changes should be reflected
+            manager.checkIfMapIsAvailable("available_map")
+            assertEquals(MapFeatureState.Available, manager.featureState.value)
 
-        manager.downloadMap("test_map")
-        assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
+            manager.downloadMap("test_map")
+            assertEquals(MapFeatureState.Downloading(0), manager.featureState.value)
 
-        manager.cancelDownload()
-        assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
-    }
+            manager.cancelDownload()
+            assertEquals(MapFeatureState.NotAvailable, manager.featureState.value)
+        }
 }

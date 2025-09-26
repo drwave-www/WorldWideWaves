@@ -62,9 +62,10 @@ fun AboutWWWLogo() {
     Image(
         painter = painterResource(Res.drawable.www_logo_transparent),
         contentDescription = stringResource(MokoRes.strings.logo_description),
-        modifier = Modifier
-            .width(250.dp)
-            .padding(top = 10.dp),
+        modifier =
+            Modifier
+                .width(250.dp)
+                .padding(top = 10.dp),
     )
     Spacer(modifier = Modifier.size(20.dp))
 }

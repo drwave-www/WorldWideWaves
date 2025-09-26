@@ -21,7 +21,6 @@ import kotlin.test.assertTrue
  * Tests all shared utility functions extracted from MapViewModel.
  */
 class MapDownloadUtilsTest {
-
     @Test
     fun `calculateProgressPercent returns correct percentage`() {
         // Test normal case
@@ -89,15 +88,19 @@ class MapDownloadUtilsTest {
         val retryManager = MapDownloadUtils.RetryManager()
 
         // Test exponential backoff progression
-        val expectedDelays = listOf(
-            MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS,      // 1000ms
-            MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS * 2,  // 2000ms
-            MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS * 4,  // 4000ms
-        )
+        val expectedDelays =
+            listOf(
+                MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS, // 1000ms
+                MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS * 2, // 2000ms
+                MapDownloadUtils.RetryManager.BASE_RETRY_DELAY_MS * 4, // 4000ms
+            )
 
         expectedDelays.forEachIndexed { index, expectedDelay ->
-            assertEquals(expectedDelay, retryManager.getNextRetryDelay(),
-                "Retry delay incorrect for attempt ${index + 1}")
+            assertEquals(
+                expectedDelay,
+                retryManager.getNextRetryDelay(),
+                "Retry delay incorrect for attempt ${index + 1}",
+            )
             retryManager.incrementRetryCount()
         }
     }

@@ -15,56 +15,60 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.worldwidewaves.shared.R
 
-private val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs,
-)
+private val provider =
+    GoogleFont.Provider(
+        providerAuthority = "com.google.android.gms.fonts",
+        providerPackage = "com.google.android.gms",
+        certificates = R.array.com_google_android_gms_fonts_certs,
+    )
 
-actual val SharedBodyFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+actual val SharedBodyFontFamily: FontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )
 
-actual val SharedDisplayFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+actual val SharedDisplayFontFamily: FontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )
 
-actual val SharedExtraFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat Alternates"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-    Font(GoogleFont("Noto Sans Arabic"), provider),
-    Font(GoogleFont("Noto Naskh Arabic"), provider),
-    Font(GoogleFont("Noto Sans Hebrew"), provider),
-    Font(GoogleFont("Noto Sans Bengali"), provider),
-    Font(GoogleFont("Noto Sans Devanagari"), provider),
-    Font(GoogleFont("Noto Sans Thai"), provider),
-    Font(GoogleFont("Noto Sans Ethiopic"), provider),
-    Font(GoogleFont("Noto Sans SC"), provider),
-    Font(GoogleFont("Noto Sans JP"), provider),
-    Font(GoogleFont("Noto Sans KR"), provider),
-    Font(GoogleFont("Noto Nastaliq Urdu"), provider),
-)
+actual val SharedExtraFontFamily: FontFamily =
+    FontFamily(
+        Font(GoogleFont("Montserrat Alternates"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+        Font(GoogleFont("Noto Sans Arabic"), provider),
+        Font(GoogleFont("Noto Naskh Arabic"), provider),
+        Font(GoogleFont("Noto Sans Hebrew"), provider),
+        Font(GoogleFont("Noto Sans Bengali"), provider),
+        Font(GoogleFont("Noto Sans Devanagari"), provider),
+        Font(GoogleFont("Noto Sans Thai"), provider),
+        Font(GoogleFont("Noto Sans Ethiopic"), provider),
+        Font(GoogleFont("Noto Sans SC"), provider),
+        Font(GoogleFont("Noto Sans JP"), provider),
+        Font(GoogleFont("Noto Sans KR"), provider),
+        Font(GoogleFont("Noto Nastaliq Urdu"), provider),
+    )

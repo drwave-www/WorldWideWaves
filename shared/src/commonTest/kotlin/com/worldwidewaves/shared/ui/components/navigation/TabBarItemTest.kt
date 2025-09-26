@@ -17,7 +17,6 @@ import kotlin.test.assertTrue
  * Tests for SharedTabBarItem component.
  */
 class TabBarItemTest {
-
     @Test
     fun testSharedTabBarItemExists() {
         assertTrue(true, "SharedTabBarItem is available in shared module")

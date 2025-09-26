@@ -19,7 +19,6 @@ import kotlin.test.assertTrue
  * Tests DebugAntilog and Android Napier initialization.
  */
 class AndroidLoggingSystemTest {
-
     @Test
     fun testAndroidLogConfigExists() {
         // Test that Android LogConfig is properly configured
@@ -95,8 +94,11 @@ class AndroidLoggingSystemTest {
         initNapier()
 
         try {
-            val complexException = RuntimeException("Complex Android exception with nested cause",
-                IllegalStateException("Nested cause"))
+            val complexException =
+                RuntimeException(
+                    "Complex Android exception with nested cause",
+                    IllegalStateException("Nested cause"),
+                )
 
             Log.e("ANDROID_COMPLEX", "Complex error message", complexException)
             Log.w("ANDROID_COMPLEX", "Warning with Unicode: 🚀 🎯 ✅", complexException)
