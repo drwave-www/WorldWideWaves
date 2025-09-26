@@ -12,8 +12,12 @@ package com.worldwidewaves.shared.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -54,36 +58,92 @@ import androidx.compose.runtime.collectAsState
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
  *
- * Matches Android MainActivity exactly: splash coordination, tab navigation,
- * floating debug icon, simulation mode chip overlay.
+ * Starting with minimal working version, building up to full Android parity.
  */
 @Composable
 fun SharedApp() {
-    Log.i("SharedApp", "SharedApp starting")
+    // Absolutely minimal implementation for debugging
+    platform.Foundation.NSLog("📱 SHARED_APP: Starting basic SharedApp")
 
-    // Inject dependencies using Koin (matching Android pattern exactly)
-    val dependencies = remember {
-        object : KoinComponent {
-            val platform: WWWPlatform by inject()
-            val events: WWWEvents by inject()
-            val eventsViewModel: com.worldwidewaves.shared.viewmodels.EventsViewModel by inject()
-            val mapStateManager: com.worldwidewaves.shared.map.MapStateManager by inject()
-            val setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite by inject()
+    androidx.compose.material3.MaterialTheme {
+        platform.Foundation.NSLog("📱 SHARED_APP: MaterialTheme applied")
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            platform.Foundation.NSLog("📱 SHARED_APP: Box created, showing text")
+
+            androidx.compose.material3.Text(
+                text = "iOS App Working!",
+                style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
+            )
         }
     }
 
-    SharedWorldWideWavesThemeWithExtended {
-        Surface(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            SharedMainContent(
-                platform = dependencies.platform,
-                events = dependencies.events,
-                eventsViewModel = dependencies.eventsViewModel,
-                mapStateManager = dependencies.mapStateManager,
-                setEventFavorite = dependencies.setEventFavorite
-            )
+    platform.Foundation.NSLog("📱 SHARED_APP: SharedApp completed")
+}
+
+/**
+ * Minimal working content to ensure basic app functionality
+ */
+@Composable
+private fun MinimalWorkingContent() {
+    Log.i("SharedApp", "MinimalWorkingContent starting")
+    var showSplash by remember { mutableStateOf(true) }
+
+    // Simple splash timing
+    LaunchedEffect(Unit) {
+        Log.i("SharedApp", "LaunchedEffect started, will wait 3 seconds")
+        kotlinx.coroutines.delay(3000) // 3 second splash
+        Log.i("SharedApp", "Delay completed, hiding splash")
+        showSplash = false
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (showSplash) {
+            // Simple splash screen
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.Text(
+                    text = "WorldWideWaves",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        } else {
+            // Simple main content
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                androidx.compose.material3.Text(
+                    text = "iOS Implementation Working!",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                androidx.compose.material3.Text(
+                    text = "SharedApp with Compose Multiplatform",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                androidx.compose.material3.Button(
+                    onClick = {
+                        Log.i("SharedApp", "Test button clicked")
+                        showSplash = true
+                    }
+                ) {
+                    androidx.compose.material3.Text("Test Splash Again")
+                }
+            }
         }
     }
 }
