@@ -116,11 +116,6 @@ android {
         compose = true
         buildConfig = true
     }
-    sourceSets {
-        main {
-            res.srcDirs("src/androidMain/res")
-        }
-    }
     buildTypes {
         release {
             isMinifyEnabled = false
