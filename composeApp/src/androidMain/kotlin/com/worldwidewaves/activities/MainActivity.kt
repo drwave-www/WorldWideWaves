@@ -47,10 +47,10 @@ import com.worldwidewaves.compose.tabs.EventsListScreen
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.components.SharedSplashScreen
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
-import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesTheme
+import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -146,7 +146,7 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            SharedWorldWideWavesTheme {
+            WorldWideWavesTheme {
                 Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                     // Box to stack main content and simulation-mode overlay
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -196,6 +196,6 @@ open class MainActivity : AppCompatActivity() {
 
     @Composable
     private fun ProgrammaticSplashScreen() {
-        SharedSplashScreen()
+        SplashScreen()
     }
 }

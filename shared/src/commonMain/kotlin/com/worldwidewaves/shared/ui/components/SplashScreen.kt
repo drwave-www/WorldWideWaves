@@ -25,7 +25,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,7 +45,7 @@ import org.jetbrains.compose.resources.painterResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedSplashScreen(
+fun SplashScreen(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize()) {

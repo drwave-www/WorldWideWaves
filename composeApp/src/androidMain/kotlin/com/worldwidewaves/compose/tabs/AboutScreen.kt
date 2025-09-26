@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
+import com.worldwidewaves.shared.ui.screens.AboutScreen
 
 /**
  * Android wrapper for SharedAboutScreen.
@@ -30,7 +30,7 @@ class AboutScreen(
     override fun Screen(modifier: Modifier) {
         val uriHandler = LocalUriHandler.current
 
-        SharedAboutScreen(
+        AboutScreen(
             platform = platform,
             modifier = modifier,
             onUrlOpen = { url ->

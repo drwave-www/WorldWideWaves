@@ -60,7 +60,7 @@ import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesTheme
+import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
@@ -99,7 +99,7 @@ abstract class AbstractEventBackActivity(
         }
 
         setContent {
-            SharedWorldWideWavesTheme {
+            WorldWideWavesTheme {
                 Surface(
                     modifier =
                         Modifier

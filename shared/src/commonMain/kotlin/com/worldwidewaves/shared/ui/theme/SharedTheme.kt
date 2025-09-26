@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
  * typography, and styling on both platforms.
  */
 @Composable
-fun SharedWorldWideWavesTheme(
+fun WorldWideWavesTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

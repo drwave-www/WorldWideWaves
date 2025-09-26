@@ -60,7 +60,7 @@ private val tabInfo = listOf(
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedAboutScreen(
+fun AboutScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
