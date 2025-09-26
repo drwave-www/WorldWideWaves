@@ -43,6 +43,8 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.format.DateTimeFormats
+import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
 import com.worldwidewaves.shared.ui.utils.formatDurationMinutes
 import dev.icerock.moko.resources.compose.stringResource
@@ -134,9 +136,7 @@ fun EventNumbers(
                 AutoResizeSingleLineText(
                     text = stringResource(MokoRes.strings.be_waved),
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = Event.NUMBERS_TITLE_FONTSIZE.sp,
-                        fontWeight = FontWeight.Bold,
+                    style = sharedExtraBoldTextStyle(Event.NUMBERS_TITLE_FONTSIZE).copy(
                         textAlign = TextAlign.End,
                     ),
                     textAlign = TextAlign.End,
@@ -161,17 +161,12 @@ fun EventNumbers(
                         ) {
                             Text(
                                 text = stringResource(key),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = Event.NUMBERS_LABEL_FONTSIZE.sp,
-                                    fontWeight = FontWeight.Bold,
-                                ),
+                                style = sharedQuinaryColoredBoldTextStyle(Event.NUMBERS_LABEL_FONTSIZE),
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = displayValue,
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        fontSize = Event.NUMBERS_VALUE_FONTSIZE.sp,
-                                        fontWeight = FontWeight.Bold,
+                                    style = sharedExtraBoldTextStyle(Event.NUMBERS_VALUE_FONTSIZE).copy(
                                         color = when (key) {
                                             MokoRes.strings.wave_progression -> MaterialTheme.colorScheme.secondary
                                             MokoRes.strings.wave_start_time -> Color.Yellow
@@ -188,7 +183,6 @@ fun EventNumbers(
                                         text = " $eventTimeZone",
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             fontSize = Event.NUMBERS_TZ_FONTSIZE.sp,
-                                            fontWeight = FontWeight.Light,
                                             color = when (key) {
                                                 MokoRes.strings.wave_start_time -> Color.Yellow
                                                 else -> MaterialTheme.colorScheme.primary

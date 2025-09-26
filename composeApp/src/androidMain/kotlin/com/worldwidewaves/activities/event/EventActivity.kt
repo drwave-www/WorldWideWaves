@@ -43,8 +43,6 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
 import com.worldwidewaves.shared.ui.components.StandardEventLayout
 import com.worldwidewaves.shared.ui.utils.calculateEventMapHeight
-import com.worldwidewaves.shared.ui.utils.rememberEventState
-import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime

@@ -26,16 +26,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -52,11 +50,7 @@ fun EventDescription(
     Text(
         modifier = modifier.padding(horizontal = Dimensions.DEFAULT_EXT_PADDING.dp),
         text = stringResource(event.getDescription()),
-        style = MaterialTheme.typography.bodyMedium.copy(
-            fontSize = Event.DESC_FONTSIZE.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFFE0E0E0) // extraQuinaryColored equivalent
-        ),
+        style = sharedQuinaryColoredBoldTextStyle(Event.DESC_FONTSIZE),
         textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
     )
 }

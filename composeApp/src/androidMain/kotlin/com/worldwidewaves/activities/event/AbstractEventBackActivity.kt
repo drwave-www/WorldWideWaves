@@ -178,7 +178,7 @@ abstract class AbstractEventBackActivity(
                             modifier = Modifier.fillMaxWidth().align(Center),
                             text = stringResource(selectedEvent!!.getLocation()),
                             style =
-                                quinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
+                                sharedQuinaryColoredBoldTextStyle(BackNav.EVENT_LOCATION_FONTSIZE).copy(
                                     textAlign = TextAlign.Center,
                                 ),
                         )
@@ -201,7 +201,7 @@ abstract class AbstractEventBackActivity(
             } else {
                 Text(
                     text = stringResource(MokoRes.strings.events_not_found_loading),
-                    style = primaryColoredTextStyle(),
+                    style = sharedPrimaryColoredTextStyle(),
                 )
             }
         }

@@ -91,7 +91,7 @@ import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.viewmodels.MapFeatureState
+import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope

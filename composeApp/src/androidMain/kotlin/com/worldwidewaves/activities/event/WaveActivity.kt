@@ -149,3 +149,21 @@ class WaveActivity : AbstractEventWaveActivity() {
 
 // ------------------------------------------------------------------------
 
+@Composable
+fun MapZoomAndLocationUpdate(
+    event: IWWWEvent,
+    eventMap: AndroidEventMap,
+) {
+    val scope = rememberCoroutineScope()
+    val progression by event.observer.progression.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+
+    LaunchedEffect(progression, isInArea) {
+        if (isInArea) {
+            scope.launch {
+                eventMap.targetUserAndWave()
+            }
+        }
+    }
+}
+

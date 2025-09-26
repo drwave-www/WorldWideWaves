@@ -42,45 +42,7 @@ import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-/**
- * Represents possible states during map feature installation.
- */
-sealed class MapFeatureState {
-    data object NotChecked : MapFeatureState()
-
-    data object Available : MapFeatureState()
-
-    data object NotAvailable : MapFeatureState()
-
-    data object Pending : MapFeatureState()
-
-    data class Downloading(
-        val progress: Int,
-    ) : MapFeatureState()
-
-    data object Installing : MapFeatureState()
-
-    data object Installed : MapFeatureState()
-
-    data class Failed(
-        val errorCode: Int,
-        val errorMessage: String? = null,
-    ) : MapFeatureState()
-
-    data class RequiresUserConfirmation(
-        val sessionState: SplitInstallSessionState,
-    ) : MapFeatureState()
-
-    data object Canceling : MapFeatureState()
-
-    data object Unknown : MapFeatureState()
-
-    data class Retrying(
-        val attempt: Int,
-        val maxAttempts: Int,
-    ) : MapFeatureState()
-}
+import com.worldwidewaves.shared.map.MapFeatureState
 
 // ----------------------------------------------------------------------------
 
@@ -278,7 +240,8 @@ class MapViewModel(
 
     private fun handleUserConfirmationStatus(state: SplitInstallSessionState) {
         Log.i(TAG, "Status: REQUIRES_USER_CONFIRMATION")
-        _featureState.value = MapFeatureState.RequiresUserConfirmation(state)
+        // Handle user confirmation by treating as pending
+        _featureState.value = MapFeatureState.Pending
     }
 
     private fun handleUnknownStatus() {
