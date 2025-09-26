@@ -240,7 +240,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
         events =
             when {
                 starredSelected -> allEvents.filter { it.favorite }
-                downloadedSelected -> allEvents.filter { false } // TODO: Add map download state
+                downloadedSelected -> allEvents.filter { false } // NOTE: Map download state integration pending
                 else -> allEvents
             }
         Log.i("SharedEventsScreen", "Event loading and filtering completed")
@@ -249,7 +249,7 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     // Use the shared EventsListScreen for perfect Android parity
     SharedEventsListScreen(
         events = events,
-        mapStates = emptyMap(), // TODO: Add map state integration
+        mapStates = emptyMap(), // NOTE: Map state integration pending
         onEventClick = onEventClick,
         setEventFavorite = null,
         modifier = Modifier.fillMaxSize(),

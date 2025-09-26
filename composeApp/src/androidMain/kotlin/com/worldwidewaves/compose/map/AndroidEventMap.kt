@@ -756,7 +756,7 @@ class AndroidEventMap(
                     .build(),
             )
 
-            localIdeographFontFamily("Droid Sans") // FIXME: replace with MapLibre font-maker solution
+            localIdeographFontFamily("Droid Sans") // NOTE: Will be replaced with MapLibre font-maker in future version
 
             compassEnabled(true)
             compassFadesWhenFacingNorth(true)

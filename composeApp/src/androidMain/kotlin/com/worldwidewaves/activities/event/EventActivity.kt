@@ -50,12 +50,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AbstractEventWaveActivity() {
-    private val clock: IClock by inject()
-    private val platform: WWWPlatform by inject()
-
-    companion object {
-        private const val TAG = "EventActivity"
-    }
+    // Dependencies injected as needed
 
     // ------------------------------------------------------------------------
 

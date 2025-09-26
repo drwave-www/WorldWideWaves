@@ -38,7 +38,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
-    private val clock: IClock by inject()
+    // Dependencies injected as needed
 
     // Ensure dynamic-feature splits are available without restarting the app
     override fun onCreate(savedInstanceState: android.os.Bundle?) {

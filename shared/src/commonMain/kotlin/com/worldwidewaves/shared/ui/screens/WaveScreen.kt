@@ -39,7 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.AbstractEventMap
@@ -51,15 +50,6 @@ import kotlin.time.ExperimentalTime
 
 // Constants
 private const val MAP_HEIGHT_DP = 300
-private const val PROGRESSION_BAR_HEIGHT_DP = 40
-private const val TRIANGLE_SIZE_PX = 20f
-private const val HIT_COUNTER_WIDTH_DP = 200
-private const val STATUS_TEXT_FONT_SIZE = 24
-private const val PROGRESSION_FONT_SIZE = 16
-
-// UI Colors
-private const val PROGRESS_COLOR = 0xFF2196F3 // Blue
-private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 
 /**
  * Complete Wave Screen implementation with exact same behavior and look as the working version.
@@ -93,21 +83,6 @@ fun WaveScreen(
     val hitDateTime by event.observer.hitDateTime.collectAsState()
     val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState(false)
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState(false)
-
-    // Derive choreography active state (exact working logic)
-    val isChoreographyActive =
-        remember(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {
-            isWarmingInProgress ||
-                isGoingToBeHit ||
-                run {
-                    if (hasBeenHit) {
-                        val secondsSinceHit = (clock.now() - hitDateTime).inWholeSeconds
-                        secondsSinceHit in 0..WaveTiming.SHOW_HIT_SEQUENCE_SECONDS.inWholeSeconds
-                    } else {
-                        false
-                    }
-                }
-        }
 
     // Play the hit sound when the user has been hit (exact working implementation)
     LaunchedEffect(isWarmingInProgress, isGoingToBeHit, hasBeenHit, hitDateTime) {

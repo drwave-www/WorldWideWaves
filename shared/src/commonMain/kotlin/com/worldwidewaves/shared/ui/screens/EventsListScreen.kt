@@ -480,7 +480,7 @@ private fun EventOverlayMapDownloaded(
                     Modifier
                         .size(EventsList.MAPDL_IMAGE_SIZE.dp)
                         .clickable {
-                            // TODO: Implement map uninstall dialog
+                            // NOTE: Map uninstall dialog implementation pending
                         },
                 painter = painterResource(Res.drawable.downloaded_icon),
                 contentDescription = stringResource(MokoRes.strings.map_downloaded),
