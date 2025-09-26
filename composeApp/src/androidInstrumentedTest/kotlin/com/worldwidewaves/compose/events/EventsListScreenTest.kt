@@ -65,12 +65,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.shared.testing.PerformanceTrace
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import io.mockk.every
-import io.mockk.mockk
 
 /**
  * Critical Phase 1 UI tests for Events List Screen - Event discovery workflow
