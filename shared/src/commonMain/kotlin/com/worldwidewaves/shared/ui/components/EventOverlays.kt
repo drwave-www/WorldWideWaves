@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Common
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
+import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.format.DateTimeFormats
@@ -129,6 +130,7 @@ fun EventOverlayDone(
 /**
  * Event overlay date component that shows the event date with proper positioning.
  * Positions date in center normally, at bottom when event is done.
+ * Uses double text rendering for stroke effect matching historical implementation.
  */
 @Composable
 fun EventOverlayDate(
@@ -142,11 +144,27 @@ fun EventOverlayDate(
             .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
+        // Background text for stroke effect
         Text(
             text = eventDate,
-            style = MaterialTheme.typography.headlineLarge.copy(
+            style = androidx.compose.ui.text.TextStyle(
+                fontSize = Event.DATE_FONTSIZE.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFFFFFFFF), // quinaryLight
+            ),
+        )
+        // Foreground text with stroke outline
+        Text(
+            text = eventDate,
+            style = androidx.compose.ui.text.TextStyle(
+                fontSize = Event.DATE_FONTSIZE.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.ExtraBold
+                drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
+                    miter = Event.DATE_MITER,
+                    width = Event.DATE_STROKE,
+                    join = androidx.compose.ui.graphics.StrokeJoin.Miter,
+                ),
             ),
         )
     }
@@ -174,7 +192,7 @@ fun EventOverlay(
             painter = painterResource(event.getLocationImage() as DrawableResource),
             contentDescription = stringResource(event.getLocation()),
         )
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.matchParentSize()) {
             EventOverlaySoonOrRunning(eventStatus)
             EventOverlayDone(eventStatus)
             EventOverlayDate(eventStatus, localizedDate)

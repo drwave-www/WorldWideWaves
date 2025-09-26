@@ -118,7 +118,7 @@ fun EventNumbers(
             modifier = Modifier
                 .border(
                     width = Event.NUMBERS_BORDERWIDTH.dp,
-                    color = MaterialTheme.colorScheme.outline,
+                    color = Color(0xFFFFFFFF), // quinaryLight
                     shape = RoundedCornerShape(
                         topStart = Event.NUMBERS_BORDERROUND.dp,
                         bottomEnd = Event.NUMBERS_BORDERROUND.dp,
