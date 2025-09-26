@@ -229,6 +229,9 @@ object WWWGlobals {
         /** Maximum duration for splash screen display */
         val SPLASH_MAX_DURATION = 2000.milliseconds
 
+        /** Splash screen check interval for both data loading and minimum duration */
+        const val SPLASH_CHECK_INTERVAL_MS = 2000L
+
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
 

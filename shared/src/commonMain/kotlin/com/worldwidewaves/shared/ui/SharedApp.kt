@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
@@ -47,6 +48,8 @@ import com.worldwidewaves.shared.utils.Log
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
+import androidx.compose.runtime.collectAsState
 
 /**
  * Shared Compose App - Identical UI on both Android and iOS.
@@ -58,11 +61,14 @@ import kotlin.time.ExperimentalTime
 fun SharedApp() {
     Log.i("SharedApp", "SharedApp starting")
 
-    // Inject dependencies using Koin (matching Android pattern)
+    // Inject dependencies using Koin (matching Android pattern exactly)
     val dependencies = remember {
         object : KoinComponent {
             val platform: WWWPlatform by inject()
             val events: WWWEvents by inject()
+            val eventsViewModel: com.worldwidewaves.shared.viewmodels.EventsViewModel by inject()
+            val mapStateManager: com.worldwidewaves.shared.map.MapStateManager by inject()
+            val setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite by inject()
         }
     }
 
@@ -73,7 +79,10 @@ fun SharedApp() {
         ) {
             SharedMainContent(
                 platform = dependencies.platform,
-                events = dependencies.events
+                events = dependencies.events,
+                eventsViewModel = dependencies.eventsViewModel,
+                mapStateManager = dependencies.mapStateManager,
+                setEventFavorite = dependencies.setEventFavorite
             )
         }
     }
@@ -86,7 +95,10 @@ fun SharedApp() {
 @Composable
 private fun SharedMainContent(
     platform: WWWPlatform,
-    events: WWWEvents
+    events: WWWEvents,
+    eventsViewModel: com.worldwidewaves.shared.viewmodels.EventsViewModel,
+    mapStateManager: com.worldwidewaves.shared.map.MapStateManager,
+    setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite
 ) {
     // Splash screen state management (matching Android pattern)
     var isSplashFinished by remember { mutableStateOf(false) }
@@ -103,16 +115,20 @@ private fun SharedMainContent(
     val tabManager = remember {
         val screens = mutableListOf<TabScreen>()
 
-        // Events list screen
+        // Events list screen (matching Android pattern exactly)
         screens.add(object : TabScreen {
             override val name = "Events"
             @Composable
             override fun Screen(modifier: Modifier) {
-                SharedEventsScreenWrapper(
+                SharedEventsScreen(
+                    eventsViewModel = eventsViewModel,
+                    mapStateManager = mapStateManager,
+                    setEventFavorite = setEventFavorite,
                     onEventClick = { eventId ->
                         selectedEventId = eventId
                         currentScreen = AppScreen.EventDetails
-                    }
+                    },
+                    modifier = modifier
                 )
             }
         })
@@ -144,11 +160,9 @@ private fun SharedMainContent(
         )
     }
 
-    // Data loading coordination (matching Android pattern)
+    // Data loading coordination (matching Android pattern exactly)
     LaunchedEffect(Unit) {
         try {
-            // Add delay to ensure initialization is complete
-            kotlinx.coroutines.delay(1000)
             events.loadEvents(
                 onTermination = { exception ->
                     isDataLoaded = true
@@ -164,9 +178,9 @@ private fun SharedMainContent(
         }
     }
 
-    // Enforce minimum splash duration (matching Android pattern)
+    // Enforce minimum splash duration (matching Android pattern exactly)
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(3000) // 3 second minimum
+        kotlinx.coroutines.delay(WWWGlobals.Timing.SPLASH_MAX_DURATION.inWholeMilliseconds)
         if (isDataLoaded) {
             isSplashFinished = true
         }
@@ -502,72 +516,33 @@ private fun SharedMapScreen(
 }
 
 /**
- * Wrapper for events screen with data loading (matching Android pattern)
+ * Shared Events Screen - Matching Android EventsListScreen pattern exactly
  */
+@OptIn(ExperimentalTime::class)
 @Composable
-private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
-    Log.i("SharedEventsScreen", "SharedEventsScreen starting")
+private fun SharedEventsScreen(
+    eventsViewModel: com.worldwidewaves.shared.viewmodels.EventsViewModel,
+    mapStateManager: com.worldwidewaves.shared.map.MapStateManager,
+    setEventFavorite: com.worldwidewaves.shared.data.SetEventFavorite,
+    onEventClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val events by eventsViewModel.events.collectAsState(initial = emptyList())
+    val mapStates by mapStateManager.mapStates.collectAsState(initial = emptyMap())
 
-    var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
-
-    // Get SetEventFavorite through existing wwwEvents for now
-    val wwwEvents = remember {
-        try {
-            Log.i("SharedEventsScreen", "Creating WWWEvents instance")
-            WWWEvents()
-        } catch (e: Exception) {
-            Log.e("SharedEventsScreen", "Failed to create WWWEvents: ${e.message}", throwable = e)
-            null
+    // Track all event IDs for map availability (matching Android pattern)
+    LaunchedEffect(events) {
+        events.forEach { event: IWWWEvent ->
+            mapStateManager.checkMapAvailability(event.id, autoDownload = false)
         }
     }
 
-    // Filter state - exact Android match with proper state management
-    var starredSelected by remember { mutableStateOf(false) }
-    var downloadedSelected by remember { mutableStateOf(false) }
-    var hasLoadingError by remember { mutableStateOf(false) }
-    var allEvents by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
-
-    LaunchedEffect(wwwEvents) {
-        wwwEvents?.let { eventsInstance ->
-            try {
-                eventsInstance.loadEvents(
-                    onLoaded = {
-                        Log.i("SharedEventsScreen", "Events loaded successfully")
-                        allEvents = eventsInstance.flow().value
-                        Log.i("SharedEventsScreen", "UI state updated with events")
-                    },
-                    onLoadingError = { error ->
-                        Log.e("SharedEventsScreen", "Event loading error: ${error.message}", throwable = error)
-                        hasLoadingError = true
-                    }
-                )
-                Log.i("SharedEventsScreen", "Event loading initiated successfully")
-            } catch (e: Exception) {
-                Log.e("SharedEventsScreen", "CRITICAL: LaunchedEffect exception: ${e.message}", throwable = e)
-                hasLoadingError = true
-            }
-        }
-    }
-
-    // Filter logic - EXACT Android match
-    LaunchedEffect(starredSelected, downloadedSelected, allEvents) {
-        events = when {
-            starredSelected -> allEvents.filter { it.favorite }
-            downloadedSelected -> allEvents.filter { false } // NOTE: Map download state integration pending
-            else -> allEvents
-        }
-        Log.i("SharedEventsScreen", "Event loading and filtering completed")
-    }
-
-    // Use the shared EventsListScreen for perfect Android parity
-    SharedEventsListScreen(
+    // Use SharedEventsListScreen exactly like Android EventsListScreen
+    com.worldwidewaves.shared.ui.screens.SharedEventsListScreen(
         events = events,
-        mapStates = emptyMap(), // NOTE: Map state integration pending
-        onEventClick = { eventId ->
-            Log.i("SharedEventsScreen", "Event clicked: $eventId")
-            onEventClick(eventId)
-        },
-        setEventFavorite = null,
-        modifier = Modifier.fillMaxSize()
+        mapStates = mapStates,
+        onEventClick = onEventClick,
+        setEventFavorite = setEventFavorite,
+        modifier = modifier
     )
 }
