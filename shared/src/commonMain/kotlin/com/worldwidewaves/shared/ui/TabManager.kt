@@ -39,9 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.TabBar
 
 // ----------------------------
@@ -56,10 +54,7 @@ import com.worldwidewaves.shared.WWWGlobals.TabBar
  *   analytics.
  */
 interface TabScreen {
-    @Composable fun Screen(
-        platformEnabler: PlatformEnabler,
-        modifier: Modifier,
-    )
+    @Composable fun Screen(modifier: Modifier)
 
     val name: String
 }
@@ -77,7 +72,6 @@ interface TabScreen {
  *    current selection.
  */
 class TabManager(
-    private val platformEnabler: PlatformEnabler,
     private val screens: List<TabScreen>, // List of tab screens
     val tabBarItem: @Composable ( // How to draw a tab item
         isSelected: Boolean,
@@ -98,21 +92,12 @@ class TabManager(
         selectedTab: Int = 0,
     ) {
         var currentTab by remember { mutableIntStateOf(selectedTab) }
-        var showStartScreen by remember { mutableStateOf(startScreen != null) }
+        var originalScreen by remember { mutableStateOf(startScreen) }
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .testTag("tab-view"),
-        ) {
+        Column(modifier = Modifier.fillMaxHeight()) {
             // Display the selected tab screen
             Surface(modifier = Modifier.weight(1f).fillMaxSize()) {
-                if (showStartScreen && startScreen != null) {
-                    startScreen.invoke(Modifier)
-                } else {
-                    screens[currentTab].Screen(platformEnabler, Modifier)
-                }
+                originalScreen?.invoke(Modifier) ?: screens[currentTab].Screen(Modifier)
             }
 
             // Tab bar
@@ -128,7 +113,7 @@ class TabManager(
                                 .fillMaxHeight()
                                 .align(Alignment.CenterVertically)
                                 .clickable {
-                                    showStartScreen = false
+                                    originalScreen = null
                                     currentTab = index
                                 },
                         contentAlignment = Alignment.Center,

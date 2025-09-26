@@ -88,25 +88,6 @@ object MidiParser {
     private const val SMPTE_FRAME_FLAG = 0x8000
     private const val CHUNK_ID_LENGTH = 4
 
-    // MIDI standard constants
-    private const val HEADER_CHUNK_LENGTH = 6
-    private const val DEFAULT_TICKS_PER_BEAT = 24
-    private const val DEFAULT_MICROSECONDS_PER_BEAT = 500_000L // 120 BPM
-    private const val MICROSECONDS_PER_MINUTE = 60_000_000L
-    private const val TEMPO_META_LENGTH = 3
-    private const val STRING_CHUNK_LENGTH = 4
-    private const val BYTE_SHIFT_16 = 16
-    private const val BYTE_SHIFT_8 = 8
-    private const val RUNNING_STATUS_MASK = 0x80
-    private const val STATUS_MASK_F0 = 0xF0
-    private const val STATUS_MASK_0F = 0x0F
-    private const val STATUS_MASK_E0 = 0xE0
-    private const val PROGRAM_CHANGE_STATUS = 0xC0
-    private const val SINGLE_DATA_BYTE_SKIP = 1
-    private const val DOUBLE_DATA_BYTE_SKIP = 2
-    private const val DEBUG_NOTES_LIMIT = 5
-    private const val MICROSECONDS_PER_SECOND = 1_000_000.0
-
     // ------------------------------------------------------------------------
 
     private data class TempoChange(
@@ -137,7 +118,7 @@ object MidiParser {
             timeDivision
         } else {
             // SMPTE frames - not supported in this simple implementation
-            DEFAULT_TICKS_PER_BEAT
+            24 // WWWGlobals.Midi.DEFAULT_TICKS_PER_BEAT
         }
 
     /**
@@ -146,10 +127,14 @@ object MidiParser {
     private fun readMidiHeader(reader: ByteArrayReader): Triple<Int, Int, Int> {
         val headerChunkId = reader.readString(CHUNK_ID_LENGTH)
         Log.d("MidiParser", "Header chunk ID: $headerChunkId")
-        require(headerChunkId == HEADER_CHUNK_ID) { "Not a valid MIDI file (missing MThd header)" }
+        if (headerChunkId != HEADER_CHUNK_ID) {
+            throw IllegalArgumentException("Not a valid MIDI file (missing MThd header)")
+        }
 
         val headerLength = reader.readInt32()
-        require(headerLength == HEADER_CHUNK_LENGTH) { "Invalid MIDI header length: $headerLength" }
+        if (headerLength != 6) { // WWWGlobals.Midi.HEADER_CHUNK_LENGTH
+            throw IllegalArgumentException("Invalid MIDI header length: $headerLength")
+        }
 
         val format = reader.readInt16()
         val numTracks = reader.readInt16()
@@ -163,29 +148,13 @@ object MidiParser {
     /**
      * Parse a MIDI file into a MidiTrack
      */
-    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack? =
+    suspend fun parseMidiFile(midiResourcePath: String): MidiTrack =
         try {
-            Log.d("MidiParser", "Loading MIDI file: $midiResourcePath")
             val midiBytes = MidiResources.readMidiFile(midiResourcePath)
-            val track = parseMidiBytes(midiBytes)
-            Log.d("MidiParser", "Successfully parsed MIDI file: $midiResourcePath")
-            track
-        } catch (e: IllegalArgumentException) {
-            Log.e("MidiParser", "Invalid MIDI file format $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: org.jetbrains.compose.resources.MissingResourceException) {
-            Log.e("MidiParser", "Resource not found $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: IllegalStateException) {
-            Log.e("MidiParser", "Invalid state reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
-        } catch (e: RuntimeException) {
-            Log.e("MidiParser", "Runtime error reading MIDI file $midiResourcePath: ${e.message}")
-            // Return null instead of crashing to allow graceful degradation
-            null
+            parseMidiBytes(midiBytes)
+        } catch (e: Exception) {
+            Log.e("MidiParser", "Failed to parse MIDI file: ${e.message}")
+            throw e
         }
 
     // ------------------------------------------------------------------------
@@ -201,13 +170,17 @@ object MidiParser {
             val reader = ByteArrayReader(bytes)
 
             // Read header chunk
-            val headerChunkId = reader.readString(STRING_CHUNK_LENGTH)
+            val headerChunkId = reader.readString(4)
             Log.d("MidiParser", "Header chunk ID: $headerChunkId")
-            require(headerChunkId == HEADER_CHUNK_ID) { "Not a valid MIDI file (missing MThd header)" }
+            if (headerChunkId != HEADER_CHUNK_ID) {
+                throw Exception("Not a valid MIDI file (missing MThd header)")
+            }
 
             // Read header length (should be 6)
             val headerLength = reader.readInt32()
-            require(headerLength == HEADER_CHUNK_LENGTH) { "Invalid MIDI header length: $headerLength" }
+            if (headerLength != 6) { // WWWGlobals.Midi.HEADER_CHUNK_LENGTH
+                throw IllegalArgumentException("Invalid MIDI header length: $headerLength")
+            }
 
             // Read format type (0 = single track, 1 = multiple tracks, same timing, 2 = multiple tracks, independent timing)
             val format = reader.readInt16()
@@ -224,7 +197,7 @@ object MidiParser {
             val globalTempoChanges = mutableListOf<TempoChange>()
 
             // Default tempo (120 BPM)
-            globalTempoChanges.add(TempoChange(0, DEFAULT_MICROSECONDS_PER_BEAT))
+            globalTempoChanges.add(TempoChange(0, 500000)) // WWWGlobals.Midi.DEFAULT_MICROSECONDS_PER_BEAT
 
             // Process each track incrementally to minimize memory footprint
             for (i in 0 until numTracks) {
@@ -235,18 +208,22 @@ object MidiParser {
                 val activeNotes = mutableMapOf<Pair<Int, Int>, NoteStartInfo>()
                 val trackTempoChanges = mutableListOf<TempoChange>()
                 // Read track chunk
-                val trackChunkId = reader.readString(STRING_CHUNK_LENGTH)
-                require(trackChunkId == TRACK_CHUNK_ID) { "Invalid track chunk ID: $trackChunkId" }
+                val trackChunkId = reader.readString(4)
+                if (trackChunkId != TRACK_CHUNK_ID) {
+                    throw Exception("Invalid track chunk ID: $trackChunkId")
+                }
 
                 // Read track length
                 val trackLength = reader.readInt32()
 
                 // Validate track length against available data
                 val remainingBytes = bytes.size - reader.position
-                require(trackLength >= 0) { "Invalid track length: $trackLength (negative length)" }
-                require(
-                    trackLength <= remainingBytes,
-                ) { "Invalid track length: $trackLength bytes claimed but only $remainingBytes bytes available" }
+                if (trackLength < 0) {
+                    throw Exception("Invalid track length: $trackLength (negative length)")
+                }
+                if (trackLength > remainingBytes) {
+                    throw Exception("Invalid track length: $trackLength bytes claimed but only $remainingBytes bytes available")
+                }
 
                 val trackEndPosition = reader.position + trackLength
 
@@ -263,7 +240,7 @@ object MidiParser {
                     var statusByte = reader.readUInt8()
 
                     // Handle running status
-                    if ((statusByte and RUNNING_STATUS_MASK) == 0) {
+                    if ((statusByte and 0x80) == 0) {
                         // This is not a status byte but a data byte - use running status
                         reader.position-- // Move back to re-read this byte as data
                         statusByte = runningStatus
@@ -278,11 +255,11 @@ object MidiParser {
                             val metaType = reader.readUInt8()
                             val metaLength = reader.readVariableLengthQuantity().toInt()
 
-                            if (metaType == TEMPO_META_TYPE && metaLength == TEMPO_META_LENGTH) {
+                            if (metaType == TEMPO_META_TYPE && metaLength == 3) {
                                 // Tempo change event
                                 val microsecondsPerBeat =
-                                    (reader.readUInt8().toLong() shl BYTE_SHIFT_16) or
-                                        (reader.readUInt8().toLong() shl BYTE_SHIFT_8) or
+                                    (reader.readUInt8().toLong() shl 16) or
+                                        (reader.readUInt8().toLong() shl 8) or
                                         reader.readUInt8().toLong()
                                 // Store tempo change with its tick position
                                 trackTempoChanges.add(TempoChange(currentTick, microsecondsPerBeat))
@@ -291,9 +268,9 @@ object MidiParser {
                                 reader.skip(metaLength)
                             }
                         }
-                        (statusByte and STATUS_MASK_F0) == NOTE_ON -> {
+                        (statusByte and 0xF0) == NOTE_ON -> {
                             // Note on event
-                            val channel = statusByte and STATUS_MASK_0F
+                            val channel = statusByte and 0x0F
                             val noteNumber = reader.readUInt8()
                             val velocity = reader.readUInt8()
 
@@ -309,19 +286,19 @@ object MidiParser {
                                 handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                             }
                         }
-                        (statusByte and STATUS_MASK_F0) == NOTE_OFF -> {
+                        (statusByte and 0xF0) == NOTE_OFF -> {
                             // Note off event
-                            val channel = statusByte and STATUS_MASK_0F
+                            val channel = statusByte and 0x0F
                             val noteNumber = reader.readUInt8()
                             reader.readUInt8() // Velocity (ignored for note off)
 
                             handleNoteOff(activeNotes, trackNotes, channel, noteNumber, currentTick)
                         }
-                        (statusByte and RUNNING_STATUS_MASK) != 0 -> {
+                        (statusByte and 0x80) != 0 -> {
                             // Other MIDI events - skip data bytes
                             when {
-                                (statusByte and STATUS_MASK_E0) == PROGRAM_CHANGE_STATUS -> reader.skip(SINGLE_DATA_BYTE_SKIP) // Program change, channel pressure - 1 data byte
-                                else -> reader.skip(DOUBLE_DATA_BYTE_SKIP) // Most other events - 2 data bytes
+                                (statusByte and 0xE0) == 0xC0 -> reader.skip(1) // Program change, channel pressure - 1 data byte
+                                else -> reader.skip(2) // Most other events - 2 data bytes
                             }
                         }
                     }
@@ -361,7 +338,7 @@ object MidiParser {
                 }
 
             // Calculate final tempo (use the last tempo change)
-            val finalTempo = MICROSECONDS_PER_MINUTE / globalTempoChanges.last().microsecondsPerBeat
+            val finalTempo = 60_000_000 / globalTempoChanges.last().microsecondsPerBeat
 
             // Calculate total duration
             val lastTick = finalNotes.maxOfOrNull { it.startTick + it.durationTicks } ?: 0L
@@ -369,17 +346,16 @@ object MidiParser {
 
             Log.d("MidiParser", "MIDI file details:")
             Log.d("MidiParser", "Format: $format, Tracks: $numTracks, Ticks per beat: $ticksPerBeat")
-            Log.d("MidiParser", "Initial tempo: ${MICROSECONDS_PER_MINUTE / globalTempoChanges.first().microsecondsPerBeat} BPM")
+            Log.d("MidiParser", "Initial tempo: ${60_000_000 / globalTempoChanges.first().microsecondsPerBeat} BPM")
             Log.d("MidiParser", "Tempo changes: ${globalTempoChanges.size}")
             Log.d("MidiParser", "Notes found: ${notes.size}")
             Log.d("MidiParser", "Total duration: ${totalDuration.inWholeSeconds} seconds")
 
             // Dump first few notes for debugging
-            notes.take(DEBUG_NOTES_LIMIT).forEachIndexed { index, note ->
+            notes.take(5).forEachIndexed { index, note ->
                 Log.d(
                     "MidiParser",
-                    "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, " +
-                        "Duration=${note.duration.inWholeMilliseconds}ms",
+                    "Note $index: Pitch=${note.pitch}, Start=${note.startTime.inWholeMilliseconds}ms, Duration=${note.duration.inWholeMilliseconds}ms",
                 )
             }
 
@@ -389,26 +365,9 @@ object MidiParser {
                 totalDuration = totalDuration,
                 tempo = finalTempo.toInt(),
             )
-        } catch (e: IllegalArgumentException) {
-            val argException = IllegalArgumentException("Invalid MIDI format: ${e.message}", e)
-            Log.e(TAG, "Invalid MIDI format: ${e.message}", throwable = e)
-            throw argException
-        } catch (e: IndexOutOfBoundsException) {
-            val boundsException = IllegalArgumentException("Malformed MIDI data: ${e.message}", e)
-            Log.e(TAG, "Malformed MIDI data: ${e.message}", throwable = e)
-            throw boundsException
-        } catch (e: NumberFormatException) {
-            val numException = IllegalArgumentException("Invalid number format in MIDI data: ${e.message}", e)
-            Log.e(TAG, "Invalid number format in MIDI data: ${e.message}", throwable = e)
-            throw numException
-        } catch (e: ArithmeticException) {
-            val mathException = IllegalArgumentException("Arithmetic error in MIDI parsing: ${e.message}", e)
-            Log.e(TAG, "Arithmetic error in MIDI parsing: ${e.message}", throwable = e)
-            throw mathException
-        } catch (e: RuntimeException) {
-            val runtimeException = IllegalArgumentException("Runtime error parsing MIDI: ${e.message}", e)
-            Log.e(TAG, "Runtime error parsing MIDI: ${e.message}", throwable = e)
-            throw runtimeException
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing MIDI bytes: ${e.message}", throwable = e)
+            throw e
         }
     }
 
@@ -434,13 +393,13 @@ object MidiParser {
                 // This tick is before the current tempo change, so calculate with the previous tempo
                 val ticksInThisTempo = ticks - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                    (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
+                    (lastTempoMPB.toDouble() / 1_000_000)
                 break
             } else {
                 // Calculate segment up to this tempo change
                 val ticksInThisTempo = currentChange.tick - lastTempoTick
                 elapsedSeconds += (ticksInThisTempo.toDouble() / ticksPerBeat) *
-                    (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
+                    (lastTempoMPB.toDouble() / 1_000_000)
 
                 // Move to next tempo
                 lastTempoTick = currentChange.tick
@@ -452,7 +411,7 @@ object MidiParser {
         if (ticks > lastTempoTick) {
             val ticksInLastTempo = ticks - lastTempoTick
             elapsedSeconds += (ticksInLastTempo.toDouble() / ticksPerBeat) *
-                (lastTempoMPB.toDouble() / MICROSECONDS_PER_SECOND)
+                (lastTempoMPB.toDouble() / 1_000_000)
         }
 
         return elapsedSeconds.seconds

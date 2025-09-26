@@ -201,25 +201,6 @@ data class BackgroundTaskUsage(
  */
 @OptIn(ExperimentalTime::class)
 open class PerformanceMonitor : IPerformanceMonitor {
-    companion object {
-        // Performance thresholds
-        private const val MIN_WAVE_TIMING_ACCURACY_PERCENT = 95.0
-        private const val MAX_MEMORY_USAGE_PERCENT = 80.0
-        private const val PERCENT_MULTIPLIER = 100.0
-        private const val MAX_SCREEN_LOAD_TIME_MS = 2000L
-        private const val DEFAULT_APP_VERSION = "1.0.0"
-        private const val PERFORMANCE_ACCURACY_PERCENT_MULTIPLIER = 100.0
-
-        // Battery usage estimation constants
-        const val BATTERY_MAH_PER_MINUTE = 2.5
-        const val BACKGROUND_CPU_TIME_PER_MINUTE_MS = 100.0
-        const val MAX_CPU_PERCENT = 15.0
-        const val CPU_PERCENT_PER_MINUTE = 0.5
-
-        // Time conversion constants
-        private const val MICROSECONDS_PER_SECOND = 1_000_000.0
-    }
-
     private val scope = CoroutineScope(Dispatchers.Default)
     private val traces = mutableMapOf<String, PerformanceTraceImpl>()
     private val metrics = mutableMapOf<String, MutableList<Double>>()
@@ -260,7 +241,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
         actualTime: Long,
     ) {
         val accuracy = 1.0 - (kotlin.math.abs(expectedTime - actualTime).toDouble() / expectedTime)
-        recordMetric("wave_timing_accuracy", accuracy * PERFORMANCE_ACCURACY_PERCENT_MULTIPLIER, "percent")
+        recordMetric("wave_timing_accuracy", accuracy * 100, "percent")
         recordEvent(
             "wave_timing",
             mapOf(
@@ -345,7 +326,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
         used: Long,
         available: Long,
     ) {
-        val usagePercent = (used.toDouble() / available) * PERCENT_MULTIPLIER
+        val usagePercent = (used.toDouble() / available) * 100
         recordMetric("memory_usage_percent", usagePercent, "percent")
     }
 
@@ -362,7 +343,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
 
     override fun getPerformanceReport(): PerformanceReport =
         PerformanceReport(
-            appVersion = DEFAULT_APP_VERSION, // This should come from build config
+            appVersion = "1.0.0", // This should come from build config
             platform = getPlatformName(),
             deviceInfo = getDeviceInfo(),
             reportPeriod = 24.hours,
@@ -374,23 +355,18 @@ open class PerformanceMonitor : IPerformanceMonitor {
     @OptIn(ExperimentalTime::class)
     private fun updateMetrics() {
         scope.launch {
-            try {
-                val current = _performanceMetrics.value
-                _performanceMetrics.value =
-                    current.copy(
-                        averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
-                        waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
-                        averageScreenLoadTime = getAverageScreenLoadTime(),
-                        averageNetworkLatency = getAverageNetworkLatency(),
-                        memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
-                        locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
-                        totalEvents = events.size.toLong(),
-                        lastUpdated = Clock.System.now().toEpochMilliseconds(),
-                    )
-            } catch (e: Exception) {
-                // Log error but don't crash performance monitoring
-                println("PerformanceMonitor: Error updating metrics: ${e.message}")
-            }
+            val current = _performanceMetrics.value
+            _performanceMetrics.value =
+                current.copy(
+                    averageWaveTimingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 0.0,
+                    waveParticipationRate = metrics["wave_participation"]?.average() ?: 0.0,
+                    averageScreenLoadTime = getAverageScreenLoadTime(),
+                    averageNetworkLatency = getAverageNetworkLatency(),
+                    memoryUsagePercent = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0,
+                    locationAccuracy = metrics["location_accuracy"]?.lastOrNull()?.toFloat() ?: 0.0f,
+                    totalEvents = events.size.toLong(),
+                    lastUpdated = Clock.System.now().toEpochMilliseconds(),
+                )
         }
     }
 
@@ -418,13 +394,13 @@ open class PerformanceMonitor : IPerformanceMonitor {
         val issues = mutableListOf<PerformanceIssue>()
 
         // Check wave timing accuracy
-        val timingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: PERCENT_MULTIPLIER
-        if (timingAccuracy < MIN_WAVE_TIMING_ACCURACY_PERCENT) {
+        val timingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 100.0
+        if (timingAccuracy < 95.0) {
             issues.add(
                 PerformanceIssue(
                     severity = PerformanceIssue.Severity.HIGH,
                     category = PerformanceIssue.Category.WAVE_TIMING,
-                    description = "Wave timing accuracy below ${MIN_WAVE_TIMING_ACCURACY_PERCENT}%: $timingAccuracy%",
+                    description = "Wave timing accuracy below 95%: $timingAccuracy%",
                     impact = "Poor user experience and wave coordination",
                     occurrence = metrics["wave_timing_accuracy"]?.size?.toLong() ?: 0,
                 ),
@@ -433,7 +409,7 @@ open class PerformanceMonitor : IPerformanceMonitor {
 
         // Check memory usage
         val memoryUsage = metrics["memory_usage_percent"]?.lastOrNull() ?: 0.0
-        if (memoryUsage > MAX_MEMORY_USAGE_PERCENT) {
+        if (memoryUsage > 80.0) {
             issues.add(
                 PerformanceIssue(
                     severity = PerformanceIssue.Severity.MEDIUM,
@@ -451,14 +427,14 @@ open class PerformanceMonitor : IPerformanceMonitor {
     private fun generateRecommendations(): List<String> {
         val recommendations = mutableListOf<String>()
 
-        val timingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: PERCENT_MULTIPLIER
-        if (timingAccuracy < MIN_WAVE_TIMING_ACCURACY_PERCENT) {
+        val timingAccuracy = metrics["wave_timing_accuracy"]?.average() ?: 100.0
+        if (timingAccuracy < 95.0) {
             recommendations.add("Optimize wave timing synchronization algorithms")
             recommendations.add("Check network latency and GPS accuracy")
         }
 
         val avgScreenLoad = getAverageScreenLoadTime()
-        if (avgScreenLoad > MAX_SCREEN_LOAD_TIME_MS.milliseconds) {
+        if (avgScreenLoad > 2000.milliseconds) {
             recommendations.add("Optimize screen loading performance")
             recommendations.add("Consider lazy loading and caching strategies")
         }
@@ -509,15 +485,9 @@ private class PerformanceTraceImpl(
         // In real implementation, would collect actual battery usage metrics
         val durationMinutes = duration.inWholeMinutes.toDouble()
         return BatteryUsage(
-            totalPowerMah = durationMinutes * PerformanceMonitor.BATTERY_MAH_PER_MINUTE, // Estimate: 2.5mAh per minute
-            backgroundCpuMs =
-                metrics["background_cpu_time"] ?: (durationMinutes * PerformanceMonitor.BACKGROUND_CPU_TIME_PER_MINUTE_MS).toLong(),
-            averageCpuPercent =
-                kotlin.math.min(
-                    PerformanceMonitor.MAX_CPU_PERCENT,
-                    durationMinutes * PerformanceMonitor.CPU_PERCENT_PER_MINUTE,
-                ),
-            // Max 15% CPU
+            totalPowerMah = durationMinutes * 2.5, // Estimate: 2.5mAh per minute
+            backgroundCpuMs = metrics["background_cpu_time"] ?: (durationMinutes * 100).toLong(),
+            averageCpuPercent = kotlin.math.min(15.0, durationMinutes * 0.5), // Max 15% CPU
         )
     }
 

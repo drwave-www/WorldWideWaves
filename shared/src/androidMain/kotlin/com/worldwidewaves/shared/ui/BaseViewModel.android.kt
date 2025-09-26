@@ -22,13 +22,24 @@ package com.worldwidewaves.shared.ui
  */
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import androidx.lifecycle.viewModelScope as androidViewModelScope
 
-actual abstract class BaseViewModel : ViewModel() {
-    protected actual val scope: CoroutineScope = viewModelScope
+/**
+ * Android implementation of BaseViewModel.
+ *
+ * This implementation delegates to Android's androidx.lifecycle.ViewModel
+ * to ensure proper integration with Android lifecycle management.
+ */
+actual abstract class BaseViewModel actual constructor() : ViewModel() {
+    /**
+     * Android viewModelScope from androidx.lifecycle
+     */
+    actual val viewModelScope: CoroutineScope get() = androidViewModelScope
 
-    // match expect visibility/signature
+    /**
+     * Android onCleared implementation
+     */
     actual override fun onCleared() {
         super.onCleared()
     }

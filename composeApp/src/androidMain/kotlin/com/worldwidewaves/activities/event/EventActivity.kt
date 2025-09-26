@@ -21,18 +21,119 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.ui.activities.WWWEventActivity
-import com.worldwidewaves.utils.AndroidPlatformEnabler
-import com.worldwidewaves.viewmodels.AndroidMapViewModel
+import android.content.Intent
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.compose.map.AndroidEventMap
+import com.worldwidewaves.shared.WWWPlatform
+import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
+import com.worldwidewaves.shared.ui.components.StandardEventLayout
+import com.worldwidewaves.shared.ui.utils.calculateEventMapHeight
+import com.worldwidewaves.viewmodels.MapViewModel
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventActivity : AbstractEventAndroidActivity<WWWEventActivity>() {
-    private val mapViewModel: AndroidMapViewModel by inject()
+class EventActivity : AbstractEventWaveActivity() {
+    private val clock: IClock by inject()
+    private val platform: WWWPlatform by inject()
 
-    override fun createActivityImpl(
-        eventId: String,
-        platformEnabler: AndroidPlatformEnabler,
-    ): WWWEventActivity = WWWEventActivity(eventId, platformEnabler, mapViewModel)
+    companion object {
+        private const val TAG = "EventActivity"
+    }
+
+    // ------------------------------------------------------------------------
+
+    @Composable
+    override fun Screen(
+        modifier: Modifier,
+        event: IWWWEvent,
+    ) {
+        val context = LocalContext.current
+        // Ensure dynamic-feature splits are available immediately
+        SplitCompat.install(context)
+
+        // Map availability for simulation button
+        val mapViewModel: MapViewModel = viewModel()
+        val mapFeatureState by mapViewModel.featureState.collectAsState()
+        var showMapRequiredDialog by remember { mutableStateOf(false) }
+
+        // Check map availability for simulation
+        LaunchedEffect(Unit) {
+            mapViewModel.checkIfMapIsAvailable(event.id, autoDownload = false)
+        }
+
+        // Calculate responsive map height
+        val calculatedHeight = calculateEventMapHeight()
+
+        // Construct the event map
+        val eventMap =
+            remember(event.id) {
+                AndroidEventMap(
+                    event,
+                    context = context as AppCompatActivity, // Pass Activity context for UI thread operations
+                    onMapClick = {
+                        context.startActivity(
+                            Intent(context, EventFullMapActivity::class.java).apply {
+                                putExtra("eventId", event.id)
+                            },
+                        )
+                    },
+                )
+            }
+
+        // Start event/map coordination
+        ObserveEventMapProgression(event, eventMap)
+
+        // Use simplified shared standard event layout
+        StandardEventLayout(
+            event = event,
+            platform = platform,
+            clock = clock,
+            mapFeatureState = mapFeatureState,
+            onNavigateToWave = { eventId ->
+                context.startActivity(
+                    Intent(context, WaveActivity::class.java).apply {
+                        putExtra("eventId", eventId)
+                    }
+                )
+            },
+            onSimulationStarted = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            },
+            onSimulationStopped = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            },
+            onSimulationError = { title, message ->
+                Toast.makeText(context, "$title: $message", Toast.LENGTH_SHORT).show()
+            },
+            onMapNotAvailable = { showMapRequiredDialog = true },
+            modifier = modifier,
+            mapHeight = calculatedHeight,
+            mapArea = {
+                eventMap.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
+            }
+        )
+
+        // Show map required dialog for simulation
+        if (showMapRequiredDialog) {
+            AlertMapNotDownloadedOnSimulationLaunch { showMapRequiredDialog = false }
+        }
+    }
+
 }

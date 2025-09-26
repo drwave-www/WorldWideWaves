@@ -77,7 +77,7 @@ private class IOSFlowObservable<T>(
     private var _cachedValue: T? = null
 
     override val value: T
-        get() = _cachedValue ?: error("Flow has not emitted any values yet")
+        get() = _cachedValue ?: throw IllegalStateException("Flow has not emitted any values yet")
 
     override fun observe(callback: (T) -> Unit): IOSObservableSubscription {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)

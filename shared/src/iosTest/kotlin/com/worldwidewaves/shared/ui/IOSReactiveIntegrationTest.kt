@@ -23,74 +23,67 @@ import kotlin.test.assertNotNull
  * and that the reactive bridge can handle state updates properly.
  */
 class IOSReactiveIntegrationTest {
-    @Test
-    fun `StateFlow holds initial value correctly`() =
-        runTest {
-            val stateFlow = MutableStateFlow("initial")
-
-            assertEquals("initial", stateFlow.value)
-        }
 
     @Test
-    fun `StateFlow updates value correctly`() =
-        runTest {
-            val stateFlow = MutableStateFlow("initial")
+    fun `StateFlow holds initial value correctly`() = runTest {
+        val stateFlow = MutableStateFlow("initial")
 
-            stateFlow.value = "updated"
-
-            assertEquals("updated", stateFlow.value)
-        }
+        assertEquals("initial", stateFlow.value)
+    }
 
     @Test
-    fun `StateFlow with custom data class works`() =
-        runTest {
-            data class TestData(
-                val id: String,
-                val name: String,
-            )
+    fun `StateFlow updates value correctly`() = runTest {
+        val stateFlow = MutableStateFlow("initial")
 
-            val stateFlow = MutableStateFlow<TestData?>(null)
-            val testData = TestData("1", "Test Event")
+        stateFlow.value = "updated"
 
-            stateFlow.value = testData
-
-            assertNotNull(stateFlow.value)
-            assertEquals("1", stateFlow.value?.id)
-            assertEquals("Test Event", stateFlow.value?.name)
-        }
+        assertEquals("updated", stateFlow.value)
+    }
 
     @Test
-    fun `StateFlow with list data works correctly`() =
-        runTest {
-            val stateFlow = MutableStateFlow<List<String>>(emptyList())
+    fun `StateFlow with custom data class works`() = runTest {
+        data class TestData(val id: String, val name: String)
 
-            stateFlow.value = listOf("event1", "event2", "event3")
+        val stateFlow = MutableStateFlow<TestData?>(null)
+        val testData = TestData("1", "Test Event")
 
-            assertEquals(3, stateFlow.value.size)
-            assertEquals("event1", stateFlow.value[0])
-            assertEquals("event2", stateFlow.value[1])
-            assertEquals("event3", stateFlow.value[2])
-        }
+        stateFlow.value = testData
+
+        assertNotNull(stateFlow.value)
+        assertEquals("1", stateFlow.value?.id)
+        assertEquals("Test Event", stateFlow.value?.name)
+    }
 
     @Test
-    fun `StateFlow boolean flags work correctly`() =
-        runTest {
-            val isLoadingFlow = MutableStateFlow(false)
-            val hasErrorFlow = MutableStateFlow(false)
+    fun `StateFlow with list data works correctly`() = runTest {
+        val stateFlow = MutableStateFlow<List<String>>(emptyList())
 
-            // Test loading state
-            isLoadingFlow.value = true
-            assertEquals(true, isLoadingFlow.value)
+        stateFlow.value = listOf("event1", "event2", "event3")
 
-            // Test error state
-            hasErrorFlow.value = true
-            assertEquals(true, hasErrorFlow.value)
+        assertEquals(3, stateFlow.value.size)
+        assertEquals("event1", stateFlow.value[0])
+        assertEquals("event2", stateFlow.value[1])
+        assertEquals("event3", stateFlow.value[2])
+    }
 
-            // Reset states
-            isLoadingFlow.value = false
-            hasErrorFlow.value = false
+    @Test
+    fun `StateFlow boolean flags work correctly`() = runTest {
+        val isLoadingFlow = MutableStateFlow(false)
+        val hasErrorFlow = MutableStateFlow(false)
 
-            assertEquals(false, isLoadingFlow.value)
-            assertEquals(false, hasErrorFlow.value)
-        }
+        // Test loading state
+        isLoadingFlow.value = true
+        assertEquals(true, isLoadingFlow.value)
+
+        // Test error state
+        hasErrorFlow.value = true
+        assertEquals(true, hasErrorFlow.value)
+
+        // Reset states
+        isLoadingFlow.value = false
+        hasErrorFlow.value = false
+
+        assertEquals(false, isLoadingFlow.value)
+        assertEquals(false, hasErrorFlow.value)
+    }
 }

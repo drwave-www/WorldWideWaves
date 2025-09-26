@@ -43,7 +43,6 @@ import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.events.utils.MapDataProvider
 import com.worldwidewaves.shared.events.utils.SystemClock
 import com.worldwidewaves.shared.position.PositionManager
-import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import org.koin.dsl.module
 
 val helpersModule =
@@ -60,5 +59,4 @@ val helpersModule =
         single<GeoJsonDataProvider> { DefaultGeoJsonDataProvider() }
         single<MapDataProvider> { DefaultMapDataProvider() }
         single<EventsDecoder> { DefaultEventsDecoder() }
-        single { CloseableCoroutineScope() }
     }

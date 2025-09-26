@@ -21,7 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.WWWGlobals
+import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.events.WWWEventWave.Direction
 import com.worldwidewaves.shared.events.utils.GeoUtils.EARTH_RADIUS
@@ -42,19 +42,6 @@ class EarthAdaptedSpeedLongitude(
     private val speed: Double,
     private val direction: Direction,
 ) : ComposedLongitude(Position(0.0, coveredArea.latitudeOfWidestPart())) {
-    companion object {
-        // Safety and configuration constants
-        private const val MIN_BAND_WIDTH = 0.001
-        private const val MAX_BANDS = 20000
-
-        // Latitude boundaries (safe distances from poles)
-        private const val SAFE_SOUTH_LATITUDE = -87.0
-        private const val SAFE_NORTH_LATITUDE = 87.0
-
-        // Conversion constants
-        private const val MILLISECONDS_PER_SECOND = 1000
-    }
-
     /*
      * Latitude-split bands and longitude band for the wave.
      */
@@ -75,8 +62,8 @@ class EarthAdaptedSpeedLongitude(
     /*
      * Security checks for the wave.
      */
-    private val minBandWidth = MIN_BAND_WIDTH
-    private val maxBands = MAX_BANDS
+    private val minBandWidth = 0.001
+    private val maxBands = 20000
 
     /*
      * The duration of a single band refresh window in seconds.
@@ -144,14 +131,7 @@ class EarthAdaptedSpeedLongitude(
                 // Convert the total distance to longitude change at the current latitude
                 val longitudeChange = (totalDistanceCovered / (EARTH_RADIUS * cos(bandLatitude.toRadians()))).toDegrees()
 
-                val newLatitude =
-                    min(
-                        WWWGlobals.Geodetic.MAX_LATITUDE,
-                        max(
-                            WWWGlobals.Geodetic.MIN_LATITUDE,
-                            bandLatitude + band.latWidth / 2,
-                        ),
-                    )
+                val newLatitude = min(90.0, max(-90.0, bandLatitude + band.latWidth / 2))
                 Position(
                     newLatitude,
                     when (direction) {
@@ -165,6 +145,7 @@ class EarthAdaptedSpeedLongitude(
 
     // ------------------------
 
+    @VisibleForTesting
     fun bands(): Map<Double, LatLonBand> {
         if (cachedBands == null) {
             val bands = calculateWaveBands().associateBy { it.latitude }
@@ -190,6 +171,7 @@ class EarthAdaptedSpeedLongitude(
      * - This ensures that the perceived wave speed is uniform across different latitudes by
      *   adjusting the band widths accordingly.
      */
+    @VisibleForTesting
     fun calculateWaveBands(): List<LatLonBand> {
         val (sw, ne) = coveredArea
         val latLonBands = mutableListOf<LatLonBand>()
@@ -206,9 +188,9 @@ class EarthAdaptedSpeedLongitude(
         // Use safe distances from actual poles to avoid mathematical instabilities
         latLonBands.add(
             LatLonBand(
-                SAFE_SOUTH_LATITUDE, // Safe distance from south pole but still outside most bounding boxes
+                -87.0, // Safe distance from south pole but still outside most bounding boxes
                 0.0, // Lower latitude band
-                adjustLongitudeWidthAtLatitude(SAFE_SOUTH_LATITUDE, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(-87.0, lonBandWidthAtLongest),
             ),
         )
 
@@ -235,9 +217,9 @@ class EarthAdaptedSpeedLongitude(
 
         latLonBands.add(
             LatLonBand(
-                SAFE_NORTH_LATITUDE, // Safe distance from north pole but still outside most bounding boxes
+                87.0, // Safe distance from north pole but still outside most bounding boxes
                 0.0, // Higher latitude band
-                adjustLongitudeWidthAtLatitude(SAFE_NORTH_LATITUDE, lonBandWidthAtLongest),
+                adjustLongitudeWidthAtLatitude(87.0, lonBandWidthAtLongest),
             ),
         )
 
@@ -257,9 +239,10 @@ class EarthAdaptedSpeedLongitude(
      *   for the shrinking distance between meridians at higher latitudes.
      * - The result is the longitude band width at that specific latitude.
      */
+    @VisibleForTesting
     fun calculateLonBandWidthAtLatitude(latitude: Double): Double {
         require(speed > 0) { "Speed must be greater than 0" }
-        val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / MILLISECONDS_PER_SECOND
+        val distanceCovered = speed * bandStepDuration.inWholeMilliseconds / 1000
         Napier.v { "Distance covered by the wave in ${bandStepDuration}s at speed speed: $distanceCovered" }
         return (distanceCovered / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
         // return (speed / (EARTH_RADIUS * cos(latitude.toRadians()))).toDegrees()
@@ -275,6 +258,7 @@ class EarthAdaptedSpeedLongitude(
      * - This ensures that the wave speed is perceived uniformly across different latitudes.
      * - The formula is: latBandWidth = lonBandWidthAtEquator / cos(latitude)
      */
+    @VisibleForTesting
     fun calculateOptimalLatBandWidth(
         latitude: Double,
         lonBandWidthAtEquator: Double,
@@ -303,11 +287,12 @@ class EarthAdaptedSpeedLongitude(
      *   is perceived the same at different latitudes.
      * - The formula is: adjustedLonWidth = lonWidth / cos(latitude)
      */
+    @VisibleForTesting
     fun adjustLongitudeWidthAtLatitude(
         latitude: Double,
         lonWidthAtTheLongest: Double,
     ): Double {
-        require(abs(latitude) < WWWGlobals.Geodetic.MAX_LATITUDE) // Prevent division by zero
+        require(abs(latitude) < 90) // Prevent division by zero
         return lonWidthAtTheLongest / cos(latitude.toRadians())
     }
 }

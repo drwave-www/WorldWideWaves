@@ -74,7 +74,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.R
-import com.worldwidewaves.activities.event.EventFullMapActivity
 import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Timing
@@ -89,11 +88,11 @@ import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
 import com.worldwidewaves.shared.ui.components.LoadingIndicator
-import com.worldwidewaves.utils.AndroidMapAvailabilityChecker
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
+import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.viewmodels.AndroidMapViewModel
+import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -140,6 +139,7 @@ class AndroidEventMap(
     private val context: AppCompatActivity, // MANDATORY - required for wave layer UI thread operations
     private val onMapLoaded: () -> Unit = {},
     onLocationUpdate: (Position) -> Unit = {},
+    private val onMapClick: (() -> Unit)? = null,
     mapConfig: EventMapConfig = EventMapConfig(),
 ) : AbstractEventMap<MapLibreMap>(event, mapConfig, onLocationUpdate),
     KoinComponent {
@@ -157,6 +157,7 @@ class AndroidEventMap(
         private const val BUTTON_HEIGHT_DP = 60f
     }
 
+
     // Overrides properties from AbstractEventMap
     override val locationProvider: WWWLocationProvider by inject(AndroidWWWLocationProvider::class.java)
     override val mapLibreAdapter: AndroidMapLibreAdapter by lazy { AndroidMapLibreAdapter() }
@@ -166,14 +167,14 @@ class AndroidEventMap(
     private var currentMap: MapLibreMap? = null
 
     // Map availability and download state tracking
-    private val mapAvailabilityChecker: AndroidMapAvailabilityChecker by inject(AndroidMapAvailabilityChecker::class.java)
+    private val mapAvailabilityChecker: MapAvailabilityChecker by inject(MapAvailabilityChecker::class.java)
 
     /**
      * The Compose UI for the map
      */
     @Composable
-    override fun Draw(
-        autoMapDownload: Boolean,
+    fun Screen(
+        autoMapDownload: Boolean = false,
         modifier: Modifier,
     ) {
         Log.i(TAG, "Screen composable entered: eventId=${event.id}, autoMapDownload=$autoMapDownload")
@@ -196,7 +197,7 @@ class AndroidEventMap(
         val mapLibreView: MapView =
             rememberMapLibreViewWithLifecycle(key = "${event.id}-$isMapAvailable")
 
-        val mapViewModel: AndroidMapViewModel = viewModel()
+        val mapViewModel: MapViewModel = viewModel()
         val mapFeatureState by mapViewModel.featureState.collectAsState()
 
         // Check if map is downloaded
@@ -505,31 +506,22 @@ class AndroidEventMap(
         scope.launch {
             withContext(Dispatchers.IO) {
                 // IO actions
-                Log.e(TAG, "🔥 STARTING STYLE RESOLUTION RETRY LOOP for event: ${event.id}")
                 var stylePath: String? = null
                 var attempts = 0
-                var styleResolved = false
-
                 repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
-                    if (styleResolved) return@repeat // Skip if already resolved
-
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
-                    val fileExists = candidate?.let { File(it).exists() } ?: false
-
-                    Log.d(TAG, "Style resolution attempt $attempts: candidate='$candidate', exists=$fileExists")
-
-                    if (candidate != null && fileExists) {
+                    if (candidate != null && File(candidate).exists()) {
                         Log.i(TAG, "Style URI resolved: $candidate")
                         stylePath = candidate
-                        styleResolved = true // Set flag to stop processing
                         return@repeat
                     }
 
-                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) {
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
+                    // Give Play-Core/asset manager time to expose freshly installed split assets
                     delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 
@@ -566,11 +558,7 @@ class AndroidEventMap(
                                     onMapLoaded()
                                 },
                                 onMapClick = { _, _ ->
-                                    context.startActivity(
-                                        Intent(context, EventFullMapActivity::class.java).apply {
-                                            putExtra("eventId", event.id)
-                                        },
-                                    )
+                                    onMapClick?.invoke()
                                 },
                             )
                         }
@@ -769,7 +757,7 @@ class AndroidEventMap(
                     .build(),
             )
 
-            localIdeographFontFamily("Droid Sans") // NOTE: Will be replaced with MapLibre font-maker in future version
+            localIdeographFontFamily("Droid Sans") // FIXME: replace with MapLibre font-maker solution
 
             compassEnabled(true)
             compassFadesWhenFacingNorth(true)
@@ -815,13 +803,14 @@ class AndroidEventMap(
      */
     override fun updateWavePolygons(
         wavePolygons: List<Polygon>,
-        clearPolygons: Boolean,
+        clearPolygons: Boolean
     ) {
         context.runOnUiThread {
             val mapLibrePolygons = wavePolygons.map { it.toMapLibrePolygon() }
             mapLibreAdapter.addWavePolygons(mapLibrePolygons, clearPolygons)
         }
     }
+
 }
 
 // ----------------------------------------------------------------------------
@@ -839,6 +828,6 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             Lifecycle.Event.ON_PAUSE -> mapView.onPause()
             Lifecycle.Event.ON_STOP -> mapView.onStop()
             Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
-            else -> error("Unexpected lifecycle event: $event")
+            else -> throw IllegalStateException()
         }
     }

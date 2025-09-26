@@ -171,8 +171,8 @@ class AccessibilityTest {
         }
 
         // Verify all interactive elements have content descriptions
-        composeTestRule.onAllNodesWithTag("interactive-element")
-        composeTestRule.onAllNodesWithContentDescription("")
+        val interactiveNodes = composeTestRule.onAllNodesWithTag("interactive-element")
+        val nodesWithDescriptions = composeTestRule.onAllNodesWithContentDescription("")
 
         // Check buttons
         composeTestRule.onNodeWithContentDescription("Join Wave").assertIsDisplayed()

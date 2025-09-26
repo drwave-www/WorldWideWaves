@@ -23,7 +23,6 @@ package com.worldwidewaves.shared.map
  * limitations under the License.
  */
 
-import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
@@ -153,7 +152,6 @@ object CityMapRegistry {
                 hasGeoJson = true,
             )
         } catch (e: Exception) {
-            Log.e("CityMapRegistry", "Failed to load city map for cityId: $cityId", e)
             null
         }
 

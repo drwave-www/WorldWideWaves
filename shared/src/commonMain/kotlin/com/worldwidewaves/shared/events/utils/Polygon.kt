@@ -21,6 +21,7 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
+import androidx.annotation.VisibleForTesting
 import kotlin.Double.Companion.NEGATIVE_INFINITY
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
@@ -38,6 +39,7 @@ open class Polygon(
 
     private var isClockwise: Boolean = true
 
+    @VisibleForTesting
     var area: Double = 0.0
 
     private var minLat: Double = POSITIVE_INFINITY

@@ -110,8 +110,7 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
     fun testTimeSignificantEventCoordination_preciseTimingRequired_achievesAccuracy() =
         runTest {
             val timingCoordinator = createMockTimingCoordinator()
-            val baseTime = 1643723400000L // Fixed deterministic base time
-            val targetTime = baseTime + 1000 // 1 second from base
+            val targetTime = System.currentTimeMillis() + 1000 // 1 second from now
             val tolerance = 5000L // 5 second tolerance (very lenient for test environment)
 
             val participants =
@@ -121,14 +120,12 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
 
             participants.forEach { timingCoordinator.registerForTimedEvent(it, targetTime) }
 
-            val testStart =
-                kotlin.time.TimeSource.Monotonic
-                    .markNow()
+            val startTime = System.currentTimeMillis()
             timingCoordinator.executeTimedCoordination(targetTime)
-            val executionDuration = testStart.elapsedNow()
+            val executionTime = System.currentTimeMillis()
 
             // In a mock test, we just verify the method calls happened and execution was reasonably fast
-            val timingAccuracy = executionDuration.inWholeMilliseconds
+            val timingAccuracy = executionTime - startTime
             assertTrue("Coordination should execute quickly in mock environment", timingAccuracy <= tolerance)
 
             // Manually trigger notification to test the flow (since mocks don't automatically call methods)

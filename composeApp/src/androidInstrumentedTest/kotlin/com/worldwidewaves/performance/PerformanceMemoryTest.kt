@@ -27,19 +27,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.*
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.testing.BaseIntegrationTest
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -132,12 +130,10 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
     @Test
     fun testConcurrentOperations_multipleAsyncTasks_maintainsPerformance() =
         runTest {
-            mockPerformanceMonitor
+            val performanceMonitor = mockPerformanceMonitor
             val taskManager = createMockTaskManager()
 
-            val startMark =
-                kotlin.time.TimeSource.Monotonic
-                    .markNow()
+            val startTime = System.currentTimeMillis()
 
             val task1 = taskManager.executeAsync("data-fetch", 1000)
             val task2 = taskManager.executeAsync("image-processing", 800)
@@ -145,7 +141,7 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
             val task4 = taskManager.executeAsync("sync-events", 1200)
 
             val results = listOf(task1, task2, task3, task4).map { it.await() }
-            val totalTime = startMark.elapsedNow().inWholeMilliseconds
+            val totalTime = System.currentTimeMillis() - startTime
 
             assertTrue("All concurrent tasks should complete successfully", results.all { it.isSuccess })
             assertTrue("Concurrent execution should be faster than sequential", totalTime < 2000)
@@ -276,11 +272,9 @@ class PerformanceMemoryTest : BaseIntegrationTest() {
         onRenderComplete: (Long) -> Unit,
     ) {
         LaunchedEffect(locations) {
-            val startMark =
-                kotlin.time.TimeSource.Monotonic
-                    .markNow()
+            val startTime = System.currentTimeMillis()
             delay(100)
-            val renderTime = startMark.elapsedNow().inWholeMilliseconds
+            val renderTime = System.currentTimeMillis() - startTime
             onRenderComplete(renderTime)
         }
 

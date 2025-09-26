@@ -25,7 +25,6 @@ import com.worldwidewaves.shared.events.utils.Polygon
 import com.worldwidewaves.shared.map.AbstractEventMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
@@ -53,7 +52,7 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 class WaveProgressionObserver(
     private val scope: CoroutineScope,
-    private val eventMap: AbstractEventMap<*>?,
+    private val eventMap: AbstractEventMap<*>,
     private val event: IWWWEvent?,
 ) {
     private var statusJob: Job? = null
@@ -83,10 +82,9 @@ class WaveProgressionObserver(
     /**
      * Start collecting progression to update polygons on the map with a small rate-limit.
      */
-    @OptIn(FlowPreview::class)
     private fun startPolygonsObservation(
         event: IWWWEvent,
-        eventMap: AbstractEventMap<*>?,
+        eventMap: AbstractEventMap<*>,
     ) {
         polygonsJob?.cancel()
 
@@ -103,9 +101,9 @@ class WaveProgressionObserver(
 
     private fun addFullWavePolygons(
         event: IWWWEvent,
-        eventMap: AbstractEventMap<*>?,
+        eventMap: AbstractEventMap<*>,
     ) {
-        eventMap?.mapLibreAdapter?.onMapSet { mapLibre ->
+        eventMap.mapLibreAdapter.onMapSet { mapLibre ->
             scope.launch(Dispatchers.Main) {
                 // Render all original polygons independently (no holes merge)
                 val polygons = event.area.getPolygons()
@@ -121,7 +119,7 @@ class WaveProgressionObserver(
      */
     private fun startStatusObservation(
         event: IWWWEvent,
-        eventMap: AbstractEventMap<*>?,
+        eventMap: AbstractEventMap<*>,
     ) {
         statusJob?.cancel()
         statusJob =
@@ -161,7 +159,7 @@ class WaveProgressionObserver(
      */
     private suspend fun updateWavePolygons(
         event: IWWWEvent,
-        eventMap: AbstractEventMap<*>?,
+        eventMap: AbstractEventMap<*>,
     ) {
         if (!event.isRunning() && !event.isDone()) return
 
@@ -177,12 +175,12 @@ class WaveProgressionObserver(
             if (lastWavePolygons.isNotEmpty()) {
                 // Keep displaying the previous frame to avoid flicker when the
                 // shared layer temporarily returns an empty list.
-                eventMap?.updateWavePolygons(lastWavePolygons, false)
+                eventMap.updateWavePolygons(lastWavePolygons, false)
             }
             return
         } else {
             lastWavePolygons = polygons
-            eventMap?.updateWavePolygons(polygons, true)
+            eventMap.updateWavePolygons(polygons, true)
         }
     }
 }

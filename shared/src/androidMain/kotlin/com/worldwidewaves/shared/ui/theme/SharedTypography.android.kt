@@ -1,0 +1,18 @@
+package com.worldwidewaves.shared.ui.theme
+
+/*
+ * Copyright 2025 DrWave
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+import androidx.compose.ui.text.font.FontFamily
+
+// Temporary fallback - use composeApp Google Fonts until shared module font system is resolved
+actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif
+actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif
+actual val SharedExtraFontFamily: FontFamily = FontFamily.Monospace

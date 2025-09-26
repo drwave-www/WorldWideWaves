@@ -166,7 +166,6 @@ fun CheckGPSEnable() {
                         )
                     } else {
                         // Fallback to full Settings screen
-                        @Suppress("DEPRECATION")
                         startActivity(
                             context,
                             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),

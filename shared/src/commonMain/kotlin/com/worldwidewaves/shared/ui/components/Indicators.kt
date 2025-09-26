@@ -99,10 +99,9 @@ fun DownloadProgressIndicator(
         // Linear progress indicator
         LinearProgressIndicator(
             progress = { progress / 100f },
-            modifier =
-                Modifier
-                    .fillMaxWidth(IndicatorConstants.PROGRESS_INDICATOR_WIDTH_RATIO)
-                    .height(8.dp),
+            modifier = Modifier
+                .fillMaxWidth(IndicatorConstants.PROGRESS_INDICATOR_WIDTH_RATIO)
+                .height(8.dp),
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             color = MaterialTheme.colorScheme.primary,
             strokeCap = StrokeCap.Round,

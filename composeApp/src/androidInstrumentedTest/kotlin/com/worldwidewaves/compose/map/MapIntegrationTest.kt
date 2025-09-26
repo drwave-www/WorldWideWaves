@@ -32,11 +32,11 @@ import com.worldwidewaves.map.AndroidMapLibreAdapter
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.BoundingBox
 import com.worldwidewaves.shared.events.utils.Position
-import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.testing.PerformanceMonitor
 import com.worldwidewaves.testing.UITestFactory
 import com.worldwidewaves.utils.AndroidWWWLocationProvider
-import com.worldwidewaves.viewmodels.AndroidMapViewModel
+import com.worldwidewaves.viewmodels.MapFeatureState
+import com.worldwidewaves.viewmodels.MapViewModel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -86,7 +86,7 @@ class MapIntegrationTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private lateinit var mockMapViewModel: AndroidMapViewModel
+    private lateinit var mockMapViewModel: MapViewModel
     private lateinit var mockAndroidMapLibreAdapter: AndroidMapLibreAdapter
     private lateinit var mockLocationProvider: AndroidWWWLocationProvider
     private lateinit var mockEvent: IWWWEvent
@@ -102,7 +102,7 @@ class MapIntegrationTest {
     }
 
     private fun setupMockMapViewModel() {
-        mockMapViewModel = mockk<AndroidMapViewModel>(relaxed = true)
+        mockMapViewModel = mockk<MapViewModel>(relaxed = true)
 
         val mockStateFlow = MutableStateFlow<MapFeatureState>(MapFeatureState.NotChecked)
         every { mockMapViewModel.featureState } returns mockStateFlow
@@ -813,7 +813,7 @@ private fun TestCameraAnimations(
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) { frame ->
-            onAnimationFrame(1643723400000L + frame * 16) // Deterministic frame timing
+            onAnimationFrame(System.currentTimeMillis())
             delay(16.milliseconds) // ~60 FPS
         }
         onAnimationComplete()
@@ -831,11 +831,9 @@ private fun TestWaveVisualization(
     onPerformanceMeasured: (Duration) -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(wavePolygons) {
-        val startMark =
-            kotlin.time.TimeSource.Monotonic
-                .markNow()
+        val startTime = System.currentTimeMillis()
         delay(50.milliseconds) // Simulate rendering time
-        val renderTime = startMark.elapsedNow()
+        val renderTime = (System.currentTimeMillis() - startTime).milliseconds
 
         onPolygonsRendered()
         onPerformanceMeasured(renderTime)
@@ -853,11 +851,9 @@ private fun TestWaveProgressionUpdates(
 ) {
     androidx.compose.runtime.LaunchedEffect(progressionUpdates) {
         progressionUpdates.forEach { _ ->
-            val startMark =
-                kotlin.time.TimeSource.Monotonic
-                    .markNow()
+            val startTime = System.currentTimeMillis()
             delay(10.milliseconds) // Simulate update processing
-            val updateTime = startMark.elapsedNow()
+            val updateTime = (System.currentTimeMillis() - startTime).milliseconds
             onUpdateReceived(updateTime)
         }
     }
@@ -896,7 +892,7 @@ private fun TestFrameRatePerformance(
 ) {
     androidx.compose.runtime.LaunchedEffect(Unit) {
         repeat(60) {
-            onFrameRendered(1643723400000L + it * 16) // Deterministic frame timing
+            onFrameRendered(System.currentTimeMillis())
             delay(16.milliseconds) // Target 60 FPS
         }
         onTestComplete()

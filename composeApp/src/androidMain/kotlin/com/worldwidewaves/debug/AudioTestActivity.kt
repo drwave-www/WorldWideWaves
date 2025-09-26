@@ -309,7 +309,7 @@ class AudioTestActivity : ComponentActivity() {
         val crowdSize = 5
         val playbackInterval = 600.milliseconds
 
-        Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
         var currentTime = Duration.ZERO
 
         while (currentTime < simulationDuration) {
@@ -423,8 +423,7 @@ class AudioTestActivity : ComponentActivity() {
 
                         Log.v(
                             TAG,
-                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): " +
-                                "MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
+                            "   Person ${personIndex + 1} (+${randomOffsetMs}ms): MIDI ${note.pitch} at ${trackPosition.inWholeMilliseconds}ms",
                         )
 
                         soundPlayer.playTone(

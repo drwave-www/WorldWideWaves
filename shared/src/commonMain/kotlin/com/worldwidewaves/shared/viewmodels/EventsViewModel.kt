@@ -20,6 +20,8 @@ import com.worldwidewaves.shared.domain.usecases.GetSortedEventsUseCase
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.BaseViewModel
 import com.worldwidewaves.shared.utils.WWWLogger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -72,53 +74,62 @@ class EventsViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Exception handler removed - unused in the codebase
+    // Exception handler for coroutines
+    private val exceptionHandler =
+        CoroutineExceptionHandler { _, throwable ->
+            WWWLogger.e("EventsViewModel", "Coroutine error: ${throwable.message}", throwable)
+            if (throwable !is CancellationException) {
+                _loadingError.value = true
+            }
+        }
 
     // ---------------------------
 
-    // ---------------------------
-    // iOS FIX: No init{} block to prevent deadlocks
-    // Events loading triggered from LaunchedEffect in EventsListScreen
+    init {
+        loadEvents()
+    }
+
     // ---------------------------
 
     /**
      * Load events from the data source through repository and use cases
-     * ⚠️ Called from LaunchedEffect for iOS safety
      */
-    suspend fun loadEvents() {
-        try {
-            // Start loading events through repository
-            eventsRepository.loadEvents { exception ->
-                WWWLogger.e("EventsViewModel", "Error loading events", exception)
+    private fun loadEvents() {
+        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
+            try {
+                // Start loading events through repository
+                eventsRepository.loadEvents { exception ->
+                    WWWLogger.e("EventsViewModel", "Error loading events", exception)
+                    _loadingError.value = true
+                }
+
+                // Observe loading state from repository
+                eventsRepository
+                    .isLoading()
+                    .onEach { isLoading -> _isLoading.value = isLoading }
+                    .launchIn(viewModelScope)
+
+                // Observe errors from repository
+                eventsRepository
+                    .getLastError()
+                    .onEach { error ->
+                        _loadingError.value = error != null
+                        error?.let {
+                            WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
+                        }
+                    }.launchIn(viewModelScope)
+
+                // Get sorted events through use case and process them
+                getSortedEventsUseCase
+                    .invoke()
+                    .onEach { sortedEvents: List<IWWWEvent> ->
+                        processEventsList(sortedEvents)
+                    }.flowOn(Dispatchers.Default)
+                    .launchIn(viewModelScope)
+            } catch (e: Exception) {
+                WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
                 _loadingError.value = true
             }
-
-            // Observe loading state from repository
-            eventsRepository
-                .isLoading()
-                .onEach { isLoading -> _isLoading.value = isLoading }
-                .launchIn(scope)
-
-            // Observe errors from repository
-            eventsRepository
-                .getLastError()
-                .onEach { error ->
-                    _loadingError.value = error != null
-                    error?.let {
-                        WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
-                    }
-                }.launchIn(scope)
-
-            // Get sorted events through use case and process them
-            getSortedEventsUseCase
-                .invoke()
-                .onEach { sortedEvents: List<IWWWEvent> ->
-                    processEventsList(sortedEvents)
-                }.flowOn(Dispatchers.Default)
-                .launchIn(scope)
-        } catch (e: Exception) {
-            WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
-            _loadingError.value = true
         }
     }
 
@@ -153,7 +164,7 @@ class EventsViewModel(
         var backupSimulationSpeed = 1
 
         // Handle warming started - using viewModelScope for automatic cleanup
-        scope.launch {
+        viewModelScope.launch {
             event.observer.isUserWarmingInProgress.collect { isWarmingStarted ->
                 if (isWarmingStarted) {
                     backupSimulationSpeed = platform.getSimulation()?.speed ?: 1
@@ -163,7 +174,7 @@ class EventsViewModel(
         }
 
         // Handle user has been hit - using viewModelScope for automatic cleanup
-        scope.launch {
+        viewModelScope.launch {
             event.observer.userHasBeenHit.collect { hasBeenHit ->
                 if (hasBeenHit) {
                     // Restore simulation speed after a delay
@@ -185,7 +196,7 @@ class EventsViewModel(
         onlyFavorites: Boolean = false,
         onlyDownloaded: Boolean = false,
     ) {
-        scope.launch {
+        viewModelScope.launch {
             try {
                 // Get all events from the use case first
                 getSortedEventsUseCase
@@ -203,7 +214,7 @@ class EventsViewModel(
 
                         val filteredEvents = filterEventsUseCase.invoke(allEvents, filterCriteria)
                         _events.value = filteredEvents
-                    }.launchIn(scope)
+                    }.launchIn(viewModelScope)
             } catch (e: Exception) {
                 WWWLogger.e("EventsViewModel", "Error filtering events", e)
                 _loadingError.value = true
