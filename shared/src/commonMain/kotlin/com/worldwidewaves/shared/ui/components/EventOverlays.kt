@@ -128,9 +128,8 @@ fun EventOverlayDone(
 }
 
 /**
- * Event overlay date component that shows the event date with proper positioning.
+ * Event overlay date component - EXACT copy of historical implementation.
  * Positions date in center normally, at bottom when event is done.
- * Uses double text rendering for stroke effect matching historical implementation.
  */
 @Composable
 fun EventOverlayDate(
@@ -144,21 +143,19 @@ fun EventOverlayDate(
             .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
-        // Background text for stroke effect
-        Text(
-            text = eventDate,
-            style = androidx.compose.ui.text.TextStyle(
-                fontSize = Event.DATE_FONTSIZE.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFFFFFFF), // quinaryLight
-            ),
+        // EXACT historical implementation - shared theme equivalent
+        val textStyle = androidx.compose.ui.text.TextStyle(
+            fontSize = Event.DATE_FONTSIZE.sp,
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.Default
         )
-        // Foreground text with stroke outline
         Text(
             text = eventDate,
-            style = androidx.compose.ui.text.TextStyle(
-                fontSize = Event.DATE_FONTSIZE.sp,
-                fontWeight = FontWeight.ExtraBold,
+            style = textStyle.copy(color = Color(0xFFFFFFFF)), // quinaryLight
+        )
+        Text(
+            text = eventDate,
+            style = textStyle.copy(
                 color = MaterialTheme.colorScheme.primary,
                 drawStyle = androidx.compose.ui.graphics.drawscope.Stroke(
                     miter = Event.DATE_MITER,
