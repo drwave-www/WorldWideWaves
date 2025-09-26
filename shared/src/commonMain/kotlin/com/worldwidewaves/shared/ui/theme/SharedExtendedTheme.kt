@@ -61,7 +61,7 @@ fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextSty
     TextStyle(fontSize = fontSize.sp)
 
 fun sharedCommonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedTypography.bodyMedium.fontFamily)
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedBodyFontFamily)
 
 fun sharedCommonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
@@ -87,8 +87,11 @@ fun sharedQuinaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAUL
 fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 
+fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedExtraFontFamily)
+
 fun sharedExtraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
+    sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
 
 fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedPrimaryColoredBoldTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)

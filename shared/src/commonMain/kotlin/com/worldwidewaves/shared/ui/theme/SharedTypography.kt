@@ -23,9 +23,10 @@ import androidx.compose.ui.unit.sp
  * typography specification as Android.
  */
 
-// System font families for cross-platform compatibility
-val SharedBodyFontFamily = FontFamily.Default // System font - works on both platforms
-val SharedDisplayFontFamily = FontFamily.Default
+// Font families - expect/actual for platform-specific font loading
+expect val SharedBodyFontFamily: FontFamily
+expect val SharedDisplayFontFamily: FontFamily
+expect val SharedExtraFontFamily: FontFamily
 
 /**
  * Shared Typography - exact same text styles on both platforms
