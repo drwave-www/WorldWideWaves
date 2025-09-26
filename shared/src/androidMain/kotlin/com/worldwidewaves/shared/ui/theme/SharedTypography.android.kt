@@ -12,8 +12,8 @@ package com.worldwidewaves.shared.ui.theme
 
 import androidx.compose.ui.text.font.FontFamily
 
-// Android font fallbacks - using system fonts for now
-// TODO: Add Google Fonts dependency to shared module for Montserrat/Noto Sans
-actual val SharedBodyFontFamily: FontFamily = FontFamily.SansSerif
-actual val SharedDisplayFontFamily: FontFamily = FontFamily.SansSerif
-actual val SharedExtraFontFamily: FontFamily = FontFamily.SansSerif
+// Android font fallbacks - using distinctive system fonts
+// TODO: Restore Google Fonts with proper dependency setup for Montserrat
+actual val SharedBodyFontFamily: FontFamily = FontFamily.Serif // Distinctive serif font
+actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif
+actual val SharedExtraFontFamily: FontFamily = FontFamily.Monospace // Very distinctive for special text

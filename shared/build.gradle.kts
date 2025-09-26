@@ -75,6 +75,9 @@ kotlin {
             implementation(libs.koin.test)
             implementation(libs.mockk.android.v1120)
         }
+        androidMain.dependencies {
+            implementation(libs.androidx.ui.text.google.fonts)
+        }
 
         /*
          * Allow build scripts to skip compiling `commonTest` sources (useful when running

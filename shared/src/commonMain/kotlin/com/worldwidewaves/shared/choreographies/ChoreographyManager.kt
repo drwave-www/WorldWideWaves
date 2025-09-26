@@ -285,7 +285,6 @@ open class ChoreographyManager<T> : KoinComponent {
     }
 
     // Backward compatibility: Non-suspend versions that return null if not loaded
-    // These are deprecated and should be migrated to suspend versions for optimal performance
 
     /**
      * Legacy non-suspend version for timing-critical warming sequences.

@@ -167,7 +167,6 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     var events by remember { mutableStateOf<List<IWWWEvent>>(emptyList()) }
 
     // Get SetEventFavorite through existing wwwEvents for now
-    // TODO: Use proper DI injection when koin-compose is fully integrated
 
     // Safely create WWWEvents with proper error handling
     val wwwEvents = remember {
@@ -238,12 +237,11 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
         events = events,
         mapStates = emptyMap(), // TODO: Add map state integration
         onEventClick = onEventClick,
-        setEventFavorite = null, // TODO: Inject SetEventFavorite via DI
+        setEventFavorite = null,
         modifier = Modifier.fillMaxSize()
     )
 }
 
-// Temporary helper functions - TODO: Remove when fully migrated to shared EventsListScreen
 private fun getEventBackgroundColor(eventId: String): androidx.compose.ui.graphics.Color {
     return when {
         eventId.contains("new_york") -> androidx.compose.ui.graphics.Color(0xFF2196F3).copy(alpha = 0.8f)

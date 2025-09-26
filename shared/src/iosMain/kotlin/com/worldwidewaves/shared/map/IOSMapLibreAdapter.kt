@@ -58,20 +58,16 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun getWidth(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        // return (mapView as? MLNMapView)?.frame?.size?.width ?: 0.0
         return 375.0 // Default iPhone width for now
     }
 
     override fun getHeight(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        // return (mapView as? MLNMapView)?.frame?.size?.height ?: 0.0
         return 812.0 // Default iPhone height for now
     }
 
     override fun getCameraPosition(): Position? {
         // TODO: Implement with proper MapLibre iOS bindings
-        // return (mapView as? MLNMapView)?.centerCoordinate?.let { coordinate ->
-        //     Position(lat = coordinate.latitude, lng = coordinate.longitude)
         // }
         return null // Will be implemented with MapLibre bindings
     }
@@ -127,7 +123,6 @@ class IOSMapLibreAdapter : MapLibreAdapter<Any> {
 
     override fun getMinZoomLevel(): Double {
         // TODO: Implement with proper MapLibre iOS bindings
-        // return (mapView as? MLNMapView)?.minimumZoomLevel ?: 0.0
         return 0.0
     }
 
