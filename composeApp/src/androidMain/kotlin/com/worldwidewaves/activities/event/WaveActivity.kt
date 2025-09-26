@@ -67,8 +67,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.worldwidewaves.compose.choreographies.WaveChoreographies
-import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
+import com.worldwidewaves.shared.ui.components.WaveScreenLayout
+import com.worldwidewaves.shared.ui.components.calculateEventMapHeight
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.DisplayText
