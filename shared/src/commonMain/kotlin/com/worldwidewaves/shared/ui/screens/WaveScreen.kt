@@ -21,6 +21,11 @@ package com.worldwidewaves.shared.ui.screens
  * limitations under the License.
  */
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -65,6 +71,7 @@ import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.WWWPlatform
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.ExperimentalTime
+import kotlin.time.Duration.Companion.hours
 
 /**
  * Shared Wave Participation Screen - Complete wave interaction UI.
@@ -150,9 +157,7 @@ fun SharedWaveScreen(
             WaveHitCounter(event)
         }
 
-        // User position triangle overlay
-        val progression by event.observer.progression.collectAsState()
-        UserPositionTriangle(progression)
+        // User position triangle overlay (removed as it's now integrated in WaveProgressionBar)
 
         // Choreography overlay when active
         if (isChoreographyActive) {
@@ -179,124 +184,173 @@ expect fun PlatformWaveMap(
 
 @Composable
 fun UserWaveStatusText(event: IWWWEvent) {
-    val eventStatus by event.observer.eventStatus.collectAsState()
-    val progression by event.observer.progression.collectAsState()
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val isWarming by event.observer.isUserWarmingInProgress.collectAsState()
 
-    val statusText = when (eventStatus) {
-        Status.SOON -> stringResource(MokoRes.strings.event_soon)
-        Status.RUNNING -> "${stringResource(MokoRes.strings.wave_is_running)} ${(progression * 100).toInt()}%"
-        Status.DONE -> stringResource(MokoRes.strings.event_done)
-        else -> "Wave Status"
+    val message = when {
+        eventStatus == Status.DONE -> MokoRes.strings.wave_done
+        hasBeenHit -> MokoRes.strings.wave_hit
+        isWarming && isInArea -> MokoRes.strings.wave_warming
+        isInArea -> MokoRes.strings.wave_be_ready
+        else -> MokoRes.strings.wave_is_running
     }
 
-    AutoSizeText(
-        text = statusText,
-        style = sharedPrimaryColoredBoldTextStyle(24),
-        modifier = Modifier.padding(16.dp)
-    )
+    Box(
+        modifier = Modifier.padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText(
+            text = stringResource(message),
+            style = sharedPrimaryColoredBoldTextStyle(24),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Composable
 fun WaveProgressionBar(event: IWWWEvent) {
     val progression by event.observer.progression.collectAsState()
-    val eventStatus by event.observer.eventStatus.collectAsState()
+    val isInArea by event.observer.userIsInArea.collectAsState()
+    val userPositionRatio by event.observer.userPositionRatio.collectAsState()
+    val isGoingToBeHit by event.observer.userIsGoingToBeHit.collectAsState()
+    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
 
-    if (eventStatus == Status.RUNNING) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(horizontal = 32.dp)
+    // Calculate responsive width - 80% of screen width
+    val barWidth = 300.dp // Fixed width for cross-platform compatibility
+
+    val triangleSize = 20f // Fixed triangle size
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp) // WaveDisplay.PROGRESSION_HEIGHT
+                .clip(RoundedCornerShape(25.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = "${stringResource(MokoRes.strings.wave_progression)}: ${(progression * 100).toInt()}%",
-                style = sharedCommonTextStyle(16),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            LinearProgressIndicator(
-                progress = { progression.toFloat() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                strokeCap = StrokeCap.Round,
-            )
-
             WaveProgressionFillArea(progression)
+
+            Text(
+                text = "${String.format("%.1f", progression)}%",
+                style = sharedPrimaryColoredBoldTextStyle(16),
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (isInArea) {
+            UserPositionTriangle(userPositionRatio, triangleSize, isGoingToBeHit, hasBeenHit)
         }
     }
 }
 
 @Composable
 private fun WaveProgressionFillArea(progression: Double) {
-    Box(
+    Canvas(
         modifier = Modifier
             .fillMaxWidth()
-            .height(20.dp)
-            .background(Color.Gray.copy(alpha = 0.3f))
-            .clip(RoundedCornerShape(4.dp))
+            .height(40.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(progression.toFloat())
-                .height(20.dp)
-                .background(MaterialTheme.colorScheme.primary)
-                .clip(RoundedCornerShape(4.dp))
+        val width = size.width
+        val height = size.height
+        val traversedWidth = (width * kotlin.math.min(progression, 100.0).toFloat() / 100f)
+
+        // Draw the progression bar - filled area (blue/primary)
+        drawRect(
+            color = androidx.compose.ui.graphics.Color(0xFF2196F3), // Blue color for progress
+            size = androidx.compose.ui.geometry.Size(traversedWidth, height),
+        )
+        // Draw the remaining area (gray)
+        drawRect(
+            color = androidx.compose.ui.graphics.Color(0xFFE0E0E0), // Light gray for remaining
+            topLeft = androidx.compose.ui.geometry.Offset(traversedWidth, 0f),
+            size = androidx.compose.ui.geometry.Size(width - traversedWidth, height),
         )
     }
 }
 
 @Composable
-fun UserPositionTriangle(userPositionRatio: Double) {
+fun UserPositionTriangle(
+    userPositionRatio: Double,
+    triangleSize: Float,
+    isGoingToBeHit: Boolean,
+    hasBeenHit: Boolean,
+) {
+    val triangleColor = when {
+        isGoingToBeHit -> androidx.compose.ui.graphics.Color(0xFFFF6B35) // Orange for about to be hit
+        hasBeenHit -> androidx.compose.ui.graphics.Color(0xFF4CAF50) // Green for hit
+        else -> androidx.compose.ui.graphics.Color(0xFF9E9E9E) // Gray for idle
+    }
+
     Canvas(
         modifier = Modifier
-            .size(30.dp)
-            .padding(8.dp)
+            .fillMaxWidth()
+            .height(triangleSize.toInt().dp)
+            .padding(top = 4.dp),
     ) {
-        drawTriangle(this, userPositionRatio)
+        val width = size.width
+        val trianglePosition = (width * userPositionRatio).toFloat().coerceIn(0f, width)
+        val path = androidx.compose.ui.graphics.Path().apply {
+            moveTo(trianglePosition, 0f)
+            lineTo(trianglePosition - triangleSize / 2f, triangleSize)
+            lineTo(trianglePosition + triangleSize / 2f, triangleSize)
+            close()
+        }
+        drawPath(path, triangleColor, style = androidx.compose.ui.graphics.drawscope.Fill)
     }
 }
 
-private fun drawTriangle(drawScope: DrawScope, ratio: Double) {
-    with(drawScope) {
-        val triangleSize = size.minDimension * 0.8f
-        val centerX = size.width / 2f
-        val centerY = size.height / 2f
-
-        // Simple triangle implementation
-        drawCircle(
-            color = Color.Red,
-            radius = triangleSize / 4f,
-            center = androidx.compose.ui.geometry.Offset(centerX, centerY)
-        )
-    }
-}
 
 @Composable
 fun WaveHitCounter(event: IWWWEvent) {
-    val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
+    val timeBeforeHit by event.observer.timeBeforeHit.collectAsState()
 
-    if (hasBeenHit) {
+    val text = formatDuration(timeBeforeHit)
+
+    if (text != "--:--") {
+        val boxWidth = 200.dp // Fixed width for cross-platform compatibility
+
         Box(
             modifier = Modifier
-                .background(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                    RoundedCornerShape(12.dp)
-                )
-                .padding(16.dp)
+                .width(boxWidth)
+                .background(Color.Transparent)
+                .padding(2.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = stringResource(MokoRes.strings.wave_hit),
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center
+            AutoSizeText(
+                text = text,
+                style = sharedPrimaryColoredBoldTextStyle(24),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
             )
         }
     }
 }
+
+private fun formatDuration(duration: kotlin.time.Duration): String =
+    when {
+        duration.isInfinite() || duration < kotlin.time.Duration.ZERO -> "--:--" // Protection
+        duration < 1.hours -> {
+            val minutes = duration.inWholeMinutes.toString().padStart(2, '0')
+            val seconds = (duration.inWholeSeconds % 60).toString().padStart(2, '0')
+            "$minutes:$seconds"
+        }
+
+        duration < 99.hours -> {
+            val hours = duration.inWholeHours.toString().padStart(2, '0')
+            val minutes = (duration.inWholeMinutes % 60).toString().padStart(2, '0')
+            "$hours:$minutes"
+        }
+
+        else -> "--:--"
+    }
 
 @Composable
 fun AutoSizeText(
@@ -304,11 +358,20 @@ fun AutoSizeText(
     style: androidx.compose.ui.text.TextStyle,
     modifier: Modifier = Modifier,
 ) {
+    var fontSize by remember { mutableStateOf(style.fontSize) }
+
     Text(
         text = text,
-        style = style,
-        modifier = modifier,
+        style = style.copy(fontSize = fontSize),
+        color = Color.White,
+        textAlign = TextAlign.Center,
         maxLines = 1,
-        fontSize = 16.sp
+        softWrap = false,
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.hasVisualOverflow) {
+                fontSize = fontSize * 0.9f
+            }
+        },
+        modifier = modifier,
     )
 }
