@@ -38,6 +38,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
 import com.worldwidewaves.shared.ui.theme.SharedWorldWideWavesThemeWithExtended
+import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.utils.Log
 
 /**
@@ -152,8 +153,11 @@ private fun SharedBottomTabBar() {
 @Composable
 private fun SharedAboutScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("About WorldWideWaves", style = MaterialTheme.typography.headlineMedium)
-        Text("Shared about screen - identical on both platforms")
+        Text("About WorldWideWaves", style = sharedCommonTextStyle().copy(
+            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+        ))
+        Text("Shared about screen - identical on both platforms", style = sharedCommonTextStyle())
     }
 }
 
@@ -296,8 +300,11 @@ private fun SharedEventDetailsScreen(
             ) {
                 Text(
                     text = eventId.replace("_", " ").uppercase(),
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = Color.White
+                    style = sharedCommonTextStyle().copy(
+                        fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                        fontWeight = MaterialTheme.typography.headlineLarge.fontWeight,
+                        color = Color.White
+                    )
                 )
             }
         }
@@ -308,12 +315,15 @@ private fun SharedEventDetailsScreen(
         ) {
             Text(
                 text = "Event Description",
-                style = MaterialTheme.typography.headlineMedium,
+                style = sharedCommonTextStyle().copy(
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+                ),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
                 text = "Experience the wave in ${getCommunityName(eventId)}. Join thousands of participants in this synchronized human wave event.",
-                style = MaterialTheme.typography.bodyLarge
+                style = sharedCommonTextStyle()
             )
         }
 
@@ -370,13 +380,16 @@ private fun SharedWaveScreen(
     ) {
         Text(
             text = "🌊 Wave: ${eventId.replace("_", " ").uppercase()}",
-            style = MaterialTheme.typography.headlineLarge,
+            style = sharedCommonTextStyle().copy(
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+            ),
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Text(
             text = "Wave participation screen - identical on both platforms",
-            style = MaterialTheme.typography.bodyLarge,
+            style = sharedCommonTextStyle(),
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -400,13 +413,16 @@ private fun SharedMapScreen(
     ) {
         Text(
             text = "🗺️ Map: ${eventId.replace("_", " ").uppercase()}",
-            style = MaterialTheme.typography.headlineLarge,
+            style = sharedCommonTextStyle().copy(
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+            ),
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Text(
             text = "Event map screen - identical on both platforms",
-            style = MaterialTheme.typography.bodyLarge,
+            style = sharedCommonTextStyle(),
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -423,7 +439,10 @@ private fun SharedMapScreen(
 @Composable
 private fun SharedDebugScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Debug Settings", style = MaterialTheme.typography.headlineMedium)
-        Text("Shared debug screen - identical on both platforms")
+        Text("Debug Settings", style = sharedCommonTextStyle().copy(
+            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+        ))
+        Text("Shared debug screen - identical on both platforms", style = sharedCommonTextStyle())
     }
 }

@@ -148,6 +148,7 @@ fun SharedAboutFaqScreen(
                 FAQDividerLine()
             }
 
+            Spacer(modifier = Modifier.size(Dimensions.SPACER_BIG.dp))
             AboutWWWSocialNetworks(onUrlOpen = onUrlOpen)
         }
     }
