@@ -36,13 +36,13 @@ import com.google.android.play.core.splitinstall.model.SplitInstallErrorCode
 import com.google.android.play.core.splitinstall.model.SplitInstallSessionStatus
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.clearEventCache
+import com.worldwidewaves.shared.map.MapFeatureState
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.StringDesc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.worldwidewaves.shared.map.MapFeatureState
 
 // ----------------------------------------------------------------------------
 

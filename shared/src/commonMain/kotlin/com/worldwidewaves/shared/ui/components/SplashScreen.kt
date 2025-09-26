@@ -24,17 +24,16 @@ package com.worldwidewaves.shared.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.background
 import com.worldwidewaves.shared.generated.resources.www_logo_transparent
-import com.worldwidewaves.shared.MokoRes
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
 

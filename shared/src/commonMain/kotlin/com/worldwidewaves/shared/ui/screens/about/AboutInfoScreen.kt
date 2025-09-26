@@ -37,13 +37,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.worldwidewaves.shared.ui.components.AboutDividerLine
-import com.worldwidewaves.shared.ui.components.AboutWWWLogo
-import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Info
 import com.worldwidewaves.shared.infos_core
+import com.worldwidewaves.shared.ui.components.AboutDividerLine
+import com.worldwidewaves.shared.ui.components.AboutWWWLogo
+import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import dev.icerock.moko.resources.compose.stringResource

@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -38,17 +41,12 @@ import com.worldwidewaves.shared.WWWGlobals.Wave
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.WWWSimulation
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.generated.resources.Res
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Close
 import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 

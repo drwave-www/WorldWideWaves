@@ -13,11 +13,9 @@ package com.worldwidewaves.compose.tabs
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabScreen
 import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
-import com.worldwidewaves.shared.WWWPlatform
-import com.worldwidewaves.compose.tabs.about.AboutFaqScreen
-import com.worldwidewaves.compose.tabs.about.AboutInfoScreen
 
 /**
  * Android wrapper for SharedAboutScreen.

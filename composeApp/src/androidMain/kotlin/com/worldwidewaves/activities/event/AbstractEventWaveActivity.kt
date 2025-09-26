@@ -25,12 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.worldwidewaves.shared.utils.WaveProgressionObserver
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
+import com.worldwidewaves.shared.utils.WaveProgressionObserver
 import org.koin.android.ext.android.inject
 
 /**

@@ -72,6 +72,19 @@ import com.worldwidewaves.shared.WWWPlatform
 import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Duration.Companion.hours
+import java.util.Locale
+
+// Constants
+private const val MAP_HEIGHT_DP = 300
+private const val PROGRESSION_BAR_HEIGHT_DP = 40
+private const val TRIANGLE_SIZE_PX = 20f
+private const val HIT_COUNTER_WIDTH_DP = 200
+private const val STATUS_TEXT_FONT_SIZE = 24
+private const val PROGRESSION_FONT_SIZE = 16
+
+// UI Colors
+private const val PROGRESS_COLOR = 0xFF2196F3 // Blue
+private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 
 /**
  * Shared Wave Participation Screen - Complete wave interaction UI.
@@ -91,7 +104,6 @@ import kotlin.time.Duration.Companion.hours
 @Composable
 fun SharedWaveScreen(
     event: IWWWEvent,
-    platform: WWWPlatform,
     clock: IClock,
     modifier: Modifier = Modifier,
     onNavigateToFullMap: (String) -> Unit = {},
@@ -100,7 +112,7 @@ fun SharedWaveScreen(
     var hasPlayedHitSound by remember { mutableStateOf(false) }
 
     // Calculate height based on aspect ratio
-    val calculatedHeight = 300.dp // Fixed for cross-platform compatibility
+    val calculatedHeight = MAP_HEIGHT_DP.dp // Fixed for cross-platform compatibility
 
     // Get choreography-related states
     val isWarmingInProgress by event.observer.isUserWarmingInProgress.collectAsState(false)
@@ -203,7 +215,7 @@ fun UserWaveStatusText(event: IWWWEvent) {
     ) {
         com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText(
             text = stringResource(message),
-            style = sharedPrimaryColoredBoldTextStyle(24),
+            style = sharedPrimaryColoredBoldTextStyle(STATUS_TEXT_FONT_SIZE),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )
@@ -219,9 +231,7 @@ fun WaveProgressionBar(event: IWWWEvent) {
     val hasBeenHit by event.observer.userHasBeenHit.collectAsState()
 
     // Calculate responsive width - 80% of screen width
-    val barWidth = 300.dp // Fixed width for cross-platform compatibility
-
-    val triangleSize = 20f // Fixed triangle size
+    val triangleSize = TRIANGLE_SIZE_PX // Fixed triangle size
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +240,7 @@ fun WaveProgressionBar(event: IWWWEvent) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp) // WaveDisplay.PROGRESSION_HEIGHT
+                .height(PROGRESSION_BAR_HEIGHT_DP.dp) // WaveDisplay.PROGRESSION_HEIGHT
                 .clip(RoundedCornerShape(25.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center,
@@ -238,8 +248,8 @@ fun WaveProgressionBar(event: IWWWEvent) {
             WaveProgressionFillArea(progression)
 
             Text(
-                text = "${String.format("%.1f", progression)}%",
-                style = sharedPrimaryColoredBoldTextStyle(16),
+                text = "${String.format(Locale.getDefault(), "%.1f", progression)}%",
+                style = sharedPrimaryColoredBoldTextStyle(PROGRESSION_FONT_SIZE),
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
@@ -255,7 +265,7 @@ private fun WaveProgressionFillArea(progression: Double) {
     Canvas(
         modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp),
+            .height(PROGRESSION_BAR_HEIGHT_DP.dp),
     ) {
         val width = size.width
         val height = size.height
@@ -263,12 +273,12 @@ private fun WaveProgressionFillArea(progression: Double) {
 
         // Draw the progression bar - filled area (blue/primary)
         drawRect(
-            color = androidx.compose.ui.graphics.Color(0xFF2196F3), // Blue color for progress
+            color = androidx.compose.ui.graphics.Color(PROGRESS_COLOR), // Blue color for progress
             size = androidx.compose.ui.geometry.Size(traversedWidth, height),
         )
         // Draw the remaining area (gray)
         drawRect(
-            color = androidx.compose.ui.graphics.Color(0xFFE0E0E0), // Light gray for remaining
+            color = androidx.compose.ui.graphics.Color(REMAINING_COLOR), // Light gray for remaining
             topLeft = androidx.compose.ui.geometry.Offset(traversedWidth, 0f),
             size = androidx.compose.ui.geometry.Size(width - traversedWidth, height),
         )
@@ -314,7 +324,7 @@ fun WaveHitCounter(event: IWWWEvent) {
     val text = formatDuration(timeBeforeHit)
 
     if (text != "--:--") {
-        val boxWidth = 200.dp // Fixed width for cross-platform compatibility
+        val boxWidth = HIT_COUNTER_WIDTH_DP.dp // Fixed width for cross-platform compatibility
 
         Box(
             modifier = Modifier
@@ -325,7 +335,7 @@ fun WaveHitCounter(event: IWWWEvent) {
         ) {
             AutoSizeText(
                 text = text,
-                style = sharedPrimaryColoredBoldTextStyle(24),
+                style = sharedPrimaryColoredBoldTextStyle(STATUS_TEXT_FONT_SIZE),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp),

@@ -83,6 +83,7 @@ import com.worldwidewaves.shared.events.utils.Position
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
+import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.map.WWWLocationProvider
 import com.worldwidewaves.shared.toMapLibrePolygon
 import com.worldwidewaves.shared.ui.components.DownloadProgressIndicator
@@ -91,7 +92,6 @@ import com.worldwidewaves.utils.AndroidWWWLocationProvider
 import com.worldwidewaves.utils.CheckGPSEnable
 import com.worldwidewaves.utils.MapAvailabilityChecker
 import com.worldwidewaves.utils.requestLocationPermission
-import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.viewmodels.MapViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope

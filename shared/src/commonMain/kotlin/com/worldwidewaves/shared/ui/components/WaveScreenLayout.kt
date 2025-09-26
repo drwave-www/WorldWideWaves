@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
-import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
+import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
 import com.worldwidewaves.shared.ui.screens.UserWaveStatusText
 import com.worldwidewaves.shared.ui.screens.WaveHitCounter
-import com.worldwidewaves.shared.ui.components.choreographies.WaveChoreographies
+import com.worldwidewaves.shared.ui.screens.WaveProgressionBar
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime

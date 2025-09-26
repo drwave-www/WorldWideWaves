@@ -31,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.worldwidewaves.shared.MokoRes
-import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 
 /**

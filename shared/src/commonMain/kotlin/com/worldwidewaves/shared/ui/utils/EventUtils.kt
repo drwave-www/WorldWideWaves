@@ -10,7 +10,6 @@ package com.worldwidewaves.shared.ui.utils
  *     http://www.apache.org/licenses/LICENSE-2.0
  */
 
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,8 +23,6 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.shared.MokoRes
-import dev.icerock.moko.resources.compose.stringResource
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

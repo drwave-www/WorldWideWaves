@@ -11,8 +11,8 @@ package com.worldwidewaves.shared.utils
  */
 
 import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 /**
  * iOS-specific tests for the logging system.
