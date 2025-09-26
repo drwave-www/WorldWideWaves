@@ -21,20 +21,12 @@ package com.worldwidewaves.shared.data
  * limitations under the License.
  */
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
+
+internal const val DATA_STORE_FILE_NAME = "wwwaves.preferences_pb"
+
+/** Returns the platform-specific absolute path used to store the preferences DataStore file. */
+expect fun keyValueStorePath(): String
 
 /**
  * Small wrapper around Android/Multiplatform `DataStore` that persists the
@@ -47,34 +39,13 @@ import kotlinx.coroutines.withContext
  *
  * All I/O happens on the supplied [dispatcher] (defaults to `Dispatchers.IO`).
  */
-class FavoriteEventsStore(
-    private val dataStore: DataStore<Preferences>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) {
-    private fun favoriteKey(eventId: String): Preferences.Key<Boolean> = booleanPreferencesKey("favorite_$eventId")
-
+interface FavoriteEventsStore {
     suspend fun setFavoriteStatus(
         eventId: String,
         isFavorite: Boolean,
-    ) = withContext(dispatcher) {
-        try {
-            dataStore.edit { it[favoriteKey(eventId)] = isFavorite }
-            Log.d("FavoriteEventsStore", "Successfully set favorite status for event $eventId: $isFavorite")
-        } catch (e: Exception) {
-            Log.e("FavoriteEventsStore", "Failed to set favorite status for event $eventId", throwable = e)
-            throw DataStoreException("Failed to update favorite status for event $eventId: ${e.message}", e)
-        }
-    }
+    )
 
-    suspend fun isFavorite(eventId: String): Boolean =
-        withContext(dispatcher) {
-            dataStore.data
-                .catch {
-                    Log.e(::isFavorite.name, "Error reading favorites", throwable = it)
-                    emit(emptyPreferences())
-                }.map { it[favoriteKey(eventId)] ?: false }
-                .firstOrNull() ?: false
-        }
+    suspend fun isFavorite(eventId: String): Boolean
 }
 
 // ----------------------------

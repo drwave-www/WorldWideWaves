@@ -1,3 +1,5 @@
+package com.worldwidewaves.compose.common
+
 /*
  * Copyright 2025 DrWave
  *
@@ -19,660 +21,147 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.compose.common
-
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.worldwidewaves.shared.events.IWWWEvent.Status
-import com.worldwidewaves.testing.BaseComponentTest
-import org.junit.Assert.assertTrue
-import org.junit.Before
+import com.worldwidewaves.shared.events.utils.SystemClock
+import com.worldwidewaves.shared.ui.components.shared.ButtonWave
+import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
+import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
 /**
- * UI tests for common/reusable components
- *
- * Tests cover:
- * - ButtonWave component functionality
- * - Social network link components
- * - Event overlay components (favorite, download, status)
- * - Divider and spacing components
- * - Common UI patterns and interactions
+ * UI tests for real common/reusable components
+ * Tests the actual ButtonWave component with real business logic
  */
 @RunWith(AndroidJUnit4::class)
-class CommonComponentsTest : BaseComponentTest() {
+class CommonComponentsTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
     @OptIn(ExperimentalTime::class)
-    @Before
-    override fun setUp() {
-        super.setUp()
-        // Additional setup specific to CommonComponentsTest if needed
-    }
+    private val clock = SystemClock()
 
+    @OptIn(ExperimentalTime::class)
     @Test
-    fun buttonWave_clickAction_triggersCallback() {
-        // Test mock ButtonWave component click functionality
-        var buttonClicked = false
+    fun buttonWave_runningEventInArea_isEnabledAndClickable() {
+        // Test real ButtonWave component with RUNNING event when user is in area
+        var navigationTriggered = false
+        var navigatedEventId = ""
 
-        setThemedContent {
-            TestButtonWave(
-                eventId = "test-event",
-                eventState = Status.RUNNING,
-                isInArea = true,
-                onButtonClick = { buttonClicked = true },
-                modifier = Modifier.testTag("button-wave"),
-            )
+        val navigator =
+            WaveNavigator { eventId ->
+                navigationTriggered = true
+                navigatedEventId = eventId
+            }
+
+        composeTestRule.setContent {
+            WorldWideWavesTheme {
+                ButtonWave(
+                    eventId = "test-running-event",
+                    eventState = Status.RUNNING,
+                    endDateTime = null,
+                    isInArea = true,
+                    onNavigateToWave = navigator,
+                    modifier = Modifier.testTag("real-button-wave"),
+                )
+            }
         }
 
-        // Verify button is displayed and enabled when event is running and user is in area
-        composeTestRule.onNodeWithTag("button-wave").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("button-wave").assertIsEnabled()
+        // Verify button is displayed and enabled for running event in area
+        composeTestRule.onNodeWithTag("real-button-wave").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("real-button-wave").assertIsEnabled()
 
-        // Test button text displays correctly
-        composeTestRule.onNodeWithText("JOIN WAVE").assertIsDisplayed()
+        // Click the button and verify navigation
+        composeTestRule.onNodeWithTag("real-button-wave").performClick()
 
-        // Click the button
-        composeTestRule.onNodeWithTag("button-wave").performClick()
-        assert(buttonClicked) { "Button click should be triggered" }
+        assert(navigationTriggered) { "Navigation should be triggered when button is clicked" }
+        assert(navigatedEventId == "test-running-event") { "Should navigate to correct event ID" }
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
-    fun buttonWave_notInArea_isDisabled() {
-        // Test button behavior when user is not in area
+    fun buttonWave_runningEventNotInArea_isDisabled() {
+        // Test real ButtonWave behavior when user is not in event area
+        val navigator = WaveNavigator { }
+
         composeTestRule.setContent {
-            TestButtonWave(
-                eventId = "test-event",
-                eventState = Status.RUNNING,
-                isInArea = false, // User not in area
-                modifier = Modifier.testTag("button-wave-disabled"),
-            )
+            WorldWideWavesTheme {
+                ButtonWave(
+                    eventId = "test-event-not-in-area",
+                    eventState = Status.RUNNING,
+                    endDateTime = null,
+                    isInArea = false, // User not in area
+                    onNavigateToWave = navigator,
+                    modifier = Modifier.testTag("button-wave-not-in-area"),
+                )
+            }
         }
 
         // Verify button is disabled when user is not in area
-        composeTestRule.onNodeWithTag("button-wave-disabled").assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("button-wave-not-in-area").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("button-wave-not-in-area").assertIsNotEnabled()
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
-    fun buttonWave_doneStatus_isEnabled() {
-        // Test button with DONE status
-        composeTestRule.setContent {
-            TestButtonWave(
-                eventId = "test-event",
-                eventState = Status.DONE,
-                isInArea = true,
-                modifier = Modifier.testTag("button-wave-done"),
-            )
-        }
-
-        // Button should be enabled for recently finished events
-        composeTestRule.onNodeWithTag("button-wave-done").assertIsEnabled()
-    }
-
-    @Test
-    fun socialNetworks_instagramLink_opensExternalUri() {
-        // Test WWWSocialNetworks component
-        composeTestRule.setContent {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Mock social networks component
-                TestSocialNetworksComponent(
-                    instagramUrl = "https://instagram.com/worldwidewaves",
-                    hashtag = "#worldwidewaves",
-                    modifier = Modifier.testTag("social-networks"),
-                )
-            }
-        }
-
-        // Verify Instagram link is displayed
-        composeTestRule.onNodeWithTag("instagram-link").assertIsDisplayed()
-
-        // Verify hashtag is displayed
-        composeTestRule.onNodeWithText("#worldwidewaves").assertIsDisplayed()
-
-        // Test Instagram link click
-        composeTestRule.onNodeWithTag("instagram-link").performClick()
-
-        // Note: Actual URI opening would be tested in integration tests
-        // Here we verify the component renders and responds to clicks
-    }
-
-    @Test
-    fun eventOverlays_favoriteToggle_updatesState() {
-        // Test EventOverlayFavorite component
-        var isFavorite = false
-        var toggleCount = 0
+    fun buttonWave_recentEndedEvent_isEnabled() {
+        // Test ButtonWave with recently ended event (within 1 hour)
+        val navigator = WaveNavigator { }
+        val recentEndTime = clock.now() - 30.minutes // 30 minutes ago
 
         composeTestRule.setContent {
-            val favoriteState = remember { mutableStateOf(isFavorite) }
-
-            TestEventOverlayFavorite(
-                isFavorite = favoriteState.value,
-                onToggle = {
-                    favoriteState.value = !favoriteState.value
-                    isFavorite = favoriteState.value
-                    toggleCount++
-                },
-                modifier = Modifier.testTag("favorite-overlay"),
-            )
-        }
-
-        // Test that the component exists and can be interacted with
-        val favoriteOverlayExists =
-            try {
-                composeTestRule.onNodeWithTag("favorite-overlay").assertExists()
-                true
-            } catch (e: Exception) {
-                false
-            }
-
-        assertTrue("Favorite overlay component should exist and be accessible", favoriteOverlayExists)
-
-        // Test click interaction if component exists
-        if (favoriteOverlayExists) {
-            try {
-                composeTestRule.onNodeWithTag("favorite-overlay").performClick()
-                composeTestRule.waitForIdle()
-                // Basic verification that interaction works
-                assertTrue("Toggle callback should have been called", toggleCount >= 0)
-            } catch (e: Exception) {
-                // If click fails, still pass the test as component exists
-                assertTrue("Component exists even if interaction fails in test environment", true)
-            }
-        }
-    }
-
-    @Test
-    fun eventOverlays_downloadStatus_downloaded_displaysCorrectly() {
-        // Test downloaded state
-        composeTestRule.setContent {
-            TestEventOverlayMapDownloaded(
-                isDownloaded = true,
-                isDownloading = false,
-                hasError = false,
-                modifier = Modifier.testTag("download-overlay-done"),
-            )
-        }
-
-        // Verify downloaded indicator
-        composeTestRule.onNodeWithContentDescription("Map downloaded").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("download-check").assertIsDisplayed()
-    }
-
-    @Test
-    fun eventOverlays_downloadStatus_downloading_displaysCorrectly() {
-        // Test downloading state
-        composeTestRule.setContent {
-            TestEventOverlayMapDownloaded(
-                isDownloaded = false,
-                isDownloading = true,
-                hasError = false,
-                modifier = Modifier.testTag("download-overlay-progress"),
-            )
-        }
-
-        // Verify downloading indicator
-        composeTestRule.onNodeWithContentDescription("Downloading map").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("download-progress").assertIsDisplayed()
-    }
-
-    @Test
-    fun eventOverlays_downloadStatus_error_displaysCorrectly() {
-        // Test error state
-        composeTestRule.setContent {
-            TestEventOverlayMapDownloaded(
-                isDownloaded = false,
-                isDownloading = false,
-                hasError = true,
-                modifier = Modifier.testTag("download-overlay-error"),
-            )
-        }
-
-        // Verify error indicator
-        composeTestRule.onNodeWithContentDescription("Download failed").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("download-error").assertIsDisplayed()
-    }
-
-    @Test
-    fun eventOverlays_downloadStatus_idle_displaysCorrectly() {
-        // Test no download state
-        composeTestRule.setContent {
-            TestEventOverlayMapDownloaded(
-                isDownloaded = false,
-                isDownloading = false,
-                hasError = false,
-                modifier = Modifier.testTag("download-overlay-none"),
-            )
-        }
-
-        // Verify no download indicator is not displayed
-        composeTestRule.onNode(hasTestTag("download-check")).assertDoesNotExist()
-    }
-
-    @Test
-    fun eventOverlays_eventStatus_done_showsCorrectBadge() {
-        // Test DONE status
-        composeTestRule.setContent {
-            TestEventOverlayDone(
-                eventStatus = Status.DONE,
-                modifier = Modifier.testTag("done-overlay"),
-            )
-        }
-
-        // Verify done overlay is displayed
-        composeTestRule.onNodeWithTag("done-overlay").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Event completed").assertIsDisplayed()
-    }
-
-    @Test
-    fun eventOverlays_eventStatus_running_showsCorrectBadge() {
-        // Test RUNNING status (should not show done overlay)
-        composeTestRule.setContent {
-            TestEventOverlayDone(
-                eventStatus = Status.RUNNING,
-                modifier = Modifier.testTag("running-overlay"),
-            )
-        }
-
-        // Verify done overlay is not displayed for running events
-        composeTestRule.onNode(hasContentDescription("Event completed")).assertDoesNotExist()
-    }
-
-    @Test
-    fun eventOverlays_eventStatus_soon_showsCorrectBadge() {
-        // Test SOON status overlay
-        composeTestRule.setContent {
-            TestEventOverlaySoonOrRunning(
-                eventStatus = Status.SOON,
-                modifier = Modifier.testTag("soon-overlay"),
-            )
-        }
-
-        // Verify soon badge is displayed
-        composeTestRule.onNodeWithText("SOON").assertIsDisplayed()
-    }
-
-    @Test
-    fun eventOverlays_eventStatus_runningBadge_showsCorrectBadge() {
-        // Test RUNNING status overlay
-        composeTestRule.setContent {
-            TestEventOverlaySoonOrRunning(
-                eventStatus = Status.RUNNING,
-                modifier = Modifier.testTag("running-badge"),
-            )
-        }
-
-        // Verify running badge is displayed
-        composeTestRule.onNodeWithText("RUNNING").assertIsDisplayed()
-    }
-
-    @Test
-    fun dividers_display_withCorrectSpacing() {
-        // Test divider components
-        composeTestRule.setContent {
-            Box(modifier = Modifier.fillMaxSize()) {
-                TestDividerComponent(
-                    modifier = Modifier.testTag("test-divider"),
-                )
-            }
-        }
-
-        // Verify divider is displayed
-        composeTestRule.onNodeWithTag("test-divider").assertIsDisplayed()
-    }
-
-    @Test
-    fun dividers_horizontal_display_correctly() {
-        // Test horizontal divider
-        composeTestRule.setContent {
-            TestHorizontalDivider(
-                modifier = Modifier.testTag("horizontal-divider"),
-            )
-        }
-
-        composeTestRule.onNodeWithTag("horizontal-divider").assertIsDisplayed()
-    }
-
-    @Test
-    fun dividers_vertical_display_correctly() {
-        // Test vertical divider
-        composeTestRule.setContent {
-            TestVerticalDivider(
-                modifier = Modifier.testTag("vertical-divider"),
-            )
-        }
-
-        composeTestRule.onNodeWithTag("vertical-divider").assertIsDisplayed()
-    }
-
-    @Test
-    fun commonComponents_accessibility_buttonWave_supportScreenReaders() {
-        // Test ButtonWave accessibility
-        composeTestRule.setContent {
-            TestButtonWave(
-                eventId = "test-event",
-                eventState = Status.RUNNING,
-                isInArea = true,
-                modifier = Modifier.testTag("accessible-button"),
-            )
-        }
-
-        // Verify button has accessible text
-        composeTestRule.onNodeWithText("JOIN WAVE").assertIsDisplayed()
-    }
-
-    @Test
-    fun commonComponents_accessibility_eventOverlay_supportScreenReaders() {
-        // Test event overlay accessibility
-        composeTestRule.setContent {
-            TestEventOverlayDone(
-                eventStatus = Status.DONE,
-                modifier = Modifier.testTag("accessible-done"),
-            )
-        }
-
-        // Verify done overlay has content description
-        composeTestRule.onNode(hasContentDescription("Event completed")).assertIsDisplayed()
-    }
-
-    @Test
-    fun commonComponents_accessibility_favorite_supportScreenReaders() {
-        // Test favorite overlay accessibility
-        composeTestRule.setContent {
-            TestEventOverlayFavorite(
-                isFavorite = true,
-                onToggle = { },
-                modifier = Modifier.testTag("accessible-favorite"),
-            )
-        }
-
-        // Verify favorite has appropriate content description
-        composeTestRule.onNode(hasContentDescription("Remove from favorites")).assertIsDisplayed()
-    }
-
-    @Test
-    fun commonComponents_theming_buttonWave_adaptsToSystemSettings() {
-        // Test with Material Theme
-        composeTestRule.setContent {
-            MaterialTheme {
-                TestButtonWave(
-                    eventId = "test-event",
-                    eventState = Status.RUNNING,
+            WorldWideWavesTheme {
+                ButtonWave(
+                    eventId = "test-recent-ended-event",
+                    eventState = Status.DONE,
+                    endDateTime = recentEndTime,
                     isInArea = true,
-                    modifier = Modifier.testTag("themed-button"),
+                    onNavigateToWave = navigator,
+                    modifier = Modifier.testTag("button-wave-recent-ended"),
                 )
             }
         }
 
-        // Verify button renders with theme
-        composeTestRule.onNodeWithTag("themed-button").assertIsDisplayed()
+        // Verify button is enabled for recently ended events
+        composeTestRule.onNodeWithTag("button-wave-recent-ended").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("button-wave-recent-ended").assertIsEnabled()
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
-    fun commonComponents_theming_eventStatus_adaptsToSystemSettings() {
-        // Test event status overlay theming
+    fun buttonWave_oldEndedEvent_isDisabled() {
+        // Test ButtonWave with event that ended long ago
+        val navigator = WaveNavigator { }
+        val oldEndTime = clock.now() - 2.hours // 2 hours ago (beyond 1 hour threshold)
+
         composeTestRule.setContent {
-            MaterialTheme {
-                TestEventOverlaySoonOrRunning(
-                    eventStatus = Status.SOON,
-                    modifier = Modifier.testTag("themed-overlay"),
+            WorldWideWavesTheme {
+                ButtonWave(
+                    eventId = "test-old-ended-event",
+                    eventState = Status.DONE,
+                    endDateTime = oldEndTime,
+                    isInArea = true,
+                    onNavigateToWave = navigator,
+                    modifier = Modifier.testTag("button-wave-old-ended"),
                 )
             }
         }
 
-        // Verify overlay uses theme colors
-        composeTestRule.onNodeWithText("SOON").assertIsDisplayed()
-    }
-
-    @Test
-    fun commonComponents_theming_textScaling_adaptsToSystemSettings() {
-        // Test text scaling adaptation
-        composeTestRule.setContent {
-            MaterialTheme {
-                TestAutoResizeText(
-                    text = "Sample text for scaling",
-                    modifier = Modifier.testTag("scaled-text"),
-                )
-            }
-        }
-
-        // Verify text component handles scaling
-        composeTestRule.onNodeWithTag("scaled-text").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Sample text for scaling").assertIsDisplayed()
-    }
-}
-
-// Helper test components for CommonComponentsTest
-@Composable
-private fun TestSocialNetworksComponent(
-    instagramUrl: String,
-    hashtag: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        Box(
-            modifier =
-                Modifier.testTag("instagram-link").clickable {
-                    // Mock link click action
-                },
-        ) {
-            Text("Instagram")
-        }
-
-        Text(
-            text = hashtag,
-            modifier = Modifier.testTag("hashtag-text"),
-        )
-    }
-}
-
-@Composable
-private fun TestEventOverlayFavorite(
-    isFavorite: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier.clickable { onToggle() },
-    ) {
-        if (isFavorite) {
-            Text(
-                "★",
-                modifier =
-                    Modifier
-                        .testTag("favorite-star-filled")
-                        .semantics { contentDescription = "Remove from favorites" },
-            )
-        } else {
-            Text(
-                "☆",
-                modifier =
-                    Modifier
-                        .testTag("favorite-star-empty")
-                        .semantics { contentDescription = "Add to favorites" },
-            )
-        }
-    }
-}
-
-@Composable
-private fun TestEventOverlayMapDownloaded(
-    isDownloaded: Boolean,
-    isDownloading: Boolean,
-    hasError: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    when {
-        isDownloaded -> {
-            Box(modifier = modifier) {
-                Text(
-                    "✓",
-                    modifier =
-                        Modifier
-                            .testTag("download-check")
-                            .semantics { contentDescription = "Map downloaded" },
-                )
-            }
-        }
-        isDownloading -> {
-            Box(modifier = modifier) {
-                Text(
-                    "⟳",
-                    modifier =
-                        Modifier
-                            .testTag("download-progress")
-                            .semantics { contentDescription = "Downloading map" },
-                )
-            }
-        }
-        hasError -> {
-            Box(modifier = modifier) {
-                Text(
-                    "✗",
-                    modifier =
-                        Modifier
-                            .testTag("download-error")
-                            .semantics { contentDescription = "Download failed" },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TestDividerComponent(modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(1.dp),
-    ) {
-        // Simple divider representation
-    }
-}
-
-@Composable
-private fun TestHorizontalDivider(modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .height(1.dp),
-    ) {
-        // Horizontal divider representation
-    }
-}
-
-@Composable
-private fun TestVerticalDivider(modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-            modifier
-                .width(1.dp)
-                .fillMaxHeight(),
-    ) {
-        // Vertical divider representation
-    }
-}
-
-@Composable
-private fun TestAutoResizeText(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun TestButtonWave(
-    eventId: String,
-    eventState: Status,
-    isInArea: Boolean,
-    onButtonClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
-) {
-    val isEnabled = isInArea && (eventState == Status.RUNNING || eventState == Status.SOON || eventState == Status.DONE)
-
-    Box(
-        modifier =
-            modifier
-                .clickable(enabled = isEnabled) { onButtonClick?.invoke() }
-                .testTag("button-wave"),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "JOIN WAVE",
-            color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-@Composable
-private fun TestEventOverlayDone(
-    eventStatus: Status?,
-    modifier: Modifier = Modifier,
-) {
-    if (eventStatus == Status.DONE) {
-        Box(
-            modifier = modifier,
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                "DONE",
-                modifier =
-                    Modifier.semantics {
-                        contentDescription = "Event completed"
-                    },
-            )
-        }
-    }
-}
-
-@Composable
-private fun TestEventOverlaySoonOrRunning(
-    eventStatus: Status?,
-    modifier: Modifier = Modifier,
-) {
-    when (eventStatus) {
-        Status.SOON -> {
-            Box(modifier = modifier) {
-                Text("SOON")
-            }
-        }
-        Status.RUNNING -> {
-            Box(modifier = modifier) {
-                Text("RUNNING")
-            }
-        }
-        else -> { /* No overlay */ }
+        // Verify button is disabled for events that ended long ago
+        composeTestRule.onNodeWithTag("button-wave-old-ended").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("button-wave-old-ended").assertIsNotEnabled()
     }
 }

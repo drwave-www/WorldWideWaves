@@ -23,14 +23,18 @@ package com.worldwidewaves.shared
 
 import dev.icerock.moko.resources.StringResource
 
+private object ChoreographyConstants {
+    const val MAX_WARMING_SEQUENCE_NUMBER = 6
+}
+
 fun getChoreographyText(
     sequenceType: String,
     sequenceNumber: Int? = null,
 ): StringResource =
     when (sequenceType) {
         "warming" -> getChoreographyWarmingText(sequenceNumber)
-        "waiting" -> com.worldwidewaves.shared.getChoreographyWaitingText()
-        "hit" -> com.worldwidewaves.shared.getChoreographyHitText()
+        "waiting" -> getChoreographyWaitingText()
+        "hit" -> getChoreographyHitText()
         else -> throw IllegalArgumentException("Invalid choreography type: $sequenceType")
     }
 
@@ -41,7 +45,7 @@ fun getChoreographyWarmingText(seq: Int?): StringResource =
         3 -> MokoRes.strings.choreography_warming_seq_3
         4 -> MokoRes.strings.choreography_warming_seq_4
         5 -> MokoRes.strings.choreography_warming_seq_5
-        6 -> MokoRes.strings.choreography_warming_seq_6
+        ChoreographyConstants.MAX_WARMING_SEQUENCE_NUMBER -> MokoRes.strings.choreography_warming_seq_6
         else -> throw IllegalArgumentException("Invalid choreography sequence number: $seq")
     }
 

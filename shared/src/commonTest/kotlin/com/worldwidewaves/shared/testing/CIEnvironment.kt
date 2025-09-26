@@ -1,5 +1,7 @@
 package com.worldwidewaves.shared.testing
 
+import com.worldwidewaves.shared.utils.getEnvironmentVariable
+
 /*
  * Copyright 2025 DrWave
  *
@@ -35,14 +37,14 @@ object CIEnvironment {
      * @return true if running in a CI environment, false otherwise
      */
     val isCI: Boolean by lazy {
-        System.getenv("CI") == "true" ||
-            System.getenv("GITHUB_ACTIONS") == "true" ||
-            System.getenv("CONTINUOUS_INTEGRATION") == "true" ||
-            System.getenv("BUILD_NUMBER") != null ||
+        getEnvironmentVariable("CI") == "true" ||
+            getEnvironmentVariable("GITHUB_ACTIONS") == "true" ||
+            getEnvironmentVariable("CONTINUOUS_INTEGRATION") == "true" ||
+            getEnvironmentVariable("BUILD_NUMBER") != null ||
             // Jenkins
-            System.getenv("TRAVIS") == "true" ||
+            getEnvironmentVariable("TRAVIS") == "true" ||
             // Travis CI
-            System.getenv("CIRCLECI") == "true" // CircleCI
+            getEnvironmentVariable("CIRCLECI") == "true" // CircleCI
     }
 
     /**
@@ -52,11 +54,11 @@ object CIEnvironment {
      */
     val ciSystemName: String by lazy {
         when {
-            System.getenv("GITHUB_ACTIONS") == "true" -> "GitHub Actions"
-            System.getenv("TRAVIS") == "true" -> "Travis CI"
-            System.getenv("CIRCLECI") == "true" -> "CircleCI"
-            System.getenv("BUILD_NUMBER") != null -> "Jenkins"
-            System.getenv("CI") == "true" -> "Generic CI"
+            getEnvironmentVariable("GITHUB_ACTIONS") == "true" -> "GitHub Actions"
+            getEnvironmentVariable("TRAVIS") == "true" -> "Travis CI"
+            getEnvironmentVariable("CIRCLECI") == "true" -> "CircleCI"
+            getEnvironmentVariable("BUILD_NUMBER") != null -> "Jenkins"
+            getEnvironmentVariable("CI") == "true" -> "Generic CI"
             else -> "local"
         }
     }
@@ -105,7 +107,7 @@ object CIEnvironment {
          */
         val enableMemoryIntensiveTests: Boolean =
             !isCI ||
-                System.getenv("CI_ENABLE_MEMORY_TESTS") == "true"
+                getEnvironmentVariable("CI_ENABLE_MEMORY_TESTS") == "true"
 
         /**
          * Whether to enable long-running tests.
@@ -113,7 +115,7 @@ object CIEnvironment {
          */
         val enableLongRunningTests: Boolean =
             !isCI ||
-                System.getenv("CI_ENABLE_LONG_TESTS") == "true"
+                getEnvironmentVariable("CI_ENABLE_LONG_TESTS") == "true"
     }
 
     /**

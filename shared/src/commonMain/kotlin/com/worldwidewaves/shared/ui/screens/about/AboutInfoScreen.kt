@@ -41,12 +41,12 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.WWWGlobals.Dimensions
 import com.worldwidewaves.shared.WWWGlobals.Info
 import com.worldwidewaves.shared.infos_core
-import com.worldwidewaves.shared.ui.components.AboutDividerLine
-import com.worldwidewaves.shared.ui.components.AboutWWWLogo
-import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
+import com.worldwidewaves.shared.ui.components.about.AboutDividerLine
+import com.worldwidewaves.shared.ui.components.about.AboutWWWLogo
+import com.worldwidewaves.shared.ui.components.about.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
-import com.worldwidewaves.shared.ui.theme.sharedExtraTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -58,10 +58,10 @@ import dev.icerock.moko.resources.compose.stringResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedAboutInfoScreen(
+fun AboutInfoScreen(
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
-        com.worldwidewaves.shared.utils.Log.i("AboutInfoScreen", "URL click: $url")
+        Log.i("AboutInfoScreen", "URL click: $url")
     },
 ) {
     val state = rememberLazyListState()
@@ -95,9 +95,10 @@ private fun MainInfo() {
         infos_core.forEach { res ->
             Text(
                 text = stringResource(res),
-                style = sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
-                    textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
-                ),
+                style =
+                    sharedCommonTextStyle(Info.TEXT_FONTSIZE).copy(
+                        textAlign = if (dir == LayoutDirection.Rtl) TextAlign.Start else TextAlign.Justify,
+                    ),
             )
         }
     }

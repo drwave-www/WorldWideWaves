@@ -21,8 +21,6 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
@@ -30,7 +28,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 fun debugBuild() {
-    Napier.base(DebugAntilog())
+    // Napier initialization is handled by initNapier() in platform-specific code
+    // This function can be used for other debug-specific initialization if needed
 }
 
 /**
@@ -60,6 +59,19 @@ object WWWGlobals {
 
         /** Precision tolerance for geometric half-plane clipping operations */
         const val HALF_PLANE_TOLERANCE = 1e-12
+
+        // Coordinate Validation Constants
+        /** Minimum valid latitude value (degrees) */
+        const val MIN_LATITUDE = -90.0
+
+        /** Maximum valid latitude value (degrees) */
+        const val MAX_LATITUDE = 90.0
+
+        /** Minimum valid longitude value (degrees) */
+        const val MIN_LONGITUDE = -180.0
+
+        /** Maximum valid longitude value (degrees) */
+        const val MAX_LONGITUDE = 180.0
     }
 
     /**
@@ -116,6 +128,8 @@ object WWWGlobals {
         /** Standard sample rate for audio generation (Hz) */
         const val STANDARD_SAMPLE_RATE = 44100
 
+        const val BITS_PER_SAMPLE_8BIT = 8
+
         /** Default bits per sample for audio */
         const val DEFAULT_BITS_PER_SAMPLE = 16
 
@@ -165,6 +179,20 @@ object WWWGlobals {
 
         /** Default octave for MIDI operations */
         const val DEFAULT_OCTAVE = 8
+
+        // Velocity Constants
+        /** Soft MIDI velocity value */
+        const val VELOCITY_SOFT = 64
+
+        /** Medium MIDI velocity value */
+        const val VELOCITY_MEDIUM = 96
+
+        /** Loud MIDI velocity value */
+        const val VELOCITY_LOUD = 127
+
+        // Note Duration Constants
+        /** Short note duration in milliseconds */
+        const val NOTE_DURATION_SHORT = 250
     }
 
     // ============================================================================================
@@ -199,7 +227,7 @@ object WWWGlobals {
         const val TARGET_USER_ZOOM = 16.0
 
         /** Target zoom level for wave display */
-        const val TARGET_WAVE_ZOOM = 10.0
+        const val TARGET_WAVE_ZOOM = 13.0
 
         /** Percentage thresholds for map constraint calculations */
         const val CONSTRAINT_SMALL_THRESHOLD = 0.1
@@ -223,11 +251,17 @@ object WWWGlobals {
      * UI Timing Constants
      */
     object Timing {
-        /** Minimum duration for splash screen display */
-        val SPLASH_MIN_DURATION = 2000.milliseconds
+        /** System splash screen duration (Android 12+ splash API) - short handoff */
+        val SYSTEM_SPLASH_DURATION = 500.milliseconds
 
-        /** Maximum duration for splash screen display */
-        val SPLASH_MAX_DURATION = 2000.milliseconds
+        /** Programmatic splash minimum duration - ensures proper user experience */
+        val SPLASH_MIN_DURATION = 3000.milliseconds
+
+        /** Maximum duration for splash screen display - fallback timeout */
+        val SPLASH_MAX_DURATION = 5000.milliseconds
+
+        /** Splash screen check interval for status validation */
+        const val SPLASH_CHECK_INTERVAL_MS = 100L
 
         /** Camera animation duration for map transitions (milliseconds) */
         const val MAP_CAMERA_ANIMATION_DURATION_MS = 500
@@ -331,6 +365,12 @@ object WWWGlobals {
 
         /** Standard buffer size for file I/O operations (8KB) */
         const val BUFFER_SIZE = 8192
+
+        /** Chunk size for streaming operations */
+        const val CHUNK_SIZE = 512
+
+        /** Maximum buffer size for large operations */
+        const val MAX_BUFFER_SIZE = 8192
     }
 
     // ============================================================================================
@@ -346,6 +386,9 @@ object WWWGlobals {
 
         /** First warming sequence number */
         const val FIRST_WARMING_SEQ = 1
+
+        /** Default choreography duration in milliseconds */
+        const val DEFAULT_DURATION = 1000L
     }
 
     // ============================================================================================

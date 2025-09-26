@@ -56,12 +56,13 @@ import kotlinx.coroutines.CoroutineScope
  * • Android: Extends androidx.lifecycle.ViewModel with viewModelScope
  * • iOS: Provides custom lifecycle with iOS-compatible coroutine scope
  */
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect abstract class BaseViewModel() {
     /**
      * Coroutine scope tied to the ViewModel lifecycle.
      * Automatically canceled when the ViewModel is cleared.
      */
-    val viewModelScope: CoroutineScope
+    protected val scope: CoroutineScope
 
     /**
      * Called when the ViewModel is being cleared.

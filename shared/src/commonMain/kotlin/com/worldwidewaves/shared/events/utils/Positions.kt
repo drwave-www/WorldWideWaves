@@ -21,7 +21,6 @@ package com.worldwidewaves.shared.events.utils
  * limitations under the License.
  */
 
-import androidx.annotation.VisibleForTesting
 import com.worldwidewaves.shared.events.utils.Position.Companion.nextId
 
 // ----------------------------------------------------------------------------
@@ -39,9 +38,7 @@ open class Position(
     var id: Int = -1
         internal set // Cannot be set outside of the module
         get() { // Cannot be read before being initialized (added to a Polygon)
-            if (field == -1) {
-                throw IllegalStateException("ID has not been initialized")
-            }
+            check(field != -1) { "ID has not been initialized" }
             return field
         }
 
@@ -89,7 +86,6 @@ open class Position(
 }
 
 // Can only be initialized from internal context
-@VisibleForTesting
 internal fun <T : Position> T.init(): T =
     apply {
         id = nextId++

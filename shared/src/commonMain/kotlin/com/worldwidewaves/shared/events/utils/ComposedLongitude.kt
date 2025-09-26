@@ -77,26 +77,20 @@ open class ComposedLongitude(
         val tempPositions = positions.toMutableList()
         tempPositions.add(position)
 
-        if (isValidArc(tempPositions)) {
-            positions.add(position)
-            updateBoundingBox(listOf(position))
-            sortPositions()
-        } else {
-            throw IllegalArgumentException("Invalid arc")
-        }
+        require(isValidArc(tempPositions)) { "Invalid arc" }
+        positions.add(position)
+        updateBoundingBox(listOf(position))
+        sortPositions()
     }
 
     fun addAll(newPositions: List<Position>) {
         val tempPositions = positions.toMutableList()
         tempPositions.addAll(newPositions)
 
-        if (isValidArc(tempPositions)) {
-            positions.addAll(newPositions)
-            updateBoundingBox(newPositions)
-            sortPositions()
-        } else {
-            throw IllegalArgumentException("Invalid arc")
-        }
+        require(isValidArc(tempPositions)) { "Invalid arc" }
+        positions.addAll(newPositions)
+        updateBoundingBox(newPositions)
+        sortPositions()
     }
 
     fun clear(): ComposedLongitude {

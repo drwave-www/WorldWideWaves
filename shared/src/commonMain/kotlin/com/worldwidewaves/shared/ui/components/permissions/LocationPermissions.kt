@@ -40,9 +40,7 @@ import dev.icerock.moko.resources.compose.stringResource
  * iOS: Uses iOS location authorization
  */
 @Composable
-fun SharedLocationPermissionRequest(
-    onPermissionResult: (Boolean) -> Unit = {},
-): Boolean {
+fun SharedLocationPermissionRequest(onPermissionResult: (Boolean) -> Unit = {}): Boolean {
     var showPermissionDialog by remember { mutableStateOf(false) }
     var permissionGranted by remember { mutableStateOf(false) }
 
@@ -62,13 +60,13 @@ fun SharedLocationPermissionRequest(
                 showPermissionDialog = false
                 permissionGranted = true
                 onPermissionResult(true)
-                PlatformRequestLocationPermission()
+                platformRequestLocationPermission()
             },
             onDenied = {
                 showPermissionDialog = false
                 permissionGranted = false
                 onPermissionResult(false)
-            }
+            },
         )
     }
 
@@ -93,7 +91,7 @@ private fun LocationPermissionDialog(
             TextButton(onClick = onDenied) {
                 Text(stringResource(MokoRes.strings.map_cancel_download))
             }
-        }
+        },
     )
 }
 
@@ -110,19 +108,17 @@ expect fun PlatformLocationPermissionCheck(): Boolean
  * Android: Launches Android permission request
  * iOS: Requests iOS location authorization
  */
-expect fun PlatformRequestLocationPermission()
+expect fun platformRequestLocationPermission()
 
 /**
  * Shared GPS enable check component.
  * Prompts user to enable GPS/location services if disabled.
  */
 @Composable
-fun SharedGPSEnableCheck(
-    onResult: (Boolean) -> Unit = {},
-) {
+fun SharedGPSEnableCheck(onResult: (Boolean) -> Unit = {}) {
     var showGPSDialog by remember { mutableStateOf(false) }
 
-    val isGPSEnabled = PlatformGPSEnabledCheck()
+    val isGPSEnabled = platformGPSEnabledCheck()
 
     if (!isGPSEnabled && !showGPSDialog) {
         showGPSDialog = true
@@ -132,13 +128,13 @@ fun SharedGPSEnableCheck(
         GPSEnableDialog(
             onEnable = {
                 showGPSDialog = false
-                PlatformOpenLocationSettings()
+                platformOpenLocationSettings()
                 onResult(true)
             },
             onCancel = {
                 showGPSDialog = false
                 onResult(false)
-            }
+            },
         )
     }
 }
@@ -161,7 +157,7 @@ private fun GPSEnableDialog(
             TextButton(onClick = onCancel) {
                 Text(stringResource(MokoRes.strings.map_cancel_download))
             }
-        }
+        },
     )
 }
 
@@ -171,11 +167,11 @@ private fun GPSEnableDialog(
  * iOS: Checks Core Location services enabled
  */
 @Composable
-expect fun PlatformGPSEnabledCheck(): Boolean
+expect fun platformGPSEnabledCheck(): Boolean
 
 /**
  * Platform-specific open location settings.
  * Android: Opens location settings Intent
  * iOS: Opens iOS Settings app
  */
-expect fun PlatformOpenLocationSettings()
+expect fun platformOpenLocationSettings()

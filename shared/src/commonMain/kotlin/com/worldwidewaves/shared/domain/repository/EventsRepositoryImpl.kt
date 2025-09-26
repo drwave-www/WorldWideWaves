@@ -24,10 +24,14 @@ package com.worldwidewaves.shared.domain.repository
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -51,6 +55,9 @@ class EventsRepositoryImpl(
     private var cachedEvents: List<IWWWEvent> = emptyList()
     private var cacheValid = false
 
+    // Background scope for cache operations to prevent main thread blocking
+    private val backgroundScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     private val _isLoading = MutableStateFlow(false)
     private val _lastError = MutableStateFlow<Exception?>(null)
 
@@ -69,7 +76,7 @@ class EventsRepositoryImpl(
                 },
                 onLoaded = {
                     _isLoading.value = false
-                    updateCache()
+                    backgroundScope.launch { updateCache() }
                 },
                 onTermination = { exception ->
                     _isLoading.value = false
@@ -107,7 +114,7 @@ class EventsRepositoryImpl(
                 },
                 onLoaded = {
                     _isLoading.value = false
-                    updateCache()
+                    backgroundScope.launch { updateCache() }
                     loadDeferred.complete(Result.success(Unit))
                 },
                 onTermination = { exception ->
@@ -147,26 +154,22 @@ class EventsRepositoryImpl(
      * Updates the internal cache with the latest events from WWWEvents.
      * This method is thread-safe and should be called when events are loaded.
      */
-    private fun updateCache() {
+    private suspend fun updateCache() {
         // Cache update doesn't require suspending since we're just copying data
         // that's already loaded in memory from WWWEvents
         val currentEvents = wwwEvents.list()
-        kotlinx.coroutines.runBlocking {
-            cacheMutex.withLock {
-                cachedEvents = currentEvents
-                cacheValid = true
-            }
+        cacheMutex.withLock {
+            cachedEvents = currentEvents
+            cacheValid = true
         }
     }
 
     /**
      * Invalidates the internal cache, forcing a reload on next access.
      */
-    private fun invalidateCache() {
-        kotlinx.coroutines.runBlocking {
-            cacheMutex.withLock {
-                cacheValid = false
-            }
+    private suspend fun invalidateCache() {
+        cacheMutex.withLock {
+            cacheValid = false
         }
     }
 }

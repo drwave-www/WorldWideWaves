@@ -22,23 +22,23 @@ actual fun PlatformLocationPermissionCheck(): Boolean {
     val context = LocalContext.current
     return ContextCompat.checkSelfPermission(
         context,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
     ) == PackageManager.PERMISSION_GRANTED
 }
 
-actual fun PlatformRequestLocationPermission() {
+actual fun platformRequestLocationPermission() {
     // This would typically trigger the Android permission request
     // Implementation depends on Activity context
 }
 
 @Composable
-actual fun PlatformGPSEnabledCheck(): Boolean {
+actual fun platformGPSEnabledCheck(): Boolean {
     val context = LocalContext.current
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 }
 
-actual fun PlatformOpenLocationSettings() {
+actual fun platformOpenLocationSettings() {
     // Would open Android location settings
     // Implementation depends on Activity context
 }

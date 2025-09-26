@@ -21,6 +21,7 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.utils.loadableBundle
 import platform.Foundation.NSBundle
 
@@ -32,6 +33,8 @@ import platform.Foundation.NSBundle
  * MokoRes tries to access the bundle during static initialization.
  */
 object BundleInitializer {
+    private const val TAG = "BundleInitializer"
+
     private var _isInitialized = false
     private var _bundle: NSBundle? = null
 
@@ -39,41 +42,36 @@ object BundleInitializer {
      * Initialize the resource bundle before any MokoRes access.
      * This should be called early in the app lifecycle.
      */
-    fun initializeBundle(): Boolean {
-        return try {
+    fun initializeBundle(): Boolean =
+        try {
             if (!_isInitialized) {
-                _bundle = loadBundleWithFallbacks()
+                // Try to load the bundle with various identifiers using moko-resources utilities
+                _bundle =
+                    try {
+                        NSBundle.loadableBundle("com.worldwidewaves.shared.main")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared.main'", e)
+                        try {
+                            NSBundle.loadableBundle("com.worldwidewaves.shared")
+                        } catch (e2: Exception) {
+                            Log.w(TAG, "Failed to load bundle with identifier 'com.worldwidewaves.shared', falling back to main bundle", e2)
+                            NSBundle.mainBundle
+                        }
+                    }
+
                 _isInitialized = _bundle != null
-                logInitializationResult()
+
+                if (_isInitialized) {
+                    Log.i(TAG, "BUNDLE_INIT: MokoRes bundle initialized successfully")
+                } else {
+                    Log.e(TAG, "BUNDLE_INIT: Failed to load MokoRes bundle")
+                }
             }
             _isInitialized
         } catch (e: Exception) {
-            platform.Foundation.NSLog("BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
+            Log.e(TAG, "BUNDLE_INIT: Exception during bundle initialization: ${e.message}")
             false
         }
-    }
-
-    private fun loadBundleWithFallbacks(): NSBundle {
-        return tryLoadBundle("com.worldwidewaves.shared.main")
-            ?: tryLoadBundle("com.worldwidewaves.shared")
-            ?: NSBundle.mainBundle
-    }
-
-    private fun tryLoadBundle(identifier: String): NSBundle? {
-        return try {
-            NSBundle.loadableBundle(identifier)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun logInitializationResult() {
-        if (_isInitialized) {
-            platform.Foundation.NSLog("BUNDLE_INIT: MokoRes bundle initialized successfully")
-        } else {
-            platform.Foundation.NSLog("BUNDLE_INIT: Failed to load MokoRes bundle")
-        }
-    }
 
     /**
      * Get the initialized bundle, ensuring it's loaded first.

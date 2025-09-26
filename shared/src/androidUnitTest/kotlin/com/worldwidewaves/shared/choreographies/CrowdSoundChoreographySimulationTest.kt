@@ -120,7 +120,7 @@ class CrowdSoundChoreographySimulationTest {
      */
     private suspend fun loadMidiTrack(): MidiTrack =
         try {
-            MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+            MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE) ?: createMockMidiTrack()
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load real MIDI file, using mock data: ${e.message}")
             createMockMidiTrack()
@@ -173,8 +173,8 @@ class CrowdSoundChoreographySimulationTest {
             (1..CROWD_SIZE)
                 .map { personId ->
                     async {
-                        val mockClock = mockk<IClock>()
-                        val mockSoundPlayer = mockk<SoundPlayer>(relaxed = true)
+                        mockk<IClock>()
+                        mockk<SoundPlayer>(relaxed = true)
 
                         // Create manager for this person
                         val manager =
@@ -196,7 +196,7 @@ class CrowdSoundChoreographySimulationTest {
         crowd: List<SimulatedPerson>,
         midiTrack: MidiTrack,
     ): SimulationResults {
-        val waveStartTime = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+        val waveStartTime = Instant.fromEpochMilliseconds(1643723400000L) // Fixed deterministic time
         val allPlaybackEvents = mutableListOf<PlaybackEvent>()
         val simulationDuration = midiTrack.totalDuration + 2.seconds // Add buffer time
 

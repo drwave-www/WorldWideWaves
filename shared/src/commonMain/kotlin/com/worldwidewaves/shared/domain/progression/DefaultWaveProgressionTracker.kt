@@ -58,15 +58,7 @@ class DefaultWaveProgressionTracker(
                         return 0.0
                     }
 
-                    val progression = (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
-
-                    Log.v(
-                        "WaveProgressionTracker",
-                        "Calculated progression: $progression% for event ${event.id} " +
-                            "(elapsed: ${elapsedTime}s, total: ${totalTime}s)",
-                    )
-
-                    progression
+                    (elapsedTime.toDouble() / totalTime * 100).coerceIn(0.0, 100.0)
                 }
             }
         } catch (e: Exception) {
@@ -84,20 +76,11 @@ class DefaultWaveProgressionTracker(
             val polygons = waveArea.getPolygons()
 
             if (polygons.isEmpty()) {
-                Log.v("WaveProgressionTracker", "No polygons available for area detection")
                 return false
             }
 
             // Use the area's optimized position checking
-            val isInArea = waveArea.isPositionWithin(userPosition)
-
-            Log.v(
-                "WaveProgressionTracker",
-                "Position ${userPosition.lat}, ${userPosition.lng} " +
-                    "${if (isInArea) "is" else "is not"} within wave area",
-            )
-
-            isInArea
+            waveArea.isPositionWithin(userPosition)
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error checking position in wave area: $e")
             // On error, assume user is not in area for safety
@@ -133,11 +116,6 @@ class DefaultWaveProgressionTracker(
             if (progressionHistory.size > maxHistorySize) {
                 progressionHistory.removeAt(0)
             }
-
-            Log.v(
-                "WaveProgressionTracker",
-                "Recorded progression snapshot: $progression% at ${snapshot.timestamp}",
-            )
         } catch (e: Exception) {
             Log.e("WaveProgressionTracker", "Error recording progression snapshot: $e")
         }

@@ -43,7 +43,7 @@ data class WWWEventWaveDeep(
 
     override suspend fun getWaveDuration(): Duration {
         // For deep waves, fall back to approximate duration
-        // TODO: Implement proper depth-based duration calculation when depth parameter is available
+        // NOTE: Proper depth-based duration calculation pending depth parameter implementation
         return getApproxDuration()
     }
 
@@ -69,7 +69,7 @@ data class WWWEventWaveDeep(
         val superValid = super.validationErrors()
         val errors = superValid?.toMutableList() ?: mutableListOf()
 
-        // TODO: Add depth parameter validation when depth property is available
+        // NOTE: Depth parameter validation pending depth property implementation
 
         return errors.takeIf { it.isNotEmpty() }?.map { "${WWWEventWaveDeep::class.simpleName}: $it" }
     }

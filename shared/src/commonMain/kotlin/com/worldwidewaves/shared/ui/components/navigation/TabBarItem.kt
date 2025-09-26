@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.painterResource
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedTabBarItem(
+fun TabBarItem(
     isSelected: Boolean,
     selectedIcon: DrawableResource,
     unselectedIcon: DrawableResource,

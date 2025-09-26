@@ -40,39 +40,58 @@ import io.github.aakira.napier.Napier
  * ```
  */
 object WWWLogger {
-
     /**
      * Log error message with optional throwable
      */
-    fun e(tag: String, message: String, throwable: Throwable? = null) {
+    fun e(
+        tag: String,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         Napier.e(message, throwable, tag = tag)
     }
 
     /**
      * Log warning message
      */
-    fun w(tag: String, message: String, throwable: Throwable? = null) {
+    fun w(
+        tag: String,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         Napier.w(message, throwable, tag = tag)
     }
 
     /**
      * Log info message
      */
-    fun i(tag: String, message: String, throwable: Throwable? = null) {
+    fun i(
+        tag: String,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         Napier.i(message, throwable, tag = tag)
     }
 
     /**
      * Log debug message
      */
-    fun d(tag: String, message: String, throwable: Throwable? = null) {
+    fun d(
+        tag: String,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         Napier.d(message, throwable, tag = tag)
     }
 
     /**
      * Log verbose message
      */
-    fun v(tag: String, message: String, throwable: Throwable? = null) {
+    fun v(
+        tag: String,
+        message: String,
+        throwable: Throwable? = null,
+    ) {
         Napier.v(message, throwable, tag = tag)
     }
 }

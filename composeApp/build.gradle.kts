@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
-import org.gradle.api.Task
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -41,6 +40,7 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -58,6 +58,7 @@ kotlin {
             implementation(libs.androidx.espresso.core)
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
+            implementation(projects.shared)
         }
         iosMain.dependencies {
             // iOS-specific dependencies can be added here
