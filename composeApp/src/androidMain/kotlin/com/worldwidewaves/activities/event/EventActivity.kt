@@ -65,6 +65,7 @@ class EventActivity : AbstractEventWaveActivity() {
         event: IWWWEvent,
     ) {
         val context = LocalContext.current
+
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(context)
 

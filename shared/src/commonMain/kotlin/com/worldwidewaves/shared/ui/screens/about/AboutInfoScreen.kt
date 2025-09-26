@@ -46,6 +46,7 @@ import com.worldwidewaves.shared.ui.components.AboutWWWLogo
 import com.worldwidewaves.shared.ui.components.AboutWWWSocialNetworks
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -60,7 +61,7 @@ import dev.icerock.moko.resources.compose.stringResource
 fun SharedAboutInfoScreen(
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
-        com.worldwidewaves.shared.utils.Log.i("AboutInfoScreen", "URL click: $url")
+        Log.i("AboutInfoScreen", "URL click: $url")
     },
 ) {
     val state = rememberLazyListState()

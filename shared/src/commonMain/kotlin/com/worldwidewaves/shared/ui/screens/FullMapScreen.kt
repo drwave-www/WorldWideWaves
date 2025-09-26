@@ -43,7 +43,6 @@ import kotlin.time.Instant
 fun <T> FullMapScreen(
     event: IWWWEvent,
     eventMap: AbstractEventMap<T>,
-    onObserveEventMapProgression: @Composable (IWWWEvent, AbstractEventMap<T>) -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToWave: (String) -> Unit = {},
     mapContent: @Composable (Modifier) -> Unit,
@@ -60,9 +59,6 @@ fun <T> FullMapScreen(
         value = event.getEndDateTime()
     }
     val isInArea by event.observer.userIsInArea.collectAsState()
-
-    // Start event/map coordination
-    onObserveEventMapProgression(event, eventMap)
 
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {

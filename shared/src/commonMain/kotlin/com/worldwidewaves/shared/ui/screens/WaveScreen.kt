@@ -24,6 +24,7 @@ package com.worldwidewaves.shared.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,9 @@ import androidx.compose.ui.zIndex
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
+import com.worldwidewaves.shared.map.AbstractEventMap
+import com.worldwidewaves.shared.ui.components.MapZoomAndLocationUpdate
+import com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
@@ -65,6 +69,8 @@ private const val REMAINING_COLOR = 0xFFE0E0E0 // Light gray
 @Composable
 fun WaveScreen(
     event: IWWWEvent,
+    eventMap: AbstractEventMap<*>,
+    onObserveEventMapProgression: @Composable (IWWWEvent, AbstractEventMap<*>) -> Unit,
     modifier: Modifier = Modifier,
     mapContent: @Composable (Modifier) -> Unit,
 ) {
@@ -72,6 +78,11 @@ fun WaveScreen(
         val clock: IClock by inject()
     }
     val clock = clockComponent.clock
+
+    // Start event/map coordination and map zoom/location updates
+    onObserveEventMapProgression(event, eventMap)
+    MapZoomAndLocationUpdate(event, eventMap)
+
     // States for sound coordination
     var hasPlayedHitSound by remember { mutableStateOf(false) }
 
@@ -126,13 +137,13 @@ fun WaveScreen(
             WaveProgressionBar(event)
 
             // Always show counter in the proper position with spacing (exact working layout)
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(1f))
             WaveHitCounter(event)
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
         // Working choreographies with proper z-index
-        com.worldwidewaves.shared.ui.components.choreographies.WorkingWaveChoreographies(
+        WorkingWaveChoreographies(
             event = event,
             modifier = Modifier.zIndex(10f)
         )

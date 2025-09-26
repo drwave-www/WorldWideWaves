@@ -43,6 +43,7 @@ import com.worldwidewaves.shared.events.IWWWEvent.WaveNumbersLiterals
 import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedExtraLightTextStyle
 import com.worldwidewaves.shared.ui.utils.AutoResizeSingleLineText
 import com.worldwidewaves.shared.ui.utils.formatDurationMinutes
 import dev.icerock.moko.resources.compose.stringResource
@@ -179,7 +180,7 @@ fun EventNumbers(
                                 ) {
                                     Text(
                                         text = " $eventTimeZone",
-                                        style = com.worldwidewaves.shared.ui.theme.sharedExtraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
+                                        style = sharedExtraLightTextStyle(Event.NUMBERS_TZ_FONTSIZE).copy(
                                             color = when (key) {
                                                 MokoRes.strings.wave_start_time -> Color.Yellow
                                                 else -> MaterialTheme.colorScheme.primary

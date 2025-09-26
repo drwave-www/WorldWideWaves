@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.ui.theme.scrimLight
+import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import dev.icerock.moko.resources.compose.stringResource
 
 /**
@@ -31,8 +33,8 @@ fun AlertMapNotDownloadedOnSimulationLaunch(
         title = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_title),
-                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle().copy(
-                    color = com.worldwidewaves.shared.ui.theme.scrimLight,
+                style = sharedCommonTextStyle().copy(
+                    color = scrimLight,
                     fontWeight = FontWeight.Bold
                 ),
             )
@@ -40,7 +42,7 @@ fun AlertMapNotDownloadedOnSimulationLaunch(
         text = {
             Text(
                 text = stringResource(MokoRes.strings.simulation_map_required_message),
-                style = com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle(),
+                style = sharedCommonTextStyle(),
             )
         },
         confirmButton = {

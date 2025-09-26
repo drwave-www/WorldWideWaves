@@ -44,6 +44,7 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
+import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import kotlin.time.ExperimentalTime
 
 /**
@@ -97,7 +98,7 @@ fun NotifyAreaUserPosition(
         ) {
             Text(
                 text = displayText,
-                style = com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
+                style = sharedQuinaryColoredTextStyle(Event.GEOLOCME_FONTSIZE),
             )
         }
     }

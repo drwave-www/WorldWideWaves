@@ -21,32 +21,20 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.shared.ui.components.ButtonWave
 import com.worldwidewaves.shared.ui.screens.FullMapScreen
-import com.worldwidewaves.shared.ui.components.WaveNavigator
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = false) {
@@ -66,13 +54,6 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
         event: IWWWEvent,
     ) {
         val context = androidx.compose.ui.platform.LocalContext.current
-        val scope = rememberCoroutineScope()
-        val eventStatus by event.observer.eventStatus.collectAsState()
-        val progression by event.observer.progression.collectAsState()
-        val endDateTime by produceState<Instant?>(initialValue = null, key1 = event, key2 = progression) {
-            value = event.getEndDateTime()
-        }
-        val isInArea by event.observer.userIsInArea.collectAsState()
 
         // Construct the event map
         val eventMap =
@@ -88,37 +69,25 @@ class EventFullMapActivity : AbstractEventWaveActivity(activateInfiniteScroll = 
                 )
             }
 
-        // Start event/map coordination
+        // Start event/map coordination and map zoom/location updates
         ObserveEventMapProgression(event, eventMap)
 
-        // Screen composition
-        Box(modifier = modifier.fillMaxSize()) {
-            eventMap.Screen(modifier = Modifier.fillMaxSize(), autoMapDownload = true)
-            ButtonWave(
-                event.id,
-                eventStatus,
-                endDateTime,
-                isInArea,
-                onNavigateToWave = WaveNavigator { eventId ->
-                    // This is already in an event activity, so we stay here
-                },
-                Modifier.align(Alignment.TopCenter).padding(top = 40.dp)
-            )
-            SharedMapActions(
-                event = event,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                onTargetWave = {
-                    scope.launch {
-                        eventMap.targetUserAndWave()
+        // Use the shared full map screen implementation
+        FullMapScreen(
+            event = event,
+            eventMap = eventMap,
+            modifier = modifier,
+            onNavigateToWave = { eventId ->
+                context.startActivity(
+                    Intent(context, WaveActivity::class.java).apply {
+                        putExtra("eventId", eventId)
                     }
-                },
-                onCenterWave = {
-                    scope.launch {
-                        eventMap.targetWave()
-                    }
-                }
-            )
-        }
+                )
+            },
+            mapContent = { mapModifier ->
+                eventMap.Screen(modifier = mapModifier, autoMapDownload = true)
+            }
+        )
     }
 }
 

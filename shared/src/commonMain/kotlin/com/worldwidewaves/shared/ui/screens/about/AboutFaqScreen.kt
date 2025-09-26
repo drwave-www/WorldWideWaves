@@ -68,6 +68,7 @@ import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtraPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredBoldTextStyle
+import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.launch
@@ -90,7 +91,7 @@ fun SharedAboutFaqScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
-        com.worldwidewaves.shared.utils.Log.i("AboutFaqScreen", "URL click: $url")
+        Log.i("AboutFaqScreen", "URL click: $url")
     },
     onSimulateClick: () -> Unit = {
         platform.enableSimulationMode()

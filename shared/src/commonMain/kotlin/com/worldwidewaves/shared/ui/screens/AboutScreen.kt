@@ -45,6 +45,8 @@ import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.shared.ui.screens.about.SharedAboutFaqScreen
 import com.worldwidewaves.shared.ui.screens.about.SharedAboutInfoScreen
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
+import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.ui.TabScreen
 import dev.icerock.moko.resources.compose.stringResource
 
 private val tabInfo = listOf(
@@ -64,20 +66,20 @@ fun AboutScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->
-        com.worldwidewaves.shared.utils.Log.i("AboutScreen", "URL click: $url")
+        Log.i("AboutScreen", "URL click: $url")
     },
 ) {
     // Create tab manager with shared sub-screens
     val tabManager = TabManager(
         screens = listOf(
-            object : com.worldwidewaves.shared.ui.TabScreen {
+            object : TabScreen {
                 override val name = "Infos"
                 @Composable
                 override fun Screen(modifier: Modifier) {
                     SharedAboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
                 }
             },
-            object : com.worldwidewaves.shared.ui.TabScreen {
+            object : TabScreen {
                 override val name = "FAQ"
                 @Composable
                 override fun Screen(modifier: Modifier) {

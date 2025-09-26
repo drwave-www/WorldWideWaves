@@ -246,14 +246,14 @@ private fun SharedEventsScreenWrapper(onEventClick: (String) -> Unit = {}) {
     )
 }
 
-private fun getEventBackgroundColor(eventId: String): androidx.compose.ui.graphics.Color {
+private fun getEventBackgroundColor(eventId: String): Color {
     return when {
-        eventId.contains("new_york") -> androidx.compose.ui.graphics.Color(0xFF2196F3).copy(alpha = 0.8f)
-        eventId.contains("los_angeles") -> androidx.compose.ui.graphics.Color(0xFFFF5722).copy(alpha = 0.8f)
-        eventId.contains("mexico") -> androidx.compose.ui.graphics.Color(0xFF4CAF50).copy(alpha = 0.8f)
-        eventId.contains("sao_paulo") -> androidx.compose.ui.graphics.Color(0xFFFFEB3B).copy(alpha = 0.8f)
-        eventId.contains("buenos_aires") -> androidx.compose.ui.graphics.Color(0xFF00BCD4).copy(alpha = 0.8f)
-        else -> androidx.compose.ui.graphics.Color(0xFF3F51B5).copy(alpha = 0.7f)
+        eventId.contains("new_york") -> Color(0xFF2196F3).copy(alpha = 0.8f)
+        eventId.contains("los_angeles") -> Color(0xFFFF5722).copy(alpha = 0.8f)
+        eventId.contains("mexico") -> Color(0xFF4CAF50).copy(alpha = 0.8f)
+        eventId.contains("sao_paulo") -> Color(0xFFFFEB3B).copy(alpha = 0.8f)
+        eventId.contains("buenos_aires") -> Color(0xFF00BCD4).copy(alpha = 0.8f)
+        else -> Color(0xFF3F51B5).copy(alpha = 0.7f)
     }
 }
 

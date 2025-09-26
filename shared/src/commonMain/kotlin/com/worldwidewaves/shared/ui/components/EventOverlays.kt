@@ -43,6 +43,8 @@ import com.worldwidewaves.shared.format.DateTimeFormats
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.event_done
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -142,10 +144,10 @@ fun EventOverlayDate(
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
         // EXACT historical implementation using shared theme functions
-        val textStyle = com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
+        val textStyle = sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
         Text(
             text = eventDate,
-            style = textStyle.copy(color = com.worldwidewaves.shared.ui.theme.sharedExtendedLight.quinary.color),
+            style = textStyle.copy(color = sharedExtendedLight.quinary.color),
         )
         Text(
             text = eventDate,
