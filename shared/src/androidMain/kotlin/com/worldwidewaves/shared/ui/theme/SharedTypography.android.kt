@@ -21,13 +21,18 @@ private val provider = GoogleFont.Provider(
     certificates = com.worldwidewaves.shared.R.array.com_google_android_gms_fonts_certs,
 )
 
-// Test fonts - very obvious to verify font system is working
-actual val SharedBodyFontFamily: FontFamily = FontFamily.Monospace // Very obvious font for testing
-actual val SharedDisplayFontFamily: FontFamily = FontFamily.Serif // Distinctive serif
-actual val SharedExtraFontFamily: FontFamily = FontFamily.Cursive // Very distinctive cursive
+// EXACT historical Google Fonts restored - theme system verified working
+actual val SharedBodyFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
 
-// TODO: Restore Google Fonts after verifying font system works
-// actual val SharedBodyFontFamily: FontFamily = FontFamily(
-//     Font(GoogleFont("Montserrat"), provider),
-//     Font(GoogleFont("Noto Sans"), provider),
-// )
+actual val SharedDisplayFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
+
+actual val SharedExtraFontFamily: FontFamily = FontFamily(
+    Font(GoogleFont("Montserrat Alternates"), provider),
+    Font(GoogleFont("Noto Sans"), provider),
+)
