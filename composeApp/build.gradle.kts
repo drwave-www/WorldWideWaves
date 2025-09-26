@@ -58,6 +58,8 @@ kotlin {
             implementation(libs.androidx.espresso.core)
             implementation(libs.androidx.compose.ui.test.junit4)
             implementation(libs.mockk.android.v1120)
+            implementation(projects.shared)
+            implementation(libs.androidx.material.icons.extended)
         }
         iosMain.dependencies {
             // iOS-specific dependencies can be added here
