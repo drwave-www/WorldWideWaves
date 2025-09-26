@@ -21,18 +21,30 @@ private val provider = GoogleFont.Provider(
     certificates = com.worldwidewaves.shared.R.array.com_google_android_gms_fonts_certs,
 )
 
-// EXACT historical Google Fonts restored - theme system verified working
-actual val SharedBodyFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-)
+// Google Fonts with manual fallback handling
+actual val SharedBodyFontFamily: FontFamily = try {
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+    )
+} catch (e: Exception) {
+    FontFamily.Serif // Fallback if Google Fonts fail
+}
 
-actual val SharedDisplayFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-)
+actual val SharedDisplayFontFamily: FontFamily = try {
+    FontFamily(
+        Font(GoogleFont("Montserrat"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+    )
+} catch (e: Exception) {
+    FontFamily.Serif // Fallback if Google Fonts fail
+}
 
-actual val SharedExtraFontFamily: FontFamily = FontFamily(
-    Font(GoogleFont("Montserrat Alternates"), provider),
-    Font(GoogleFont("Noto Sans"), provider),
-)
+actual val SharedExtraFontFamily: FontFamily = try {
+    FontFamily(
+        Font(GoogleFont("Montserrat Alternates"), provider),
+        Font(GoogleFont("Noto Sans"), provider),
+    )
+} catch (e: Exception) {
+    FontFamily.Monospace // Distinctive fallback for extra fonts
+}
