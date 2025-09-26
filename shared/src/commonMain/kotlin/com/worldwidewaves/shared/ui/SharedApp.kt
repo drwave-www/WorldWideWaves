@@ -151,23 +151,7 @@ private fun SharedBottomTabBar() {
     }
 }
 
-/**
- * Placeholder for shared About screen
- */
-@Composable
-private fun SharedAboutScreen() {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            "About WorldWideWaves",
-            style =
-                sharedCommonTextStyle().copy(
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
-                ),
-        )
-        Text("Shared about screen - identical on both platforms", style = sharedCommonTextStyle())
-    }
-}
+// SharedAboutScreen removed - was unused
 
 /**
  * Wrapper that loads events and passes them to the shared EventsListScreen
@@ -449,20 +433,4 @@ private fun SharedMapScreen(
     }
 }
 
-/**
- * Placeholder for shared Debug screen
- */
-@Composable
-private fun SharedDebugScreen() {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            "Debug Settings",
-            style =
-                sharedCommonTextStyle().copy(
-                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
-                ),
-        )
-        Text("Shared debug screen - identical on both platforms", style = sharedCommonTextStyle())
-    }
-}
+// SharedDebugScreen removed - was unused

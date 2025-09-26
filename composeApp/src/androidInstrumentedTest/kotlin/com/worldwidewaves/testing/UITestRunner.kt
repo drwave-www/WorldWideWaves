@@ -38,6 +38,7 @@ import org.junit.Rule
  * - Test environment configuration
  */
 abstract class BaseUITest {
+
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -66,6 +67,7 @@ abstract class BaseUITest {
  * Test utilities and factories for creating test data
  */
 object UITestFactory {
+
     /**
      * Create mock events for testing
      */
@@ -77,7 +79,9 @@ object UITestFactory {
     /**
      * Create mock map states for testing
      */
-    fun createMockMapStates(eventIds: List<String> = emptyList()): Map<String, Boolean> = eventIds.associateWith { true }
+    fun createMockMapStates(eventIds: List<String> = emptyList()): Map<String, Boolean> {
+        return eventIds.associateWith { true }
+    }
 
     /**
      * Create mock view models for testing
@@ -99,68 +103,75 @@ object UITestFactory {
         hasBeenHit: Boolean = false,
         progression: Double = 50.0,
         userPositionRatio: Double = 0.5,
-        timeBeforeHit: kotlin.time.Duration = kotlin.time.Duration.parse("5m"),
-    ): IWWWEvent = mockk<IWWWEvent>(relaxed = true)
+        timeBeforeHit: kotlin.time.Duration = kotlin.time.Duration.parse("5m")
+    ): IWWWEvent {
+        return mockk<IWWWEvent>(relaxed = true)
+    }
 
     /**
      * Create test data for countdown timer testing
      */
-    fun createTimerTestData(): List<kotlin.time.Duration> =
-        listOf(
+    fun createTimerTestData(): List<kotlin.time.Duration> {
+        return listOf(
             kotlin.time.Duration.parse("10m"),
             kotlin.time.Duration.parse("5m"),
             kotlin.time.Duration.parse("1m"),
             kotlin.time.Duration.parse("30s"),
             kotlin.time.Duration.parse("10s"),
             kotlin.time.Duration.parse("5s"),
-            kotlin.time.Duration.parse("1s"),
+            kotlin.time.Duration.parse("1s")
         )
+    }
 
     /**
      * Create test scenarios for wave phase transitions
      */
-    fun createWavePhaseScenarios(): List<Map<String, Any>> =
-        listOf(
+    fun createWavePhaseScenarios(): List<Map<String, Any>> {
+        return listOf(
             mapOf(
                 "phase" to "OBSERVER",
                 "isInArea" to false,
                 "isWarmingInProgress" to false,
                 "isGoingToBeHit" to false,
-                "hasBeenHit" to false,
+                "hasBeenHit" to false
             ),
             mapOf(
                 "phase" to "WARMING",
                 "isInArea" to true,
                 "isWarmingInProgress" to true,
                 "isGoingToBeHit" to false,
-                "hasBeenHit" to false,
+                "hasBeenHit" to false
             ),
             mapOf(
                 "phase" to "WAITING",
                 "isInArea" to true,
                 "isWarmingInProgress" to false,
                 "isGoingToBeHit" to true,
-                "hasBeenHit" to false,
+                "hasBeenHit" to false
             ),
             mapOf(
                 "phase" to "HIT",
                 "isInArea" to true,
                 "isWarmingInProgress" to false,
                 "isGoingToBeHit" to false,
-                "hasBeenHit" to true,
-            ),
+                "hasBeenHit" to true
+            )
         )
+    }
 
     /**
      * Create mock progression data for testing
      */
-    fun createProgressionTestData(): List<Double> = listOf(0.0, 25.0, 50.0, 75.0, 100.0)
+    fun createProgressionTestData(): List<Double> {
+        return listOf(0.0, 25.0, 50.0, 75.0, 100.0)
+    }
 }
 
 /**
  * Custom assertions and matchers for UI testing
  */
 object UITestAssertions {
+
     /**
      * Assert that a loading state is displayed
      */
@@ -195,11 +206,7 @@ object UITestAssertions {
     /**
      * Assert that progression percentage is within expected range
      */
-    fun assertProgressionRange(
-        progression: Double,
-        expectedMin: Double,
-        expectedMax: Double,
-    ) {
+    fun assertProgressionRange(progression: Double, expectedMin: Double, expectedMax: Double) {
         assert(progression in expectedMin..expectedMax) {
             "Progression $progression should be between $expectedMin and $expectedMax"
         }
@@ -208,17 +215,13 @@ object UITestAssertions {
     /**
      * Assert that wave phase transition is valid
      */
-    fun assertValidPhaseTransition(
-        fromPhase: String,
-        toPhase: String,
-    ) {
-        val validTransitions =
-            mapOf(
-                "OBSERVER" to listOf("WARMING"),
-                "WARMING" to listOf("WAITING"),
-                "WAITING" to listOf("HIT"),
-                "HIT" to listOf("DONE"),
-            )
+    fun assertValidPhaseTransition(fromPhase: String, toPhase: String) {
+        val validTransitions = mapOf(
+            "OBSERVER" to listOf("WARMING"),
+            "WARMING" to listOf("WAITING"),
+            "WAITING" to listOf("HIT"),
+            "HIT" to listOf("DONE")
+        )
 
         val allowedTransitions = validTransitions[fromPhase] ?: emptyList()
         assert(toPhase in allowedTransitions) {
@@ -238,11 +241,7 @@ object UITestAssertions {
     /**
      * Assert that timing accuracy is within tolerance
      */
-    fun assertTimingAccuracy(
-        expected: Long,
-        actual: Long,
-        toleranceMs: Long = 100,
-    ) {
+    fun assertTimingAccuracy(expected: Long, actual: Long, toleranceMs: Long = 100) {
         val difference = kotlin.math.abs(expected - actual)
         assert(difference <= toleranceMs) {
             "Timing difference $difference ms exceeds tolerance $toleranceMs ms"
