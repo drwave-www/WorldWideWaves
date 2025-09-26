@@ -21,21 +21,11 @@ package com.worldwidewaves.shared.ui.components.choreographies
  * limitations under the License.
  */
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,16 +36,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.worldwidewaves.shared.WWWGlobals.WaveTiming
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.utils.IClock
@@ -70,7 +52,6 @@ import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_
 import com.worldwidewaves.shared.generated.resources.e_choreography_warming_seq_6
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.math.max
@@ -153,44 +134,27 @@ fun WaveChoreographies(
     when {
         // Show warming choreography with sequence refresh
         isWarmingInProgress -> {
-            // Get the current sequence using suspend function
-            var warmingSequence by remember { mutableStateOf<com.worldwidewaves.shared.choreographies.ChoreographyManager.DisplayableSequence<DrawableResource>?>(null) }
-
-            LaunchedEffect(warmingKey) {
-                val sequence = event.warming.getCurrentChoregraphySequence()
-                Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence for ${event.id}: $sequence")
-                warmingSequence = sequence
-            }
-
-            // When this sequence ends, request a new one
-            if (warmingSequence != null) {
-                Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing warming sequence for ${event.id}")
-                TimedSequenceDisplay(
-                    sequence = warmingSequence,
-                    clock = clock,
-                    modifier = modifier.fillMaxWidth().padding(bottom = 120.dp), // Leave space for counter
-                    onSequenceComplete = { warmingKey++ },
-                )
-            } else {
-                Log.v("WaveChoreographies", "[CHOREO_DEBUG] Warming sequence is NULL for ${event.id}")
+            Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing warming sequence for ${event.id}")
+            WarmingSequence(key = warmingKey) {
+                warmingKey++
             }
         }
 
         // Show waiting choreography when going to be hit
         isGoingToBeHit -> {
-            ChoreographyDisplay(
-                event.wave.waitingChoregraphySequence(),
-                clock,
-                modifier.fillMaxWidth().padding(bottom = 120.dp), // Leave space for counter
+            Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing waiting sequence for ${event.id}")
+            ChoreographySprite(
+                resource = Res.drawable.e_choreography_waiting,
+                contentDescription = "Wave waiting choreography"
             )
         }
 
         // Show hit choreography when user has been hit and within time window
         showHitSequence -> {
-            ChoreographyDisplay(
-                event.wave.hitChoregraphySequence(),
-                clock,
-                modifier.fillMaxWidth().padding(bottom = 120.dp), // Leave space for counter
+            Log.v("WaveChoreographies", "[CHOREO_DEBUG] Showing hit sequence for ${event.id}")
+            ChoreographySprite(
+                resource = Res.drawable.e_choreography_hit,
+                contentDescription = "Wave hit choreography"
             )
         }
     }
