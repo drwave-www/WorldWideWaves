@@ -120,7 +120,7 @@ class CrowdSoundChoreographySimulationTest {
      */
     private suspend fun loadMidiTrack(): MidiTrack =
         try {
-            MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
+            MidiParser.parseMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE) ?: createMockMidiTrack()
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load real MIDI file, using mock data: ${e.message}")
             createMockMidiTrack()

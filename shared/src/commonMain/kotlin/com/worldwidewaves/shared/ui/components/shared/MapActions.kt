@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared.ui.components
+package com.worldwidewaves.shared.ui.components.shared
 
 /*
  * Copyright 2025 DrWave
@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -43,10 +42,11 @@ import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.generated.resources.Res
+import com.worldwidewaves.shared.generated.resources.target_me_active
+import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -63,17 +63,16 @@ fun MapActions(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
-    onCenterWave: () -> Unit = {},
+    onTargetUser: () -> Unit = {},
 ) {
+    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
+    val isInArea by event.observer.userIsInArea.collectAsState()
+
     val clockComponent =
         object : KoinComponent {
             val clock: IClock by inject()
         }
     val clock = clockComponent.clock
-
-    val scope = rememberCoroutineScope()
-    val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
-    // isInArea removed - was unused
 
     val isRunning = eventStatus == Status.RUNNING
 
@@ -88,40 +87,35 @@ fun MapActions(
         contentAlignment = Alignment.BottomEnd,
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.DEFAULT_INT_PADDING.dp)) {
-            // Target wave button
             Image(
                 modifier =
                     Modifier
                         .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
                         .clickable {
                             if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                                scope.launch {
-                                    onTargetWave()
-                                }
+                                onTargetWave()
                             }
                         },
-                painter =
-                    painterResource(
-                        if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive,
-                    ),
+                painter = painterResource(if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive),
                 contentDescription =
                     stringResource(
                         if (isRunning) MokoRes.strings.event_target_wave_on else MokoRes.strings.event_target_wave_off,
                     ),
             )
-
-            // Center wave button
             Image(
                 modifier =
                     Modifier
-                        .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
+                        .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
-                            scope.launch {
-                                onCenterWave()
+                            if (isInArea) {
+                                onTargetUser()
                             }
                         },
-                painter = painterResource(Res.drawable.target_wave_inactive),
-                contentDescription = stringResource(MokoRes.strings.map_cancel_download),
+                painter = painterResource(if (isInArea) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
+                contentDescription =
+                    stringResource(
+                        if (isInArea) MokoRes.strings.event_target_me_on else MokoRes.strings.event_target_me_off,
+                    ),
             )
         }
     }

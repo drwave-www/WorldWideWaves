@@ -54,6 +54,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.inject
@@ -65,6 +66,11 @@ abstract class WWWAbstractEventBackActivity(
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
 ) : WWWMainActivity(platformEnabler, showSplash) {
+    /**
+     * Controls whether the event screen should be scrollable.
+     * Set to false for full-screen content like maps that shouldn't scroll.
+     */
+    protected open val isScrollable: Boolean = true
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
@@ -75,6 +81,11 @@ abstract class WWWAbstractEventBackActivity(
         scope.launch {
             trackEventLoading(eventId)
         }
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
     }
 
     @Composable
@@ -100,17 +111,6 @@ abstract class WWWAbstractEventBackActivity(
             waitingHandlers.add(handler)
         }
     }
-
-    /**
-     * Handle back button press - should be called from Android activity's onBackPressed()
-     */
-    fun handleBackPress(): Boolean =
-        if (onFinish != null) {
-            onFinish?.invoke()
-            true // Back press was handled
-        } else {
-            false // Back press was not handled
-        }
 
     private fun setEvent(event: IWWWEvent?) {
         if (event != null) {
@@ -180,8 +180,13 @@ abstract class WWWAbstractEventBackActivity(
 
             // Default page to manage initializations, download process and errors
             if (selectedEvent != null) { // Event has been loaded
-                // Content Event screen
-                val screenModifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+                // Content Event screen - conditionally apply scrolling
+                val screenModifier =
+                    if (isScrollable) {
+                        Modifier.fillMaxSize().verticalScroll(scrollState)
+                    } else {
+                        Modifier.fillMaxSize()
+                    }
                 Box(modifier = screenModifier) {
                     Event(selectedEvent!!, modifier = Modifier.fillMaxSize())
                 }

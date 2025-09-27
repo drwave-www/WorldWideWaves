@@ -12,15 +12,13 @@ package com.worldwidewaves.shared.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.screens.AboutScreen
-import com.worldwidewaves.shared.utils.Log
 
 /**
- * Android wrapper for SharedAboutScreen.
- * Handles Android-specific URL opening while delegating UI to shared component.
+ * Cross-platform wrapper for SharedAboutScreen.
+ * Uses PlatformEnabler for URL opening to maintain cross-platform compatibility.
  */
 class AboutTabScreen(
     private val platform: WWWPlatform,
@@ -32,19 +30,12 @@ class AboutTabScreen(
         platformEnabler: PlatformEnabler,
         modifier: Modifier,
     ) {
-        val uriHandler = LocalUriHandler.current
-
         AboutScreen(
             platform = platform,
             platformEnabler = platformEnabler,
             modifier = modifier,
             onUrlOpen = { url ->
-                try {
-                    uriHandler.openUri(url)
-                } catch (e: Exception) {
-                    Log
-                        .e("AboutScreen", "Failed to open URL: $url", throwable = e)
-                }
+                platformEnabler.openUrl(url)
             },
         )
     }

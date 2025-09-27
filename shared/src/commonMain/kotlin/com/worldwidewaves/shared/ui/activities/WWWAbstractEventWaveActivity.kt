@@ -62,12 +62,16 @@ abstract class WWWAbstractEventWaveActivity(
 
     // ------------------------------------------------------------------------
 
-    fun onResume() {
+    override fun onResume() {
+        // Call parent to handle global sound choreography
+        super.onResume()
         // Restart observation when activity is visible
         waveProgressionObserver?.startObservation()
     }
 
-    fun onPause() {
+    override fun onPause() {
+        // Call parent to handle global sound choreography
+        super.onPause()
         // Stop observation when activity is not visible
         // Only pause to keep the same StateFlow instances alive for UI collectors
         waveProgressionObserver?.pauseObservation()
@@ -125,7 +129,9 @@ abstract class WWWAbstractEventWaveActivity(
 
     // ------------------------------------------------------------------------
 
-    fun onDestroy() {
+    override fun onDestroy() {
+        // Call parent to handle global sound choreography cleanup
+        super.onDestroy()
         waveProgressionObserver?.stopObservation()
         waveProgressionObserver = null
     }

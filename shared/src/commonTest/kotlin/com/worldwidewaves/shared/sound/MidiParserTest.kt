@@ -632,7 +632,8 @@ class MidiParserTest {
                 val track = MidiParser.parseMidiFile("test.mid")
 
                 // THEN: Should return valid track
-                assertEquals("Parsed MIDI Track", track.name, "Should have default track name")
+                assertTrue(track != null, "Should return a valid track")
+                assertEquals("Parsed MIDI Track", track!!.name, "Should have default track name")
                 assertEquals(0.seconds, track.totalDuration, "Should have zero duration for empty track")
             } finally {
                 unmockkObject(MidiResources)

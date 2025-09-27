@@ -23,9 +23,9 @@ package com.worldwidewaves.utils
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalUriHandler
 import com.worldwidewaves.activities.event.EventActivity
 import com.worldwidewaves.activities.event.WaveActivity
 import com.worldwidewaves.shared.PlatformEnabler
@@ -60,11 +60,17 @@ class AndroidPlatformEnabler(
 
     @Composable
     override fun OpenUrl(url: String) {
-        val uriHandler = LocalUriHandler.current
+        openUrl(url)
+    }
+
+    override fun openUrl(url: String) {
         try {
-            uriHandler.openUri(url)
+            val context: Context = context ?: KoinPlatform.getKoin().get()
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
         } catch (e: Exception) {
-            Log.e("AboutScreen", "Failed to open URL: $url", throwable = e)
+            Log.e("AndroidPlatformEnabler", "Failed to open URL: $url", throwable = e)
         }
     }
 }

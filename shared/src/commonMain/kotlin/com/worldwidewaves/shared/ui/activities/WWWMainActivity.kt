@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,23 +47,20 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
 import com.worldwidewaves.shared.ui.TabManager
-import com.worldwidewaves.shared.ui.components.SimulationModeChip
-import com.worldwidewaves.shared.ui.components.SplashScreen
+import com.worldwidewaves.shared.ui.components.global.SimulationModeChip
+import com.worldwidewaves.shared.ui.components.global.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
 import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -75,8 +73,7 @@ open class WWWMainActivity(
 ) : KoinComponent {
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
 
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutTabScreen: AboutTabScreen by inject()
@@ -92,10 +89,15 @@ open class WWWMainActivity(
     val startTime = Clock.System.now().toEpochMilliseconds()
 
     init {
+        Log.i("WWWMainActivity", "Initializing WWWMainActivity")
+
         // Begin loading events – when done, flag so splash can disappear
         events.loadEvents(onTermination = {
+            Log.i("WWWMainActivity", "Events loading completed")
             isDataLoaded = true
             checkSplashFinished(startTime)
+            // Start global sound choreography observation for all events
+            startGlobalSoundChoreographyForAllEvents()
         })
     }
 
@@ -118,14 +120,14 @@ open class WWWMainActivity(
     @Composable
     open fun Draw() {
         // Enforce minimum duration for programmatic splash
-        scope.launch {
+        LaunchedEffect(Unit) {
             delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
         }
 
         WorldWideWavesTheme {
             Surface(
-                modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
             ) {
                 // Box to stack main content and simulation-mode overlay
@@ -156,12 +158,6 @@ open class WWWMainActivity(
                     // -----------------------------------------------------------------
                     //  Floating Debug Icon (green) - bottom right corner
                     // -----------------------------------------------------------------
-                    // Debug logging to investigate visibility issue
-                    Log.d(
-                        "MainActivity",
-                        "Debug screen status: debugScreen=${debugTabScreen != null}, ready=$ready",
-                    )
-                    // Show debug button in debug builds even if debugScreen is null
                     if (ready && debugTabScreen != null) {
                         // Calculate position at 15% from bottom
                         val windowInfo = LocalWindowInfo.current
@@ -195,12 +191,46 @@ open class WWWMainActivity(
         tabManager.TabView()
     }
 
+    /**
+     * Start global sound choreography for all loaded events.
+     * This enables sound to play throughout the app when user is in any event area.
+     */
+    private fun startGlobalSoundChoreographyForAllEvents() {
+        try {
+            Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+            globalSoundChoreography.startObservingAllEvents()
+            Log.d("WWWMainActivity", "Global sound choreography started successfully")
+        } catch (e: Exception) {
+            Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}", e)
+            // Don't crash the app if sound choreography fails
+        }
+    }
+
+    /**
+     * Lifecycle methods for global sound choreography management.
+     * These should be called from the Android activity lifecycle.
+     */
+    open fun onPause() {
+        globalSoundChoreography.pause()
+    }
+
+    open fun onResume() {
+        globalSoundChoreography.resume()
+    }
+
+    open fun onDestroy() {
+        globalSoundChoreography.stopObserving()
+    }
+
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+        Log.d("WWWMainActivity", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
+
         if (isDataLoaded &&
             elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
         ) {
+            Log.i("WWWMainActivity", "Splash conditions met, dismissing splash screen")
             isSplashFinished.update { true }
         }
     }

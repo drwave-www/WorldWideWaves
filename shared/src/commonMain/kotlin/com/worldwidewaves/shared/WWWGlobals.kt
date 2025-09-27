@@ -21,8 +21,6 @@ package com.worldwidewaves.shared
  * limitations under the License.
  */
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
@@ -30,7 +28,8 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 fun debugBuild() {
-    Napier.base(DebugAntilog())
+    // Napier initialization is handled by initNapier() in platform-specific code
+    // This function can be used for other debug-specific initialization if needed
 }
 
 /**
@@ -116,6 +115,8 @@ object WWWGlobals {
         /** Standard sample rate for audio generation (Hz) */
         const val STANDARD_SAMPLE_RATE = 44100
 
+        const val BITS_PER_SAMPLE_8BIT = 8
+
         /** Default bits per sample for audio */
         const val DEFAULT_BITS_PER_SAMPLE = 16
 
@@ -199,7 +200,7 @@ object WWWGlobals {
         const val TARGET_USER_ZOOM = 16.0
 
         /** Target zoom level for wave display */
-        const val TARGET_WAVE_ZOOM = 10.0
+        const val TARGET_WAVE_ZOOM = 13.0
 
         /** Percentage thresholds for map constraint calculations */
         const val CONSTRAINT_SMALL_THRESHOLD = 0.1

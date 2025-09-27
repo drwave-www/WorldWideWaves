@@ -51,7 +51,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,8 +70,8 @@ import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.downloaded_icon
 import com.worldwidewaves.shared.generated.resources.favorite_off
 import com.worldwidewaves.shared.generated.resources.favorite_on
-import com.worldwidewaves.shared.ui.components.EventOverlayDone
-import com.worldwidewaves.shared.ui.components.EventOverlaySoonOrRunning
+import com.worldwidewaves.shared.ui.components.event.EventOverlayDone
+import com.worldwidewaves.shared.ui.components.event.EventOverlaySoonOrRunning
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedExtendedLight
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredBoldTextStyle
@@ -80,7 +79,6 @@ import com.worldwidewaves.shared.ui.theme.sharedQuaternaryColoredTextStyle
 import com.worldwidewaves.shared.ui.theme.sharedQuinaryColoredTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
@@ -110,7 +108,7 @@ data class EventsFilterCallbacks(
 )
 
 @Composable
-fun EventsListScreen(
+fun EventsScreen(
     events: List<IWWWEvent>,
     mapStates: Map<String, Boolean> = emptyMap(),
     onEventClick: (String) -> Unit = {},
@@ -394,6 +392,7 @@ private fun EventOverlay(
         }
 
         EventOverlayCountryAndCommunityFlags(event, heightModifier)
+
         EventOverlaySoonOrRunning(eventStatus)
         EventOverlayDone(eventStatus)
         EventOverlayMapDownloaded(event.id, isMapInstalled)
@@ -497,7 +496,25 @@ private fun EventOverlayFavorite(
     modifier: Modifier = Modifier,
 ) {
     var isFavorite by remember { mutableStateOf(event.favorite) }
-    val scope = rememberCoroutineScope()
+    var pendingFavoriteToggle by remember { mutableStateOf(false) }
+
+    // Handle favorite toggle
+    LaunchedEffect(pendingFavoriteToggle) {
+        if (pendingFavoriteToggle) {
+            setEventFavorite?.let { favoriteSetter ->
+                try {
+                    isFavorite = !isFavorite
+                    favoriteSetter.call(event, isFavorite)
+                    Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
+                } catch (e: Exception) {
+                    // Revert on error
+                    isFavorite = !isFavorite
+                    Log.e("SharedEventsListScreen", "Failed to toggle favorite for ${event.id}", e)
+                }
+            }
+            pendingFavoriteToggle = false
+        }
+    }
 
     // Sync with event favorite state changes - EXACT Android match
     LaunchedEffect(event.favorite) {
@@ -523,12 +540,8 @@ private fun EventOverlayFavorite(
                     Modifier
                         .size(EventsList.FAVS_IMAGE_SIZE.dp)
                         .clickable {
-                            setEventFavorite?.let { favoriteSetter ->
-                                scope.launch {
-                                    isFavorite = !isFavorite
-                                    favoriteSetter.call(event, isFavorite)
-                                    Log.i("SharedEventsListScreen", "Favorite toggled for ${event.id}: $isFavorite")
-                                }
+                            setEventFavorite?.let {
+                                pendingFavoriteToggle = true
                             }
                         },
                 painter =

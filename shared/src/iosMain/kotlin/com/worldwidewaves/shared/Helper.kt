@@ -40,7 +40,7 @@ fun doInitKoin() {
     if (koinApp != null) return
 
     // Initialize Napier logging for iOS
-    platform.Foundation.NSLog("HELPER: doInitKoin() starting - direct NSLog test")
+    platform.Foundation.NSLog("HELPER: doInitKoin() starting with enhanced coroutine exception handling")
 
     // Initialize MokoRes bundle BEFORE anything else
     platform.Foundation.NSLog("HELPER: About to initialize MokoRes bundle")

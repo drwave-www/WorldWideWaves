@@ -89,11 +89,18 @@ class SoundChoreographyManager(
      * Preload a MIDI file for later playback
      */
     suspend fun preloadMidiFile(midiResourcePath: String): Boolean {
+        Log.d("SoundChoreographyManager", "Attempting to preload MIDI file: $midiResourcePath")
         try {
             currentTrack = MidiParser.parseMidiFile(midiResourcePath)
-            return currentTrack != null
+            val success = currentTrack != null
+            if (success) {
+                Log.d("SoundChoreographyManager", "Successfully preloaded MIDI file: $midiResourcePath")
+            } else {
+                Log.w("SoundChoreographyManager", "MIDI file returned null: $midiResourcePath")
+            }
+            return success
         } catch (e: Exception) {
-            Log.e(::preloadMidiFile.name, "Failed to load MIDI file: ${e.message}")
+            Log.e("SoundChoreographyManager", "Failed to load MIDI file $midiResourcePath: ${e.message}")
             return false
         }
     }

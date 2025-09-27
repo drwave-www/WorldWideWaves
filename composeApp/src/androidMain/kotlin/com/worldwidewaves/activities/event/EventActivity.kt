@@ -34,7 +34,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AppCompatActivity() {
-    private var eventActivity: WWWEventActivity? = null
+    private var eventActivityImpl: WWWEventActivity? = null
     private val mapViewModel: AndroidMapViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,29 +47,29 @@ class EventActivity : AppCompatActivity() {
 
         if (eventId != null) {
             val platformEnabler = AndroidPlatformEnabler(this)
-            eventActivity = WWWEventActivity(eventId, platformEnabler, mapViewModel)
-            eventActivity?.onEventLoaded { event ->
+            eventActivityImpl = WWWEventActivity(eventId, platformEnabler, mapViewModel)
+            eventActivityImpl?.onEventLoaded { event ->
                 // Construct the event map
                 val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
                 setContent {
-                    eventActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
+                    eventActivityImpl!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
                 }
             }
         }
     }
 
     override fun onDestroy() {
-        eventActivity?.onDestroy()
+        eventActivityImpl?.onDestroy()
         super.onDestroy()
     }
 
     override fun onResume() {
         super.onResume()
-        eventActivity?.onResume()
+        eventActivityImpl?.onResume()
     }
 
     override fun onPause() {
-        eventActivity?.onPause()
+        eventActivityImpl?.onPause()
         super.onPause()
     }
 }

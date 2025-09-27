@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared.ui.components.choreographies
+package com.worldwidewaves.shared.ui.components.wave.choreographies
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -82,7 +82,7 @@ private object WorkingChoreographyConstants {
  */
 @OptIn(ExperimentalTime::class)
 @Composable
-fun WorkingWaveChoreographies(
+fun WaveChoreographies(
     event: IWWWEvent,
     modifier: Modifier = Modifier,
 ) {
@@ -229,7 +229,7 @@ fun ChoreographyDisplay(
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
-    val painter = painterResource(sequence.image!!)
+    val painter = painterResource(sequence.image)
 
     // Create a timer to cycle through images
     LaunchedEffect(sequence) {

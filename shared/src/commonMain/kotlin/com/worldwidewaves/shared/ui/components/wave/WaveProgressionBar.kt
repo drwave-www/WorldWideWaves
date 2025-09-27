@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-package com.worldwidewaves.shared.ui.screens
+package com.worldwidewaves.shared.ui.components.wave
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
