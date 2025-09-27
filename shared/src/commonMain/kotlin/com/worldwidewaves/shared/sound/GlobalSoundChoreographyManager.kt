@@ -57,12 +57,6 @@ class GlobalSoundChoreographyManager(
 
     companion object {
         private const val TAG = "GlobalSoundChoreography"
-        private var instanceCount = 0
-    }
-
-    init {
-        instanceCount++
-        Log.d(TAG, "GlobalSoundChoreographyManager instance #$instanceCount created")
     }
 
     /**

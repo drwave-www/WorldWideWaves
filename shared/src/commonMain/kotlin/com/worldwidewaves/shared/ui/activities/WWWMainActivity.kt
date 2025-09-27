@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +64,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -94,19 +94,15 @@ open class WWWMainActivity(
     val startTime = Clock.System.now().toEpochMilliseconds()
 
     init {
-        Log.i("WWWMainActivity", "=== INITIALIZING WWWMainActivity ===")
-        Log.i("WWWMainActivity", "showSplash: $showSplash")
-        Log.i("WWWMainActivity", "Starting events loading...")
+        Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
         // Begin loading events – when done, flag so splash can disappear
         events.loadEvents(onTermination = {
-            Log.i("WWWMainActivity", "=== EVENTS LOADING TERMINATION CALLBACK CALLED ===")
+            Log.i("WWWMainActivity", "Events loading completed")
             isDataLoaded = true
-            Log.i("WWWMainActivity", "Setting isDataLoaded = true")
             checkSplashFinished(startTime)
             // Start global sound choreography observation for all events
             startGlobalSoundChoreographyForAllEvents()
-            Log.i("WWWMainActivity", "=== MAIN ACTIVITY INITIALIZATION COMPLETE ===")
         })
     }
 
@@ -129,7 +125,7 @@ open class WWWMainActivity(
     @Composable
     open fun Draw() {
         // Enforce minimum duration for programmatic splash
-        scope.launch {
+        LaunchedEffect(Unit) {
             delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
         }
@@ -167,12 +163,6 @@ open class WWWMainActivity(
                     // -----------------------------------------------------------------
                     //  Floating Debug Icon (green) - bottom right corner
                     // -----------------------------------------------------------------
-                    // Debug logging to investigate visibility issue
-                    Log.d(
-                        "MainActivity",
-                        "Debug screen status: debugScreen=${debugTabScreen != null}, ready=$ready",
-                    )
-                    // Show debug button in debug builds even if debugScreen is null
                     if (ready && debugTabScreen != null) {
                         // Calculate position at 15% from bottom
                         val windowInfo = LocalWindowInfo.current
@@ -211,7 +201,7 @@ open class WWWMainActivity(
      * This enables sound to play throughout the app when user is in any event area.
      */
     private fun startGlobalSoundChoreographyForAllEvents() {
-        Log.d("WWWMainActivity", "startGlobalSoundChoreographyForAllEvents() called from WWWMainActivity instance: ${this.hashCode()}")
+        Log.d("WWWMainActivity", "Starting global sound choreography for all events")
         globalSoundChoreography.startObservingAllEvents()
     }
 
@@ -234,18 +224,13 @@ open class WWWMainActivity(
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */
     private fun checkSplashFinished(startTime: Long) {
         val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-        Log.i("WWWMainActivity.checkSplashFinished", "=== CHECKING SPLASH FINISHED ===")
-        Log.i("WWWMainActivity.checkSplashFinished", "isDataLoaded: $isDataLoaded")
-        Log.i("WWWMainActivity.checkSplashFinished", "elapsed: ${elapsed}ms")
-        Log.i("WWWMainActivity.checkSplashFinished", "required: ${WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds}ms")
+        Log.d("WWWMainActivity", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
 
         if (isDataLoaded &&
             elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
         ) {
-            Log.i(::checkSplashFinished.name, "CONDITIONS MET - Setting isSplashFinished = true")
+            Log.i("WWWMainActivity", "Splash conditions met, dismissing splash screen")
             isSplashFinished.update { true }
-        } else {
-            Log.i(::checkSplashFinished.name, "CONDITIONS NOT MET - Splash screen will continue")
         }
     }
 }

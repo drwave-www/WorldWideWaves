@@ -183,25 +183,47 @@ class DefaultEventsConfigurationProvider(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String =
         coroutineScopeProvider.withIOContext {
-            Log.i(::geoEventsConfiguration.name, "=== STARTING EVENTS CONFIGURATION LOAD ===")
-            Log.i(::geoEventsConfiguration.name, "Target file: ${FileSystem.EVENTS_CONF}")
+            Log.i("EventsConfigurationProvider", "=== STARTING EVENTS CONFIGURATION LOAD ===")
+            Log.i("EventsConfigurationProvider", "Target file: ${FileSystem.EVENTS_CONF}")
 
             try {
-                Log.i(::geoEventsConfiguration.name, "Attempting Res.readBytes() call...")
+                Log.i("EventsConfigurationProvider", "Attempting Res.readBytes() call...")
                 val bytes = Res.readBytes(FileSystem.EVENTS_CONF)
-                Log.i(::geoEventsConfiguration.name, "Successfully read ${bytes.size} bytes from Compose Resources")
+                Log.i("EventsConfigurationProvider", "Successfully read ${bytes.size} bytes from Compose Resources")
 
                 val result = bytes.decodeToString()
-                Log.i(::geoEventsConfiguration.name, "Successfully decoded ${result.length} characters")
-                Log.i(::geoEventsConfiguration.name, "First 100 chars: ${result.take(100)}")
-                Log.i(::geoEventsConfiguration.name, "=== EVENTS CONFIGURATION LOAD SUCCESSFUL ===")
+                Log.i("EventsConfigurationProvider", "Successfully decoded ${result.length} characters")
+                Log.i("EventsConfigurationProvider", "First 100 chars: ${result.take(100)}")
+                Log.i("EventsConfigurationProvider", "=== EVENTS CONFIGURATION LOAD SUCCESSFUL ===")
                 result
             } catch (e: Exception) {
-                Log.e(::geoEventsConfiguration.name, "=== EVENTS CONFIGURATION LOAD FAILED ===")
-                Log.e(::geoEventsConfiguration.name, "Exception type: ${e::class.simpleName}")
-                Log.e(::geoEventsConfiguration.name, "Exception message: ${e.message}")
-                Log.e(::geoEventsConfiguration.name, "Stack trace: ${e.stackTraceToString()}")
-                throw e
+                Log.e("EventsConfigurationProvider", "=== EVENTS CONFIGURATION LOAD FAILED ===")
+                Log.e("EventsConfigurationProvider", "Exception type: ${e::class.simpleName}")
+                Log.e("EventsConfigurationProvider", "Exception message: ${e.message}")
+                Log.e("EventsConfigurationProvider", "Falling back to hardcoded minimal event for iOS debugging")
+
+                // Fallback to hardcoded minimal event JSON for debugging
+                """[
+                {
+                    "id": "debug_event_ios",
+                    "title": "iOS Debug Event",
+                    "location": {
+                        "latitude": 40.7589,
+                        "longitude": -73.9851,
+                        "address": "New York, NY"
+                    },
+                    "scheduledStartTime": "2025-09-27T12:00:00Z",
+                    "duration": "PT30M",
+                    "description": "Debug event for iOS Compose Resources issue",
+                    "status": "upcoming",
+                    "waveSettings": {
+                        "radius": 100,
+                        "speed": 0.5,
+                        "color": "#FF0000"
+                    },
+                    "soundChoreographyId": "debug_sound"
+                }
+                ]"""
             }
         }
 }
