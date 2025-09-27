@@ -46,6 +46,7 @@ import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
+import com.worldwidewaves.shared.sound.GlobalSoundChoreographyManager
 import com.worldwidewaves.shared.ui.AboutTabScreen
 import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
@@ -75,6 +76,7 @@ open class WWWMainActivity(
 ) : KoinComponent {
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
+    private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -96,6 +98,8 @@ open class WWWMainActivity(
         events.loadEvents(onTermination = {
             isDataLoaded = true
             checkSplashFinished(startTime)
+            // Start global sound choreography observation for all events
+            startGlobalSoundChoreographyForAllEvents()
         })
     }
 
@@ -193,6 +197,30 @@ open class WWWMainActivity(
     @Composable
     protected open fun Screen() {
         tabManager.TabView()
+    }
+
+    /**
+     * Start global sound choreography for all loaded events.
+     * This enables sound to play throughout the app when user is in any event area.
+     */
+    private fun startGlobalSoundChoreographyForAllEvents() {
+        globalSoundChoreography.startObservingAllEvents()
+    }
+
+    /**
+     * Lifecycle methods for global sound choreography management.
+     * These should be called from the Android activity lifecycle.
+     */
+    open fun onPause() {
+        globalSoundChoreography.pause()
+    }
+
+    open fun onResume() {
+        globalSoundChoreography.resume()
+    }
+
+    open fun onDestroy() {
+        globalSoundChoreography.stopObserving()
     }
 
     /** Updates [isSplashFinished] once both data and min duration requirements are met. */

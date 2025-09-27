@@ -42,6 +42,8 @@ open class MainActivity : AppCompatActivity() {
     /** Controls how long the *official* (system) splash stays on-screen (~10 ms). */
     private var isOfficialSplashDismissed = false
 
+    private var mainActivityImpl: WWWMainActivity? = null
+
     // ----------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,7 +97,23 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            WWWMainActivity(AndroidPlatformEnabler(this)).Draw()
+            mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
+            mainActivityImpl!!.Draw()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainActivityImpl?.onResume()
+    }
+
+    override fun onPause() {
+        mainActivityImpl?.onPause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        mainActivityImpl?.onDestroy()
+        super.onDestroy()
     }
 }

@@ -22,6 +22,7 @@ package com.worldwidewaves.shared.sound
  */
 
 import com.worldwidewaves.shared.events.IWWWEvent
+import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
@@ -37,7 +38,8 @@ import kotlin.time.ExperimentalTime
  * when the user is in an event area, regardless of which screen is currently displayed.
  *
  * This manager:
- * - Observes user's area status globally
+ * - Observes user's area status globally for all loaded events
+ * - Automatically detects which event the user is currently in
  * - Starts sound choreography when user enters area and event is active
  * - Stops sound choreography when user leaves area or app goes to background
  * - Manages background audio permissions and lifecycle
@@ -47,12 +49,55 @@ class GlobalSoundChoreographyManager(
     private val coroutineScopeProvider: CoroutineScopeProvider = DefaultCoroutineScopeProvider(),
 ) : KoinComponent {
     private val clock: IClock by inject()
+    private val events: WWWEvents by inject()
     private var currentEvent: IWWWEvent? = null
     private var observationJob: Job? = null
     private var isActive = false
 
     companion object {
         private const val TAG = "GlobalSoundChoreography"
+    }
+
+    /**
+     * Start observing all loaded events for area status and sound choreography.
+     * Automatically detects which event the user is currently in.
+     */
+    fun startObservingAllEvents() {
+        Log.d(TAG, "Starting global sound choreography observation for all events")
+
+        // Stop any existing observation
+        stopObserving()
+
+        observationJob =
+            coroutineScopeProvider.scopeDefault().launch {
+                // Get all loaded events
+                val allEvents = events.list()
+                Log.d(TAG, "Observing ${allEvents.size} events for area status")
+
+                // Monitor all events and find the one where user is in area
+                allEvents.forEach { event ->
+                    coroutineScopeProvider.scopeDefault().launch {
+                        event.observer.userIsInArea.collect { isInArea: Boolean ->
+                            Log.d(TAG, "Event ${event.id}: User area status changed: isInArea=$isInArea")
+
+                            if (isInArea && currentEvent != event) {
+                                // User entered a new event area
+                                if (currentEvent != null) {
+                                    Log.d(TAG, "Switching from event ${currentEvent!!.id} to ${event.id}")
+                                    stopSoundChoreography()
+                                }
+                                currentEvent = event
+                                startSoundChoreography(event)
+                            } else if (!isInArea && currentEvent == event) {
+                                // User left the current event area
+                                Log.d(TAG, "User left event area: ${event.id}")
+                                stopSoundChoreography()
+                                currentEvent = null
+                            }
+                        }
+                    }
+                }
+            }
     }
 
     /**
