@@ -35,6 +35,6 @@ import platform.UIKit.UIViewController
 fun MainViewController(): UIViewController {
     Log.i("MainViewController", "Creating iOS main view controller")
     return ComposeUIViewController {
-        WWWMainActivity(IOSPlatformEnabler()).Draw()
+        WWWMainActivity(IOSPlatformEnabler(), showSplash = true).Draw()
     }
 }

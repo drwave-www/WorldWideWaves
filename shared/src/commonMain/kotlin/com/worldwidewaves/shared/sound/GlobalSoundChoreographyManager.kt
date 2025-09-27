@@ -86,8 +86,6 @@ class GlobalSoundChoreographyManager(
                 allEvents.forEach { event ->
                     coroutineScopeProvider.scopeDefault().launch {
                         event.observer.userIsInArea.collect { isInArea: Boolean ->
-                            Log.d(TAG, "Event ${event.id}: User area status changed: isInArea=$isInArea")
-
                             if (isInArea && currentEvent != event) {
                                 // User entered a new event area
                                 if (currentEvent != null) {
@@ -124,8 +122,6 @@ class GlobalSoundChoreographyManager(
             coroutineScopeProvider.scopeDefault().launch {
                 // Observe user's area status
                 event.observer.userIsInArea.collect { isInArea ->
-                    Log.d(TAG, "User area status changed: isInArea=$isInArea for event=${event.id}")
-
                     if (isInArea && !isActive) {
                         startSoundChoreography(event)
                     } else if (!isInArea && isActive) {
@@ -164,8 +160,7 @@ class GlobalSoundChoreographyManager(
             event.observer.userHasBeenHit.collect { hasBeenHit ->
                 if (hasBeenHit && isActive) {
                     try {
-                        val note = event.warming.playCurrentSoundChoreographyTone()
-                        Log.d(TAG, "Played sound choreography tone: $note")
+                        event.warming.playCurrentSoundChoreographyTone()
                     } catch (e: Exception) {
                         Log.e(TAG, "Error playing sound choreography tone", e)
                     }
@@ -184,28 +179,19 @@ class GlobalSoundChoreographyManager(
 
     /**
      * Pause sound choreography (e.g., when app goes to background).
+     * Note: Sound choreography continues in background for wave participation.
      */
     fun pause() {
-        Log.d(TAG, "Pausing sound choreography")
-        if (isActive) {
-            stopSoundChoreography()
-        }
+        Log.d(TAG, "App going to background - sound choreography continues")
+        // Don't stop sound choreography to allow background wave participation
     }
 
     /**
      * Resume sound choreography (e.g., when app comes to foreground).
      */
     fun resume() {
-        Log.d(TAG, "Resuming sound choreography")
-        currentEvent?.let { event ->
-            coroutineScopeProvider.scopeDefault().launch {
-                // Check if user is still in area
-                val isInArea = event.observer.userIsInArea.value
-                if (isInArea && !isActive) {
-                    startSoundChoreography(event)
-                }
-            }
-        }
+        Log.d(TAG, "App returning to foreground - sound choreography continues")
+        // Sound choreography was never paused, so no action needed
     }
 
     /**
