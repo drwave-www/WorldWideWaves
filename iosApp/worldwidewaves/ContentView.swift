@@ -42,10 +42,18 @@ struct ContentView: View {
                 Text("❌ Init Error: \(error)")
                     .font(.caption)
                     .foregroundColor(.red)
-            } else if mainActivityCreated, let mainActivity = mainActivityInstance {
-                // 🧪 iOS: MINIMAL TEST - Using minimal version to isolate crash
-                MinimalMainActivityTestView(mainActivity: mainActivity)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if mainActivityCreated {
+                VStack(spacing: 8) {
+                    Text("✅ Koin DI Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("✅ MokoRes Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("✅ MainActivity Created!")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                }
             } else if koinInitialized && mokoInitialized {
                 VStack(spacing: 8) {
                     Text("✅ Koin DI Working!")
@@ -135,41 +143,6 @@ struct ContentView: View {
     }
 }
 
-// MainActivityHostView - iOS equivalent of Android MainActivity setContent
-struct MainActivityHostView: UIViewControllerRepresentable {
-    let mainActivity: WWWMainActivity
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        print("🎯 iOS: Creating WWWMainActivity ComposeUIViewController...")
-
-        // Following Android MainActivity pattern via Kotlin function:
-        // mainActivityImpl!!.Draw() → createMainActivityViewController(mainActivity)
-        return MainViewControllerKt.createMainActivityViewController(mainActivity: mainActivity)
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        // No updates needed for stable content
-    }
-}
-
-// MinimalMainActivityTestView - iOS crash isolation test
-struct MinimalMainActivityTestView: UIViewControllerRepresentable {
-    let mainActivity: WWWMainActivity
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        print("🧪 iOS: Creating MINIMAL WWWMainActivity test...")
-
-        // Minimal test to isolate crash - no complex Draw() logic
-        return MainViewControllerKt.createMinimalMainActivityTest(mainActivity: mainActivity)
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        // No updates needed for static test
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+#Preview {
+    ContentView()
 }
