@@ -23,22 +23,59 @@ package com.worldwidewaves.shared.utils
 
 import androidx.compose.runtime.Composable
 import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.utils.Log
+import platform.Foundation.NSURL
+import platform.UIKit.UIAlertAction
+import platform.UIKit.UIAlertActionStyleDefault
+import platform.UIKit.UIAlertController
+import platform.UIKit.UIAlertControllerStyleAlert
+import platform.UIKit.UIApplication
 
 class IOSPlatformEnabler : PlatformEnabler {
     override fun openEventActivity(eventId: String) {
-        TODO()
+        Log.i("IOSPlatformEnabler", "Opening Event for eventId: $eventId")
+        toast("Event details: $eventId")
     }
 
     override fun openWaveActivity(eventId: String) {
-        TODO("Not yet implemented")
+        Log.i("IOSPlatformEnabler", "Opening Wave for eventId: $eventId")
+        toast("Wave activity: $eventId")
     }
 
     override fun toast(message: String) {
-        TODO("Not yet implemented")
+        val alert =
+            UIAlertController.alertControllerWithTitle(
+                title = "WorldWideWaves",
+                message = message,
+                preferredStyle = UIAlertControllerStyleAlert,
+            )
+
+        alert.addAction(
+            UIAlertAction.actionWithTitle(
+                title = "OK",
+                style = UIAlertActionStyleDefault,
+                handler = null,
+            ),
+        )
+
+        UIApplication.sharedApplication.keyWindow?.rootViewController?.presentViewController(
+            alert,
+            animated = true,
+            completion = null,
+        )
     }
 
     @Composable
     override fun OpenUrl(url: String) {
-        TODO("Not yet implemented")
+        try {
+            val nsUrl = NSURL.URLWithString(url)
+            if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
+                UIApplication.sharedApplication.openURL(nsUrl)
+            } else {
+                Log.e("IOSPlatformEnabler", "Cannot open URL: $url")
+            }
+        } catch (e: Exception) {
+            Log.e("IOSPlatformEnabler", "Failed to open URL: $url", throwable = e)
+        }
     }
 }

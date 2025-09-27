@@ -36,6 +36,7 @@ class AboutScreen(
     ) {
         AboutScreen(
             platform = platform,
+            platformEnabler = platformEnabler,
             modifier = modifier,
             onUrlOpen = { url ->
                 try {
