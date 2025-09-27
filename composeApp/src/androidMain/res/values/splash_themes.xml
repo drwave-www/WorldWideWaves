@@ -12,16 +12,16 @@
     <style name="Theme.WorldWideWaves.Splash" parent="Theme.SplashScreen">
         <!-- Set the splash screen background to match your current background -->
         <item name="windowSplashScreenBackground">#011026</item>
-        
+
         <!-- Use the logo as the splash screen icon -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/www_simple_logo_transparent</item>
-        
-        <!-- Configure animation duration -->
-        <item name="windowSplashScreenAnimationDuration">50</item>
-        
+
+        <!-- Configure animation duration (increased from 50ms to 1000ms for proper visibility) -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+
         <!-- Set the theme used after splash screen appears -->
         <item name="postSplashScreenTheme">@style/Theme.WorldWideWaves</item>
-        
+
         <!-- Status bar and navigation bar configurations -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
