@@ -44,24 +44,24 @@ class EventFullMapActivity : AppCompatActivity() {
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(this)
 
+        val platformEnabler = AndroidPlatformEnabler(this)
         if (eventId != null) {
-            val platformEnabler = AndroidPlatformEnabler(this)
             fullMapActivity = WWWFullMapActivity(eventId, platformEnabler)
-            fullMapActivity?.onEventLoaded { event ->
-                // Construct the event map
-                val eventMap =
-                    AndroidEventMap(
-                        event,
-                        context = this as AppCompatActivity,
-                        mapConfig =
-                            EventMapConfig(
-                                initialCameraPosition = MapCameraPosition.WINDOW,
-                                autoTargetUserOnFirstLocation = true,
-                            ),
-                    )
-                setContent {
-                    fullMapActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
-                }
+            setContent {
+                fullMapActivity!!.asComponent(
+                    eventMapBuilder = { event ->
+                        AndroidEventMap(
+                            event,
+                            context = this as AppCompatActivity,
+                            mapConfig =
+                                EventMapConfig(
+                                    initialCameraPosition = MapCameraPosition.WINDOW,
+                                    autoTargetUserOnFirstLocation = true,
+                                ),
+                        )
+                    },
+                    onFinish = { finish() },
+                )
             }
         }
     }

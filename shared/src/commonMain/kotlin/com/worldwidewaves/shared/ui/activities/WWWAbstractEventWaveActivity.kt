@@ -23,10 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.WaveProgressionObserver
@@ -51,14 +53,36 @@ abstract class WWWAbstractEventWaveActivity(
      */
     private val platform: WWWPlatform by inject()
 
-    /**
-     * Central events repository – provides helper to restart observers globally.
-     */
-    private val events: WWWEvents by inject()
-
     private var waveProgressionObserver: WaveProgressionObserver? = null
 
     protected var eventMap: AbstractEventMap<*>? = null
+
+    // ------------------------------------------------------------------------
+
+    @Composable fun asComponent(
+        eventMapBuilder: (IWWWEvent) -> AbstractEventMap<*>,
+        onFinish: () -> Unit,
+    ) {
+        var eventMap by remember { mutableStateOf<AbstractEventMap<*>?>(null) }
+        var event by remember { mutableStateOf<IWWWEvent?>(null) }
+
+        this.Load()
+        this.onEventLoaded { loadedEvent ->
+            event = loadedEvent
+            eventMap = eventMapBuilder(loadedEvent)
+        }
+
+        event?.let { evt ->
+            eventMap?.let {
+                val currentEventMap = eventMap
+                this.Draw(
+                    event = evt,
+                    eventMap = currentEventMap!!,
+                    onFinish = onFinish,
+                )
+            }
+        }
+    }
 
     // ------------------------------------------------------------------------
 

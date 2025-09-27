@@ -46,10 +46,9 @@ import com.worldwidewaves.shared.generated.resources.target_me_active
 import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
+import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
 import dev.icerock.moko.resources.compose.stringResource
 import org.jetbrains.compose.resources.painterResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 /**
@@ -64,15 +63,13 @@ fun MapActions(
     modifier: Modifier = Modifier,
     onTargetWave: () -> Unit = {},
     onTargetUser: () -> Unit = {},
+    // iOS FIX: Clock dependency passed as parameter to prevent deadlock
+    clock: IClock = getIOSSafeClock(),
 ) {
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()
 
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
+    // iOS FIX: Removed dangerous object : KoinComponent pattern
 
     val isRunning = eventStatus == Status.RUNNING
 

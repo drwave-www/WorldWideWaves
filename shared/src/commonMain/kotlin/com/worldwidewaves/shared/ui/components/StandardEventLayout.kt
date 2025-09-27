@@ -33,9 +33,9 @@ import com.worldwidewaves.shared.ui.components.event.WWWEventSocialNetworks
 import com.worldwidewaves.shared.ui.components.shared.ButtonWave
 import com.worldwidewaves.shared.ui.components.shared.SimulationButton
 import com.worldwidewaves.shared.ui.components.shared.WaveNavigator
+import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
+import com.worldwidewaves.shared.ui.utils.getIOSSafePlatform
 import com.worldwidewaves.shared.ui.utils.rememberEventState
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 /**
  * Standard event screen layout pattern used across multiple event activities.
@@ -56,14 +56,12 @@ fun StandardEventLayout(
     mapHeight: Dp,
     mapArea: @Composable () -> Unit = {},
     additionalContent: @Composable () -> Unit = {},
+    // iOS FIX: Dependencies passed as parameters to prevent deadlock
+    platform: WWWPlatform = getIOSSafePlatform(),
+    clock: IClock = getIOSSafeClock(),
 ) {
-    val platformComponent =
-        object : KoinComponent {
-            val platform: WWWPlatform by inject()
-            val clock: IClock by inject()
-        }
-    val platform = platformComponent.platform
-    val clock = platformComponent.clock
+    // iOS FIX: Removed dangerous object : KoinComponent pattern
+    // Dependencies now resolved safely outside composition
 
     val eventState = rememberEventState(event, platform)
 

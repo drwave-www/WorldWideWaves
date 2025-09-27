@@ -43,15 +43,16 @@ class WaveActivity : AppCompatActivity() {
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(this)
 
+        val platformEnabler = AndroidPlatformEnabler(this)
         if (eventId != null) {
-            val platformEnabler = AndroidPlatformEnabler(this)
             waveActivityImpl = WWWWaveActivity(eventId, platformEnabler)
-            waveActivityImpl?.onEventLoaded { event ->
-                // Construct the event map
-                val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
-                setContent {
-                    waveActivityImpl!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
-                }
+            setContent {
+                waveActivityImpl!!.asComponent(
+                    eventMapBuilder = { event ->
+                        AndroidEventMap(event, context = this as AppCompatActivity)
+                    },
+                    onFinish = { finish() },
+                )
             }
         }
     }

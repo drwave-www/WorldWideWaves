@@ -37,9 +37,8 @@ import com.worldwidewaves.shared.WWWGlobals.Event
 import com.worldwidewaves.shared.events.IWWWEvent.Status
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.ui.theme.sharedExtraBoldTextStyle
+import com.worldwidewaves.shared.ui.utils.getIOSSafeClock
 import dev.icerock.moko.resources.compose.stringResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -64,12 +63,10 @@ fun ButtonWave(
     isInArea: Boolean,
     onNavigateToWave: WaveNavigator,
     modifier: Modifier = Modifier,
+    // iOS FIX: Clock dependency passed as parameter to prevent deadlock
+    clock: IClock = getIOSSafeClock(),
 ) {
-    val clockComponent =
-        object : KoinComponent {
-            val clock: IClock by inject()
-        }
-    val clock = clockComponent.clock
+    // iOS FIX: Removed dangerous object : KoinComponent pattern
 
     val isRunning = eventState == Status.RUNNING
     val isSoon = eventState == Status.SOON

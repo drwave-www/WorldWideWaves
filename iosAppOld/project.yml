@@ -20,7 +20,9 @@ targets:
         type: folder
     settings:
       INFOPLIST_FILE: iosApp/Info.plist
-      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp
+      PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.WorldWideWavesDrWaves
+      PRODUCT_NAME: "WorldWideWaves"
+      CFBundleDisplayName: "WorldWideWaves"
       DEVELOPMENT_TEAM: ""
       OTHER_LDFLAGS: [
         "-lc++",
