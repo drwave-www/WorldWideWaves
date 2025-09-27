@@ -13,6 +13,7 @@
 		56B0305B5D3847FC6B326502 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8509E5A49E4A5CAAEB3ADB /* ContentView.swift */; };
 		84D49F2169A00DBE2EBC7CF5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D79507B4FE35B12BCF209904 /* Preview Assets.xcassets */; };
 		904B143AD85747788BDF9954 /* Shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0BCACD5445C37FEB9733A013 /* Shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		9DB9B6C15B1CB04CDF3EF377 /* Compose Resources in Resources */ = {isa = PBXBuildFile; fileRef = 8FE992363391657E3B9F4F13 /* Compose Resources */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,6 +34,7 @@
 		0BCACD5445C37FEB9733A013 /* Shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Shared.framework; path = ../shared/build/bin/iosSimulatorArm64/debugFramework/Shared.framework; sourceTree = "<group>"; };
 		668CECA83ACC03A83C85A623 /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		86038AE1032E284E79B32AD6 /* iosApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8FE992363391657E3B9F4F13 /* Compose Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "Compose Resources"; path = ../shared/src/commonMain/composeResources; sourceTree = SOURCE_ROOT; };
 		C117AD187833E2513BD2F553 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CE8509E5A49E4A5CAAEB3ADB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D79507B4FE35B12BCF209904 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -51,6 +53,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B3F4541C82845E6E8F3A5F1 /* shared */ = {
+			isa = PBXGroup;
+			children = (
+				C3CA892880A620978599BFFE /* src */,
+			);
+			path = shared;
+			sourceTree = "<group>";
+		};
 		1DB4B685CAEE8BEFEBBAEF94 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -76,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				1DB4B685CAEE8BEFEBBAEF94 /* iosApp */,
+				AD6A8D7CF8FDF70DF2F6E5E2 /* WorldWideWaves */,
 				3666012298E772D226418813 /* Frameworks */,
 				94C98B8B3A2BFC1966447269 /* Products */,
 			);
@@ -105,11 +116,28 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		AD6A8D7CF8FDF70DF2F6E5E2 /* WorldWideWaves */ = {
+			isa = PBXGroup;
+			children = (
+				0B3F4541C82845E6E8F3A5F1 /* shared */,
+			);
+			name = WorldWideWaves;
+			path = ..;
+			sourceTree = "<group>";
+		};
 		C04D76922C77250D14BD9ED1 /* Debug */ = {
 			isa = PBXGroup;
 			children = (
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		C3CA892880A620978599BFFE /* src */ = {
+			isa = PBXGroup;
+			children = (
+				ECE2970CCB961F2BDF5F8106 /* commonMain */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		D8A02A86820B196DF9063E59 /* shared */ = {
@@ -118,6 +146,14 @@
 				7ED1F555305FC1FD8E939C1B /* build */,
 			);
 			path = shared;
+			sourceTree = "<group>";
+		};
+		ECE2970CCB961F2BDF5F8106 /* commonMain */ = {
+			isa = PBXGroup;
+			children = (
+				8FE992363391657E3B9F4F13 /* Compose Resources */,
+			);
+			path = commonMain;
 			sourceTree = "<group>";
 		};
 		FECAC4265DC8BE5061013D4A /* Preview Content */ = {
@@ -192,6 +228,7 @@
 			files = (
 				22EA1CB33A17DCC6FC82406D /* Assets.xcassets in Resources */,
 				84D49F2169A00DBE2EBC7CF5 /* Preview Assets.xcassets in Resources */,
+				9DB9B6C15B1CB04CDF3EF377 /* Compose Resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

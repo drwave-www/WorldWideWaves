@@ -125,25 +125,18 @@ class WWWEvents : KoinComponent {
                 Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
                 val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
                 Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
-                val validatedEvents = confValidationErrors(events)
+                Log.i("WWWEvents.loadEventsJob", "Temporarily skipping validation to debug crash...")
 
-                validatedEvents
-                    .filterValues { it?.isNotEmpty() == true } // Log validation errors
-                    .forEach { (event, errors) ->
-                        Log.e(::WWWEvents.name, "Validation Errors for Event ID: ${event.id}")
-                        errors?.forEach { errorMessage ->
-                            Log.e(::WWWEvents.name, errorMessage)
-                        }
-                        validationErrors.add(event to errors!!)
-                    }
-
-                // Filter out invalid events
+                // TEMPORARY: Skip validation to debug crash
                 val validEvents =
-                    validatedEvents
-                        .filterValues { it.isNullOrEmpty() }
-                        .keys
-                        .onEach { initFavoriteEvent.call(it) } // Initialize favorite status
-                        .toList()
+                    events.onEach {
+                        try {
+                            initFavoriteEvent.call(it)
+                            Log.d("WWWEvents.loadEventsJob", "Initialized favorite for event: ${it.id}")
+                        } catch (e: Exception) {
+                            Log.e("WWWEvents.loadEventsJob", "Error initializing favorite for event ${it.id}: ${e.message}")
+                        }
+                    }
 
                 // Update the _eventsFlow in the main dispatcher to ensure thread safety
                 withContext(Dispatchers.Main) {

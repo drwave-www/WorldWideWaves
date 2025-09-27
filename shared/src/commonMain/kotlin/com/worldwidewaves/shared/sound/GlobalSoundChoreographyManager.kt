@@ -28,6 +28,7 @@ import com.worldwidewaves.shared.events.utils.DefaultCoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.IClock
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -88,24 +89,43 @@ class GlobalSoundChoreographyManager(
                 val allEvents = events.list()
                 Log.d(TAG, "Observing ${allEvents.size} events for area status")
 
-                // Monitor all events and find the one where user is in area
-                allEvents.forEach { event ->
-                    coroutineScopeProvider.scopeDefault().launch {
-                        event.observer.userIsInArea.collect { isInArea: Boolean ->
-                            if (isInArea && currentEvent != event) {
-                                // User entered a new event area
-                                if (currentEvent != null) {
-                                    Log.d(TAG, "Switching from event ${currentEvent!!.id} to ${event.id}")
-                                    stopSoundChoreography()
-                                }
-                                currentEvent = event
-                                startSoundChoreography(event)
-                            } else if (!isInArea && currentEvent == event) {
-                                // User left the current event area
-                                Log.d(TAG, "User left event area: ${event.id}")
+                if (allEvents.isEmpty()) {
+                    Log.w(TAG, "No events to observe")
+                    return@launch
+                }
+
+                // Combine all userIsInArea flows to react to any changes
+                val eventFlows =
+                    allEvents.map { event ->
+                        event.observer.userIsInArea
+                    }
+
+                combine(eventFlows) { areaStatuses ->
+                    // Find the first event where user is in area
+                    val eventInAreaIndex = areaStatuses.indexOfFirst { it }
+                    val eventInArea = if (eventInAreaIndex >= 0) allEvents[eventInAreaIndex] else null
+
+                    Log.d(TAG, "Area status changed - eventInArea: ${eventInArea?.id}, currentEvent: ${currentEvent?.id}")
+                    eventInArea
+                }.collect { eventInArea ->
+                    // Handle state changes
+                    when {
+                        eventInArea != null && currentEvent != eventInArea -> {
+                            // User entered a new event area
+                            if (currentEvent != null) {
+                                Log.d(TAG, "Switching from event ${currentEvent!!.id} to ${eventInArea.id}")
                                 stopSoundChoreography()
-                                currentEvent = null
+                            } else {
+                                Log.d(TAG, "User entered event area: ${eventInArea.id}")
                             }
+                            currentEvent = eventInArea
+                            startSoundChoreography(eventInArea)
+                        }
+                        eventInArea == null && currentEvent != null -> {
+                            // User left all event areas
+                            Log.d(TAG, "User left event area: ${currentEvent!!.id}")
+                            stopSoundChoreography()
+                            currentEvent = null
                         }
                     }
                 }

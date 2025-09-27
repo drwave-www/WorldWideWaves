@@ -15,6 +15,9 @@ targets:
           - "*.xcodeproj"
           - "build"
           - "DerivedData"
+      - path: ../shared/src/commonMain/composeResources
+        name: "Compose Resources"
+        type: folder
     settings:
       INFOPLIST_FILE: iosApp/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.worldwidewaves.iosApp
