@@ -115,8 +115,16 @@ class WWWEvents : KoinComponent {
     private fun loadEventsJob() =
         coroutineScopeProvider.launchIO {
             try {
-                val eventsJsonString = eventsConfigurationProvider.geoEventsConfiguration()
-                val events = eventsDecoder.decodeFromJson(eventsJsonString)
+                Log.i("WWWEvents.loadEventsJob", "=== STARTING loadEventsJob() ===")
+                Log.i("WWWEvents.loadEventsJob", "Calling eventsConfigurationProvider.geoEventsConfiguration()...")
+
+                val eventsJsonString: String = eventsConfigurationProvider.geoEventsConfiguration()
+                Log.i("WWWEvents.loadEventsJob", "Received JSON string: ${eventsJsonString.length} characters")
+                Log.i("WWWEvents.loadEventsJob", "JSON preview: ${eventsJsonString.take(200)}")
+
+                Log.i("WWWEvents.loadEventsJob", "Decoding JSON to events...")
+                val events: List<IWWWEvent> = eventsDecoder.decodeFromJson(eventsJsonString)
+                Log.i("WWWEvents.loadEventsJob", "Successfully decoded ${events.size} events")
                 val validatedEvents = confValidationErrors(events)
 
                 validatedEvents

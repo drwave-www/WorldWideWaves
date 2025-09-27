@@ -183,8 +183,26 @@ class DefaultEventsConfigurationProvider(
     @OptIn(ExperimentalResourceApi::class)
     override suspend fun geoEventsConfiguration(): String =
         coroutineScopeProvider.withIOContext {
-            Log.i(::geoEventsConfiguration.name, "Loading events configuration from ${FileSystem.EVENTS_CONF}")
-            Res.readBytes(FileSystem.EVENTS_CONF).decodeToString()
+            Log.i(::geoEventsConfiguration.name, "=== STARTING EVENTS CONFIGURATION LOAD ===")
+            Log.i(::geoEventsConfiguration.name, "Target file: ${FileSystem.EVENTS_CONF}")
+
+            try {
+                Log.i(::geoEventsConfiguration.name, "Attempting Res.readBytes() call...")
+                val bytes = Res.readBytes(FileSystem.EVENTS_CONF)
+                Log.i(::geoEventsConfiguration.name, "Successfully read ${bytes.size} bytes from Compose Resources")
+
+                val result = bytes.decodeToString()
+                Log.i(::geoEventsConfiguration.name, "Successfully decoded ${result.length} characters")
+                Log.i(::geoEventsConfiguration.name, "First 100 chars: ${result.take(100)}")
+                Log.i(::geoEventsConfiguration.name, "=== EVENTS CONFIGURATION LOAD SUCCESSFUL ===")
+                result
+            } catch (e: Exception) {
+                Log.e(::geoEventsConfiguration.name, "=== EVENTS CONFIGURATION LOAD FAILED ===")
+                Log.e(::geoEventsConfiguration.name, "Exception type: ${e::class.simpleName}")
+                Log.e(::geoEventsConfiguration.name, "Exception message: ${e.message}")
+                Log.e(::geoEventsConfiguration.name, "Stack trace: ${e.stackTraceToString()}")
+                throw e
+            }
         }
 }
 
