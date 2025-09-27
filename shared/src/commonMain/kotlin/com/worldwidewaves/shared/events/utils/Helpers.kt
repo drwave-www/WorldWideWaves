@@ -235,40 +235,51 @@ interface GeoJsonDataProvider {
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
-    override suspend fun getGeoJsonData(eventId: String): JsonObject? =
-        try {
-            // 1) Starting log -------------------------------------------------
-            Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
+    private val cache = mutableMapOf<String, JsonObject?>()
 
-            val geojsonData = readGeoJson(eventId)
+    override suspend fun getGeoJsonData(eventId: String): JsonObject? {
+        // Check cache first
+        if (cache.containsKey(eventId)) {
+            Log.d(::getGeoJsonData.name, "Using cached geojson data for event $eventId")
+            return cache[eventId]
+        }
 
-            if (geojsonData != null) {
-                // 2) Raw string diagnostics -----------------------------------
-                val preview = geojsonData.take(80).replace("\n", "")
-                Log.i(
-                    ::getGeoJsonData.name,
-                    "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
-                )
+        // Not in cache, load and cache the result
+        val result =
+            try {
+                Log.i(::getGeoJsonData.name, "Loading geojson data for event $eventId")
 
-                // 3) Parse and post-parse diagnostics -------------------------
-                val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
-                val keysSummary = jsonObj.keys.joinToString(", ")
-                val rootType = jsonObj["type"]?.toString()
-                Log.d(
-                    ::getGeoJsonData.name,
-                    "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
-                )
+                val geojsonData = readGeoJson(eventId)
 
-                jsonObj
-            } else {
-                // Missing data warning ----------------------------------------
-                Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
+                if (geojsonData != null) {
+                    val preview = geojsonData.take(80).replace("\n", "")
+                    Log.i(
+                        ::getGeoJsonData.name,
+                        "Retrieved geojson string (length=${geojsonData.length}) preview=\"${preview}\"",
+                    )
+
+                    val jsonObj = Json.parseToJsonElement(geojsonData).jsonObject
+                    val keysSummary = jsonObj.keys.joinToString(", ")
+                    val rootType = jsonObj["type"]?.toString()
+                    Log.d(
+                        ::getGeoJsonData.name,
+                        "Parsed geojson top-level keys=[$keysSummary], type=$rootType",
+                    )
+
+                    jsonObj
+                } else {
+                    Log.d(::getGeoJsonData.name, "Geojson data is null for event $eventId")
+                    null
+                }
+            } catch (e: Exception) {
+                Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
                 null
             }
-        } catch (e: Exception) {
-            Log.e(::getGeoJsonData.name, "Error loading geojson data for event $eventId: ${e.message}")
-            null
-        }
+
+        // Cache the result (even if null) to avoid repeated attempts
+        cache[eventId] = result
+        return result
+    }
 }
 
 // ---------------------------
