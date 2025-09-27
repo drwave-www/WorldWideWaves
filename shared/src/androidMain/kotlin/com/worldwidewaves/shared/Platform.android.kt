@@ -25,6 +25,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.google.android.play.core.splitcompat.SplitCompat
+import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
 import com.worldwidewaves.shared.generated.resources.Res
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
@@ -66,6 +67,7 @@ actual suspend fun getMapFileAbsolutePath(
     extension: String,
 ): String? {
     val context: Context by inject(Context::class.java)
+    val mapChecker: IMapAvailabilityChecker by inject(IMapAvailabilityChecker::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
 
@@ -116,6 +118,12 @@ actual suspend fun getMapFileAbsolutePath(
     if (!needsUpdate) {
         Log.i(::getMapFileAbsolutePath.name, "Using cached file for $eventId.$extension")
         return cachedFile.absolutePath
+    }
+
+    // Check if the map is actually downloaded before attempting expensive operations
+    if (!mapChecker.isMapDownloaded(eventId)) {
+        Log.d(::getMapFileAbsolutePath.name, "Map feature not downloaded for $eventId.$extension, skipping file access attempts")
+        return null
     }
 
     // If we need to update the cache, try to open the asset from feature module
