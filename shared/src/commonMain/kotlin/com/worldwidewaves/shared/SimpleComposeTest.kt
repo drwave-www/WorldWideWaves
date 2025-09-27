@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
  * Simple Compose UI following the iOS integration guidance
  */
 @Composable
-fun AppUI() {
+fun SimpleTestAppUI() {
     MaterialTheme {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Button(onClick = {}) {

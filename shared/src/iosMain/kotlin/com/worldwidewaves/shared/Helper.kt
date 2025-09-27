@@ -35,6 +35,7 @@ import org.koin.core.logger.PrintLogger
  * Swift code calls this via `HelperKt.doInitKoin()`.
  * We load every common module *and* the iOS-specific module only once.
  */
+@Throws(Throwable::class)
 fun doInitKoin() {
     // Prevent multiple initialisations when called repeatedly from Swift previews/tests.
     if (koinApp != null) return

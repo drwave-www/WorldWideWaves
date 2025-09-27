@@ -31,7 +31,7 @@ import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleAlert
 import platform.UIKit.UIApplication
 
-class IOSPlatformEnabler : PlatformEnabler {
+class IOSPlatformEnabler @Throws(Throwable::class) constructor() : PlatformEnabler {
     override fun openEventActivity(eventId: String) {
         Log.i("IOSPlatformEnabler", "Opening Event for eventId: $eventId")
         toast("Event details: $eventId")

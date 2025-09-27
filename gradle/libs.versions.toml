@@ -45,6 +45,7 @@ coreSplashscreen = "1.0.1"
 icerockMoko = "0.25.0"
 ktlint = "1.4.1"
 detekt = "1.23.7"
+material3 = "1.4.0"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -98,6 +99,7 @@ feature-delivery-ktx = { group = "com.google.android.play", name = "feature-deli
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
 icerock-moko-resources = { group = "dev.icerock.moko", name= "resources", version.ref = "icerockMoko" }
 icerock-moko-resources-compose = { group = "dev.icerock.moko", name= "resources-compose", version.ref = "icerockMoko" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
