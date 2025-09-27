@@ -232,6 +232,17 @@ class DefaultEventsConfigurationProvider(
 
 interface GeoJsonDataProvider {
     suspend fun getGeoJsonData(eventId: String): JsonObject?
+
+    /**
+     * Invalidate cached data for a specific event.
+     * Called when event data (e.g., downloaded maps) changes.
+     */
+    fun invalidateCache(eventId: String)
+
+    /**
+     * Clear all cached data.
+     */
+    fun clearCache()
 }
 
 class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
@@ -279,6 +290,18 @@ class DefaultGeoJsonDataProvider : GeoJsonDataProvider {
         // Cache the result (even if null) to avoid repeated attempts
         cache[eventId] = result
         return result
+    }
+
+    override fun invalidateCache(eventId: String) {
+        if (cache.remove(eventId) != null) {
+            Log.d(::invalidateCache.name, "Invalidated cache for event $eventId")
+        }
+    }
+
+    override fun clearCache() {
+        val size = cache.size
+        cache.clear()
+        Log.d(::clearCache.name, "Cleared GeoJSON cache ($size entries)")
     }
 }
 

@@ -368,8 +368,6 @@ class WWWEventObserver(
                     }
                 }
             }
-        } else {
-            Log.v("WWWEventObserver", "Unified observation already running for event ${event.id}")
         }
     }
 
