@@ -37,8 +37,16 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+
+// Session cache to remember unavailable geojson within the same app session
+private val unavailableGeoJsonCache = ConcurrentHashMap.newKeySet<String>()
 
 actual suspend fun readGeoJson(eventId: String): String? {
+    // Quick session cache check to avoid repeated calls for known unavailable maps
+    if (unavailableGeoJsonCache.contains(eventId)) {
+        return null
+    }
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
 
     return if (filePath != null) {
@@ -48,6 +56,8 @@ actual suspend fun readGeoJson(eventId: String): String? {
         }
     } else {
         Log.d(::readGeoJson.name, "GeoJSON file not available for event $eventId")
+        // Cache this unavailable result to avoid repeated attempts in the same session
+        unavailableGeoJsonCache.add(eventId)
         null
     }
 }
