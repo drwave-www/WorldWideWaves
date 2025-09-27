@@ -97,7 +97,9 @@ open class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
+            if (mainActivityImpl == null) {
+                mainActivityImpl = WWWMainActivity(AndroidPlatformEnabler(this))
+            }
             mainActivityImpl!!.Draw()
         }
     }

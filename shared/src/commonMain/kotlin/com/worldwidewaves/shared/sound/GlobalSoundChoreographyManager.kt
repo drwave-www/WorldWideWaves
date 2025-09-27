@@ -72,8 +72,14 @@ class GlobalSoundChoreographyManager(
 
         Log.d(TAG, "Starting global sound choreography observation for all events")
 
-        // Stop any existing observation
-        stopObserving()
+        // Stop any existing observation but don't reset the observing flag
+        observationJob?.cancel()
+        observationJob = null
+        if (isActive) {
+            stopSoundChoreography()
+        }
+        currentEvent = null
+
         isObservingAllEvents = true
 
         observationJob =
