@@ -184,7 +184,15 @@ class DefaultEventsConfigurationProvider(
     override suspend fun geoEventsConfiguration(): String =
         coroutineScopeProvider.withIOContext {
             Log.i(::geoEventsConfiguration.name, "Loading events configuration from ${FileSystem.EVENTS_CONF}")
-            Res.readBytes(FileSystem.EVENTS_CONF).decodeToString()
+            try {
+                val bytes = Res.readBytes(FileSystem.EVENTS_CONF)
+                val result = bytes.decodeToString()
+                Log.i(::geoEventsConfiguration.name, "Successfully loaded events.json: ${result.length} characters")
+                result
+            } catch (e: Exception) {
+                Log.e(::geoEventsConfiguration.name, "Failed to load events configuration: ${e.message}", e)
+                throw e
+            }
         }
 }
 

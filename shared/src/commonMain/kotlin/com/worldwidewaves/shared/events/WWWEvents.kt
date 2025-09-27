@@ -171,8 +171,17 @@ class WWWEvents : KoinComponent {
 
     @VisibleForTesting
     fun onEventsLoaded() {
+        Log.i(::WWWEvents.name, "Events loaded successfully. Calling ${pendingLoadedCallbacks.size} pending callbacks")
         eventsLoaded = true
-        pendingLoadedCallbacks.onEach { callback -> callback.invoke() }.clear()
+        pendingLoadedCallbacks
+            .onEach { callback ->
+                try {
+                    callback.invoke()
+                    Log.d(::WWWEvents.name, "Successfully called events loaded callback")
+                } catch (e: Exception) {
+                    Log.e(::WWWEvents.name, "Error calling events loaded callback: ${e.message}", e)
+                }
+            }.clear()
     }
 
     @VisibleForTesting

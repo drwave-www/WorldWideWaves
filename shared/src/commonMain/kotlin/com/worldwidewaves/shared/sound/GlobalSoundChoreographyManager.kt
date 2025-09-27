@@ -53,6 +53,7 @@ class GlobalSoundChoreographyManager(
     private var currentEvent: IWWWEvent? = null
     private var observationJob: Job? = null
     private var isActive = false
+    private var isObservingAllEvents = false
 
     companion object {
         private const val TAG = "GlobalSoundChoreography"
@@ -63,10 +64,17 @@ class GlobalSoundChoreographyManager(
      * Automatically detects which event the user is currently in.
      */
     fun startObservingAllEvents() {
+        // Prevent double initialization
+        if (isObservingAllEvents) {
+            Log.d(TAG, "Already observing all events, skipping duplicate initialization")
+            return
+        }
+
         Log.d(TAG, "Starting global sound choreography observation for all events")
 
         // Stop any existing observation
         stopObserving()
+        isObservingAllEvents = true
 
         observationJob =
             coroutineScopeProvider.scopeDefault().launch {
@@ -135,6 +143,7 @@ class GlobalSoundChoreographyManager(
 
         observationJob?.cancel()
         observationJob = null
+        isObservingAllEvents = false
 
         if (isActive) {
             stopSoundChoreography()
