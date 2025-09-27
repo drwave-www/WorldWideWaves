@@ -85,51 +85,49 @@ class EventsViewModel(
 
     // ---------------------------
 
-    init {
-        loadEvents()
-    }
-
+    // ---------------------------
+    // iOS FIX: No init{} block to prevent deadlocks
+    // Events loading triggered from LaunchedEffect in EventsListScreen
     // ---------------------------
 
     /**
      * Load events from the data source through repository and use cases
+     * ⚠️ Called from LaunchedEffect for iOS safety
      */
-    private fun loadEvents() {
-        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
-            try {
-                // Start loading events through repository
-                eventsRepository.loadEvents { exception ->
-                    WWWLogger.e("EventsViewModel", "Error loading events", exception)
-                    _loadingError.value = true
-                }
-
-                // Observe loading state from repository
-                eventsRepository
-                    .isLoading()
-                    .onEach { isLoading -> _isLoading.value = isLoading }
-                    .launchIn(viewModelScope)
-
-                // Observe errors from repository
-                eventsRepository
-                    .getLastError()
-                    .onEach { error ->
-                        _loadingError.value = error != null
-                        error?.let {
-                            WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
-                        }
-                    }.launchIn(viewModelScope)
-
-                // Get sorted events through use case and process them
-                getSortedEventsUseCase
-                    .invoke()
-                    .onEach { sortedEvents: List<IWWWEvent> ->
-                        processEventsList(sortedEvents)
-                    }.flowOn(Dispatchers.Default)
-                    .launchIn(viewModelScope)
-            } catch (e: Exception) {
-                WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
+    suspend fun loadEvents() {
+        try {
+            // Start loading events through repository
+            eventsRepository.loadEvents { exception ->
+                WWWLogger.e("EventsViewModel", "Error loading events", exception)
                 _loadingError.value = true
             }
+
+            // Observe loading state from repository
+            eventsRepository
+                .isLoading()
+                .onEach { isLoading -> _isLoading.value = isLoading }
+                .launchIn(viewModelScope)
+
+            // Observe errors from repository
+            eventsRepository
+                .getLastError()
+                .onEach { error ->
+                    _loadingError.value = error != null
+                    error?.let {
+                        WWWLogger.e("EventsViewModel", "Repository error: ${it.message}", it)
+                    }
+                }.launchIn(viewModelScope)
+
+            // Get sorted events through use case and process them
+            getSortedEventsUseCase
+                .invoke()
+                .onEach { sortedEvents: List<IWWWEvent> ->
+                    processEventsList(sortedEvents)
+                }.flowOn(Dispatchers.Default)
+                .launchIn(viewModelScope)
+        } catch (e: Exception) {
+            WWWLogger.e("EventsViewModel", "Error in loadEvents", e)
+            _loadingError.value = true
         }
     }
 

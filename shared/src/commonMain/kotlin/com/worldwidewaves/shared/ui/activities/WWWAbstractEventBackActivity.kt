@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -45,7 +46,6 @@ import com.worldwidewaves.shared.MokoRes
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.generated.resources.Res
 import com.worldwidewaves.shared.generated.resources.ic_arrow_back
 import com.worldwidewaves.shared.ui.theme.sharedPrimaryColoredTextStyle
@@ -55,9 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -72,16 +70,29 @@ abstract class WWWAbstractEventBackActivity(
      */
     protected open val isScrollable: Boolean = true
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
     private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()
 
-    init {
-        scope.launch {
-            trackEventLoading(eventId)
+    // iOS FIX: Removed init{} block to prevent Dispatchers.Main deadlock
+    // Event tracking now must be triggered from @Composable LaunchedEffect
+
+    /**
+     * ⚠️ iOS CRITICAL: Start event tracking.
+     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     */
+    protected suspend fun start() {
+        initialize()
+        trackEventLoading(eventId)
+    }
+
+    @Composable fun Load() {
+        LaunchedEffect(Unit) {
+            start()
         }
     }
+
+    // ------------------------------------------------------------------------
 
     override fun onDestroy() {
         scope.cancel()
@@ -121,8 +132,8 @@ abstract class WWWAbstractEventBackActivity(
     }
 
     private fun trackEventLoading(eventId: String) {
-        wwwEvents.addOnEventsLoadedListener {
-            setEvent(wwwEvents.getEventById(eventId))
+        events.addOnEventsLoadedListener {
+            setEvent(events.getEventById(eventId))
         }
     }
 

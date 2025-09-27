@@ -45,15 +45,16 @@ class EventActivity : AppCompatActivity() {
         // Ensure dynamic-feature splits are available immediately
         SplitCompat.install(this)
 
+        val platformEnabler = AndroidPlatformEnabler(this)
         if (eventId != null) {
-            val platformEnabler = AndroidPlatformEnabler(this)
             eventActivityImpl = WWWEventActivity(eventId, platformEnabler, mapViewModel)
-            eventActivityImpl?.onEventLoaded { event ->
-                // Construct the event map
-                val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
-                setContent {
-                    eventActivityImpl!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
-                }
+            setContent {
+                eventActivityImpl!!.asComponent(
+                    eventMapBuilder = { event ->
+                        AndroidEventMap(event, context = this@EventActivity)
+                    },
+                    onFinish = { finish() },
+                )
             }
         }
     }

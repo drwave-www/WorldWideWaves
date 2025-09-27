@@ -72,8 +72,9 @@ open class WWWMainActivity(
     showSplash: Boolean = true,
 ) : KoinComponent {
     private val platform: WWWPlatform by inject()
-    private val events: WWWEvents by inject()
+    protected val events: WWWEvents by inject()
     private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
+    private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
 
     private val eventsListScreen: EventsListScreen by inject()
     private val aboutTabScreen: AboutTabScreen by inject()
@@ -88,14 +89,25 @@ open class WWWMainActivity(
     // Record start time to enforce minimum duration
     val startTime = Clock.System.now().toEpochMilliseconds()
 
-    init {
+    // iOS FIX: Removed init{} block to prevent events loading deadlock
+    // Events loading and initialization now must be triggered from @Composable LaunchedEffect
+
+    /**
+     * ⚠️ iOS CRITICAL: Initialize main activity by loading events and starting sound choreography.
+     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     */
+    suspend fun initialize() {
         Log.i("WWWMainActivity", "Initializing WWWMainActivity")
+
+        // iOS FIX: Initialize sound choreography manager since init{} was removed
+        soundChoreographyManager.initialize()
 
         // Begin loading events – when done, flag so splash can disappear
         events.loadEvents(onTermination = {
             Log.i("WWWMainActivity", "Events loading completed")
             isDataLoaded = true
             checkSplashFinished(startTime)
+
             // Start global sound choreography observation for all events
             startGlobalSoundChoreographyForAllEvents()
         })
@@ -123,6 +135,7 @@ open class WWWMainActivity(
         LaunchedEffect(Unit) {
             delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
+            initialize()
         }
 
         WorldWideWavesTheme {

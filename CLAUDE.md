@@ -6,11 +6,22 @@ WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves th
 
 ### Technology Stack
 - **Framework**: Kotlin Multiplatform Mobile (KMM)
-- **UI**: Jetpack Compose & Compose Multiplatform
+- **UI**: Jetpack Compose (Android) & **SwiftUI** (iOS)
 - **Maps**: MapLibre (open-source mapping)
 - **Backend**: Firebase integration
 - **Architecture**: Clean Architecture with reactive programming
 - **Testing**: Comprehensive unit and instrumented test suites
+
+### iOS-Specific Configuration (CRITICAL)
+- **UI Framework**: SwiftUI (NOT Compose Multiplatform on iOS)
+- **Bundle ID**: `com.worldwidewaves.WorldWideWavesDrWaves` (EXACT - must match)
+- **Project Path**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/`
+- **Xcode Project**: `iosApp.xcodeproj`
+- **Main File**: `iosApp/ContentView.swift`
+- **Gradle Task**: `./gradlew :shared:embedAndSignAppleFrameworkForXcode` (via Xcode build script)
+- **Framework Path**: `../shared/build/xcode-frameworks/Debug/iphonesimulator18.5`
+- **Team ID**: `DrWaves`
+- **Status**: ✅ WORKING (September 27, 2025)
 
 ## Recent Major Updates
 
@@ -24,6 +35,38 @@ A comprehensive position system refactor has been completed to improve performan
 - **Status**: ✅ Completed (902/902 unit tests passing, instrumented tests in progress)
 
 See `POSITION_SYSTEM_REFACTOR.md` for detailed documentation.
+
+## 🚨 ABSOLUTE iOS DEADLOCK PREVENTION RULES - RED ALERT
+
+### ⚠️ **CRITICAL WARNING: iOS DEADLOCK RISKS**
+**VIOLATION OF THESE RULES WILL CAUSE iOS APP DEADLOCKS AND CRASHES**
+
+#### **🔴 NEVER - ABSOLUTELY FORBIDDEN:**
+1. **NEVER** create `object : KoinComponent` inside `@Composable` functions
+2. **NEVER** call `by inject()` during Compose composition
+3. **NEVER** use `runBlocking` anywhere before ComposeUIViewController creation
+4. **NEVER** launch coroutines in `init{}` blocks (use suspend functions instead)
+5. **NEVER** call DI `get()` or `inject()` in `init{}` blocks
+6. **NEVER** use `Dispatchers.Main` in constructors or static initializers
+
+#### **✅ ALWAYS - MANDATORY PATTERNS:**
+1. **ALWAYS** resolve dependencies outside composition using `LocalKoin.current.get()`
+2. **ALWAYS** pass dependencies as Composable parameters
+3. **ALWAYS** use `suspend fun initialize()` instead of `init{}` for async work
+4. **ALWAYS** call initialization from `LaunchedEffect(Unit) { component.initialize() }`
+5. **ALWAYS** verify no violations with: `rg -n "object.*KoinComponent" shared/src/commonMain`
+
+#### **🧪 VERIFICATION COMMANDS (Must Return ZERO Results):**
+```bash
+rg -n "object.*KoinComponent" shared/src/commonMain --type kotlin
+rg -n "by inject\(\)" shared/src/commonMain --type kotlin | rg -v "class.*:"
+rg -n -A 5 "init\s*\{" shared/src/commonMain --type kotlin | rg "launch|get\(\)"
+```
+
+**📋 TRACKING**: See `iOS_VIOLATION_TRACKER.md` for comprehensive violation list
+**🚨 STATUS**: Multiple critical violations exist - iOS app NOT SAFE until ALL fixed
+
+---
 
 ## Mandatory Development Requirements
 
