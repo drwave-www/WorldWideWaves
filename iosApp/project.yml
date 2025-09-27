@@ -24,10 +24,18 @@ targets:
         "-framework", "Shared"
       ]
       FRAMEWORK_SEARCH_PATHS: [
-        "../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)"
+        "../shared/build/bin/iosSimulatorArm64/debugFramework",
+        "../shared/build/bin/iosArm64/debugFramework"
       ]
     dependencies:
-      - framework: ../shared/build/xcode-frameworks/$$(CONFIGURATION)/$$(SDK_NAME)/Shared.framework
+      - framework: ../shared/build/bin/iosSimulatorArm64/debugFramework/Shared.framework
+    preBuildScripts:
+      - name: "Build Kotlin Framework"
+        script: |
+          echo "Building Kotlin framework for iOS..."
+          cd ..
+          ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+          ./gradlew :shared:linkDebugFrameworkIosArm64
         embed: false
 schemes:
   iosApp:
