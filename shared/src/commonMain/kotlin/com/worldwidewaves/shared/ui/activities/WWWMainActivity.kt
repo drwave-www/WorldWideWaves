@@ -117,9 +117,9 @@ open class WWWMainActivity(
 
     @Composable
     open fun Draw() {
-        // Also enforce minimum duration
+        // Enforce minimum duration for programmatic splash
         scope.launch {
-            delay(WWWGlobals.Timing.SPLASH_MAX_DURATION)
+            delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
             checkSplashFinished(startTime)
         }
 

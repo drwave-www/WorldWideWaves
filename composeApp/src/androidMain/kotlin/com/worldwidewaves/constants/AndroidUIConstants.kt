@@ -30,8 +30,8 @@ import com.worldwidewaves.shared.WWWGlobals
  */
 object AndroidUIConstants {
     object Timing {
-        /** Splash screen minimum duration - uses shared constant */
-        val SPLASH_MIN_DURATION_MS = WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+        /** System splash screen duration - short handoff to programmatic splash */
+        val SPLASH_MIN_DURATION_MS = WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds
 
         /** Splash screen maximum duration - uses shared constant */
         val SPLASH_MAX_DURATION_MS = WWWGlobals.Timing.SPLASH_MAX_DURATION.inWholeMilliseconds

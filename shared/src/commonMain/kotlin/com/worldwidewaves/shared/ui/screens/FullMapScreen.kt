@@ -41,7 +41,6 @@ fun FullMapScreen(
     eventMap: AbstractEventMap<*>?,
     modifier: Modifier = Modifier,
     onNavigateToWave: (String) -> Unit = {},
-    mapContent: @Composable ((Modifier) -> Unit),
 ) {
     val scope = rememberCoroutineScope()
 
@@ -54,7 +53,7 @@ fun FullMapScreen(
 
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {
-        mapContent(Modifier.fillMaxSize())
+        eventMap?.Screen(autoMapDownload = true, modifier = Modifier.fillMaxSize())
 
         ButtonWave(
             event.id,

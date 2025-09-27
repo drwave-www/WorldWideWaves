@@ -63,7 +63,7 @@ open class MainActivity : AppCompatActivity() {
         splashScreen.setKeepOnScreenCondition {
             if (!isOfficialSplashDismissed) {
                 lifecycleScope.launch {
-                    kotlinx.coroutines.delay(com.worldwidewaves.constants.AndroidUIConstants.Timing.SPLASH_MIN_DURATION_MS)
+                    kotlinx.coroutines.delay(com.worldwidewaves.shared.WWWGlobals.Timing.SYSTEM_SPLASH_DURATION.inWholeMilliseconds)
                     isOfficialSplashDismissed = true
                 }
                 true // keep the official splash right now
