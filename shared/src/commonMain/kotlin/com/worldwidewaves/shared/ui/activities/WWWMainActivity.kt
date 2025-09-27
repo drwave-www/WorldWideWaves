@@ -72,199 +72,200 @@ import kotlin.time.ExperimentalTime
 data class UIProperties(
     val densityScale: Float = 1.0f,
     val containerHeightPx: Int = 800,
-    val containerWidthPx: Int = 400
+    val containerWidthPx: Int = 400,
 )
 
 @OptIn(ExperimentalTime::class)
-open class WWWMainActivity @Throws(Throwable::class) constructor(
-    val platformEnabler: PlatformEnabler,
-    showSplash: Boolean = true,
-) : KoinComponent {
-    private val platform: WWWPlatform by inject()
-    protected val events: WWWEvents by inject()
-    private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
-    private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
-
-    private val eventsListScreen: EventsListScreen by inject()
-    private val aboutTabScreen: AboutTabScreen by inject()
-    private val debugTabScreen: DebugTabScreen? by inject()
-
-    /** Flag updated when `events.loadEvents()` finishes. */
-    private var isDataLoaded: Boolean = false
-
-    /** Flow observed by Compose to know when we can display main content. */
-    private val isSplashFinished = MutableStateFlow(!showSplash)
-
-    // Record start time to enforce minimum duration
-    val startTime = Clock.System.now().toEpochMilliseconds()
-
-    // iOS FIX: Removed init{} block to prevent events loading deadlock
-    // Events loading and initialization now must be triggered from @Composable LaunchedEffect
-
-    /**
-     * ⚠️ iOS CRITICAL: Initialize main activity by loading events and starting sound choreography.
-     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
-     */
-    suspend fun initialize() {
-        Log.i("WWWMainActivity", "Initializing WWWMainActivity")
-
-        // iOS FIX: Initialize sound choreography manager since init{} was removed
-        soundChoreographyManager.initialize()
-
-        // Begin loading events – when done, flag so splash can disappear
-        events.loadEvents(onTermination = {
-            Log.i("WWWMainActivity", "Events loading completed")
-            isDataLoaded = true
-            checkSplashFinished(startTime)
-
-            // Start global sound choreography observation for all events
-            startGlobalSoundChoreographyForAllEvents()
-        })
-    }
-
-    protected val tabManager by lazy {
-        val screens =
-            mutableListOf(
-                eventsListScreen,
-                aboutTabScreen,
-            )
-        // Debug screen removed from tab bar - will be accessed via floating icon
-
-        TabManager(
-            platformEnabler,
-            screens.toList(),
-        ) { isSelected, tabIndex, contentDescription ->
-            ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
-        }
-    }
-
-    @Composable
+open class WWWMainActivity
     @Throws(Throwable::class)
-    open fun Draw(
-        uiProperties: UIProperties? = null
-    ) {
-        // Enforce minimum duration for programmatic splash
-        LaunchedEffect(Unit) {
-            delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
-            checkSplashFinished(startTime)
-            initialize()
+    constructor(
+        val platformEnabler: PlatformEnabler,
+        showSplash: Boolean = true,
+    ) : KoinComponent {
+        private val platform: WWWPlatform by inject()
+        protected val events: WWWEvents by inject()
+        private val globalSoundChoreography: GlobalSoundChoreographyManager by inject()
+        private val soundChoreographyManager: com.worldwidewaves.shared.choreographies.SoundChoreographyManager by inject()
+
+        private val eventsListScreen: EventsListScreen by inject()
+        private val aboutTabScreen: AboutTabScreen by inject()
+        private val debugTabScreen: DebugTabScreen? by inject()
+
+        /** Flag updated when `events.loadEvents()` finishes. */
+        private var isDataLoaded: Boolean = false
+
+        /** Flow observed by Compose to know when we can display main content. */
+        private val isSplashFinished = MutableStateFlow(!showSplash)
+
+        // Record start time to enforce minimum duration
+        val startTime = Clock.System.now().toEpochMilliseconds()
+
+        // iOS FIX: Removed init{} block to prevent events loading deadlock
+        // Events loading and initialization now must be triggered from @Composable LaunchedEffect
+
+        /**
+         * ⚠️ iOS CRITICAL: Initialize main activity by loading events and starting sound choreography.
+         * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+         */
+        suspend fun initialize() {
+            Log.i("WWWMainActivity", "Initializing WWWMainActivity")
+
+            // iOS FIX: Initialize sound choreography manager since init{} was removed
+            soundChoreographyManager.initialize()
+
+            // Begin loading events – when done, flag so splash can disappear
+            events.loadEvents(onTermination = {
+                Log.i("WWWMainActivity", "Events loading completed")
+                isDataLoaded = true
+                checkSplashFinished(startTime)
+
+                // Start global sound choreography observation for all events
+                startGlobalSoundChoreographyForAllEvents()
+            })
         }
 
-        WorldWideWavesTheme {
-            Surface(
-                modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
-                color = MaterialTheme.colorScheme.background,
-            ) {
-                // Box to stack main content and simulation-mode overlay
-                Box(modifier = Modifier.fillMaxSize()) {
-                    var showDebugScreen by remember { mutableStateOf(false) }
+        protected val tabManager by lazy {
+            val screens =
+                mutableListOf(
+                    eventsListScreen,
+                    aboutTabScreen,
+                )
+            // Debug screen removed from tab bar - will be accessed via floating icon
 
-                    val ready by isSplashFinished.collectAsState()
-                    if (ready) {
-                        if (showDebugScreen) {
-                            debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
-                                // Fallback debug screen if injection failed
-                                DebugScreen(
-                                    modifier = Modifier.fillMaxSize(),
-                                )
+            TabManager(
+                platformEnabler,
+                screens.toList(),
+            ) { isSelected, tabIndex, contentDescription ->
+                ConfigurableTabBarItem(isSelected, tabIndex, contentDescription, screens.size)
+            }
+        }
+
+        @Composable
+        @Throws(Throwable::class)
+        open fun Draw(uiProperties: UIProperties? = null) {
+            // Enforce minimum duration for programmatic splash
+            LaunchedEffect(Unit) {
+                delay(WWWGlobals.Timing.SPLASH_MIN_DURATION)
+                checkSplashFinished(startTime)
+                initialize()
+            }
+
+            WorldWideWavesTheme {
+                Surface(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    // Box to stack main content and simulation-mode overlay
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        var showDebugScreen by remember { mutableStateOf(false) }
+
+                        val ready by isSplashFinished.collectAsState()
+                        if (ready) {
+                            if (showDebugScreen) {
+                                debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
+                                    // Fallback debug screen if injection failed
+                                    DebugScreen(
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+                            } else {
+                                Screen()
                             }
                         } else {
-                            Screen()
+                            SplashScreen()
                         }
-                    } else {
-                        SplashScreen()
-                    }
 
-                    // -----------------------------------------------------------------
-                    //  Global Simulation-Mode chip shown whenever the mode is enabled
-                    // -----------------------------------------------------------------
-                    SimulationModeChip(platform)
+                        // -----------------------------------------------------------------
+                        //  Global Simulation-Mode chip shown whenever the mode is enabled
+                        // -----------------------------------------------------------------
+                        SimulationModeChip(platform)
 
-                    // -----------------------------------------------------------------
-                    //  Floating Debug Icon (green) - bottom right corner
-                    // -----------------------------------------------------------------
-                    if (ready && debugTabScreen != null) {
-                        // Calculate position at 15% from bottom
-                        // iOS-safe approach: Use provided basic properties or convert from Android APIs
-                        val effectiveUIProps = uiProperties ?: run {
-                            val windowInfo = LocalWindowInfo.current
-                            val density = LocalDensity.current
-                            UIProperties(
-                                densityScale = density.density,
-                                containerHeightPx = windowInfo.containerSize.height,
-                                containerWidthPx = windowInfo.containerSize.width
-                            )
-                        }
-                        val screenHeightDp = (effectiveUIProps.containerHeightPx / effectiveUIProps.densityScale).dp
-                        val bottomOffset = screenHeightDp * 0.15f
+                        // -----------------------------------------------------------------
+                        //  Floating Debug Icon (green) - bottom right corner
+                        // -----------------------------------------------------------------
+                        if (ready && debugTabScreen != null) {
+                            // Calculate position at 15% from bottom
+                            // iOS-safe approach: Use provided basic properties or convert from Android APIs
+                            val effectiveUIProps =
+                                uiProperties ?: run {
+                                    val windowInfo = LocalWindowInfo.current
+                                    val density = LocalDensity.current
+                                    UIProperties(
+                                        densityScale = density.density,
+                                        containerHeightPx = windowInfo.containerSize.height,
+                                        containerWidthPx = windowInfo.containerSize.width,
+                                    )
+                                }
+                            val screenHeightDp = (effectiveUIProps.containerHeightPx / effectiveUIProps.densityScale).dp
+                            val bottomOffset = screenHeightDp * 0.15f
 
-                        FloatingActionButton(
-                            onClick = { showDebugScreen = !showDebugScreen },
-                            modifier =
-                                Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(end = 16.dp, bottom = bottomOffset),
-                            containerColor = Color(0xFF4CAF50), // Green color
-                            shape = CircleShape,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.BugReport,
-                                contentDescription = "Debug Screen",
-                                tint = Color.White,
-                            )
+                            FloatingActionButton(
+                                onClick = { showDebugScreen = !showDebugScreen },
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(end = 16.dp, bottom = bottomOffset),
+                                containerColor = Color(0xFF4CAF50), // Green color
+                                shape = CircleShape,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.BugReport,
+                                    contentDescription = "Debug Screen",
+                                    tint = Color.White,
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    @Composable
-    protected open fun Screen() {
-        tabManager.TabView()
-    }
+        @Composable
+        protected open fun Screen() {
+            tabManager.TabView()
+        }
 
-    /**
-     * Start global sound choreography for all loaded events.
-     * This enables sound to play throughout the app when user is in any event area.
-     */
-    private fun startGlobalSoundChoreographyForAllEvents() {
-        try {
-            Log.d("WWWMainActivity", "Starting global sound choreography for all events")
-            globalSoundChoreography.startObservingAllEvents()
-            Log.d("WWWMainActivity", "Global sound choreography started successfully")
-        } catch (e: Exception) {
-            Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}", e)
-            // Don't crash the app if sound choreography fails
+        /**
+         * Start global sound choreography for all loaded events.
+         * This enables sound to play throughout the app when user is in any event area.
+         */
+        private fun startGlobalSoundChoreographyForAllEvents() {
+            try {
+                Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+                globalSoundChoreography.startObservingAllEvents()
+                Log.d("WWWMainActivity", "Global sound choreography started successfully")
+            } catch (e: Exception) {
+                Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}", e)
+                // Don't crash the app if sound choreography fails
+            }
+        }
+
+        /**
+         * Lifecycle methods for global sound choreography management.
+         * These should be called from the Android activity lifecycle.
+         */
+        open fun onPause() {
+            globalSoundChoreography.pause()
+        }
+
+        open fun onResume() {
+            globalSoundChoreography.resume()
+        }
+
+        open fun onDestroy() {
+            globalSoundChoreography.stopObserving()
+        }
+
+        /** Updates [isSplashFinished] once both data and min duration requirements are met. */
+        private fun checkSplashFinished(startTime: Long) {
+            val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+            Log.d("WWWMainActivity", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
+
+            if (isDataLoaded &&
+                elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
+            ) {
+                Log.i("WWWMainActivity", "Splash conditions met, dismissing splash screen")
+                isSplashFinished.update { true }
+            }
         }
     }
-
-    /**
-     * Lifecycle methods for global sound choreography management.
-     * These should be called from the Android activity lifecycle.
-     */
-    open fun onPause() {
-        globalSoundChoreography.pause()
-    }
-
-    open fun onResume() {
-        globalSoundChoreography.resume()
-    }
-
-    open fun onDestroy() {
-        globalSoundChoreography.stopObserving()
-    }
-
-    /** Updates [isSplashFinished] once both data and min duration requirements are met. */
-    private fun checkSplashFinished(startTime: Long) {
-        val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-        Log.d("WWWMainActivity", "Checking splash finished: dataLoaded=$isDataLoaded, elapsed=${elapsed}ms")
-
-        if (isDataLoaded &&
-            elapsed >= WWWGlobals.Timing.SPLASH_MIN_DURATION.inWholeMilliseconds
-        ) {
-            Log.i("WWWMainActivity", "Splash conditions met, dismissing splash screen")
-            isSplashFinished.update { true }
-        }
-    }
-}

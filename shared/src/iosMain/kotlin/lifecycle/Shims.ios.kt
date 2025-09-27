@@ -6,8 +6,7 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-actual fun <T> Flow<T>.collectAsStateLifecycle(initial: T): State<T> =
-    this.collectAsState(initial)
+actual fun <T> Flow<T>.collectAsStateLifecycle(initial: T): State<T> = this.collectAsState(initial)
 
 @Composable
 actual fun isLifecycleAtLeastStarted(): Boolean = true

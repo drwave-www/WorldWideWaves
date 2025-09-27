@@ -1,16 +1,15 @@
-// AppDelegate.swift
 import UIKit
 import Shared
 
-@main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var composeVC: UIViewController?  // Keep Compose VC alive
 
-    func application(_ app: UIApplication,
-                     didFinishLaunchingWithOptions opts: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        NSLog("🎯 iOS: AppDelegate - DIRECT window management (bypassing SceneDelegate)")
-        print("🎯 iOS: AppDelegate - DIRECT window management (bypassing SceneDelegate)")
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+
+        NSLog("🎯 iOS: SceneDelegate starting...")
+        print("🎯 iOS: SceneDelegate starting...")
 
         // Try SOFTWARE rendering first (simulator sanity check)
         setenv("SKIKO_RENDER_API", "SOFTWARE", 1)
@@ -36,10 +35,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSLog("✅ iOS: K/N hook installed")
         print("✅ iOS: K/N hook installed")
 
-        // Create window directly in AppDelegate
-        window = UIWindow(frame: UIScreen.main.bounds)
+        // Create window with scene
+        let window = UIWindow(windowScene: windowScene)
 
-        // Create our Compose controller with PROPER UIKit lifecycle
+        // Set our Kotlin root controller with PROPER UIKit lifecycle
         NSLog("🎯 iOS: Creating RootController...")
         print("🎯 iOS: Creating RootController...")
         do {
@@ -69,39 +68,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             // Keep strong reference
             self.composeVC = vc
-            window?.rootViewController = host
+            window.rootViewController = host
 
-            NSLog("✅ iOS: AppDelegate setup complete")
-            print("✅ iOS: AppDelegate setup complete")
-
-            // FORCE additional composition triggers
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                NSLog("🎯 iOS: Additional layout trigger #1...")
-                print("🎯 iOS: Additional layout trigger #1...")
-                vc.view.setNeedsLayout()
-                vc.view.layoutIfNeeded()
-                host.view.setNeedsLayout()
-                host.view.layoutIfNeeded()
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                NSLog("🎯 iOS: Additional layout trigger #2...")
-                print("🎯 iOS: Additional layout trigger #2...")
-                vc.view.setNeedsDisplay()
-                host.view.setNeedsDisplay()
-            }
+            NSLog("✅ iOS: Child VC setup complete")
+            print("✅ iOS: Child VC setup complete")
 
         } catch let e as NSError {
             NSLog("❌ iOS: RootController failed: \(e.localizedDescription)")
+            NSLog("❌ iOS: Error details: \(e)")
             print("❌ iOS: RootController failed: \(e.localizedDescription)")
+            print("❌ iOS: Error details: \(e)")
             // Fallback
-            window?.rootViewController = UIViewController()
+            window.rootViewController = UIViewController()
         }
 
-        window?.makeKeyAndVisible()
-        NSLog("✅ iOS: AppDelegate window made visible")
-        print("✅ iOS: AppDelegate window made visible")
-
-        return true
+        self.window = window
+        window.makeKeyAndVisible()
+        NSLog("✅ iOS: SceneDelegate window made visible")
+        print("✅ iOS: SceneDelegate window made visible")
     }
 }
