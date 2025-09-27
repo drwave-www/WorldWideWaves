@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
+import com.worldwidewaves.shared.ui.screens.DebugScreen
 
 /**
  * iOS wrapper for SharedDebugScreen.
@@ -24,8 +24,11 @@ class DebugScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
-        SharedDebugScreen(
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
+        DebugScreen(
             modifier = modifier,
             onPerformanceClick = {
                 // Debug functionality handled by shared debug screen

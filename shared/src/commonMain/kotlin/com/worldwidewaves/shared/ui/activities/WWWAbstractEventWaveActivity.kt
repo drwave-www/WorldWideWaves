@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.ui.activities
 
 /* * Copyright 2025 DrWave
  * 
@@ -24,6 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
 import com.worldwidewaves.shared.map.AbstractEventMap
@@ -34,11 +36,11 @@ import kotlin.time.ExperimentalTime
 
 
 @OptIn(ExperimentalTime::class)
-abstract class WWWEventWaveActivity(
+abstract class WWWAbstractEventWaveActivity(
     eventId: String,
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false
-) : WWWEventBackActivity(eventId, platformEnabler, showSplash) {
+) : WWWAbstractEventBackActivity(eventId, platformEnabler, showSplash) {
 
     /**
      * Application-level CoroutineScope (stays alive as long as the process lives)

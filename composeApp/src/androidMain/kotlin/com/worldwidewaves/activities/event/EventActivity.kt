@@ -26,7 +26,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.WWWEventActivity
+import com.worldwidewaves.shared.ui.activities.WWWEventActivity
 import com.worldwidewaves.utils.AndroidPlatformEnabler
 import com.worldwidewaves.viewmodels.AndroidMapViewModel
 import org.koin.android.ext.android.inject
@@ -34,7 +34,6 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class EventActivity : AppCompatActivity() {
-
     private var eventActivity: WWWEventActivity? = null
     private val mapViewModel: AndroidMapViewModel by inject()
 
@@ -53,7 +52,7 @@ class EventActivity : AppCompatActivity() {
                 // Construct the event map
                 val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
                 setContent {
-                    eventActivity!!.Draw(event, eventMap = eventMap)
+                    eventActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
                 }
             }
         }
@@ -74,4 +73,10 @@ class EventActivity : AppCompatActivity() {
         super.onPause()
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (eventActivity?.handleBackPress() != true) {
+            super.onBackPressed()
+        }
+    }
 }

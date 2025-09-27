@@ -44,8 +44,8 @@ import com.worldwidewaves.shared.WWWGlobals.TabBar
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.ui.screens.about.SharedAboutFaqScreen
-import com.worldwidewaves.shared.ui.screens.about.SharedAboutInfoScreen
+import com.worldwidewaves.shared.ui.screens.about.AboutFaqScreen
+import com.worldwidewaves.shared.ui.screens.about.AboutInfoScreen
 import com.worldwidewaves.shared.ui.theme.sharedCommonTextStyle
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
@@ -64,7 +64,7 @@ private val tabInfo =
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedAboutScreen(
+fun AboutScreen(
     platform: WWWPlatform,
     platformEnabler: PlatformEnabler,
     modifier: Modifier = Modifier,
@@ -82,16 +82,22 @@ fun SharedAboutScreen(
                         override val name = "Infos"
 
                         @Composable
-                        override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
-                            SharedAboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
+                        override fun Screen(
+                            platformEnabler: PlatformEnabler,
+                            modifier: Modifier,
+                        ) {
+                            AboutInfoScreen(modifier = modifier, onUrlOpen = onUrlOpen)
                         }
                     },
                     object : TabScreen {
                         override val name = "FAQ"
 
                         @Composable
-                        override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
-                            SharedAboutFaqScreen(
+                        override fun Screen(
+                            platformEnabler: PlatformEnabler,
+                            modifier: Modifier,
+                        ) {
+                            AboutFaqScreen(
                                 platform = platform,
                                 modifier = modifier,
                                 onUrlOpen = onUrlOpen,

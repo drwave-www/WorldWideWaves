@@ -21,70 +21,70 @@ package com.worldwidewaves.activities.event
  * limitations under the License.
  */
 
-import android.content.Intent
+import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.EventMapConfig
 import com.worldwidewaves.shared.map.MapCameraPosition
-import com.worldwidewaves.shared.ui.screens.FullMapScreen
+import com.worldwidewaves.shared.ui.activities.WWWFullMapActivity
+import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class EventFullMapActivity : AbstractEventWaveActivity() {
-    // Dependencies injected as needed
+class EventFullMapActivity : AppCompatActivity() {
+    private var fullMapActivity: WWWFullMapActivity? = null
 
-    // Ensure dynamic-feature splits are available without restarting the app
-    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SplitCompat.installActivity(this)
+
+        val eventId = intent.getStringExtra("eventId")
+
+        // Ensure dynamic-feature splits are available immediately
+        SplitCompat.install(this)
+
+        if (eventId != null) {
+            val platformEnabler = AndroidPlatformEnabler(this)
+            fullMapActivity = WWWFullMapActivity(eventId, platformEnabler)
+            fullMapActivity?.onEventLoaded { event ->
+                // Construct the event map
+                val eventMap =
+                    AndroidEventMap(
+                        event,
+                        context = this as AppCompatActivity,
+                        mapConfig =
+                            EventMapConfig(
+                                initialCameraPosition = MapCameraPosition.WINDOW,
+                                autoTargetUserOnFirstLocation = true,
+                            ),
+                    )
+                setContent {
+                    fullMapActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
+                }
+            }
+        }
     }
 
-    // ------------------------------------------------------------------------
+    override fun onDestroy() {
+        fullMapActivity?.onDestroy()
+        super.onDestroy()
+    }
 
-    @Composable
-    override fun Screen(
-        modifier: Modifier,
-        event: IWWWEvent,
-    ) {
-        val context = androidx.compose.ui.platform.LocalContext.current
+    override fun onResume() {
+        super.onResume()
+        fullMapActivity?.onResume()
+    }
 
-        // Construct the event map
-        val eventMap =
-            remember(event.id) {
-                AndroidEventMap(
-                    event,
-                    context = context as AppCompatActivity, // Pass Activity context for wave layer UI thread operations
-                    mapConfig =
-                        EventMapConfig(
-                            initialCameraPosition = MapCameraPosition.WINDOW,
-                            autoTargetUserOnFirstLocation = true,
-                        ),
-                )
-            }
+    override fun onPause() {
+        fullMapActivity?.onPause()
+        super.onPause()
+    }
 
-        // Start event/map coordination and map zoom/location updates
-        ObserveEventMapProgression(event, eventMap)
-
-        // Use the shared full map screen implementation
-        FullMapScreen(
-            event = event,
-            eventMap = eventMap,
-            modifier = modifier,
-            onNavigateToWave = { eventId ->
-                context.startActivity(
-                    Intent(context, WaveActivity::class.java).apply {
-                        putExtra("eventId", eventId)
-                    },
-                )
-            },
-            mapContent = { mapModifier ->
-                eventMap.Screen(modifier = mapModifier, autoMapDownload = true)
-            },
-        )
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (fullMapActivity?.handleBackPress() != true) {
+            super.onBackPressed()
+        }
     }
 }

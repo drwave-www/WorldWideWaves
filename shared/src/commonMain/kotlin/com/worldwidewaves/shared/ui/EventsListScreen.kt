@@ -33,7 +33,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.data.SetEventFavorite
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
-import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
+import com.worldwidewaves.shared.ui.screens.EventsListScreen
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
 import org.koin.core.component.KoinComponent
 
@@ -46,12 +46,15 @@ class EventsListScreen(
     private val viewModel: EventsViewModel,
     private val mapChecker: IMapAvailabilityChecker,
     private val setEventFavorite: SetEventFavorite,
-) : TabScreen, KoinComponent {
-
+) : TabScreen,
+    KoinComponent {
     override val name = "Events"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
         val events by viewModel.events.collectAsState()
         val mapStates by mapChecker.mapStates.collectAsState()
 
@@ -78,7 +81,7 @@ class EventsListScreen(
         }
 
         // Use shared EventsListScreen for perfect UI parity
-        SharedEventsListScreen(
+        EventsListScreen(
             events = events,
             mapStates = mapStates,
             onEventClick = { eventId -> platformEnabler.openEventActivity(eventId) },

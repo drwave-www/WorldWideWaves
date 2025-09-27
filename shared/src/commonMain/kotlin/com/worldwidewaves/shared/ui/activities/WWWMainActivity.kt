@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.ui.activities
 
 /* * Copyright 2025 DrWave
  * 
@@ -43,14 +43,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.PlatformEnabler
+import com.worldwidewaves.shared.WWWGlobals
+import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.events.WWWEvents
-import com.worldwidewaves.shared.ui.AboutScreen
-import com.worldwidewaves.shared.ui.DebugScreen
+import com.worldwidewaves.shared.ui.AboutTabScreen
+import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.ui.EventsListScreen
 import com.worldwidewaves.shared.ui.TabManager
 import com.worldwidewaves.shared.ui.components.SimulationModeChip
 import com.worldwidewaves.shared.ui.components.SplashScreen
 import com.worldwidewaves.shared.ui.components.navigation.ConfigurableTabBarItem
+import com.worldwidewaves.shared.ui.screens.DebugScreen
 import com.worldwidewaves.shared.ui.theme.WorldWideWavesTheme
 import com.worldwidewaves.shared.utils.Log
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +71,7 @@ import kotlin.time.ExperimentalTime
 
 
 @OptIn(ExperimentalTime::class)
-open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean = true) : KoinComponent {
+open class WWWMainActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean = true) : KoinComponent {
 
     private val platform: WWWPlatform by inject()
     private val events: WWWEvents by inject()
@@ -75,8 +79,8 @@ open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val eventsListScreen: EventsListScreen by inject()
-    private val aboutScreen: AboutScreen by inject()
-    private val debugScreen: DebugScreen? by inject()
+    private val aboutTabScreen: AboutTabScreen by inject()
+    private val debugTabScreen: DebugTabScreen? by inject()
 
     /** Flag updated when `events.loadEvents()` finishes. */
     private var isDataLoaded: Boolean = false
@@ -99,7 +103,7 @@ open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean
         val screens =
             mutableListOf(
                 eventsListScreen,
-                aboutScreen,
+                aboutTabScreen,
             )
         // Debug screen removed from tab bar - will be accessed via floating icon
 
@@ -130,9 +134,9 @@ open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean
                     val ready by isSplashFinished.collectAsState()
                     if (ready) {
                         if (showDebugScreen) {
-                            debugScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
+                            debugTabScreen?.Screen(platformEnabler, Modifier.fillMaxSize()) ?: run {
                                 // Fallback debug screen if injection failed
-                                com.worldwidewaves.shared.ui.screens.SharedDebugScreen(
+                                DebugScreen(
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
@@ -154,10 +158,10 @@ open class WWWActivity(val platformEnabler: PlatformEnabler, showSplash: Boolean
                     // Debug logging to investigate visibility issue
                     Log.d(
                         "MainActivity",
-                        "Debug screen status: debugScreen=${debugScreen != null}, ready=$ready"
+                        "Debug screen status: debugScreen=${debugTabScreen != null}, ready=$ready"
                     )
                     // Show debug button in debug builds even if debugScreen is null
-                    if (ready && debugScreen != null) {
+                    if (ready && debugTabScreen != null) {
                         // Calculate position at 15% from bottom
                         val windowInfo = LocalWindowInfo.current
                         val density = LocalDensity.current

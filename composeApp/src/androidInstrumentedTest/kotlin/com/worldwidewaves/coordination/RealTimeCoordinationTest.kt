@@ -121,12 +121,14 @@ class RealTimeCoordinationTest : BaseIntegrationTest() {
 
             participants.forEach { timingCoordinator.registerForTimedEvent(it, targetTime) }
 
-            val testStart = kotlin.time.TimeSource.Monotonic.markNow()
+            val testStart =
+                kotlin.time.TimeSource.Monotonic
+                    .markNow()
             timingCoordinator.executeTimedCoordination(targetTime)
             val executionDuration = testStart.elapsedNow()
 
             // In a mock test, we just verify the method calls happened and execution was reasonably fast
-            val timingAccuracy = executionTime - startTime
+            val timingAccuracy = executionDuration.inWholeMilliseconds
             assertTrue("Coordination should execute quickly in mock environment", timingAccuracy <= tolerance)
 
             // Manually trigger notification to test the flow (since mocks don't automatically call methods)

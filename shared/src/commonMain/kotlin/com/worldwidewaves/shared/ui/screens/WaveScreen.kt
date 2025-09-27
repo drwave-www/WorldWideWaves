@@ -59,9 +59,8 @@ private const val MAP_HEIGHT_DP = 300
 @Composable
 fun WaveScreen(
     event: IWWWEvent,
-    eventMap: AbstractEventMap<*>,
+    eventMap: AbstractEventMap<*>?,
     modifier: Modifier = Modifier,
-    mapContent: @Composable (Modifier) -> Unit,
 ) {
     val clockComponent =
         object : KoinComponent {
@@ -102,10 +101,12 @@ fun WaveScreen(
         ) {
             UserWaveStatusText(event)
 
-            mapContent(
-                Modifier
-                    .fillMaxWidth()
-                    .height(calculatedHeight),
+            eventMap?.Screen(
+                autoMapDownload = true,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(calculatedHeight),
             )
 
             WaveProgressionBar(event)

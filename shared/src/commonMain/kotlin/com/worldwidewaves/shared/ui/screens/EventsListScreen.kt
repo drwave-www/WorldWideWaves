@@ -110,7 +110,7 @@ data class EventsFilterCallbacks(
 )
 
 @Composable
-fun SharedEventsListScreen(
+fun EventsListScreen(
     events: List<IWWWEvent>,
     mapStates: Map<String, Boolean> = emptyMap(),
     onEventClick: (String) -> Unit = {},

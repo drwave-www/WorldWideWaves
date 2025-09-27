@@ -13,18 +13,18 @@ package com.worldwidewaves.shared.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
-import com.worldwidewaves.shared.ui.screens.SharedDebugScreen
+import com.worldwidewaves.shared.ui.screens.DebugScreen
 
 /**
  * Android wrapper for SharedDebugScreen.
  * Delegates to shared implementation for perfect cross-platform parity.
  */
-class DebugScreen : TabScreen {
+class DebugTabScreen : TabScreen {
     override val name = "Debug"
 
     @Composable
     override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
-        SharedDebugScreen(
+        DebugScreen(
             modifier = modifier,
             onPerformanceClick = {
                 // Debug functionality handled by shared debug screen

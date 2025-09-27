@@ -27,9 +27,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.ui.screens.SharedEventsListScreen
-import com.worldwidewaves.shared.viewmodels.EventsViewModel
+import com.worldwidewaves.shared.ui.screens.EventsListScreen
 import com.worldwidewaves.shared.utils.Log
+import com.worldwidewaves.shared.viewmodels.EventsViewModel
 
 /**
  * iOS wrapper for SharedEventsListScreen.
@@ -42,11 +42,14 @@ class EventsListScreen(
     override val name = "Events"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
         val events by viewModel.events.collectAsState()
 
         // Use shared EventsListScreen for perfect UI parity
-        SharedEventsListScreen(
+        EventsListScreen(
             events = events,
             mapStates = emptyMap(), // iOS simplified implementation for now
             onEventClick = { eventId ->

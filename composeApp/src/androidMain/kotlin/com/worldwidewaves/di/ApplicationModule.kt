@@ -24,7 +24,7 @@ package com.worldwidewaves.di
 import com.worldwidewaves.BuildConfig
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.domain.usecases.IMapAvailabilityChecker
-import com.worldwidewaves.shared.ui.DebugScreen
+import com.worldwidewaves.shared.ui.DebugTabScreen
 import com.worldwidewaves.shared.utils.CloseableCoroutineScope
 import com.worldwidewaves.shared.utils.Log
 import com.worldwidewaves.shared.viewmodels.EventsViewModel
@@ -70,11 +70,11 @@ val applicationModule =
         factory { AndroidWWWLocationProvider() }
 
         // Debug screen - only in debug builds
-        single<DebugScreen?> {
+        single<DebugTabScreen?> {
             val isDebug = BuildConfig.DEBUG
             Log.d("ApplicationModule", "Debug screen injection: BuildConfig.DEBUG=$isDebug")
             if (isDebug) {
-                DebugScreen()
+                DebugTabScreen()
             } else {
                 null
             }

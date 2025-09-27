@@ -1,4 +1,4 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.ui.activities
 
 /* * Copyright 2025 DrWave
  * 
@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.ui.components.AlertMapNotDownloadedOnSimulationLaunch
 import com.worldwidewaves.shared.ui.components.StandardEventLayout
@@ -44,7 +45,7 @@ class WWWEventActivity(
     platformEnabler : PlatformEnabler,
     val mapViewModel: MapViewModel,
     showSplash: Boolean = false
-) : WWWEventWaveActivity(eventId, platformEnabler, showSplash) {
+) : WWWAbstractEventWaveActivity(eventId, platformEnabler, showSplash) {
 
         @Composable
         override fun Event(
@@ -76,7 +77,10 @@ class WWWEventActivity(
                 modifier = modifier,
                 mapHeight = calculatedHeight,
                 mapArea = {
-                    eventMap?.Screen(modifier = Modifier.fillMaxWidth().height(calculatedHeight))
+                    eventMap?.Screen(
+                        autoMapDownload = false,
+                        modifier = Modifier.fillMaxWidth().height(calculatedHeight)
+                    )
                 },
             )
 

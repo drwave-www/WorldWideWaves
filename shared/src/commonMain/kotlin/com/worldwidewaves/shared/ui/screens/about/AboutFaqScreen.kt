@@ -87,7 +87,7 @@ import kotlin.math.roundToInt
  * Works identically on both Android and iOS platforms.
  */
 @Composable
-fun SharedAboutFaqScreen(
+fun AboutFaqScreen(
     platform: WWWPlatform,
     modifier: Modifier = Modifier,
     onUrlOpen: (String) -> Unit = { url ->

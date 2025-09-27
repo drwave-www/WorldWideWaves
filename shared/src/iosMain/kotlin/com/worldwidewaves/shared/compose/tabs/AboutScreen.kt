@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWPlatform
 import com.worldwidewaves.shared.ui.TabScreen
-import com.worldwidewaves.shared.ui.screens.SharedAboutScreen
+import com.worldwidewaves.shared.ui.screens.AboutScreen
 import com.worldwidewaves.shared.utils.Log
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
@@ -30,8 +30,11 @@ class AboutScreen(
     override val name = "Info"
 
     @Composable
-    override fun Screen(platformEnabler: PlatformEnabler, modifier: Modifier) {
-        SharedAboutScreen(
+    override fun Screen(
+        platformEnabler: PlatformEnabler,
+        modifier: Modifier,
+    ) {
+        AboutScreen(
             platform = platform,
             modifier = modifier,
             onUrlOpen = { url ->

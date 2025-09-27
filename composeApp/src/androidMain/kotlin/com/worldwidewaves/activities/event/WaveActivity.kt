@@ -22,48 +22,59 @@
 
 package com.worldwidewaves.activities.event
 
+import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import com.google.android.play.core.splitcompat.SplitCompat
 import com.worldwidewaves.compose.map.AndroidEventMap
-import com.worldwidewaves.shared.events.IWWWEvent
-import com.worldwidewaves.shared.ui.screens.WaveScreen
+import com.worldwidewaves.shared.ui.activities.WWWWaveActivity
+import com.worldwidewaves.utils.AndroidPlatformEnabler
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
-class WaveActivity : AbstractEventWaveActivity() {
-    @Composable
-    override fun Screen(
-        modifier: Modifier,
-        event: IWWWEvent,
-    ) {
-        val context = LocalContext.current
+class WaveActivity : AppCompatActivity() {
+    private var waveActivity: WWWWaveActivity? = null
 
-        // Construct the event Map
-        val eventMap =
-            remember(event.id) {
-                AndroidEventMap(
-                    event,
-                    context = this@WaveActivity as AppCompatActivity
-                )
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val eventId = intent.getStringExtra("eventId")
+
+        // Ensure dynamic-feature splits are available immediately
+        SplitCompat.install(this)
+
+        if (eventId != null) {
+            val platformEnabler = AndroidPlatformEnabler(this)
+            waveActivity = WWWWaveActivity(eventId, platformEnabler)
+            waveActivity?.onEventLoaded { event ->
+                // Construct the event map
+                val eventMap = AndroidEventMap(event, context = this as AppCompatActivity)
+                setContent {
+                    waveActivity!!.Draw(event, eventMap = eventMap, onFinish = { finish() })
+                }
             }
+        }
+    }
 
-        // Start event/map coordination
-        ObserveEventMapProgression(event, eventMap)
+    override fun onDestroy() {
+        waveActivity?.onDestroy()
+        super.onDestroy()
+    }
 
-        // Use the complete shared wave screen with exact working behavior
-        WaveScreen(
-            event = event,
-            eventMap = eventMap,
-            modifier = modifier,
-            mapContent = { mapModifier ->
-                eventMap.Screen(
-                    autoMapDownload = true,
-                    modifier = mapModifier,
-                )
-            },
-        )
+    override fun onResume() {
+        super.onResume()
+        waveActivity?.onResume()
+    }
+
+    override fun onPause() {
+        waveActivity?.onPause()
+        super.onPause()
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (waveActivity?.handleBackPress() != true) {
+            super.onBackPressed()
+        }
     }
 }

@@ -1,24 +1,23 @@
-package com.worldwidewaves.shared
+package com.worldwidewaves.shared.ui.activities
 
 /* * Copyright 2025 DrWave
- * 
+ *
  * WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves through cities and
  * countries. The project aims to transcend physical and cultural
  * boundaries, fostering unity, community, and shared human experience by leveraging real-time
  * coordination and location-based services.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License. */
-
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -42,6 +41,8 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.worldwidewaves.shared.MokoRes
+import com.worldwidewaves.shared.PlatformEnabler
 import com.worldwidewaves.shared.WWWGlobals.BackNav
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.events.WWWEvents
@@ -58,18 +59,16 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
 
-
 @OptIn(ExperimentalTime::class)
-abstract class WWWEventBackActivity(
+abstract class WWWAbstractEventBackActivity(
     val eventId: String,
     platformEnabler: PlatformEnabler,
-    showSplash: Boolean = false
-) : WWWActivity(platformEnabler, showSplash) {
-
+    showSplash: Boolean = false,
+) : WWWMainActivity(platformEnabler, showSplash) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
-    private var onFinish: (() -> Unit)? = null
+    private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()
 
     init {
@@ -99,6 +98,18 @@ abstract class WWWEventBackActivity(
             handler(selectedEvent!!)
         } else {
             waitingHandlers.add(handler)
+        }
+    }
+
+    /**
+     * Handle back button press - should be called from Android activity's onBackPressed()
+     */
+    fun handleBackPress(): Boolean {
+        return if (onFinish != null) {
+            onFinish?.invoke()
+            true // Back press was handled
+        } else {
+            false // Back press was not handled
         }
     }
 
@@ -187,7 +198,6 @@ abstract class WWWEventBackActivity(
     @Composable
     protected abstract fun Event(
         event: IWWWEvent,
-        modifier: Modifier
+        modifier: Modifier,
     )
-
 }
