@@ -142,17 +142,25 @@ class DefaultCoroutineScopeProvider(
     private val supervisorJob = SupervisorJob()
     private val exceptionHandler =
         CoroutineExceptionHandler { _, exception ->
-            Napier.e("CoroutineExceptionHandler got $exception")
+            Napier.e("CoroutineExceptionHandler caught unhandled exception: $exception", exception)
+            // Log additional context for debugging
+            Napier.e("Exception type: ${exception::class.simpleName}")
+            Napier.e("Exception message: ${exception.message}")
+            // Don't rethrow - this prevents the app crash
         }
+
+    // Create scopes with exception handler included
+    private val ioScope = CoroutineScope(supervisorJob + ioDispatcher + exceptionHandler)
+    private val defaultScope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
     private val scope = CoroutineScope(supervisorJob + defaultDispatcher + exceptionHandler)
 
-    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(ioDispatcher, block = block)
+    override fun launchIO(block: suspend CoroutineScope.() -> Unit): Job = ioScope.launch(block = block)
 
-    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = scope.launch(defaultDispatcher, block = block)
+    override fun launchDefault(block: suspend CoroutineScope.() -> Unit): Job = defaultScope.launch(block = block)
 
-    override fun scopeIO(): CoroutineScope = scope + ioDispatcher
+    override fun scopeIO(): CoroutineScope = ioScope
 
-    override fun scopeDefault(): CoroutineScope = scope + defaultDispatcher
+    override fun scopeDefault(): CoroutineScope = defaultScope
 
     override suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T): T = withContext(ioDispatcher) { block() }
 

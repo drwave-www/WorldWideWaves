@@ -255,7 +255,9 @@ class WWWEventObserver(
     private var lastEmittedPositionRatio: Double = -1.0
     private var lastEmittedTimeBeforeHit: Duration = INFINITE
 
+    @Volatile
     private var unifiedObservationJob: Job? = null
+    private val observationLock = Any()
 
     // ---------------------------
 
@@ -272,86 +274,90 @@ class WWWEventObserver(
      * 3. Provides better error handling and logging
      */
     fun startObservation() {
-        if (unifiedObservationJob == null) {
-            coroutineScopeProvider.launchDefault {
-                Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
+        synchronized(observationLock) {
+            if (unifiedObservationJob?.isActive == true) {
+                Log.v("WWWEventObserver", "Observation already active for event ${event.id}, skipping duplicate")
+                return
+            }
 
-                try {
-                    // Initialize state with current values
-                    val currentStatus = event.getStatus()
-                    val currentProgression =
-                        try {
-                            waveProgressionTracker.calculateProgression(event)
-                        } catch (e: Throwable) {
-                            Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
-                            0.0
-                        }
+            Log.v("WWWEventObserver", "Starting unified observation for event ${event.id}")
 
-                    Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
-
-                    // Always initialize ALL state values
-                    updateStates(currentProgression, currentStatus)
-
-                    // Start unified observation that combines all trigger sources
-                    val mainObservationJob =
-                        createUnifiedObservationFlow()
-                            .flowOn(Dispatchers.Default)
-                            .catch { e ->
-                                Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
-                            }.onEach { observation ->
-                                updateStates(observation.progression, observation.status)
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Use the dedicated position observer to handle position changes and area detection
-                    val positionObserverJob =
-                        positionObserver
-                            .observePositionForEvent(event)
-                            .onEach { observation ->
-                                _userIsInArea.updateIfChanged(observation.isInArea)
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Add immediate position change observer for backward compatibility and immediate response
-                    val directPositionObserverJob =
-                        positionManager.position
-                            .onEach { _ ->
-                                Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
-                                updateAreaDetection()
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Add polygon loading observer to trigger area detection when polygon data becomes available
-                    val polygonLoadingJob =
-                        event.area.polygonsLoaded
-                            .onEach { isLoaded ->
-                                if (isLoaded) {
-                                    Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
-                                    updateAreaDetection()
-                                }
-                            }.launchIn(coroutineScopeProvider.scopeDefault())
-
-                    // Create a parent job that manages all child jobs
-                    unifiedObservationJob =
-                        coroutineScopeProvider.launchDefault {
-                            try {
-                                // Wait for the main observation job to complete
-                                mainObservationJob.join()
-                            } finally {
-                                // Cancel all observer jobs when done
-                                positionObserverJob.cancel()
-                                directPositionObserverJob.cancel()
-                                polygonLoadingJob.cancel()
-                            }
-                        }
-                } catch (e: Exception) {
-                    // This is expected when feature map hasn't been downloaded yet - downgrade to info
-                    if (e.message?.contains("Flow context cannot contain job") == true) {
-                        Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
-                    } else {
-                        Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
+            try {
+                // Initialize state with current values
+                val currentStatus = event.getStatus()
+                val currentProgression =
+                    try {
+                        waveProgressionTracker.calculateProgression(event)
+                    } catch (e: Throwable) {
+                        Log.e("WWWEventObserver", "Error getting wave progression for event ${event.id}: $e")
+                        0.0
                     }
+
+                Log.v("WWWEventObserver", "Initial state: status=$currentStatus, progression=$currentProgression")
+
+                // Always initialize ALL state values
+                updateStates(currentProgression, currentStatus)
+
+                // Start unified observation that combines all trigger sources
+                val mainObservationJob =
+                    createUnifiedObservationFlow()
+                        .flowOn(Dispatchers.Default)
+                        .catch { e ->
+                            Log.e("WWWEventObserver", "Error in unified observation flow for event ${event.id}: $e")
+                        }.onEach { observation ->
+                            updateStates(observation.progression, observation.status)
+                        }.launchIn(coroutineScopeProvider.scopeDefault())
+
+                // Use the dedicated position observer to handle position changes and area detection
+                val positionObserverJob =
+                    positionObserver
+                        .observePositionForEvent(event)
+                        .onEach { observation ->
+                            _userIsInArea.updateIfChanged(observation.isInArea)
+                        }.launchIn(coroutineScopeProvider.scopeDefault())
+
+                // Add immediate position change observer for backward compatibility and immediate response
+                val directPositionObserverJob =
+                    positionManager.position
+                        .onEach { _ ->
+                            Log.v("WWWEventObserver", "Direct position changed, updating area detection for event ${event.id}")
+                            updateAreaDetection()
+                        }.launchIn(coroutineScopeProvider.scopeDefault())
+
+                // Add polygon loading observer to trigger area detection when polygon data becomes available
+                val polygonLoadingJob =
+                    event.area.polygonsLoaded
+                        .onEach { isLoaded ->
+                            if (isLoaded) {
+                                Log.v("WWWEventObserver", "Polygons loaded, updating area detection for event ${event.id}")
+                                updateAreaDetection()
+                            }
+                        }.launchIn(coroutineScopeProvider.scopeDefault())
+
+                // Create a parent job that manages all child jobs
+                val parentJob =
+                    coroutineScopeProvider.launchDefault {
+                        try {
+                            // Wait for the main observation job to complete
+                            mainObservationJob.join()
+                        } finally {
+                            // Cancel all observer jobs when done
+                            positionObserverJob.cancel()
+                            directPositionObserverJob.cancel()
+                            polygonLoadingJob.cancel()
+                        }
+                    }
+
+                // Store reference to parent job for cancellation
+                unifiedObservationJob = parentJob
+            } catch (e: Exception) {
+                // This is expected when feature map hasn't been downloaded yet - downgrade to info
+                if (e.message?.contains("Flow context cannot contain job") == true) {
+                    Log.i("WWWEventObserver", "Feature map not yet downloaded for event ${event.id}")
+                } else {
+                    Log.e("WWWEventObserver", "Failed to start observation for event ${event.id}", throwable = e)
                 }
             }
-        } else {
-            Log.v("WWWEventObserver", "Unified observation already running for event ${event.id}")
         }
     }
 
@@ -441,11 +447,9 @@ class WWWEventObserver(
 
                 // Then collect simulation changes
                 platform.simulationChanged.collect { _ ->
-                    Log.v("WWWEventObserver", "Simulation change detected for event ${event.id}")
                     send(Unit)
                 }
             } catch (e: CancellationException) {
-                Log.v("WWWEventObserver", "Simulation observation cancelled for event ${event.id}")
                 throw e
             } catch (e: Exception) {
                 Log.e("WWWEventObserver", "Error in simulation observation for event ${event.id}: $e")

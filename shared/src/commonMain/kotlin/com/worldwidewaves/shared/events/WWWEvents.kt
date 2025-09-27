@@ -219,7 +219,6 @@ class WWWEvents : KoinComponent {
         coroutineScopeProvider.launchDefault {
             list().forEach { event ->
                 try {
-                    Log.d("WWWEvents", "Simulation change - Restarting observer for event ${event.id}")
                     event.observer.stopObservation()
                     event.observer.startObservation()
                 } catch (e: Exception) {
