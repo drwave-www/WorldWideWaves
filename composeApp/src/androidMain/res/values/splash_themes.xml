@@ -16,7 +16,7 @@
         <!-- Use the logo as the splash screen icon -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/www_simple_logo_transparent</item>
 
-        <!-- Configure animation duration (increased from 50ms to 1000ms for proper visibility) -->
+        <!-- Configure animation duration (increased for proper visibility across devices) -->
         <item name="windowSplashScreenAnimationDuration">1000</item>
 
         <!-- Set the theme used after splash screen appears -->
