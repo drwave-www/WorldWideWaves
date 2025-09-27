@@ -65,6 +65,11 @@ abstract class WWWAbstractEventBackActivity(
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
 ) : WWWMainActivity(platformEnabler, showSplash) {
+    /**
+     * Controls whether the event screen should be scrollable.
+     * Set to false for full-screen content like maps that shouldn't scroll.
+     */
+    protected open val isScrollable: Boolean = true
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val wwwEvents: WWWEvents by inject()
     private var selectedEvent by mutableStateOf<IWWWEvent?>(null)
@@ -180,8 +185,13 @@ abstract class WWWAbstractEventBackActivity(
 
             // Default page to manage initializations, download process and errors
             if (selectedEvent != null) { // Event has been loaded
-                // Content Event screen
-                val screenModifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+                // Content Event screen - conditionally apply scrolling
+                val screenModifier =
+                    if (isScrollable) {
+                        Modifier.fillMaxSize().verticalScroll(scrollState)
+                    } else {
+                        Modifier.fillMaxSize()
+                    }
                 Box(modifier = screenModifier) {
                     Event(selectedEvent!!, modifier = Modifier.fillMaxSize())
                 }

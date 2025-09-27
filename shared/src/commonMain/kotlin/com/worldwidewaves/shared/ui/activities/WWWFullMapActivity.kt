@@ -32,6 +32,9 @@ class WWWFullMapActivity(
     platformEnabler: PlatformEnabler,
     showSplash: Boolean = false,
 ) : WWWAbstractEventWaveActivity(eventId, platformEnabler, showSplash) {
+    // Disable scrolling for full map screen to allow map to take full height
+    override val isScrollable: Boolean = false
+
     @Composable
     override fun Event(
         event: IWWWEvent,
