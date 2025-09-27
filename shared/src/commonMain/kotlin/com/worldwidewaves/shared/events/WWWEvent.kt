@@ -118,22 +118,9 @@ data class WWWEvent(
 
     // ---------------------------
 
-    @Transient
-    @Volatile
-    private var cachedObserver: WWWEventObserver? = null
+    @Transient var cachedObserver: WWWEventObserver? = null
 
-    private val observerLock = Any()
-
-    override fun getEventObserver(): WWWEventObserver {
-        cachedObserver?.let { return it }
-
-        synchronized(observerLock) {
-            return cachedObserver ?: WWWEventObserver(this).also {
-                cachedObserver = it
-                Log.d("WWWEvent", "Created new observer for event $id")
-            }
-        }
-    }
+    override fun getEventObserver(): WWWEventObserver = cachedObserver ?: WWWEventObserver(this).also { cachedObserver = it }
 
     // ---------------------------
 

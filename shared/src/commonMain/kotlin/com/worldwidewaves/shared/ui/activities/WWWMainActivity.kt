@@ -125,7 +125,7 @@ open class WWWMainActivity(
 
         WorldWideWavesTheme {
             Surface(
-                modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                modifier = Modifier.background(MaterialTheme.colorScheme.background).fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
             ) {
                 // Box to stack main content and simulation-mode overlay
