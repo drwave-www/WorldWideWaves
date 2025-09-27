@@ -197,12 +197,11 @@ open class WWWMainActivity(
      */
     private fun startGlobalSoundChoreographyForAllEvents() {
         try {
-            Log.d("WWWMainActivity", "TEMPORARILY DISABLED: Starting global sound choreography for all events")
-            // TEMPORARILY DISABLED to test if this causes the crashes
-            // globalSoundChoreography.startObservingAllEvents()
-            Log.d("WWWMainActivity", "Sound choreography disabled for crash testing")
+            Log.d("WWWMainActivity", "Starting global sound choreography for all events")
+            globalSoundChoreography.startObservingAllEvents()
+            Log.d("WWWMainActivity", "Global sound choreography started successfully")
         } catch (e: Exception) {
-            Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}")
+            Log.e("WWWMainActivity", "Error starting global sound choreography: ${e.message}", e)
             // Don't crash the app if sound choreography fails
         }
     }
