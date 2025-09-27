@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,8 +44,6 @@ import com.worldwidewaves.shared.map.MapFeatureState
 import com.worldwidewaves.shared.ui.theme.onPrimaryLight
 import com.worldwidewaves.shared.utils.Log
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
@@ -71,8 +68,8 @@ fun BoxScope.SimulationButton(
             val platform: WWWPlatform by inject()
         }
     val platform = platformComponent.platform
-    val scope = rememberCoroutineScope()
     var simulationButtonState by remember { mutableStateOf("idle") }
+    var pendingAction by remember { mutableStateOf<(suspend () -> Unit)?>(null) }
     val isSimulationEnabled by platform.simulationModeEnabled.collectAsState()
 
     // Check if map is available for simulation
@@ -93,18 +90,19 @@ fun BoxScope.SimulationButton(
                 .clip(CircleShape)
                 .background(onPrimaryLight)
                 .clickable(enabled = simulationButtonState != "loading") {
-                    handleSimulationClick(
-                        simulationButtonState = simulationButtonState,
-                        isMapAvailableForSimulation = isMapAvailableForSimulation,
-                        onMapNotAvailable = onMapNotAvailable,
-                        onStateChange = { simulationButtonState = it },
-                        scope = scope,
-                        event = event,
-                        platform = platform,
-                        onSimulationStarted = onSimulationStarted,
-                        onSimulationStopped = onSimulationStopped,
-                        onError = onError,
-                    )
+                    val action =
+                        handleSimulationClick(
+                            simulationButtonState = simulationButtonState,
+                            isMapAvailableForSimulation = isMapAvailableForSimulation,
+                            onMapNotAvailable = onMapNotAvailable,
+                            onStateChange = { simulationButtonState = it },
+                            event = event,
+                            platform = platform,
+                            onSimulationStarted = onSimulationStarted,
+                            onSimulationStopped = onSimulationStopped,
+                            onError = onError,
+                        )
+                    pendingAction = action
                 },
         contentAlignment = Alignment.Center,
     ) {
@@ -135,6 +133,14 @@ fun BoxScope.SimulationButton(
         }
     }
 
+    // Execute pending actions
+    LaunchedEffect(pendingAction) {
+        pendingAction?.let { action ->
+            action()
+            pendingAction = null
+        }
+    }
+
     // Reset button state when simulation is disabled externally
     LaunchedEffect(isSimulationEnabled) {
         if (!isSimulationEnabled && simulationButtonState == "active") {
@@ -145,39 +151,40 @@ fun BoxScope.SimulationButton(
 
 /**
  * Handles the simulation button click logic with proper error handling.
+ * Returns functions that should be called within LaunchedEffect to manage coroutine lifecycle properly.
  */
 private fun handleSimulationClick(
     simulationButtonState: String,
     isMapAvailableForSimulation: Boolean,
     onMapNotAvailable: () -> Unit,
     onStateChange: (String) -> Unit,
-    scope: CoroutineScope,
     event: IWWWEvent,
     platform: WWWPlatform,
     onSimulationStarted: (String) -> Unit,
     onSimulationStopped: (String) -> Unit,
     onError: (String, String) -> Unit,
-) {
+): (suspend () -> Unit)? =
     when (simulationButtonState) {
         "idle" -> {
             if (!isMapAvailableForSimulation) {
                 onMapNotAvailable()
-                return
-            }
-            onStateChange("loading")
-            scope.launch {
-                try {
-                    startSimulation(event, platform, onSimulationStarted, onStateChange, onError)
-                } catch (e: Exception) {
-                    onStateChange("idle")
-                    onError("Simulation Error", e.message ?: "Unknown error")
-                    Log.e("SimulationButton", "Simulation start failed", e)
+                null
+            } else {
+                onStateChange("loading")
+                suspend {
+                    try {
+                        startSimulation(event, platform, onSimulationStarted, onStateChange, onError)
+                    } catch (e: Exception) {
+                        onStateChange("idle")
+                        onError("Simulation Error", e.message ?: "Unknown error")
+                        Log.e("SimulationButton", "Simulation start failed", e)
+                    }
                 }
             }
         }
         "active" -> {
             onStateChange("idle")
-            scope.launch {
+            suspend {
                 try {
                     stopSimulation(event, platform, onSimulationStopped)
                 } catch (e: Exception) {
@@ -186,8 +193,8 @@ private fun handleSimulationClick(
                 }
             }
         }
+        else -> null
     }
-}
 
 /**
  * Starts simulation with random position and timing.

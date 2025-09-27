@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,7 +47,6 @@ import com.worldwidewaves.shared.generated.resources.target_me_inactive
 import com.worldwidewaves.shared.generated.resources.target_wave_active
 import com.worldwidewaves.shared.generated.resources.target_wave_inactive
 import dev.icerock.moko.resources.compose.stringResource
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -67,7 +65,6 @@ fun MapActions(
     onTargetWave: () -> Unit = {},
     onTargetUser: () -> Unit = {},
 ) {
-    val scope = rememberCoroutineScope()
     val eventStatus by event.observer.eventStatus.collectAsState(Status.UNDEFINED)
     val isInArea by event.observer.userIsInArea.collectAsState()
 
@@ -96,9 +93,7 @@ fun MapActions(
                         .size(Event.TARGET_WAVE_IMAGE_SIZE.dp)
                         .clickable {
                             if (isRunning && (clock.now() > event.getWaveStartDateTime())) {
-                                scope.launch {
-                                    onTargetWave()
-                                }
+                                onTargetWave()
                             }
                         },
                 painter = painterResource(if (isRunning) Res.drawable.target_wave_active else Res.drawable.target_wave_inactive),
@@ -113,9 +108,7 @@ fun MapActions(
                         .size(Event.TARGET_ME_IMAGE_SIZE.dp)
                         .clickable {
                             if (isInArea) {
-                                scope.launch {
-                                    onTargetUser()
-                                }
+                                onTargetUser()
                             }
                         },
                 painter = painterResource(if (isInArea) Res.drawable.target_me_active else Res.drawable.target_me_inactive),
