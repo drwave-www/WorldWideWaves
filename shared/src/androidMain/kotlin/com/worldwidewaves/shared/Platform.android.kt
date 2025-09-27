@@ -250,8 +250,15 @@ actual fun cachedFileExists(fileName: String): Boolean {
     val isDevelopmentMode = Build.HARDWARE == "ranchu" || Build.HARDWARE == "goldfish"
 
     return if (isDevelopmentMode) {
-        Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
-        false
+        // Allow caching for generated style files to prevent performance issues
+        if (fileName.startsWith("style-") && fileName.endsWith(".json")) {
+            val fileExists = File(context.cacheDir, fileName).exists()
+            Log.i(::cachedFileExists.name, "Development mode (allowing style cache): $fileName -> $fileExists")
+            fileExists
+        } else {
+            Log.i(::cachedFileExists.name, "Development mode (not cached): $fileName")
+            false
+        }
     } else {
         File(context.cacheDir, fileName).exists()
     }

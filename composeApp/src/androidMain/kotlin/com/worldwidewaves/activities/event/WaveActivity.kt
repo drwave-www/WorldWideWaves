@@ -70,11 +70,4 @@ class WaveActivity : AppCompatActivity() {
         waveActivity?.onPause()
         super.onPause()
     }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (waveActivity?.handleBackPress() != true) {
-            super.onBackPressed()
-        }
-    }
 }

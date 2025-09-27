@@ -13,6 +13,6 @@ package com.worldwidewaves.shared.ui.theme
 import androidx.compose.ui.text.font.FontFamily
 
 // iOS font fallbacks - using system fonts that are available on iOS
-actual val SharedBodyFontFamily: FontFamily = FontFamily.Default
-actual val SharedDisplayFontFamily: FontFamily = FontFamily.Default
-actual val SharedExtraFontFamily: FontFamily = FontFamily.Default
+actual val WWWBodyFontFamily: FontFamily = FontFamily.Default
+actual val WWWDisplayFontFamily: FontFamily = FontFamily.Default
+actual val WWWExtraFontFamily: FontFamily = FontFamily.Default

@@ -24,13 +24,13 @@ import com.worldwidewaves.shared.WWWGlobals.Dimensions
  * Extended color scheme for perfect Android parity
  */
 @Immutable
-data class SharedExtendedColorScheme(
-    val quaternary: SharedColorFamily,
-    val quinary: SharedColorFamily,
+data class WWWExtendedColorScheme(
+    val quaternary: WWWColorFamily,
+    val quinary: WWWColorFamily,
 )
 
 @Immutable
-data class SharedColorFamily(
+data class WWWColorFamily(
     val color: Color,
     val onColor: Color,
     val colorContainer: Color,
@@ -41,16 +41,16 @@ data class SharedColorFamily(
  * Shared extended theme - IDENTICAL to Android extendedLight
  */
 val sharedExtendedLight =
-    SharedExtendedColorScheme(
+    WWWExtendedColorScheme(
         quaternary =
-            SharedColorFamily(
+            WWWColorFamily(
                 quaternaryLight,
                 onQuaternaryLight,
                 quaternaryContainerLight,
                 onQuaternaryContainerLight,
             ),
         quinary =
-            SharedColorFamily(
+            WWWColorFamily(
                 quinaryLight,
                 onQuinaryLight,
                 quinaryContainerLight,
@@ -63,7 +63,7 @@ val sharedExtendedLight =
 fun sharedDefaultTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle = TextStyle(fontSize = fontSize.sp)
 
 fun sharedCommonTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedBodyFontFamily)
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = WWWBodyFontFamily)
 
 fun sharedCommonJustifiedTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedCommonTextStyle(fontSize).copy(textAlign = TextAlign.Justify)
@@ -72,7 +72,7 @@ fun sharedCommonBoldStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyl
     sharedCommonTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
 
 fun sharedPrimaryColoredTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedCommonTextStyle(fontSize).copy(color = SharedLightColorScheme.primary)
+    sharedCommonTextStyle(fontSize).copy(color = WWWLightColorScheme.primary)
 
 fun sharedPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedPrimaryColoredTextStyle(fontSize).copy(fontWeight = FontWeight.Bold)
@@ -90,7 +90,7 @@ fun sharedExtraBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextS
     sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.ExtraBold)
 
 fun sharedExtraTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
-    sharedDefaultTextStyle(fontSize).copy(fontFamily = SharedExtraFontFamily)
+    sharedDefaultTextStyle(fontSize).copy(fontFamily = WWWExtraFontFamily)
 
 fun sharedExtraLightTextStyle(fontSize: Int = Dimensions.FONTSIZE_DEFAULT): TextStyle =
     sharedExtraTextStyle(fontSize).copy(fontWeight = FontWeight.Light)
@@ -104,8 +104,8 @@ fun sharedExtraPrimaryColoredBoldTextStyle(fontSize: Int = Dimensions.FONTSIZE_D
 @Composable
 fun SharedWorldWideWavesThemeWithExtended(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = SharedLightColorScheme,
-        typography = SharedTypography,
+        colorScheme = WWWLightColorScheme,
+        typography = WWWTypography,
         content = content,
     )
 }

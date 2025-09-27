@@ -409,7 +409,7 @@ abstract class AbstractEventMap<T>(
     )
 
     @Composable
-    abstract fun Screen(
+    abstract fun Draw(
         autoMapDownload: Boolean,
         modifier: Modifier,
     )

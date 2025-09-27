@@ -72,11 +72,4 @@ class EventActivity : AppCompatActivity() {
         eventActivity?.onPause()
         super.onPause()
     }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (eventActivity?.handleBackPress() != true) {
-            super.onBackPressed()
-        }
-    }
 }

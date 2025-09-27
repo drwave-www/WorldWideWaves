@@ -73,7 +73,7 @@ class WWWEventActivity(
             modifier = modifier,
             mapHeight = calculatedHeight,
             mapArea = {
-                eventMap?.Screen(
+                eventMap?.Draw(
                     autoMapDownload = false,
                     modifier = Modifier.fillMaxWidth().height(calculatedHeight),
                 )

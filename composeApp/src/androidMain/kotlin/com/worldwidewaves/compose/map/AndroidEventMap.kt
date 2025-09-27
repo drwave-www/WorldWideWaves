@@ -172,7 +172,7 @@ class AndroidEventMap(
      * The Compose UI for the map
      */
     @Composable
-    override fun Screen(
+    override fun Draw(
         autoMapDownload: Boolean,
         modifier: Modifier,
     ) {
@@ -505,22 +505,31 @@ class AndroidEventMap(
         scope.launch {
             withContext(Dispatchers.IO) {
                 // IO actions
+                Log.e(TAG, "🔥 STARTING STYLE RESOLUTION RETRY LOOP for event: ${event.id}")
                 var stylePath: String? = null
                 var attempts = 0
+                var styleResolved = false
+
                 repeat(MAX_STYLE_RESOLUTION_ATTEMPTS) { attempt ->
+                    if (styleResolved) return@repeat // Skip if already resolved
+
                     attempts = attempt + 1
                     val candidate = event.map.getStyleUri()
-                    if (candidate != null && File(candidate).exists()) {
+                    val fileExists = candidate?.let { File(it).exists() } ?: false
+
+                    Log.d(TAG, "Style resolution attempt $attempts: candidate='$candidate', exists=$fileExists")
+
+                    if (candidate != null && fileExists) {
                         Log.i(TAG, "Style URI resolved: $candidate")
                         stylePath = candidate
+                        styleResolved = true // Set flag to stop processing
                         return@repeat
                     }
 
-                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) { // Log warning only on last attempts
+                    if (attempt == MAX_STYLE_RESOLUTION_ATTEMPTS - 1) {
                         Log.w(TAG, "Style URI resolution attempts: $attempts, retrying...")
                     }
 
-                    // Give Play-Core/asset manager time to expose freshly installed split assets
                     delay(STYLE_RESOLUTION_DELAY_MS)
                 }
 

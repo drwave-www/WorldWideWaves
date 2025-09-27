@@ -80,11 +80,4 @@ class EventFullMapActivity : AppCompatActivity() {
         fullMapActivity?.onPause()
         super.onPause()
     }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (fullMapActivity?.handleBackPress() != true) {
-            super.onBackPressed()
-        }
-    }
 }

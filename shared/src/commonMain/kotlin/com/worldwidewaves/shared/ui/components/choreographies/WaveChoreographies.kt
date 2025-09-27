@@ -56,7 +56,6 @@ import kotlin.math.max
 import kotlin.time.ExperimentalTime
 
 /**
- * EXACT historical choreography implementation moved to shared.
  * High-level choreography container displayed on the **Wave** screen.
  *
  * Behaviour:

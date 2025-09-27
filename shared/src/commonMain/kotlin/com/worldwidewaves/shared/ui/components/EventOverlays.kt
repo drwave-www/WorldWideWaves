@@ -131,7 +131,7 @@ fun EventOverlayDone(
 }
 
 /**
- * Event overlay date component - EXACT copy of historical implementation.
+ * Event overlay date component
  * Positions date in center normally, at bottom when event is done.
  */
 @Composable
@@ -147,7 +147,6 @@ fun EventOverlayDate(
                 .let { if (eventStatus == Status.DONE) it.padding(bottom = Dimensions.DEFAULT_EXT_PADDING.dp) else it },
         contentAlignment = if (eventStatus == Status.DONE) Alignment.BottomCenter else Alignment.Center,
     ) {
-        // EXACT historical implementation using shared theme functions
         val textStyle = sharedExtraBoldTextStyle(Event.DATE_FONTSIZE)
         Text(
             text = eventDate,

@@ -11,9 +11,7 @@ package com.worldwidewaves.shared.ui.screens
  */
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,9 +53,9 @@ fun FullMapScreen(
 
     // Screen composition
     Box(modifier = modifier.fillMaxSize()) {
-        eventMap?.Screen(
+        eventMap?.Draw(
             autoMapDownload = true,
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            modifier = Modifier.fillMaxSize(),
         )
 
         ButtonWave(

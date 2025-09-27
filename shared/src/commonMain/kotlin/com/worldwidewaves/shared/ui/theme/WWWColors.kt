@@ -30,7 +30,7 @@ val onQuaternaryLight = Color(0xFFBDBDBD)
 val quinaryLight = Color.White // White
 val onQuinaryLight = Color(0xFF5DB075)
 
-// Background colors - EXACT historical match (dark blue)
+// Background colors
 val backgroundLight = Color(0xFF011026) // Dark blue background
 val onBackgroundLight = Color.White
 val surfaceLight = Color(0xFF011026) // Dark blue surface
@@ -76,7 +76,7 @@ val onQuinaryContainerLight = Color(0xFF3A0905)
 /**
  * Shared ColorScheme - identical on both Android and iOS
  */
-val SharedLightColorScheme =
+val WWWLightColorScheme =
     lightColorScheme(
         primary = primaryLight,
         onPrimary = onPrimaryLight,

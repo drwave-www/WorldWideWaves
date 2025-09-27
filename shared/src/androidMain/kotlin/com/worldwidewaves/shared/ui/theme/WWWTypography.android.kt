@@ -22,7 +22,7 @@ private val provider =
         certificates = R.array.com_google_android_gms_fonts_certs,
     )
 
-actual val SharedBodyFontFamily: FontFamily =
+actual val WWWBodyFontFamily: FontFamily =
     FontFamily(
         Font(GoogleFont("Montserrat"), provider),
         Font(GoogleFont("Noto Sans"), provider),
@@ -39,7 +39,7 @@ actual val SharedBodyFontFamily: FontFamily =
         Font(GoogleFont("Noto Nastaliq Urdu"), provider),
     )
 
-actual val SharedDisplayFontFamily: FontFamily =
+actual val WWWDisplayFontFamily: FontFamily =
     FontFamily(
         Font(GoogleFont("Montserrat"), provider),
         Font(GoogleFont("Noto Sans"), provider),
@@ -56,7 +56,7 @@ actual val SharedDisplayFontFamily: FontFamily =
         Font(GoogleFont("Noto Nastaliq Urdu"), provider),
     )
 
-actual val SharedExtraFontFamily: FontFamily =
+actual val WWWExtraFontFamily: FontFamily =
     FontFamily(
         Font(GoogleFont("Montserrat Alternates"), provider),
         Font(GoogleFont("Noto Sans"), provider),

@@ -92,7 +92,6 @@ fun WaveScreen(
         }
     }
 
-    // EXACT historical screen composition that was working
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -101,7 +100,7 @@ fun WaveScreen(
         ) {
             UserWaveStatusText(event)
 
-            eventMap?.Screen(
+            eventMap?.Draw(
                 autoMapDownload = true,
                 modifier =
                     Modifier

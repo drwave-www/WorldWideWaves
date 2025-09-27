@@ -22,8 +22,8 @@ import androidx.compose.runtime.Composable
 @Composable
 fun WorldWideWavesTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = SharedLightColorScheme,
-        typography = SharedTypography,
+        colorScheme = WWWLightColorScheme,
+        typography = WWWTypography,
         content = content,
     )
 }
