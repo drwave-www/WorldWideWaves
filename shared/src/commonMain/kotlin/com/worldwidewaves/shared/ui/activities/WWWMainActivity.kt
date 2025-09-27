@@ -91,6 +91,9 @@ open class WWWMainActivity(
     /** Flag updated when `events.loadEvents()` finishes. */
     private var isDataLoaded: Boolean = false
 
+    /** Flag to ensure sound choreography is only started once per instance. */
+    private var soundChoreographyStarted: Boolean = false
+
     /** Flow observed by Compose to know when we can display main content. */
     private val isSplashFinished = MutableStateFlow(!showSplash)
 
@@ -214,10 +217,19 @@ open class WWWMainActivity(
      * This enables sound to play throughout the app when user is in any event area.
      */
     private fun startGlobalSoundChoreographyForAllEvents() {
+        if (soundChoreographyStarted) {
+            Log.d(
+                "WWWMainActivity",
+                "Sound choreography already started for instance #$instanceCount (hashCode: ${this.hashCode()}), skipping",
+            )
+            return
+        }
+
         Log.d(
             "WWWMainActivity",
             "Starting global sound choreography for all events (instance #$instanceCount, hashCode: ${this.hashCode()})",
         )
+        soundChoreographyStarted = true
         globalSoundChoreography.startObservingAllEvents()
     }
 

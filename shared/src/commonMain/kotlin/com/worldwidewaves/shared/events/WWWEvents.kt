@@ -27,14 +27,12 @@ import com.worldwidewaves.shared.events.utils.CoroutineScopeProvider
 import com.worldwidewaves.shared.events.utils.EventsConfigurationProvider
 import com.worldwidewaves.shared.events.utils.EventsDecoder
 import com.worldwidewaves.shared.utils.Log
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.jvm.JvmOverloads
@@ -140,15 +138,13 @@ class WWWEvents : KoinComponent {
 
                 Log.i("WWWEvents.loadEventsJob", "About to update events flow with ${validEvents.size} events")
 
-                // Update the _eventsFlow in the main dispatcher to ensure thread safety
-                withContext(Dispatchers.Main) {
-                    try {
-                        _eventsFlow.value = validEvents
-                        Log.i("WWWEvents.loadEventsJob", "Successfully updated events flow")
-                    } catch (e: Exception) {
-                        Log.e("WWWEvents.loadEventsJob", "Error updating events flow: ${e.message}")
-                        throw e
-                    }
+                // Update the _eventsFlow directly (StateFlow is thread-safe)
+                try {
+                    _eventsFlow.value = validEvents
+                    Log.i("WWWEvents.loadEventsJob", "Successfully updated events flow")
+                } catch (e: Exception) {
+                    Log.e("WWWEvents.loadEventsJob", "Error updating events flow: ${e.message}")
+                    throw e
                 }
 
                 Log.i("WWWEvents.loadEventsJob", "About to call onEventsLoaded()")
