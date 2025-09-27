@@ -148,4 +148,6 @@ interface PlatformEnabler {
     fun toast(message: String)
 
     @Composable fun OpenUrl(url: String)
+
+    fun openUrl(url: String)
 }

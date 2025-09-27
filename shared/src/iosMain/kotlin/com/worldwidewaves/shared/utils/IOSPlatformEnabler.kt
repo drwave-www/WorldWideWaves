@@ -67,6 +67,10 @@ class IOSPlatformEnabler : PlatformEnabler {
 
     @Composable
     override fun OpenUrl(url: String) {
+        openUrl(url)
+    }
+
+    override fun openUrl(url: String) {
         try {
             val nsUrl = NSURL.URLWithString(url)
             if (nsUrl != null && UIApplication.sharedApplication.canOpenURL(nsUrl)) {
