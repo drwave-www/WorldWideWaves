@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.worldwidewaves.shared.events.IWWWEvent
 import com.worldwidewaves.shared.map.AbstractEventMap
 import com.worldwidewaves.shared.ui.components.ButtonWave
-import com.worldwidewaves.shared.ui.components.MapZoomAndLocationUpdate
 import com.worldwidewaves.shared.ui.components.SharedMapActions
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
@@ -44,9 +43,6 @@ fun FullMapScreen(
     onNavigateToWave: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
-
-    // Start event/map coordination and map zoom/location updates (CRITICAL for map display)
-    MapZoomAndLocationUpdate(event, eventMap)
 
     val eventStatus by event.observer.eventStatus.collectAsState()
     val progression by event.observer.progression.collectAsState()
