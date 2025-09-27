@@ -43,9 +43,6 @@ class WWWFullMapActivity(
             eventMap = eventMap,
             modifier = modifier,
             onNavigateToWave = { eventId -> platformEnabler.openWaveActivity(eventId) },
-            mapContent = { mapModifier ->
-                eventMap?.Screen(autoMapDownload = true, modifier = mapModifier)
-            },
         )
     }
 }

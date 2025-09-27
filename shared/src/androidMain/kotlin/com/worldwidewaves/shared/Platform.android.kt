@@ -36,11 +36,6 @@ import org.koin.mp.KoinPlatform
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-
-// Cache to remember which maps are not available to avoid repeated file access attempts
-private val unavailableMapCache = ConcurrentHashMap<String, Long>()
-private const val UNAVAILABLE_CACHE_DURATION_MS = 60_000L // 1 minute
 
 actual suspend fun readGeoJson(eventId: String): String? {
     val filePath = getMapFileAbsolutePath(eventId, "geojson")
@@ -70,20 +65,6 @@ actual suspend fun getMapFileAbsolutePath(
     eventId: String,
     extension: String,
 ): String? {
-    // Check if this map was recently determined to be unavailable
-    val cacheKey = "$eventId.$extension"
-    val cachedUnavailableTime = unavailableMapCache[cacheKey]
-    if (cachedUnavailableTime != null) {
-        val now = System.currentTimeMillis()
-        if (now - cachedUnavailableTime < UNAVAILABLE_CACHE_DURATION_MS) {
-            // Map is still in unavailable cache, skip attempting to load
-            return null
-        } else {
-            // Cache entry expired, remove it and continue with normal flow
-            unavailableMapCache.remove(cacheKey)
-        }
-    }
-
     val context: Context by inject(Context::class.java)
     val cachedFile = File(context.cacheDir, "$eventId.$extension")
     val metadataFile = File(context.cacheDir, "$eventId.$extension.metadata")
@@ -184,8 +165,6 @@ actual suspend fun getMapFileAbsolutePath(
     // If we get here, all retries failed - handle the final exception intelligently
     if (lastException is java.io.FileNotFoundException) {
         Log.d(::getMapFileAbsolutePath.name, "Map feature not available: $eventId.$extension (feature module not downloaded)")
-        // Cache this unavailable map to avoid repeated attempts
-        unavailableMapCache[cacheKey] = System.currentTimeMillis()
     } else {
         Log.e(::getMapFileAbsolutePath.name, "Error loading map from feature module: ${lastException?.message}", lastException)
     }
