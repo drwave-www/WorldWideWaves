@@ -229,7 +229,7 @@ fun ChoreographyDisplay(
     val remainingTime by remember(sequence) { mutableStateOf(sequence.remainingDuration) }
 
     // Get the painter
-    val painter = painterResource(sequence.image!!)
+    val painter = painterResource(sequence.image)
 
     // Create a timer to cycle through images
     LaunchedEffect(sequence) {

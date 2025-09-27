@@ -33,7 +33,7 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class WaveActivity : AppCompatActivity() {
-    private var waveActivityImplImpl: WWWWaveActivity? = null
+    private var waveActivityImpl: WWWWaveActivity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
