@@ -79,10 +79,15 @@ class SoundChoreographyManager(
     // Selected instrument settings - SQUARE waveform has richer harmonics for better perceived loudness
     private var selectedWaveform = SoundPlayer.Waveform.SQUARE
 
-    init {
-        coroutineScopeProvider.launchIO {
-            preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
-        }
+    // iOS FIX: Removed init{} block to prevent coroutine deadlocks
+    // MIDI preloading now must be triggered from @Composable LaunchedEffect
+
+    /**
+     * ⚠️ iOS CRITICAL: Initialize manager by preloading default MIDI file.
+     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     */
+    suspend fun initialize() {
+        preloadMidiFile(FileSystem.CHOREOGRAPHIES_SOUND_MIDIFILE)
     }
 
     /**

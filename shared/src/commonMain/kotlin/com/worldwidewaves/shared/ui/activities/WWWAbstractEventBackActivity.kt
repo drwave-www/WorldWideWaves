@@ -55,7 +55,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.core.component.inject
 import kotlin.time.ExperimentalTime
@@ -77,10 +76,15 @@ abstract class WWWAbstractEventBackActivity(
     private var onFinish by mutableStateOf<(() -> Unit)?>(null)
     private val waitingHandlers: MutableList<(IWWWEvent) -> Unit> = mutableListOf()
 
-    init {
-        scope.launch {
-            trackEventLoading(eventId)
-        }
+    // iOS FIX: Removed init{} block to prevent Dispatchers.Main deadlock
+    // Event tracking now must be triggered from @Composable LaunchedEffect
+
+    /**
+     * ⚠️ iOS CRITICAL: Start event tracking.
+     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     */
+    suspend fun start() {
+        trackEventLoading(eventId)
     }
 
     override fun onDestroy() {

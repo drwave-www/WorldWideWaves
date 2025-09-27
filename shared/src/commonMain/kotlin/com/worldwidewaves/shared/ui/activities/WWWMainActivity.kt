@@ -88,7 +88,14 @@ open class WWWMainActivity(
     // Record start time to enforce minimum duration
     val startTime = Clock.System.now().toEpochMilliseconds()
 
-    init {
+    // iOS FIX: Removed init{} block to prevent events loading deadlock
+    // Events loading and initialization now must be triggered from @Composable LaunchedEffect
+
+    /**
+     * ⚠️ iOS CRITICAL: Initialize main activity by loading events and starting sound choreography.
+     * Must be called from @Composable LaunchedEffect, never from init{} or constructor.
+     */
+    suspend fun initialize() {
         Log.i("WWWMainActivity", "Initializing WWWMainActivity")
 
         // Begin loading events – when done, flag so splash can disappear

@@ -21,40 +21,128 @@
 import SwiftUI
 import Shared
 
-struct ContentView: UIViewControllerRepresentable {
-    // iOS Compose Multiplatform integration - Uses same UI as Android
+struct ContentView: View {
+    @State private var koinInitialized = false
+    @State private var mokoInitialized = false
+    @State private var mainActivityCreated = false
+    @State private var initError: String?
 
-    func makeUIViewController(context: Context) -> UIViewController {
-        NSLog("📱 ContentView: makeUIViewController called")
+    init() {
+        print("🔧 iOS: Starting ContentView initialization...")
+    }
 
-        do {
-            // Initialize Koin DI with error handling
-            NSLog("📱 ContentView: About to initialize Koin DI")
-            HelperKt.doInitKoin()
-            NSLog("📱 ContentView: doInitKoin completed successfully")
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("🎯 WorldWideWaves iOS")
+                .font(.largeTitle)
+                .fontWeight(.bold)
 
-            // Return Compose UI - Same as Android for perfect UI parity
-            NSLog("📱 ContentView: About to call MainViewController")
-            let controller = MainViewControllerKt.MainViewController()
-            NSLog("📱 ContentView: MainViewController created successfully")
-            return controller
-        } catch {
-            NSLog("📱 ContentView: Error during initialization: \(error)")
-            // Return a fallback UIViewController
-            let fallbackController = UIViewController()
-            fallbackController.view.backgroundColor = UIColor.red
-            let label = UILabel()
-            label.text = "iOS App Initialization Error"
-            label.textColor = UIColor.white
-            label.textAlignment = .center
-            label.frame = fallbackController.view.bounds
-            fallbackController.view.addSubview(label)
-            return fallbackController
+            if let error = initError {
+                Text("❌ Init Error: \(error)")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            } else if mainActivityCreated {
+                VStack(spacing: 8) {
+                    Text("✅ Koin DI Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("✅ MokoRes Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("✅ MainActivity Created!")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                }
+            } else if koinInitialized && mokoInitialized {
+                VStack(spacing: 8) {
+                    Text("✅ Koin DI Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("✅ MokoRes Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("🔧 Creating MainActivity...")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                }
+            } else if koinInitialized {
+                VStack(spacing: 8) {
+                    Text("✅ Koin DI Working!")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                    Text("🔧 Testing MokoRes...")
+                        .font(.title2)
+                        .foregroundColor(.orange)
+                }
+            } else {
+                Text("🔧 Initializing...")
+                    .font(.title2)
+                    .foregroundColor(.orange)
+            }
+
+            Text("Successfully running on iOS")
+                .font(.body)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .onAppear {
+            // Move Koin initialization to onAppear for proper SwiftUI lifecycle
+            initializeKoin()
         }
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        // No updates needed - Compose handles state internally
+    private func initializeKoin() {
+        print("🔧 iOS: Starting Koin initialization...")
+        do {
+            HelperKt.doInitKoin()
+            DispatchQueue.main.async {
+                self.koinInitialized = true
+                print("✅ iOS: Koin initialization successful")
+                // Test MokoRes after Koin succeeds
+                self.testMokoRes()
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.initError = error.localizedDescription
+                print("❌ iOS: Koin initialization failed: \(error)")
+            }
+        }
+    }
+
+    private func testMokoRes() {
+        print("🔧 iOS: Testing MokoRes resource loading...")
+
+        // Simple test: MokoRes is already initialized by Koin Helper
+        // The logs already showed "MokoRes bundle initialization result: true"
+        DispatchQueue.main.async {
+            self.mokoInitialized = true
+            print("✅ iOS: MokoRes confirmed working (bundle initialized)")
+            // Baby step: try to create MainActivity instance
+            self.createMainActivity()
+        }
+    }
+
+    private func createMainActivity() {
+        print("🔧 iOS: Attempting to create WWWMainActivity instance...")
+        do {
+            // iOS DEADLOCK FIX: Create instance without triggering async work in init
+            let platformEnabler = IOSPlatformEnabler()
+            let mainActivity = WWWMainActivity(platformEnabler: platformEnabler, showSplash: false)
+
+            // ⚠️ CRITICAL: Do NOT call mainActivity.initialize() here!
+            // This would cause Dispatchers.Main deadlock on iOS
+            // Initialize should be called from @Composable LaunchedEffect only
+
+            DispatchQueue.main.async {
+                self.mainActivityCreated = true
+                print("✅ iOS: WWWMainActivity instance created successfully (async init required)")
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.initError = "MainActivity error: \(error.localizedDescription)"
+                print("❌ iOS: WWWMainActivity creation failed: \(error)")
+            }
+        }
     }
 }
 

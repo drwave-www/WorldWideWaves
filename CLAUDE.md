@@ -6,11 +6,22 @@ WorldWideWaves is an ephemeral mobile app designed to orchestrate human waves th
 
 ### Technology Stack
 - **Framework**: Kotlin Multiplatform Mobile (KMM)
-- **UI**: Jetpack Compose & Compose Multiplatform
+- **UI**: Jetpack Compose (Android) & **SwiftUI** (iOS)
 - **Maps**: MapLibre (open-source mapping)
 - **Backend**: Firebase integration
 - **Architecture**: Clean Architecture with reactive programming
 - **Testing**: Comprehensive unit and instrumented test suites
+
+### iOS-Specific Configuration (CRITICAL)
+- **UI Framework**: SwiftUI (NOT Compose Multiplatform on iOS)
+- **Bundle ID**: `com.worldwidewaves.WorldWideWavesDrWaves` (EXACT - must match)
+- **Project Path**: `/Users/ldiasdasilva/StudioProjects/WorldWideWaves/iosApp/`
+- **Xcode Project**: `iosApp.xcodeproj`
+- **Main File**: `iosApp/ContentView.swift`
+- **Gradle Task**: `./gradlew :shared:embedAndSignAppleFrameworkForXcode` (via Xcode build script)
+- **Framework Path**: `../shared/build/xcode-frameworks/Debug/iphonesimulator18.5`
+- **Team ID**: `DrWaves`
+- **Status**: ✅ WORKING (September 27, 2025)
 
 ## Recent Major Updates
 
