@@ -25,8 +25,9 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.desc
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.core.context.loadKoinModules
-import org.koin.java.KoinJavaComponent.inject
 import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
@@ -134,8 +135,10 @@ actual suspend fun cacheDeepFile(fileName: String) {
 actual fun clearEventCache(eventId: String) {
     // Also invalidate GeoJSON cache in memory
     try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
-        geoJsonProvider.invalidateCache(eventId)
+        // Use KoinComponent approach for iOS
+        object : KoinComponent {
+            val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
+        }.geoJsonProvider.invalidateCache(eventId)
     } catch (e: Exception) {
         // Silent failure - cache invalidation is not critical for iOS operation
     }

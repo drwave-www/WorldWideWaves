@@ -50,7 +50,9 @@ fun clearUnavailableGeoJsonCache(eventId: String) {
 
     // Also invalidate GeoJSON cache in memory to force fresh load
     try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
+        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
+            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        )
         geoJsonProvider.invalidateCache(eventId)
     } catch (e: Exception) {
         Log.w("clearUnavailableGeoJsonCache", "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
@@ -356,7 +358,9 @@ actual fun clearEventCache(eventId: String) {
 
     // Also invalidate GeoJSON cache in memory
     try {
-        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject()
+        val geoJsonProvider: com.worldwidewaves.shared.events.utils.GeoJsonDataProvider by inject(
+            com.worldwidewaves.shared.events.utils.GeoJsonDataProvider::class.java,
+        )
         geoJsonProvider.invalidateCache(eventId)
     } catch (e: Exception) {
         Log.w(::clearEventCache.name, "Failed to invalidate GeoJSON cache for $eventId: ${e.message}")
